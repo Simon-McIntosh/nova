@@ -1,0 +1,37 @@
+<section id="fit-inside-the-iteration">
+<h2>Fit inside the equilibrium iteration</h2>
+<p>The reconstruction solves the least-squares fit on every pass of the equilibrium iteration instead of once at a held map. Each pass forms one response column per profile coefficient by stepping that coefficient at the held map, adds the conductor columns the case carries, solves the whitened system, adds the correction to the coefficients, and lays the updated coefficients down as the map the profile's own forward solve reaches for them. The pass ends when the map moves less than the tolerance of the axis-to-boundary span, and the iteration stops when a solve moves the map by more than one span, which is a solve that has left the branch the rows were measured on.</p>
+<p>Every row was written by <code>nova.equilibrium.flux_iteration.FluxIterationFit</code> from one batch job on 98dci4-gpu-0002 (titan, one P100, two cores, 24 GB) at revision <code>acd8365</code>, and each row's file landed as the row finished. The known states are the three §1 cases, started from the §1 perturbed source; the stored cases are the three §2 imas-efit entries, started from the map imas-efit stored. <code>flux error</code> is the largest flux error against the generating map or reference over the span, <code>residual</code> the largest whitened sensor residual; the §1 bands are 1e-6 and 1e-8.</p>
+<table id="fit-inside-the-iteration-cases"><thead><tr><th>Case</th><th>Passes</th><th>Flux error / span</th><th>Residual</th><th>Last map update / span</th><th>Stopped by</th><th>&Sigma; I<sub>p</sub> (A)</th><th>1.10&times; control</th></tr></thead><tbody>
+<tr><td>Solov'ev known state</td><td colspan=7>not measured</td></tr>
+<tr><td>MAST 22086 known state</td><td>4</td><td>3.46e-13</td><td>7.08e-14</td><td>0.000747</td><td>rejected at pass 4</td><td>718397.48</td><td>0.129</td></tr>
+<tr><td>ITER 135013 known state</td><td>11</td><td colspan=6>no terminal state: the next pass's solve did not finish inside the job's wall</td></tr>
+<tr><td>MAST-U 45272 stored</td><td>0</td><td>—</td><td>—</td><td>inf</td><td>axis lost at pass 0</td><td>761031.79</td><td>0.1</td></tr>
+<tr><td>TCV workshop stored</td><td>0</td><td>—</td><td>—</td><td>inf</td><td>axis lost at pass 0</td><td>-237997.52</td><td>0.0896</td></tr>
+<tr><td>ITER 135013 stored</td><td colspan=7>not measured</td></tr>
+</tbody></table>
+<p>1 of 3 measured cases reach the §1 flux error band and the §1 residual band at their terminal state (mast). The 1.10&times; scaled input left the 1.5 per cent plasma-current band on 3 of 3 measured cases.</p>
+<p>MAST-U 45272 stored lost the axis on pass 0 (NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component); TCV workshop stored lost the axis on pass 0 (NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component); TCV's fitted current is -237998 A against the stored 240259 A, so the fit's own map reverses it and the refusal follows from the sign.</p>
+<h3 id="fit-inside-the-iteration-iter-passes">The ITER known state</h3>
+<p>ITER's iteration grew its map update from 0.00196 to 0.404 of the span over its last six passes, so the next solve started more than a span from the state the rows were measured on and did not terminate inside the job's wall. The pass table is the measurement: a held-map response column under-represents how far the coefficients carry the map, and the correction overshoots by a growing factor.</p>
+<table id="fit-inside-the-iteration-iter-table"><thead><tr><th>Pass</th><th>Largest misfit</th><th>Map update / span</th></tr></thead><tbody>
+<tr><td>0</td><td>3.83e-05</td><td>0.000357</td></tr>
+<tr><td>1</td><td>0.000194</td><td>0.000357</td></tr>
+<tr><td>2</td><td>0.000198</td><td>0.00196</td></tr>
+<tr><td>3</td><td>0.00106</td><td>0.00196</td></tr>
+<tr><td>4</td><td>0.00109</td><td>0.0106</td></tr>
+<tr><td>5</td><td>0.00579</td><td>0.0106</td></tr>
+<tr><td>6</td><td>0.00584</td><td>0.0605</td></tr>
+<tr><td>7</td><td>0.0332</td><td>0.0605</td></tr>
+<tr><td>8</td><td>0.0316</td><td>0.404</td></tr>
+<tr><td>9</td><td>0.232</td><td>0.404</td></tr>
+</tbody></table>
+<h3 id="fit-inside-the-iteration-known-states">Known states</h3>
+<p>Solov'ev known state: no panel was written.</p>
+<figure id="fit-inside-the-iteration-panel-mast"><img src="/nova/figures/inverse-equilibrium-baseline/fit-inside-the-iteration/known-states/mast.svg" alt="MAST 22086 known state terminal and reference flux contours"><figcaption>MAST 22086 known state: the reference map in wide grey line contours, the reconstructed map in narrow ink contours on the same levels, both null sets and the wall. Terminal flux error 3.46e-13 of the span, residual 7.08e-14.</figcaption></figure>
+<p>ITER 135013 known state: no panel was written.</p>
+<h3 id="fit-inside-the-iteration-stored-cases">Stored cases</h3>
+<figure id="fit-inside-the-iteration-panel-mastu"><img src="/nova/figures/inverse-equilibrium-baseline/fit-inside-the-iteration/stored-cases/mastu.svg" alt="MAST-U 45272 stored terminal and reference flux contours"><figcaption>MAST-U 45272 stored: the reference map in wide grey line contours, the reconstructed map in narrow ink contours on the same levels, both null sets and the wall. The fit's own map was refused: <code>SurfaceGeometryError: the seeded axis is not an elliptic stationary point of the map</code>, so the panel shows the state the fit reached, whose stationary points are not the reference's. The wall is drawn and the seed axis is marked fainter than the reference's nulls.</figcaption></figure>
+<figure id="fit-inside-the-iteration-panel-tcv"><img src="/nova/figures/inverse-equilibrium-baseline/fit-inside-the-iteration/stored-cases/tcv.svg" alt="TCV workshop stored terminal and reference flux contours"><figcaption>TCV workshop stored: the reference map in wide grey line contours, the reconstructed map in narrow ink contours on the same levels, both null sets and the wall. The fit's own map was refused: <code>SurfaceGeometryError: the seeded axis is not an elliptic stationary point of the map</code>, so the panel shows the state the fit reached, whose stationary points are not the reference's. The wall is drawn and the seed axis is marked fainter than the reference's nulls.</figcaption></figure>
+<p>ITER 135013 stored: no panel was written.</p>
+</section>

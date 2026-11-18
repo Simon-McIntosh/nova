@@ -25,7 +25,24 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 61,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The section has landed and no node will be dispatched from this clause again. The landed record already withholds the verdict the finding asks about: it reports MAST as marginal and not established, states that its 18 surviving fits are a selected subset, and gives its control as not measured.",
+      "when": "2026-11-18T06:44:52.337130+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The section has landed and no node will be dispatched from this clause again. The landed record already withholds the verdict the finding asks about: it reports MAST as marginal and not established, states that its 18 surviving fits are a selected subset, and gives its control as not measured.",
+      "when": "2026-11-18T06:44:52.337130+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261118T061015725158-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261118T061015725158-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "041517ac5a31388055e3cfb286f47b84222b2325",
   "rubric": "content",

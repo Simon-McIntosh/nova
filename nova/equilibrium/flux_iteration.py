@@ -266,6 +266,7 @@ class FluxIterationFit:
         flux_tolerance: float = 1.0e-10,
         relaxation: float = 1.0,
         rcond: float = 1.0e-8,
+        on_pass: Callable[[int, float, float], None] | None = None,
     ) -> FluxIterationReceipt:
         """Return one reconstruction from the held-map least-squares passes.
 
@@ -446,6 +447,8 @@ class FluxIterationFit:
                     coefficients=coefficients.copy(),
                 )
             )
+            if on_pass is not None:
+                on_pass(index, misfit, update)
             if update <= flux_tolerance:
                 converged = True
                 break

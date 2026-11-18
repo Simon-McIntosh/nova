@@ -171,6 +171,19 @@ def _flux_solver(profile, request):
     return solve
 
 
+def _progress(name):
+    """Print each pass as it lands, since a solve-heavy pass can run for minutes."""
+
+    def report(index, misfit, update):
+        print(
+            "PASS "
+            + json.dumps(dict(case=name, index=index, misfit=misfit, update=update)),
+            flush=True,
+        )
+
+    return report
+
+
 def _run_known(case, args):
     from nova.equilibrium.flux_iteration import FluxIterationFit
     from tests import test_equilibrium_magnetics_fit as study
@@ -187,6 +200,7 @@ def _run_known(case, args):
         case["measurement"],
         case["initial_flux"],
         plasma_current_scale=case["plasma_current"],
+        on_pass=_progress(case["name"]),
         max_passes=args.max_passes,
         flux_tolerance=args.flux_tolerance,
         relaxation=args.relaxation,
@@ -296,6 +310,7 @@ def _run_stored(case, args):
             case["measurement"],
             case["initial_flux"],
             plasma_current_scale=float(data["plasma_current_scale"]),
+            on_pass=_progress(case["name"]),
             max_passes=args.max_passes,
             flux_tolerance=args.flux_tolerance,
             relaxation=args.relaxation,
@@ -337,6 +352,7 @@ def _run_stored(case, args):
             scaled_measurement,
             case["initial_flux"],
             plasma_current_scale=float(data["plasma_current_scale"]) * 1.10,
+            on_pass=_progress(case["name"] + "-control"),
             max_passes=args.max_passes,
             flux_tolerance=args.flux_tolerance,
             relaxation=args.relaxation,

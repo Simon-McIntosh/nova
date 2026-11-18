@@ -53,6 +53,13 @@
     "scripts/prototypes/diiid_pinned_seed_drift/measure.py:273 -> pinned.solve_frame"
   ],
   "completed_at": "2026-11-18T05:55:19.524Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "exempted",
+      "reason": "Lead decision 2026-11-18: accept the three-change causal account (edge cap, stationary normalization and domain, integration route; only the full historical functional restores registration) as this node's result, and re-register only after the finite-edge section lands, because that moves the value again. The section stays implementable in the plan with the re-registration owed.",
+      "recorded_at": "2026-11-18T06:28:49.932319+00:00"
+    }
+  },
   "dispatched_at": "2026-11-18T05:55:07Z",
   "evidence_limits": [
     "Bounded read-only review: no test was re-run and no mutation was applied; the two suite logs and the control receipts were read as recorded.",
@@ -60,6 +67,13 @@
     "The head entry-point measurement ran at 32edef46a; the benchmark blob is identical at the reviewed head, so its current stands while the receipt names no head revision.",
     "The declared figure directory received no file; this node produced no terminal forward state, so the poloidal flux-panel rule is not engaged and its absence is not a defect."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Lead decision 2026-11-18: accept the three-change causal account (edge cap, stationary normalization and domain, integration route; only the full historical functional restores registration) as this node's result, and re-register only after the finite-edge section lands, because that moves the value again. The section stays implementable in the plan with the re-registration owed.",
+      "recorded_at": "2026-11-18T06:29:10.219519+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html",

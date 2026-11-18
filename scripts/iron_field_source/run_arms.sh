@@ -30,9 +30,11 @@ unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH || true
 
 mkdir -p "$out"
 rm -rf "$scratch"
-mkdir -p "$scratch"
-git -C "$root" archive "$base" | tar -x -C "$scratch" --exclude='docs/figures/*'
-echo "BASE-EXPORTED $base into $scratch"
+# A shared clone at the base revision, not an archive: the suite shells out to
+# git show for pinned sources, and an archive has no objects to show.
+git clone --shared --no-checkout --quiet "$root" "$scratch"
+git -C "$scratch" checkout --quiet --detach "$base"
+echo "BASE-CHECKOUT $base in $scratch ($(git -C "$scratch" rev-parse HEAD))"
 
 command_for() {
     echo "PYTHONPATH=. JAX_PLATFORMS=cpu $python -m pytest -p no:cacheprovider -q $tests"

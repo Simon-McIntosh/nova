@@ -71,6 +71,16 @@
       "note": "The section now carries a positive control that its case qualifies when solved alone by the route the row-exchange section used, and the batched call is measured on that route.",
       "reason": "",
       "when": "2026-11-18T05:38:43.965733+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b432cc86733a5664aa2f18af1c6964c6d289b7b8",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The bracket clause now asks for the largest fraction that qualifies and the smallest that does not where one exists, so a fully reached sequence satisfies it.",
+      "reason": "",
+      "when": "2026-11-18T05:38:52.757537+00:00"
     }
   ],
   "responses": {
@@ -91,6 +101,15 @@
       "note": "The section now carries a positive control that its case qualifies when solved alone by the route the row-exchange section used, and the batched call is measured on that route.",
       "reason": "",
       "when": "2026-11-18T05:38:43.965733+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "b432cc86733a5664aa2f18af1c6964c6d289b7b8",
+      "commit_basis": "edit",
+      "note": "The bracket clause now asks for the largest fraction that qualifies and the smallest that does not where one exists, so a fully reached sequence satisfies it.",
+      "reason": "",
+      "when": "2026-11-18T05:38:52.757537+00:00"
     },
     "reasoning-1": {
       "action": "acted",

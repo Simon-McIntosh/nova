@@ -29,6 +29,7 @@ from benchmarks.estimator_scoreboard import (
 from nova.imas.mast_efit_referee import (
     EfitRefereeError,
     compare_states,
+    q95_from_flux_map,
     read_equilibrium_state,
     read_equilibrium_wall,
     reference_free_checks,
@@ -220,6 +221,85 @@ def test_state_digest_is_stable_and_moves_with_content(corpus):
     assert first.dd_version == DD_VERSION
 
 
+def write_mapped_state(
+    path: Path,
+    *,
+    amplitude: float = 5.0,
+    flux_map: Path | None = None,
+    descending: bool = False,
+    mirror: bool = False,
+) -> Path:
+    """Write one state carrying its own flux map, gradient and reference radius.
+
+    ``descending`` writes a state whose flux falls from the axis outward, so the
+    gradient's stored flux nodes run from the axis level down to the boundary
+    level: the orientation a map is not obliged to share with the rising one.
+    ``mirror`` writes the same configuration with every flux negated, which the
+    geometry cannot tell apart: it is the invariance a stored map is read under.
+    """
+
+    import imas
+    from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
+
+    equilibrium = imas.IDSFactory().equilibrium()
+    equilibrium.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    equilibrium.time = np.array([1.0])
+    if flux_map is None:
+        radius = np.linspace(0.0, 2.0, 41)
+        height = np.linspace(-1.0, 1.0, 41)
+        rr, zz = np.meshgrid(radius, height, indexing="ij")
+        flux = -((rr - 1.0) ** 2 + zz**2)
+        if descending:
+            # axis level -0.2 and a boundary circle at about -1.0 inside the lattice
+            flux = -0.2 - 4.0 * ((rr - 1.0) ** 2 + zz**2)
+    else:
+        stored = np.load(Path(flux_map), allow_pickle=False)
+        radius = np.asarray(stored["radius"], dtype=float)
+        height = np.asarray(stored["height"], dtype=float)
+        flux = np.asarray(stored["flux"], dtype=float)
+    equilibrium.time_slice.resize(1)
+    frame = equilibrium.time_slice[0]
+    angle = np.linspace(0.0, 2.0 * np.pi, 64)
+    frame.boundary.outline.r = 1.0 + 0.45 * np.cos(angle)
+    frame.boundary.outline.z = 0.45 * np.sin(angle)
+    frame.boundary.type = 1
+    quantities = frame.global_quantities
+    quantities.magnetic_axis.r = 1.0
+    quantities.magnetic_axis.z = 0.0
+    level_axis = -0.2 if descending else -1.0
+    level_boundary = -1.0 if descending else -0.2
+    if mirror:
+        level_axis, level_boundary = -level_axis, -level_boundary
+    quantities.psi_axis = level_axis
+    quantities.psi_boundary = level_boundary
+    quantities.ip = 1.0e6
+    norm = np.linspace(0.0, 1.0, 65)
+    frame.profiles_1d.psi = (
+        quantities.psi_axis + (quantities.psi_boundary - quantities.psi_axis) * norm
+    )
+    # a map whose flux falls outward carries the same field with the opposite
+    # gradient sign, so its inward integral adds to the vacuum field rather than
+    # cancelling it
+    sign = -1.0 if descending else 1.0
+    if mirror:
+        sign = -sign
+    frame.profiles_1d.f_df_dpsi = sign * amplitude * (1.0 - norm)
+    frame.profiles_1d.q = 1.0 + 2.0 * norm**2
+    frame.profiles_2d.resize(1)
+    profile = frame.profiles_2d[0]
+    profile.grid.dim1 = radius
+    profile.grid.dim2 = height
+    profile.grid_type.index = 1
+    profile.psi = -flux if mirror else flux
+    equilibrium.vacuum_toroidal_field.b0 = np.array([-5.3])
+    equilibrium.vacuum_toroidal_field.r0 = 1.0
+    path.mkdir(parents=True, exist_ok=True)
+    entry = imas.DBEntry(f"imas:hdf5?path={path}", "w", dd_version=DD_VERSION)
+    entry.put(equilibrium)
+    entry.close()
+    return path
+
+
 def test_a_state_without_a_boundary_is_refused(corpus):
     import imas
     from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
@@ -260,6 +340,7 @@ def test_a_column_group_is_added_without_a_scoring_change(corpus):
             {
                 "id": "synthetic",
                 "machine": "synthetic",
+                "vacuum_b0": 5.3,
                 "wall": str(corpus["wall"]),
                 "reference": {"source": str(corpus["reference"])},
                 "estimators": [
@@ -307,7 +388,16 @@ def test_a_column_group_is_added_without_a_scoring_change(corpus):
         == read_equilibrium_state(written[0], wall_source=corpus["wall"]).digest()
     )
     assert entries["absent"]["status"] == "absent"
-    assert all(entries["stored"]["verdicts"].values())
+    # the corpus states carry no flux map, so the safety factor is not supplied
+    # by the one calculator and that is the only band the stored state fails
+    for name in ("stored", "perturbed"):
+        assert np.isnan(entries[name]["q95_flux_map"])
+    assert entries["stored"]["verdicts"]["q95_difference"] is False
+    assert all(
+        verdict
+        for field, verdict in entries["stored"]["verdicts"].items()
+        if field != "q95_difference"
+    )
     assert not all(entries["perturbed"]["verdicts"].values())
     assert all(entries["stored"]["reference_free_verdicts"].values())
 
@@ -315,6 +405,177 @@ def test_a_column_group_is_added_without_a_scoring_change(corpus):
     assert published.count("<th colspan=") == 3
     assert "not supplied" in published
     assert reference.digest()[7:19] in published
+
+
+def test_the_safety_factor_is_read_from_a_states_own_flux_map(tmp_path):
+    """One calculator reads q95 off the map and the gradient the state stores."""
+
+    mapped = write_mapped_state(tmp_path / "mapped", amplitude=5.0)
+    state = read_equilibrium_state(mapped, wall_source=corpus_wall(tmp_path))
+    assert state.flux_map is not None
+    value = q95_from_flux_map(state, vacuum_b0=5.3)
+
+    assert np.isfinite(value)
+    # the map and gradient are what the value is read from: a steeper diamagnetic
+    # gradient carries more toroidal flux per unit poloidal flux and raises q
+    stronger = read_equilibrium_state(
+        write_mapped_state(tmp_path / "steeper", amplitude=20.0),
+        wall_source=corpus_wall(tmp_path),
+    )
+    assert q95_from_flux_map(stronger, vacuum_b0=5.3) > value > 0.0
+
+
+def test_a_state_without_a_flux_map_reports_q95_not_supplied(tmp_path):
+    """A scalar safety factor never stands in for the map the calculator reads."""
+
+    plain = write_state(tmp_path / "plain", q95_scale=2.0)
+    wall = write_wall(tmp_path / "machine")
+    state = read_equilibrium_state(plain, wall_source=wall)
+    assert state.flux_map is None
+    assert np.isfinite(state.q95)
+    assert np.isnan(q95_from_flux_map(state, vacuum_b0=5.3))
+
+    manifest = {
+        "cases": [
+            {
+                "id": "unmapped",
+                "machine": "synthetic",
+                "vacuum_b0": 5.3,
+                "wall": str(wall),
+                "reference": {"source": str(plain)},
+                "estimators": [{"name": "plain", "source": str(plain)}],
+            }
+        ]
+    }
+    manifest_path = tmp_path / "cases.json"
+    manifest_path.write_text(json.dumps(manifest))
+    html = tmp_path / "table.html"
+    receipt = tmp_path / "receipt.json"
+    assert (
+        main(
+            [
+                "--manifest",
+                str(manifest_path),
+                "--html",
+                str(html),
+                "--receipt",
+                str(receipt),
+            ]
+        )
+        == 0
+    )
+    record = json.loads(receipt.read_text())["cases"][0]
+    entry = record["estimators"][0]
+    assert np.isnan(entry["q95_flux_map"])
+    assert np.isnan(entry["metrics"]["q95_difference"])
+    assert entry["verdicts"]["q95_difference"] is False
+    # the stored value is the file's own q profile at psi_N = 0.95, read here
+    # from the numbers the fixture wrote rather than through the reader
+    nodes = np.linspace(0.0, 1.0, 65)
+    written = 2.0 * (1.0 + 3.0 * nodes**2)
+    assert entry["q95_stored"] == pytest.approx(
+        float(np.interp(0.95, nodes, written)), rel=1e-12
+    )
+    # the stored value is reported beside the absence, never in place of it.
+    assert "not supplied" in html.read_text()
+    assert "no flux map" in html.read_text()
+
+
+def test_the_declared_perturbation_moves_the_map_the_calculator_reads(tmp_path):
+    """The copy's q95 moves because its stored map moved, not its scalar q."""
+
+    mapped = write_mapped_state(tmp_path / "source", amplitude=5.0)
+    wall = corpus_wall(tmp_path)
+    reference = read_equilibrium_state(mapped, wall_source=wall)
+    copy = read_equilibrium_state(
+        perturb_state(
+            mapped,
+            tmp_path / "copy",
+            radial_shift_m=0.0,
+            flux_fraction=0.0,
+            flux_map_scale=DEFAULT_PERTURBATION["flux_map_scale"],
+        ),
+        wall_source=wall,
+    )
+    reference_q95 = q95_from_flux_map(reference, vacuum_b0=5.3)
+    copy_q95 = q95_from_flux_map(copy, vacuum_b0=5.3)
+    assert np.isfinite(reference_q95) and np.isfinite(copy_q95)
+    difference = abs(abs(copy_q95) - abs(reference_q95))
+    assert difference > STATE_SCOREBOARD_TOLERANCES["q95_difference"].bound
+    comparison = compare_states(reference, copy, q95_values=(reference_q95, copy_q95))
+    assert comparison.verdicts()["q95_difference"] is False
+
+
+def test_a_descending_flux_map_reads_its_inward_gradient_tail(tmp_path):
+    """A map whose flux falls outward reads the same q95 as its own mirror."""
+
+    wall = corpus_wall(tmp_path / "machine")
+    values = []
+    for amplitude in (0.0, 40.0):
+        descending = read_equilibrium_state(
+            write_mapped_state(
+                tmp_path / f"descending-{amplitude:.0f}",
+                amplitude=amplitude,
+                descending=True,
+            ),
+            wall_source=wall,
+        )
+        mirror = read_equilibrium_state(
+            write_mapped_state(
+                tmp_path / f"mirror-{amplitude:.0f}",
+                amplitude=amplitude,
+                descending=True,
+                mirror=True,
+            ),
+            wall_source=wall,
+        )
+        assert descending.flux_map is not None and mirror.flux_map is not None
+        assert descending.flux_axis > descending.flux_boundary
+        stored = np.asarray(descending.flux_map.gradient_psi, dtype=float)
+        assert stored[0] > stored[-1]
+        value = q95_from_flux_map(descending, vacuum_b0=5.3)
+        assert np.isfinite(value) and value > 0.0
+        # the map's flux orientation is not physical: negating every level leaves
+        # the configuration unchanged, so the two must read the same value.  An
+        # interpolant ordered on the physical nodes instead of on normalised flux
+        # reads a different inward tail here and breaks the equality
+        assert value == pytest.approx(
+            q95_from_flux_map(mirror, vacuum_b0=5.3), rel=1e-12
+        )
+        values.append(value)
+
+    # and the tail is not the zero endpoint: it grows with the gradient
+    assert values[1] > values[0] * (1.0 + 1e-4)
+
+
+def test_a_zero_perturbation_leaves_a_descending_flux_map_untouched(tmp_path):
+    """No declared perturbation reflects a map whose flux span is signed."""
+
+    wall = corpus_wall(tmp_path / "machine")
+    source = read_equilibrium_state(
+        write_mapped_state(tmp_path / "descending", amplitude=5.0, descending=True),
+        wall_source=wall,
+    )
+    copy = read_equilibrium_state(
+        perturb_state(tmp_path / "descending", tmp_path / "copy"),
+        wall_source=wall,
+    )
+    assert source.flux_map is not None and copy.flux_map is not None
+    assert copy.flux_axis == pytest.approx(source.flux_axis)
+    assert copy.flux_boundary == pytest.approx(source.flux_boundary)
+    np.testing.assert_allclose(copy.flux_map.flux, source.flux_map.flux, rtol=1e-12)
+    np.testing.assert_allclose(
+        copy.flux_map.gradient_psi,
+        source.flux_map.gradient_psi,
+        rtol=1e-12,
+    )
+    assert copy.q95 == pytest.approx(source.q95)
+
+
+def corpus_wall(root: Path) -> Path:
+    """Return the corpus wall written under one scratch root."""
+
+    return write_wall(root / "machine")
 
 
 def write_flux_map(path: Path) -> Path:

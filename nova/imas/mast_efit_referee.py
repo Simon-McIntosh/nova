@@ -518,6 +518,59 @@ def _imas_uri(source: Path | str) -> str:
 
 
 @dataclass(frozen=True)
+class FluxMap:
+    """One state's own stored poloidal flux map and the field data it carries.
+
+    ``flux`` is the total poloidal flux on the rectangular lattice.
+    ``gradient_psi`` and ``gradient`` are the stored diamagnetic gradient
+    ``F dF/dpsi`` on its own flux nodes, from which the toroidal-field function
+    the geometry read consumes is integrated inward.  ``reference_radius`` is
+    the state's own toroidal-field reference radius; the machine's vacuum field
+    on the state's axis is supplied with the case, because a stored ``b0`` is
+    the code's own reading of it rather than the case's.
+    """
+
+    radius: np.ndarray
+    height: np.ndarray
+    flux: np.ndarray
+    reference_radius: float
+    gradient_psi: np.ndarray
+    gradient: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Reject a map whose arrays do not index one another."""
+
+        radius = np.ascontiguousarray(self.radius, dtype=float)
+        height = np.ascontiguousarray(self.height, dtype=float)
+        flux = np.ascontiguousarray(self.flux, dtype=float)
+        if flux.shape != (radius.size, height.size):
+            raise EfitRefereeError(
+                f"the stored flux map carries shape {flux.shape}; its axes index "
+                f"{(radius.size, height.size)}"
+            )
+        if radius.size < 2 or height.size < 2:
+            raise EfitRefereeError("a flux map needs at least two nodes on each axis")
+        gradient_psi = np.ascontiguousarray(self.gradient_psi, dtype=float)
+        gradient = np.ascontiguousarray(self.gradient, dtype=float)
+        if gradient_psi.shape != gradient.shape:
+            raise EfitRefereeError(
+                f"the stored gradient carries {gradient.shape} on "
+                f"{gradient_psi.shape} flux nodes"
+            )
+        for name, values in (
+            ("radius", radius),
+            ("height", height),
+            ("flux", flux),
+            ("gradient_psi", gradient_psi),
+            ("gradient", gradient),
+        ):
+            if not np.all(np.isfinite(values)):
+                raise EfitRefereeError(f"the stored flux map's {name} is not finite")
+            values.setflags(write=False)
+            object.__setattr__(self, name, values)
+
+
+@dataclass(frozen=True)
 class EquilibriumState:
     """One reconstructed state read from an IMAS equilibrium, with its digest."""
 
@@ -531,6 +584,7 @@ class EquilibriumState:
     plasma_current_a: float
     q95: float
     wall_loops: tuple[np.ndarray, ...]
+    flux_map: FluxMap | None = None
 
     def __post_init__(self) -> None:
         """Reject a state that cannot be scored as a closed plasma boundary."""
@@ -592,6 +646,17 @@ class EquilibriumState:
             digest.update(np.float64(value).tobytes())
         for loop in self.wall_loops:
             digest.update(np.asarray(loop, dtype=float).tobytes())
+        if self.flux_map is not None:
+            digest.update(np.float64(self.flux_map.reference_radius).tobytes())
+            for values in (
+                self.flux_map.radius,
+                self.flux_map.height,
+                self.flux_map.flux,
+                self.flux_map.gradient_psi,
+                self.flux_map.gradient,
+            ):
+                digest.update(np.asarray(values, dtype=float).dtype.str.encode())
+                digest.update(np.asarray(values, dtype=float).tobytes())
         return "sha256:" + digest.hexdigest()
 
 
@@ -626,6 +691,146 @@ def _equilibrium_q95(equilibrium, index: int) -> float:
     order = np.argsort(psi_norm[usable])
     q95 = float(np.interp(0.95, psi_norm[usable][order], q[usable][order]))
     return q95 if np.isfinite(q95) else float("nan")
+
+
+def _equilibrium_flux_map(equilibrium, index: int) -> FluxMap | None:
+    """Read one state's own stored poloidal flux map, or None when it carries none.
+
+    The rectangular lattice is the ``profiles_2d`` grid the state wrote its
+    flux on, and the field data is the diamagnetic gradient the same state
+    stores on its own flux nodes.  A state that stores neither is one this
+    calculator cannot read, and it reports no measure rather than borrowing one
+    from a scalar record.
+    """
+
+    frame = equilibrium.time_slice[index]
+    try:
+        count = len(frame.profiles_2d)
+    except AttributeError, TypeError:
+        return None
+    if count == 0:
+        return None
+    profile = frame.profiles_2d[0]
+    radius = np.asarray(profile.grid.dim1, dtype=float)
+    height = np.asarray(profile.grid.dim2, dtype=float)
+    flux = np.asarray(profile.psi, dtype=float)
+    if flux.size == 0 or radius.size < 2 or height.size < 2:
+        return None
+    if flux.shape != (radius.size, height.size):
+        raise EfitRefereeError(
+            f"the stored flux map carries shape {flux.shape} "
+            f"on axes {(radius.size, height.size)}"
+        )
+    profiles = frame.profiles_1d
+    try:
+        gradient_psi = np.asarray(profiles.psi, dtype=float)
+        gradient = np.asarray(profiles.f_df_dpsi, dtype=float)
+    except AttributeError, TypeError:
+        return None
+    if gradient.size < 2 or gradient_psi.size != gradient.size:
+        return None
+    usable = np.isfinite(gradient_psi) & np.isfinite(gradient)
+    if np.count_nonzero(usable) < 2:
+        return None
+    try:
+        reference_psi = float(equilibrium.vacuum_toroidal_field.r0)
+    except AttributeError, TypeError:
+        return None
+    if not np.isfinite(reference_psi) or abs(reference_psi) >= EMPTY_SENTINEL:
+        return None
+    return FluxMap(
+        radius=radius,
+        height=height,
+        flux=flux,
+        reference_radius=reference_psi,
+        gradient_psi=gradient_psi[usable],
+        gradient=gradient[usable],
+    )
+
+
+def _stored_gradient(flux_map: FluxMap):
+    """Return the state's stored ``F dF/dpsi`` as a function of normalised flux.
+
+    The stored nodes are normalised *before* they are ordered: a map whose flux
+    falls from the axis outward carries descending physical nodes, and dividing
+    that sequence by its signed axis-to-edge span is what maps it onto an
+    increasing ``psi_N``.  Ordering the physical nodes first would leave the
+    interpolation coordinates descending, which ``numpy.interp`` reads as
+    unordered input and returns its endpoint value; that would report a zero
+    inward integral at ``psi_N = 0.95`` for a state whose flux runs the other way.
+    """
+
+    nodes = np.asarray(flux_map.gradient_psi, dtype=float)
+    values = np.asarray(flux_map.gradient, dtype=float)
+    start = float(nodes[0])
+    span = float(nodes[-1]) - start
+    if not np.isfinite(span) or span == 0.0:
+        raise EfitRefereeError("the stored gradient has no flux span")
+    position = (nodes - start) / span
+    order = np.argsort(position)
+    ordered = np.ascontiguousarray(position[order])
+    gradient = np.ascontiguousarray(values[order])
+
+    def stored(psi_norm):
+        """Return the stored gradient at one normalised flux."""
+
+        return np.interp(psi_norm, ordered, gradient)
+
+    return stored
+
+
+def q95_from_flux_map(state: EquilibriumState, *, vacuum_b0: float) -> float:
+    """Return one state's safety factor at ``psi_N = 0.95`` read from its own map.
+
+    One calculator serves every column: the state's own stored flux map is
+    handed to :class:`nova.equilibrium.flux_surface_geometry.FluxSurfaceGeometry`
+    with the state's own magnetic axis and boundary flux, its own reference
+    radius and its own diamagnetic gradient integrated inward from the vacuum
+    boundary field the case declares.  The inward integral is
+    :func:`nova.equilibrium.observation.gradient_tail` and the field primitive is
+    :func:`nova.equilibrium.convention.flux_function_toroidal_field`, so a
+    stored map's gradient is read through the same two owners a solved state's
+    is.  ``nan`` reports a state that carries no flux map or no field data, which
+    no scalar record may stand in for.
+    """
+
+    flux_map = state.flux_map
+    if flux_map is None:
+        return float("nan")
+    span = float(state.flux_boundary) - float(state.flux_axis)
+    if not np.isfinite(span) or span == 0.0:
+        return float("nan")
+    if not np.isfinite(vacuum_b0) or vacuum_b0 == 0.0:
+        raise EfitRefereeError("the case supplies no vacuum toroidal field")
+    boundary_field = abs(float(vacuum_b0)) * float(flux_map.reference_radius)
+
+    from types import SimpleNamespace
+
+    from nova.equilibrium.convention import flux_function_toroidal_field
+    from nova.equilibrium.flux_surface_geometry import FluxSurfaceGeometry
+    from nova.equilibrium.observation import gradient_tail
+
+    stored = _stored_gradient(flux_map)
+
+    def field(psi_norm):
+        """Return the toroidal-field function at one normalised flux."""
+
+        tail = np.asarray(
+            gradient_tail(stored, np.asarray(psi_norm, dtype=float)), dtype=float
+        )
+        squared = flux_function_toroidal_field(boundary_field, span, tail)
+        return np.sign(boundary_field) * np.sqrt(np.maximum(squared, 0.0))
+
+    geometry = FluxSurfaceGeometry.from_flux_map(
+        SimpleNamespace(radius=flux_map.radius, height=flux_map.height),
+        flux_map.flux.reshape(-1),
+        field,
+        axis=tuple(float(value) for value in state.magnetic_axis_m),
+        boundary_flux=float(state.flux_boundary),
+        reference_radius=float(flux_map.reference_radius),
+    )
+    value = float(np.interp(0.95, geometry.psi_norm, geometry.safety_factor))
+    return value if np.isfinite(value) else float("nan")
 
 
 def read_equilibrium_wall(source: Path | str) -> tuple[np.ndarray, ...]:
@@ -753,6 +958,7 @@ def read_equilibrium_state(
         plasma_current_a=_scalar(quantities.ip),
         q95=_equilibrium_q95(equilibrium, index) if q95 is None else float(q95),
         wall_loops=wall_loops,
+        flux_map=_equilibrium_flux_map(equilibrium, index),
     )
     return state
 
@@ -796,6 +1002,8 @@ class StateComparison:
 def compare_states(
     reference: EquilibriumState,
     candidate: EquilibriumState,
+    *,
+    q95_values: tuple[float, float] | None = None,
 ) -> StateComparison:
     """Score a candidate state against a reference with the registered bands.
 
@@ -803,7 +1011,10 @@ def compare_states(
     compared after the one additive constant that aligns the candidate's axis
     flux onto the reference's.  Every flux measure is a fraction of the
     reference's axis-to-boundary span, so the bands are on the span rather than
-    on absolute flux.
+    on absolute flux.  ``q95_values`` carries the two safety factors one
+    calculated value per state where the caller read them from the states' own
+    flux maps; without it the states' stored values are compared, which is a
+    comparison of two definitions rather than of two reconstructions.
     """
 
     span = reference.flux_span
@@ -813,8 +1024,13 @@ def compare_states(
     if flux_span_usable:
         gauge = float(reference.flux_axis) - float(candidate.flux_axis)
     q95_difference = float("nan")
-    if np.isfinite(reference.q95) and np.isfinite(candidate.q95):
-        q95_difference = abs(abs(candidate.q95) - abs(reference.q95))
+    reference_q95, candidate_q95 = (
+        (float(reference.q95), float(candidate.q95))
+        if q95_values is None
+        else (float(q95_values[0]), float(q95_values[1]))
+    )
+    if np.isfinite(reference_q95) and np.isfinite(candidate_q95):
+        q95_difference = abs(abs(candidate_q95) - abs(reference_q95))
     return StateComparison(
         reference=reference,
         candidate=candidate,
@@ -920,12 +1136,14 @@ __all__ = [
     "FROZEN_SHOTS",
     "EfitReferee",
     "EfitRefereeError",
+    "FluxMap",
     "ReferenceGeometryScores",
     "ReferenceFreeChecks",
     "RefereedParityResult",
     "StateComparison",
     "compare_reference_geometry",
     "compare_states",
+    "q95_from_flux_map",
     "read_efit_referee",
     "read_equilibrium_state",
     "reference_free_checks",

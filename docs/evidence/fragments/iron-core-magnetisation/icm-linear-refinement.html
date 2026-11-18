@@ -1,10 +1,18 @@
 <section id="icm-linear-refinement-state">
-<h3>WEST affine refinement: assembly persisted; solve blocked during device staging</h3>
-<p>The graded 8/40 mm interaction was assembled on an NVIDIA H200 NVL and
-persisted with its geometry digest. Its material solve failed before the first
-Newton residual in two attempts. No fine-mesh probe field, refinement change,
-or large-mesh route equivalence is reported as measured. The node's numerical
-criteria remain unmet.</p>
+<h3>WEST affine refinement: staging repaired; weighted Newton matrix is indefinite</h3>
+<p>The graded 8/40 mm interaction is persisted with its geometry digest.
+Single-transfer staging and a donated float64 Cholesky factor now work on the
+H200, including a factor at the fine mesh's full dimension. However, the
+actual graded 16/80 mm weighted Newton matrix is indefinite: its minimum
+diagonal is −0.0225203602061 and a stored vector has Rayleigh quotient
+−0.0248960031604. The requested Cholesky-only Newton route therefore cannot
+complete its first comparison. The underlying interaction has a measured
+metric-weighted quotient of 1.02585274855 times μ₀, contradicting the assumed
+upper bound of μ₀. The interaction values have not been changed.</p>
+<p>No fine-mesh probe field, refinement change, or completed large-mesh
+Cholesky/LU equivalence is reported as measured. The numerical criteria remain
+unmet. The independent diagnostic below separates the operator-bound failure
+from the earlier staging defect.</p>
 
 <h4>Measured assembly</h4>
 <table><thead><tr><th>quantity</th><th>measurement</th></tr></thead><tbody>
@@ -58,19 +66,81 @@ at the same pre-Newton staging call, again requesting one 39.478252032 GB
 buffer. Both failures occurred before factorisation. The compiled factor
 peak therefore does not establish the peak of operand preparation. Duplicate
 transfers and staging-buffer lifetimes remain a hypothesis to investigate,
-not a measured cause. The two-failure stop rule was reached; no further
-solver repair or H200 attempt was made.</p>
+not a measured cause. The two-failure stop rule ended that attempt. A subsequent explicit
+ruling authorized the metric-Cholesky repair and further H200 measurement;
+those results follow below.</p>
+
+<h4>Single-transfer staging and float64 factor ownership</h4>
+<p>The linear branch now calls <code>_stage_linear_interaction</code> once
+and reuses that device array, rather than constructing the dense interaction
+twice in operand tuples. On the graded 16/80 mesh, the first transfer starts
+with zero live device bytes and ends with exactly 9 903 310 848 bytes, one
+interaction. Every one of its 1 237 913 856 entries agrees exactly with the
+persisted source. The Cholesky comparison also records one transfer, with
+zero entry error. The constant branch retains its operand arithmetic.</p>
+<p>The new route uses the full local volume Gram matrix Q and material
+differential A. With D = Q A, R = sqrt(D), and W = inv(Q) R, the Newton system
+has symmetric form B = (1 + λ) I − R G W. The inverse formula
+p = (b + W B⁻¹ R G b)/(1 + λ) avoids inverting R, so zero differential
+directions remain representable. Row tiles build B into one column-major
+buffer, donated to Cholesky; corrections are refined in the original
+float64 differential system. No float32 factor was used.</p>
+<table><thead><tr><th>known-SPD identity control</th><th>unknowns</th><th>diagonal error</th><th>same donated buffer</th><th>observed device peak [GB]</th></tr></thead><tbody>
+<tr><td>graded comparison dimension</td><td>35 184</td><td>0</td><td>true</td><td>9.908151808</td></tr>
+<tr><td>fine dimension</td><td>70 248</td><td>0</td><td>true</td><td>39.497542656</td></tr>
+</tbody></table>
+<p>These are actual H200 allocator peaks. The full-dimensional factor control
+holds one matrix and no dense interaction, so it proves float64 factorisation
+without a matrix copy; it does not establish a completed fine solve's peak.
+For the graded 16/80 Newton matrix, the compiled construction peak including
+G is 20.026282128 GB and the donated factor peak including retained G is
+19.806622209 GB. The failed factor leaves 19.839303936 GB live. The comparison
+process's cumulative peak is 39.643942144 GB from its preceding LU solve, so
+that cumulative number is not attributed to Cholesky. No fine-mesh staging
+or G-plus-factor runtime result is substituted for a measurement.</p>
+
+<h4>Independent definiteness counterexample</h4>
+<p>H200 job <code>1327469</code> reaches the graded 16/80 comparison. Combined
+LU converges in eight corrections, terminal residual 8.71113792505e-16.
+Cholesky refuses its first Newton matrix. Independent job
+<code>1327536</code> first factors known identity matrices at both full
+problem dimensions, then captures the actual graded matrix before Cholesky.</p>
+<table><thead><tr><th>diagnostic</th><th>measurement</th></tr></thead><tbody>
+<tr><td>minimum diagonal of B</td><td>−0.02252036020610193</td></tr>
+<tr><td>maximum diagonal of B</td><td>0.9914102694644059</td></tr>
+<tr><td>assembled versus direct action, relative norm at one seeded vector</td><td>3.350560959398e-16</td></tr>
+<tr><td>normalised bilinear asymmetry at two seeded vectors</td><td>5.469397436580e-18</td></tr>
+<tr><td>smallest eigenvalue estimate</td><td>−0.02489600316043086</td></tr>
+<tr><td>stored vector Rayleigh quotient</td><td>−0.024896003160430776</td></tr>
+<tr><td>eigenvector residual norm</td><td>1.920590347590e-8</td></tr>
+<tr><td>corresponding metric-weighted G quotient / μ₀</td><td>1.0258527485498994</td></tr>
+<tr><td>largest weighted material differential eigenvalue × μ₀</td><td>0.9991968312167876</td></tr>
+</tbody></table>
+<p>A negative diagonal already rules out positive definiteness. The stored
+vector independently gives a negative quadratic form, irrespective of how
+accurately the iterative eigenvalue estimate has converged. Its transformed
+vector gives (uᵀ Q G u)/(μ₀ uᵀ Q u) = 1.02585274855, while the material
+differential remains below its bound. Thus the measured interaction does not
+satisfy the bound assumed by the Cholesky-only ruling. The action comparison
+and known-SPD controls distinguish this from an incorrect row contraction
+or a full-size Cholesky backend failure.</p>
+<p>The counterexample is retained as <code>cholesky-diagnostic.json</code>
+and <code>cholesky-rayleigh-witness.npy</code> under the GPFS evidence root.
+Possible continuations are to preserve G and use shifted Cholesky only as a
+preconditioner for an exact unshifted iterative Newton solve, or to repair the
+interaction under a separate decision that permits its values to change.
+Neither continuation has been silently substituted for the specified solve.</p>
 
 <h4>Acceptance checks that remain open</h4>
 <table><thead><tr><th>required measurement</th><th>observed state</th></tr></thead><tbody>
-<tr><td>8/40 full-drive solve from M = 0</td><td>failed before first residual</td></tr>
+<tr><td>8/40 full-drive solve from M = 0</td><td>not reached after graded comparison definiteness refusal</td></tr>
 <tr><td>midplane fields at +1, +2 and +4 m</td><td>unmeasured</td></tr>
 <tr><td>change against graded 16/80 below 1% at every probe</td><td>unmeasured</td></tr>
-<tr><td>same-process interaction and probe agreement at 1e-12 on graded 16/80</td><td>not reached</td></tr>
+<tr><td>same-process interaction and probe agreement at 1e-12 on graded 16/80</td><td>incomplete: Cholesky refused its first matrix</td></tr>
 <tr><td>same-process interaction and probe agreement at 1e-12 on uniform 40 mm</td><td>not reached</td></tr>
 </tbody></table>
-<p>These missing rows are consequences of the failed solve at the head of the
-WEST batch. No stored reference is substituted for the required same-process
+<p>These missing rows are consequences of the first graded comparison's
+indefinite Newton matrix. No stored reference is substituted for the required same-process
 comparison, and no further refinement or tolerance change was attempted.</p>
 
 <h4>Controls and bounded evidence</h4>
@@ -81,16 +151,30 @@ Frobenius / maximum-entry relative errors 3.129988135484e-15 /
 checks passed 11 tests in 35.66 s. These small controls support the implemented
 arithmetic but do not establish the missing large-mesh comparisons.</p>
 <p>The filtered CPU gate passed 101 tests at the base and 112 at the
-implementation head, with 11 deselected in each. A scratch mutation that
+implementation head, with 11 deselected in each. The metric-Cholesky
+implementation's paired gate passes 101 tests at the base and 118 at the head,
+again with 11 deselected. Its six focused differential, fill, regularisation,
+partial-tile and nonlinear checks also pass. A scratch mutation that
 admits a perturbed interaction and raises the refinement threshold makes
 four named tests fail: interaction perturbation, +1%, +1.01% and −1.01%.
 The clean head passes those tests, so both acceptance guards are shown to
 refuse their declared cases. The production thresholds remain 1e-12 relative
 agreement and strictly less than 1% refinement change. Full-suite arm
 commands, exact revisions, completion flags and the failure delta are
-recorded in the run manifest.</p>
+recorded in the run manifest. The H200 default-constant control compares
+against the base in one process and is byte-identical for magnetisation,
+permeability, residual history, step scales, regularisation, reduction ratios
+and probe fields.</p>
 
 <h4>Revisions, geometry binding and retained receipts</h4>
+<p>Metric-Cholesky implementation and comparison: revision
+<code>2ff4127c7b84dec626333a75d6a02724e2beb0f3</code>. Independent diagnostic:
+revision <code>59e1a985d6e87fd84525044a0bfe73a8e08ca603</code>, executed blob
+<code>6bd6c250b2af2b500586ed9a9406139a90328f8c</code>. The current receipts
+<code>constant-bit-identity.json</code> and
+<code>graded-16-80-cholesky.json</code> retain the successful controls and
+incomplete comparison; the failed comparison snapshot also remains in the
+run directory as <code>graded-16-80-cholesky-as-failed.json</code>.</p>
 <p>Assembly and first solve attempt: revision
 <code>2c6dbb043a5839ab7615c0a552a558038930ae9c</code>, executed measurement blob
 <code>fd461c52c9597db06979a0182a3b37b2b2be39e5</code>. Allocator-budget and

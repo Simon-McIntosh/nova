@@ -52,6 +52,11 @@
 <p>The requested H200 build is queued as job <code>1324409</code> and pends on <code>Priority</code> with the node's eight cards allocated for the whole fence; <code>scontrol show node 98dci4-gpu-0003</code> reads <code>AllocTRES=gres/gpu=8</code> against <code>CfgTRES=gres/gpu=8</code> throughout. The walls above are therefore a P100 measurement on <code>98dci4-gpu-0002</code> (JAX 0.11.0, <code>devices [CudaDevice(id=0)]</code>, <code>x64 True</code>), and the cache is cold there because the persistent compilation cache keys on device topology. No H200 wall is claimed.</p>
 </section>
 
+<section id="iter-bank-recertify-exceptions">
+<h2>Two exceptions the lead accepted</h2>
+<p>The lead ruling of 2026-11-18 lands the re-certified bank with two of this node's stops accepted as exceptions. First, the first-derivative rows depart from the previous bank by up to 7.20e-8 against a 1e-10 clause; the ruling attributes that departure to the polygon kernel repair correcting main's corner derivatives, and notes that the attribution arms ran out of memory at 96 GB. Second, the P100 build and reload walls recorded above stand in place of an H200 wall, because no card was free for the whole fence, and the H200 wall will be measured later. Neither item is re-attempted here, and neither changes the certified result: the rebuilt bank meets its component budgets at every retained node.</p>
+</section>
+
 <section id="iter-bank-recertify-negative">
 <h2>The base kernel is refused by the same check</h2>
 <p>The negative-control arm runs the head tree with the polygon kernel replaced by the pre-repair revision <code>0d21b02a768db6fb2c445485e8597d144e233fcf</code>; the accuracy contract therefore discriminates the kernel and not the harness. Rigel job <code>1324564</code> completes with <strong>one failed, 13 passed, EXIT=1</strong>:</p>

@@ -100,6 +100,14 @@ def main():
     parser.add_argument("--head", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
+        "--shard",
+        type=int,
+        nargs=2,
+        metavar=("INDEX", "COUNT"),
+        default=None,
+        help="run only the rows whose position modulo COUNT equals INDEX",
+    )
+    parser.add_argument(
         "--trace-helper",
         type=Path,
         default=None,
@@ -121,40 +129,43 @@ def main():
         extract(tree, revision, args.repository)
         trees[arm] = (tree, revision)
         print(f"TREE {arm} {revision} {tree}", flush=True)
+    jobs = [
+        (arm, frame, branch, label) for arm in trees for frame, branch, label in ROWS
+    ]
+    if args.shard:
+        index, count = args.shard
+        jobs = [job for number, job in enumerate(jobs) if number % count == index]
+        print(
+            f"SHARD {index}/{count} {[job[0] + ':' + job[3] for job in jobs]}",
+            flush=True,
+        )
     comparison = []
-    for arm, (tree, revision) in trees.items():
-        for frame, branch, label in ROWS:
-            folder = args.output / arm / f"frame-{frame}-{branch}"
-            if completed(folder):
-                print(f"RETAINED {arm} {label}", flush=True)
-            else:
-                folder, code, log = solve_row(
-                    python,
-                    tree,
-                    revision,
-                    frame,
-                    branch,
-                    folder,
-                    args.trace_helper,
-                )
-                print(f"ROW {arm} {label} EXTRACT_ID={code} LOG={log}", flush=True)
-                if code:
-                    raise SystemExit(code)
-            receipt = json.loads((folder / "receipt.json").read_text())
-            built = json.loads((folder / "built-profile.json").read_text())
-            comparison.append(
-                dict(
-                    arm=arm,
-                    label=label,
-                    frame=frame,
-                    branch=branch,
-                    **receipt,
-                    built_profile=built,
-                )
+    for arm, frame, branch, label in jobs:
+        tree, revision = trees[arm]
+        folder = args.output / arm / f"frame-{frame}-{branch}"
+        if completed(folder):
+            print(f"RETAINED {arm} {label}", flush=True)
+        else:
+            folder, code, log = solve_row(
+                python,
+                tree,
+                revision,
+                frame,
+                branch,
+                folder,
+                args.trace_helper,
             )
-            (args.output / "comparison.json").write_text(
-                json.dumps(comparison, indent=2) + "\n"
-            )
+            print(f"ROW {arm} {label} EXTRACT_ID={code} LOG={log}", flush=True)
+            if code:
+                print(f"ROW_FAILED {arm} {label} EXIT={code}", flush=True)
+                continue
+        receipt = json.loads((folder / "receipt.json").read_text())
+        built = json.loads((folder / "built-profile.json").read_text())
+        comparison.append(dict(arm=arm, label=label, **receipt, built_profile=built))
+        name = "comparison.json"
+        if args.shard:
+            name = f"comparison-{args.shard[0]}.json"
+        (args.output / name).write_text(json.dumps(comparison, indent=2) + "\n")
     print(
         "BATCH_COMPLETE "
         + json.dumps([row["label"] + ":" + row["arm"] for row in comparison]),

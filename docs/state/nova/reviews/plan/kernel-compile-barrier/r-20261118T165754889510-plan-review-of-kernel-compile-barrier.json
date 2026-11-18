@@ -156,6 +156,16 @@
       "finding": "reasoning-3",
       "reason": "the lever was a lead ruling recorded with its measured failure; the section now states endpoints for node (d), and the earlier nodes are history",
       "when": "2026-11-18T17:27:38.100848+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "92b086a8b8bbeb157d3146fa1f53c5a88fd567b3",
+      "commit_basis": "edit",
+      "finding": "reasoning-4",
+      "note": "a comment on s2 records that the lead rulings of 2026-11-15 and 2026-11-18 supersede decision variadic-share-on-production-base and what the two enabled budget tests therefore mean",
+      "reason": "",
+      "when": "2026-11-18T17:27:46.643529+00:00"
     }
   ],
   "responses": {
@@ -206,6 +216,15 @@
       "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
       "reason": "the lever was a lead ruling recorded with its measured failure; the section now states endpoints for node (d), and the earlier nodes are history",
       "when": "2026-11-18T17:27:38.100848+00:00"
+    },
+    "reasoning-4": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "92b086a8b8bbeb157d3146fa1f53c5a88fd567b3",
+      "commit_basis": "edit",
+      "note": "a comment on s2 records that the lead rulings of 2026-11-15 and 2026-11-18 supersede decision variadic-share-on-production-base and what the two enabled budget tests therefore mean",
+      "reason": "",
+      "when": "2026-11-18T17:27:46.643529+00:00"
     },
     "single_goal-1": {
       "action": "declined",

@@ -149,6 +149,13 @@
       "note": "the three line anchors are corrected",
       "reason": "",
       "when": "2026-11-18T17:27:29.369816+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "finding": "reasoning-3",
+      "reason": "the lever was a lead ruling recorded with its measured failure; the section now states endpoints for node (d), and the earlier nodes are history",
+      "when": "2026-11-18T17:27:38.100848+00:00"
     }
   ],
   "responses": {
@@ -193,6 +200,12 @@
       "note": "s3 holds 64 GB to the first call only and records the batch loop peak without a bound",
       "reason": "",
       "when": "2026-11-18T17:26:40.359365+00:00"
+    },
+    "reasoning-3": {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "reason": "the lever was a lead ruling recorded with its measured failure; the section now states endpoints for node (d), and the earlier nodes are history",
+      "when": "2026-11-18T17:27:38.100848+00:00"
     },
     "single_goal-1": {
       "action": "declined",

@@ -1,0 +1,119 @@
+<section id="icm-linear-refinement-state">
+<h3>WEST affine refinement: assembly persisted; solve blocked during device staging</h3>
+<p>The graded 8/40 mm interaction was assembled on an NVIDIA H200 NVL and
+persisted with its geometry digest. Its material solve failed before the first
+Newton residual in two attempts. No fine-mesh probe field, refinement change,
+or large-mesh route equivalence is reported as measured. The node's numerical
+criteria remain unmet.</p>
+
+<h4>Measured assembly</h4>
+<table><thead><tr><th>quantity</th><th>measurement</th></tr></thead><tbody>
+<tr><td>cells / affine unknowns</td><td>11 708 / 70 248</td></tr>
+<tr><td>interaction storage</td><td>39.478252032 GB</td></tr>
+<tr><td>assembly wall</td><td>23 263.762956 s</td></tr>
+<tr><td>evaluator compilation</td><td>5.664510 s</td></tr>
+<tr><td>evaluator execution</td><td>7 942.076623 s</td></tr>
+<tr><td>host remainder</td><td>15 316.021823 s</td></tr>
+<tr><td>process peak host RSS through assembly</td><td>124.483842048 GB</td></tr>
+<tr><td>JAX-managed device peak through assembly</td><td>16.918528 MB</td></tr>
+</tbody></table>
+<p>Host remainder is assembly wall minus synchronised evaluator compilation
+and execution. The small device peak belongs to the tiled evaluator: the dense
+energy and interaction matrices are assembled on the host. It does not measure
+total GPU driver memory. These assembly observations precede the attempted
+material solve. Continuation reload validated the saved operator against the
+same ordered mesh geometry, without repeating assembly.</p>
+
+<h4>Compiled factor capacity and actual staging refusal</h4>
+<p>The combined factor reproduces the recorded physical-memory overflow. An
+opt-in <code>linear_factorisation="split"</code> route constructs the identical
+local-tangent Jacobian in one compiled call and donates its disposable buffer
+to LU in another. The Newton loop releases each factor after its update so it
+cannot remain live beside the next factor. The combined default, interaction
+arithmetic and numerical tolerances remain unchanged.</p>
+<table><thead><tr><th>compiled stage or memory bound</th><th>storage [GB]</th></tr></thead><tbody>
+<tr><td>combined factor live peak</td><td>157.961968936</td></tr>
+<tr><td>split Jacobian live peak</td><td>118.486807672</td></tr>
+<tr><td>donated LU live peak, including retained interaction</td><td>118.435037361</td></tr>
+<tr><td>physical H200 memory</td><td>150.754820096</td></tr>
+<tr><td>90% physical capacity</td><td>135.679338086</td></tr>
+<tr><td>first process allocator limit</td><td>112.585605120</td></tr>
+<tr><td>continuation allocator limit</td><td>135.102726144</td></tr>
+</tbody></table>
+<p>In job <code>1324237</code>, the interaction persisted successfully, then
+operand staging failed at the first <code>jax.block_until_ready((state,
+operands))</code>, before Newton could run. The log records
+<code>RESOURCE_EXHAUSTED: Out of memory while trying to allocate 36.77GiB</code>
+from <code>jit_stage</code>. The requested allocation was 39 478 252 032 bytes,
+exactly one dense interaction. The process allocator limit was below the
+compiled split peak, so physical-card capacity alone was an insufficient
+admission check.</p>
+<p>The refinement launcher was changed to set
+<code>XLA_PYTHON_CLIENT_MEM_FRACTION=0.90</code> with preallocation disabled.
+The capacity check now compares the compiled peak against both 90% of
+physical memory and the allocator's reported byte limit. Job
+<code>1324984</code> reloaded the persisted operator with the enlarged
+135.102726144 GB allocator limit. It passed that capacity check but failed
+at the same pre-Newton staging call, again requesting one 39.478252032 GB
+buffer. Both failures occurred before factorisation. The compiled factor
+peak therefore does not establish the peak of operand preparation. Duplicate
+transfers and staging-buffer lifetimes remain a hypothesis to investigate,
+not a measured cause. The two-failure stop rule was reached; no further
+solver repair or H200 attempt was made.</p>
+
+<h4>Acceptance checks that remain open</h4>
+<table><thead><tr><th>required measurement</th><th>observed state</th></tr></thead><tbody>
+<tr><td>8/40 full-drive solve from M = 0</td><td>failed before first residual</td></tr>
+<tr><td>midplane fields at +1, +2 and +4 m</td><td>unmeasured</td></tr>
+<tr><td>change against graded 16/80 below 1% at every probe</td><td>unmeasured</td></tr>
+<tr><td>same-process interaction and probe agreement at 1e-12 on graded 16/80</td><td>not reached</td></tr>
+<tr><td>same-process interaction and probe agreement at 1e-12 on uniform 40 mm</td><td>not reached</td></tr>
+</tbody></table>
+<p>These missing rows are consequences of the failed solve at the head of the
+WEST batch. No stored reference is substituted for the required same-process
+comparison, and no further refinement or tolerance change was attempted.</p>
+
+<h4>Controls and bounded evidence</h4>
+<p>The unchanged shell operator pin passed both H200 cases: 2 passed, 102
+deselected in 16.45 s, with compact relative error zero and batched-edge
+Frobenius / maximum-entry relative errors 3.129988135484e-15 /
+7.533115359696e-15. Focused CPU differential, nonlinear field and refusal
+checks passed 11 tests in 35.66 s. These small controls support the implemented
+arithmetic but do not establish the missing large-mesh comparisons.</p>
+<p>The filtered CPU gate passed 101 tests at the base and 112 at the
+implementation head, with 11 deselected in each. A scratch mutation that
+admits a perturbed interaction and raises the refinement threshold makes
+four named tests fail: interaction perturbation, +1%, +1.01% and −1.01%.
+The clean head passes those tests, so both acceptance guards are shown to
+refuse their declared cases. The production thresholds remain 1e-12 relative
+agreement and strictly less than 1% refinement change. Full-suite arm
+commands, exact revisions, completion flags and the failure delta are
+recorded in the run manifest.</p>
+
+<h4>Revisions, geometry binding and retained receipts</h4>
+<p>Assembly and first solve attempt: revision
+<code>2c6dbb043a5839ab7615c0a552a558038930ae9c</code>, executed measurement blob
+<code>fd461c52c9597db06979a0182a3b37b2b2be39e5</code>. Allocator-budget and
+persisted-operator continuation: revision
+<code>183124d5f78e138420e8f3a0adbdbe9be48bc862</code>. Its executed measurement
+blob is <code>acd0e8abbf1c0246b9ac6eb404bb7f294e90b837</code>, matching the
+stamp in <code>graded-8-40.json</code>. The launcher
+refuses a dirty tree, checks the extracted measurement script against its
+committed blob, enables x64 before array construction and runs from a
+job-local archive that is removed on exit.</p>
+<p>The evidence root is
+<code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/west-h200/refinement/</code>.
+It retains <code>graded-8-40-assembly.json</code> from the first attempt and
+<code>graded-8-40.json</code> from the continuation. Both report
+<code>completed=false</code>. The persisted matrix is
+<code>graded-8-40-operator.npy</code>; its companion metadata binds it to
+geometry digest
+<code>0d51ea9c2ee5677db8aee521fa73070927595831300f91e17c53bc617f32435e</code>.</p>
+<p>Run logs and the manifest live under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223040695957-icm-linear-refinement/</code>.
+The original receipt is preserved there as
+<code>graded-8-40-as-failed.json</code>; <code>h200-measure.log</code> and
+<code>h200-continuation.log</code> retain both allocation refusals. The
+original scheduler-wrapper failure, before any measurement code ran, remains
+separate in <code>h200-job.log</code>.</p>
+</section>

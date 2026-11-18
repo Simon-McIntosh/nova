@@ -41,7 +41,24 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 128,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The review itself judges it does not change the plan: the four-row rerun is an observational arm, and the edge-value equality and the finite-edge test are the falsifiable measures",
+      "when": "2026-11-18T06:36:06.736600+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The review itself judges it does not change the plan: the four-row rerun is an observational arm, and the edge-value equality and the finite-edge test are the falsifiable measures",
+      "when": "2026-11-18T06:36:06.736600+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261118T045109814107-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261118T045109814107-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "c3a0898c13fffd458c000bd4deab65867f172e90",
   "rubric": "content",

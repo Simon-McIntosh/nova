@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
@@ -324,6 +324,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261117T235623557829-review-of-estimator-scoreboard-7611f2b35922" data-who="reckon-build" data-when="2026-11-17T23:57:28.942Z">
     <div class="r-comment-body"><p>reviewed r-20261114T143301237025-estimator-scoreboard at base dd32048a48b754655722787346acf0471fe03cdf and head 7611f2b359221922d1c26901e735d57eb3e6e448; scores goal_fidelity 17, evidence 17, scope_discipline 19, durability 17, fit 17, reuse 5 (total 92); eight non-blocking findings, no blocking finding, so the node may land</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261114T143301237025-estimator-scoreboard" data-who="reckon-build" data-when="2026-11-17T22:39:34Z">
+    <div class="r-comment-body"><p>the row-exchange case is scored on one comparator from stored states, with imas-efit&#x27;s reconstruction passing four of five bands and failing the safety factor at 0.148 against a band of 0.1, the nova inverse-class state passing every band at the fit&#x27;s own recorded precision, a declared perturbed copy of that state failing every band, and all three reference-free checks reported for every column; each column names its state source and the receipt carries each state&#x27;s digest</p></div>
 </div>
 </section>
 </main>

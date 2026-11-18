@@ -50,7 +50,12 @@ def _evaluate_sampled_flux_function(
     upper_edge_increment,
     psi_norm,
 ):
-    """Evaluate a sampled flux function from its already-derived edge data."""
+    """Evaluate a sampled flux function from its already-derived edge data.
+
+    This is the zero-edge form: above the last coordinate a quintic end cap
+    preserves the last value and slope and reaches zero one edge interval
+    later, which is the profile of a source that vanishes at the separatrix.
+    """
     grid = coordinate
     samples = values
     evaluation_coordinate = jnp.asarray(psi_norm)
@@ -79,6 +84,61 @@ def _evaluate_sampled_flux_function(
     return jnp.where(below, samples[0], result)
 
 
+def _evaluate_finite_edge_sampled_flux_function(
+    coordinate,
+    values,
+    edge_width,
+    lower_slope,
+    upper_slope,
+    lower_edge_increment,
+    upper_edge_increment,
+    upper_cap_width,
+    upper_edge_target,
+    psi_norm,
+):
+    """Evaluate a sampled flux function that supplies its own boundary value.
+
+    Above the last coordinate the exterior is the quintic Hermite bridge from
+    the last sample, carrying its value and slope, to ``upper_edge_target`` at
+    ``psi_norm == 1``.  The bridge's slope at the boundary is zero, so the
+    function holds the supplied value beyond it.  Below the first coordinate
+    the value still holds constant toward the magnetic axis.
+    """
+    grid = coordinate
+    samples = values
+    evaluation_coordinate = jnp.asarray(psi_norm)
+    interior = jnp.interp(evaluation_coordinate, grid, samples)
+    below = evaluation_coordinate < grid[0]
+    edge_value = jnp.where(below, samples[0], samples[-1])
+    del lower_slope, upper_slope
+    outward_increment = jnp.where(below, -lower_edge_increment, upper_edge_increment)
+    outward_distance = jnp.where(
+        below,
+        grid[0] - evaluation_coordinate,
+        evaluation_coordinate - grid[-1],
+    )
+    outward_width = jnp.where(below, edge_width, upper_cap_width)
+    parameter = jnp.clip(outward_distance / outward_width, 0.0, 1.0)
+    parameter_cubed = parameter * parameter * parameter
+    value_basis = 1.0 + parameter_cubed * (-10.0 + parameter * (15.0 - 6.0 * parameter))
+    slope_basis = parameter + parameter_cubed * (
+        -6.0 + parameter * (8.0 - 3.0 * parameter)
+    )
+    target_basis = parameter_cubed * (10.0 + parameter * (-15.0 + 6.0 * parameter))
+    edge_target = jnp.where(below, 0.0, upper_edge_target)
+    exterior = (
+        value_basis * edge_value
+        + slope_basis * outward_increment
+        + target_basis * edge_target
+    )
+    result = jnp.where(
+        (evaluation_coordinate >= grid[0]) & (evaluation_coordinate <= grid[-1]),
+        interior,
+        exterior,
+    )
+    return jnp.where(below, samples[0], result)
+
+
 @jax.tree_util.register_pytree_node_class
 @dataclass(frozen=True, slots=True)
 class SampledFluxFunction:
@@ -86,19 +146,34 @@ class SampledFluxFunction:
 
     Values interpolate on a strictly increasing normalized-flux coordinate.
     Below the first coordinate, values hold constant toward the magnetic axis.
-    Above the last coordinate, a quintic end cap preserves its value and slope
-    before reaching zero one edge interval away. The representation is
-    the array-owned equivalent of a closure around ``jnp.interp`` and can be
-    stacked without closing any member's table into a compiled program.
+    Above the last coordinate the outer form is chosen at construction.
+
+    The zero-edge form (``edge_value=None``, the default) is a quintic end cap
+    that preserves the cap value and slope and then reaches zero one edge
+    interval away, the profile of a source that vanishes at the separatrix.
+    The finite-edge form takes the boundary value the profile supplies at
+    ``psi_norm == 1`` and bridges to it from the last sample with the same
+    quintic, so the function returns that value at the boundary, holds it
+    beyond, and stays continuous in value and slope with the interior
+    samples.  It requires samples that end inside ``psi_norm == 1``, because a
+    table that reaches the boundary already carries a value there.
+
+    Both forms are the array-owned equivalent of a closure around
+    ``jnp.interp`` and can be stacked without closing any member's table into
+    a compiled program.
     """
 
     coordinate: object
     values: object
+    edge_value: object | None = None
     edge_width: object = field(init=False)
     lower_slope: object = field(init=False)
     upper_slope: object = field(init=False)
     lower_edge_increment: object = field(init=False)
     upper_edge_increment: object = field(init=False)
+    upper_cap_width: object = field(init=False)
+    upper_edge_target: object = field(init=False)
+    has_finite_edge: bool = field(init=False)
 
     def __post_init__(self) -> None:
         coordinate = np.asarray(self.coordinate, dtype=np.float64)
@@ -114,18 +189,47 @@ class SampledFluxFunction:
         edge_width = grid[1] - grid[0]
         lower_slope = (samples[1] - samples[0]) / edge_width
         upper_slope = (samples[-1] - samples[-2]) / edge_width
-        lower_edge_increment = edge_width * lower_slope
-        upper_edge_increment = edge_width * upper_slope
         object.__setattr__(self, "coordinate", grid)
         object.__setattr__(self, "values", samples)
         object.__setattr__(self, "edge_width", edge_width)
         object.__setattr__(self, "lower_slope", lower_slope)
         object.__setattr__(self, "upper_slope", upper_slope)
-        object.__setattr__(self, "lower_edge_increment", lower_edge_increment)
-        object.__setattr__(self, "upper_edge_increment", upper_edge_increment)
+        object.__setattr__(self, "lower_edge_increment", edge_width * lower_slope)
+        object.__setattr__(self, "upper_edge_increment", edge_width * upper_slope)
+        if self.edge_value is None:
+            object.__setattr__(self, "has_finite_edge", False)
+            object.__setattr__(self, "upper_cap_width", edge_width)
+            object.__setattr__(
+                self, "upper_edge_target", jnp.zeros((), dtype=grid.dtype)
+            )
+            return
+        target = float(np.asarray(self.edge_value, dtype=np.float64))
+        if not np.isfinite(target):
+            raise ValueError("finite edge value must be finite")
+        if coordinate[-1] >= 1.0:
+            raise ValueError(
+                "finite edge value requires samples ending inside psi_norm=1"
+            )
+        upper_cap_width = jnp.asarray(1.0 - coordinate[-1])
+        object.__setattr__(self, "has_finite_edge", True)
+        object.__setattr__(self, "upper_cap_width", upper_cap_width)
+        object.__setattr__(self, "upper_edge_target", jnp.asarray(target))
 
     def __call__(self, psi_norm):
-        """Evaluate the interpolant, constant core hold and compact outer cap."""
+        """Evaluate the interpolant, constant core hold and outer boundary form."""
+        if self.has_finite_edge:
+            return _evaluate_finite_edge_sampled_flux_function(
+                self.coordinate,
+                self.values,
+                self.edge_width,
+                self.lower_slope,
+                self.upper_slope,
+                self.lower_edge_increment,
+                self.upper_edge_increment,
+                self.upper_cap_width,
+                self.upper_edge_target,
+                psi_norm,
+            )
         return _evaluate_sampled_flux_function(
             self.coordinate,
             self.values,
@@ -139,6 +243,18 @@ class SampledFluxFunction:
 
     def tree_flatten(self):
         """Return profile tables and precomputed edge data as dynamic leaves."""
+        if self.has_finite_edge:
+            return (
+                self.coordinate,
+                self.values,
+                self.edge_width,
+                self.lower_slope,
+                self.upper_slope,
+                self.lower_edge_increment,
+                self.upper_edge_increment,
+                self.upper_cap_width,
+                self.upper_edge_target,
+            ), (True,)
         return (
             self.coordinate,
             self.values,
@@ -147,12 +263,12 @@ class SampledFluxFunction:
             self.upper_slope,
             self.lower_edge_increment,
             self.upper_edge_increment,
-        ), None
+        ), (False,)
 
     @classmethod
     def tree_unflatten(cls, aux_data, children):
         """Rebuild without asking NumPy to inspect traced member arrays."""
-        del aux_data
+        (has_finite_edge,) = aux_data
         instance = object.__new__(cls)
         object.__setattr__(instance, "coordinate", children[0])
         object.__setattr__(instance, "values", children[1])
@@ -161,6 +277,15 @@ class SampledFluxFunction:
         object.__setattr__(instance, "upper_slope", children[4])
         object.__setattr__(instance, "lower_edge_increment", children[5])
         object.__setattr__(instance, "upper_edge_increment", children[6])
+        object.__setattr__(instance, "has_finite_edge", has_finite_edge)
+        if has_finite_edge:
+            object.__setattr__(instance, "upper_cap_width", children[7])
+            object.__setattr__(instance, "upper_edge_target", children[8])
+            object.__setattr__(instance, "edge_value", children[8])
+        else:
+            object.__setattr__(instance, "upper_cap_width", children[2])
+            object.__setattr__(instance, "upper_edge_target", jnp.zeros(()))
+            object.__setattr__(instance, "edge_value", None)
         return instance
 
 

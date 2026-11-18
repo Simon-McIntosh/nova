@@ -18,6 +18,11 @@
       "kind": "exempted",
       "reason": "the receipt's log.txt records the exact builder flags for every arm (--current-scale 1e4 --plasma-scale 0); the usage line in the script is incomplete, but nothing recorded depends on it",
       "recorded_at": "2026-11-18T17:00:39.284905+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the coordinator's section-9 verdict in the plan states that a/b = 0.5 reproduces S at the finest arm but is not shown converged on either lever; the plan, not summary.json's verdict field, is what section 9 reads",
+      "recorded_at": "2026-11-18T17:00:46.386651+00:00"
     }
   },
   "findings": [

@@ -139,14 +139,27 @@
       "finding": "evidence_paths-1",
       "reason": "these receipts are kilobyte JSON profiles and logs, below the few-MB threshold of the GPFS receipts rule, and follow the receipt convention every landed node of this plan used",
       "when": "2026-11-18T17:27:20.440631+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "92b086a8b8bbeb157d3146fa1f53c5a88fd567b3",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "the three line anchors are corrected",
+      "reason": "",
+      "when": "2026-11-18T17:27:29.369816+00:00"
     }
   ],
   "responses": {
     "anchors_resolve-1": {
-      "action": "noted",
-      "by": "plan-review-reflex",
-      "reason": "each cited file resolves and each symbol is one grep away in it, so the anchor costs a worker a lookup rather than sending it at the wrong mechanism.",
-      "when": "2026-11-18T17:18:55.322057+00:00"
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "92b086a8b8bbeb157d3146fa1f53c5a88fd567b3",
+      "commit_basis": "edit",
+      "note": "the three line anchors are corrected",
+      "reason": "",
+      "when": "2026-11-18T17:27:29.369816+00:00"
     },
     "done_when-1": {
       "action": "acted",

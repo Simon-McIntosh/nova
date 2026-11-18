@@ -53,6 +53,16 @@
       "note": "The agreement between batched and solo states is now stated in one unit: the flux difference at every mesh node within 1e-9 of the axis-to-boundary flux span.",
       "reason": "",
       "when": "2026-11-18T10:36:48.861896+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a7cb73dde1b7870974c876f3aab0e846bd0fc44e",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The endpoint now says what is meant: one traced call returns per-state converged flags and residuals as arrays of the batch width, with no host conversion inside the traced solve.",
+      "reason": "",
+      "when": "2026-11-18T10:37:33.617441+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "The agreement between batched and solo states is now stated in one unit: the flux difference at every mesh node within 1e-9 of the axis-to-boundary flux span.",
       "reason": "",
       "when": "2026-11-18T10:36:48.861896+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a7cb73dde1b7870974c876f3aab0e846bd0fc44e",
+      "commit_basis": "edit",
+      "note": "The endpoint now says what is meant: one traced call returns per-state converged flags and residuals as arrays of the batch width, with no host conversion inside the traced solve.",
+      "reason": "",
+      "when": "2026-11-18T10:37:33.617441+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261118T065954315747-plan-review-of-forward-solve-near-stored-states.json",

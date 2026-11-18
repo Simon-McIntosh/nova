@@ -2291,3 +2291,49 @@ snapshots, preserving the original two-file command and the repair pair's
 three-file commands. The earlier suite waiver and incomplete receipts remain
 historical records and are not substituted for this new measurement.</p>
 </section>
+
+<section id="efit-comparison-q95-suite-result">
+<h2>Exact CPU suites for the q95 repair remain incomplete</h2>
+<p>CPU batch 1324011 finished FAILED after 3 h 9 min 16 s of its 16-hour
+allocation, with four cores and 64 GB. The controller preserved all three
+immutable arms and exited 1. Each pytest process aborted with SIGABRT,
+native <code>EXIT=-6</code>, before a pytest summary. The controller's completed
+index records that all arms were attempted; no suite completed.</p>
+<table><thead><tr><th>Arm / actual revision</th><th>Resolved files</th><th>CPU wall [s]</th><th>Partial pass / F markers</th><th>Native exit / completed</th></tr></thead><tbody>
+<tr><td>Original base: d7676e478fc8701b036ec717f80d403c3ead86f5</td><td>forward, magnetics_fit</td><td>3600.820330</td><td>45 / 1</td><td>-6 / false</td></tr>
+<tr><td>Repair base: 04fa0938f3c25ef05ace2f2b5004b16e627a15af</td><td>forward, magnetics_fit, comparison</td><td>4328.591536</td><td>79 / 1</td><td>-6 / false</td></tr>
+<tr><td>Measured head: b9884b0af797a090f105f80be019cacf258ba354</td><td>forward, magnetics_fit, comparison</td><td>3386.841530</td><td>79 / 1</td><td>-6 / false</td></tr>
+</tbody></table>
+<p>All three native stacks show <code>backend_compile_and_load</code> in JAX
+through <code>ForwardProfile._solve_accelerated</code> during
+<code>test_known_state_recovery</code>. No lower-level abort reason is reported.
+The supported normal-cache environment was used, with cache overrides unset
+and cache enabled plus float64 capability checked before each fresh process.
+No memory, cache-only or scheduler-timeout cause is inferred.</p>
+<p>The partial F markers have no native test identity and are not assigned to
+the known pre-existing failure. Every arm retains <code>completed=false</code>,
+<code>summary=null</code> and <code>failure_count=null</code>. Empty failure-ID
+arrays mean unavailable captures. Both the original-base/head and
+repair-base/head added-failure counts are unavailable. The manifest now points
+its primary pair at the native original-base and measured-head receipts and
+preserves the repair-base record separately.</p>
+<p>The exact requested commands, imported module paths, working directories,
+SHA256 digests and bare EXIT lines are retained under
+<code>q95-review-suite-1324011/</code>. All three digests and commands were
+verified; the assessment is <code>q95-suite-assessment.json</code> and its
+validation receipt is <code>q95-suite-record-validation.log</code>. The measured
+head remains b988; documentation commit 238f90964ede799f40dc938df030e8b1f844137f
+has matching suite-source bytes but is not relabelled as an executed revision.</p>
+<p>Initial submission 1324002 failed before Python or pytest started because
+the scheduler wrapper could not bind its node-local temporary fence path on
+the remote node. Its native zero-duration failure is retained separately as
+launch scaffolding. The unchanged payload entered the real CPU allocation in
+1324011, so the three subsequent compilation aborts are code-under-test
+failures, not that launch error.</p>
+<p>The q95 source finding is answered by the physical-span fix and its five
+focused passes; reversing the owner change restores all four regression
+failures. The newly required complete suite evidence remains missing, and
+this repair's delivery is blocked on that condition. No unchanged rerun,
+forward/topology/backend edit, additional stored-case seed or new figure is
+introduced. The completed physical row control remains unchanged.</p>
+</section>

@@ -58,9 +58,28 @@
       "note": "\u00a713 now compares against EFIT at psi_N=1 (p' -2319.18090032498, FF' +0.005842038974463571) and has the builder sample to the boundary; the 0.95 values are named as the last sample",
       "reason": "",
       "when": "2026-11-18T06:37:27.949253+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "03d6212b45343c6044de69ef4d706d423aee2a8d",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The pinned-drift record has landed on main (docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html), so the citation resolves",
+      "reason": "",
+      "when": "2026-11-18T06:38:19.891096+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "03d6212b45343c6044de69ef4d706d423aee2a8d",
+      "commit_basis": "edit",
+      "note": "The pinned-drift record has landed on main (docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html), so the citation resolves",
+      "reason": "",
+      "when": "2026-11-18T06:38:19.891096+00:00"
+    },
     "done_when-1": {
       "action": "declined",
       "by": "",

@@ -81,7 +81,24 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 99,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "anchors_resolve-1",
+      "reason": "each cited file resolves and each symbol is one grep away in it, so the anchor costs a worker a lookup rather than sending it at the wrong mechanism.",
+      "when": "2026-11-18T17:18:55.322057+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "each cited file resolves and each symbol is one grep away in it, so the anchor costs a worker a lookup rather than sending it at the wrong mechanism.",
+      "when": "2026-11-18T17:18:55.322057+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261118T165754889510-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261118T165754889510-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "367516f1ae425cb04b6ca9c7a5c6b816bf800cdd",
   "rubric": "content",

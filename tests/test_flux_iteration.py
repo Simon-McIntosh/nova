@@ -308,6 +308,36 @@ def test_a_flux_solver_supplies_the_next_map():
     np.testing.assert_allclose(receipt.coefficients, TRUTH, atol=1.0e-9)
 
 
+def test_a_map_update_beyond_the_span_is_rejected():
+    fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
+    profile = fitter.profile
+    calls = []
+
+    def solve(source, psi):
+        calls.append(1)
+        if len(calls) == 2:  # the second solve leaves the branch entirely
+            return np.asarray(psi) + 10.0
+        return EXTERNAL + COUPLING @ profile.instrument.cell_current(source, psi)
+
+    solved = FluxIterationFit(
+        profile,
+        fitter.magnetics,
+        lambda currents: SENSOR @ np.asarray(currents),
+        flux_solver=solve,
+    )
+    receipt = solved.fit(
+        measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+    )
+    assert not receipt.converged
+    assert receipt.rejected_pass == 1
+    assert receipt.rejected_message is not None
+    assert len(receipt.passes) == 1
+    assert receipt.last_flux_update == receipt.passes[0].flux_update
+
+
 def test_a_scaled_input_leaves_the_plasma_current_band():
     fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
     scaled = SliceMeasurement(

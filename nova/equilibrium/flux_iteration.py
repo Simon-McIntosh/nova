@@ -89,6 +89,8 @@ class FluxIterationReceipt:
     stopped_improving_pass: int | None
     axis_lost_pass: int | None
     axis_loss_message: str | None
+    rejected_pass: int | None
+    rejected_message: str | None
     topology_error: str | None
     first_pass_values: np.ndarray
     first_pass_residual: np.ndarray
@@ -266,6 +268,7 @@ class FluxIterationFit:
         flux_tolerance: float = 1.0e-10,
         relaxation: float = 1.0,
         rcond: float = 1.0e-8,
+        max_update: float = 1.0,
         on_pass: Callable[[int, float, float], None] | None = None,
     ) -> FluxIterationReceipt:
         """Return one reconstruction from the held-map least-squares passes.
@@ -283,6 +286,8 @@ class FluxIterationFit:
             or max_passes < 1
             or flux_tolerance <= 0.0
             or not 0.0 < relaxation <= 1.0
+            or not np.isfinite(max_update)
+            or max_update <= 0.0
             or not 0.0 <= rcond < 1.0
         ):
             raise ValueError("fit budgets and scales must be finite and positive")
@@ -345,6 +350,8 @@ class FluxIterationFit:
         sensor_evaluations = 0
         axis_lost_pass: int | None = None
         axis_loss_message: str | None = None
+        rejected_pass: int | None = None
+        rejected_message: str | None = None
         topology_error: str | None = None
         first_pass_values: np.ndarray | None = None
         first_pass_residual: np.ndarray | None = None
@@ -438,6 +445,14 @@ class FluxIterationFit:
                 break
             delta = updated - flux
             update = float(np.max(np.abs(delta)) / span)
+            if passes and update > max_update:
+                # a solve that moves the map by more than the span has left the
+                # branch the fit was measured on; the previous map stays
+                rejected_pass = index
+                rejected_message = (
+                    f"the map update {update:.3g} of the span exceeded {max_update:g}"
+                )
+                break
             flux = flux + relaxation * delta
             passes.append(
                 IterationPass(
@@ -497,6 +512,8 @@ class FluxIterationFit:
             stopped_improving_pass=stopped_improving,
             axis_lost_pass=axis_lost_pass,
             axis_loss_message=axis_loss_message,
+            rejected_pass=rejected_pass,
+            rejected_message=rejected_message,
             topology_error=topology_error,
             first_pass_values=(
                 first_pass_values if first_pass_values is not None else np.zeros(0)

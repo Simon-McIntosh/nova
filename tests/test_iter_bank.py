@@ -384,7 +384,9 @@ def test_derive_rows_window_keeps_near_zero_magnitudes_out_of_the_filtered_max()
     report = derive_rows.compare(head, rows)
     assert report["unfiltered"]["max_relative"] == pytest.approx(1e-4, rel=1e-6)
     assert report["filtered"]["max_relative"] == pytest.approx(1e-9, rel=1e-6)
-    assert report["filtered"]["count"] == 2
+    # Three entries survive the window: the two 1.0-magnitude entries of cell 0
+    # and the untouched dpsi/dZ entry of cell 1; the 1e-12 entry does not.
+    assert report["filtered"]["count"] == 3
 
 
 def test_derive_rows_lists_only_the_entries_above_the_relative_threshold():

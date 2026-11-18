@@ -154,6 +154,24 @@
     "reason": "corrective-run:resume",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_estimator_scoreboard.py",
+    "integrated_revision": "05edfd0ef54e9c4e54d3a82a5d9853e8d2a08741",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261114T143301237025-estimator-scoreboard/review-landing/gate-05edfd0ef54e9c4e54d3a82a5d9853e8d2a08741.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'PYTHONPATH=. JAX_PLATFORMS=cpu ./.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_estimator_scoreboard.py'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/nova"
+    ]
+  },
   "lane": null,
   "lane_advisory": {
     "backend": "omp-local",

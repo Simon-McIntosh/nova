@@ -66,6 +66,13 @@
     "scripts/iron_field_source/diagnostics.py:37-58"
   ],
   "completed_at": "2026-11-18T16:57:37.849Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-icm-iron-field-source-1d739e7ec2c8",
+      "recorded_at": "2026-11-18T17:57:20.267082+00:00"
+    }
+  },
   "dispatched_at": "2026-11-18T16:57:11Z",
   "failure_derivation": "baseline arm job 1324861 at 9b016126111a5acaebca064c07432042b5a2628c: 93 passed in 8543.15s (/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/arms/baseline_arm.log); after arm job 1324862 at 1d739e7ec2c85bb661e93afbca84bc9f94b743f5: 95 passed in 9104.13s (same directory, after_arm.log); the 2-test growth is the two tests the node added and neither arm reports a failure.",
   "finding_dispositions": {

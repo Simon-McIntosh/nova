@@ -59,10 +59,10 @@ EXTRACTION_LABEL = {"137D": "R137D", "146D": "R146D", "146L": "R146L", "179L": "
 RELATIVE_TOLERANCE = 1e-10
 
 
-def boundary_agreement(base, table):
+def boundary_agreement(extraction_path, table):
     """Compare the builder's psi_norm = 1 value with the committed extraction."""
 
-    extraction = json.loads(base["--extraction"].read_text())["rows"]
+    extraction = json.loads(extraction_path.read_text())["rows"]
     agreement = {}
     for label, arms in table.items():
         record = extraction[EXTRACTION_LABEL[label]]
@@ -88,7 +88,19 @@ def main():
             arm: row_record(args.input / arm / f"frame-{frame}-{branch}")
             for arm in ARMS
         }
-    args.output.write_text(json.dumps(table, indent=2, sort_keys=True) + "\n")
+    agreement = boundary_agreement(args.extraction, table)
+    args.output.write_text(
+        json.dumps(
+            {
+                "rows": table,
+                "boundary_agreement": agreement,
+                "relative_tolerance": RELATIVE_TOLERANCE,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
     for label, arms in table.items():
         for arm, record in arms.items():
             print(
@@ -103,6 +115,16 @@ def main():
                     if record["lower_saddle_distance_m"] is not None
                     else "not read",
                 ),
+                flush=True,
+            )
+    for label, record in agreement.items():
+        for quantity in ("p_prime", "ff_prime"):
+            extracted = record[f"extracted_{quantity}"]
+            builder = record[f"builder_{quantity}"]
+            relative = abs(builder - extracted) / max(abs(extracted), 1.0)
+            print(
+                "BOUNDARY %s %s extracted=%.17g builder=%.17g relative=%.3e"
+                % (label, quantity, extracted, builder, relative),
                 flush=True,
             )
     print(f"WROTE {args.output}", flush=True)

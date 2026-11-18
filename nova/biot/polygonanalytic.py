@@ -3529,9 +3529,11 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
     )
     near_corner = nearest <= 1e-7
 
-    # Keep primal quadrature reductions outside the tangent-direction loop.
+    # Isolate derivative recomputation from shared primal subexpressions.
     if staged:
-        _, pushforward = jax.linearize(tangent_expression, *primals)
+        _, pushforward = jax.linearize(
+            jax.checkpoint(tangent_expression, prevent_cse=True), *primals
+        )
 
     def directional(include_height):
         direction = (

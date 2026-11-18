@@ -53,10 +53,19 @@
   choice.</p>
 
   <p id="icm-linear-shell-arm-mesher-limit">The mesher is the limit on going coarser,
-  not the criterion. A mesh-only probe at 640 and 960&nbsp;mm refused with
-  <code>unresolved iron sliver; refine the cell-size field or reduce cell_size</code>,
-  so 480&nbsp;mm (6 cells) is the coarsest uniform spacing this mesher admits. The
-  criterion is already failed at 120&nbsp;mm, so no coarser body was invented.</p>
+  not the criterion. One logged run over twelve spacings records the admitted cell
+  count and the refusal at each: every spacing from 10&nbsp;mm to 480&nbsp;mm is
+  admitted, 480&nbsp;mm at 6 cells and 36 unknowns, with the meshed cell area summing
+  to 0.2984508339013301&nbsp;m² at every admitted size. The 640, 960 and
+  1000&nbsp;mm spacings are refused with exactly:</p>
+  <p id="icm-linear-shell-arm-mesher-refusal"><code>unresolved iron sliver; refine the
+  cell-size field or reduce cell_size</code></p>
+  <p id="icm-linear-shell-arm-mesher-limit-close">So 480&nbsp;mm is the coarsest uniform
+  spacing this mesher admits, the criterion is already failed at 120&nbsp;mm, and no
+  coarser body was invented. Receipt
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/shell-arm/mesh-limit.json</code>,
+  job 1324644, log
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/shell-arm/logs/mesh-limit-1324644.log</code>.</p>
 
   <h3 id="icm-linear-shell-arm-lane">Lane: the assembly cost is size-independent, and CPU cannot serve the sweep</h3>
   <p id="icm-linear-shell-arm-lane-cpu">An identical sweep was first submitted to
@@ -90,7 +99,11 @@
   <code>ImportError: cannot import name 'exterior_reference'</code>. The module was
   restored from its last complete revision and reproduces the recorded finite-loop
   shielding vector <code>[61.12438346603941, 61.0718066323272, 61.109581606774945]</code>
-  against <code>dipole = 61.101838</code>.</p>
+  against <code>dipole = 61.101838</code>. The gate now imports this module:
+<code>tests/test_magnetisation.py::test_finite_loop_reference_module_transmits_the_shell</code>
+checks the degree-one transmission against the closed-form shell shielding in
+<code>controls.py</code> and pins the recorded finite-loop vector, so a repeat
+truncation fails the suite instead of surfacing when a measurement next runs.</p>
 </main>
 </body>
 </html>

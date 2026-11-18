@@ -315,3 +315,74 @@ def test_source_does_not_modify_or_import_an_equilibrium_implementation() -> Non
     assert "nova/equilibrium" not in source
     assert "prescribed input" in source
     assert "same class as the coil currents" in source
+
+
+@pytest.fixture
+def seed_preflight(monkeypatch):
+    declared = pinned.REPRESENTATIVE_COHORT[0]
+    reading = {"current_a": declared["unscaled_source_ip_a"]}
+    seed = np.asarray([0.25])
+
+    def cell_current(state, requested_class):
+        np.testing.assert_array_equal(state, seed)
+        assert requested_class == TopologyClass.DIVERTED
+        return np.asarray([reading["current_a"]])
+
+    profile = SimpleNamespace(
+        operator=SimpleNamespace(
+            cell_current=cell_current,
+            current_normalisation_amplitude=lambda target, current: target / current,
+        )
+    )
+    row = {
+        "efit_times": {102: 2200.0},
+        "magnetics_plasma_current_times": [2000.0, 2400.0],
+        "magnetics_plasma_current": [declared["recorded_ip_a"] / 1000.0] * 2,
+    }
+    monkeypatch.setattr(pinned, "_read", lambda *args: row)
+    monkeypatch.setattr(
+        pinned, "build_profile", lambda *args: (profile, seed, None, None, 19, "")
+    )
+    monkeypatch.setattr(
+        pinned,
+        "description_driven_currents",
+        lambda *args: (profile, None, None, {"uses_circuit": True}),
+    )
+
+    def refuse_scoring(*args):
+        pytest.fail("a seed-only qualification must stop before solver scoring")
+
+    monkeypatch.setattr(pinned, "solve_unpinned", refuse_scoring)
+    monkeypatch.setattr(pinned, "solve_constrained", refuse_scoring)
+    return reading
+
+
+@pytest.mark.parametrize("relative_shift,qualified", [(1.0e-6, True), (-3.0e-6, False)])
+def test_entry_point_records_seed_qualification_before_scoring(
+    monkeypatch, tmp_path, seed_preflight, relative_shift, qualified
+) -> None:
+    seed_preflight["current_a"] *= 1.0 + relative_shift
+    monkeypatch.setattr(
+        "sys.argv",
+        ["pinned", "--preflight-frame", "102", "--output", str(tmp_path)],
+    )
+    if qualified:
+        pinned.main()
+    else:
+        with pytest.raises(
+            RuntimeError, match="pre-solve cohort qualification drifted"
+        ):
+            pinned.main()
+    receipt = json.loads((tmp_path / "seed_preflight.json").read_text())
+    assert receipt["qualified"] is qualified
+    assert receipt["unscaled_seed_plasma_current_a"] == seed_preflight["current_a"]
+    assert receipt["relative_tolerance"] == 2.0e-6
+    assert receipt["frame"] == 102
+    assert receipt["inference_current_authority"]["uses_circuit"] is True
+
+
+def test_seed_entry_point_refuses_the_banked_output_directory(monkeypatch) -> None:
+    monkeypatch.setattr("sys.argv", ["pinned", "--preflight-frame", "102"])
+    with pytest.raises(SystemExit) as refused:
+        pinned.main()
+    assert refused.value.code == 2

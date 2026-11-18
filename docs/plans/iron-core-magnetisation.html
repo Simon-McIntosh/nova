@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="129">
+<meta name="plan-version" content="130">
 <meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
@@ -651,6 +651,9 @@ number is reported for either ratio.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261117T223231577276-icm-linear-shell-arm" data-who="reckon-build" data-when="2026-11-17T22:33:57Z">
     <div class="r-comment-body"><p>Recorded the coarse piecewise-linear shell arm on the mu_r = 1000 shell: 80 mm spacing (76 cells, 456 unknowns) reads 0.136630 % worst-probe error against the dipole reference 61.101838 and meets the 0.5 % criterion, while the next coarser spacing 120 mm (38 cells, 228 unknowns) reads 0.557274 % and misses it, with every coarser admitted mesh missing by more (160 mm 1.104580 %, 240 mm 3.502014 %, 320 mm 22.190394 %, 480 mm (36 unknowns, the coarsest the mesher admits) 31.780779 %), so the shell criterion is shown able to fail for the piecewise-linear basis; the same node restored scripts/iron_linear_magnetisation/reference.py, which the base held as a docstring-only stub so that measure.py refused with ImportError, and now holds that module to the gate with tests/test_magnetisation.py::test_finite_loop_reference_module_transmits_the_shell, which fails on the truncating commit's bytes, and records the mesher's spacing limit as the receipt mesh_limit.py writes.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-lead-ruling-in-place-symmetric-factor" data-who="lead" data-when="">
+    <div class="r-comment-body"><p>Lead ruling, 2026-11-18. The graded 8/40&nbsp;mm operator (70&nbsp;248 unknowns, 39.5&nbsp;GB) assembled on the H200 in 6.5&nbsp;h and was saved. Both solve attempts then ran out of memory while staging operands before Newton: the solve keeps three or four copies of the dense matrix. Fix it at the root rather than closing on the 16/80-versus-40&nbsp;mm agreement. Write the Newton step in its symmetric positive-definite Galerkin form (I &minus; C<sup>&frac12;</sup>GC<sup>&frac12;</sup>, with the spectrum of G in [0,&nbsp;1]) and factor it by Cholesky in place, without copying G or the Jacobian. Peak memory is then near G plus one factor, about 79&nbsp;GB, with half the LU flops. Then solve 8/40 on the H200 from the saved operator. A compressed (H-matrix) operator was considered as the scaling fix for larger meshes and is not in this section.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T222130291065-review-of-icm-strip-error-sweep-43dc514d920c-figure" data-who="reckon-build" data-when="2026-11-06T22:32:39.513Z">
     <div class="r-comment-body"><p>Figure review of run r-20261106T212311176377-icm-strip-error-sweep at head 43dc514d9 is parsed with no blocking finding: the strip-error curve figure renders clean (zero ink in the outer 8 px frame, ink bbox x 35..1365 y 86..690, one frameless legend row, the 1e-10 direct label in clear space), and one non-blocking finding records that the two lightest curve stops measure 2.61:1 and 1.93:1 against white, below the 3:1 a plotted line is required to hold, so the coincident right-hand branch is drawn in the palest trace.</p></div>

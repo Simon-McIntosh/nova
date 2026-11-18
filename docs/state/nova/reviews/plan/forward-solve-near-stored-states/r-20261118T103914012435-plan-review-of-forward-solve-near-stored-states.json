@@ -91,9 +91,28 @@
       "note": "The batching section now says a batched entry to the forward solve already exists and that the recorded refusal is one route breaking inside it; the section is a measurement plus a repair of that route, not a new capability.",
       "reason": "",
       "when": "2026-11-18T11:26:02.395363+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "30139c214f381d3b0f451eeb29fa6e65816431ff",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "The batching section now states that it adds no second batched surface and works through the existing batched entry; the owning modules go into the node brief as the reuse map.",
+      "reason": "",
+      "when": "2026-11-18T11:26:11.217425+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "30139c214f381d3b0f451eeb29fa6e65816431ff",
+      "commit_basis": "edit",
+      "note": "The batching section now states that it adds no second batched surface and works through the existing batched entry; the owning modules go into the node brief as the reuse map.",
+      "reason": "",
+      "when": "2026-11-18T11:26:11.217425+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "",

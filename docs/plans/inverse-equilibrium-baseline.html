@@ -20,12 +20,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
   <meta name="plan-after" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[&quot;inverse-equilibrium-baseline#s8&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s8&quot;,&quot;forward-solve-near-stored-states#s4&quot;],&quot;s5&quot;:[&quot;inverse-equilibrium-baseline#s3&quot;],&quot;s6&quot;:[],&quot;s7&quot;:[&quot;inverse-equilibrium-baseline#s6&quot;,&quot;inverse-equilibrium-baseline#s3&quot;,&quot;inverse-equilibrium-baseline#s8&quot;],&quot;s8&quot;:[],&quot;s9&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;]}">
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="67">
+<meta name="plan-version" content="69">
 <meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
@@ -135,7 +135,7 @@
     levels, with both null sets and the wall, under the repository plotting rules.</p>
 
     <h2 id="s3">§3 — One scoreboard for every estimator</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>Waits on §8, whose nova-written ITER rows and two reconstructed states it scores; §2 produced no fitted state on a stored case, and an estimator that does so later, §9 among them, joins as a further column.</p>
     <p>The baseline is only useful if a new approach can be put beside it without re-deriving the
     comparison. The §8 case and bands become a scoreboard that accepts any reconstructed state supplied
@@ -280,6 +280,9 @@
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261118T045610416300-review-of-efit-comparison-6c0ffac5faf8" data-who="reckon-build" data-when="2026-11-18T05:05:59Z">
     <div class="r-comment-body"><p>Independent review of d7676e478fc8701b036ec717f80d403c3ead86f5..6c0ffac5faf86c18d6c80a8fc9f683b4018f7a24 stored under the reviewed run; all six dimensions scored, one non-blocking reuse finding, no blocking findings; CPU added failure count waived, not zero.</p></div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261114T133703375306-efit-comparison" data-who="reckon-build" data-when="2026-11-18T00:20:21Z">
+    <div class="r-comment-body"><p>q95fixb988 andevidence238f: physicalq95 now0.95instead0.9215; signedcase-95insteadof-92.15 removesfalse2.85bandgap. Focused5passed7.25s; reversecommit4failed3.46s. CurrentrequiredCPUjob1324011 all3arms abortedSIGABRT(-6) before summaries, bothdeltasnull; fullsuiteevidenceremainsblocked. Nativeassessment atq95-suite-assessment.json; fragment at docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html#efit-comparison-q95-physical-span. Nativefullsuiteaborttable committed6c0ffac5faf86c18d6c80a8fc9f683b4018f7a24 at docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html#efit-comparison-q95-suite-result.</p></div>
+</div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261117T235623557829-review-of-estimator-scoreboard-7611f2b35922" data-who="reckon-build" data-when="2026-11-17T23:57:28.942Z">
     <div class="r-comment-body"><p>reviewed r-20261114T143301237025-estimator-scoreboard at base dd32048a48b754655722787346acf0471fe03cdf and head 7611f2b359221922d1c26901e735d57eb3e6e448; scores goal_fidelity 17, evidence 17, scope_discipline 19, durability 17, fit 17, reuse 5 (total 92); eight non-blocking findings, no blocking finding, so the node may land</p></div>
 </div>
@@ -293,7 +296,7 @@
     <div class="r-comment-body"><p>Independent review of 794d6ea6a5726be907fe0e38f516699bc68bfdf0..040c8fd9d195c2f5e56ee6aa29a000becc87fd9e stored parsed; all six dimensions scored; zero added failures from completed source base/head arms; three non-blocking findings and no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261118T044759953920-scoreboard-one-safety-factor-calculator" data-who="reckon-build" data-when="2026-11-18T05:20:45Z">
-    <div class="r-comment-body"><p>the scoreboard reads q95 for every column with one calculator, q95_from_flux_map, on that column&#x27;s own stored flux map at psi_N = 0.95, through the owners&#x27; primitives (nova.equilibrium.observation.gradient_tail for the inward integral and nova.equilibrium.convention.flux_function_toroidal_field for the field), with the stored gradient normalised onto psi_N before ordering so a descending-flux map and its negated mirror read the same value, and with the perturbation rescaling taken between the two signed spans so a zero perturbation is the identity; the row-exchange imas-efit column reads 0.064737 (inside the 0.1 band), nova-inverse-class 9.3e-15, each state&#x27;s stored q95 printed beside it as a definition difference, a state with no flux map reading not supplied, and the perturbed copy failing at 0.244142 with its perturbation applied to the map the calculator reads</p></div>
+    <div class="r-comment-body"><p>the scoreboard reads q95 for every column with one calculator, q95_from_flux_map, on that column's own stored flux map at psi_N = 0.95, through the owners' primitives (nova.equilibrium.observation.gradient_tail for the inward integral and nova.equilibrium.convention.flux_function_toroidal_field for the field), with the stored gradient normalised onto psi_N before ordering so a descending-flux map and its negated mirror read the same value, and with the perturbation rescaling taken between the two signed spans so a zero perturbation is the identity; the row-exchange imas-efit column reads 0.064737 (inside the 0.1 band), nova-inverse-class 9.3e-15, each state's stored q95 printed beside it as a definition difference, a state with no flux map reading not supplied, and the perturbed copy failing at 0.244142 with its perturbation applied to the map the calculator reads</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261116T014730916750-review-of-white-noise-covariance-f0cd75cbf01a" data-who="reckon-build" data-when="2026-11-16T02:11:16.404Z">
     <div class="r-comment-body"><p>review of run r-20261115T012417719546-white-noise-covariance over b15155f8d0361efce262ded60fd0b54a95133cf4..f0cd75cbf01ac4af6f497d543edc033df1309dd1: scores 13/13/20/4/18/20 (total 88), one blocking finding that the provenance dates job 1318468 to 2026-11-16 while its own log header reads 2026-11-15T20:47:16+0100, and two non-blocking findings (the linearised arm is a self-consistency check stated as a validation; the record names no reproduction path).</p></div>

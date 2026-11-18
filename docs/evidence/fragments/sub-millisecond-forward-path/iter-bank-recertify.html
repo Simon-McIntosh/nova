@@ -9,7 +9,7 @@
 <meta name="plan-summary" content="The rebuilt bank matches the independent source-gradient reference at the retained nodes where the previous bank is 24 to 71 percent wrong; the plasma-row Hessian case passes at 1e-8 and refuses the base kernel; the first-derivative rows depart by 7.204e-8 at the worst among entries of magnitude above 1e-3 and by up to 1.887e-6 in absolute terms, reported as measured">
 <meta name="plan-evidence-for" content="sub-millisecond-forward-path">
 <meta name="plan-verifies" content="sub-millisecond-forward-path#s7">
-<meta name="plan-commits" content="60af91b43d3d00aea7962b2490a5983f79d09a94 ad26d7beef2d0b1d2172e724050ef09cfe0ea880 8bfb651b9f3e3540d2f1b366846edd93639cb86f 050d9d1fe14e35b041323c111cd4cecbf6d46710 b56f72eeed1130da9d5dbc74d1a6a347e956c02c 1ea0f5fa63324c984e0709c494f93dfe06409e3b f3141c438d29e61850d6e59abe4c3cecececeb11a9 5edcb1df8a62e63609c092044bd4972ecd911a10 366155652077a1cf979a0b2d8fa2c124c8e7d3d1 0a73119c5aa485f3f05e4292bd2b71dbf3c3d2ed 39eaf5ef59f0ef1f3afd8c6ec233f918d84a8ed1 fe3ab4fb1ddd5610512ff401e9671ddf354e537f">
+<meta name="plan-commits" content="60af91b43d3d00aea7962b2490a5983f79d09a94 ad26d7beef2d0b1d2172e724050ef09cfe0ea880 8bfb651b9f3e3540d2f1b366846edd93639cb86f 050d9d1fe14e35b041323c111cd4cecbf6d46710 b56f72eeed1130da9d5dbc74d1a6a347e956c02c 1ea0f5fa63324c984e0709c494f93dfe06409e3b f3141c438d29e61850d6e59abe4c3cecececeb11a9 5edcb1df8a62e63609c092044bd4972ecd911a10 366155652077a1cf979a0b2d8fa2c124c8e7d3d1 0a73119c5aa485f3f05e4292bd2b71dbf3c3d2ed 39eaf5ef59f0ef1f3afd8c6ec233f918d84a8ed1 fe3ab4fb1ddd5610512ff401e9671ddf354e537f a3925a3f287d13b6cd933871d064de402ab8d161">
 <meta name="plan-recorded-at" content="2026-11-18">
 <meta name="plan-environment" content="rigel CPU x64 bank rebuild and fresh-process suite arms">
 <title>The ITER bank is rebuilt and re-certified | nova</title>
@@ -65,17 +65,19 @@
 <pre>FAILED tests/test_iter_bank.py::test_plasma_row_hessian_matches_source_gradient_reference</pre>
 <pre>plasma-row Hessian errors [0.008403679427691496, 5.848686736614972e-11]</pre>
 <p>The mixed component exceeds its budget by six orders of magnitude while the vertical component remains 5.8486e-11, so the failure sits on the derivative the repair changed and not on the harness. Both arms run the same head case, so the only difference between the pass and the refusal is the polygon kernel.</p>
+<p>The five derivation cases carry their own controls, run at the repair head in job <code>1327725</code>: shadowing the shared norm with a local copy reddens only the identity case (<strong>1 failed, 4 passed</strong>), moving <code>DERIVATIVE</code> from <code>slice(1, 3)</code> to <code>slice(2, 4)</code> reddens four (<strong>4 failed, 1 passed</strong>), and collapsing <code>DEFAULT_WINDOW</code> from 1e-3 to 0 reddens the window case (<strong>1 failed, 4 passed</strong>). A first run of the window case itself failed on a miscount of its survivors (three entries survive, not two), which is the case catching its own author before it caught anything else.</p>
 </section>
 
 <section id="iter-bank-recertify-tests">
 <h2>Every accuracy case runs live</h2>
-<p>Commit <code>1ea0f5fa63324c984e0709c494f93dfe06409e3b</code> bounds the six live accuracy cases at 900 s each. The module fixture builds the seven ITER states and costs 230.770 s on eight rigel cores, which the repository's 300 s default charged to the first case as a setup timeout; the bound is raised rather than shortening any case. The cases remain marked <code>slow</code>, so a default path-free lane still excludes them, while an explicitly named path collects all fourteen.</p>
+<p>Commit <code>1ea0f5fa63324c984e0709c494f93dfe06409e3b</code> bounds the six live accuracy cases at 900 s each. The module fixture builds the seven ITER states and costs 230.770 s on eight rigel cores, which the repository's 300 s default charged to the first case as a setup timeout; the bound is raised rather than shortening any case. The cases remain marked <code>slow</code>, so a default path-free lane still excludes them, while an explicitly named path collects all nineteen: the fourteen accuracy cases and five fast cases that pin the five decisions <code>derive_rows.py</code> encodes.</p>
 <table><thead><tr><th>Arm</th><th>Revision</th><th>Result</th></tr></thead><tbody>
 <tr><td>Baseline</td><td><code>3a9238f0a626bec0783b4f0da32922dd0c390f4b</code></td><td>7 passed, 6 errors in 318.84 s, EXIT=1</td></tr>
 <tr><td>After, at the measurement head</td><td><code>1ea0f5fa63324c984e0709c494f93dfe06409e3b</code></td><td>14 passed, 0 skipped in 596.84 s, EXIT=0</td></tr>
 <tr><td>After, at the final head</td><td><code>0a73119c5aa485f3f05e4292bd2b71dbf3c3d2ed</code></td><td>14 passed, 0 skipped in 605.40 s, EXIT=0</td></tr>
+<tr><td>After, at the repair head</td><td><code>a3925a3f287d13b6cd933871d064de402ab8d161</code></td><td>19 passed, 0 skipped in 600.71 s, EXIT=0 (job <code>1327725</code>)</td></tr>
 </tbody></table>
-<p>The baseline's six errors are setup timeouts of the six live cases at the 300 s default; they are reported as they stand rather than relabelled. The after arm runs all fourteen with no skip and no error. Each arm is a fresh Python process over a <code>git archive</code> of the named revision, submitted as one sbatch allocation on rigel with eight CPUs and 96 GB, using:</p>
+<p>The baseline's six errors are setup timeouts of the six live cases at the 300 s default; they are reported as they stand rather than relabelled. The after arm runs all nineteen with no skip and no error. Each arm is a fresh Python process over a <code>git archive</code> of the named revision, submitted as one sbatch allocation on rigel with eight CPUs and 96 GB, using:</p>
 <pre>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_iter_bank.py</pre>
 </section>
 
@@ -104,6 +106,8 @@
 <li>Current-bank comparison, the rebuilt bank against the current bank: <code>receipts/recertify-head-bank.json</code> and <code>logs/bank-mode-head.log</code> (job <code>1324661</code>), whose <code>UNCHANGED</code> block is the head-against-current measurement of the value, first-derivative and coil rows.</li>
 <li>Instrument control: <code>receipts/recertify-current-bank.json</code> and <code>logs/bank-mode-check4.log</code> (job <code>1324621</code>) compare the bank with itself and report a zero departure in every family, which is what a comparison returning zero on identical archives looks like; it says nothing about the repair, and it is not the current-bank measurement.</li>
 <li>First-derivative attribution: <code>scripts/prototypes/iter_bank/derive_rows.py</code>, <code>receipts/derive-rows.json</code> and <code>logs/derive-rows-instrumented.log</code> (job <code>1325117</code>, <code>EXIT=2</code>).</li>
+<li>First-derivative attribution at the repair head, boundary withdrawn: <code>receipts/derive-rows-v2.json</code> and <code>logs/derive-rows-v2.log</code> (job <code>1327698</code>, <code>EXIT=0</code>), whose per-component filtered maxima and medians are the ones the table above quotes.</li>
+<li>Derivation-case controls and the repair-head suite: <code>logs/repair-1.log</code> (job <code>1327698</code>) and <code>logs/repair-2.log</code> (job <code>1327725</code>).</li>
 <li>Rebuilt bank: <code>h200-head/receipt.json</code>, <code>h200-head/store/sha256/81ee8fdf8056855f0846f0e00b7213434451be8e9557369b74ef35a23a62fd4f/bank.npz</code>, <code>logs/p100-build.log</code> (job <code>1324641</code>).</li>
 <li>Rebuilt-bank certification: <code>receipts/recertify-head-bank.json</code>, <code>logs/bank-mode-head.log</code> (job <code>1324661</code>).</li>
 <li>Builder attribution, refused by memory: <code>logs/rows-attrib-head.log</code> (job <code>1324664</code>, <code>EXIT=137</code>) and <code>logs/rows-attrib-base.log</code> (job <code>1324665</code>, <code>EXIT=137</code>).</li>

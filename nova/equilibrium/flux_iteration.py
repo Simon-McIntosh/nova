@@ -89,6 +89,7 @@ class FluxIterationReceipt:
     stopped_improving_pass: int | None
     axis_lost_pass: int | None
     axis_loss_message: str | None
+    topology_error: str | None
     whitened_residuals: np.ndarray
     singular_values: np.ndarray
     covariance: np.ndarray
@@ -339,6 +340,7 @@ class FluxIterationFit:
         sensor_evaluations = 0
         axis_lost_pass: int | None = None
         axis_loss_message: str | None = None
+        topology_error: str | None = None
         converged = False
         residual = np.full(target.size, np.nan)
         spectrum = np.zeros(0)
@@ -441,8 +443,9 @@ class FluxIterationFit:
         active = self._profile(coefficients)
         try:
             _unused, terminal_topology = active.operator.read(jnp.asarray(flux))
-        except Exception:
+        except Exception as error:  # reported, since a map still has a state
             terminal_topology = None
+            topology_error = f"{type(error).__name__}: {error}"
         try:
             terminal_cells = self._cell_current(active, flux)
             sensor_evaluations += 1
@@ -478,6 +481,7 @@ class FluxIterationFit:
             stopped_improving_pass=stopped_improving,
             axis_lost_pass=axis_lost_pass,
             axis_loss_message=axis_loss_message,
+            topology_error=topology_error,
             whitened_residuals=residual.copy(),
             singular_values=np.asarray(spectrum, dtype=np.float64),
             covariance=np.asarray(covariance, dtype=np.float64),

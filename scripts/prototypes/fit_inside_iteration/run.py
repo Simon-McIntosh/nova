@@ -193,7 +193,11 @@ def _run_known(case, args):
     shim = SimpleNamespace(
         forward=SimpleNamespace(terminal_state=fitted.terminal_state)
     )
-    study._draw_recovery_panels(case["name"], case["figure"], shim)
+    panel_error = None
+    try:
+        study._draw_recovery_panels(case["name"], case["figure"], shim)
+    except Exception as error:  # the row outlives a painter's refusal
+        panel_error = f"{type(error).__name__}: {error}"
     row = dict(
         case=case["name"],
         construction="known state of the §1 record",
@@ -204,6 +208,9 @@ def _run_known(case, args):
         stopped_improving_pass=fitted.stopped_improving_pass,
         axis_lost_pass=fitted.axis_lost_pass,
         axis_loss_message=fitted.axis_loss_message,
+        topology_error=fitted.topology_error,
+        panel_error=panel_error,
+        terminal_flux_finite=bool(np.all(np.isfinite(fitted.terminal_state.flux))),
         flux_map_error_over_span=error,
         flux_map_band=1.0e-6,
         whitened_residual_sup=residual,
@@ -270,7 +277,11 @@ def _run_stored(case, args):
         study._panel(data, False, flux=case["initial_flux"], suffix="-refused")
         raise
     data["terminal_residual"] = fitted.terminal_misfit
-    study._panel(data, bool(fitted.converged), flux=fitted.terminal_state.flux)
+    panel_error = None
+    try:
+        study._panel(data, bool(fitted.converged), flux=fitted.terminal_state.flux)
+    except Exception as error:  # the row outlives a painter's refusal
+        panel_error = f"{type(error).__name__}: {error}"
     scores, scores_error = None, None
     try:
         state, centroid = study._as_equilibrium(data, fitted, fitted.source_profile)
@@ -317,6 +328,9 @@ def _run_stored(case, args):
         stopped_improving_pass=fitted.stopped_improving_pass,
         axis_lost_pass=fitted.axis_lost_pass,
         axis_loss_message=fitted.axis_loss_message,
+        topology_error=fitted.topology_error,
+        panel_error=panel_error,
+        terminal_flux_finite=bool(np.all(np.isfinite(fitted.terminal_state.flux))),
         terminal_misfit=fitted.terminal_misfit,
         last_flux_update=fitted.last_flux_update,
         coefficients=fitted.coefficients.tolist(),

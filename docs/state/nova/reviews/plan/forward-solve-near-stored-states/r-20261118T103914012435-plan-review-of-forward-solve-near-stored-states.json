@@ -138,6 +138,13 @@
       "finding": "reuse_search-2",
       "reason": "The reach section states the endpoint and its search set; whether the sequence is run through the existing drive-continuation owner is the worker to settle, and that owner is cited in the node brief as the reuse map.",
       "when": "2026-11-18T11:26:48.645959+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reuse_search-3",
+      "reason": "Agreed and recorded for the brief: the stored-case read already exists and the node reuses it; no plan change, as the finding itself says.",
+      "when": "2026-11-18T11:26:56.943861+00:00"
     }
   ],
   "responses": {
@@ -182,6 +189,12 @@
       "by": "",
       "reason": "The reach section states the endpoint and its search set; whether the sequence is run through the existing drive-continuation owner is the worker to settle, and that owner is cited in the node brief as the reuse map.",
       "when": "2026-11-18T11:26:48.645959+00:00"
+    },
+    "reuse_search-3": {
+      "action": "declined",
+      "by": "",
+      "reason": "Agreed and recorded for the brief: the stored-case read already exists and the node reuses it; no plan change, as the finding itself says.",
+      "when": "2026-11-18T11:26:56.943861+00:00"
     },
     "thin_wrapper-1": {
       "action": "acted",

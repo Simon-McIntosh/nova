@@ -3486,13 +3486,15 @@ def _compact_partial(function):
     """Carry closed arrays through a loop in one lossless buffer per dtype."""
     leaves, structure = jax.tree.flatten(function.args)
     groups = {}
+    offsets = {}
     positions = []
     for leaf in leaves:
         dtype = leaf.dtype
         members = groups.setdefault(dtype, [])
-        offset = sum(member.size for member in members)
+        offset = offsets.get(dtype, 0)
         positions.append((dtype, offset, leaf.shape, leaf.size))
         members.append(leaf)
+        offsets[dtype] = offset + leaf.size
     buffers = {
         dtype: jnp.concatenate([leaf.reshape(-1) for leaf in members])
         for dtype, members in groups.items()

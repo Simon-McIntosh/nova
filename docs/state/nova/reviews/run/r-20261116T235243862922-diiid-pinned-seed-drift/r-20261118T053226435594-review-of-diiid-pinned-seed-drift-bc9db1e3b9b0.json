@@ -72,6 +72,11 @@
       "kind": "exempted",
       "reason": "Lead decision 2026-11-18: accept the three-change causal account (edge cap, stationary normalization and domain, integration route; only the full historical functional restores registration) as this node's result, and re-register only after the finite-edge section lands, because that moves the value again. The section stays implementable in the plan with the re-registration owed.",
       "recorded_at": "2026-11-18T06:29:10.219519+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The test guards that the preflight propagates the moment sum it computed; the qualification threshold itself is tested by the passing and refusing preflight cases",
+      "recorded_at": "2026-11-18T06:29:16.697758+00:00"
     }
   },
   "findings": [

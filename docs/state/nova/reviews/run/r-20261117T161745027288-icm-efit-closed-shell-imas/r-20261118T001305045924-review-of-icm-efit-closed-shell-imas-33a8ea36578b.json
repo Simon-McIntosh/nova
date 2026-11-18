@@ -1,0 +1,91 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs on disk because its manifest carries no baseline_suite/after_suite JSON: logs/suite-baseline.log ends '1 failed, 92 passed ... EXIT=1' with the failure tests/test_magnetisation.py::test_linear_shell_operator_pin[compact] (git exit 128 in a .gitless archive extraction), logs/suite-baseline-pin.log re-runs that node with GIT_DIR set and ends '2 passed, 91 deselected ... EXIT=0', and logs/suite-after.log ends '93 passed ... EXIT=0', so no id fails at the head that does not fail at the base and the added-failure set is empty.",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/iron_linear_magnetisation/measure.py:130",
+    "scripts/iron_linear_magnetisation/measure.py:145"
+  ],
+  "completed_at": "2026-11-18T00:13:47.529Z",
+  "dispatched_at": "2026-11-18T00:13:35Z",
+  "findings": [
+    {
+      "file": "scripts/imas_efit_closed_shell/summarise.py",
+      "line": "158",
+      "severity": "non-blocking",
+      "text": "non-blocking: the convergence block compares only the two finest refinement entries, so the plan's other lever (relativeError 1e-2 to 1e-4, which the receipt's e2/e4 and fine/v40 pairs show moving S by 0.50 % and 0.52 % at a/b = 0.5) is never computed or judged against the 0.005 ceiling, and the fragment's 'the solver tolerance is not the lever' (icm-efit-closed-shell-imas.html:56) is contradicted by its own 0.50/0.52 % numbers; at a/b = 0.5 the control therefore fails the plan's convergence test on both levers while summary.json records only the refinement one."
+    },
+    {
+      "file": "scripts/imas_efit_closed_shell/summarise.py",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: the module docstring defines S as the flux 'with iron' over the flux 'without iron', which would be 1/S, while the code at line 74 and the owner's docstring compute psi_air/psi_iron, so a reader taking the docstring as the definition inverts the shielding factor."
+    },
+    {
+      "file": "scripts/imas_efit_closed_shell/report.py",
+      "line": "170",
+      "severity": "non-blocking",
+      "text": "non-blocking: the convergence paragraph retypes the solver-log literals (relErr 1.4e-4 and 1.1e-6, Bmax 3.0897e-07) instead of reading them, contradicting the module's claim at report.py:5 that numbers are never retyped, and the quoted Bmax is the call=1 record of one arm while the scored arms log up to 5.99e-05 T (r090) and 1.20e-04 T (r050), so the stated flux scale is not the measured case's."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html",
+      "line": "131",
+      "severity": "non-blocking",
+      "text": "non-blocking: done_when clause 3 asks for the one-directional verdict to be written for section 9 to read, and no s10 comment in docs/plans/iron-core-magnetisation.html carries it; the verdict lives in the fragment and in the receipt's staged plan-comment.html, so section 9 cannot read it from the plan until the coordinator places it."
+    },
+    {
+      "file": "scripts/iron_linear_magnetisation/controls.py",
+      "line": "62",
+      "severity": "non-blocking",
+      "text": "non-blocking: exact_shielding is extended in a file outside the node's declared write paths and the new ratio/mu parameters have no repository test (tests/test_magnetisation.py reaches it only through scripts/iron_linear_magnetisation/measure.py:130 with the defaults), so the out-of-fence edit is unguarded even though it is backward compatible and was the reuse repair the previous review demanded."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T161745027288-icm-efit-closed-shell-imas/manifest.md",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "non-blocking: the landing line says the work is delivered 'at a4e2c9e0d, which amends f8c29adbd', but the reviewed head is 33a8ea365 (two commits later: 862fcb8eb and 33a8ea365), so the landing record names a revision that is not the one delivered."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all eighteen commits f9517fcc0..33a8ea365 commit by commit and the final diff stat: eleven paths, 1203 insertions and 4 deletions; eight new Python modules and two shell launchers under scripts/imas_efit_closed_shell, the 155-line fragment, and the 8-line/4-line signature extension of exact_shielding in scripts/iron_linear_magnetisation/controls.py:62.",
+    "done_when": "the done_when asks for S within 2 % of 61.10 at a/b = 0.9, the same at a/b = 0.5 against 195.1, and the result sent to the owners with the message in the receipt directory and the one-directional verdict written for section 9; logs/gate-summarise.log pins summary.json and report.html to the receipt, logs/gate-reproduce.log re-solves all four headline arms (psi matching at rtol 1e-12, S to three decimals), owners-message.txt and plan-comment.html sit in the receipt directory, but 'converged' fails at a/b = 0.5 (summary.json convergence.r050.last_step_delta -0.01495) and the section 9 verdict is staged, not written into the plan.",
+    "goal": "the goal is to run the imas-efit closed-shell control from an IMAS pulse and score its shielding factor; scripts/imas_efit_closed_shell/make_pulse.py:84 writes pf_active, iron_core, wall, magnetics and tf at DD 4.1.0, scripts/imas_efit_closed_shell/run_case.sh:24 drives imas-efit from them, and scripts/imas_efit_closed_shell/summarise.py:82 scores the result at a/b = 0.9 and a/b = 0.5, which I recomputed independently from the receipt's score-*.json files to S = 60.420 (rel_error -0.01115) and S = 193.485 (-0.00805) against 61.101838 and 195.055750, so the goal is met.",
+    "manifest": "read; status complete, seventeen commits named, nine gate logs ending EXIT=0 and re-run at 22:25 after the 22:24 head, suite arms recorded as baseline 92 passed/1 failed (test_linear_shell_operator_pin[compact], scaffolding, re-run green in suite-baseline-pin.log) and after 93 passed, with answers mapping each repair to a commit; the landing line names a4e2c9e0d while the reviewed head is 33a8ea365.",
+    "write_paths": "the declared paths are scripts/imas_efit_closed_shell, docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html and the unused docs/figures/iron-core-magnetisation/icm-efit-closed-shell-imas; the delivered diff f9517fcc0..33a8ea365 holds ten of eleven paths inside the first two, with scripts/iron_linear_magnetisation/controls.py:62 outside them, and the three intermediate plan commits (88d7454f1, 5ffae01cd, fb6696a33) net to an empty plan diff."
+  },
+  "justifications": {
+    "durability": "no repository test is added; the guards live in logs/gate-*.py and die with the run directory, so nothing fails at promotion if summarise.py's 0.005 or the owner import regresses.",
+    "evidence": "logs/gate-summarise.log and logs/gate-reproduce.log pin the receipt to a fresh solve, though the plan's >0.5 %-moving convergence test is only half computed and a/b = 0.5 fails the half that is.",
+    "fit": "the modules follow the sibling script idiom (docstring, from __future__ annotations, pathlib, argparse) and ruff check/format pass on the extracted head, though summarise.py:3 inverts the ratio it defines.",
+    "goal_fidelity": "scripts/imas_efit_closed_shell/summarise.py:133 records both ratios' rel_error against the exact factor and both are inside the 2 % gate from a pulse-only case.",
+    "reuse": "scripts/iron_linear_magnetisation/controls.py:62 now owns the factor and is imported by make_pulse.py:44 and summarise.py:24; searches for an existing shell-outline owner found scripts/iron_linear_magnetisation/controls.py:45 shell() (fixed 512-segment shapely region) and scripts/prototypes/iron_magnetisation/shell.py (module-level prototype), neither a parameterised polygon generator, and nova/imas/pf_active.py only reads the IDS.",
+    "scope_discipline": "git diff --stat f9517fcc0 33a8ea365 lists scripts/iron_linear_magnetisation/controls.py outside the declared paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to run the imas-efit closed-shell control from an IMAS pulse and score its shielding factor; scripts/imas_efit_closed_shell/make_pulse.py:84 writes pf_active, iron_core, wall, magnetics and tf at DD 4.1.0, scripts/imas_efit_closed_shell/run_case.sh:24 drives imas-efit from them, and scripts/imas_efit_closed_shell/summarise.py:82 scores the result at a/b = 0.9 and a/b = 0.5, which I recomputed independently from the receipt's score-*.json files to S = 60.420 (rel_error -0.01115) and S = 193.485 (-0.00805) against 61.101838 and 195.055750, so the goal is met.\nVERDICT done_when: the done_when asks for S within 2 % of 61.10 at a/b = 0.9, the same at a/b = 0.5 against 195.1, and the result sent to the owners with the message in the receipt directory and the one-directional verdict written for section 9; logs/gate-summarise.log pins summary.json and report.html to the receipt, logs/gate-reproduce.log re-solves all four headline arms (psi matching at rtol 1e-12, S to three decimals), owners-message.txt and plan-comment.html sit in the receipt directory, but 'converged' fails at a/b = 0.5 (summary.json convergence.r050.last_step_delta -0.01495) and the section 9 verdict is staged, not written into the plan.\nVERDICT write_paths: the declared paths are scripts/imas_efit_closed_shell, docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html and the unused docs/figures/iron-core-magnetisation/icm-efit-closed-shell-imas; the delivered diff f9517fcc0..33a8ea365 holds ten of eleven paths inside the first two, with scripts/iron_linear_magnetisation/controls.py:62 outside them, and the three intermediate plan commits (88d7454f1, 5ffae01cd, fb6696a33) net to an empty plan diff.\nVERDICT manifest: read; status complete, seventeen commits named, nine gate logs ending EXIT=0 and re-run at 22:25 after the 22:24 head, suite arms recorded as baseline 92 passed/1 failed (test_linear_shell_operator_pin[compact], scaffolding, re-run green in suite-baseline-pin.log) and after 93 passed, with answers mapping each repair to a commit; the landing line names a4e2c9e0d while the reviewed head is 33a8ea365.\nVERDICT diff: read all eighteen commits f9517fcc0..33a8ea365 commit by commit and the final diff stat: eleven paths, 1203 insertions and 4 deletions; eight new Python modules and two shell launchers under scripts/imas_efit_closed_shell, the 155-line fragment, and the 8-line/4-line signature extension of exact_shielding in scripts/iron_linear_magnetisation/controls.py:62.\nCALL_SITES: scripts/iron_linear_magnetisation/measure.py:130, scripts/iron_linear_magnetisation/measure.py:145\nSCORE goal_fidelity: 18\nSCORE evidence: 15\nSCORE scope_discipline: 14\nSCORE durability: 10\nSCORE fit: 15\nSCORE reuse: 18\nJUSTIFICATION goal_fidelity: scripts/imas_efit_closed_shell/summarise.py:133 records both ratios' rel_error against the exact factor and both are inside the 2 % gate from a pulse-only case.\nJUSTIFICATION evidence: logs/gate-summarise.log and logs/gate-reproduce.log pin the receipt to a fresh solve, though the plan's >0.5 %-moving convergence test is only half computed and a/b = 0.5 fails the half that is.\nJUSTIFICATION scope_discipline: git diff --stat f9517fcc0 33a8ea365 lists scripts/iron_linear_magnetisation/controls.py outside the declared paths.\nJUSTIFICATION durability: no repository test is added; the guards live in logs/gate-*.py and die with the run directory, so nothing fails at promotion if summarise.py's 0.005 or the owner import regresses.\nJUSTIFICATION fit: the modules follow the sibling script idiom (docstring, from __future__ annotations, pathlib, argparse) and ruff check/format pass on the extracted head, though summarise.py:3 inverts the ratio it defines.\nJUSTIFICATION reuse: scripts/iron_linear_magnetisation/controls.py:62 now owns the factor and is imported by make_pulse.py:44 and summarise.py:24; searches for an existing shell-outline owner found scripts/iron_linear_magnetisation/controls.py:45 shell() (fixed 512-segment shapely region) and scripts/prototypes/iron_magnetisation/shell.py (module-level prototype), neither a parameterised polygon generator, and nova/imas/pf_active.py only reads the IDS.\nFINDING scripts/imas_efit_closed_shell/summarise.py:158 non-blocking: the convergence block compares only the two finest refinement entries, so the plan's other lever (relativeError 1e-2 to 1e-4, which the receipt's e2/e4 and fine/v40 pairs show moving S by 0.50 % and 0.52 % at a/b = 0.5) is never computed or judged against the 0.005 ceiling, and the fragment's 'the solver tolerance is not the lever' (icm-efit-closed-shell-imas.html:56) is contradicted by its own 0.50/0.52 % numbers; at a/b = 0.5 the control therefore fails the plan's convergence test on both levers while summary.json records only the refinement one.\nFINDING scripts/imas_efit_closed_shell/summarise.py:3 non-blocking: the module docstring defines S as the flux 'with iron' over the flux 'without iron', which would be 1/S, while the code at line 74 and the owner's docstring compute psi_air/psi_iron, so a reader taking the docstring as the definition inverts the shielding factor.\nFINDING scripts/imas_efit_closed_shell/report.py:170 non-blocking: the convergence paragraph retypes the solver-log literals (relErr 1.4e-4 and 1.1e-6, Bmax 3.0897e-07) instead of reading them, contradicting the module's claim at report.py:5 that numbers are never retyped, and the quoted Bmax is the call=1 record of one arm while the scored arms log up to 5.99e-05 T (r090) and 1.20e-04 T (r050), so the stated flux scale is not the measured case's.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell-imas.html:131 non-blocking: done_when clause 3 asks for the one-directional verdict to be written for section 9 to read, and no s10 comment in docs/plans/iron-core-magnetisation.html carries it; the verdict lives in the fragment and in the receipt's staged plan-comment.html, so section 9 cannot read it from the plan until the coordinator places it.\nFINDING scripts/iron_linear_magnetisation/controls.py:62 non-blocking: exact_shielding is extended in a file outside the node's declared write paths and the new ratio/mu parameters have no repository test (tests/test_magnetisation.py reaches it only through scripts/iron_linear_magnetisation/measure.py:130 with the defaults), so the out-of-fence edit is unguarded even though it is backward compatible and was the reuse repair the previous review demanded.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T161745027288-icm-efit-closed-shell-imas/manifest.md:23 non-blocking: the landing line says the work is delivered 'at a4e2c9e0d, which amends f8c29adbd', but the reviewed head is 33a8ea365 (two commits later: 862fcb8eb and 33a8ea365), so the landing record names a revision that is not the one delivered.",
+  "review_node": "review-of-icm-efit-closed-shell-imas-33a8ea36578b",
+  "review_run_id": "r-20261118T001305045924-review-of-icm-efit-closed-shell-imas-33a8ea36578b",
+  "reviewed_base_sha": "f9517fcc04e249939811eded8f3c8be77b54b744",
+  "reviewed_head_sha": "33a8ea36578b36475194371ef0e9db27a1ab7eac",
+  "reviewed_run_id": "r-20261117T161745027288-icm-efit-closed-shell-imas",
+  "reviewer": {
+    "backend": "omp-local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T001305045924-review-of-icm-efit-closed-shell-imas-33a8ea36578b"
+  },
+  "reviewer_note": "independent review of the landed node at head 33a8ea36578b36475194371ef0e9db27a1ab7eac against base f9517fcc04e249939811eded8f3c8be77b54b744",
+  "rubric_note": "the diff adds no assertion and no test file, so the added-assertion reading is that the landed change carries none; the node's guards are the run-directory gate scripts, and logs/negative-controls.txt shows each one fires on the pre-repair files (gate-reuse EXIT=0 -> EXIT=1 on the restated factor, gate-refused ZeroDivisionError, gate-convergence-tolerance failing a 1.49 % step, run_case.sh losing its EXIT= line), so they are genuine but uncommitted, which caps durability.",
+  "scores": {
+    "durability": 10,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T00:37:48.489037+00:00",
+  "total": 90
+}

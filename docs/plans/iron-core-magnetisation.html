@@ -25,8 +25,8 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="124">
-<meta name="plan-modified" content="2026-11-17">
+<meta name="plan-version" content="125">
+<meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
   <main class="plan-doc">
@@ -634,6 +634,9 @@ number is reported for either ratio.</p></div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261117T204231385690-review-of-icm-efit-closed-shell-imas-f8c29adbd262" data-who="reckon-build" data-when="2026-11-17T20:46:04.763Z">
     <div class="r-comment-body"><p>review of r-20261117T161745027288-icm-efit-closed-shell-imas at head f8c29adbd262ca8f74909dbae826162db845be24 from base f9517fcc04e249939811eded8f3c8be77b54b744: parsed record scoring goal_fidelity 17, evidence 16, scope_discipline 16, durability 12, fit 17, reuse 5, added_failure_count 0 with no added_failure_ids (neither suite arm was armed), eight findings all non-blocking — the load-bearing one is that scripts/imas_efit_closed_shell/summarise.py:154 thresholds the refinement convergence flag at 5 % while the plan's section 6b requires under 0.5 %, so the 1.50 % last step at a/b = 0.5 is flagged passed.</p></div>
 </div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261118T001305045924-review-of-icm-efit-closed-shell-imas-33a8ea36578b" data-who="reckon-build" data-when="2026-11-18T00:13:47.529Z">
+    <div class="r-comment-body"><p>Stored the parsed independent review for r-20261117T161745027288-icm-efit-closed-shell-imas at head 33a8ea36578b36475194371ef0e9db27a1ab7eac from base f9517fcc04e249939811eded8f3c8be77b54b744, scoring goal_fidelity 18 / evidence 15 / scope_discipline 14 / durability 10 / fit 15 / reuse 18 with six non-blocking findings and none blocking; added_failure_count 0 from the reviewed run&#x27;s suite-baseline and suite-after logs.</p></div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T222130291065-review-of-icm-strip-error-sweep-43dc514d920c-figure" data-who="reckon-build" data-when="2026-11-06T22:32:39.513Z">
     <div class="r-comment-body"><p>Figure review of run r-20261106T212311176377-icm-strip-error-sweep at head 43dc514d9 is parsed with no blocking finding: the strip-error curve figure renders clean (zero ink in the outer 8 px frame, ink bbox x 35..1365 y 86..690, one frameless legend row, the 1e-10 direct label in clear space), and one non-blocking finding records that the two lightest curve stops measure 2.61:1 and 1.93:1 against white, below the 3:1 a plotted line is required to hold, so the coincident right-hand branch is drawn in the palest trace.</p></div>
 </div>
@@ -911,7 +914,7 @@ number is reported for either ratio.</p></div>
     <div class="r-comment-body"><p>A review finding was folded into this section's node (<code>icm-iron-field-source</code>) from the landed cleanup run r-20261115T081846316772. <code>tests/test_imas_iron_read.py::test_census_mesh_matches_previous_read</code> now asserts <code>len(actual) == len(expected) &gt; 0</code>, and both sides call the production <code>_mesh</code>, so a change in cell count or partition moves both together unseen. Restore an independent pin on the production count (1694 cells at 0.08 m), with a negative control that changes the mesh spacing. Add this to the brief when the contract is edited after the §5 decision.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-s11-largest-operator-correction" data-who="reckon-build" data-when="">
-    <div class="r-comment-body"><p>Correction to clause (2)'s parenthetical: graded 16/80&nbsp;mm (35&nbsp;184 unknowns) is not the largest mesh the existing route solves on the card. Uniform 40&nbsp;mm (39&nbsp;792 unknowns, 50.7&nbsp;GB factor peak) is, and its operator is already persisted. The clause keeps graded 16/80 because it carries the grading boundary the 8/40 mesh shares. The node brief also asks for the uniform 40&nbsp;mm comparison.</p></div>
+    <div class="r-comment-body"><p>Correction to clause (2)'s parenthetical: graded 16/80 mm (35 184 unknowns) is not the largest mesh the existing route solves on the card. Uniform 40 mm (39 792 unknowns, 50.7 GB factor peak) is, and its operator is already persisted. The clause keeps graded 16/80 because it carries the grading boundary the 8/40 mesh shares. The node brief also asks for the uniform 40 mm comparison.</p></div>
 </div>
 </section>
 </main>

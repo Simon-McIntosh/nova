@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T05:23:18.469Z",
+  "dispatched_at": "2026-11-18T05:23:08Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:108",
+      "id": "anchors_resolve-1",
+      "reason": "a worker dispatched on \u00a74 has no record to open for the premise it builds on and the record cannot be produced until \u00a74 has landed, so the citation has to be re-anchored to something that resolves (or the dependency direction restated) before the section is runnable.",
+      "text": "\u00a74 cites `docs/evidence/fragments/inverse-equilibrium-baseline/reconstruction-cost.html`, which does not exist at HEAD (`git cat-file -e HEAD:docs/evidence/fragments/inverse-equilibrium-baseline/reconstruction-cost.html` exits nonzero; the directory holds only `efit-comparison.html`, `efit-on-nova-rows.html`, `estimator-scoreboard.html`, `known-answer-recovery.html`, `inverse-equilibrium-baseline.html`), and the plan says the record \"lands with that section's run\" \u2014 the inverse baseline's cost section, which `docs/plans/inverse-equilibrium-baseline.html:155` makes wait on `forward-solve-near-stored-states#s4`, so the cited evidence and the section that needs it wait on each other",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:108",
+      "id": "reasoning-1",
+      "reason": "if the refusal the section must remove is the axis-admission read rather than a convergence-flag conversion, a batching repair leaves the case refusing and the section's measure targets the wrong layer.",
+      "text": "\u00a74 attributes the batch refusal to \"converting a traced flag on the host\", but the resolvable record for the ITER case names a different host read: the axis-admission read raising `NoQualifiedAxisError` (`docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html:1713`, with 0 of 4 candidate slots qualified), and no record in the repository states a traced-flag conversion refusal under a batch nor the quoted 255 s / 270 s single-solve walls",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:109",
+      "id": "done_when-1",
+      "reason": "the endpoint is unreachable on the case it names, so the section must name a case whose single solve converges or must declare the dependency on the repair section, or its gate can only ever record a failure.",
+      "text": "\u00a74(1) and \u00a74(2) require 16 and 64 independent states of the nova-written ITER case each to qualify below the unchanged 1e-10 threshold and each to agree with the same state solved alone, while \u00a70 (`:35-40`) and \u00a71(1) (`:73-79`) record that case's solve ending with no magnetic axis admitted and a non-finite residual, and \u00a74 declares it waits on nothing in this plan so no \u00a73 repair may be assumed",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:89",
+      "id": "done_when-2",
+      "reason": "a worker must otherwise invent the convention for the missing endpoint or report Not reached, and either choice changes the verdict \u00a73 is dispatched on.",
+      "text": "\u00a72(1) requires the record to state \"the smallest fraction at which it does not [qualify]\" among 1/64 \u2026 1, while \u00a72(3) defines Reached as the final solve of that same sequence qualifying; in the Reached case no fraction in the stated set fails and the quantity (1) demands does not exist, so the record cannot satisfy (1) and (3) together; \u00a73 repairs only cases \u00a72 marks reached, so the contradiction sits on the one path the plan depends on",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b432cc86733a5664aa2f18af1c6964c6d289b7b8",
+  "plan_fingerprint": "1971c401e5ebe80c0ea43f5bdc1d99dcfccb56b05c8529383ed58ee2e267c8ce",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 7,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T045216283717-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "b38f440aeb07281a71b163d3046b083ee95e4675",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a74's cited record `docs/evidence/fragments/inverse-equilibrium-baseline/reconstruction-cost.html` does not resolve, and cannot precede the section it feeds.",
+    "done_when": "a finding \u2014 \u00a74's clauses (1) and (2) require the non-convergent ITER case's batch copies to qualify, and \u00a72(1) requires a non-qualifying fraction that does not exist when \u00a72(3) returns Reached.",
+    "evidence_paths": "pass \u2014 \u00a74's record path is under `docs/evidence/fragments/...` and its measurement is one job with the compilation-cache contract printed; that the named record does not yet exist is scored under `anchors_resolve`.",
+    "naming": "pass \u2014 `s4`'s text carries no plan labels, stage names, ticket numbers or version tags; \"the nova-written ITER case\" is a case identity.",
+    "reasoning": "a finding \u2014 \u00a74's named root cause (a convergence flag converted on the host) is not what any resolvable record shows; the only recorded host terminal read for these cases is the axis-admission refusal.",
+    "single_goal": "pass \u2014 each section names one deliverable; \u00a74 is one (the public solve swept over a batch), and its suite clause is a guard rather than a second deliverable.",
+    "wiring": "pass \u2014 `s1` depends on `inverse-equilibrium-baseline#s2`, `s2` on `s1`, `s3` on `s2` and `s4` declares none, which matches its prose \"Waits on nothing in this plan\" and the \u00a74 row of the section contract table; the inverse plan's cost section names this plan's `s4` (`docs/plans/inverse-equilibrium-baseline.html:155`)."
+  },
+  "section_digests": {
+    "_document": "5eaec87b2f497b8b435123ea3e8e5b8d1c88bab5cda6853f1bb3ef3ea38b75de",
+    "s0": "fe67d113b2c5e41864cb02b1f30199cabdf5f90a0b2d92d05a7a6872e03f4022",
+    "s1": "ad38a639ccff273d1e55e7b6f13b0c54dbeab542646bea92d52811c964773a64",
+    "s2": "ed15c567af2056735491ae3a501ef8e40b78fedcfd0f3648e0b04c4e008e0e1c",
+    "s3": "c1164314d236e8fd566ce929a4f43e519d3b76ca3978d08d77b3c0ba13e6055c",
+    "s4": "7640fd7ee99b1f424a0c73c68c25fed295719b544ab30e84632c909e6ed868b0"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T05:36:29.184486+00:00",
+  "total": null
+}

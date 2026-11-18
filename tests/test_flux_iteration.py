@@ -76,12 +76,13 @@ class _Instrument:
 
 
 class _PrescribedField:
-    """A prescribed field whose flux needs its own current vector."""
+    """A prescribed field holding a vector, which an argument may replace."""
 
-    def flux(self, current):
-        if current is None:
-            raise TypeError("prescribed flux needs a current vector")
-        return np.asarray(current, dtype=np.float64)[0] * np.ones(CELLS)
+    current = np.array([0.5])
+
+    def flux(self, current=None):
+        value = self.current if current is None else np.asarray(current, float)
+        return float(value[0]) * np.ones(CELLS)
 
 
 class _Operator:
@@ -306,8 +307,21 @@ def test_an_operator_with_a_prescribed_field_takes_its_current_vector():
         flux_loop=LOOPS,
     )
     source = _source(TRUTH)
-    with pytest.raises(ValueError, match="prescribed current vector"):
-        FluxIterationFit(_Profile(source, prescribed=True), geometry, _sensor_rows)
+    stored = FluxIterationFit(_Profile(source, prescribed=True), geometry, _sensor_rows)
+    stored_receipt = stored.fit(
+        SliceMeasurement(
+            measured=SENSOR @ cells,
+            vacuum=np.zeros(SENSORS),
+            mask=np.ones(SENSORS, dtype=bool),
+            plasma_current=float(np.sum(cells)),
+            scale=SCALE,
+        ),
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+    )
+    assert stored_receipt.axis_loss_message is None
+    assert stored_receipt.flux_evaluations >= 1
     fitter = FluxIterationFit(
         _Profile(source, prescribed=True),
         geometry,

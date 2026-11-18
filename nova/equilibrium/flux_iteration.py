@@ -88,6 +88,7 @@ class FluxIterationReceipt:
     last_flux_update: float
     stopped_improving_pass: int | None
     axis_lost_pass: int | None
+    axis_loss_message: str | None
     whitened_residuals: np.ndarray
     singular_values: np.ndarray
     covariance: np.ndarray
@@ -206,11 +207,6 @@ class FluxIterationFit:
             if prescribed_current is None
             else np.array(prescribed_current, dtype=np.float64, copy=True)
         )
-        if profile.operator.prescribed_field is not None and prescribed is None:
-            raise ValueError(
-                "the operator carries a prescribed current field, so the map "
-                "update needs the prescribed current vector"
-            )
         if prescribed is not None:
             prescribed.setflags(write=False)
         self._prescribed_current = prescribed
@@ -342,6 +338,7 @@ class FluxIterationFit:
         flux_evaluations = 0
         sensor_evaluations = 0
         axis_lost_pass: int | None = None
+        axis_loss_message: str | None = None
         converged = False
         residual = np.full(target.size, np.nan)
         spectrum = np.zeros(0)
@@ -416,8 +413,9 @@ class FluxIterationFit:
                     )
                 updated = np.asarray(updated, dtype=np.float64)
                 flux_evaluations += 1
-            except ValueError:
+            except ValueError as error:
                 axis_lost_pass = index
+                axis_loss_message = f"{type(error).__name__}: {error}"
                 break
             delta = updated - flux
             update = float(np.max(np.abs(delta)) / span)
@@ -476,6 +474,7 @@ class FluxIterationFit:
             last_flux_update=float(last_update),
             stopped_improving_pass=stopped_improving,
             axis_lost_pass=axis_lost_pass,
+            axis_loss_message=axis_loss_message,
             whitened_residuals=residual.copy(),
             singular_values=np.asarray(spectrum, dtype=np.float64),
             covariance=np.asarray(covariance, dtype=np.float64),

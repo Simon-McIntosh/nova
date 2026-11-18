@@ -32,6 +32,13 @@
       "finding": "done_when-1",
       "reason": "The section has landed and no node will be dispatched from this clause again. The landed record already withholds the verdict the finding asks about: it reports MAST as marginal and not established, states that its 18 surviving fits are a selected subset, and gives its control as not measured.",
       "when": "2026-11-18T06:44:52.337130+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "The section has landed. By lead decision the flux scaling is reported as a property of the linearised operator and the landed record labels it so; it is not presented as a test the fit could fail, and the three measured ratios are stated with their draw counts.",
+      "when": "2026-11-18T06:46:12.813473+00:00"
     }
   ],
   "responses": {
@@ -40,6 +47,12 @@
       "by": "",
       "reason": "The section has landed and no node will be dispatched from this clause again. The landed record already withholds the verdict the finding asks about: it reports MAST as marginal and not established, states that its 18 surviving fits are a selected subset, and gives its control as not measured.",
       "when": "2026-11-18T06:44:52.337130+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The section has landed. By lead decision the flux scaling is reported as a property of the linearised operator and the landed record labels it so; it is not presented as a test the fit could fail, and the three measured ratios are stated with their draw counts.",
+      "when": "2026-11-18T06:46:12.813473+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261118T061015725158-plan-review-of-inverse-equilibrium-baseline.json",

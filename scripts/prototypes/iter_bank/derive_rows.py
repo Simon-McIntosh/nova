@@ -22,6 +22,14 @@ so the two statistics cannot be mistaken for one another.
 Run it from the repository root with ``PYTHONPATH=.``, so the shared helper
 (and this script's own module path) resolves:
 ``PYTHONPATH=. python scripts/prototypes/iter_bank/derive_rows.py``.
+
+``--zero-entries`` answers a different question about the same two archives:
+every first-derivative entry whose current-bank value is exactly zero, its value
+in each bank, and a direct evaluation of the same jet from this tree's kernel and
+from ``--base-tree``'s kernel (run in a subprocess that imports that tree). Each
+entry also carries the distance from its node to the source cell's boundary and
+to that cell's nearest vertex, so an entry that sits on the source can be told
+from one that does not.
 """
 
 from __future__ import annotations
@@ -46,6 +54,7 @@ def load(path):
     with np.load(path, allow_pickle=False) as archive:
         return dict(
             rows=np.asarray(archive["rows"]),
+            nodes=np.asarray(archive["nodes"]),
             active_nodes=int(archive["active_nodes"]),
             bucket=int(archive["bucket"]),
             path=str(path),
@@ -190,6 +199,226 @@ def exit_status(report):
     return 2 if report["material"]["present"] else 0
 
 
+def zero_entries(head_rows, current_rows, components=DERIVATIVE):
+    """Every first-derivative entry whose current-bank magnitude is exactly zero."""
+    current = np.asarray(current_rows)[:, :, :, components]
+    head = np.asarray(head_rows)[:, :, :, components]
+    entries = []
+    for row in np.argwhere(current == 0):
+        node, cell, moment, index = (int(value) for value in row)
+        entries.append(
+            dict(
+                node=node,
+                cell=cell,
+                moment=moment,
+                component=COMPONENT[index],
+                current_value=float(current[node, cell, moment, index]),
+                head_value=float(head[node, cell, moment, index]),
+            )
+        )
+    return entries
+
+
+def geometry_polygons(path):
+    """Read the cell polygons and centres the bank was built from."""
+    with np.load(path) as archive:
+        vertices = np.asarray(archive["vertices"])
+        counts = np.asarray(archive["vertex_count"])
+        centre = np.asarray(archive["centre"])
+    polygons = tuple(vertices[i, : int(n)] for i, n in enumerate(counts))
+    return dict(
+        vertices=vertices, vertex_count=counts, centre=centre, polygons=polygons
+    )
+
+
+def kernel_rows(points, polygons, batch=4):
+    """Evaluate this tree's kernel jets at every point, for every cell."""
+    import jax
+    import jax.numpy as jnp
+    from nova.equilibrium import topology
+    from nova.equilibrium.fixed_points import _source_jets
+
+    coupling = topology.BiotMomentCoupling.from_polygons(polygons)
+    program = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
+    rows = np.zeros((len(points), len(polygons), 3, 6))
+    for first in range(0, len(points), batch):
+        block = np.asarray(points[first : first + batch], dtype=np.float64)
+        size = len(block)
+        if size < batch:
+            block = np.concatenate((block, np.repeat(block[-1:], batch - size, axis=0)))
+        rows[first : first + size] = np.asarray(program(jnp.asarray(block), coupling))[
+            :size
+        ]
+    return rows
+
+
+_ZERO_KERNEL_RUNNER = '''
+"""Evaluate one revision of the polygon kernel at a list of points."""
+import sys
+
+import numpy as np
+
+from nova.jax.config import configure_dtypes
+
+configure_dtypes()
+
+import jax
+import jax.numpy as jnp
+from nova.equilibrium import topology
+from nova.equilibrium.fixed_points import _source_jets
+
+inputs = np.load(sys.argv[1])
+batch = int(sys.argv[2]) if len(sys.argv) > 2 else 4
+points = np.asarray(inputs["points"], dtype=np.float64)
+vertices = np.asarray(inputs["vertices"])
+counts = np.asarray(inputs["vertex_count"])
+polygons = tuple(vertices[i, : int(n)] for i, n in enumerate(counts))
+coupling = topology.BiotMomentCoupling.from_polygons(polygons)
+program = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
+rows = np.zeros((len(points), len(polygons), 3, 6))
+for first in range(0, len(points), batch):
+    block = points[first : first + batch]
+    size = len(block)
+    if size < batch:
+        block = np.concatenate((block, np.repeat(block[-1:], batch - size, axis=0)))
+    rows[first : first + size] = np.asarray(program(jnp.asarray(block), coupling))[
+        :size
+    ]
+np.savez(sys.argv[3], rows=rows)
+print("KERNEL_ROWS", len(points), len(polygons), flush=True)
+'''
+
+
+def stack_polygons(polygons):
+    """Pad a polygon tuple into the vertices and counts the runner reads."""
+    width = max(len(polygon) for polygon in polygons)
+    vertices = np.zeros((len(polygons), width, 2))
+    counts = np.zeros(len(polygons), dtype=np.int64)
+    for index, polygon in enumerate(polygons):
+        vertices[index, : len(polygon)] = polygon
+        counts[index] = len(polygon)
+    return dict(vertices=vertices, vertex_count=counts)
+
+
+def base_kernel_rows(points, polygons, tree, directory, batch=4):
+    """Evaluate another revision's kernel in a subprocess that imports that tree."""
+    import os
+    import subprocess
+    import sys
+
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    inputs = directory / "zero-kernel-inputs.npz"
+    outputs = directory / "zero-kernel-rows.npz"
+    runner = directory / "zero-kernel-runner.py"
+    geometry = stack_polygons(polygons)
+    np.savez(
+        inputs,
+        points=np.asarray(points, dtype=np.float64),
+        vertices=geometry["vertices"],
+        vertex_count=geometry["vertex_count"],
+    )
+    runner.write_text(_ZERO_KERNEL_RUNNER)
+    environment = dict(os.environ, PYTHONPATH=str(tree))
+    subprocess.run(
+        [sys.executable, str(runner), str(inputs), str(batch), str(outputs)],
+        check=True,
+        cwd=str(tree),
+        env=environment,
+    )
+    with np.load(outputs) as archive:
+        return np.asarray(archive["rows"])
+
+
+def segment_distance(point, polygon):
+    """Distance from one point to a closed polygon's boundary."""
+    start = np.asarray(polygon, dtype=np.float64)
+    end = np.asarray(np.roll(start, -1, axis=0), dtype=np.float64)
+    direction = end - start
+    denominator = np.sum(direction * direction, axis=-1)
+    safe = np.where(denominator > 0.0, denominator, 1.0)
+    projection = np.clip(np.sum((point - start) * direction, axis=-1) / safe, 0.0, 1.0)
+    nearest = start + projection[:, None] * direction
+    return float(np.min(np.sqrt(np.sum((point - nearest) ** 2, axis=-1))))
+
+
+def vertex_distance(point, polygon):
+    """Distance from one point to a polygon's nearest vertex."""
+    gaps = np.sqrt(np.sum((np.asarray(polygon) - np.asarray(point)) ** 2, axis=-1))
+    return float(np.min(gaps))
+
+
+def zero_entry_report(
+    head, current, geometry_path, *, base_tree=None, directory=None, batch=4
+):
+    """Attribute every exactly-zero first-derivative entry to a kernel."""
+    active = min(head["active_nodes"], current["active_nodes"])
+    geometry = geometry_polygons(geometry_path)
+    entries = zero_entries(head["rows"][:active], current["rows"][:active])
+    nodes = np.asarray(current["nodes"][:active], dtype=np.float64)
+    unique = sorted({entry["node"] for entry in entries})
+    position_of = {node: position for position, node in enumerate(unique)}
+    points = nodes[unique] if unique else np.zeros((0, 2), dtype=np.float64)
+    cells = sorted({entry["cell"] for entry in entries})
+    local_of = {cell: index for index, cell in enumerate(cells)}
+    selected = tuple(geometry["polygons"][cell] for cell in cells)
+    print(
+        "ZERO_PLAN "
+        + json.dumps(
+            dict(entries=len(entries), nodes=len(unique), cells=len(cells), batch=batch)
+        ),
+        flush=True,
+    )
+    repaired = kernel_rows(points, selected, batch=batch)
+    base = None
+    if base_tree is not None and directory is not None:
+        base = base_kernel_rows(points, selected, base_tree, directory, batch=batch)
+    nearest = np.argmin(
+        np.sum((points[:, None, :] - geometry["centre"][None, :, :]) ** 2, axis=-1),
+        axis=1,
+    )
+    for entry in entries:
+        position = position_of[entry["node"]]
+        cell = entry["cell"]
+        moment = entry["moment"]
+        jet = 1 if entry["component"] == "dpsi/dR" else 2
+        polygon = geometry["polygons"][cell]
+        entry["coordinates"] = points[position].tolist()
+        entry["own_cell"] = int(nearest[position])
+        entry["node_belongs_to_this_cell"] = bool(int(nearest[position]) == cell)
+        entry["distance_to_cell_boundary"] = segment_distance(points[position], polygon)
+        entry["distance_to_nearest_vertex"] = vertex_distance(points[position], polygon)
+        local = local_of[cell]
+        entry["repaired_value"] = float(repaired[position, local, moment, jet])
+        if base is None:
+            entry["base_value"] = None
+        else:
+            entry["base_value"] = float(base[position, local, moment, jet])
+
+    head_values = [abs(entry["head_value"]) for entry in entries]
+    head_gaps = [
+        abs(entry["head_value"] - entry["repaired_value"]) for entry in entries
+    ]
+    summary = dict(
+        count=len(entries),
+        unique_nodes=len(unique),
+        head_max_abs_value=max(head_values, default=0.0),
+        head_vs_repaired_max_abs=max(head_gaps, default=0.0),
+        head_matches_repaired=bool(max(head_gaps, default=0.0) <= 1e-10),
+    )
+    if base is not None:
+        base_values = [abs(entry["base_value"]) for entry in entries]
+        base_gaps = [
+            abs(entry["base_value"] - entry["repaired_value"]) for entry in entries
+        ]
+        summary["base_max_abs_value"] = max(base_values, default=0.0)
+        summary["base_reproduces_zeros"] = bool(
+            all(value == 0.0 for value in base_values)
+        )
+        summary["base_vs_repaired_max_abs"] = max(base_gaps, default=0.0)
+    return dict(entries=entries, summary=summary)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--head-bank", type=Path, required=True)
@@ -203,12 +432,60 @@ def main():
         help="absolute departure that fails the run; none by default",
     )
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument(
+        "--zero-entries",
+        action="store_true",
+        help="attribute the exactly-zero first-derivative entries to a kernel",
+    )
+    parser.add_argument(
+        "--geometry",
+        type=Path,
+        help="cell geometry npz, required by --zero-entries",
+    )
+    parser.add_argument(
+        "--base-tree",
+        type=Path,
+        help="tree whose kernel --zero-entries also evaluates, in a subprocess",
+    )
+    parser.add_argument(
+        "--batch",
+        type=int,
+        default=4,
+        help="points per kernel batch; successive derivative sums need fewer",
+    )
+    parser.add_argument(
+        "--work-directory",
+        type=Path,
+        help="directory the base-kernel runner writes its inputs and rows to",
+    )
     args = parser.parse_args()
 
     head = load(args.head_bank)
     current = load(args.current_bank)
     if head["rows"].shape != current["rows"].shape:
         raise SystemExit("the two banks have different row shapes")
+    if args.zero_entries:
+        if args.geometry is None:
+            raise SystemExit("--zero-entries requires --geometry")
+        zero = zero_entry_report(
+            head,
+            current,
+            args.geometry,
+            base_tree=args.base_tree,
+            directory=args.work_directory,
+            batch=args.batch,
+        )
+        zero["head_bank"] = head["path"]
+        zero["current_bank"] = current["path"]
+        zero["base_tree"] = str(args.base_tree) if args.base_tree is not None else None
+        zero["geometry"] = str(args.geometry)
+        zero["completed"] = True
+        print("ZERO_SUMMARY " + json.dumps(zero["summary"], sort_keys=True), flush=True)
+        if args.output is not None:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(json.dumps(zero, indent=2))
+            print("DERIVE_COMPLETE " + str(args.output), flush=True)
+        raise SystemExit(0)
     active = min(head["active_nodes"], current["active_nodes"])
     if head["active_nodes"] != current["active_nodes"]:
         print("ACTIVE_NODES_DIFFER", head["active_nodes"], current["active_nodes"])

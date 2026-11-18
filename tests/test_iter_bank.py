@@ -417,3 +417,27 @@ def test_derive_rows_fails_only_on_a_named_absolute_boundary():
 
 def test_derive_rows_shares_the_certification_relative_norm():
     assert derive_rows.relative is recertify.relative
+
+
+def test_derive_rows_lists_every_exactly_zero_entry():
+    rows = stored_rows(cells=2)
+    rows[0, 0, 0, 1] = 0.0
+    head = rows.copy()
+    head[0, 0, 0, 1] = 3.5e-9
+    entries = derive_rows.zero_entries(head, rows)
+    assert len(entries) == 1
+    assert entries[0]["node"] == 0
+    assert entries[0]["cell"] == 0
+    assert entries[0]["moment"] == 0
+    assert entries[0]["component"] == "dpsi/dR"
+    assert entries[0]["current_value"] == 0.0
+    assert entries[0]["head_value"] == pytest.approx(3.5e-9)
+
+
+def test_derive_rows_zero_entries_ignore_rows_past_the_active_count():
+    rows = stored_rows(nodes=3)
+    head = rows.copy()
+    head[0, 0, 0, 1] = 3.5e-9
+    rows[2] = 0.0
+    assert derive_rows.zero_entries(head[:2], rows[:2]) == []
+    assert len(derive_rows.zero_entries(head, rows)) == 2

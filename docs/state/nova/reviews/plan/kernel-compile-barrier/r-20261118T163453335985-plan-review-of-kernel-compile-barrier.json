@@ -1,0 +1,79 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T16:51:55.826Z",
+  "dispatched_at": "2026-11-18T16:51:25Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261118T163453335985-plan-review-of-kernel-compile-barrier/plan.html:73",
+      "id": "done_when-1",
+      "reason": "a worker dispatched on s4 cannot satisfy both clauses, and the only escape (the cache) is refused by the test it must un-xfail.",
+      "text": "s4 clause (2) keeps the cold-compile test to be un-xfailed and passing, but test_kernel_compile_growth measures a cache-disabled compile and refuses a persistent hit, so the clause requires a cold compile under 60 s at 132, 300 and 550 cells, which the plan states carries no bound and which node (c)'s negative result and node (d)'s cache both leave at about 405 s",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261118T163453335985-plan-review-of-kernel-compile-barrier/plan.html:66",
+      "id": "done_when-2",
+      "reason": "the clause is unsatisfiable as written, so a re-dispatched node (c) can only fail or silently skip its own done-when.",
+      "text": "node (c) still owes \"the lowered-graph ceiling in tests/equilibrium/test_bounded_point_program.py from 10,000,000 bytes to 6,000,000 or below\" while the same paragraph records the negative result that the only accepted lever returned a 0.2% smaller graph and the eight-cell fixture the ceiling measures lowers at 9,351,538 bytes (STABLEHLO_CEILING is 10_000_000 at tests/equilibrium/test_bounded_point_program.py:47)",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261118T163453335985-plan-review-of-kernel-compile-barrier/plan.html:66",
+      "id": "reasoning-1",
+      "reason": "a reader cannot tell whether clause (2)'s job waits on a form that will never exist or runs on the repaired program now.",
+      "text": "the section closes with \"Clauses (2) and (3) below are measured on (c)'s form and not before ... so it is spent once, on the form that meets the bound\", which contradicts the clause (2) text two sentences earlier (\"No folded form was accepted, so the program is the repaired kernel's own and there is no second form to compare\")",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261118T163453335985-plan-review-of-kernel-compile-barrier/plan.html:73",
+      "id": "wiring-1",
+      "reason": "without an owner for that row the node's binding measure cannot be met by any work s4 describes.",
+      "text": "s4 clause (1) binds the topology read's first call to the pinned pre-warm with NOVA_CACHE_MISS_BUDGET at zero, but the pre-warm rows in scripts/h200_test_lane/prewarm.sh are solve-fixture-floor, forward-compile-identity and forward-solve-lane, and neither s4's nodes nor s3 node (d) add the read's programs, so the clause's own miss budget refuses the run",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261118T163453335985-plan-review-of-kernel-compile-barrier/plan.html:73",
+      "id": "evidence_paths-1",
+      "reason": "the section's whole evidence is a table a later reader must be able to open, and a tmp path or a session log loses it.",
+      "text": "s4 node (a) (three compile arms, an executable size and a memory row per cell count) and node (b) (two arms of three files in one sirius job) name no record path, fragment, figure directory or receipt directory, while s3's nodes each name all three",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "85ea658cbc47072a439d42653aefaa9fedce159b",
+  "plan_fingerprint": "760ef202cbb2208c127da34d3799096ab152f061505f1d71da05e64b28d753ff",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 99,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T163453335985-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "367516f1ae425cb04b6ca9c7a5c6b816bf800cdd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited fragments (docs/evidence/fragments/kernel-compile-barrier/ordered-sharing.html, docs/evidence/fragments/sub-millisecond-forward-path/polygon-stable-evaluator.html), the peer plan docs/plans/sub-millisecond-forward-path.html and the four cited test files all resolve at the snapshot's base.",
+    "done_when": "a finding \u2014 s4 clause (2) requires the strict xfail on test_kernel_compile_growth to be removed and the test to pass, while s4 clause (1) and s3's recorded negative result leave the cold compile unbounded; that test's measurement child asserts no persistent cache hit (tests/equilibrium/test_topology_read.py:2725) and raises KernelCompileBarrier above 60 s, so a cache cannot make it pass.",
+    "evidence_paths": "a finding \u2014 s4 names no record path for either node, so the compile clause's receipts and the regression arm's per-file receipt rows have no durable location.",
+    "naming": "pass \u2014 no plan label, stage name or ticket number reaches a symbol, file name or comment in the reviewed units.",
+    "reasoning": "a finding \u2014 s3's trailing sentence still says clauses (2) and (3) are measured \"on (c)'s form ... on the form that meets the bound\" after the same paragraph records that (c) returned a negative result and no folded form was accepted.",
+    "single_goal": "pass \u2014 s3's nodes are one deliverable each (consolidation, attribution, bounded-form measurement, cached program) and s4 splits its compile clause and its regression arm into two nodes with separate verdicts.",
+    "wiring": "a finding \u2014 s4 clause (1) requires the kernel-backed topology read to be served from the pinned pre-warm cache with no miss recorded, but no node owns adding that program to the pre-warm; s3 node (d) adds only the production point program and s4's nodes (a)/(b) name no pre-warm row, while scripts/h200_test_lane/prewarm.sh warms only solve-fixture-floor, forward-compile-identity and forward-solve-lane."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "503926907cf43c5f87a4f78d064db35b7c81ea4d4bb4272a84cc0af0be43251e",
+    "s4": "873b9ddf711f4daa03f88d01d45d1d8ff5eb53b234837c65f416c3f7bc828d24",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T16:56:49.983491+00:00",
+  "total": null
+}

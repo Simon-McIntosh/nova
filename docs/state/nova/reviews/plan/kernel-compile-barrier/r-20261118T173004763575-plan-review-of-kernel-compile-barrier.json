@@ -53,9 +53,28 @@
       "note": "s4 node (a) adds the kernel-backed topology read at 132, 300 and 550 cells to the pre-warm",
       "reason": "",
       "when": "2026-11-18T18:21:17.631564+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "f067f8a14f5c5d4ec90b3ac73a2c6c929d28f035",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "s4 names NOVA_TOPOLOGY_EVIDENCE_DIR and the directory the cold-compile receipts are kept in",
+      "reason": "",
+      "when": "2026-11-18T18:21:26.407489+00:00"
     }
   ],
   "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "f067f8a14f5c5d4ec90b3ac73a2c6c929d28f035",
+      "commit_basis": "edit",
+      "note": "s4 names NOVA_TOPOLOGY_EVIDENCE_DIR and the directory the cold-compile receipts are kept in",
+      "reason": "",
+      "when": "2026-11-18T18:21:26.407489+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",

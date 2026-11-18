@@ -19,6 +19,13 @@
     "nova/imas/mast_efit_referee.py:q95_from_flux_map"
   ],
   "completed_at": "2026-11-18T06:31:24Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-scoreboard-one-safety-factor-calculator-7437b9862399",
+      "recorded_at": "2026-11-18T07:09:18.997197+00:00"
+    }
+  },
   "dispatched_at": "2026-11-18T06:26:57Z",
   "finding_dispositions": {
     "0": {

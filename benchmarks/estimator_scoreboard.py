@@ -127,6 +127,7 @@ def perturb_state(
     for frame in equilibrium.time_slice:
         quantities = frame.global_quantities
         span = float(quantities.psi_axis) - float(quantities.psi_boundary)
+        signed_span = float(quantities.psi_boundary) - float(quantities.psi_axis)
         frame.boundary.outline.r = np.asarray(frame.boundary.outline.r, dtype=float) + (
             radial_shift_m
         )
@@ -137,16 +138,25 @@ def perturb_state(
             quantities.psi_boundary = (
                 float(quantities.psi_boundary) - flux_fraction * span
             )
-            new_span = float(quantities.psi_boundary) - float(quantities.psi_axis)
+            # the stored arrays are rescaled by the ratio of the boundary-minus-axis
+            # spans, both signed: dividing by the absolute span would reflect a map
+            # whose flux falls outward, which no perturbation declares
+            stretch = (
+                (float(quantities.psi_boundary) - float(quantities.psi_axis))
+                / signed_span
+                if signed_span != 0.0
+                else 1.0
+            )
             for stored in frame.profiles_2d:
-                stored.psi = float(quantities.psi_axis) + (
-                    np.asarray(stored.psi, dtype=float) - axis_old
-                ) * (new_span / abs(span))
+                stored.psi = (
+                    float(quantities.psi_axis)
+                    + (np.asarray(stored.psi, dtype=float) - axis_old) * stretch
+                )
             profile_psi = np.asarray(frame.profiles_1d.psi, dtype=float)
             if profile_psi.size:
-                frame.profiles_1d.psi = float(quantities.psi_axis) + (
-                    profile_psi - axis_old
-                ) * (new_span / abs(span))
+                frame.profiles_1d.psi = (
+                    float(quantities.psi_axis) + (profile_psi - axis_old) * stretch
+                )
         quantities.ip = float(quantities.ip) * current_scale
         profile = frame.profiles_1d
         profile.q = np.asarray(profile.q, dtype=float) * q_scale

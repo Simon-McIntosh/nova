@@ -748,27 +748,35 @@ def _equilibrium_flux_map(equilibrium, index: int) -> FluxMap | None:
     )
 
 
-def _gradient_tail(flux_map: FluxMap, psi_norm: np.ndarray) -> np.ndarray:
-    """Return the boundary-inward integral of the stored gradient [T m].
+def _stored_gradient(flux_map: FluxMap):
+    """Return the state's stored ``F dF/dpsi`` as a function of normalised flux.
 
-    The integral is the trapezoidal one :func:`nova.equilibrium.observation.
-    gradient_tail` takes over the state's own ``F dF/dpsi`` nodes, resent on
-    normalised flux, so the toroidal-field function is the same quantity the
-    solve's own geometry read consumes.
-
+    The stored nodes are normalised *before* they are ordered: a map whose flux
+    falls from the axis outward carries descending physical nodes, and dividing
+    that sequence by its signed axis-to-edge span is what maps it onto an
+    increasing ``psi_N``.  Ordering the physical nodes first would leave the
+    interpolation coordinates descending, which ``numpy.interp`` reads as
+    unordered input and returns its endpoint value; that would report a zero
+    inward integral at ``psi_N = 0.95`` for a state whose flux runs the other way.
     """
 
     nodes = np.asarray(flux_map.gradient_psi, dtype=float)
     values = np.asarray(flux_map.gradient, dtype=float)
-    span = float(nodes[-1]) - float(nodes[0])
+    start = float(nodes[0])
+    span = float(nodes[-1]) - start
     if not np.isfinite(span) or span == 0.0:
         raise EfitRefereeError("the stored gradient has no flux span")
-    position = np.argsort(nodes)
-    x = (nodes[position] - float(nodes[0])) / span
-    y = values[position]
-    segment = 0.5 * np.diff(x) * (y[1:] + y[:-1])
-    tail = np.concatenate([np.cumsum(segment[::-1])[::-1], np.zeros(1)])
-    return np.interp(psi_norm, x, tail)
+    position = (nodes - start) / span
+    order = np.argsort(position)
+    ordered = np.ascontiguousarray(position[order])
+    gradient = np.ascontiguousarray(values[order])
+
+    def stored(psi_norm):
+        """Return the stored gradient at one normalised flux."""
+
+        return np.interp(psi_norm, ordered, gradient)
+
+    return stored
 
 
 def q95_from_flux_map(state: EquilibriumState, *, vacuum_b0: float) -> float:
@@ -778,9 +786,12 @@ def q95_from_flux_map(state: EquilibriumState, *, vacuum_b0: float) -> float:
     handed to :class:`nova.equilibrium.flux_surface_geometry.FluxSurfaceGeometry`
     with the state's own magnetic axis and boundary flux, its own reference
     radius and its own diamagnetic gradient integrated inward from the vacuum
-    boundary field the case declares.  ``nan`` reports a state that carries no
-    flux map or no field data, which no scalar record may stand in for.
-
+    boundary field the case declares.  The inward integral is
+    :func:`nova.equilibrium.observation.gradient_tail` and the field primitive is
+    :func:`nova.equilibrium.convention.flux_function_toroidal_field`, so a
+    stored map's gradient is read through the same two owners a solved state's
+    is.  ``nan`` reports a state that carries no flux map or no field data, which
+    no scalar record may stand in for.
     """
 
     flux_map = state.flux_map
@@ -795,14 +806,20 @@ def q95_from_flux_map(state: EquilibriumState, *, vacuum_b0: float) -> float:
 
     from types import SimpleNamespace
 
+    from nova.equilibrium.convention import flux_function_toroidal_field
     from nova.equilibrium.flux_surface_geometry import FluxSurfaceGeometry
+    from nova.equilibrium.observation import gradient_tail
+
+    stored = _stored_gradient(flux_map)
 
     def field(psi_norm):
         """Return the toroidal-field function at one normalised flux."""
 
-        tail = _gradient_tail(flux_map, np.asarray(psi_norm, dtype=float))
-        squared = boundary_field**2 + 2.0 * span * tail
-        return np.sqrt(np.maximum(squared, 0.0))
+        tail = np.asarray(
+            gradient_tail(stored, np.asarray(psi_norm, dtype=float)), dtype=float
+        )
+        squared = flux_function_toroidal_field(boundary_field, span, tail)
+        return np.sign(boundary_field) * np.sqrt(np.maximum(squared, 0.0))
 
     geometry = FluxSurfaceGeometry.from_flux_map(
         SimpleNamespace(radius=flux_map.radius, height=flux_map.height),
@@ -1126,6 +1143,7 @@ __all__ = [
     "StateComparison",
     "compare_reference_geometry",
     "compare_states",
+    "q95_from_flux_map",
     "read_efit_referee",
     "read_equilibrium_state",
     "reference_free_checks",

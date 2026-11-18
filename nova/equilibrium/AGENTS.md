@@ -63,9 +63,10 @@ the cheaper form beside the nested class. Three properties are load-bearing.
   state.** Measured on the three known states: MAST 22086 and ITER 135013 reach both
   known-answer bands in one pass (1.3e-15 and 1.5e-15 of the span); Solov'ev,
   started from the largest perturbation the recovery record uses, diverges at
-  full step and is not recovered by damping: the half-step arm turns at pass 14,
-  and a quarter-step arm that improves to a residual of 0.14 over 24 passes
-  leaves it again, reading 1.0 at pass 104. Read `relaxation` before reading a
+  full step and is not recovered by damping at 0.5, 0.25 or 0.1: each arm
+  improves to a residual near 0.14 and then leaves the basin, the half-step at
+  pass 12, the quarter-step at pass 23, the tenth-step at pass 56, reading 0.98,
+  1.01 and 0.41 at the ends of their budgets. Read `relaxation` before reading a
   failure as a fit defect.
 - **A pass can be refused, and the receipt says so.** An update beyond
   `max_update` spans after the first pass keeps the previous map and records

@@ -30,6 +30,7 @@ from nova.biot.tiledassembly import (
     _polygon_current_response,
     cell_interaction,
     galerkin_cell_interaction,
+    linear_cell_interaction,
     linear_galerkin_cell_interaction,
     linear_magnetisation_geometry,
     sheet_edge_field,
@@ -46,6 +47,7 @@ __all__ = [
     "graded_cell_size",
     "BoundCurrents",
     "bound_currents",
+    "linear_cell_interaction",
     "solve_magnetisation",
 ]
 

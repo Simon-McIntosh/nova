@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T20:03:38.526Z",
+  "dispatched_at": "2026-11-18T20:03:22Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:83",
+      "id": "wiring-1",
+      "reason": "whichever surface a dispatcher reads, one of the two graphs must be corrected or \u00a77 runs on the wrong head and \u00a712's refusal measurement lands on a profile \u00a713 then replaces.",
+      "text": "the plan's dependency graph is stated twice and disagrees: `plan-section-depends-on` (line 34) records s7<-{s6,s10,s12}, s11<-{s8} and s12<-{s10,s13}, while the section elements record s7<-{s6}, s11<-{} and s12<-{s10}; \u00a77's own text requires \u00a710 (\"\u00a77 therefore follows \u00a76, and \u00a710's single-kernel coupling, and is measured on the parent head that carries both\"), so a dispatch built from `data-links` runs \u00a77 on a head without the single-kernel coupling, and \u00a712 may run before or after \u00a713 with no ordering even though \u00a713 changes the edge profiles \u00a712's refusals are measured on",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:85",
+      "id": "done_when-1",
+      "reason": "a done-when with an unreachable branch sends the node's H200 job at a comparison the plan's own \u00a712 says cannot be formed, so the node burns its allocation and returns a measurement fitting neither branch.",
+      "text": "\u00a77's clause (2) presumes an \"unmasked converged 137D\" from which to re-solve, but \u00a712 (line 113) reports that on \u00a77's declared head the identical seed stops at 3.3e-4 with ACTIVE_SET_STEP_REFUSED on the single-kernel coupling; both branches of the disjunction are then unavailable and the job cannot close the node",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:121",
+      "id": "done_when-2",
+      "reason": "the section's edge values are the ones \u00a76's edge current rides on, so without an independent surface and a stated tolerance the node can pass its gate with a wrong edge form.",
+      "text": "\u00a713 clause (2) requires the builder's psiN=1 values to match \"that committed extraction to 1e-10 relative\" and then checks frame :102 against \"the review reading (~-2319.18, ~+0.00584)\"; the committed extraction is the builder's own source of those values, so the 1e-10 clause cannot fail on a builder that reads it, and the only independent reading, which line 119 records no committed record holds, is given no tolerance",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:85",
+      "id": "evidence_paths-1",
+      "reason": "the node's only durable product is the record \u00a77 never names, so a later reader and \u00a79, which runs on \u00a77's head, have nothing to open.",
+      "text": "\u00a77 requires an H200 job that \"reports the \u00a76 table ... with flux-contour panels\" but names no evidence record and no figure directory, unlike \u00a712 and \u00a713 which name both",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:108",
+      "id": "evidence_paths-2",
+      "reason": "the section's done-when (1) is satisfied only by a record a reviewer can open, and the path that makes that true is left to the worker.",
+      "text": "\u00a711 says to run the benchmark entry point \"with `--output` under this node's evidence directory\" without naming the directory, so the one artifact the node must commit has no declared home",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "88c0e8119d02765d179f8fd30037437e7b4ddeaf",
+  "plan_fingerprint": "c8121998c48a91cbb8a9089637b3ae5bb377cb9a26141b7b4630ab499d2d726e",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 136,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T200220729324-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "bc0c5e2725a85eb3c772854973cfd9c9ad854155",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited evidence fragment, ids-set artifact, receipt, prototype driver and commit (cb9c883b, 508124520, 37d974e55, 62562397d, a60f18521, 37b9ba7c4 among them) resolves, and every extensionless href resolves once `.html` is appended.",
+    "done_when": "a finding \u2014 \u00a77's done-when offers a second branch that re-solves \"the unmasked converged 137D\", a state \u00a712 reports does not exist on the single-kernel head \u00a77 says it is measured on (docs/plans/diiid-vertical-force-balance.html:85,113), and \u00a713's independent cross-check carries no tolerance (line 121).",
+    "evidence_paths": "a finding \u2014 \u00a77 names no record or figure destination for the job it requires, and \u00a711 names \"this node's evidence directory\" rather than a durable path (docs/plans/diiid-vertical-force-balance.html:85,108).",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach the mechanism names the sections deliver, and the host record's `f-dvf-*` identifiers stay inside plan prose.",
+    "reasoning": "pass \u2014 the stated root causes match the cited evidence (the 0.95 sampling ceiling \u00a713 blames is real at `nova/equilibrium/map_extraction.py:209` and the `SampledFluxFunction` cap reaches zero exactly one edge interval past its last sample; \u00a712's kernel difference is \u00a710's landed change), and the open sections state delivered records and measures rather than code paths.",
+    "single_goal": "pass \u2014 each open node names one deliverable (s7 compensator inactive on every route, s9 corrected-current solve, s11 seed current against its registration, s12 refusal mechanism, s13 finite-edge representation) with its measurement clauses attached to that one deliverable.",
+    "wiring": "a finding \u2014 the plan declares two different dependency graphs: `plan-section-depends-on` gives s7<-s6,s10,s12, s12<-s10,s13 and s11<-s8, while the section elements' `data-links` give s7<-s6, s11<-nothing and s12<-s10 (docs/plans/diiid-vertical-force-balance.html:83,106,112)."
+  },
+  "section_digests": {
+    "_document": "1521260222faccb369b644ad24c59d32b09a89ffded99da40ab36806830d9b99",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8221264aa226d15c859f15d29e63bdc333dd055f1fa3f0ad1683edb6aba86e66",
+    "s12": "95c2ca272095b9a7723109be1e1906771bb259110daaf42b9ab5a27c90ee76f2",
+    "s13": "e14df5cf0cb26cb414397b74fb90f493b050e0a424f5b4402cd3a7a7de859cac",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "3dc57bc53014ca0924803e72edad5a80c9db8d8548f1484de73c21e0193d0ae3",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T20:24:53.814075+00:00",
+  "total": null
+}

@@ -59,8 +59,12 @@ def loop(points):
     return np.column_stack((br, bz))
 
 
-def exact_shielding():
-    """Dipole shielding factor for the linear spherical shell."""
-    mu = SHELL_MU
-    ratio = SHELL_INNER_RADIUS / SHELL_OUTER_RADIUS
+def exact_shielding(ratio=SHELL_INNER_RADIUS / SHELL_OUTER_RADIUS, mu=SHELL_MU):
+    """Dipole shielding factor for a linear spherical shell.
+
+    ``ratio`` is the shell's inner over outer radius and ``mu`` its relative
+    permeability; the defaults are this control's 0.9-1 m shell at mu_r = 1000.
+    The factor is psi without iron over psi with it, so it is the reduction the
+    shell causes.
+    """
     return ((2 * mu + 1) * (mu + 2) - 2 * (mu - 1) ** 2 * ratio**3) / (9 * mu)

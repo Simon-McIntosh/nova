@@ -1556,6 +1556,39 @@ def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
         require_clean_script(script, blob, revision)
 
 
+@pytest.mark.parametrize(
+    "ratio, mu",
+    [(0.5, 1000.0), (0.7, 100.0), (0.25, 10.0), (0.9, 1000.0)],
+    ids=["half-radius", "seven-tenths", "quarter", "own-shell"],
+)
+def test_exact_shielding_follows_the_shell_it_is_given(ratio, mu):
+    """The shared factor answers for the shell in its arguments, not its own.
+
+    scripts/iron_linear_magnetisation/controls.py carries the repository's one
+    closed-shell factor. It became the imas-efit control's owner when that case
+    stopped restating the formula, so the parameters it took there are pinned
+    here: the returned ratio must track both the radius ratio and mu, which a
+    version that read its module constants could not do.
+    """
+    from scripts.iron_linear_magnetisation import controls
+
+    expected = ((2 * mu + 1) * (mu + 2) - 2 * (mu - 1) ** 2 * ratio**3) / (9 * mu)
+    factor = controls.exact_shielding(ratio, mu)
+    assert factor == pytest.approx(expected, rel=1e-12), (ratio, mu)
+    # The defaults are still this control's 0.9-1 m shell at mu_r = 1000, so a
+    # bare call must equal the closed form at those two constants and not at the
+    # parameters above.
+    default_ratio = controls.SHELL_INNER_RADIUS / controls.SHELL_OUTER_RADIUS
+    default_mu = controls.SHELL_MU
+    expected_default = (
+        (2 * default_mu + 1) * (default_mu + 2)
+        - 2 * (default_mu - 1) ** 2 * default_ratio**3
+    ) / (9 * default_mu)
+    assert controls.exact_shielding() == pytest.approx(expected_default, rel=1e-15)
+    if ratio != default_ratio or mu != default_mu:
+        assert factor != pytest.approx(controls.exact_shielding(), rel=1e-6)
+
+
 @pytest.mark.parametrize("batch_edges", [False, True], ids=["compact", "batch-edges"])
 def test_linear_shell_operator_pin(tmp_path, monkeypatch, batch_edges):
     """The affine integration rule preserves its delivered shell-cell operator."""

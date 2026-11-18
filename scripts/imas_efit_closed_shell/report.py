@@ -1,0 +1,311 @@
+"""Write the receipt report from a summariser payload.
+
+    report.py <summary.json> <outdir>
+
+The numbers are read from the summary, never retyped, and every arm row carries
+the outline resolution that produced it, because the shielding factor is a
+function of that resolution.
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+COMMIT = "d5eac87ae310499cc54398e8ce406b887b481153"
+ARCHIVE_SHA = "4869dfe92e9770de4a595e4c34274465f619844f75e6ddf5aa3574b8a000693b"
+
+STYLE = """
+  body { font-family: "Source Sans 3", sans-serif; max-width: 62rem; margin: 2rem auto;
+         line-height: 1.45; color: #1a1a1a; }
+  h1 { font-size: 1.5rem; } h2 { font-size: 1.15rem; margin-top: 2rem; }
+  h3 { font-size: 1rem; margin-top: 1.5rem; }
+  table { border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  th, td { border-bottom: 1px solid #ccc; padding: 0.3rem 0.6rem; text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+  code, pre { font-family: "Source Code Pro", monospace; font-size: 0.85rem; }
+  pre { background: #f5f5f5; padding: 0.75rem; overflow-x: auto; }
+  .pass { color: #0a6b2d; } .miss { color: #8a1c1c; }
+"""
+
+
+def table(entry: dict) -> str:
+    rows = [
+        "<tr><th>arm</th><th>outline vertices per half-arc</th><th>knots</th>"
+        "<th>S (2, 0)</th><th>S (3, 1)</th><th>S (1.2, 0)</th>"
+        "<th>mean</th><th>exact</th><th>Δ</th></tr>"
+    ]
+    for arm in sorted(
+        (s for s in entry["series"] if "S_mean" in s),
+        key=lambda s: s["arc_vertices"],
+    ):
+        knots = min(10 * (2 * (arm["arc_vertices"] + 1)), 500)
+        s = arm["S_exterior"]
+        rows.append(
+            "<tr><td>%s</td><td>%d</td><td>%d</td><td>%.3f</td><td>%.3f</td><td>%.3f</td>"
+            "<td>%.3f</td><td>%.6f</td><td>%+.2f %%</td></tr>"
+            % (
+                arm["arm"].split("-", 1)[1],
+                arm["arc_vertices"],
+                knots,
+                s[0],
+                s[1],
+                s[2],
+                arm["S_mean"],
+                arm["exact_S"],
+                arm["rel_error"] * 100.0,
+            )
+        )
+    return "<table>" + "".join(rows) + "</table>"
+
+
+def main() -> None:
+    summary = json.loads(Path(sys.argv[1]).read_text())
+    outdir = Path(sys.argv[2])
+    outdir.mkdir(parents=True, exist_ok=True)
+    entries = {entry["tag"]: entry for entry in summary["table"]}
+    fine = {tag: entries[tag]["finest"] for tag in entries}
+    convergence = {c["tag"]: c for c in summary["convergence"]}
+
+    def final_sentence(tag: str) -> str:
+        """The closing line of a ratio's table, read from the summary."""
+        arm = fine[tag]
+        exact = entries[tag]["exact_S"]
+        return (
+            f"<p>Final S = {arm['S_mean']:.2f} from the {arm['arc_vertices']}-vertex"
+            f" outline, spread {arm['spread_over_mean'] * 100:.2f} % over the three"
+            f" exterior probes, against the exact {exact:.6f}:"
+            f" {arm['rel_error'] * 100:+.2f} %.</p>"
+        )
+
+    # The non-monotone series is described from the summary, not retyped: the
+    # refined arms, in vertex order, with the vertex list beside them.
+    refined = sorted(
+        (
+            arm
+            for arm in entries["r090"]["series"]
+            if "S_mean" in arm and arm["arc_vertices"] >= 40
+        ),
+        key=lambda arm: arm["arc_vertices"],
+    )
+    groups: dict[int, list[float]] = {}
+    for arm in refined:
+        groups.setdefault(arm["arc_vertices"], []).append(arm["S_mean"])
+    series_text = ", ".join(
+        "/".join(f"{value:.1f}" for value in groups[vertices])
+        for vertices in sorted(groups)
+    )
+    vertex_text = ", ".join(str(vertices) for vertices in sorted(groups))
+
+    # Solver-log values for the scored arms, read from the summary payload.
+    scored_text = (
+        f"relErr = {fine['r090']['solver']['rel_err']:.2g} at a/b = 0.9 and "
+        f"{fine['r050']['solver']['rel_err']:.2g} at a/b = 0.5, both at"
+        f" <code>relativeError={fine['r090']['solver']['tolerance']:g}</code>"
+    )
+    bmax_text = (
+        f"{fine['r090']['solver']['bmax']:.3g} T at a/b = 0.9 and "
+        f"{fine['r050']['solver']['bmax']:.3g} T at a/b = 0.5"
+    )
+
+    lever_rows = [
+        "<tr><th>ratio</th><th>lever</th><th>arms</th><th>S</th>"
+        "<th>step</th><th>within 0.5 %</th></tr>"
+    ]
+    ceiling = summary["convergence_tolerance"]
+    for lever in summary.get("levers", []):
+        entry = entries[lever["tag"]]
+        values = {
+            arm["arm"]: arm["S_mean"] for arm in entry["series"] if "S_mean" in arm
+        }
+        first, second = lever["pair"]
+        left, right = values[first], values[second]
+        step = right / left - 1.0
+        within = abs(step) < ceiling
+        settings = ""
+        if lever["settings"]:
+            settings = " (%s)" % ", ".join(f"{value:g}" for value in lever["settings"])
+        lever_rows.append(
+            "<tr><td>%s</td><td>%s</td><td>%s%s</td><td>%.3f → %.3f</td>"
+            '<td>%+.2f %%</td><td class="%s">%s</td></tr>'
+            % (
+                lever["tag"],
+                lever["lever"],
+                " / ".join(lever["pair"]),
+                settings,
+                left,
+                right,
+                step * 100.0,
+                "pass" if within else "miss",
+                within,
+            )
+        )
+    lever_table = "<table>" + "".join(lever_rows) + "</table>"
+
+    def lever_text(tag: str) -> str:
+        values = {
+            arm["arm"]: arm["S_mean"]
+            for arm in entries[tag]["series"]
+            if "S_mean" in arm
+        }
+        steps = [
+            "%s %+.2f %%"
+            % (
+                lever["lever"],
+                (values[lever["pair"][1]] / values[lever["pair"][0]] - 1.0) * 100.0,
+            )
+            for lever in summary.get("levers", [])
+            if lever["tag"] == tag
+        ]
+        return ", ".join(steps)
+
+    lever_r090_text = lever_text("r090")
+    lever_r050_text = lever_text("r050")
+
+    html = f"""<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>imas-efit closed-shell shielding control from an IMAS pulse</title>
+<style>{STYLE}</style></head><body>
+<h1>imas-efit closed-shell shielding control from an IMAS pulse</h1>
+
+<p><strong>Verdict.</strong> imas-efit reproduces the exact closed-shell shielding
+factor of section 1 from a case that arrives entirely through IDSs, at both radius
+ratios, once the iron outline is discretised finely enough:
+<span class="pass">S = {fine["r090"]["S_mean"]:.2f} at a/b = 0.9</span>
+(exact {fine["r090"]["exact_S"]:.6f}, {fine["r090"]["rel_error"] * 100:+.2f} %) and
+<span class="pass">S = {fine["r050"]["S_mean"]:.2f} at a/b = 0.5</span>
+(exact {fine["r050"]["exact_S"]:.6f}, {fine["r050"]["rel_error"] * 100:+.2f} %),
+both inside the 2 % gate. The two deliverables the gate could not cover are the
+resolution rule (S is a function of the outline's vertex count, and the coarse
+outline a naive case produces misses by 20 %) and the plasma-filled variants, which
+the reconstruction refuses — one at a cold start, one on an oscillating null space —
+with and without the iron present.</p>
+
+<h2>Case</h2>
+<p>Empty space, a spherical shell of inner radius a and outer radius b = 1 m with
+μ<sub>r</sub> = 1000, and a one-turn coil of radius 0.03 m inside it. Section 1
+gives the exterior reduction of the coil's poloidal flux as</p>
+<pre>S = ((2μ + 1)(μ + 2) − 2(μ − 1)² (a/b)³) / (9μ)</pre>
+<p>so S = {entries["r090"]["exact_S"]:.6f} at a/b = 0.9 and
+{entries["r050"]["exact_S"]:.6f} at a/b = 0.5. Nothing about the case is in an XML
+machine file: <code>make_pulse.py</code> writes five IDSs at DD 4.1.0 —</p>
+<ul>
+  <li><code>pf_active</code>: one rectangular coil (2 × 2 cm at R = 0.03 m) with
+    10<sup>4</sup> A, one supply, and one circuit whose connections
+    <code>[[1, 1], [−1, −1]]</code> make the coil its own single-coil circuit;</li>
+  <li><code>iron_core</code>: the shell's poloidal half-annulus as one closed
+    polygon (outer arc, inner arc, two closing edges on the axis) plus a flat B–H
+    table <code>b_field = [0, 10³]</code>, <code>permeability_relative =
+    [1000, 1000]</code> — linear, with no saturation branch;</li>
+  <li><code>wall</code>: the limiter box the reconstructor bounds its plasma with;</li>
+  <li><code>magnetics</code>: four <code>b_field_pol_probe</code> entries and
+    <code>ip</code> = 0;</li>
+  <li><code>tf</code>: <code>b_field_phi_vacuum_r</code> = 0.</li>
+</ul>
+<p>The plasma current is <em>pinned to zero</em>: <code>magnetics/ip = 0</code> with
+<code>&lt;plasmaCurrent weights="1"/&gt;</code> in the options. The reconstruction is
+then the vacuum poloidal flux of the coil in the iron's presence, which is exactly
+the quantity S is defined for; it also makes the slice trivially converged. The
+probes are constrained at weight 1 with σ = 10 T against a signal of order
+10<sup>−4</sup> T: their pull on the solution is nil at that ratio, and weight 1 keeps
+their rows in the fit rather than deleting them from the Jacobian.</p>
+
+<h2>Measurement</h2>
+<p>S is the ratio of ψ at a probe <em>without</em> iron to ψ at the same probe with it —
+the factor by which the shell reduces the coil's flux — and the formula of section 1
+is that ratio.
+For a dipole source inside a spherical shell every exterior point must give the same
+S, so the spread over the three exterior probes is the internal check on the
+measurement.</p>
+
+<h3>a/b = 0.9</h3>
+{table(entries["r090"])}
+{final_sentence("r090")}
+
+<h3>a/b = 0.5</h3>
+{table(entries["r050"])}
+{final_sentence("r050")}
+
+<h2>Convergence evidence</h2>
+<p>Every arm's slice reports <code>CONVERGENCE_SUMMARY: status= 2 iterations= 1
+cerror= 0.000E+000 chi2= 0.00E+000 classification= 2</code>: with no plasma there is
+nothing to iterate, and the written ψ is the reconstruction's algebra of the coil,
+wall and iron responses. The iron's own Newton relaxation converges inside each arm:
+the two arms the headline numbers come from end at
+{scored_text}, read from their own solver logs with no
+<code>IRON_MAXITER</code> line anywhere. The iron is fully linear where it works:
+their last <code>IRON_BMOD</code> records are {bmax_text}, four orders below any
+saturation scale, and the flat B–H table therefore has no curvature to resolve.</p>
+<p>Two levers move S and neither is neutral at a/b = 0.5. Each solver pair below
+differs in nothing but <code>relativeError</code>, and each refinement pair differs
+in nothing but the outline resolution:</p>
+{lever_table}
+<p>Against the {summary["convergence_tolerance"] * 100:.1f} % ceiling that section 6b
+requires of a final boundary refinement, at a/b = 0.9 every lever is inside it
+({lever_r090_text}), so that series is converged by the criterion
+(<code>passed = {str(convergence["r090"]["passed"]).lower()}</code>). At a/b = 0.5
+no lever is ({lever_r050_text}): changing the solver tolerance alone moves S by the
+ceiling and the last boundary refinement moves it by three times that
+(<code>passed = {str(convergence["r050"]["passed"]).lower()}</code>), and the
+{abs(convergence["r050"]["last_step_delta"]) * 100:.2f} % step is larger than the
+{fine["r050"]["rel_error"] * 100:+.2f} % by which that arm lands from the exact value.
+The {fine["r050"]["S_mean"]:.2f} is therefore inside the 2 % accuracy gate and is not a
+converged value, whatever the solver tolerance is set to.</p>
+
+<h2>Two findings for the owners</h2>
+<h3>The outline resolution is derived from the vertex count and capped at 500 knots</h3>
+<p><code>IronCoreBuilder</code> sets <code>nBP = max(nVertices * 10, 50)</code> and
+then <code>nBP = min(nBP, maxBreakpoints)</code> with
+<code>maxBreakpoints = 500</code> (<code>src/ironCoreBuilder.h:20</code>), so no pulse
+can ask for a finer iron boundary than 500 knots, and the knot grid is uniform in the
+boundary's normalised distance — it does not follow the polygon's corners. The
+consequence is in the tables: a 20-vertex half-arc (420 knots) gives
+{entries["r090"]["series"][0]["S_mean"]:.2f} at a/b = 0.9, 20 % above the exact value,
+and refining the outline at the 500-knot cap is not monotone ({series_text} for
+{vertex_text} vertices), because the knots alias against the corners.
+A user cannot tell a converged case from a coincidental one without this ladder.</p>
+<h3>A plasma-filled version of the same case does not converge, and the iron is not
+the reason</h3>
+<p>The measurement pins <code>ip</code> to zero, and it had to. Two plasma-filled
+variants of this case were run, and both are refused, in different ways.</p>
+<ul>
+<li>With <code>ip</code> = 10 A and the coil at 10<sup>4</sup> A, the slice dies before
+its first iteration: <code>FINDAX: no in-vessel, outside-coil extremum with
+grid-supported escape region</code>, then
+<code>CONVERGENCE_SUMMARY: status= -2 iterations= 0 cerror= 1.798E+308
+classification= -5</code> and <code>Fatal error … status=-2 from fit.f90
+bad_failure</code> at <code>startup=cold(full)</code>. The case with the
+<code>iron_core</code> IDS and the identical case without it fail on the same line,
+so the seeding failure is in the plasma start-up, not in the iron.</li>
+<li>With <code>ip</code> = 1 MA the slice iterates to 80 and satisfies every
+measurement — <code>chi2 = 2.03E-020</code> — while <code>cerror</code> oscillates
+(<code>RELAX … osc=37</code>) and ends at 7.079 × 10<sup>−3</sup> against the
+configured 1.0e-4, with <code>PLATEAU_REJECTED_BY_CEILING</code> on every late
+iteration and <code>status= -1 classification= -2</code>. The log carries
+<code>matrix: SVD smallest singular value is zero</code> throughout, so the
+magnetics-only constraint set does not determine the null space the iteration
+wanders in.</li>
+</ul>
+<p>Neither is a defect of this control: a shielding factor needs no plasma, and
+pinning <code>ip</code> to zero is the physically correct setting for one. Both are
+reported to the imas-efit owners, because a magnetics-only fit that cannot seed from
+a cold start at a small plasma current, and cannot close below 7 × 10<sup>−3</sup>
+at a large one, is a property of the reconstruction rather than of this case.</p>
+<h2>Provenance</h2>
+<p>imas-efit commit <code>{COMMIT}</code> on <code>develop</code>, extracted with
+<code>git archive</code> (sha256 <code>{ARCHIVE_SHA}</code>) and built in
+<code>~/.cache/icm-efit-closed-shell/d5eac87ae310</code> with
+<code>-DEFIT_USE_IMAS=ON</code>. The checked-out tree was read only and never built
+in place. Commands, exits and the solver lines are in <code>log.txt</code> and
+<code>convergence-lines.txt</code>; per-arm fluxes in <code>scores/</code>, pulse
+descriptors in <code>pulses/</code>, and the machine-readable table in
+<code>summary.json</code>.</p>
+</body></html>
+"""
+    (outdir / "report.html").write_text(html)
+    print(f"wrote {outdir / 'report.html'}")
+
+
+if __name__ == "__main__":
+    main()

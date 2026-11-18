@@ -39,6 +39,32 @@ not comparable with any production receipt.
   kernel) and `tests/test_default_wiring.py` (every production entry point
   resolves the defaults on and its launcher leaves them to the public seam).
 
+## Fit coefficients inside the iteration, and give the map the fitted conductors
+
+`FluxIterationFit` in `flux_iteration.py` solves the least-squares fit on every
+pass of the map iteration: each pass steps one profile coefficient at a time at
+the coefficient measurements the map's own solve reaches for the corrected
+coefficients. Two properties are load-bearing.
+
+- **The fit and the map must be the same object.** A pass solves for the
+  coefficients at the held map and then asks the profile's solve for the map
+  those coefficients imply. The response columns are built at the held map, so
+  the map's dependence on the coefficients must come back through the solve; if
+  a case's operator reads its conductor currents from a stored vector rather
+  than from the vector the fit solved for, the fit is measured against one map
+  and reported against another, and the least squares absorbs the conductor
+  field into the profile basis at the wrong sign. `flux_solver` therefore has to
+  receive the pass's fitted conductor vector along with the profile source. A
+  fixture that supplies its prescribed field from a request must pass the
+  request's own `current=`, not a lookup of a key the fixture does not set.
+- **A solve that leaves the branch ends the iteration, not the state.** When a
+  pass's solve moves the map by more than `max_update` spans, the previous map
+  stays and the receipt records `rejected_pass` and `rejected_message`. A row
+  whose terminal flux error and residual are inside the recovery bands while
+  `converged` is false is a rejected final solve after a correct state landed,
+  not a failed fit: read `flux_map_error_over_span` and
+  `whitened_residual_sup` beside the flag.
+
 ## Keep the two reference lanes separate
 
 ### Closed-form analytic oracle

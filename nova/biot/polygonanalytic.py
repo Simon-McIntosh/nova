@@ -3529,26 +3529,20 @@ def _packed_moments_height_tangent(nodes, primals, tangents):
     )
     near_corner = nearest <= 1e-7
 
-    # Isolate derivative recomputation from shared primal subexpressions.
-    if staged:
-        _, pushforward = jax.linearize(
-            jax.checkpoint(tangent_expression, prevent_cse=True), *primals
-        )
-
     def directional(include_height):
         direction = (
             *tangents[:1],
             jnp.where(include_height, tangents[1], jnp.zeros_like(target_z)),
             *tangents[2:],
         )
-        return pushforward(*direction)
+        return jax.jvp(tangent_expression, primals, direction)[1]
 
     def ordered_direction(carry, include_height):
         return carry, directional(include_height)
 
     if staged:
         _, derivatives = jax.lax.scan(
-            ordered_direction, None, jnp.asarray((True, False))
+            ordered_direction, None, jnp.asarray((True, False)), unroll=2
         )
         ordinary = tuple(row[0] for row in derivatives)
         other = tuple(row[1] for row in derivatives)

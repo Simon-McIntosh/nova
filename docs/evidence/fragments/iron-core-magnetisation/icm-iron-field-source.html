@@ -376,19 +376,20 @@ fixed per-process cost of several minutes on this backend; later solves in the
 same process are much cheaper per target than the first.</p>
 
 <h2 id="icm-iron-field-source-suite">Tests</h2>
-<p>The two suite arms for <code>tests/test_magnetisation.py</code> ran as scheduler
-jobs on rigel, each over its own tree: the baseline at
-<code>9b0161261</code> from a <code>git archive</code> export, the after arm in
-this checkout. <b>Baseline: 1 failed, 92 passed in 8652.31&nbsp;s.</b>
-<b>After: 1 failed, 94 passed in 8841.68&nbsp;s</b> at head
-<code>1c402b927</code>. Neither failure is a seam defect: the baseline failure is
+<p>The suite arms for <code>tests/test_magnetisation.py</code> ran as scheduler
+jobs on rigel, each over its own tree and with
+<code>PYTHONPATH=. JAX_PLATFORMS=cpu … -m pytest -p no:cacheprovider -q
+tests/test_magnetisation.py</code>. <b>Baseline at <code>9b0161261</code>:
+1 failed, 92 passed in 8652.31&nbsp;s</b> — the failure is
 <code>test_linear_shell_operator_pin[compact]</code>, which shells out to
-<code>git show</code> and cannot run in an export without <code>.git</code>; the
-after failure was this node's own regression -
-<code>linear_cell_interaction</code> had been dropped from the package's imports
-when the seam reshaped them - and it is fixed and verified at
-<code>7fb035a71</code> (<code>test_linear_field_constant_mode_matches_closed_sheet_field</code>,
-1 passed in 22.15&nbsp;s). The after arm at that final head is job 1324666.</p>
+<code>git show</code> and found no objects in a tree exported without
+<code>.git</code>; the runner now clones the base revision, so the arm is
+re-run in a tree where that test can pass. <b>After: 95 passed in
+9215.26&nbsp;s</b>. The first after arm had recorded one failure, this node's own
+regression: the seam dropped the <code>linear_cell_interaction</code> re-export
+from the package, and restoring it took that arm to 95 passed. Both arms are
+recorded again at the fence revisions, the baseline in a clone of the base
+revision and the after arm in this checkout.</p>
 <p><code>tests/test_magnetisation.py::test_frame_carries_the_bound_currents_exactly</code>
 is the new seam contract and
 <code>::test_reloaded_coilset_accepts_the_iron_frame</code> is the same contract

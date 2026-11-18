@@ -107,10 +107,6 @@ def components(values, points, gradient, hessian):
     return result
 
 
-def reference_scale(gradient, hessian):
-    return gradient, hessian
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=ROOT)
@@ -122,56 +118,60 @@ def main():
         "--current-bank", type=Path, help="Previously published bank npz"
     )
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument(
+        "--skip-rows",
+        action="store_true",
+        help="read only the published bank, never evaluate the row builder",
+    )
     args = parser.parse_args()
     data = retained(args.root)
     if args.limit:
         for key in ("indices", "points", "gradient", "hessian", "moments"):
             axis = 1 if key in ("gradient", "hessian", "moments") else 0
             data[key] = np.take(data[key], np.arange(args.limit), axis=axis)
-    _, polygons = polygons_of(args.root)
-    rows, coupling = plasma_rows(data["points"], polygons, args.batch)
-    values = contraction(rows, data["moments"])
+    tolerance = dict(psi_R=1e-10, psi_Z=1e-10, psi_RZ=TOLERANCE, psi_ZZ=TOLERANCE)
     result = dict(
         count=int(len(data["indices"])),
         states=list(STATES),
-        cells=len(polygons),
         points=data["points"].tolist(),
         indices=data["indices"].tolist(),
-        rows_mode=components(values, data["points"], data["gradient"], data["hessian"]),
     )
-    print("ROWS_MODE " + json.dumps(result["rows_mode"], sort_keys=True), flush=True)
-    np.savez(
-        args.output.with_suffix(".rows.npz"),
-        values=values,
-        rows=rows,
-        indices=data["indices"],
-        points=data["points"],
-    )
-    tolerance = dict(psi_R=1e-10, psi_Z=1e-10, psi_RZ=TOLERANCE, psi_ZZ=TOLERANCE)
-    result["rows_pass"] = all(
-        all(np.array(error) <= tolerance[name] for error in result["rows_mode"][name])
-        for name in tolerance
-    )
+    rows = None
+    if not args.skip_rows:
+        _, polygons = polygons_of(args.root)
+        rows, _ = plasma_rows(data["points"], polygons, args.batch)
+        values = contraction(rows, data["moments"])
+        result["cells"] = len(polygons)
+        result["rows_mode"] = components(
+            values, data["points"], data["gradient"], data["hessian"]
+        )
+        result["rows_pass"] = passes(result["rows_mode"], tolerance)
+        np.savez(
+            args.output.with_suffix(".rows.npz"),
+            values=values,
+            rows=rows,
+            indices=data["indices"],
+            points=data["points"],
+        )
+        print(
+            "ROWS_MODE " + json.dumps(result["rows_mode"], sort_keys=True),
+            flush=True,
+        )
     if args.store is not None:
         bank = support_read.read_bank(args.store, args.digest, None, None)
-        stored = np.asarray(bank.rows)[data["indices"]]
-        bank_values = contraction(stored, data["moments"])
+        stored = np.asarray(bank.rows)
+        bank_values = contraction(stored[data["indices"]], data["moments"])
         result["bank_mode"] = components(
             bank_values, data["points"], data["gradient"], data["hessian"]
         )
-        result["rows_max_abs_delta"] = float(
-            np.max(np.abs(stored.astype(np.float64) - rows.astype(np.float64)))
-        )
-        result["bank_pass"] = all(
-            all(
-                np.array(error) <= tolerance[name]
-                for error in result["bank_mode"][name]
-            )
-            for name in tolerance
-        )
+        result["bank_pass"] = passes(result["bank_mode"], tolerance)
         print(
             "BANK_MODE " + json.dumps(result["bank_mode"], sort_keys=True), flush=True
         )
+        if rows is not None:
+            result["rows_max_abs_delta"] = float(
+                np.max(np.abs(stored[data["indices"]] - rows))
+            )
         if args.current_bank is not None:
             with np.load(args.current_bank, allow_pickle=False) as archive:
                 current = np.asarray(archive["rows"])
@@ -183,16 +183,17 @@ def main():
             )
             result["unchanged"] = dict(
                 first_derivative_rows=relative(
-                    stored[..., 1:3] - current[data["indices"], :, :, 1:3],
+                    stored[data["indices"], :, :, 1:3]
+                    - current[data["indices"], :, :, 1:3],
                     current[data["indices"], :, :, 1:3],
                 ).tolist(),
                 value_rows=relative(
-                    stored[..., :1] - current[data["indices"], :, :, :1],
+                    stored[data["indices"], :, :, :1]
+                    - current[data["indices"], :, :, :1],
                     current[data["indices"], :, :, :1],
                 ).tolist(),
                 first_derivative_rows_active=relative(
-                    np.asarray(bank.rows)[:active, :, :, 1:3]
-                    - current[:active, :, :, 1:3],
+                    stored[:active, :, :, 1:3] - current[:active, :, :, 1:3],
                     current[:active, :, :, 1:3],
                 ).tolist(),
                 coil_rows=relative(
@@ -212,6 +213,14 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2))
     print("RECERTIFY_COMPLETE " + json.dumps(digest_of(result)), flush=True)
+
+
+def passes(errors, tolerance):
+    """Hold every reported component to its stated relative budget."""
+    return all(
+        all(np.array(error) <= tolerance[name] for error in errors[name])
+        for name in tolerance
+    )
 
 
 def digest_of(result):

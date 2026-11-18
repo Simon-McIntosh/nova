@@ -10,7 +10,8 @@ from pathlib import Path
 
 RUN = Path(sys.argv[1]).resolve()
 ROOT = Path(__file__).resolve().parents[3]
-FRAGMENT = ROOT / "docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html"
+FRAGMENT = (ROOT / "docs/evidence/fragments/forward-solve-near-stored-states"
+            / "stored-state-refusals.html")
 FIGURES = ROOT / "docs/figures/forward-solve-near-stored-states/stored-state-refusals"
 SRC = "/nova/figures/forward-solve-near-stored-states/stored-state-refusals"
 
@@ -46,13 +47,15 @@ def number(value, digits=6):
 
 def arm_row(label, record):
     if not record:
-        return "<tr><td><code>{}</code></td><td colspan=\"8\">not run</td></tr>".format(label)
+        return ("<tr><td><code>" + label
+                + "</code></td><td colspan=\"8\">not run</td></tr>")
     cells = [
         "<code>" + label + "</code>",
         html.escape(str(record.get("case"))),
         html.escape(str(record.get("seed_policy") or "-")),
         number(record.get("residual")),
-        str(record.get("termination_reason") + 0) if record.get("termination_reason") is not None else "-",
+        "-" if record.get("termination_reason") is None
+        else str(record["termination_reason"]),
         "yes" if record.get("qualified") else "no",
         "yes" if record.get("converged") else "no",
         number(record.get("wall_seconds"), 5),
@@ -96,10 +99,16 @@ def coefficients_of(records_map, case):
 
 def case_block(records_map, case):
     mesh = mesh_of(records_map, case)
-    route = (records_map.get("default_policy") or {}).get("route", "-")
+    route = "-"
+    for label in LABELS:
+        record = records_map.get(label) or {}
+        if record.get("case") == case:
+            route = (record.get("policy") or {}).get("route", "-")
+            break
     lines = [
         "case=" + CASES[case],
-        "mesh=" + json.dumps({k: mesh.get(k) for k in ("kind", "nodes", "stencil_rows")}),
+        "mesh=" + json.dumps(
+            {key: mesh.get(key) for key in ("kind", "nodes", "stencil_rows")}),
         "route=" + str(route) + " with the from_defaults policy",
         "coefficients=" + json.dumps(coefficients_of(records_map, case)),
     ]
@@ -107,13 +116,19 @@ def case_block(records_map, case):
 
 
 def policy_table(records_map):
-    default = records_map.get("default_policy") or {}
+    default = {}
+    for label in LABELS:
+        record = records_map.get(label) or {}
+        if record.get("policy"):
+            default = record["policy"]
+            break
     control = (records_map.get("mastu-stored-continuation") or {}).get("policy") or {}
     keys = ("route", "newton_steps", "gmres_iterations", "active_set_steps",
             "kernel_tolerance", "qualification_tolerance")
-    rows = "".join("<tr><td><code>" + key + "</code></td><td>" + str(default.get(key))
-                   + "</td><td>" + str(control.get(key)) + "</td></tr>"
-                   for key in keys if key in default)
+    rows = "".join("<tr><td><code>" + key + "</code></td><td>"
+                   + str(default.get(key, "-")) + "</td><td>"
+                   + str(control.get(key, "-")) + "</td></tr>"
+                   for key in keys if key in default or key in control)
     return ("<table><thead><tr><th>policy field</th><th>default</th>"
             "<th>MAST-U continuation</th></tr></thead><tbody>" + rows
             + "</tbody></table>")

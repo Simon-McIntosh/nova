@@ -9,7 +9,7 @@ route=- with the from_defaults policy
 coefficients=[]</pre>
 <pre id="stored-state-refusals-tcv">case=TCV workshop at 0.4 s
 mesh={&quot;kind&quot;: &quot;StencilMesh&quot;, &quot;nodes&quot;: 355, &quot;stencil_rows&quot;: 234}
-route=- with the from_defaults policy
+route=newton_krylov with the from_defaults policy
 coefficients=[0.0, 0.382753270244829, -0.382753270244829]</pre>
 <pre id="stored-state-refusals-iter">case=ITER 135013 at 75 s
 mesh={&quot;kind&quot;: null, &quot;nodes&quot;: null, &quot;stencil_rows&quot;: null}
@@ -20,6 +20,6 @@ coefficients=[]</pre>
 <figure id="stored-state-refusals-tcv-stored-default"><img alt="tcv-stored-default: terminal residual nonfinite, reason 3, qualified False" width="100%" src="/nova/figures/forward-solve-near-stored-states/stored-state-refusals/tcv-tcv-stored-default-preview.png"><figcaption>tcv-stored-default: terminal residual nonfinite, reason 3, qualified False</figcaption></figure>
 </section>
 <section id="stored-state-refusals-policy"><h3>The default policy beside the continuation policy</h3>
-<table><thead><tr><th>policy field</th><th>default</th><th>MAST-U continuation</th></tr></thead><tbody></tbody></table>
+<table><thead><tr><th>policy field</th><th>default</th><th>MAST-U continuation</th></tr></thead><tbody><tr><td><code>route</code></td><td>newton_krylov</td><td>-</td></tr><tr><td><code>newton_steps</code></td><td>10</td><td>-</td></tr><tr><td><code>gmres_iterations</code></td><td>30</td><td>-</td></tr><tr><td><code>active_set_steps</code></td><td>16</td><td>-</td></tr><tr><td><code>kernel_tolerance</code></td><td>1e-08</td><td>-</td></tr><tr><td><code>qualification_tolerance</code></td><td>1e-10</td><td>-</td></tr></tbody></table>
 </section>
 </section>

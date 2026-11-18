@@ -428,8 +428,11 @@ class Solve(GroupSet):
                     values = source.field_matrix(block).reshape(2, len(block), -1)[
                         component
                     ]
-                else:  # Aphi = psi / (2 pi R)
-                    values = source.psi_matrix(block) / (2 * np.pi * block[:, :1])
+                else:  # Aphi = psi / (2 pi R), zero on the axis like the sections
+                    radius = block[:, :1]
+                    psi = source.psi_matrix(block)
+                    values = np.zeros_like(psi)
+                    np.divide(psi, 2 * np.pi * radius, out=values, where=radius != 0)
                 if self.target_quadrature is not None:
                     values = self.target_quadrature.collapse(values)
                 examples.append(values)

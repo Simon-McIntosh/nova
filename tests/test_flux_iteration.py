@@ -282,6 +282,32 @@ def test_a_flux_map_that_loses_its_axis_is_recorded_at_that_pass():
     assert len(receipt.passes) == 2
 
 
+def test_a_flux_solver_supplies_the_next_map():
+    fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
+    profile = fitter.profile
+    calls = []
+
+    def solve(source, psi):
+        calls.append(np.asarray(psi).copy())
+        return EXTERNAL + COUPLING @ profile.instrument.cell_current(source, psi)
+
+    solved = FluxIterationFit(
+        profile,
+        fitter.magnetics,
+        lambda currents: SENSOR @ np.asarray(currents),
+        flux_solver=solve,
+    )
+    receipt = solved.fit(
+        measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+    )
+    assert receipt.converged
+    assert len(calls) == len(receipt.passes) == receipt.flux_evaluations
+    np.testing.assert_allclose(receipt.coefficients, TRUTH, atol=1.0e-9)
+
+
 def test_a_scaled_input_leaves_the_plasma_current_band():
     fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
     scaled = SliceMeasurement(

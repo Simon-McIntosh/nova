@@ -154,6 +154,23 @@ def _model_rows(case, fitted):
         return f"{type(refusal).__name__}: {refusal}"
 
 
+def _flux_solver(profile, request):
+    """Return the map the profile's own solve reaches for given coefficients."""
+    from nova.equilibrium.solve_request import ExplicitSolveSeed
+
+    def solve(source, flux):
+        receipt = profile.solve(
+            replace(
+                request,
+                source_profile=source,
+                seed_policy=ExplicitSolveSeed(np.asarray(flux, dtype=np.float64)),
+            )
+        )
+        return np.asarray(receipt.terminal_state.flux, dtype=np.float64)
+
+    return solve
+
+
 def _run_known(case, args):
     from nova.equilibrium.flux_iteration import FluxIterationFit
     from tests import test_equilibrium_magnetics_fit as study
@@ -164,6 +181,7 @@ def _run_known(case, args):
         case["rows"],
         coefficient_basis=case["basis"],
         prescribed_current=case["prescribed_current"],
+        flux_solver=_flux_solver(case["figure"]["profile"], case["figure"]["request"]),
     )
     fitted = fitter.fit(
         case["measurement"],
@@ -271,6 +289,7 @@ def _run_stored(case, args):
         conductor_response=case["conductor_response"],
         conductor_names=case["conductor_names"],
         prescribed_current=case["prescribed_current"],
+        flux_solver=_flux_solver(case["data"]["profile"], case["data"]["request"]),
     )
     try:
         fitted = fitter.fit(

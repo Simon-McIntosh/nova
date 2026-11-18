@@ -134,6 +134,7 @@ class FluxIterationFit:
         conductor_current_field: str = "current",
         conductor_names: tuple[str, ...] | None = None,
         prescribed_current: np.ndarray | None = None,
+        flux_solver: Callable[[object, np.ndarray], np.ndarray] | None = None,
     ) -> None:
         configure_dtypes()
         assert jax.config.jax_enable_x64 is True
@@ -213,6 +214,7 @@ class FluxIterationFit:
         if prescribed is not None:
             prescribed.setflags(write=False)
         self._prescribed_current = prescribed
+        self._flux_solver = flux_solver
 
     def _source(self, coefficients) -> ForwardSource:
         coefficients = self._basis @ np.asarray(coefficients)[: self._profile_count]
@@ -415,14 +417,18 @@ class FluxIterationFit:
                     else None
                 )
                 arguments = (conductor, None, None)
-                if self._prescribed_current is None:
-                    updated = operator(jnp.asarray(flux), *arguments)
+                if self._flux_solver is None:
+                    if self._prescribed_current is None:
+                        updated = operator(jnp.asarray(flux), *arguments)
+                    else:
+                        updated = operator(
+                            jnp.asarray(flux),
+                            *arguments,
+                            jnp.asarray(self._prescribed_current),
+                        )
                 else:
-                    updated = operator(
-                        jnp.asarray(flux),
-                        *arguments,
-                        jnp.asarray(self._prescribed_current),
-                    )
+                    # a solved map for these coefficients, not one linear step
+                    updated = self._flux_solver(active.source, np.array(flux))
                 updated = np.asarray(updated, dtype=np.float64)
                 flux_evaluations += 1
             except ValueError as error:

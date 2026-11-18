@@ -71,6 +71,16 @@
       "note": "The reach section now gives the MAST-U stored-coefficients solve its verdict: it counts as reached by the first section positive control, so the repair section obligation on it is defined.",
       "reason": "",
       "when": "2026-11-18T06:58:01.380482+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "dee645a5d967f95841e61625fbd90c62e74ac9ba",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The boundary paragraph now says the batching section is the one exception to the stored-state scope and why.",
+      "reason": "",
+      "when": "2026-11-18T06:58:39.243253+00:00"
     }
   ],
   "responses": {
@@ -100,6 +110,15 @@
       "note": "The reach section now gives the MAST-U stored-coefficients solve its verdict: it counts as reached by the first section positive control, so the repair section obligation on it is defined.",
       "reason": "",
       "when": "2026-11-18T06:58:01.380482+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "dee645a5d967f95841e61625fbd90c62e74ac9ba",
+      "commit_basis": "edit",
+      "note": "The boundary paragraph now says the batching section is the one exception to the stored-state scope and why.",
+      "reason": "",
+      "when": "2026-11-18T06:58:39.243253+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261118T063658835939-plan-review-of-forward-solve-near-stored-states.json",

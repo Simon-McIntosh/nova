@@ -61,9 +61,28 @@
       "note": "the base job of clause (2) is sized for the repaired kernel: eight hours, since its compile is about 1.9 times the 7,044 s measured before the repair",
       "reason": "",
       "when": "2026-11-18T05:32:32.384485+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "8b17d6b3f7927884283e3433a5a8d6eb85094c68",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "s3 requires the two re-based identity rows to pass on the H200 at the node head",
+      "reason": "",
+      "when": "2026-11-18T05:32:43.412645+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "8b17d6b3f7927884283e3433a5a8d6eb85094c68",
+      "commit_basis": "edit",
+      "note": "s3 requires the two re-based identity rows to pass on the H200 at the node head",
+      "reason": "",
+      "when": "2026-11-18T05:32:43.412645+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",

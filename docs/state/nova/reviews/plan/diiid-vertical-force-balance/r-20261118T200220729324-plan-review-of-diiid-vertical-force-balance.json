@@ -70,6 +70,13 @@
       "finding": "done_when-2",
       "reason": "The independent measure is clause (1): a flux function built with a finite edge must return it at psi_N=1, and restoring the zero cap reddens it; clause (2) checks the builder's plumbing against its committed extraction, and the brief sets the cross-check against the review reading at 1e-6 relative",
       "when": "2026-11-18T20:32:57.256448+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "evidence_paths-1",
+      "reason": "\u00a77 is restated after \u00a712 by lead decision, and its record and figure paths are named in that restatement",
+      "when": "2026-11-18T20:33:04.698717+00:00"
     }
   ],
   "responses": {
@@ -84,6 +91,12 @@
       "by": "",
       "reason": "The independent measure is clause (1): a flux function built with a finite edge must return it at psi_N=1, and restoring the zero cap reddens it; clause (2) checks the builder's plumbing against its committed extraction, and the brief sets the cross-check against the review reading at 1e-6 relative",
       "when": "2026-11-18T20:32:57.256448+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a77 is restated after \u00a712 by lead decision, and its record and figure paths are named in that restatement",
+      "when": "2026-11-18T20:33:04.698717+00:00"
     },
     "wiring-1": {
       "action": "declined",

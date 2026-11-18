@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms and confirmed against their logs: the baseline arm baseline_suite-1794967629600356988.log ends '7 passed, 6 errors in 334.15s' with EXIT=1, the six ids being the three test_iter_nodal_jets_match_analytic_map and three test_iter_coil_jets_match_analytic_map setups timing out at the 300 s bound, and the head arm logs/after-final.log ends '14 passed in 621.69s' with EXIT=0 at revision 669eed1df; no id fails at head that does not fail at base, so the added-failure set is empty.",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/iter_bank/render.py:378",
+    "scripts/prototypes/dina_flattop_scenario/render.py:28"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-18T05:20:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "id": "71254330887",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: the first-derivative row statistics (7.20e-08 worst entry, median 3e-12, 53 of 306 and 66 of 297 counts) are not reproducible from the committed receipt, whose first_derivative_rows max is 5.548857e-1 and median 9.4566e-11, and no script or log producing the fragment's filtered statistic is stored, so the number the lead accepted the exception on cannot be reopened."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "id": "a911760a672",
+      "line": "102",
+      "severity": "non-blocking",
+      "text": "non-blocking: the receipts list cites receipts/recertify-current-bank.json and logs/bank-mode-check4.log as the current-bank comparison, but both record UNCHANGED deltas of exactly zero with unchanged_pass true, i.e. a bank compared against itself, so the citation cannot support the unchanged-rows claim and the only real comparison is the head receipt whose unchanged_pass is false."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/recertify.py",
+      "id": "c479e773fbf",
+      "line": "35",
+      "severity": "non-blocking",
+      "text": "non-blocking: relative(delta, scale, axis=0) is a second implementation of scripts/prototypes/bank_hessian_diagnosis/report.py:22 relative(delta, scale), the same formula with the same default axis, in the reference directory the brief directs the node to reuse, so the certification instrument and its reference now hold two copies of the normalisation."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "id": "9b9758cb563",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: the guard imports matplotlib's private _get_dash_pattern from matplotlib.lines, so a matplotlib release that moves the symbol turns every figure guard into an ImportError at collection rather than a measured refusal."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all thirteen commits against base 3a9238f0a; the change adds scripts/prototypes/iter_bank/recertify.py, rewrites the wall and legend checks in scripts/prototypes/iter_bank/render.py, adds five guard cases in docs/figures/sub-millisecond-forward-path/iter-bank/test_render.py, adds the slow markers and the plasma-row Hessian case in tests/test_iter_bank.py, and writes the 110-line fragment with the regenerated SVG and PNG.",
+    "done_when": "clause 1 is met on both second derivatives and on the coil rows (6.82e-12) and on the base-kernel negative control in logs/negative-control3.log, but not on the first-derivative rows, whose head receipt records unchanged_pass false; clause 2 is tests/test_iter_bank.py at 669eed1df, 14 passed / 0 skipped with the six live cases marked slow and a 900 s bound plus the added 1e-8 Hessian case; clause 3's H200 walls are P100 walls (logs/p100-build.log) under the recorded lead ruling in the manifest's accepted_exceptions.",
+    "goal": "the goal is to rebuild the ITER bank on the landed polygon kernel and re-certify its plasma-row second derivatives against the independent reference; scripts/prototypes/iter_bank/recertify.py (new, 239 lines) certifies receipts/recertify-head-bank.json at psi_RZ 7.001e-9 / 6.781e-9 / 6.849e-9 and psi_ZZ 1.586e-9 / 1.804e-9 / 1.409e-9 at the 64 retained nodes of states 220, 333 and 336, all inside the 1e-8 budget.",
+    "manifest": "read manifest.md at the reviewed run; status complete, thirteen commits to 669eed1df, both suite arms recorded with logs, the recert receipts cited, and the two lead-accepted exceptions stated, though its accepted_exceptions figure of 7.20e-8 is not the value its own head receipt reports.",
+    "write_paths": "the declared paths are scripts/prototypes/iter_bank, tests/test_iter_bank.py, docs/figures/sub-millisecond-forward-path/iter-bank, docs/figures/sub-millisecond-forward-path/iter-bank-recertify and docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html; all seven paths in 3a9238f0a..669eed1df are inside them, and no file under nova/ changes."
+  },
+  "justifications": {
+    "durability": "tests/test_iter_bank.py:337 asserts the plasma-row Hessian against an independently differenced analytic gradient and logs/negative-control3.log shows the pre-repair kernel reddens it at 8.4037e-3 on the mixed component, while docs/figures/sub-millisecond-forward-path/iter-bank/test_render.py:184-215 each mutate the guarded property and require check_scene to refuse.",
+    "evidence": "the gate result is recorded and reconciles with logs/after-final.log, which ends 14 passed in 621.69s with EXIT=0 at 669eed1df, but receipts/recertify-head-bank.json's unchanged_pass is false and its first_derivative_rows max is 5.55e-1, while docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:49 reports 7.20e-8 as the worst entry.",
+    "fit": "the additions follow render.py's existing module-constant and ValueError-refusal idiom, but scripts/prototypes/iter_bank/render.py:16 imports matplotlib's private _get_dash_pattern.",
+    "goal_fidelity": "scripts/prototypes/iter_bank/recertify.py:99-160 certifies the rebuilt bank against the same reference that refuses the previous bank at psi_RZ 0.643, so the rebuild-and-recertify goal is delivered, with the first-derivative clause carried only as a lead-accepted exception.",
+    "reuse": "scripts/prototypes/iter_bank/recertify.py:35 re-implements the relative-norm helper already owned by scripts/prototypes/bank_hessian_diagnosis/report.py:22, the module the brief names as the reference source, instead of importing it.",
+    "scope_discipline": "git diff --stat 3a9238f0a..669eed1df lists seven paths, every one inside a declared write path, and no file under nova/ changes."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to rebuild the ITER bank on the landed polygon kernel and re-certify its plasma-row second derivatives against the independent reference; scripts/prototypes/iter_bank/recertify.py (new, 239 lines) certifies receipts/recertify-head-bank.json at psi_RZ 7.001e-9 / 6.781e-9 / 6.849e-9 and psi_ZZ 1.586e-9 / 1.804e-9 / 1.409e-9 at the 64 retained nodes of states 220, 333 and 336, all inside the 1e-8 budget.\nVERDICT done_when: clause 1 is met on both second derivatives and on the coil rows (6.82e-12) and on the base-kernel negative control in logs/negative-control3.log, but not on the first-derivative rows, whose head receipt records unchanged_pass false; clause 2 is tests/test_iter_bank.py at 669eed1df, 14 passed / 0 skipped with the six live cases marked slow and a 900 s bound plus the added 1e-8 Hessian case; clause 3's H200 walls are P100 walls (logs/p100-build.log) under the recorded lead ruling in the manifest's accepted_exceptions.\nVERDICT write_paths: the declared paths are scripts/prototypes/iter_bank, tests/test_iter_bank.py, docs/figures/sub-millisecond-forward-path/iter-bank, docs/figures/sub-millisecond-forward-path/iter-bank-recertify and docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html; all seven paths in 3a9238f0a..669eed1df are inside them, and no file under nova/ changes.\nVERDICT manifest: read manifest.md at the reviewed run; status complete, thirteen commits to 669eed1df, both suite arms recorded with logs, the recert receipts cited, and the two lead-accepted exceptions stated, though its accepted_exceptions figure of 7.20e-8 is not the value its own head receipt reports.\nVERDICT diff: read all thirteen commits against base 3a9238f0a; the change adds scripts/prototypes/iter_bank/recertify.py, rewrites the wall and legend checks in scripts/prototypes/iter_bank/render.py, adds five guard cases in docs/figures/sub-millisecond-forward-path/iter-bank/test_render.py, adds the slow markers and the plasma-row Hessian case in tests/test_iter_bank.py, and writes the 110-line fragment with the regenerated SVG and PNG.\nCALL_SITES: scripts/prototypes/iter_bank/render.py:378, scripts/prototypes/dina_flattop_scenario/render.py:28\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: scripts/prototypes/iter_bank/recertify.py:99-160 certifies the rebuilt bank against the same reference that refuses the previous bank at psi_RZ 0.643, so the rebuild-and-recertify goal is delivered, with the first-derivative clause carried only as a lead-accepted exception.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate result is recorded and reconciles with logs/after-final.log, which ends 14 passed in 621.69s with EXIT=0 at 669eed1df, but receipts/recertify-head-bank.json's unchanged_pass is false and its first_derivative_rows max is 5.55e-1, while docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:49 reports 7.20e-8 as the worst entry.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 3a9238f0a..669eed1df lists seven paths, every one inside a declared write path, and no file under nova/ changes.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_iter_bank.py:337 asserts the plasma-row Hessian against an independently differenced analytic gradient and logs/negative-control3.log shows the pre-repair kernel reddens it at 8.4037e-3 on the mixed component, while docs/figures/sub-millisecond-forward-path/iter-bank/test_render.py:184-215 each mutate the guarded property and require check_scene to refuse.\nSCORE fit: 16\nJUSTIFICATION fit: the additions follow render.py's existing module-constant and ValueError-refusal idiom, but scripts/prototypes/iter_bank/render.py:16 imports matplotlib's private _get_dash_pattern.\nSCORE reuse: 11\nJUSTIFICATION reuse: scripts/prototypes/iter_bank/recertify.py:35 re-implements the relative-norm helper already owned by scripts/prototypes/bank_hessian_diagnosis/report.py:22, the module the brief names as the reference source, instead of importing it.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:49 non-blocking: the first-derivative row statistics (7.20e-08 worst entry, median 3e-12, 53 of 306 and 66 of 297 counts) are not reproducible from the committed receipt, whose first_derivative_rows max is 5.548857e-1 and median 9.4566e-11, and no script or log producing the fragment's filtered statistic is stored, so the number the lead accepted the exception on cannot be reopened.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:102 non-blocking: the receipts list cites receipts/recertify-current-bank.json and logs/bank-mode-check4.log as the current-bank comparison, but both record UNCHANGED deltas of exactly zero with unchanged_pass true, i.e. a bank compared against itself, so the citation cannot support the unchanged-rows claim and the only real comparison is the head receipt whose unchanged_pass is false.\nFINDING scripts/prototypes/iter_bank/recertify.py:35 non-blocking: relative(delta, scale, axis=0) is a second implementation of scripts/prototypes/bank_hessian_diagnosis/report.py:22 relative(delta, scale), the same formula with the same default axis, in the reference directory the brief directs the node to reuse, so the certification instrument and its reference now hold two copies of the normalisation.\nFINDING scripts/prototypes/iter_bank/render.py:16 non-blocking: the guard imports matplotlib's private _get_dash_pattern from matplotlib.lines, so a matplotlib release that moves the symbol turns every figure guard into an ImportError at collection rather than a measured refusal.",
+  "review_node": "review-of-iter-bank-recertify-82dc4e5ada74",
+  "review_run_id": "r-20261118T045046619494-review-of-iter-bank-recertify-82dc4e5ada74",
+  "reviewed_base_sha": "3a9238f0a626bec0783b4f0da32922dd0c390f4b",
+  "reviewed_head_sha": "669eed1df4a24126e90131f1d6ee0b39d14926fb",
+  "reviewed_run_id": "r-20261117T110237355670-iter-bank-recertify",
+  "reviewer": {
+    "backend": "omp-local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T045046619494-review-of-iter-bank-recertify-82dc4e5ada74"
+  },
+  "reviewer_note": "independent review of the landed node at head 669eed1df4a24126e90131f1d6ee0b39d14926fb against base 3a9238f0a626bec0783b4f0da32922dd0c390f4b; every measurement claim was checked against the receipts and gate logs under the reviewed run directory rather than the worker's account.",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 11,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T05:40:09.347007+00:00",
+  "total": 95
+}

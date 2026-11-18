@@ -1805,6 +1805,17 @@ def _draw_recovery_panels(name, case, fitted):
             linewidth=linewidth,
         )
         landmarks = state.topology
+        if landmarks is None:
+            # a state that lost its axis has no nulls to draw; the contours
+            # still show where it went, and the caption says the nulls are
+            # absent rather than inheriting the other state's markers
+            print(
+                "PANEL_NULLS_UNAVAILABLE",
+                name,
+                color,
+                flush=True,
+            )
+            continue
         diverted = bool(landmarks.diverted)
         poloidal.draw_nulls(
             axis,

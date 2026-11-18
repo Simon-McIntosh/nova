@@ -246,14 +246,17 @@ def _run_known(case, args):
         flux_evaluations=fitted.flux_evaluations,
         sensor_evaluations=fitted.sensor_evaluations,
         wall_seconds=fitted.wall_seconds,
+        max_passes=args.max_passes,
+        flux_tolerance=args.flux_tolerance,
         nested_forward_calls=NESTED_FORWARD_CALLS[case["name"]],
         reconstructed_plasma_current_a=float(
             np.sum(fitted.terminal_state.cell_current)
         ),
         generating_plasma_current_a=float(case["measurement"].plasma_current),
+        scaled_control_judged=bool(fitted.converged),
         scaled_control_relative_error=control,
         scaled_control_band=0.015,
-        scaled_control_fired=bool(control > 0.015),
+        scaled_control_fired=bool(fitted.converged and control > 0.015),
         relaxed=fitted.relaxation,
         whitened_residuals=np.asarray(fitted.whitened_residuals).tolist(),
         measured=np.asarray(case["measurement"].measured).tolist(),
@@ -366,6 +369,8 @@ def _run_stored(case, args):
         flux_evaluations=fitted.flux_evaluations,
         sensor_evaluations=fitted.sensor_evaluations,
         wall_seconds=fitted.wall_seconds,
+        max_passes=args.max_passes,
+        flux_tolerance=args.flux_tolerance,
         bands_applied=bands_applied,
         scores=scores,
         scores_error=scores_error,
@@ -373,9 +378,12 @@ def _run_stored(case, args):
             np.sum(fitted.terminal_state.cell_current)
         ),
         stored_plasma_current_a=float(case["reference_plasma_current"]),
+        scaled_control_judged=bool(fitted.converged),
         scaled_control_relative_error=control,
         scaled_control_band=0.015,
-        scaled_control_fired=bool(control is not None and control > 0.015),
+        scaled_control_fired=bool(
+            fitted.converged and control is not None and control > 0.015
+        ),
         scaled_control_error=control_error,
         terminal_axis=(
             np.asarray(fitted.terminal_state.topology.axis).tolist()
@@ -478,10 +486,13 @@ def main(argv=None):
         bands_met=[row["case"] for row in rows if row.get("bands_met")],
         failed=[row["case"] for row in rows if row.get("construction") == "failed"],
         control_fired=[row["case"] for row in rows if row.get("scaled_control_fired")],
+        control_judged=[
+            row["case"] for row in rows if row.get("scaled_control_judged")
+        ],
         control_unfired=[
             row["case"]
             for row in rows
-            if row.get("converged") and not row.get("scaled_control_fired")
+            if row.get("scaled_control_judged") and not row.get("scaled_control_fired")
         ],
     )
     _write(output / "result-table.json", table)

@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T05:57:50.696Z",
+  "dispatched_at": "2026-11-18T05:57:35Z",
+  "findings": [
+    {
+      "anchor": "plan.html:65",
+      "id": "reasoning-1",
+      "reason": "the pre-repair figures belong to the consolidation head, not to the repaired main, so the section must name the revision those targets are measured at or a dispatched profile lands on the wrong program.",
+      "text": "the paragraph opens \"The base this section starts from is the byte-identical shared form on main\" and then reports 267,438 post-splitter instructions, a 217.9 s cold compile and a 6,088,070-byte 132-cell lowering as main's, but the same section (plan.html:66) records the polygon tangent repair landed on main at 681a6ecd2, and its cited fragment gives that kernel 1.565208x the instructions (418,596) and 1.871670x the compile (405.2 s) plus a 10,251,815-byte production row; a worker reading \"on main\" for the base cannot reproduce either the 267,438 stub-visibility control or the 218.9 s reproduction clause, and node (b)'s first clause still says \"at 132 on main\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:68",
+      "id": "done_when-1",
+      "reason": "the node's single base arm is lost to an OOM and re-submitted, and the paragraph would have to state the repaired kernel's measured host memory before its allocation can be sized.",
+      "text": "clause (2)'s base job is budgeted as \"about 7,044 s and 381 GB\" in \"one sirius job at --mem=450G and --time=08:00:00, sized for the repaired kernel\", but 381 GB is the pre-repair figure and the only growth the paragraph records is the repair's 1.9x compile and the 1.68x lowered graph (6,088,070 to 10,251,815 bytes), so the memory request rests on a superseded measurement and the job that carries the one base build over the 64 nodes can be killed for memory",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "68f9b2fee616fc3a9fb97fe3dc2104b38c0c3bab",
+  "plan_fingerprint": "2ff5f40a590e4a263a05c14f417b89bf3cfcc77852455387c15d0b7a3c081a97",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 95,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261118T053351126564-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "2b20fe34ff2bc6d5beae5821ac8130cdea79d86e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/equilibrium/fixed_points.py:323/:546/:611`, `scripts/prototypes/read_route/jets.py:262`, `scripts/prototypes/fixed_points/solve.py:121`, `kernel_compile_census/row.py:115`, `tests/biot/test_moment_program_identity.py`, `tests/equilibrium/test_bounded_point_program.py`, `tests/test_moment_field_hessian.py`, both cited evidence fragments and merge 681a6ecd2 all resolve; extensionless hrefs resolve as `<path>.html`.",
+    "done_when": "a finding \u2014 node (c)'s clause (2) sizes its one base job at `--mem=450G` from the snapshot's pre-repair 381 GB while the same sentence says the job is \"sized for the repaired kernel\" (plan.html:68).",
+    "evidence_paths": "pass \u2014 node (b)'s record `docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html` exists on main, and node (c) names `one-traced-body.html`, a figure directory and a receipt directory.",
+    "naming": "pass \u2014 the replaced ceiling, the two cited test rows and the artifact names carry no plan labels, stage names or ticket numbers.",
+    "reasoning": "a finding \u2014 the base paragraph pins the pre-repair figures (267,438 instructions, 217.9 s, 6,088,070 bytes) to \"on main\" while the snapshot records that main carries 681a6ecd2, whose row program is 1.565x the instructions and 1.872x the compile (plan.html:65).",
+    "single_goal": "pass \u2014 (a) consolidation, (b) attribution, (c) bounded form; each carries one deliverable with its own gate.",
+    "wiring": "pass \u2014 s3 declares depends-on s2 and s5, both present in the snapshot, and the polygon tangent repair it builds on is recorded as landed at 681a6ecd2 rather than as a wait, so no missing edge."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "9b89128222c9bac23a694dd9f15c8fd64d0aaf670d38d1d9b8dd08f9700e20bc",
+    "s4": "b4c3eef27a064692dbf419c8ce536674acaafb04413c9c58789ff1b0a6338bcc",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:11:19.650199+00:00",
+  "total": null
+}

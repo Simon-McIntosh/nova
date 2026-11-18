@@ -249,6 +249,8 @@ def _run_known(case, args):
         scale=np.asarray(case["measurement"].scale).tolist(),
         mask=np.asarray(case["measurement"].mask).tolist(),
         model_rows=_model_rows(case, fitted),
+        first_pass_values=np.asarray(fitted.first_pass_values).tolist(),
+        first_pass_residual=np.asarray(fitted.first_pass_residual).tolist(),
     )
     if not fitted.converged:
         row["not_converged_reason"] = "flux update did not reach its tolerance"

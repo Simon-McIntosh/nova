@@ -90,6 +90,8 @@ class FluxIterationReceipt:
     axis_lost_pass: int | None
     axis_loss_message: str | None
     topology_error: str | None
+    first_pass_values: np.ndarray
+    first_pass_residual: np.ndarray
     whitened_residuals: np.ndarray
     singular_values: np.ndarray
     covariance: np.ndarray
@@ -341,6 +343,8 @@ class FluxIterationFit:
         axis_lost_pass: int | None = None
         axis_loss_message: str | None = None
         topology_error: str | None = None
+        first_pass_values: np.ndarray | None = None
+        first_pass_residual: np.ndarray | None = None
         converged = False
         residual = np.full(target.size, np.nan)
         spectrum = np.zeros(0)
@@ -379,6 +383,9 @@ class FluxIterationFit:
                 break
             residual = (values - target) * weight
             misfit = float(np.max(np.abs(residual)))
+            if index == 0:
+                first_pass_values = np.array(values, dtype=np.float64)
+                first_pass_residual = np.array(residual, dtype=np.float64)
             response = np.column_stack(columns)
             if self._conductor_count:
                 response = np.vstack(
@@ -482,6 +489,12 @@ class FluxIterationFit:
             axis_lost_pass=axis_lost_pass,
             axis_loss_message=axis_loss_message,
             topology_error=topology_error,
+            first_pass_values=(
+                first_pass_values if first_pass_values is not None else np.zeros(0)
+            ),
+            first_pass_residual=(
+                first_pass_residual if first_pass_residual is not None else np.zeros(0)
+            ),
             whitened_residuals=residual.copy(),
             singular_values=np.asarray(spectrum, dtype=np.float64),
             covariance=np.asarray(covariance, dtype=np.float64),

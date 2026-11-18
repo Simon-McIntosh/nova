@@ -132,6 +132,13 @@
       "finding": "wiring-1",
       "reason": "the repair is an ancestor of main, so every dispatch base carries it; an edge to that plan's section would hold s3 on its unrelated bank re-certification, which is still open",
       "when": "2026-11-18T17:27:11.290020+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "finding": "evidence_paths-1",
+      "reason": "these receipts are kilobyte JSON profiles and logs, below the few-MB threshold of the GPFS receipts rule, and follow the receipt convention every landed node of this plan used",
+      "when": "2026-11-18T17:27:20.440631+00:00"
     }
   ],
   "responses": {
@@ -149,6 +156,12 @@
       "note": "s4 clause (1) names the empty-cache arm that must exceed the miss budget and exit nonzero",
       "reason": "",
       "when": "2026-11-18T17:27:01.943534+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "reason": "these receipts are kilobyte JSON profiles and logs, below the few-MB threshold of the GPFS receipts rule, and follow the receipt convention every landed node of this plan used",
+      "when": "2026-11-18T17:27:20.440631+00:00"
     },
     "reasoning-1": {
       "action": "acted",

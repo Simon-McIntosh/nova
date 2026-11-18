@@ -35,7 +35,9 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--trace-helper", type=Path, required=True)
     args = parser.parse_args()
-    assert Path(bench.__file__).resolve().is_relative_to(ROOT), bench.__file__
+    assert Path(bench.__file__).resolve().is_relative_to(args.tree.resolve()), (
+        bench.__file__
+    )
     args.output.mkdir(parents=True, exist_ok=True)
     import jax.numpy as jnp
     from nova.equilibrium.forward import ForwardProfile

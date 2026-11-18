@@ -1,0 +1,54 @@
+<section id="drifting-sensor-sequences-record">
+<h2>Drifting sensor noise in a held ITER state: the fixture machine could not be built inside the node's wall, so neither code's sequence was measured</h2>
+<p>This node was to write 200 slices of ITER magnetics rows from one held generating state twice — once with a 1/f sequence and once with white noise of the same marginal size — and read both with the nova magnetics fit and with imas-efit, reporting the per-slice and 50-slice-mean error of the axis position, the boundary flux and q95. <strong>No sequence was measured.</strong> The blocker is upstream of the noise: the section-1 ITER fixture machine, which both codes' rows are generated from, does not build inside the node's wall on the allocation it ran on, and the sensor-row stage that follows the build exits without a traceback. What follows is the measurement of that blocker, the code that runs the study once the machine exists, and what a next run needs.</p>
+
+<section id="drifting-sensor-sequences-machine"><h3>The fixture machine build, measured twice</h3>
+<p>The generating machine is the section-1 ITER case (<code>tests.reference_case()</code>, pulse 135011 run 7, slice 353, DD 3.39.0), requested through <code>tests.test_equilibrium_forward_reference.cached_machine(case, cells, passive=True)</code>, whose plasma grid is assembled in <code>SourceBatch</code> passes reported by its own progress bar. Every figure below is that bar's own statement, read from the run's logs.</p>
+<table id="drifting-sensor-sequences-build">
+<tr><th>request</th><th>pass</th><th>wall</th><th>outcome</th></tr>
+<tr><td>500 cells</td><td>plasma grid, batch 1 of 5</td><td>18 min 53 s</td><td>process killed at the node's 40-minute guard with batches 2–5 unstarted</td></tr>
+<tr><td>120 cells</td><td>plasma grid, pass 1 (4 batches)</td><td>14 min 19 s</td><td>complete; 5 min 2 s on batch 1, 6 min 26 s to two, remainder in batch 4</td></tr>
+<tr><td>120 cells</td><td>plasma grid, pass 2 (4 batches)</td><td>52 min 16 s</td><td>complete</td></tr>
+<tr><td>120 cells</td><td>plasma wall, pass 1 (4 batches)</td><td>7 min 56 s</td><td>complete</td></tr>
+<tr><td>120 cells</td><td>plasma wall, pass 2 (4 batches)</td><td>17 min 48 s</td><td>complete; the zarr store <code>solovev_hex_machine</code> was written to the run directory</td></tr>
+</table>
+<p>The 120-cell machine therefore costs <strong>1 h 32 min of build</strong> on this allocation (job 1319168, partition <code>sun</code>, 36 cores, 144 G) before any solve, and the 500-cell request is strictly larger: its first batch alone took longer than the entire first pass at 120 cells. The machine is the same object both codes' rows come from, so it is on the critical path of both arms.</p>
+</section>
+
+<section id="drifting-sensor-sequences-generating"><h3>The generating state, once the machine existed</h3>
+<p>With the 120-cell machine cached, the generating forward solve ran and qualified:</p>
+<pre id="drifting-sensor-sequences-solve">GENERATING residual=2.901e-14 axis=[6.259793, 0.505014]</pre>
+<p>That is the state the section-8 record's comparison was made against at 120 cells, and its residual is two orders below the 1e-12 qualification tolerance the case declares. It is not the 500-cell state section 8 reported at residual <code>1.17e-15</code>; the mesh is stated here as a limit of what ran, not as a choice.</p>
+</section>
+
+<section id="drifting-sensor-sequences-failure"><h3>The sensor-row stage exits without a traceback</h3>
+<p>Immediately after the solve, the case evaluates its sensor rows through the section-1 helpers: <code>_PlasmaDiagnosticSource</code> over the cell set, <code>_known_field_reader</code> over the pulse's static magnetics, and <code>_total_observations</code>. Three processes reached that stage and exited inside it, each leaving the same two lines and no exception text:</p>
+<pre id="drifting-sensor-sequences-exit">point: 100%|██████████████████████| 1/1 [05:06&lt;00:00, 306.77s/it]
+poloidal_flux_loop: 100%|█████████| 1/1 [03:32&lt;00:00, 212.73s/it]
+point:   0%|                               | 0/1 [00:00&lt;?it/s]
+...resource_tracker.py:396: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/mp-hnaohem1'}
+  warnings.warn(</pre>
+<p>All three were started together in the one allocation and each died at the same stage, the three deaths spread over five minutes. A fourth process, started alone after two of those had exited, passed the same stage: it sat at <code>point</code> for 9 min 1 s, advanced to a <code>probe</code> stage, and was stopped by the run's cleanup when the node's window closed, without having written rows. So the stage is survivable and the exit is not deterministic. The run's step is bounded at 144 G and the killed processes held 10 G of resident memory at the last sample, so a memory limit on the step is not the explanation; the node's own kernel log records an out-of-memory kill only for a different job's cgroup step.</p>
+<p>The consequence is exact: <code>rows.npz</code> is written by the same case construction, after this stage, so no rows exist, and the imas-efit arm — which reads those rows as an IMAS magnetics pulse — was never startable. Neither code produced a slice.</p>
+</section>
+
+<section id="drifting-sensor-sequences-delivered"><h3>What the node does deliver</h3>
+<p>A complete, smoke-tested study driver in the run directory <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202148674467-drifting-sensor-sequences/study/</code>, written against the section-8 route so that the measurement is a run and not designed by its author:</p>
+<ul>
+<li><code>study.py</code> — reads the ITER pulse's own 24 flux loops and 48 poloidal-field probes (position plus poloidal angle) and the case's sensor geometry; builds the generating state through the section-1 helper; writes the noise-free rows and the generating reference; shapes white noise into a coloured sequence in the Fourier domain with a flat band below a corner at <code>4 cycles per sequence</code> and <code>f^-1</code> above it, normalising every sensor to unit standard deviation before scaling by <code>factor x sigma</code> so the two sequences carry the same marginal size; runs the nova <code>MagneticsFit</code> on the same coefficient basis <code>[1, -1]</code> section 8 established as imas-efit's resolved one for this case; writes the rows as an IMAS pulse and runs the imas-efit binary through the section-8 configuration with both degrees named and both priors at zero weight; and re-reads imas-efit's stored equilibrium for axis, fluxes and q95.</li>
+<li><code>analyse.py</code> — merges the workers' per-slice shards, and reports per code and sequence the axis RMSE, the boundary-flux RMSE as a fraction of the flux span, the |q95| RMSE, the lag-one correlation of each, the error of the mean over 50 consecutive slices, and the ratio of that realised mean error to the receipt's own <code>sqrt(dpsi^T Sigma dpsi / 50)</code> mapped through a central-difference Jacobian on the shared amplitude.</li>
+<li><code>figure.py</code> and <code>overlay_figure.py</code> — the axis-against-slice panel per code and the overlaid line contours of the two codes' states on one physical level array, with both null sets, the wall, and the axis off.</li>
+</ul>
+<p>The analysis and figure paths were exercised end to end on synthetic 200-slice, three-shard rows: the control discriminates by construction (lag-one about 0 on the white series, about 0.999 on the smooth series), the shard merge reproduces the 200 slices, and the figure is written. That establishes the machinery, not the measurement.</p>
+</section>
+
+<section id="drifting-sensor-sequences-limits"><h3>Limits and what a next run needs</h3>
+<p>No clause of the node's done-when is answered: no sequence, therefore no RMSE, no lag-one control, no threshold crossing, no covariance ratio, and no swept index or corner. The lead takes the work as blocked rather than partial.</p>
+<p>A next run needs, in order of leverage: (1) the machine built once and published as a store both arms load, under the evidence root rather than a per-run directory, because the build — not the fit — is the wall; (2) a wall of at least four hours on a CPU allocation for the 120-cell build alone, or a GPU allocation for the build as well as the fits; (3) the sensor-row stage's silent exit diagnosed: it is the point at which the run dies, it prints no traceback, and the section-1 helper it sits in is shared with the section-6 and section-8 records, so the cause is worth knowing independently of this node.</p>
+<p>The mesh is 120 cells, not the 500-cell section-1 reference mesh; a reader comparing costs with section 8 should hold that difference.</p>
+</section>
+
+<section id="drifting-sensor-sequences-figures"><h3>Figures</h3>
+<p>None. A figure of a sequence that was never reconstructed would be an image of the driver's synthetic smoke test, and this record does not publish one.</p>
+</section>
+</section>

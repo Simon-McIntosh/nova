@@ -14,6 +14,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--source-read-only", action="store_true")
+    parser.add_argument("--save-partition", action="store_true")
     parser.add_argument("revisions", nargs="+")
     arguments = parser.parse_args()
     root = Path.cwd()
@@ -51,6 +52,8 @@ def main():
             ]
             if arguments.source_read_only:
                 command.append("--source-read-only")
+            if arguments.save_partition:
+                command.append("--save-partition")
             environment = {**os.environ, "PYTHONPATH": str(tree)}
             log = arguments.output / f"{revision}.log"
             with log.open("w") as stream:

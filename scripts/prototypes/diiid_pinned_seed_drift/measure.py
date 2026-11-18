@@ -41,6 +41,7 @@ def main():
     parser.add_argument("--source-read-only", action="store_true")
     parser.add_argument("--normalisation-reference", type=Path)
     parser.add_argument("--hold-profile-ends", action="store_true")
+    parser.add_argument("--save-partition", action="store_true")
     arguments = parser.parse_args()
     assert jax.config.jax_enable_x64 is True
     revision = (
@@ -152,6 +153,19 @@ def main():
         "elapsed_seconds": time.monotonic() - started,
     }
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
+    if arguments.save_partition:
+        from benchmarks.diiid_forward_gs_match import _label_state
+
+        _, coordinate, pressure, diamagnetic = _label_state(row, arguments.frame)
+        result["partition"] = {
+            "domain_label": np.asarray(masks.label).tolist(),
+            "psi_norm": np.asarray(masks.psi_norm).tolist(),
+            "radius": np.asarray(profile.operator.radius).tolist(),
+            "area": np.asarray(profile.operator.area).tolist(),
+            "profile_coordinate": np.asarray(coordinate).tolist(),
+            "p_prime": np.asarray(pressure).tolist(),
+            "ff_prime": np.asarray(diamagnetic).tolist(),
+        }
     arguments.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(f"CURRENT_A={unscaled:.12f} OUTPUT={arguments.output}", flush=True)
     if arguments.normalisation_reference:

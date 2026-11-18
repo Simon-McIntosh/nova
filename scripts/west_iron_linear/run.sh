@@ -23,7 +23,7 @@ mkdir -p "$scratch/tree" "$out"
 git -C "$source_tree" archive "$revision" | tar -x -C "$scratch/tree"
 export PYTHONPATH="$scratch/tree" TMPDIR="$scratch" MPLCONFIGDIR="$scratch/matplotlib"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
-if [ "${IRON_REFINEMENT:-0}" = 1 ] || [ "${IRON_CHOLESKY:-0}" = 1 ]; then
+if [ "${IRON_REFINEMENT:-0}" = 1 ] || [ "${IRON_CHOLESKY:-0}" = 1 ] || [ "${IRON_CHOLESKY_DIAGNOSTIC:-0}" = 1 ]; then
     # The split factor uses more than the allocator's default card fraction.
     export XLA_PYTHON_CLIENT_MEM_FRACTION=0.90
 fi
@@ -40,6 +40,14 @@ prepare(Path(tree), revision, Path(source))
 subprocess.run(['git', '-C', tree, 'update-ref', 'HEAD', revision], check=True)
 PY
 cd "$scratch/tree"
+if [ "${IRON_CHOLESKY_DIAGNOSTIC:-0}" = 1 ]; then
+    diagnostic=scripts/west_iron_linear/diagnose.py
+    diagnostic_blob=$(git -C "$source_tree" rev-parse "$revision:$diagnostic")
+    /home/ITER/mcintos/Code/nova/.venv/bin/python "$diagnostic" \
+        --revision "$revision" --blob "$diagnostic_blob" --output "$out"
+    echo EXIT=0
+    exit 0
+fi
 if [ "${IRON_CHOLESKY:-0}" = 1 ]; then
     control=scripts/west_iron_linear/constant_control.py
     control_blob=$(git -C "$source_tree" rev-parse "$revision:$control")

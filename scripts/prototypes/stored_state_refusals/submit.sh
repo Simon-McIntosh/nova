@@ -57,6 +57,10 @@ unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 export PYTHONPATH="${WORKTREE}"
 export JAX_PLATFORMS=cuda,cpu
 export SOURCE_REVISION="${revision}"
+# The fixture machine is a zarr store under the user data directory. Point that
+# at the run directory, which is shared GPFS, so a machine built by one job is
+# loaded by the next instead of paying the build again after a wall expiry.
+export XDG_DATA_HOME="${run_dir}/machine-cache"
 export STORED_STATE_REFUSALS_OUTPUT="${output_dir}"
 export STORED_STATE_REFUSALS_FIGURES="${figure_dir}"
 cd "${WORKTREE}"

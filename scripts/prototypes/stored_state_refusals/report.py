@@ -36,6 +36,18 @@ def records():
                 merged[key].update(value)
             elif key not in merged:
                 merged[key] = value
+    for label in LABELS:
+        arm = merged.get(label)
+        if not arm:
+            continue
+        for path in sorted(
+            RUN.glob(f"*/comparison/*{label}-generating-failure.json")
+        ):
+            failure = json.loads(path.read_text())
+            arm["exception"] = failure.get("exception")
+            arm["axis_admitted"] = failure.get("axis_admitted")
+            arm["failure_message"] = failure.get("message")
+            arm["trips"] = failure.get("trips")
     return merged
 
 
@@ -48,17 +60,20 @@ def number(value, digits=6):
 def arm_row(label, record):
     if not record:
         return ("<tr><td><code>" + label
-                + "</code></td><td colspan=\"8\">not run</td></tr>")
+                + "</code></td><td colspan=\"10\">not run</td></tr>")
     cells = [
         "<code>" + label + "</code>",
         html.escape(str(record.get("case"))),
         html.escape(str(record.get("seed_policy") or "-")),
         number(record.get("residual")),
+        "-" if record.get("axis_admitted") is None
+        else ("yes" if record["axis_admitted"] else "no"),
         "-" if record.get("termination_reason") is None
         else str(record["termination_reason"]),
         "yes" if record.get("qualified") else "no",
         "yes" if record.get("converged") else "no",
         number(record.get("wall_seconds"), 5),
+        html.escape(str(record.get("exception") or "-")),
     ]
     return "<tr>" + "".join(f"<td>{cell}</td>" for cell in cells) + "</tr>"
 
@@ -143,10 +158,23 @@ def assemble(records_map):
         "map with imas-efit's stored conductor currents and profile coefficients. "
         "The table gives every arm's terminal state.</p>")
     parts.append("<table><thead><tr><th>arm</th><th>case</th><th>seed</th>"
-                 "<th>residual</th><th>reason</th><th>qualified</th>"
-                 "<th>converged</th><th>wall s</th></tr></thead><tbody>"
+                 "<th>residual</th><th>axis admitted</th><th>reason</th>"
+                 "<th>qualified</th><th>converged</th><th>wall s</th>"
+                 "<th>failure</th></tr></thead><tbody>"
                  + "".join(arm_row(label, records_map.get(label)) for label in LABELS)
                  + "</tbody></table>")
+    for label in LABELS:
+        record = records_map.get(label) or {}
+        if not record.get("exception"):
+            continue
+        parts.append(
+            "<p><code>" + label + "</code> raises <code>"
+            + html.escape(str(record["exception"])) + "</code>: "
+            + html.escape(str(record.get("failure_message"))) + ". "
+            + "The solve admitted no stationary point, so no magnetic axis was "
+            + "admitted and the terminal residual is not finite; termination "
+            + "reason " + str(record.get("termination_reason")) + " over "
+            + str(record.get("trips")) + " trips.</p>")
     return "\n".join(parts)
 
 

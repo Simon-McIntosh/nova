@@ -168,6 +168,16 @@ def _mastu(monkeypatch, records):
     data = _problem(_read_case("mastu"), monkeypatch)
     stored = data["request"]
     records["mesh"] = _mesh_record(data)
+    receipt = getattr(data["machine"], "cache_receipt", None)
+    if receipt is not None:
+        records["machine_cache"] = dict(
+            store=receipt.store,
+            key=receipt.key,
+            hit=receipt.hit,
+            build_seconds=receipt.build_seconds,
+            load_seconds=receipt.load_seconds,
+            store_seconds=receipt.store_seconds,
+        )
     records["default_policy"] = stored.policy.to_dict()
     records.setdefault("stored_coefficients", {})["mastu"] = (
         _profile_coefficients(stored.source_profile).tolist()

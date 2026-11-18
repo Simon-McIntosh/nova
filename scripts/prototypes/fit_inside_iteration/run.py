@@ -1,22 +1,17 @@
 """Measure the least-squares fit inside the equilibrium iteration.
 
-Runs the known states of the §1 record and the stored imas-efit cases of the
-§2 record through :class:`nova.equilibrium.flux_iteration.FluxIterationFit`, in
-sequence inside one allocation, and writes a per-case table plus one overlaid
-line-contour panel per case. Each case carries its negative control: every
-magnetics row, the measured plasma current and the measured conductor currents
-scaled by 1.10 must leave the 1.5 % plasma-current band when the case converged.
+Runs the known states of the known-answer recovery record and the stored cases
+of the imas-efit comparison record through
+:class:`nova.equilibrium.flux_iteration.FluxIterationFit`, in sequence inside
+one allocation, and writes a per-case table plus one overlaid line-contour
+panel per case. Each case carries its negative control: every magnetics row,
+the measured plasma current and the measured conductor currents scaled by 1.10
+must leave the 1.5 % plasma-current band when the case converged.
 
 The known states reuse the row construction, generating receipts and starting
-fields of the §1 study; the stored cases reuse the reader, rows, profile basis
-and fitted-conductor projection of the §2 study. No second construction of
-either is introduced here.
-
-Usage, on a compute node with the shared environment's interpreter:
-
-    python scripts/prototypes/fit_inside_iteration/run.py \
-        --cases solovev,mast,iter,mastu,tcv,iter-stored \
-        --output <run-dir>/evidence --figures <run-dir>/figures
+fields of the known-answer recovery study; the stored cases reuse the reader,
+rows, profile basis and fitted-conductor projection of the imas-efit comparison
+study. No second construction of either is introduced here.
 """
 
 from __future__ import annotations
@@ -244,7 +239,7 @@ def _run_known(case, args):
         panel_error = f"{type(refusal).__name__}: {refusal}"
     row = dict(
         case=case["name"],
-        construction="known state of the §1 record",
+        construction="known state of the known-answer recovery record",
         converged=bool(fitted.converged),
         passes=len(fitted.passes),
         pass_flux_update=[item.flux_update for item in fitted.passes],
@@ -368,7 +363,7 @@ def _run_stored(case, args):
     bands_applied = case["name"] != "iter"
     row = dict(
         case=case["name"],
-        construction="stored imas-efit case of the §2 record",
+        construction="stored case of the imas-efit comparison record",
         label=data["constraint_context"]["comparison_label"],
         converged=bool(fitted.converged),
         passes=len(fitted.passes),

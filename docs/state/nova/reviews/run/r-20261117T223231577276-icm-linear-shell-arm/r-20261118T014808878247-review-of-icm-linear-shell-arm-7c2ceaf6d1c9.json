@@ -19,6 +19,11 @@
       "kind": "exempted",
       "reason": "the stale lane sentence describes a superseded CPU attempt; the measured numbers come from the completed titan receipt, which the fragment cites correctly",
       "recorded_at": "2026-11-18T02:13:40.527356+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the logs' header names the single-file command they actually ran, and both arms pass at base and head; the recorded three-file command is the brief's gate, and its separate gate log passes at the head",
+      "recorded_at": "2026-11-18T02:14:31.404175+00:00"
     }
   },
   "findings": [

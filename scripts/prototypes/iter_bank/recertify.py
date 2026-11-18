@@ -22,7 +22,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.equilibrium import support_read, topology
+from nova.equilibrium import topology
 from nova.equilibrium.fixed_points import _source_jets
 
 assert jax.config.jax_enable_x64 is True
@@ -112,8 +112,7 @@ def main():
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--batch", type=int, default=4)
-    parser.add_argument("--store", type=Path, help="Published bank content store")
-    parser.add_argument("--digest", help="Digest of the published bank")
+    parser.add_argument("--bank", type=Path, help="Published bank npz to certify")
     parser.add_argument(
         "--current-bank", type=Path, help="Previously published bank npz"
     )
@@ -157,9 +156,11 @@ def main():
             "ROWS_MODE " + json.dumps(result["rows_mode"], sort_keys=True),
             flush=True,
         )
-    if args.store is not None:
-        bank = support_read.read_bank(args.store, args.digest, None, None)
-        stored = np.asarray(bank.rows)
+    if args.bank is not None:
+        with np.load(args.bank, allow_pickle=False) as archive:
+            stored = np.asarray(archive["rows"])
+            built_coil = np.asarray(archive["coil_exterior"])
+            active = int(archive["active_nodes"])
         bank_values = contraction(stored[data["indices"]], data["moments"])
         result["bank_mode"] = components(
             bank_values, data["points"], data["gradient"], data["hessian"]
@@ -176,7 +177,6 @@ def main():
             with np.load(args.current_bank, allow_pickle=False) as archive:
                 current = np.asarray(archive["rows"])
                 current_coil = np.asarray(archive["coil_exterior"])
-                active = int(archive["active_nodes"])
             current_values = contraction(current[data["indices"]], data["moments"])
             result["current_bank"] = components(
                 current_values, data["points"], data["gradient"], data["hessian"]
@@ -197,7 +197,7 @@ def main():
                     current[:active, :, :, 1:3],
                 ).tolist(),
                 coil_rows=relative(
-                    np.asarray(bank.coil_exterior)[:active] - current_coil[:active],
+                    built_coil[:active] - current_coil[:active],
                     current_coil[:active],
                 ).tolist(),
             )

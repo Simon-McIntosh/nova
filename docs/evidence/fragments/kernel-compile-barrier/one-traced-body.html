@@ -1,0 +1,33 @@
+<article id="kernel-compile-barrier-s3-one-traced-body-result">
+<h2>The repaired point program: residual and actual repeated bodies</h2>
+<p>The identity reference and cold-control kernel is <code>681a6ecd20d6a3473b02e340b6dc66dd288981c5</code>. The assigned base is <code>c9a2cb2d270dfb529272bb0a3c4f38fd553d53e1</code>; helper commit <code>3c4e66d772b77e46ebf1613f9e307da9c913775a</code> changes neither <code>nova/biot/polygonanalytic.py</code> nor <code>nova/equilibrium/fixed_points.py</code>. The measurements below precede any product edit.</p>
+<section id="kernel-compile-barrier-s3-one-traced-body-residual">
+<h3>The derivative-free residual leaves room under 60 seconds</h3>
+<p>H200 job <code>1325215</code>, node <code>98dci4-gpu-0003</code>, profiles <code>production_point_batch</code> at 132 with all moment-row derivative instantiations stubbed by the existing <code>point_program_attribution.profile_arm</code> driver, using its <code>gradient</code> block. The process starts fresh with the persistent compilation cache disabled and asserts H200 hardware. Its receipt reaches <code>phase=done</code>, with one observed cache miss and zero hits; the captured profile log ends <code>EXIT=0</code>.</p>
+<table><thead><tr><th>Derivative-free measure</th><th>Result</th></tr></thead><tbody>
+<tr><td>Cold compile</td><td>32.232170674949884 s</td></tr>
+<tr><td>Instructions after the variadic splitter</td><td>45,471</td></tr>
+<tr><td>Lowered StableHLO</td><td>1,980,103 bytes</td></tr>
+<tr><td>Executable</td><td>1,717,563 bytes</td></tr>
+<tr><td>Peak host RSS</td><td>2,344,752 KiB</td></tr>
+<tr><td>Attributed compile</td><td>30.8426 s; 95.69% coverage</td></tr>
+<tr><td>Variadic splitter / multi-output fusion</td><td>15.9223 s / 4.7091 s</td></tr>
+</tbody></table>
+<p>The residual is below 60 s. It does not prove that folding the derivative program reaches that bound. Receipts are under <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/one-traced-body/residual-h200/</code>: <code>profile.json</code>, <code>attribution.json</code> and <code>profile.log</code>.</p>
+</section>
+<section id="kernel-compile-barrier-s3-one-traced-body-base-structure">
+<h3>The height samples are already folded; the direction visits are not</h3>
+<p>CPU lowering job <code>1325815</code> uses the unchanged product at helper revision <code>3c4e66d772b77e46ebf1613f9e307da9c913775a</code>. It saves the actual 132-cell module before any edit. That module contains 10,251,812 bytes, 100,091 parsed operations and 837 outlined functions. Its SHA256 is <code>487ee64642ef682f16cdc6a540d9a33e114a8725ae70dad9e45254e8f9603f78</code>. These are lowered-text counts, not optimized HLO instruction counts.</p>
+<table><thead><tr><th>Base mechanism</th><th>Outlined definitions</th><th>Call sites in the point function</th><th>Operations in that definition</th><th>Instantiation</th></tr></thead><tbody>
+<tr><td>Ordinary and height-held directions</td><td>1, <code>closed_call</code></td><td>2</td><td>27,061</td><td>Two statically expanded visits from <code>scan(unroll=2)</code></td></tr>
+<tr><td>Six corner-height samples</td><td>1, <code>closed_call_656</code></td><td>1</td><td>10,892</td><td>One body inside a six-trip <code>while</code>, from <code>lax.map</code></td></tr>
+</tbody></table>
+<p>A definition shared by two call sites is not one instance: XLA can inline the direction body twice. The height samples, by contrast, are already one instance and need no replacement. The checked count sees both known-present bodies, keeps their callers separate and records every other outlined loop body too. The raw module and count receipt are <code>base-lowering/module.mlir</code> and <code>base-lowering/structure.json</code> under <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/one-traced-body/</code>. Their callable signatures distinguish the direction mask from the scalar height shift.</p>
+<p>The earlier <a href="/nova/evidence/fragments/kernel-compile-barrier/ordered-sharing.html">ordered-sharing record</a> localizes the rejected dynamic-direction map to the weighted-dot reduction. That rejected map is not an accepted fold. A candidate must change the lowered size and instantiated structure before card evaluation and must retain the existing identity assertions, including the polygon jet's 1e-13 bound.</p>
+</section>
+<section id="kernel-compile-barrier-s3-one-traced-body-cpu-preflight">
+<h3>The superseded CPU numerical preflight does not yield an identity verdict</h3>
+<p>CPU job <code>1325219</code> on <code>98dci4-clu-3141</code> completed the unchanged production-row lowering, then exceeded its 64G allocation during the first packed reference check. The scheduler records <code>OUT_OF_MEMORY</code>, elapsed <code>00:08:22</code>, batch MaxRSS <code>66939356K</code>; the packed log ends <code>EXIT=137</code> and its receipt remains <code>completed=false</code>. Production and polygon checks did not start. No numerical identity failure or pass is inferred. The revised lane uses CPU only for lowering and body inspection; identity is measured on the H200 in a fresh process per check, with caching disabled.</p>
+<p>The durable outcome and raw logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T071941834311-kernel-compile-barrier-s3-one-traced-body/</code>: <code>cpu-reference-outcome.json</code>, <code>cpu-reference-packed.log</code> and <code>cpu-reference-scheduler.log</code>.</p>
+</section>
+</article>

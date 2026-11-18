@@ -7,7 +7,7 @@
 <tr><td>1328101</td><td>titan, one P100</td><td>nova fits, white then drift, six slices each</td><td>2 white slices in 90 minutes; one slice is one nonlinear solve on the 500-cell mesh</td></tr>
 <tr><td>1328133 / 1328134</td><td>all_debug, CPU</td><td>imas-efit, every magnetics row, white and drift, 200 slices each</td><td>complete, 200 + 200</td></tr>
 <tr><td>1328161 / 1328170</td><td>all_debug, CPU</td><td>imas-efit, the 24 flux loops alone, white and drift, 200 slices each</td><td>complete, 200 + 200</td></tr>
-<tr><td>1328128 / 1328151</td><td>all_debug, CPU</td><td><code>tests/test_equilibrium_magnetics_fit.py</code> at head <code>a5b918df7</code> and at base <code>5820ad785d</code></td><td>head aborted at 45 reported tests after 43:55 with exit status 134 (<code>suite-head-arm.log</code>, <code>NOVA_LANE_EXIT_STATUS=134</code>); base reached the same 45 reported tests and was still inside its 59-minute wall</td></tr>
+<tr><td>1328128 / 1328151</td><td>all_debug, CPU</td><td><code>tests/test_equilibrium_magnetics_fit.py</code> at head <code>a5b918df7</code> and at base <code>5820ad785d</code></td><td>both cut at 45 reported tests: the head arm aborted there after 43:55 with exit status 134 (<code>NOVA_LANE_EXIT_STATUS=134</code>), and the base arm was cancelled at its 59-minute wall (<code>CANCELLED AT 2026-11-18T23:06:44 DUE TO TIME LIMIT</code>); neither arm passed nor failed</td></tr>
 </table>
 </section>
 

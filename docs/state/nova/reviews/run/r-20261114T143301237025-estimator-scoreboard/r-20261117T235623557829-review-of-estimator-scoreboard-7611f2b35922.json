@@ -32,6 +32,12 @@
       "recorded_at": "2026-11-18T00:15:56.655662+00:00",
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261114T143301237025-estimator-scoreboard"
+    },
+    "3": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-18T00:15:56.655662+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261114T143301237025-estimator-scoreboard"
     }
   },
   "findings": [

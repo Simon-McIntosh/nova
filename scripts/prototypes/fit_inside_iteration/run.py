@@ -144,6 +144,16 @@ def _stored_case(name):
     )
 
 
+def _model_rows(case, fitted):
+    """Return the model rows at the terminal state, or why they cannot be read."""
+    try:
+        return np.asarray(
+            case["rows"](fitted.terminal_state.cell_current), dtype=np.float64
+        ).tolist()
+    except ValueError as refusal:  # a terminal state without cells still has a row
+        return f"{type(refusal).__name__}: {refusal}"
+
+
 def _run_known(case, args):
     from nova.equilibrium.flux_iteration import FluxIterationFit
     from tests import test_equilibrium_magnetics_fit as study
@@ -238,9 +248,7 @@ def _run_known(case, args):
         vacuum=np.asarray(case["measurement"].vacuum).tolist(),
         scale=np.asarray(case["measurement"].scale).tolist(),
         mask=np.asarray(case["measurement"].mask).tolist(),
-        model_rows=np.asarray(
-            case["rows"](fitted.terminal_state.cell_current)
-        ).tolist(),
+        model_rows=_model_rows(case, fitted),
     )
     if not fitted.converged:
         row["not_converged_reason"] = "flux update did not reach its tolerance"

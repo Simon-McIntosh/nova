@@ -225,9 +225,17 @@ def _run_known(case, args):
         scaled_control_band=0.015,
         scaled_control_fired=bool(control > 0.015),
         relaxed=fitted.relaxation,
+        whitened_residuals=np.asarray(fitted.whitened_residuals).tolist(),
+        measured=np.asarray(case["measurement"].measured).tolist(),
+        vacuum=np.asarray(case["measurement"].vacuum).tolist(),
+        scale=np.asarray(case["measurement"].scale).tolist(),
+        mask=np.asarray(case["measurement"].mask).tolist(),
+        model_rows=np.asarray(
+            case["rows"](fitted.terminal_state.cell_current)
+        ).tolist(),
     )
     if not fitted.converged:
-        row["not_converged_reason"] = "flux update did not reach its tolerance"
+        row["not_converged_reason" = "flux update did not reach its tolerance"
     return row
 
 

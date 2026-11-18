@@ -196,8 +196,8 @@ def _run_known(case, args):
     panel_error = None
     try:
         study._draw_recovery_panels(case["name"], case["figure"], shim)
-    except Exception as error:  # the row outlives a painter's refusal
-        panel_error = f"{type(error).__name__}: {error}"
+    except Exception as refusal:  # the row outlives a painter's refusal
+        panel_error = f"{type(refusal).__name__}: {refusal}"
     row = dict(
         case=case["name"],
         construction="known state of the §1 record",
@@ -280,8 +280,8 @@ def _run_stored(case, args):
     panel_error = None
     try:
         study._panel(data, bool(fitted.converged), flux=fitted.terminal_state.flux)
-    except Exception as error:  # the row outlives a painter's refusal
-        panel_error = f"{type(error).__name__}: {error}"
+    except Exception as refusal:  # the row outlives a painter's refusal
+        panel_error = f"{type(refusal).__name__}: {refusal}"
     scores, scores_error = None, None
     try:
         state, centroid = study._as_equilibrium(data, fitted, fitted.source_profile)

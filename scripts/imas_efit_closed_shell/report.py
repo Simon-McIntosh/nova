@@ -98,6 +98,71 @@ def main() -> None:
     )
     vertex_text = ", ".join(str(vertices) for vertices in sorted(groups))
 
+    # Solver-log values for the scored arms, read from the summary payload.
+    scored_text = (
+        f"relErr = {fine['r090']['solver']['rel_err']:.2g} at a/b = 0.9 and "
+        f"{fine['r050']['solver']['rel_err']:.2g} at a/b = 0.5, both at"
+        f" <code>relativeError={fine['r090']['solver']['tolerance']:g}</code>"
+    )
+    bmax_text = (
+        f"{fine['r090']['solver']['bmax']:.3g} T at a/b = 0.9 and "
+        f"{fine['r050']['solver']['bmax']:.3g} T at a/b = 0.5"
+    )
+
+    lever_rows = [
+        "<tr><th>ratio</th><th>lever</th><th>arms</th><th>S</th>"
+        "<th>step</th><th>within 0.5 %</th></tr>"
+    ]
+    ceiling = summary["convergence_tolerance"]
+    for lever in summary.get("levers", []):
+        entry = entries[lever["tag"]]
+        values = {
+            arm["arm"]: arm["S_mean"] for arm in entry["series"] if "S_mean" in arm
+        }
+        first, second = lever["pair"]
+        left, right = values[first], values[second]
+        step = right / left - 1.0
+        within = abs(step) < ceiling
+        settings = ""
+        if lever["settings"]:
+            settings = " (%s)" % ", ".join(f"{value:g}" for value in lever["settings"])
+        lever_rows.append(
+            "<tr><td>%s</td><td>%s</td><td>%s%s</td><td>%.3f → %.3f</td>"
+            '<td>%+.2f %%</td><td class="%s">%s</td></tr>'
+            % (
+                lever["tag"],
+                lever["lever"],
+                " / ".join(lever["pair"]),
+                settings,
+                left,
+                right,
+                step * 100.0,
+                "pass" if within else "miss",
+                within,
+            )
+        )
+    lever_table = "<table>" + "".join(lever_rows) + "</table>"
+
+    def lever_text(tag: str) -> str:
+        values = {
+            arm["arm"]: arm["S_mean"]
+            for arm in entries[tag]["series"]
+            if "S_mean" in arm
+        }
+        steps = [
+            "%s %+.2f %%"
+            % (
+                lever["lever"],
+                (values[lever["pair"][1]] / values[lever["pair"][0]] - 1.0) * 100.0,
+            )
+            for lever in summary.get("levers", [])
+            if lever["tag"] == tag
+        ]
+        return ", ".join(steps)
+
+    lever_r090_text = lever_text("r090")
+    lever_r050_text = lever_text("r050")
+
     html = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <title>imas-efit closed-shell shielding control from an IMAS pulse</title>
@@ -165,25 +230,28 @@ measurement.</p>
 <h2>Convergence evidence</h2>
 <p>Every arm's slice reports <code>CONVERGENCE_SUMMARY: status= 2 iterations= 1
 cerror= 0.000E+000 chi2= 0.00E+000 classification= 2</code>: with no plasma there is
-nothing to iterate, and the written ψ is the converged algebra of the coil, wall and
-iron responses. The iron's own Newton relaxation converges inside each arm —
-<code>IRON_CONVERGENCE</code> reaches relErr = 1.4 × 10<sup>−4</sup> at
-<code>relativeError=1e-2</code> and 1.1 × 10<sup>−6</sup> at 1e-4, with no
-<code>IRON_MAXITER</code> line anywhere. The iron is fully linear where it works: at
-<code>call=1</code> it logs μ<sub>r</sub> = 1000 everywhere and
-<code>IRON_BMOD: Bmin= 8.4527E-08 Bmax= 3.0897E-07</code>, four orders below any
+nothing to iterate, and the written ψ is the reconstruction's algebra of the coil,
+wall and iron responses. The iron's own Newton relaxation converges inside each arm:
+the two arms the headline numbers come from end at
+{scored_text}, read from their own solver logs with no
+<code>IRON_MAXITER</code> line anywhere. The iron is fully linear where it works:
+their last <code>IRON_BMOD</code> records are {bmax_text}, four orders below any
 saturation scale, and the flat B–H table therefore has no curvature to resolve.</p>
-<p>The discretisation is the only thing still moving. Its last step is
-{convergence["r090"]["last_step_delta"] * 100:+.2f} % at a/b = 0.9 and
-{convergence["r050"]["last_step_delta"] * 100:+.2f} % at a/b = 0.5, against the
-{summary["convergence_tolerance"] * 100:.1f} % that section 6b requires of a final
-boundary refinement. The a/b = 0.9 series is converged by that criterion
-(<code>passed = {str(convergence["r090"]["passed"]).lower()}</code>); the a/b = 0.5
-series is not (<code>passed = {str(convergence["r050"]["passed"]).lower()}</code>), and
-its {abs(convergence["r050"]["last_step_delta"]) * 100:.2f} % step is larger than the
-{fine["r050"]["rel_error"] * 100:+.2f} % it lands from the exact value, so that number
-is one rung of a ladder that has not stopped moving — read it as inside the 2 % gate,
-not as a converged value.</p>
+<p>Two levers move S and neither is neutral at a/b = 0.5. Each solver pair below
+differs in nothing but <code>relativeError</code>, and each refinement pair differs
+in nothing but the outline resolution:</p>
+{lever_table}
+<p>Against the {summary["convergence_tolerance"] * 100:.1f} % ceiling that section 6b
+requires of a final boundary refinement, at a/b = 0.9 every lever is inside it
+({lever_r090_text}), so that series is converged by the criterion
+(<code>passed = {str(convergence["r090"]["passed"]).lower()}</code>). At a/b = 0.5
+no lever is ({lever_r050_text}): changing the solver tolerance alone moves S by the
+ceiling and the last boundary refinement moves it by three times that
+(<code>passed = {str(convergence["r050"]["passed"]).lower()}</code>), and the
+{abs(convergence["r050"]["last_step_delta"]) * 100:.2f} % step is larger than the
+{fine["r050"]["rel_error"] * 100:+.2f} % by which that arm lands from the exact value.
+The {fine["r050"]["S_mean"]:.2f} is therefore inside the 2 % accuracy gate and is not a
+converged value, whatever the solver tolerance is set to.</p>
 
 <h2>Two findings for the owners</h2>
 <h3>The outline resolution is derived from the vertex count and capped at 500 knots</h3>

@@ -52,17 +52,21 @@
   </table>
   <p>The 20- and 40-vertex rows each appear twice in the full table, once at
     <code>relativeError</code> 1e-2 (<code>e2</code>, <code>fine</code>) and once at
-    1e-4 (<code>e4</code>, <code>v40</code>): the pairs differ by 0.16 % and 0.20 %
-    at a/b = 0.9 and by 0.50 % and 0.52 % at a/b = 0.5, so the solver tolerance is not
-    the lever and the outline resolution is.</p>
-  <p>Against §6b's 0.5 % ceiling on a final boundary refinement, the two series differ
-    in kind: the a/b = 0.9 ladder converges (last step 0.32 %, <code>passed =
-    true</code>) and the a/b = 0.5 ladder does not (last step 1.49 %, <code>passed =
-    false</code>). The 1.49 % step at 0.5 is larger than the 0.80 % by which that arm
-    lands from the exact value, so its agreement is not a converged value — it is one
-    rung of a ladder that is still moving, and it is reported as inside the 2 % gate
-    rather than as resolved. The probe spread at the finest outline is 0.40 % and
-    0.84 %. The series is not monotone: at a fixed knot count the uniform
+    1e-4 (<code>e4</code>, <code>v40</code>). Each pair differs in nothing but that
+    setting, so its step is what the solver tolerance alone moves: 0.20 % and 0.16 %
+    at a/b = 0.9 (20-vertex pair first, then the 40-vertex pair), inside §6b's 0.5 %
+    ceiling, and 0.52 % and 0.50 % at a/b = 0.5, at or above it. Two levers move
+    this measurement, the solver tolerance and the boundary refinement, and at
+    a/b = 0.5 neither is shown converged: changing the tolerance alone moves S by
+    the full ceiling, and the last boundary refinement moves it by 1.50 %. That
+    ratio is therefore reported as inside the 2 % accuracy gate and not as a
+    converged value, whatever the tolerance is set to.</p>
+  <p>At a/b = 0.9 both levers are inside the ceiling, so that series is converged by
+    §6b's criterion: its last boundary refinement is 0.32 % (<code>passed =
+    true</code>), against the a/b = 0.5 ladder's 1.50 % (<code>passed =
+    false</code>). The 1.50 % step is larger than the 0.80 % by which that arm lands
+    from the exact value, so its agreement is one rung of a ladder that is still
+    moving. The probe spread at the finest outline is 0.40 % and 0.84 %. The series is not monotone: at a fixed knot count the uniform
     knot grid aliases against the polygon's corners, so S reads 55.15 at 80 vertices
     and 60.01 at 160 on the same 500 knots.</p>
   <p>The interior probes separate the two effects. Their flux ratio is the shielded

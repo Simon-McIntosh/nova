@@ -73,7 +73,7 @@ def solve_row(python, tree, revision, frame, branch, output, trace_helper):
         "--output",
         str(output),
         "--trace-helper",
-        str(tree / trace_helper),
+        str(trace_helper),
     ]
     log = output / "row.log"
     with log.open("w") as stream:
@@ -101,9 +101,15 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--trace-helper",
-        default="scripts/prototypes/diiid_hollow_current/trace.py",
+        type=Path,
+        default=None,
+        help="the repository source reader, which the row driver loads itself",
     )
     args = parser.parse_args()
+    if args.trace_helper is None:
+        args.trace_helper = (
+            args.repository / "scripts/prototypes/diiid_hollow_current/trace.py"
+        )
     python = sys.executable
     args.output.mkdir(parents=True, exist_ok=True)
     scratch = Path(

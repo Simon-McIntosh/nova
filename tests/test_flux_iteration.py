@@ -61,6 +61,7 @@ class _Instrument:
     def __init__(self, flux_weight=FLUX_WEIGHT):
         self.cells_remaining = None
         self.currents = np.zeros(2)
+        self.map_current = object()
         self.flux_weight = flux_weight
 
     def cell_current(self, source, psi):
@@ -100,11 +101,12 @@ class _Operator:
     def __call__(
         self,
         psi,
-        current=None,
+        current=object(),
         requested_class=None,
         target_current=None,
         prescribed_current=None,
     ):
+        self.instrument.map_current = current
         if current is not None:
             self.instrument.currents = np.asarray(current, dtype=np.float64)
         external = EXTERNAL
@@ -222,6 +224,9 @@ def test_the_iteration_recovers_the_state_the_rows_came_from():
     assert receipt.singular_values.shape == (TRUTH.size,)
     assert receipt.undetermined_coefficients == ()
     assert np.all(np.isfinite(receipt.terminal_state.flux))
+    # a profile-only fit carries no conductor columns, so the map keeps the
+    # external current it was built with instead of receiving an empty vector
+    assert fitter.profile.instrument.map_current is None
 
 
 def test_each_pass_costs_one_flux_map_per_coefficient_plus_the_residual():

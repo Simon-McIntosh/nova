@@ -398,11 +398,14 @@ class FluxIterationFit:
             )
             coefficients = coefficients + correction
             try:
-                arguments = (
-                    jnp.asarray(coefficients[self._profile_count :]),
-                    None,
-                    None,
+                # no conductor columns means the operator keeps its own
+                # external current; an empty vector is not the same request
+                conductor = (
+                    jnp.asarray(coefficients[self._profile_count :])
+                    if self._conductor_count
+                    else None
                 )
+                arguments = (conductor, None, None)
                 if self._prescribed_current is None:
                     updated = operator(jnp.asarray(flux), *arguments)
                 else:

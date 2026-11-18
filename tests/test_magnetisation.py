@@ -1937,3 +1937,137 @@ def test_west_refinement_blocks_at_one_percent(change, status):
     candidate = reference.copy()
     candidate[2] += change
     assert refinement_verdict(reference, candidate)["status"] == status
+
+
+@pytest.mark.parametrize("fill", [1.0, 0.2])
+@pytest.mark.parametrize("damping", [0.0, 0.01])
+def test_metric_cholesky_step_matches_original_differential(fill, damping):
+    from scipy.linalg import block_diag
+
+    cells = iron._mesh(shapely.box(1, 0, 2, 1), 0.5)
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    owners = geometry["owners"]
+    project = np.einsum(
+        "qij,qj,q->qi",
+        np.linalg.inv(geometry["gram"])[owners],
+        geometry["basis"],
+        geometry["weights"],
+    )
+    metric = np.zeros((len(cells.polygons), 6, 6))
+    metric[:, :3, :3] = metric[:, 3:, 3:] = geometry["gram"]
+    full_metric = block_diag(*geometry["gram"], *geometry["gram"])
+    values, vectors = np.linalg.eigh(full_metric)
+    half = (vectors * np.sqrt(values)) @ vectors.T
+    inverse_half = (vectors / np.sqrt(values)) @ vectors.T
+    rng = np.random.default_rng(426)
+    symmetric = rng.normal(size=full_metric.shape)
+    symmetric = symmetric @ symmetric.T
+    symmetric *= 0.3 * iron._MU0 / np.linalg.norm(symmetric, 2)
+    gram = inverse_half @ symmetric @ half
+    operands = tuple(
+        map(
+            jnp.asarray,
+            (
+                gram,
+                rng.normal(size=len(gram)) * 0.05,
+                *iron._fit_law([0, 0.2, 1], [2, 4, 2]),
+                geometry["basis"],
+                project,
+                owners,
+            ),
+        )
+    )
+    if fill != 1:
+        operands += (
+            jnp.full(len(metric), fill),
+            jnp.full((2, len(metric)), (1 - fill) / fill * 0.5),
+        )
+    state = jnp.arange(len(gram), dtype=jnp.float64) * 10
+    factor = iron._linear_cholesky_factor(
+        state, operands, jnp.asarray(metric), jnp.asarray(damping)
+    )
+    update = iron._linear_cholesky_programs(state.device)[3]
+    actual, _ = update(state, operands, factor, jnp.asarray(1.0))
+    expected, _ = iron._linear_update(
+        state,
+        operands,
+        iron._linear_factor(state, operands, jnp.asarray(damping)),
+        jnp.asarray(1.0),
+    )
+    np.testing.assert_allclose(actual, expected, rtol=1e-12, atol=1e-12)
+    jacobian = jax.jacfwd(iron._linear_residual)(state, operands)
+    differential = jacobian + damping * jnp.eye(len(gram))
+    error = differential @ (actual - state) + iron._linear_residual(state, operands)
+    assert (
+        np.linalg.norm(error) / np.linalg.norm(iron._linear_residual(state, operands))
+        < 1e-12
+    )
+    np.testing.assert_array_equal(operands[0], gram)
+
+
+def test_metric_cholesky_rows_cover_components_and_partial_tile():
+    rng = np.random.default_rng(47)
+    count = 67
+    dimension = 6 * count
+    gram = rng.normal(size=(dimension, dimension))
+    root = rng.normal(size=(count, 6, 6))
+    transform = rng.normal(size=(count, 6, 6))
+    gain = rng.uniform(size=(2, count))
+    full_root = np.zeros((dimension, dimension))
+    full_transform = np.zeros_like(full_root)
+    for cell in range(count):
+        index = np.r_[3 * cell + np.arange(3), 3 * (count + cell) + np.arange(3)]
+        full_root[np.ix_(index, index)] = root[cell]
+        full_transform[np.ix_(index, index)] = transform[cell]
+    expected = (
+        1.01 * np.eye(dimension)
+        - full_root @ (gram + np.diag(np.repeat(gain.reshape(-1), 3))) @ full_transform
+    )
+    column, write, _, _ = iron._linear_cholesky_programs(jax.devices()[0])
+    buffer = jax.jit(lambda: jnp.zeros((dimension, dimension)), out_shardings=column)()
+    for first in range(0, count, 64):
+        buffer = write(
+            buffer,
+            jnp.asarray(gram),
+            jnp.asarray(root),
+            jnp.asarray(transform),
+            jnp.asarray(gain),
+            jnp.asarray(1.01),
+            jnp.asarray(first),
+            min(64, count - first),
+        )
+    np.testing.assert_allclose(buffer, expected, rtol=1e-12, atol=1e-12)
+
+
+def test_metric_cholesky_nonlinear_solution_and_probe_agreement(monkeypatch):
+    region = shapely.box(1, 0, 2, 1)
+    cells = iron._mesh(region, 0.5)
+    matrix = np.eye(6 * len(cells.polygons)) * iron._MU0 * 0.3
+    interaction = iron.MagnetisationInteraction(
+        matrix, iron._geometry_digest(cells, "linear"), "linear"
+    )
+
+    def external(points):
+        return np.column_stack((0.02 * points[:, 0], 0.03 + 0.01 * points[:, 1]))
+
+    results = [
+        iron.solve_magnetisation(
+            region,
+            external,
+            [0, 0.2, 1],
+            [2, 4, 2],
+            cell_size=0.5,
+            basis="linear",
+            interaction=interaction,
+            linear_factorisation=route,
+            tolerance=1e-12,
+        )
+        for route in ("combined", "cholesky")
+    ]
+    assert all(result.converged for result in results)
+    assert results[0].iterations >= 2
+    expected, actual = (result.linear_coefficients for result in results)
+    assert np.linalg.norm(actual - expected) / np.linalg.norm(expected) < 1e-12
+    probes = np.array([[3.0, 0.0], [4.0, 1.0], [6.0, 0.0]])
+    expected, actual = (result.field(probes) for result in results)
+    assert np.linalg.norm(actual - expected) / np.linalg.norm(expected) < 1e-12

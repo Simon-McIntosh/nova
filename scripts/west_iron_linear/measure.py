@@ -69,6 +69,22 @@ def probe_agreement(reference, candidate):
     return relative.tolist()
 
 
+def coefficient_agreement(reference, candidate):
+    reference, candidate = np.asarray(reference), np.asarray(candidate)
+    assert reference.shape == candidate.shape and np.isfinite(candidate).all()
+    assert np.linalg.norm(reference) > 0
+    row = dict(
+        frobenius_relative=float(
+            np.linalg.norm(candidate - reference) / np.linalg.norm(reference)
+        ),
+        maximum_entry_relative=float(
+            np.abs(candidate - reference).max() / np.abs(reference).max()
+        ),
+    )
+    assert max(row.values()) <= 1e-12, row
+    return row
+
+
 def refinement_verdict(reference, candidate):
     """A one-percent change at any probe leaves the refinement blocked."""
     reference, candidate = np.asarray(reference), np.asarray(candidate)
@@ -196,6 +212,65 @@ def factor_capacity(cells, geometry, inputs, *, factorisation="combined"):
     return row
 
 
+def cholesky_capacity(cells):
+    """Measure donated column-major row construction and potrf at the full shape."""
+    count = len(cells.polygons)
+    n = 6 * count
+
+    def shape(dimensions):
+        return jax.ShapeDtypeStruct(dimensions, np.float64)
+
+    _, write, factor, _ = iron._linear_cholesky_programs(jax.devices()[0])
+    started = time.monotonic()
+    programs = {}
+    for name, function, arguments in (
+        (
+            "row_construction",
+            write,
+            (
+                shape((n, n)),
+                shape((n, n)),
+                shape((count, 6, 6)),
+                shape((count, 6, 6)),
+                shape((2, count)),
+                shape(()),
+                jax.ShapeDtypeStruct((), np.int64),
+                min(count, 64),
+            ),
+        ),
+        ("cholesky", factor, (shape((n, n)),)),
+    ):
+        executable = function.lower(*arguments).compile()
+        stats = executable.memory_analysis()
+        assert stats.alias_size_in_bytes == 8 * n * n, "factor buffer donation was lost"
+        retained = 8 * n * n if name == "cholesky" else 0
+        programs[name] = dict(
+            argument_bytes=stats.argument_size_in_bytes,
+            output_bytes=stats.output_size_in_bytes,
+            temporary_bytes=stats.temp_size_in_bytes,
+            alias_bytes=stats.alias_size_in_bytes,
+            retained_interaction_bytes=retained,
+            live_bytes=stats.argument_size_in_bytes
+            + stats.output_size_in_bytes
+            + stats.temp_size_in_bytes
+            - stats.alias_size_in_bytes
+            + retained,
+            input_formats=str(executable.input_formats),
+            output_formats=str(executable.output_formats),
+        )
+        del executable
+    limit = jax.devices()[0].memory_stats()["bytes_limit"]
+    live = max(program["live_bytes"] for program in programs.values())
+    return dict(
+        programs=programs,
+        compile_seconds=time.monotonic() - started,
+        compiled_live_bytes=live,
+        allocator_budget_bytes=limit,
+        fits=live < limit,
+        factor_dtype="float64",
+    )
+
+
 def solve(
     inputs,
     size,
@@ -204,6 +279,9 @@ def solve(
     *,
     factorisation="combined",
     observe_interaction=None,
+    observe_solution=None,
+    progress=None,
+    tolerance=1e-10,
 ):
     """Measure projection and Newton separately; forbid hidden assembly."""
 
@@ -213,6 +291,37 @@ def solve(
     residual = iron._linear_residual
     clock = {}
     preparation = {}
+    memory = []
+
+    def measured_phase(name, function):
+        def call(*args, **kwargs):
+            event = dict(phase=name, before=jax.devices()[0].memory_stats())
+            memory.append(event)
+            began = time.monotonic()
+            if progress:
+                progress(memory)
+            try:
+                value = function(*args, **kwargs)
+                jax.block_until_ready(value)
+                if name == "interaction_staging":
+                    event.update(
+                        dtype=str(value.dtype),
+                        matrix_bytes=value.size * value.dtype.itemsize,
+                        buffer_pointer=value.unsafe_buffer_pointer(),
+                    )
+                return value
+            except Exception as error:
+                event["error"] = repr(error)
+                raise
+            finally:
+                event.update(
+                    after=jax.devices()[0].memory_stats(),
+                    seconds=time.monotonic() - began,
+                )
+                if progress:
+                    progress(memory)
+
+        return call
 
     def timed(name, function):
         def call(*args, **kwargs):
@@ -241,6 +350,15 @@ def solve(
         return value
 
     with ExitStack() as stack:
+        for attribute, phase in (
+            ("_stage_linear_interaction", "interaction_staging"),
+            ("_linear_cholesky_factor", "cholesky_factor"),
+        ):
+            stack.enter_context(
+                patch.object(
+                    iron, attribute, measured_phase(phase, getattr(iron, attribute))
+                )
+            )
         for name, attribute in (
             ("law_fit_seconds", "_fit_law"),
             ("mesh_seconds", "_mesh"),
@@ -267,11 +385,13 @@ def solve(
             cell_size=size,
             basis="linear",
             interaction=interaction,
-            tolerance=1e-10,
+            tolerance=tolerance,
             max_iterations=100,
             linear_factorisation=factorisation,
         )
         wall = time.monotonic() - started
+    if observe_solution:
+        observe_solution(result)
     preparation["projection_checks_and_device_setup_seconds"] = (
         clock["start"] - started - sum(preparation.values())
     )
@@ -298,6 +418,8 @@ def solve(
         mu_max=float(result.permeability_relative.max()),
         field_T=total.tolist(),
         magnitude_T=np.linalg.norm(total, axis=1).tolist(),
+        memory_phases=memory,
+        factor_dtype="float64",
     )
 
 
@@ -310,6 +432,7 @@ def main():
     parser.add_argument("--refinement", action="store_true")
     parser.add_argument("--resume-refinement", action="store_true")
     parser.add_argument("--compare-routes", action="store_true")
+    parser.add_argument("--cholesky", action="store_true")
     replay_mode = parser.add_mutually_exclusive_group()
     replay_mode.add_argument("--replay", action="store_true")
     replay_mode.add_argument("--half-drive-only", action="store_true")
@@ -323,7 +446,7 @@ def main():
     size = mesh_size(args.mesh, inputs)
     cells = iron._mesh(inputs["region"], size)
     count = len(cells.polygons)
-    path = args.output / f"{args.mesh}.json"
+    path = args.output / f"{args.mesh}{'-cholesky' if args.cholesky else ''}.json"
     operator_path = args.output / f"{args.mesh}-operator.npy"
     row = dict(
         **stamp,
@@ -339,11 +462,13 @@ def main():
         constant=constant_reference(args.mesh),
         module=str(Path(iron.__file__).resolve()),
         cwd=str(Path.cwd().resolve()),
+        factor_dtype="float64",
+        factorisation="cholesky" if args.cholesky else "split",
     )
     assert row["constant"]["cells"] == count, "constant receipt names another mesh"
     if args.resume_refinement:
         assert args.refinement and args.mesh == "graded-8-40"
-        original = json.loads(path.read_text())
+        original = json.loads((args.output / f"{args.mesh}.json").read_text())
         assert original["geometry_digest"] and original["operator_path"] == str(
             operator_path
         )
@@ -363,17 +488,39 @@ def main():
         )
         assert interaction.geometry_digest == assembly["geometry_digest"]
         geometry = tiled.linear_magnetisation_geometry(cells.polygons)
-        row["split_capacity"] = factor_capacity(
-            cells, geometry, inputs, factorisation="split"
+        route = "cholesky" if args.cholesky else "split"
+        row[route + "_capacity"] = (
+            cholesky_capacity(cells)
+            if args.cholesky
+            else factor_capacity(cells, geometry, inputs, factorisation="split")
         )
         save(path, row)
-        assert row["split_capacity"]["fits"], row["split_capacity"]
-        row["full_drive"] = solve(inputs, size, interaction, factorisation="split")
+        assert row[route + "_capacity"]["fits"], row[route + "_capacity"]
+
+        def progress(events):
+            row["memory_phases"] = events
+            save(path, row)
+
+        row["full_drive"] = solve(
+            inputs,
+            size,
+            interaction,
+            factorisation=route,
+            progress=progress,
+            tolerance=1e-12 if args.cholesky else 1e-10,
+        )
         row["solve_device_memory_stats"] = jax.devices()[0].memory_stats()
         row["assembly_calls"] = 0
-        reference_path = args.output.parent / "graded-16-80.json"
+        reference_path = (
+            args.output / "graded-16-80-cholesky.json"
+            if args.cholesky
+            else args.output.parent / "graded-16-80.json"
+        )
         row["refinement_reference"] = str(reference_path)
-        reference = json.loads(reference_path.read_text())["full_drive"]["magnitude_T"]
+        reference_row = json.loads(reference_path.read_text())
+        reference = reference_row["combined" if args.cholesky else "full_drive"][
+            "magnitude_T"
+        ]
         row["refinement"] = refinement_verdict(
             reference, row["full_drive"]["magnitude_T"]
         )
@@ -390,12 +537,25 @@ def main():
         row["operator_path"] = str(source)
         row["geometry_digest"] = interaction.geometry_digest
         save(path, row)
-        for route in ("combined", "split"):
+        coefficients = {}
+        candidate_route = "cholesky" if args.cholesky else "split"
+        if args.cholesky:
+            row["cholesky_capacity"] = cholesky_capacity(cells)
+            save(path, row)
+            assert row["cholesky_capacity"]["fits"]
+        for route in ("combined", candidate_route):
 
             def observe(matrix):
                 row[f"{route}_interaction"] = interaction_agreement(
                     interaction.matrix, matrix
                 )
+
+            def solution(result):
+                coefficients[route] = result.linear_coefficients.copy()
+
+            def progress(events):
+                row[route + "_memory_phases"] = events
+                save(path, row)
 
             row[route] = solve(
                 inputs,
@@ -403,11 +563,17 @@ def main():
                 interaction,
                 factorisation=route,
                 observe_interaction=observe,
+                observe_solution=solution,
+                progress=progress,
+                tolerance=1e-12 if args.cholesky else 1e-10,
             )
             save(path, row)
             assert row[route]["converged"], row[route]["termination"]
         row["probe_relative_difference"] = probe_agreement(
-            row["combined"]["field_T"], row["split"]["field_T"]
+            row["combined"]["field_T"], row[candidate_route]["field_T"]
+        )
+        row["coefficient_relative_difference"] = coefficient_agreement(
+            coefficients["combined"], coefficients[candidate_route]
         )
         row["completed"] = True
         save(path, row)

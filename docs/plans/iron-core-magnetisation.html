@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="126">
+<meta name="plan-version" content="127">
 <meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
@@ -917,7 +917,10 @@ number is reported for either ratio.</p></div>
     <div class="r-comment-body"><p>Correction to clause (2)'s parenthetical: graded 16/80 mm (35 184 unknowns) is not the largest mesh the existing route solves on the card. Uniform 40 mm (39 792 unknowns, 50.7 GB factor peak) is, and its operator is already persisted. The clause keeps graded 16/80 because it carries the grading boundary the 8/40 mesh shares. The node brief also asks for the uniform 40 mm comparison.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261118T005532530803-review-of-icm-linear-shell-arm-2bb9e0e7f546" data-who="reckon-build" data-when="2026-11-18T00:56:05.262Z">
-    <div class="r-comment-body"><p>Reviewed r-20261117T223231577276-icm-linear-shell-arm at base c97c56ee268b8535ba58cd42b458a35d4718544b and head 2bb9e0e7f5467413d0458b57c510e362b9f204e7: the goal is met (linear-0.12.json reads 0.557274 % at 228 unknowns against the 0.5 % criterion while 80 mm reads 0.136630 %), the gate pair at both revisions reads 101 passed EXIT=0, and the review records scores goal_fidelity 20, evidence 17, scope_discipline 19, durability 7, fit 18, reuse 20 (total 101) with four non-blocking findings: the self-referential truncation assertion at reference.py:104, the unguarded restoration at reference.py:1 that no test imports, the mesher-limit claim at icm-linear-shell-arm.html:55 with no persisted probe log, and the manifest&#x27;s suite arms naming one test file where the gate named three.</p></div>
+    <div class="r-comment-body"><p>Reviewed r-20261117T223231577276-icm-linear-shell-arm at base c97c56ee268b8535ba58cd42b458a35d4718544b and head 2bb9e0e7f5467413d0458b57c510e362b9f204e7: the goal is met (linear-0.12.json reads 0.557274 % at 228 unknowns against the 0.5 % criterion while 80 mm reads 0.136630 %), the gate pair at both revisions reads 101 passed EXIT=0, and the review records scores goal_fidelity 20, evidence 17, scope_discipline 19, durability 7, fit 18, reuse 20 (total 101) with four non-blocking findings: the self-referential truncation assertion at reference.py:104, the unguarded restoration at reference.py:1 that no test imports, the mesher-limit claim at icm-linear-shell-arm.html:55 with no persisted probe log, and the manifest's suite arms naming one test file where the gate named three.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261118T014808878247-review-of-icm-linear-shell-arm-7c2ceaf6d1c9" data-who="reckon-build" data-when="2026-11-18T01:49:23.430Z">
+    <div class="r-comment-body"><p>Reviewed r-20261117T223231577276-icm-linear-shell-arm at base c97c56ee268b8535ba58cd42b458a35d4718544b and head 7c2ceaf6d1c900612fb8ea2872d8f5dc1ec27541: clause (3) of plan §5b is met (coarse/linear-0.08.json reads 0.136630 % at 76 cells / 456 unknowns and coarse/linear-0.12.json reads 0.557274 % at 38 cells / 228 unknowns against dipole 61.101838, with 160/240/320/480 mm missing by more), both gate arms read 101 passed (base) and 102 passed (head) with EXIT=0, and the review scores goal_fidelity 20, evidence 16, scope_discipline 14, durability 16, fit 18, reuse 17 with added_failure_count 0 and four non-blocking findings (self-comparison at reference.py:112; a lane paragraph at icm-linear-shell-arm.html:75 citing a receipt that now reads completed:true; manifest suite-arm commands disagreeing with their log headers; a guard test at tests/test_magnetisation.py:1484 outside the declared write paths).</p></div>
 </div>
 </section>
 </main>

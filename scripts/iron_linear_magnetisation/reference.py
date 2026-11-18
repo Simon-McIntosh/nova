@@ -101,6 +101,14 @@ def main():
     vacuum, shielded = exterior_reference(10)
     owner = loop(SHELL_PROBES)
     np.testing.assert_allclose(vacuum, owner, rtol=2e-13, atol=1e-25)
+    # The degree-one transmission is checked against the closed-form shell
+    # shielding in controls, an independent owner. Comparing ten terms with
+    # six would move both sides with any wrong transmission inside this
+    # function and would only state that the series has converged.
+    pure_vacuum, pure_shielded = exterior_reference(1)
+    np.testing.assert_allclose(
+        pure_shielded * exact_shielding(), pure_vacuum, rtol=2e-15, atol=1e-25
+    )
     np.testing.assert_allclose(
         shielded, exterior_reference(6)[1], rtol=2e-15, atol=1e-25
     )

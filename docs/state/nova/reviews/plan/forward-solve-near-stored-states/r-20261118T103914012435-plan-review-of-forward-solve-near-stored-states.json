@@ -121,6 +121,16 @@
       "note": "Covered by the same change: the batched call carries the request and returns the receipt fields per state, so no wrapper re-adds them.",
       "reason": "",
       "when": "2026-11-18T11:26:28.823542+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "30139c214f381d3b0f451eeb29fa6e65816431ff",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "The section now accounts for its surface in its own text: no new public entry point, the existing batched entry is widened to the request and receipt of the unbatched solve.",
+      "reason": "",
+      "when": "2026-11-18T11:26:38.589363+00:00"
     }
   ],
   "responses": {
@@ -141,6 +151,15 @@
       "note": "The batching endpoint now requires the batched call to take the same request and return, per state, the same receipt fields as the unbatched public solve.",
       "reason": "",
       "when": "2026-11-18T11:26:20.716671+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "30139c214f381d3b0f451eeb29fa6e65816431ff",
+      "commit_basis": "edit",
+      "note": "The section now accounts for its surface in its own text: no new public entry point, the existing batched entry is widened to the request and receipt of the unbatched solve.",
+      "reason": "",
+      "when": "2026-11-18T11:26:38.589363+00:00"
     },
     "reuse_search-1": {
       "action": "acted",

@@ -18,6 +18,8 @@ rung='h200'
 wall='02:30:00'
 cases=''
 output_name='measurement'
+job_name=''
+seed_flux=''
 while (($#)); do
   case "$1" in
     --log) log=$2; shift 2 ;;
@@ -25,9 +27,12 @@ while (($#)); do
     --time) wall=$2; shift 2 ;;
     --cases) cases=$2; shift 2 ;;
     --output-name) output_name=$2; shift 2 ;;
+    --job-name) job_name=$2; shift 2 ;;
+    --seed-flux) seed_flux=$2; shift 2 ;;
     *) printf 'unknown argument %s\n' "$1" >&2; exit 2 ;;
   esac
 done
+[[ -n "${job_name}" ]] || job_name="stored-state-refusals-${output_name}"
 [[ -n "${log}" ]] || { printf 'error: --log is required\n' >&2; exit 2; }
 [[ ${log} = /* ]] || { printf 'error: --log must be absolute\n' >&2; exit 2; }
 [[ -e ${log} ]] && { printf 'error: %s exists\n' "${log}" >&2; exit 2; }
@@ -63,6 +68,7 @@ export SOURCE_REVISION="${revision}"
 export XDG_DATA_HOME="${run_dir}/machine-cache"
 export STORED_STATE_REFUSALS_OUTPUT="${output_dir}"
 export STORED_STATE_REFUSALS_FIGURES="${figure_dir}"
+export STORED_STATE_REFUSALS_SEED_FLUX="${seed_flux}"
 cd "${WORKTREE}"
 {
   printf 'STANDING_CASES_LOG revision=%s\n' "${revision}"
@@ -78,6 +84,7 @@ PAYLOAD
 chmod +x "${payload_file}"
 
 readonly job=$(sbatch --parsable "${partition_args[@]}" --gres=gpu:1 \
+  --job-name="${job_name}" \
   --time="${wall}" \
   --output="${run_dir}/slurm-%j.out" --wrap="bash ${payload_file}")
 printf 'SUBMITTED rung=%s job=%s log=%s payload=%s\n' \

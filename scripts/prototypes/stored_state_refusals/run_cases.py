@@ -20,7 +20,6 @@ with both null sets and the wall.  Run it through
 
 from __future__ import annotations
 
-import json
 import os
 import sys
 import traceback
@@ -49,36 +48,16 @@ from nova.equilibrium.source import (  # noqa: E402
     PolynomialFluxFunction,
 )
 from nova.equilibrium.solve_request import ExplicitSolveSeed  # noqa: E402
-from nova.io.json import write_atomic  # noqa: E402
 from tests.test_magnetics_fit_efit_comparison import (  # noqa: E402
     _attempt,
     _panel,
     _problem,
     _read_case,
+    _residual_fields,
+    _write,
 )
 
 DIFFERENCE_STEP = 1.0e-4
-
-
-def _json_safe(value):
-    if isinstance(value, dict):
-        return {str(key): _json_safe(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [_json_safe(item) for item in value]
-    if isinstance(value, np.bool_):
-        return bool(value)
-    if isinstance(value, np.integer):
-        return int(value)
-    if isinstance(value, (np.floating, float)):
-        value = float(value)
-        return value if np.isfinite(value) else None
-    return value
-
-
-def _write(path, value):
-    payload = _json_safe(value)
-    json.dumps(payload, allow_nan=False)
-    write_atomic(path, payload, indent=2, sort_keys=False, newline=True)
 
 
 def _profile_coefficients(source):
@@ -114,8 +93,34 @@ def _mesh_record(data):
     )
 
 
+def _history_fields(label):
+    """Return the residuals the refused solve kept when it wrote no receipt."""
+    path = OUTPUT / "comparison" / f"{label}-rejected-history.pkl"
+    if not path.is_file():
+        return {}
+    import pickle
+
+    import nova.equilibrium.fixed_point  # noqa: F401 - resolves the pickle type
+
+    try:
+        with path.open("rb") as stream:
+            history = pickle.load(stream)
+        values = np.asarray(history.active_set_residuals, dtype=float)
+    except OSError, AttributeError:
+        return {}
+    finite = values[np.isfinite(values)]
+    if finite.size == 0:
+        return dict(finite_residual_entries=0)
+    return dict(
+        last_finite_residual=float(finite[-1]),
+        lowest_recorded_residual=float(finite.min()),
+        finite_residual_entries=int(finite.size),
+    )
+
+
 def _record(data, label, request, receipt, record, started):
     flux = data.get("terminal_flux")
+    residual = data.get("terminal_residual")
     record.update(
         policy=request.policy.to_dict(),
         coefficients=_profile_coefficients(request.source_profile).tolist(),
@@ -123,11 +128,13 @@ def _record(data, label, request, receipt, record, started):
         current_present=bool(np.size(np.asarray(request.current))),
         qualified=receipt is not None,
         converged=bool(data.get("terminal_converged")),
-        residual=data.get("terminal_residual"),
         termination_reason=data.get("terminal_termination_reason"),
         device=str(jax.devices()[0]),
         wall_seconds=perf_counter() - started,
+        **_residual_fields(residual),
     )
+    if receipt is None:
+        record.update(_history_fields(label))
     if receipt is not None:
         record["resolved_policy"] = receipt.resolved_defaults.policy.to_dict()
     if flux is not None:
@@ -179,13 +186,11 @@ def _mastu(monkeypatch, records):
             store_seconds=receipt.store_seconds,
         )
     records["default_policy"] = stored.policy.to_dict()
-    records.setdefault("stored_coefficients", {})["mastu"] = (
-        _profile_coefficients(stored.source_profile).tolist()
-    )
+    records.setdefault("stored_coefficients", {})["mastu"] = _profile_coefficients(
+        stored.source_profile
+    ).tolist()
     _report(records)
-    records["mastu-stored-default"] = _arm(
-        data, stored, "mastu-stored-default"
-    )
+    records["mastu-stored-default"] = _arm(data, stored, "mastu-stored-default")
     _report(records)
     terminal = data.get("terminal_flux")
     if terminal is None:
@@ -216,23 +221,35 @@ def _mastu(monkeypatch, records):
 
 def _displaced(monkeypatch, records, data, stored, qualified_terminal):
     raw = _profile_coefficients(stored.source_profile)
-    step = DIFFERENCE_STEP * max(abs(raw[0]), 1.0)
+    pressure_size = int(
+        np.asarray(stored.source_profile.core.p_prime.coefficients).size
+    )
+    # The comparison defines no displacement of its own, so the coordinate is
+    # the request's live coefficient of largest magnitude: a zero coefficient
+    # moves no current net and would re-ask the stored solve.
+    index = int(np.argmax(np.abs(raw)))
+    step = DIFFERENCE_STEP * max(abs(float(raw[index])), 1.0)
     records["displacement"] = dict(
-        coordinate="pressure_0",
-        index=0,
+        coordinate=("p_prime" if index < pressure_size else "ff_prime")
+        + f"_{index if index < pressure_size else index - pressure_size}",
+        index=index,
+        coefficient_frame="pressure then ff_prime",
+        pressure_size=pressure_size,
         description=(
-            "index 0 of the fit coefficient frame, the first pressure "
-            "coefficient of the request PolynomialFluxFunction; the fit's "
-            "central-difference response step is 1e-4 times max(|c|, 1)"
+            "the request's live coefficient of largest magnitude in the "
+            "polynomial flux frame, displaced by 1e-4 times max(|c|, 1); the "
+            "comparison's own fit defines no displacement, so the coordinate "
+            "is chosen from the coefficients the fit stored"
         ),
         size=float(step),
+        relative_size=float(step / abs(float(raw[index]))),
         sign="negative",
-        value_before=float(raw[0]),
-        value_after=float(raw[0] - step),
+        value_before=float(raw[index]),
+        value_after=float(raw[index] - step),
     )
     _report(records)
     displaced = replace(
-        stored, source_profile=_displaced_source(stored.source_profile, 0, step)
+        stored, source_profile=_displaced_source(stored.source_profile, index, step)
     )
     records["mastu-displaced-default"] = _arm(
         data, displaced, "mastu-displaced-default"
@@ -251,6 +268,24 @@ def _displaced(monkeypatch, records, data, stored, qualified_terminal):
     _report(records)
 
 
+def _mastu_displaced_only(monkeypatch, records):
+    """Re-run the displaced arms alone, seeded from the landed stored solve."""
+    data = _problem(_read_case("mastu"), monkeypatch)
+    stored = data["request"]
+    records["mesh"] = _mesh_record(data)
+    records.setdefault("stored_coefficients", {})["mastu"] = _profile_coefficients(
+        stored.source_profile
+    ).tolist()
+    seed_path = os.environ.get("STORED_STATE_REFUSALS_SEED_FLUX")
+    qualified_terminal = None
+    if seed_path and Path(seed_path).is_file():
+        qualified_terminal = np.load(seed_path)["flux"]
+        records["seed_flux"] = str(Path(seed_path).resolve())
+    _report(records)
+    _displaced(monkeypatch, records, data, stored, qualified_terminal)
+    del data
+
+
 def _stored_case(name, monkeypatch, records):
     data = _problem(_read_case(name), monkeypatch)
     request = data["request"]
@@ -261,9 +296,7 @@ def _stored_case(name, monkeypatch, records):
         request.source_profile
     ).tolist()
     _report(records)
-    records[f"{name}-stored-default"] = _arm(
-        data, request, f"{name}-stored-default"
-    )
+    records[f"{name}-stored-default"] = _arm(data, request, f"{name}-stored-default")
     _report(records)
     return data, request
 
@@ -290,6 +323,8 @@ def main():
         if len(sys.argv) > 1
         else set()
     )
+    if "mastu-displaced" in selected:
+        _mastu_displaced_only(monkeypatch, records)
     if not selected or "mastu" in selected:
         data, stored, qualified_terminal = _mastu(monkeypatch, records)
         _displaced(monkeypatch, records, data, stored, qualified_terminal)

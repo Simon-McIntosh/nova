@@ -39,42 +39,53 @@ def polygons(geometry):
     return tuple(vertices[index, : int(count)] for index, count in enumerate(counts))
 
 
-def mirror_gap(cell):
-    """How far a cell's vertex set departs from the owner's mirror pairing.
+def mirror_gap(cell, centre_z):
+    """The nearest-vertex departure of a cell from its own mirror image.
 
-    ``_horizontal_reflection`` is the repository's own mirror gap and
-    ``BiotMomentCoupling`` fills ``reflection_axis`` from it, so this reads the
-    pairing it found instead of re-deriving one with a second threshold.  A
-    cell the owner does not pair has no gap to report and yields infinity.
+    This is a magnitude for the report, not a symmetry decision: whether a cell
+    reflects about a horizontal axis is ``_horizontal_reflection``'s answer,
+    the one ``BiotMomentCoupling`` fills ``reflection_axis`` from, and
+    ``paired_cells`` below asks it directly.
     """
-    reflection = _horizontal_reflection(cell)
-    if reflection is None:
-        return float("inf")
-    axis, partner = reflection
-    section = np.asarray(cell, dtype=np.float64)
-    reflected_z = 2.0 * axis - section[:, 1]
-    return float(np.max(np.abs(section[partner, 1] - reflected_z)))
+    cell = np.asarray(cell, dtype=float)
+    reflected = cell.copy()
+    reflected[:, 1] = 2.0 * centre_z - reflected[:, 1]
+    return float(np.max([np.min(np.hypot(*(cell - point).T)) for point in reflected]))
 
 
 def symmetric_cells(geometry):
-    """One mirror gap per cell, taken from the owner's horizontal reflection."""
+    """One departure per cell, about that cell's own centre Z."""
+    centre = np.asarray(geometry["centre"])
     cells = polygons(geometry)
-    return np.array([mirror_gap(cell) for cell in cells])
+    return np.array(
+        [mirror_gap(cell, centre[index, 1]) for index, cell in enumerate(cells)]
+    )
+
+
+def paired_cells(geometry):
+    """One flag per cell: does the kernel's reflection pair its vertex set?"""
+    cells = polygons(geometry)
+    return np.array([_horizontal_reflection(cell) is not None for cell in cells])
 
 
 def classify(entries, geometry, *, plane=PLANE):
-    """Return {A, B} entry groups and the per-cell mirror gaps."""
+    """Return {A, B} entry groups and the per-cell symmetry flag.
+
+    An entry is group A when its height sits on its cell's horizontal axis and
+    the kernel's own reflection pairs that cell; ``mirror_gap`` rides along as
+    the departure magnitude for the report.
+    """
     symmetry = symmetric_cells(geometry)
+    paired = paired_cells(geometry)
     centre = np.asarray(geometry["centre"])
     groups = {"A": [], "B": []}
     for entry in entries:
         cell = entry["cell"]
         dz = float(entry["coordinates"][1] - centre[cell, 1])
         on_plane = abs(dz) < plane
-        symmetric = symmetry[cell] < plane
         record = dict(entry, mirror_gap=float(symmetry[cell]), dz=dz)
-        groups["A" if on_plane and symmetric else "B"].append(record)
-    return groups, symmetry
+        groups["A" if on_plane and paired[cell] else "B"].append(record)
+    return groups, paired
 
 
 def describe(group, key):
@@ -137,6 +148,12 @@ def print_rows(name, entries):
         print(json.dumps({key: entry[key] for key in KEYS}))
 
 
+def print_report(violations, worst):
+    """Print both tables the report carries, one row per entry."""
+    print_rows("VIOLATIONS_A", violations)
+    print_rows("WORST_B", worst)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipt", default=RECEIPT)
@@ -155,7 +172,7 @@ def main():
     groups, symmetry = classify(receipt["entries"], geometry)
     report = dict(
         entries=len(receipt["entries"]),
-        symmetric_cells=int((symmetry < PLANE).sum()),
+        symmetric_cells=int(symmetry.sum()),
         groups={
             name: dict(
                 count=len(group),
@@ -187,8 +204,7 @@ def main():
             indent=1,
         )
     )
-    print_rows("VIOLATIONS_A", violations)
-    print_rows("WORST_B", worst)
+    print_report(violations, worst)
     if args.output:
         with open(args.output, "w") as stream:
             json.dump(report, stream, indent=1)

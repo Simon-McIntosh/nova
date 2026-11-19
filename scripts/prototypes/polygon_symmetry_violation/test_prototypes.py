@@ -17,8 +17,11 @@ from scripts.prototypes.polygon_symmetry_violation.compare import (
     central_step,
     psi_identity,
 )
+from scripts.prototypes.polygon_symmetry_violation import mutation_control
 from scripts.prototypes.polygon_symmetry_violation.split import (
     mirror_gap,
+    paired_cells,
+    print_report,
     print_rows,
     symmetric_cells,
 )
@@ -148,12 +151,57 @@ def test_mirror_gap_reports_no_pairing_for_a_skewed_cell():
     assert mirror_gap(skewed) == float("inf")
 
 
-def test_symmetric_cells_is_one_gap_per_cell():
+def skewed(centre_z, radius=0.5):
+    cell = square(centre_z, radius)
+    cell[0, 1] -= 0.05
+    return cell
+
+
+def test_symmetric_cells_is_one_gap_per_cell_and_reports_departures():
     geometry = dict(
-        vertices=np.array([square(0.0), square(1.0)]),
-        vertex_count=np.array([4, 4]),
-        centre=np.array([[0.0, 0.0], [0.0, 1.0]]),
+        vertices=np.array([square(0.0), square(1.0), skewed(2.0)]),
+        vertex_count=np.array([4, 4, 4]),
+        centre=np.array([[0.0, 0.0], [0.0, 1.0], [0.0, 2.0]]),
     )
     gaps = symmetric_cells(geometry)
-    assert gaps.shape == (2,)
-    assert np.all(gaps == 0.0)
+    assert gaps.shape == (3,)
+    assert gaps[0] == 0.0 and gaps[1] == 0.0
+    assert gaps[2] > 0.01, "a skewed cell must report a departure, not a zero"
+
+
+def test_paired_cells_asks_the_kernel_reflection():
+    geometry = dict(
+        vertices=np.array([square(0.0), skewed(2.0)]),
+        vertex_count=np.array([4, 4]),
+        centre=np.array([[0.0, 0.0], [0.0, 2.0]]),
+    )
+    assert list(paired_cells(geometry)) == [True, False]
+
+
+def entry(node, value):
+    return dict(
+        node=node,
+        cell=0,
+        moment=1,
+        repaired_value=value,
+        base_value=0.0,
+        dz=0.0,
+        mirror_gap=0.0,
+        distance_to_cell_boundary=1.0,
+    )
+
+
+def test_print_report_emits_rows_under_both_headers(capsys):
+    """The call site, so a bare header print cannot come back unnoticed."""
+    print_report([entry(11, 1e-6)], [entry(12, 2e-6), entry(13, 3e-6)])
+    lines = capsys.readouterr().out.strip().splitlines()
+    assert lines[0] == "VIOLATIONS_A"
+    worst = lines.index("WORST_B")
+    assert len(lines[1:worst]) == 1
+    assert len(lines[worst + 1 :]) == 2
+    assert [json.loads(line)["node"] for line in lines[worst + 1 :]] == [12, 13]
+
+
+def test_control_exits_zero_only_when_the_guard_separates():
+    assert mutation_control.run([]) == 0
+    assert mutation_control.run(["--repaired"]) == 1

@@ -69,7 +69,8 @@ def serial_pools() -> None:
     polygonanalytic._available_cpu_count = lambda: 1
 
 
-EFIT_CONFIG = """<Top>
+EFIT_CONFIG = (
+    """<Top>
   <include file="${EFIT_CONFIG_DIR}/machines/_common/debug.xml"/>
   <include file="${EFIT_CONFIG_DIR}/machines/_common/outputOptions.xml"/>
   <include file="${EFIT_CONFIG_DIR}/machines/_common/codeControls.xml"/>
@@ -84,10 +85,22 @@ EFIT_CONFIG = """<Top>
     <ff ndeg="2" edge="1" func="8" autoDegree="off"/>
     <ww ndeg="0" edge="1" func="0"/>
   </numericalControls>
-  <q0 weights="0" values="1.3" sigmas="0.3" interpolationMethod="1" """ \
-"""timeWindow="0" timeMargin="1"/>
+  <q0 weights="0" values="1.3" sigmas="0.3" interpolationMethod="1" """
+    """timeWindow="0" timeMargin="1"/>
 </Top>
 """
+)
+
+
+def probe_row_angle(dictionary_angle) -> np.ndarray:
+    """Return the sensor angle that writes an IMAS probe row [deg].
+
+    IMAS defines a probe's sensitive axis as ``cos(theta) Rhat - sin(theta)
+    Zhat`` and imas-efit reads it by negating ``poloidal_angle``; nova's sensor
+    projects ``Br cos(a) + Bz sin(a)``, so the row that reproduces the IMAS
+    axis is written at ``-np.asarray(dictionary_angle)``.
+    """
+    return -np.asarray(dictionary_angle, dtype=float)
 
 
 def sensor_geometry() -> dict:
@@ -174,7 +187,7 @@ def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
     # The pulse carries the machine's ``poloidal_angle`` unchanged; the row is
     # projected along the IMAS clockwise convention ``(cos, -sin)``, which is
     # ``angle = -theta`` in nova's own ``(Br cos + Bz sin)`` sensor projection.
-    probe_angle = -np.asarray(geometry["angle"], dtype=float)
+    probe_angle = probe_row_angle(geometry["angle"])
     sensors = Magnetics(
         r=np.r_[geometry["loop"][:, 0], geometry["probe"][:, 0]],
         z=np.r_[geometry["loop"][:, 1], geometry["probe"][:, 1]],
@@ -184,7 +197,7 @@ def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
     prior_sensors = Magnetics(
         r=np.r_[geometry["loop"][:, 0], geometry["probe"][:, 0]],
         z=np.r_[geometry["loop"][:, 1], geometry["probe"][:, 1]],
-        angle=np.r_[np.zeros(24), np.asarray(geometry["angle"], dtype=float)],
+        angle=np.r_[np.zeros(24), -probe_angle],
         flux_loop=np.r_[np.ones(24, bool), np.zeros(48, bool)],
     )
     magnetic_source = tm._PlasmaDiagnosticSource(sections)

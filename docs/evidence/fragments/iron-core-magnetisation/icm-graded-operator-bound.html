@@ -254,6 +254,31 @@ def test_graded_linear_interaction_holds_the_demagnetisation_bound(
   explained by this record; it needs the repaired operator assembled on that
   mesh, which the node could not do.</p>
 
+  <h3 id="icm-graded-operator-bound-suites">Both suite arms</h3>
+  <p>The file was run once on each side of the fence as its own scheduler job
+  (16 cores), each on a tree extracted from that arm's revision into
+  <code>/tmp</code> and prepared by <code>scripts.iron_graded_refinement.gate.prepare</code>:</p>
+  <pre><code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
+    -p no:cacheprovider -q tests/test_magnetisation.py</code></pre>
+  <ul>
+    <li><strong>Baseline</strong> <code>e429aef8de8becbfbf77eccff24ede82ca33fa5a</code>:
+      <code>7 failed, 91 passed in 7146.10 s (1:59:06)</code>, exit status 1.</li>
+    <li><strong>After</strong> (this head <code>d69525873ae0c6a96e82c7b32ddfb042fe52d0d6</code>):
+      <code>7 failed, 91 passed in 7019.10 s (1:56:59)</code>, exit status 1.</li>
+  </ul>
+  <p>The two failure sets are identical: the five
+  <code>test_control_receipt_*</code> rows and both
+  <code>test_in_vessel_fill_matches_six_limb_reference</code> rows, every one a
+  <code>FileNotFoundError</code> on
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/case.json</code>
+  or its <code>production/material-refinement-20261114/summary.json</code>, which
+  a login or compute node does not hold. Those seven are baseline failures of the
+  environment, not regressions of this node, because they fail on both arms with
+  the same message. <code>test_linear_shell_operator_pin[compact]</code> passes on
+  both: with the prepared tree in place, the <code>git show
+  0d4ad57d6dbc72331ceeec2dea452dae8ce1a0c9:nova/biot/tiledassembly.py</code> the
+  test runs resolves, which it did not in the first pair of arms (eight failures
+  there, this one among them with exit status 128).</p>
   <h3 id="icm-graded-operator-bound-receipts">Receipts</h3>
   <p><code>shells-repaired-confounded.jsonl</code> holds two superseded rows:
   the first repaired arm switched the rule by patching
@@ -263,19 +288,20 @@ def test_graded_linear_interaction_holds_the_demagnetisation_bound(
   target rule together. The rows reported here come from the helper switch,
   which is the rule the repair changes.</p>
   <p>Rows are under
-  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/operator-bound/receipts/</code>
-  (<code>shells-delivered.jsonl</code>, <code>shells-repaired.jsonl</code>,
-  <code>localise-volume12.json</code>, <code>localise-edge8.json</code>,
-  <code>localise-8-40-volume12.json</code>, <code>localise-default.json</code>,
-  <code>pin.json</code>) with the proposed patch as
-  <code>volume-rule.patch</code>. Job scripts and logs are under
-  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T195612393267-icm-graded-operator-bound/</code>:
-  that directory's <code>run-shells-delivered.sh</code>,
-  <code>run-localise-volume12.sh</code>, <code>localise-volume12-job.log</code>.
-  Every arm ran on <code>all_debug</code> with <code>JAX_PLATFORMS=cpu</code>,
-  float64 asserted by <code>configure_dtypes()</code>, from the worktree at
-  <code>e429aef8de8becbfbf77eccff24ede82ca33fa5a</code> with the rule switched by
-  the script rather than by a second build.</p>
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/operator-bound/receipts/</code>:
+  <code>shells-delivered.jsonl</code> and <code>shells-repaired.jsonl</code> (one
+  row per label per arm), <code>localise-localise-{default,edge8,volume12}.json</code>
+  (the block split), <code>selfcell.log</code> (the per-cell scan),
+  <code>pin.json</code> (the pin delta), <code>probe-test.log</code> (the proposed
+  test executed) and <code>volume-rule.patch</code>. Job scripts and logs are
+  under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T195612393267-icm-graded-operator-bound/</code>
+  and its <code>logs/</code>. Every arm is a scheduler job that extracts
+  <code>git archive HEAD</code> into its own <code>/tmp</code> tree, so no
+  evidence was produced on a login or fleet node; each sets
+  <code>JAX_PLATFORMS=cpu</code> and asserts the float64 flag through
+  <code>configure_dtypes()</code>, and the rule is switched in the process rather
+  than by a second build.</p>
 </main>
 </body>
 </html>

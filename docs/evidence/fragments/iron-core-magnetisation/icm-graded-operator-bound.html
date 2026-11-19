@@ -220,6 +220,12 @@
       <td>0.9999999886 / 857&nbsp;s</td>
       <td>2638 / 5776</td>
       <td>5.83e-9 / 2.89e-8</td></tr>
+      <tr><td>uniform 40&nbsp;mm</td><td>150</td>
+      <td>1.0000072220 / 624&nbsp;s</td>
+      <td>0.9999999996 / 1623&nbsp;s</td>
+      <td>0.9999999996 / 2523&nbsp;s</td>
+      <td>6348 / 22500</td>
+      <td>1.49e-11 / 7.48e-11</td></tr>
       <tr><td>graded 16/80&nbsp;mm</td><td>115</td>
       <td>1.0000016176 / 493&nbsp;s</td>
       <td>0.9999999960 / 1311&nbsp;s</td>
@@ -232,17 +238,20 @@
   global twelve-node quotient to the printed digit, so the bound is met by the
   cheaper rule and the expensive rule agrees. The operator distance is the honest
   second number and it is not uniform in a factor rule: at 200&nbsp;mm every
-  pair is inside eight widths and the match is 7.5e-12; at 160&nbsp;mm a third
-  of the pairs are left at six nodes and the entrywise distance is 2.9e-8; on
-  the 115-cell graded 16/80 shell, the one the bound was violated on, two thirds
-  of the pairs are left at six nodes and the distance is 2.73e-9. Each is
-  decades below the delivered rule's own distance on the same shell (1.15e-4 on
-  the graded one), and the quotients show the difference does not reach the
-  spectrum.</p>
-  <p>Cost on that shell, one process, one node, same contention: delivered
-  493&nbsp;s, targeted 1311&nbsp;s, global twelve nodes 2025&nbsp;s. The targeted
-  rule costs 2.7 times the delivered rule and 0.65 of the global rule. Five
-  scheduler jobs shared the node, so read the ratio and not the wall.</p>
+  pair is inside eight widths and the match is 7.5e-12; at 40&nbsp;mm, where 28
+  per&nbsp;cent of the ordered pairs are flagged, it is 7.5e-11; at 160&nbsp;mm
+  46&nbsp;per&nbsp;cent are flagged and the entrywise distance is 2.9e-8; on the
+  115-cell graded 16/80 shell, the one the bound was violated on, 33&nbsp;per
+  cent are flagged and the distance is 2.73e-9. Every one is decades below the
+  delivered rule's own distance on the same shell (7.7e-5 and 1.45e-4 frobenius
+  and entrywise on the uniform 40&nbsp;mm mesh, 9.4e-5 and 1.15e-4 on the graded
+  one), and the quotient agrees to the printed digit on all four.</p>
+  <p>Cost, one process, one node, same contention. On the graded 16/80 shell:
+  delivered 493&nbsp;s, targeted 1311&nbsp;s, global twelve nodes 2025&nbsp;s, so
+  the targeted rule costs 2.7 times the delivered rule and 0.65 of the global
+  one. On the uniform 40&nbsp;mm shell: 624, 1623 and 2523&nbsp;s, the same
+  ratios to a tenth (2.6 and 0.64). Five scheduler jobs shared the node, so read
+  the ratio and not the wall.</p>
   <p>The pinned shell operator moves by
   <code>1.3996715205415066e-06</code> relative to its stored control, the size
   of the rule change itself and not of an unrelated drift: the constant basis is

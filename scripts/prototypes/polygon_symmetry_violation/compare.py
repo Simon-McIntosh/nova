@@ -79,6 +79,14 @@ CORNER_BAND = (
 CORNER_BAND_OFF = (
     "    return (xp.abs(offset) <= 1e-3) & (xp.hypot(level, offset) < 0.0 * radius)\n"
 )
+STABLE_PRIMAL = (
+    "        nodes=nodes,\n    )\n\n\n@_packed_moments_with_stable_height.defjvp"
+)
+STABLE_PRIMAL_ON = (
+    "        nodes=nodes,\n        stable_poles=True,\n    )\n\n\n"
+    "@_packed_moments_with_stable_height.defjvp"
+)
+STABLE_MARKER = "        nodes=nodes,\n        stable_poles=True,"
 
 RUNNER = '''
 """Evaluate booked section moments at a point list from one tree."""
@@ -371,39 +379,29 @@ def scale_rows(values, records, local_of, entries):
     return rows
 
 
-def headline(group_a, group_b):
+def headline(group_a, group_b, names):
     """The statistics the report quotes, from the rows it prints."""
 
     def magnitude(group, tree):
         return np.array([abs(row["direct"][tree]) for row in group])
 
-    def reference(group):
-        return np.array([row["finest"] for row in group], dtype=float)
+    reference = np.array([row["finest"] for row in group_b], dtype=float)
+    floor = np.maximum(np.abs(reference), 1e-30)
 
-    book_b = np.array([row["direct"]["current"] for row in group_b])
-    base_b = np.array([row["direct"]["base"] for row in group_b])
-    reference_b = reference(group_b)
-    floor = np.maximum(np.abs(reference_b), 1e-30)
-    return dict(
-        group_a_count=len(group_a),
-        group_b_count=len(group_b),
-        a_current_max=float(magnitude(group_a, "current").max()),
-        a_base_max=float(magnitude(group_a, "base").max()),
-        a_nocorner_max=float(magnitude(group_a, "nocorner").max()),
-        a_noband_max=float(magnitude(group_a, "noband").max()),
-        a_current_median=float(np.median(magnitude(group_a, "current"))),
-        b_current_median=float(np.median(magnitude(group_b, "current"))),
-        b_current_max=float(magnitude(group_b, "current").max()),
-        b_base_max=float(magnitude(group_b, "base").max()),
-        b_reference_median=float(np.median(np.abs(reference_b))),
-        b_reference_max=float(np.abs(reference_b).max()),
-        b_current_vs_reference_max_relative=float(
-            np.max(np.abs(book_b - reference_b) / floor)
-        ),
-        b_base_vs_reference_max_relative=float(
-            np.max(np.abs(base_b - reference_b) / floor)
-        ),
-    )
+    keys = dict(group_a_count=len(group_a), group_b_count=len(group_b))
+    for tree in names:
+        keys[f"a_{tree}_max"] = float(magnitude(group_a, tree).max())
+        keys[f"b_{tree}_max"] = float(magnitude(group_b, tree).max())
+        booked = np.array([row["direct"][tree] for row in group_b])
+        keys[f"b_{tree}_vs_reference_max_relative"] = float(
+            np.max(np.abs(booked - reference) / floor)
+        )
+    if "current" in names:
+        keys["a_current_median"] = float(np.median(magnitude(group_a, "current")))
+        keys["b_current_median"] = float(np.median(magnitude(group_b, "current")))
+    keys["b_reference_median"] = float(np.median(np.abs(reference)))
+    keys["b_reference_max"] = float(np.abs(reference).max())
+    return keys
 
 
 def main():
@@ -416,6 +414,11 @@ def main():
     parser.add_argument("--directory", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--batch", type=int, default=2)
+    parser.add_argument(
+        "--trees",
+        default="current,base,nocorner,noband",
+        help="comma separated arms to build; stable adds the stable primal",
+    )
     args = parser.parse_args()
 
     with open(args.split) as stream:
@@ -441,26 +444,36 @@ def main():
     records = plan(violations, worst, centre)
     points = [record["point"] for record in records]
 
-    trees = dict(
-        current=head,
-        base=base_tree(
+    trees = dict(current=head)
+    requests = args.trees.split(",")
+    if "base" in requests:
+        trees["base"] = base_tree(
             head, directory / "trees" / "base", args.worktree, args.base_revision
-        ),
-        nocorner=variant(
+        )
+    if "nocorner" in requests:
+        trees["nocorner"] = variant(
             head,
             directory / "trees" / "nocorner",
             CORNER_STENCIL,
             CORNER_STENCIL_OFF,
             "near_corner = nearest < 0.0",
-        ),
-        noband=variant(
+        )
+    if "noband" in requests:
+        trees["noband"] = variant(
             head,
             directory / "trees" / "noband",
             CORNER_BAND,
             CORNER_BAND_OFF,
             "hypot(level, offset) < 0.0 * radius",
-        ),
-    )
+        )
+    if "stable" in requests:
+        trees["stable"] = variant(
+            head,
+            directory / "trees" / "stable",
+            STABLE_PRIMAL,
+            STABLE_PRIMAL_ON,
+            STABLE_MARKER,
+        )
 
     values = {}
     for name, tree in trees.items():
@@ -470,8 +483,8 @@ def main():
 
     psi_gap = 0.0
     for record in records:
-        if record["arm"] != "psi":
-            continue
+        if record["arm"] != "psi" or "base" not in values:
+            break
         entry = entries[record["entry"]]
         local, moment = local_of[int(entry["cell"])], int(entry["moment"])
         psi_gap = max(
@@ -492,7 +505,9 @@ def main():
         group_a=group_rows[: len(violations)],
         group_b=group_rows[len(violations) :],
         scale=scale_rows(values, records, local_of, entries),
-        headline=headline(group_rows[: len(violations)], group_rows[len(violations) :]),
+        headline=headline(
+            group_rows[: len(violations)], group_rows[len(violations) :], list(trees)
+        ),
     )
     with open(args.output, "w") as stream:
         json.dump(payload, stream, indent=1)

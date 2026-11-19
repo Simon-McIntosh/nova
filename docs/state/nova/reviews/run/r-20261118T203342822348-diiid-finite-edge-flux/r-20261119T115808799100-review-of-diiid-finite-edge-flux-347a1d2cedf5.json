@@ -23,6 +23,13 @@
     "The gate file does not import the summariser, so the suite carries no evidence about the repaired line; the negative control and the table regeneration are the evidence that does.",
     "The project declares requires-python >=3.14, where the unparenthesised form was legal; the repair is portability below the declared floor."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Prototype scaffolding: the summariser regenerates a receipt and does not ship; the product code is covered by tests/equilibrium/test_finite_edge_flux_function.py",
+      "recorded_at": "2026-11-19T18:14:04.202546+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_finite_edge_flux/summarize.py",

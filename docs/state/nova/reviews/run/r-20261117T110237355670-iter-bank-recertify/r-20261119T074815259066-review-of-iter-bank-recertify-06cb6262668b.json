@@ -8,7 +8,13 @@
   "call_site_note": "none - git grep at 06cb6262668b finds no runtime importer of scripts/prototypes/iter_bank/derive_rows.py: the only references are docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html and tests/test_iter_bank.py:347, so no code under nova/ revives the landed module; zero_entries and zero_entry_report are reached only from that module's own main().",
   "call_sites": [],
   "completed_at": "2026-11-19T08:09:01.264Z",
-  "dimension_dispositions": {},
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-iter-bank-recertify-06cb6262668b",
+      "recorded_at": "2026-11-19T09:42:15.586549+00:00"
+    }
+  },
   "dispatched_at": "2026-11-19T08:08:21Z",
   "findings": [
     {

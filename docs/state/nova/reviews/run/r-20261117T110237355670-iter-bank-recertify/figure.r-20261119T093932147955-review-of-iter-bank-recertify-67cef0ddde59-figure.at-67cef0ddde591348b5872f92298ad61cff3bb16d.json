@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachments": [
+    "docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh-preview.png",
+    "image-1.png"
+  ],
+  "completed_at": "2026-11-19T10:00:32.793Z",
+  "dispatched_at": "2026-11-19T09:41:06Z",
+  "figures": {
+    "docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh-preview.png": {
+      "contrast": "pass for text \u2014 coil and legend labels are #333333, measured 12.635:1 against white, and legend text is black at about 21:1; both clear their background with a wide margin. Data marks clear the page: coil outlines 3.112:1, cell mesh a median 4.704:1. One mark sits below the 3:1 the repository's style asks of a line on white \u2014 the first wall at 2.583:1 \u2014 recorded as a non-blocking finding because it is a reference line rather than text and remains traceable end to end.",
+      "data_ink": "pass \u2014 line art carries the figure on a plain white field: 73,748 purple cell-mark pixels, twelve grey coil rectangles and a pale wall contour, with no filled region, no raster imagery and no shadow. Measured ink coverage 0.067544 of the canvas. The overview panel is sparse in white space, but that is the machine geometry, not a decorative element competing with it.",
+      "decoration": "pass \u2014 no gradient, background fill, gridline, frame or styled theme; both axes are off, the legend is frameless, and the field is white throughout.",
+      "label_collision": "pass \u2014 measured on the delivered raster with a neutral-dark text mask: 21 text blocks (14 labels, one per coil section, with the four two-line CS and VS labels split into their two lines, plus the three legend entries), 0 overlapping pairs, and no block touching the canvas edge (ink extent x 39..1348 of 1400, y 17..1035 of 1072). Each two-line section label clears its coil mark, and the VS3 diamonds sit in space beside their labels rather than under them.",
+      "legibility": "pass \u2014 one 1400x1072 raster holding two poloidal panels: an overview carrying the fourteen coil sections and a magnified wall-and-cell detail. All fourteen labels are present once each and the duplicates the node repaired are separated in name: CS3U, CS2U, CS1 upper, CS1 lower, CS2L, CS3L, PF1, PF2, PF3, PF4, PF5, PF6, VS3 upper, VS3 lower. The hexagonal cell mesh resolves at the delivered 1400 px width and, downsampled to the 900 px column the figure is read on, the coil labels, legend and cell mesh all remain legible. The detail panel shows the first wall crossing the cell outlines, so the wall is readable as data and not only as a legend claim. The only legibility reservation is recorded as a non-blocking finding: the wall is the faintest mark in the scene. The second attachment, image-1.png (1400x1074), is the same scene through another raster path and measures the same (ink fraction 0.067378 against 0.067544, 73,915 mesh pixels against 73,748, median mesh contrast 4.616 against 4.704), so the verdict applies to both.",
+      "table_form": "pass \u2014 the image is machine geometry and a plasma cell mesh, a spatial relationship no table carries; the run's tabulated measurements stay in the evidence fragment."
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": 27,
+      "severity": "non-blocking",
+      "summary": "The first wall is the faintest mark in the picture at 2.583:1 against white, below the 3:1 the repository's style asks of a line on white and lighter than the coil grey it is set against (3.112:1), while the cell mesh it sits over measures a median 4.616 to 4.704:1. The mechanism the node claims is present and visible: the dash renders, the legend swatch repeats it, and the wall is drawn above the clipped cell outlines, crossing them in the detail panel. The cost is at page scale, where the figure is read at roughly 900 px wide: the outline stays a pale hairline, and where it hugs the plasma edge its gaps close up, so the component this node's done-when is about is the least legible mark in the scene and is read partly by inference from the legend. A stronger lightness step from the coil grey, or a wider dash period, would separate it without thinning anything else. Non-blocking because the contour is traceable end to end within the scene and the legend names it."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": 303,
+      "severity": "non-blocking",
+      "summary": "The scene draws the same plasma twice at two extents \u2014 an overview carrying the fourteen coil sections, and a wall-only detail \u2014 and names neither. build_figure draws the two panels with no title, panel label or annotation, and the evidence caption at docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:92 describes 'the regenerated panel' in the singular. On the delivered raster a reader sees two plasma outlines of different sizes with nothing saying how they relate, so the right-hand panel can read as a second plasma state rather than the magnified wall-and-cell detail of the same mesh. Naming each panel, or one caption sentence saying the right panel is the detail, removes the inference; nothing here stops a reader using either panel, so this does not hold the node."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "line": 96,
+      "severity": "non-blocking",
+      "summary": "The evidence table describes the first wall as a 'dashed dark grey #9aa2ab', but on the delivered raster #9aa2ab is the lightest ink in the figure at 2.583:1 against white \u2014 below the 3:1 the repository's style asks of a line on white and lighter than the coil grey it is set against (3.112:1). The word 'dark' overstates the separation, and this is the line a reader checks to decide how visible the wall is; 'light blue-grey dash' states what the picture shows. The same paragraph's claim that the wall sits 'above the clipped plasma-cell outlines' is accurate and visible in the raster. The picture is not changed by this \u2014 the record's description of it is."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261119T093932147955-review-of-iter-bank-recertify-67cef0ddde59-figure",
+  "reviewed_base_sha": "3a9238f0a626bec0783b4f0da32922dd0c390f4b",
+  "reviewed_head_sha": "67cef0ddde591348b5872f92298ad61cff3bb16d",
+  "reviewed_run_id": "r-20261117T110237355670-iter-bank-recertify",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T10:03:09.733601+00:00",
+  "total": null
+}

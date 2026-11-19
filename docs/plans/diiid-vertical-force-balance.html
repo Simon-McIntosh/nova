@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="137">
+<meta name="plan-version" content="138">
 <meta name="plan-modified" content="2026-11-19">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -401,6 +401,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s13" data-id="c-run-r-20261119T104720206556-review-of-diiid-finite-edge-flux-2ffdb3b1fb99-figure" data-who="reckon-build" data-when="2026-11-19T11:10:02.352Z">
     <div class="r-comment-body"><p>figure review of r-20261118T203342822348-diiid-finite-edge-flux at 2ffdb3b1fb9979aa098aa49b11629a4d2df14bb2 is parsed: all six rubric items answered for all four attached figures, four non-blocking findings and no blocking finding, added_failure_count 0 with an empty added_failure_ids.</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-run-r-20261119T104441722179-review-of-diiid-finite-edge-flux-2ffdb3b1fb99" data-who="reckon-build" data-when="2026-11-19T11:22:03.190Z">
+    <div class="r-comment-body"><p>Reviewed r-20261118T203342822348-diiid-finite-edge-flux at 2ffdb3b1f against base d0947cef and scored goal_fidelity 19, evidence 14, scope_discipline 20, durability 13, fit 16, reuse 18 (total 82) with added_failure_count 0 and three findings: one blocking (scripts/prototypes/diiid_finite_edge_flux/summarize.py:30 is Python 2 `except TypeError, ValueError:` and does not compile at head, so the committed summariser cannot regenerate the table.json receipt) and two non-blocking (the record overstates the negative control as three failures where logs/negative-control.log ends &quot;2 failed, 4 passed, 1 skipped&quot;; tests/equilibrium/test_finite_edge_flux_function.py:121 asserts against the p_prime the test itself passed in and never exercises the builder&#x27;s edge_value wiring).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

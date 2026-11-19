@@ -27,7 +27,7 @@ def termination_name(code):
 
     try:
         return FixedPointTerminationReason(int(code)).name
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         return f"unrecognised termination code {code}"
 
 

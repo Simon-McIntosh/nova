@@ -13,6 +13,8 @@ import argparse
 import dataclasses
 from pathlib import Path
 
+import matplotlib
+import matplotlib.path
 import numpy as np
 
 BLUE = "#1f5fa8"
@@ -28,27 +30,35 @@ def draw(axes, data):
     radius = np.asarray(data["radius"], float)
     height = np.asarray(data["height"], float)
     levels = np.asarray(data["levels"], float)
-    draw_flux_contours(
-        axes,
-        radius,
-        height,
-        np.asarray(data["psi_nova"], float),
-        levels,
-        color=BLUE,
-        linewidth=0.7,
-    )
-    draw_flux_contours(
-        axes,
-        radius,
-        height,
-        np.asarray(data["psi_efit"], float),
-        levels,
-        color=ORANGE,
-        linewidth=0.6,
-        linestyles="dashed",
-    )
     wall_r = np.asarray(data["wall_r"], float)
     wall_z = np.asarray(data["wall_z"], float)
+    grid_r, grid_z = np.meshgrid(radius, height)
+    ring = matplotlib.path.Path(np.column_stack([wall_r, wall_z]))
+    inside = ring.contains_points(
+        np.column_stack([grid_r.ravel(), grid_z.ravel()])
+    ).reshape(grid_r.shape)
+    # A raster carries field across its whole rectangle; only the vessel
+    # interior is a field the machine can hold, so every point outside the
+    # limiter ring carries nothing to contour.
+    blank = np.where(inside, 1.0, np.nan)
+    draw_flux_contours(
+        axes,
+        radius,
+        height,
+        (np.asarray(data["psi_nova"], float).T * blank),
+        levels,
+        color=BLUE,
+        linewidth=0.6,
+    )
+    draw_flux_contours(
+        axes,
+        radius,
+        height,
+        (np.asarray(data["psi_efit"], float).T * blank),
+        levels,
+        color=ORANGE,
+        linewidth=1.1,
+    )
     draw_wall(axes, radius=wall_r, height=wall_z)
     for code, colour in (("nova", BLUE), ("efit", ORANGE)):
         style = dataclasses.replace(DEFAULT_INK, axis_color=colour, xpoint_color=colour)
@@ -60,11 +70,13 @@ def draw(axes, data):
             x_points=points if points.size else None,
             style=style,
         )
+    axes.set_xlim(wall_r.min() - 0.35, wall_r.max() + 0.35)
+    axes.set_ylim(wall_z.min() - 0.35, wall_z.max() + 0.35)
     axes.set_aspect("equal")
     axes.set_axis_off()
     return [
-        lines.Line2D([], [], color=BLUE, lw=0.9, label="nova"),
-        lines.Line2D([], [], color=ORANGE, lw=0.9, ls="--", label="imas-efit"),
+        lines.Line2D([], [], color=BLUE, lw=0.8, label="nova, reconstructed slice"),
+        lines.Line2D([], [], color=ORANGE, lw=1.4, label="imas-efit, same slice"),
     ]
 
 

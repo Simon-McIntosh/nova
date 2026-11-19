@@ -141,7 +141,13 @@ def main() -> int:
     print(
         json.dumps(
             {
-                k: (v if np.ndim(v) == 0 else np.asarray(v).shape)
+                k: (
+                    float(v)
+                    if np.ndim(v) == 0 and np.asarray(v).dtype.kind == "f"
+                    else int(v)
+                    if np.ndim(v) == 0
+                    else np.asarray(v).shape
+                )
                 for k, v in payload.items()
             }
         )

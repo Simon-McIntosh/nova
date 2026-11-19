@@ -87,6 +87,15 @@ STABLE_PRIMAL_ON = (
     "@_packed_moments_with_stable_height.defjvp"
 )
 STABLE_MARKER = "        nodes=nodes,\n        stable_poles=True,"
+SMALL_BAND = (
+    "    return vertex.radius + vertex.offset < 0.5 * vertex.xp.hypot(\n"
+    "        vertex.radius, vertex.level\n    )\n"
+)
+SMALL_BAND_OFF = (
+    "    return vertex.radius + vertex.offset < 0.0 * vertex.xp.hypot(\n"
+    "        vertex.radius, vertex.level\n    )\n"
+)
+SMALL_MARKER = "vertex.radius + vertex.offset < 0.0 * vertex.xp.hypot"
 
 RUNNER = '''
 """Evaluate booked section moments at a point list from one tree."""
@@ -465,6 +474,14 @@ def main():
             CORNER_BAND,
             CORNER_BAND_OFF,
             "hypot(level, offset) < 0.0 * radius",
+        )
+    if "nosmall" in requests:
+        trees["nosmall"] = variant(
+            head,
+            directory / "trees" / "nosmall",
+            SMALL_BAND,
+            SMALL_BAND_OFF,
+            SMALL_MARKER,
         )
     if "stable" in requests:
         trees["stable"] = variant(

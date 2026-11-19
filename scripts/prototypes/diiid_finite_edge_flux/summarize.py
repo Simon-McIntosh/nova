@@ -34,13 +34,14 @@ def termination_name(code):
 def row_record(folder):
     receipt = json.loads((folder / "receipt.json").read_text())
     built = json.loads((folder / "built-profile.json").read_text())
+    solve = json.loads((folder / "solve-receipt.json").read_text())
     topology = receipt.get("terminal_topology") or {}
     distance = topology.get("lower_saddle_distance_m")
     return {
         "residual": receipt["residual"],
         "converged": bool(receipt["converged"]),
-        "termination_reason": termination_name(receipt.get("termination_reason")),
-        "termination_code": receipt.get("termination_reason"),
+        "termination_reason": termination_name(solve.get("terminal_reason")),
+        "termination_code": solve.get("terminal_reason"),
         "lower_saddle_distance_m": distance,
         "lower_x_rz_m": topology.get("lower_saddle_rz_m"),
         "efit_x_rz_m": receipt.get("efit_x_point_rz_m"),

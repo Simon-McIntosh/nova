@@ -23,6 +23,11 @@
       "node": "polygon-symmetry-violation-2",
       "recorded_at": "2026-11-19T22:01:47.940470+00:00"
     },
+    "1": {
+      "kind": "exempted",
+      "reason": "log-only presentation in a diagnosis prototype; the 20 group-B rows are carried in the --output JSON the fragment cites",
+      "recorded_at": "2026-11-19T22:02:10.574303+00:00"
+    },
     "4": {
       "kind": "folded",
       "node": "polygon-symmetry-violation-2",

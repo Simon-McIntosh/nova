@@ -10,6 +10,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-11-19T12:22:17.033Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "The low durability score comes only from the prototype summariser under scripts/prototypes having no regression guard; it is measurement scaffolding, and the product change carries seven committed tests and a reddening negative control",
+      "recorded_at": "2026-11-19T18:13:46.784984+00:00"
+    }
+  },
   "dispatched_at": "2026-11-19T12:21:50Z",
   "evidence_limits": [
     "The suite delta is read from the reviewed run's recorded arms (0 failures at both revisions), so added_failure_count is 0; no suite was re-run here.",

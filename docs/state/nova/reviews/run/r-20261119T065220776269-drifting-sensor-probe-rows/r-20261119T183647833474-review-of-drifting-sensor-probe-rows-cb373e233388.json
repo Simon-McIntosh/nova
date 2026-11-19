@@ -4,6 +4,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-11-19T18:39:21.352Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-drifting-sensor-probe-rows-cb373e233388",
+      "recorded_at": "2026-11-19T19:32:56.072141+00:00"
+    }
+  },
   "dispatched_at": "2026-11-19T18:38:55Z",
   "finding_dispositions": {
     "0": {

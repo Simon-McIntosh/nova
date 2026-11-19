@@ -30,4 +30,6 @@
   <img src="/nova/figures/inverse-equilibrium-baseline/fit-iteration-recovers-solovev/known-states/iter.svg" alt="ITER 135013 known state: reference and terminal line contours on shared levels, both null sets drawn, vessel in place">
   <figcaption>The ITER 135013 known state beside its reference under the same painter and the same rules: wide grey reference contours under narrow blue contours of the terminal state, the vessel drawn, and the axis and every admitted X-point of both maps in their own styles.</figcaption>
 </figure>
+<h3>Verification</h3>
+<p>Both suite arms run the armed command over <code>tests/test_equilibrium_magnetics_fit.py</code> and <code>tests/test_flux_iteration.py</code> — sixty tests collected — at the base revision <code>82edcf8b2</code> and at the head, each in a fresh process. Both arms reach forty-five passes and one failure, <code>test_known_state_recovery[solovev]</code>, which fails at the base as well: the gate this revision does not close is red before the change and red after it. Both then abort the interpreter with <code>SIGABRT</code> inside <code>libjax_common.so</code> on entering <code>test_known_state_recovery[mast]</code>, so each arm stops at forty-six of sixty without printing a summary line. An abort present at the base arm is not this revision's.</p>
 </section>

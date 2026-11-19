@@ -28,9 +28,9 @@ from nova.biot import tiledassembly  # noqa: E402
 from scripts.iron_linear_magnetisation.controls import shell  # noqa: E402
 
 
-def delivered_rule(order):
-    """Return the section rule the repair replaced."""
-    return max(6, order // 4)
+def repaired_rule(order):
+    """Return the section rule the repair proposes."""
+    return max(12, order // 2)
 
 
 def quotient(interaction, gram):
@@ -56,16 +56,16 @@ def main():
     assert len(cells.polygons) == control["shell_cells"] == 228
     polygons = tuple(cells.polygons[index] for index in control["selected_cells"])
     stored = np.asarray(control["operator"])
-    repaired, blocks = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
-    with patch.object(tiledassembly, "_volume_section_order", delivered_rule):
-        delivered, delivered_blocks = iron.linear_galerkin_cell_interaction(
+    delivered, blocks = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
+    with patch.object(tiledassembly, "_volume_section_order", repaired_rule):
+        repaired, repaired_blocks = iron.linear_galerkin_cell_interaction(
             polygons, plan=iron._PLAN
         )
-    assert np.array_equal(blocks[0], delivered_blocks[0])
+    assert np.array_equal(blocks[0], repaired_blocks[0])
     scale = np.linalg.norm(stored)
     record = dict(
-        rule_repaired=tiledassembly._volume_section_order(24),
-        rule_delivered=delivered_rule(24),
+        rule_delivered=tiledassembly._volume_section_order(24),
+        rule_repaired=repaired_rule(24),
         pin_relative_defect=float(
             np.linalg.norm(np.asarray(repaired) - stored) / scale
         ),

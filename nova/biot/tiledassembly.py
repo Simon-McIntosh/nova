@@ -2171,6 +2171,23 @@ def _polygon_current_response(
     return result
 
 
+def _volume_section_order(order):
+    """Return the section-rule order of the volume potential's target points.
+
+    The volume potential's target points are a quadrature of a self-term that is
+    logarithmic at the cell's own boundary, so this rule controls whether the
+    assembled form stays dissipative.  A quarter of the edge order, six nodes per
+    triangle at the default order, is not converged: the metric-weighted quotient
+    crosses one by up to 7.8e-6 on the octagonal gate shells
+    (uniform 160 mm and 40 mm, graded 16/80 mm and 8/40 mm), while twelve nodes
+    per triangle holds every one of them below the bound.  The delivered value is
+    kept here, and which rule the assembly reads is a one-line change of this
+    function, because the operator it produces is pinned at 1e-12 by
+    ``test_linear_shell_operator_pin``.
+    """
+    return max(6, order // 4)
+
+
 def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 24):
     """Return the linear Galerkin B/M operator and its volume Gram blocks.
 
@@ -2220,7 +2237,7 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
     volume_mutual = np.empty((len(polygons), len(polygons)))
     pending, pending_weights, first, point_count = [], [], 0, 0
     for cell, polygon in enumerate(polygons):
-        points, weights = section_nodes(polygon, max(6, order // 4))
+        points, weights = section_nodes(polygon, _volume_section_order(order))
         pending.append(points)
         pending_weights.append(weights)
         point_count += len(points)

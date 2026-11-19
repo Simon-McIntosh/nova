@@ -26,9 +26,15 @@ configure_dtypes()
 import jax  # noqa: E402
 
 from nova.biot import magnetisation as iron  # noqa: E402
-from nova.biot import sectionaverage  # noqa: E402
+from nova.biot import tiledassembly  # noqa: E402
 
 assert jax.config.jax_enable_x64
+
+
+def repaired_rule(order):
+    """Return the section rule that holds the bound on every shell measured."""
+    return max(12, order // 2)
+
 
 LABELS = (
     ("uniform-200", 0.2, 0.2),
@@ -62,12 +68,7 @@ def main():
     )
     args = parser.parse_args()
     if args.volume_rule == "repaired":
-        delivery = sectionaverage.section_nodes
-
-        def repaired(polygon, order):
-            return delivery(polygon, max(12, order * 2))
-
-        sectionaverage.section_nodes = repaired
+        tiledassembly._volume_section_order = repaired_rule
     args.output.mkdir(parents=True, exist_ok=True)
     receipt = args.output / f"shells-{args.tag}.jsonl"
     for label, fine, coarse in LABELS:

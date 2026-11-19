@@ -65,5 +65,5 @@ assert relative <= 1e-14, relative
 if args.write:
     control["revision"] = args.revision
     control["operator"] = [[float(value) for value in row] for row in actual]
-    path.write_text(json.dumps(control, indent=1) + "\n")
+    path.write_text(json.dumps(control, indent=2) + "\n")
     print("written", path, flush=True)

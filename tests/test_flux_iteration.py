@@ -419,6 +419,36 @@ def test_a_cycle_that_overshoots_is_laid_down_one_converging_fraction_at_a_time(
     assert not bare.converged
 
 
+def test_the_pass_lays_down_the_ladder_rung_its_own_cycle_residual_favours():
+    """The choice is the cycle residual's, not the first rung that improves.
+
+    The pass measures each candidate fraction by the residual the coefficient
+    set's own cycle carries at the map that fraction would hold, so a rung that
+    is exactly downhill is chosen over a larger one that is only partly so.
+    Held by the instrument here, the residual falls monotonically along the
+    ladder, and the pass must report the last rung it tried rather than the
+    first one that beat the map it was built from.
+    """
+    fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
+    readings = []
+
+    def ladder(coefficients, flux, span):
+        readings.append(1)
+        return 1.0e-6 * (4 - len(readings))
+
+    fitter._cycle_residual = ladder
+    receipt = fitter.fit(
+        measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+        max_passes=1,
+    )
+    assert len(readings) == 4
+    assert receipt.passes[0].trials == 4
+    assert receipt.passes[0].fraction == 2.0**-3
+
+
 def test_a_pass_moves_no_amplitude_past_the_trust_radius():
     """A column the rows barely resolve may not name a profile the data never saw.
 

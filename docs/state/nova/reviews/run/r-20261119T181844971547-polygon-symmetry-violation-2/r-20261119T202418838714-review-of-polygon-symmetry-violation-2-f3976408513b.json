@@ -1,0 +1,85 @@
+{
+  "added_failure_basis": "The reviewed run records tests: none and no baseline_suite or after_suite arm (its node.json carries no suite pair and its manifest test_logs is empty), so there is no gate-log pair from which an added failure id could be derived; the count of zero is the absence of a measured delta, not a measured delta of zero.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "f23935bda",
+    "42e8036c9",
+    "49cd89e65",
+    "46215a93c",
+    "680e3a158",
+    "95518fbdc",
+    "5b3f2d196",
+    "8c51fac67",
+    "3b4796201",
+    "c96be3423",
+    "f39764085"
+  ],
+  "completed_at": "2026-11-19T20:34:10.840Z",
+  "dispatched_at": "2026-11-19T20:33:52Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/compare.py",
+      "line": "503",
+      "severity": "blocking",
+      "text": "The psi-identity check breaks before it examines anything: `for record in records: if record[\"arm\"] != \"psi\" or \"base\" not in values: break` stops on the first record of the plan, which plan() emits with arm=\"direct\" (compare.py:262), so psi_gap stays at the initial 0.0 whenever a base tree exists. measure.py:179 prints that as `PSI_IDENTITY max_abs_difference 0.000e+00` (logs/measure-49cd89e65.log:21040) and the fragment quotes it at polygon-symmetry-violation.html:57 as \"The flux row is identical between the current and base kernels (psi_current_vs_base_max_abs = 0.0)` -- a claim of bit-identity supported by a loop that never ran. The fix is `continue` rather than `break` for the arm test (or two separate tests), followed by a re-run; until then the statement at html:57 must be removed or restated as unmeasured."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/split.py",
+      "line": "179",
+      "severity": "non-blocking",
+      "text": "The WORST_B section is printed with no rows: line 177 loops over `violations` and line 179 prints the runs the header alone, so the group-B rows exist only in the --output JSON. The effect is visible in logs/measure-49cd89e65.log:21031, where `WORST_B` is immediately followed by the next command's echo, so a reader of the log sees an empty group-B table while report['worst_B'] carries 20 entries."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/compare.py",
+      "line": "304",
+      "severity": "non-blocking",
+      "text": "central() is defined three times inside the one prototype package -- compare.py:304, scrutiny.py:68 and crosscheck.py:34 take the same (forward, backward) ladder and return the same per-step difference -- where crosscheck.py and plane.py already import plan()/evaluate() from compare.py, so nothing prevented one import; three copies of the same arithmetic can drift apart under the next edit."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/split.py",
+      "line": "40",
+      "severity": "non-blocking",
+      "text": "mirror_gap()/symmetric_cells() re-derive a capability the repository owns: nova/biot/polygonanalytic.py:2462 _horizontal_reflection decides whether a section reflects about a horizontal axis and returns that axis, and nova/equilibrium/topology.py:2472 uses it to fill BiotMomentCoupling.reflection_axis for exactly these cells; the addition's nearest-vertex gap threshold is a different and more permissive test (1e-9 absolute against the owner's 32*eps*scale) and the module states no reason for the duplication, so a reader cannot tell whether the two classifiers agree."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T181844971547-polygon-symmetry-violation-2/manifest.md",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "negative_control_log names logs/nosmall2.log, which is a green arm: its last line is EXIT=0 and its SUMMARY agrees with the current tree in its arm's maximum (a_nosmall_max 6.06230122870705e-06 against a_current_max 6.06230122870705e-06). A negative control must show a refusal, so the record declares a control that demonstrates nothing; the small-corner arm's actual content is a green measurement and belongs in artifacts, not under this key."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against 7ee4fa80: three feature rounds build the measurement (split/probe, compare/measure, crosscheck/plane), two fix commits correct the archive root and the per-entry cell choice, and the docs commits revise the fragment to the greens cross-check conclusion.",
+    "done_when": "The done_when is 'git diff --stat from the base names no path under nova/, and the fragment recommends one kernel change with an estimated compile-cost effect'; git diff --name-status 7ee4fa80 f39764085 lists nine added paths and none under nova/, and the fragment's polygon-symmetry-violation-recommendation section gives the row-derivative change with an instruction-count and compile-wall estimate.",
+    "goal": "The reviewed node's brief (/home/ITER/mcintos/.cache/nova-s21-briefs/nov19/polygon-symmetry-violation.md) asks for the split reproduction, the group-A mechanism, a group-B independent reference and the smallest kernel change with a cost estimate; docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html delivers all four.",
+    "manifest": "The manifest reports status complete, tests: none, the 867/745 split, the 7.293e-13 flux cross-check and a negative_control_log at logs/nosmall2.log, and its commits line omits 8c51fac67 and c96be3423 which the reviewed range contains.",
+    "write_paths": "The declared write paths are docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html and scripts/prototypes/polygon_symmetry_violation; every one of the nine added files at f39764085 lies in exactly those two locations."
+  },
+  "justifications": {
+    "durability": "The diff adds zero assert lines and no test file, and the only guard, compare.py:227 variant(), checks that a textual substitution landed rather than that any measurement is correct.",
+    "evidence": "The done_when is a diff-shape plus document-content assertion that I verified myself (git diff --name-status 7ee4fa80 f39764085 names no path under nova/; the recommendation section carries the estimate), while the manifest records tests: none and its one quoted identity number is the vacuous zero printed from scripts/prototypes/polygon_symmetry_violation/compare.py:503.",
+    "fit": "The modules follow the scripts/prototypes house style (module docstring with a Run-with line, argparse main, from __future__ import annotations), but central() is defined three times in the one package (compare.py:304, scrutiny.py:68, crosscheck.py:34) and split.py:179 prints a WORST_B header with no rows.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html answers every deliverable in the brief (split, group-A mechanism, group-B independent lattice, kernel recommendation with a cost estimate), but its polygon-symmetry-violation-exclusions paragraph rests on a number that no computation produced.",
+    "reuse": "Every measurement route extends an owner -- BiotMomentCoupling.from_polygons (nova/equilibrium/topology.py:2468), packed_analytic_moments, polygon_analytic_greens and fixed_points._source_jets -- except the cell mirror-symmetry decision at split.py:40, which re-implements rather than extends nova/biot/polygonanalytic.py:2462 _horizontal_reflection.",
+    "scope_discipline": "All nine added paths in the diff are the declared fragment and the declared scripts/prototypes/polygon_symmetry_violation directory, and no product source is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's brief at /home/ITER/mcintos/.cache/nova-s21-briefs/nov19/polygon-symmetry-violation.md asks for the split reproduction, the group-A mechanism, a group-B independent reference and the smallest kernel change with a cost estimate, and docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html delivers all four.\nVERDICT done_when: the done_when is 'git diff --stat from the base names no path under nova/, and the fragment recommends one kernel change with an estimated compile-cost effect'; git diff --name-status 7ee4fa80 f39764085 lists nine added paths and none under nova/, and the polygon-symmetry-violation-recommendation section of the fragment gives the row-derivative change with an instruction-count and compile-wall estimate.\nVERDICT write_paths: the declared paths are docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html and scripts/prototypes/polygon_symmetry_violation, and every one of the nine added files at f39764085 lies in exactly those two locations.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T181844971547-polygon-symmetry-violation-2/manifest.md, which reports status complete, tests: none, the 867/745 split and the 7.293e-13 flux cross-check, and whose commits line omits 8c51fac67 and c96be3423 that the reviewed range contains.\nVERDICT diff: read all eleven commits 7ee4fa80..f39764085 one by one; three rounds build the measurement (split/probe, compare/measure, crosscheck/plane), two fix commits correct the archive root and the per-entry cell choice, and three docs commits carry the fragment to its greens cross-check conclusion.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html answers every deliverable of /home/ITER/mcintos/.cache/nova-s21-briefs/nov19/polygon-symmetry-violation.md, but the exclusions section cites a number no computation produced.\nSCORE evidence: 10\nJUSTIFICATION evidence: the done_when is a diff-shape plus document-content assertion I verified directly; the manifest records tests: none and its one quoted identity number comes from a loop that breaks at scripts/prototypes/polygon_symmetry_violation/compare.py:503.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --name-status 7ee4fa80 f39764085 is inside the two declared write paths and nothing under nova/ changed.\nSCORE durability: 4\nJUSTIFICATION durability: git diff 7ee4fa80 f39764085 adds zero assert lines and no test file, and compare.py:227 variant() only verifies that a textual substitution landed.\nSCORE fit: 13\nJUSTIFICATION fit: the modules follow the scripts/prototypes house style, yet central() exists at compare.py:304, scrutiny.py:68 and crosscheck.py:34 and split.py:179 prints a WORST_B header with no rows.\nSCORE reuse: 14\nJUSTIFICATION reuse: measurement routes extend owners (nova/equilibrium/topology.py:2468 BiotMomentCoupling.from_polygons, packed_analytic_moments, polygon_analytic_greens, fixed_points._source_jets), but split.py:40 re-derives the mirror-symmetry decision owned by nova/biot/polygonanalytic.py:2462 _horizontal_reflection without extending it.\nFINDING scripts/prototypes/polygon_symmetry_violation/compare.py:503 blocking: the psi-identity loop breaks on the first record, which plan() emits with arm=\"direct\", so psi_current_vs_base_max_abs is always the initial 0.0 and the bit-identity claim at polygon-symmetry-violation.html:57 is unmeasured.\nFINDING scripts/prototypes/polygon_symmetry_violation/split.py:179 non-blocking: the WORST_B header is printed with no rows because the loop above iterates violations; logs/measure-49cd89e65.log:21031 shows the empty section.\nFINDING scripts/prototypes/polygon_symmetry_violation/compare.py:304 non-blocking: central() is defined three times in the one package (compare.py:304, scrutiny.py:68, crosscheck.py:34) where one import would do.\nFINDING scripts/prototypes/polygon_symmetry_violation/split.py:40 non-blocking: mirror_gap/symmetric_cells re-implement the cell mirror-symmetry decision owned by nova/biot/polygonanalytic.py:2462 _horizontal_reflection and used at nova/equilibrium/topology.py:2472, with a permissive threshold and no stated reason.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T181844971547-polygon-symmetry-violation-2/manifest.md:22 non-blocking: negative_control_log names logs/nosmall2.log, a green arm ending EXIT=0 that refuses nothing.",
+  "review_run_id": "r-20261119T202418838714-review-of-polygon-symmetry-violation-2-f3976408513b",
+  "reviewed_base_sha": "7ee4fa80433045b2d3482cdc48ae3dac6bb5ae47",
+  "reviewed_head_sha": "f3976408513be85108c9d5ee87ce40007f023fc5",
+  "reviewed_run_id": "r-20261119T181844971547-polygon-symmetry-violation-2",
+  "scores": {
+    "durability": 4,
+    "evidence": 10,
+    "fit": 13,
+    "goal_fidelity": 16,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T20:53:42.103657+00:00",
+  "total": 77
+}

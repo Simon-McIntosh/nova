@@ -95,7 +95,7 @@ def copy_figures(records_map):
 def figure(label, record, caption):
     if not record or not record.get("terminal_flux"):
         return ""
-    name = f"{record.get('case')}-{label}-preview.png"
+    name = Path(str(record.get("panel", ""))).name
     return ('<figure id="stored-state-refusals-' + label + '"><img alt="'
             + html.escape(caption) + '" width="100%" src="' + SRC + "/" + name
             + '"><figcaption>' + html.escape(caption) + "</figcaption></figure>")

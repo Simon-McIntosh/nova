@@ -33,6 +33,11 @@
       "reason": "diagnosis prototype; the central-difference helper is consolidated only if the moment-row Z-gradient fix reuses these scripts",
       "recorded_at": "2026-11-19T22:02:19.432808+00:00"
     },
+    "3": {
+      "kind": "exempted",
+      "reason": "diagnosis prototype classifier; the moment-row fix will use the owner _horizontal_reflection, not this script",
+      "recorded_at": "2026-11-19T22:02:27.797579+00:00"
+    },
     "4": {
       "kind": "folded",
       "node": "polygon-symmetry-violation-2",

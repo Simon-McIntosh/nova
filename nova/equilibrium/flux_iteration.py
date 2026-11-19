@@ -64,13 +64,19 @@ class IterationPass:
     ``misfit`` is the largest whitened row residual the pass's held map drives,
     ``flux_update`` the largest flux change of the update that pass applies
     divided by the axis-to-boundary span, and ``coefficients`` the coefficients
-    its least-squares solve laid down.
+    its least-squares solve laid down. ``fraction`` is how much of the
+    one-cycle update at those coefficients the pass laid down, so a pass whose
+    full cycle would leave the branch the rows were measured on shows the
+    smaller step it took instead, and ``trials`` counts the cycle evaluations
+    the pass paid beyond the one its step was built from.
     """
 
     index: int
     misfit: float
     flux_update: float
     coefficients: np.ndarray
+    fraction: float = 1.0
+    trials: int = 0
 
 
 @dataclass(frozen=True)
@@ -80,7 +86,8 @@ class FluxIterationReceipt:
     ``passes`` carries every pass in order, so the pass at which the flux map
     stopped improving and the size of the last flux update beside the terminal
     misfit are read from it. ``flux_evaluations`` counts the Grad-Shafranov
-    read-write cycles applied; no forward solve is converged for a proposed
+    read-write cycles evaluated — one for each pass's step and one for each
+    fraction it backs off from; no forward solve is converged for a proposed
     coefficient set, so it is the whole flux cost of the reconstruction.
     """
 
@@ -97,6 +104,8 @@ class FluxIterationReceipt:
     axis_loss_message: str | None
     rejected_pass: int | None
     rejected_message: str | None
+    stalled_pass: int | None
+    stalled_message: str | None
     topology_error: str | None
     first_pass_values: np.ndarray
     first_pass_residual: np.ndarray
@@ -107,6 +116,7 @@ class FluxIterationReceipt:
     null_directions: np.ndarray
     conductor_currents: np.ndarray
     relaxation: float
+    max_coefficient_step: float
     flux_evaluations: int
     sensor_evaluations: int
     wall_seconds: float
@@ -217,6 +227,52 @@ class FluxIterationFit:
             raise ValueError("the held-map observation contains non-finite values")
         return values
 
+    def _whitened_misfit(self, coefficients, flux, target, weight) -> float:
+        """Return the whitened rows a map and a coefficient set produce.
+
+        Costs one cell-current evaluation and one row read: no flux cycle, so a
+        backtracking step can ask what a trial map's rows look like before
+        laying the map down.
+        """
+        active = self._profile(coefficients)
+        cells = self._cell_current(active, flux)
+        values = self._rows(cells, coefficients[self._profile_count :])
+        return float(np.max(np.abs((values - target) * weight)))
+
+    def _cycle(self, coefficients, flux) -> np.ndarray:
+        """Return the one-cycle Grad-Shafranov read-write map at coefficients.
+
+        The conductor currents the fit laid down are the operator's current, and
+        a prescribed field keeps its own argument; an empty current vector is
+        not the same request as no current at all.
+        """
+        profile = self._profile(coefficients)
+        conductor = (
+            jnp.asarray(coefficients[self._profile_count :])
+            if self._conductor_count
+            else None
+        )
+        if self._prescribed_current is None:
+            updated = profile.operator(jnp.asarray(flux), conductor)
+        else:
+            updated = profile.operator(
+                jnp.asarray(flux),
+                conductor,
+                None,
+                None,
+                jnp.asarray(self._prescribed_current),
+            )
+        return np.asarray(updated, dtype=np.float64)
+
+    def _cycle_residual(self, coefficients, flux, span) -> float:
+        """Return one cycle's own residual, divided by the span.
+
+        The map a coefficient set asks for is the fixed point of that cycle, so
+        this is how far the held map sits from the map those coefficients
+        describe: the quantity a damped step has to lower.
+        """
+        return float(np.max(np.abs(self._cycle(coefficients, flux) - flux)) / span)
+
     def fit(
         self,
         measurement: SliceMeasurement,
@@ -228,15 +284,23 @@ class FluxIterationFit:
         relaxation: float = 1.0,
         rcond: float = 1.0e-8,
         max_update: float = 1.0,
+        max_coefficient_step: float = 1.0,
+        max_backtracks: int = 3,
         on_pass: Callable[[int, float, float], None] | None = None,
     ) -> FluxIterationReceipt:
         """Return one reconstruction from the held-map least-squares passes.
 
         ``initial_flux`` is the starting map on the profile's node set — the
         stored state of a stored case, or the starting field of a known state's
-        study. ``relaxation`` is the fraction of each flux update laid down; the
-        default lays down the whole update. Convergence is the flux update
-        falling to ``flux_tolerance`` of the axis-to-boundary span.
+        study. A pass lays down a fraction of the one-cycle flux update at the
+        coefficients it fitted, halving that fraction ``max_backtracks`` times
+        and laying down the one that leaves the held map closest to the map
+        those coefficients describe: a whole cycle is the fixed-point iteration
+        itself, and from a starting field more than a span away it leaves the
+        branch the rows were measured on instead of approaching the answer.
+        ``relaxation`` caps the fraction a pass may lay down. Convergence is
+        the applied flux update falling to ``flux_tolerance`` of the
+        axis-to-boundary span.
         """
         started = perf_counter()
         if (
@@ -247,6 +311,9 @@ class FluxIterationFit:
             or not 0.0 < relaxation <= 1.0
             or not np.isfinite(max_update)
             or max_update <= 0.0
+            or not np.isfinite(max_coefficient_step)
+            or max_coefficient_step <= 0.0
+            or max_backtracks < 0
             or not 0.0 <= rcond < 1.0
         ):
             raise ValueError("fit budgets and scales must be finite and positive")
@@ -311,6 +378,8 @@ class FluxIterationFit:
         axis_loss_message: str | None = None
         rejected_pass: int | None = None
         rejected_message: str | None = None
+        stalled_pass: int | None = None
+        stalled_message: str | None = None
         topology_error: str | None = None
         first_pass_values: np.ndarray | None = None
         first_pass_residual: np.ndarray | None = None
@@ -374,36 +443,66 @@ class FluxIterationFit:
                 diagnostics=True,
                 rcond=rcond,
             )
+            # a column the rows barely resolve answers a residual of its own
+            # size with an amplitude the data never saw, and the map then moves
+            # to a profile no row asked for; the pass takes a bounded step in
+            # the amplitudes so a nearly invisible direction cannot walk away
+            largest = float(np.max(np.abs(coefficients))) if coefficients.size else 0.0
+            radius = max_coefficient_step * max(largest, 0.0)
+            reached = float(np.max(np.abs(correction))) if correction.size else 0.0
+            if radius > 0.0 and reached > radius:
+                correction = correction * (radius / reached)
             coefficients = coefficients + correction
             # the map this pass lays down belongs to the coefficients just
-            # fitted, so the operator is rebuilt from them
-            updated_profile = self._profile(coefficients)
+            # fitted, and one whole cycle of it is the fixed-point iteration
+            # itself: from a starting field more than a span from the answer it
+            # leaves the branch the rows were measured on, so the pass lays
+            # down the largest fraction of that cycle which brings the held map
+            # nearer the map its own coefficients describe
             try:
-                # no conductor columns means the operator keeps its own
-                # external current; an empty vector is not the same request
-                conductor = (
-                    jnp.asarray(coefficients[self._profile_count :])
-                    if self._conductor_count
-                    else None
-                )
-                if self._prescribed_current is None:
-                    updated = updated_profile.operator(jnp.asarray(flux), conductor)
-                else:
-                    updated = updated_profile.operator(
-                        jnp.asarray(flux),
-                        conductor,
-                        None,
-                        None,
-                        jnp.asarray(self._prescribed_current),
-                    )
-                updated = np.asarray(updated, dtype=np.float64)
+                updated = self._cycle(coefficients, flux)
                 flux_evaluations += 1
             except ValueError as error:
                 axis_lost_pass = index
                 axis_loss_message = f"{type(error).__name__}: {error}"
                 break
             delta = updated - flux
-            update = float(np.max(np.abs(delta)) / span)
+            residual_at_hold = float(np.max(np.abs(delta)) / span)
+            fraction = relaxation
+            # the pass lays down the ladder's fraction that leaves the held map
+            # closest to the map its own coefficients describe; the whole cycle
+            # is the fixed-point iteration itself and some fraction of it is the
+            # largest step the branch the rows were measured on supports
+            accepted = residual_at_hold <= flux_tolerance
+            trials = 0
+            best_fraction = 1.0 if accepted else 0.0
+            best_residual = residual_at_hold
+            while not accepted and trials <= max_backtracks:
+                try:
+                    residual_at_trial = self._cycle_residual(
+                        coefficients, flux + fraction * delta, span
+                    )
+                    flux_evaluations += 1
+                except ValueError:  # the trial map carries no usable axis
+                    residual_at_trial = np.inf
+                trials += 1
+                if residual_at_trial < best_residual:
+                    best_fraction = fraction
+                    best_residual = residual_at_trial
+                fraction *= 0.5
+            if not best_fraction:
+                stalled_pass = index
+                stalled_message = (
+                    f"no fraction down to {fraction * 2.0:.3g} of the cycle left "
+                    f"the held map nearer the one its coefficients describe than "
+                    f"{residual_at_hold:.3g} of the span"
+                )
+                break
+            fraction = best_fraction
+            step = fraction * delta
+            # the pass reports the map it applies, so a damped pass's row is the
+            # step it laid down and not the undamped one it was scaled from
+            update = float(np.max(np.abs(step)) / span)
             if passes and update > max_update:
                 # a solve that moves the map by more than the span has left the
                 # branch the fit was measured on; the previous map stays
@@ -412,13 +511,15 @@ class FluxIterationFit:
                     f"the map update {update:.3g} of the span exceeded {max_update:g}"
                 )
                 break
-            flux = flux + relaxation * delta
+            flux = flux + step
             passes.append(
                 IterationPass(
                     index=index,
                     misfit=misfit,
                     flux_update=update,
                     coefficients=coefficients.copy(),
+                    fraction=fraction,
+                    trials=trials,
                 )
             )
             if on_pass is not None:
@@ -473,6 +574,8 @@ class FluxIterationFit:
             axis_loss_message=axis_loss_message,
             rejected_pass=rejected_pass,
             rejected_message=rejected_message,
+            stalled_pass=stalled_pass,
+            stalled_message=stalled_message,
             topology_error=topology_error,
             first_pass_values=(
                 first_pass_values if first_pass_values is not None else np.zeros(0)
@@ -493,6 +596,7 @@ class FluxIterationFit:
                 coefficients[self._profile_count :], dtype=np.float64
             ),
             relaxation=relaxation,
+            max_coefficient_step=max_coefficient_step,
             flux_evaluations=flux_evaluations,
             sensor_evaluations=sensor_evaluations,
             wall_seconds=perf_counter() - started,

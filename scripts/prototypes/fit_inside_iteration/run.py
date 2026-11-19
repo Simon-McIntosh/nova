@@ -225,7 +225,11 @@ def _run_known(case, args):
         passes=len(fitted.passes),
         pass_flux_update=[item.flux_update for item in fitted.passes],
         pass_misfit=[item.misfit for item in fitted.passes],
+        pass_fraction=[item.fraction for item in fitted.passes],
+        pass_trials=[item.trials for item in fitted.passes],
         stopped_improving_pass=fitted.stopped_improving_pass,
+        stalled_pass=fitted.stalled_pass,
+        stalled_message=fitted.stalled_message,
         axis_lost_pass=fitted.axis_lost_pass,
         axis_loss_message=fitted.axis_loss_message,
         rejected_pass=fitted.rejected_pass,
@@ -258,6 +262,7 @@ def _run_known(case, args):
         scaled_control_band=0.015,
         scaled_control_fired=bool(fitted.converged and control > 0.015),
         relaxed=fitted.relaxation,
+        max_coefficient_step=fitted.max_coefficient_step,
         whitened_residuals=np.asarray(fitted.whitened_residuals).tolist(),
         measured=np.asarray(case["measurement"].measured).tolist(),
         vacuum=np.asarray(case["measurement"].vacuum).tolist(),
@@ -352,7 +357,11 @@ def _run_stored(case, args):
         passes=len(fitted.passes),
         pass_flux_update=[item.flux_update for item in fitted.passes],
         pass_misfit=[item.misfit for item in fitted.passes],
+        pass_fraction=[item.fraction for item in fitted.passes],
+        pass_trials=[item.trials for item in fitted.passes],
         stopped_improving_pass=fitted.stopped_improving_pass,
+        stalled_pass=fitted.stalled_pass,
+        stalled_message=fitted.stalled_message,
         axis_lost_pass=fitted.axis_lost_pass,
         axis_loss_message=fitted.axis_loss_message,
         rejected_pass=fitted.rejected_pass,
@@ -395,7 +404,6 @@ def _run_stored(case, args):
             if fitted.terminal_state.topology is not None
             else None
         ),
-        relaxed=fitted.relaxation,
     )
     if not bands_applied:
         row["judged"] = "same magnetics, different constraints; gap reported"

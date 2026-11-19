@@ -58,8 +58,9 @@ def _profile_weight(psi, weight=FLUX_WEIGHT):
 class _Instrument:
     """Own the pass counters and the laid-down currents across rebuilds."""
 
-    def __init__(self, flux_weight=FLUX_WEIGHT):
+    def __init__(self, flux_weight=FLUX_WEIGHT, overshoot=1.0):
         self.cells_remaining = None
+        self.overshoot = overshoot
         self.currents = np.zeros(2)
         self.map_current = object()
         self.flux_weight = flux_weight
@@ -122,17 +123,25 @@ class _Operator:
             external = EXTERNAL + np.asarray(
                 self.prescribed_field.flux(prescribed_current), dtype=np.float64
             )
-        return jnp.asarray(
-            external + COUPLING @ self.instrument.cell_current(self.source, psi)
-        )
+        base = external + COUPLING @ self.instrument.cell_current(self.source, psi)
+        overshoot = self.instrument.overshoot
+        if overshoot != 1.0:
+            # a cycle that overshoots the map it was asked for, the way a
+            # strongly beta-dominated read-write cycle does
+            base = np.asarray(psi, dtype=np.float64) + overshoot * (
+                base - np.asarray(psi, dtype=np.float64)
+            )
+        return jnp.asarray(base)
 
     def read(self, psi):
         return None, SimpleNamespace(flux_span=1.0)
 
 
 class _Profile:
-    def __init__(self, source, flux_weight=FLUX_WEIGHT, prescribed=False):
-        self.instrument = _Instrument(flux_weight)
+    def __init__(
+        self, source, flux_weight=FLUX_WEIGHT, prescribed=False, overshoot=1.0
+    ):
+        self.instrument = _Instrument(flux_weight, overshoot)
         self.prescribed = prescribed
         self.operator = _Operator(self.instrument, source, prescribed)
 
@@ -169,7 +178,7 @@ def _fixed_point(amplitudes, flux_weight=FLUX_WEIGHT):
     return flux
 
 
-def _instrument(initial=None, conductor=False, flux_weight=FLUX_WEIGHT):
+def _instrument(initial=None, conductor=False, flux_weight=FLUX_WEIGHT, overshoot=1.0):
     flux = _fixed_point(TRUTH, flux_weight)
     cells = _profile_weight(flux, flux_weight) @ TRUTH
     measured = SENSOR @ cells
@@ -202,7 +211,10 @@ def _instrument(initial=None, conductor=False, flux_weight=FLUX_WEIGHT):
             conductor_names=CONDUCTOR_NAMES,
         )
     fitter = FluxIterationFit(
-        _Profile(source, flux_weight), geometry, sensor_rows, **kwargs
+        _Profile(source, flux_weight, overshoot=overshoot),
+        geometry,
+        sensor_rows,
+        **kwargs,
     )
     return fitter, measurement, flux, cells
 
@@ -237,6 +249,9 @@ def test_the_iteration_recovers_the_state_the_rows_came_from():
 
 
 def test_each_pass_costs_one_flux_map_per_coefficient_plus_the_residual():
+    # one residual read and one response column per coefficient per pass, and
+    # one cycle for the step the pass lays down plus one for every fraction it
+    # backed off from
     fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
     receipt = fitter.fit(
         measurement,
@@ -244,7 +259,9 @@ def test_each_pass_costs_one_flux_map_per_coefficient_plus_the_residual():
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
     )
-    assert receipt.flux_evaluations == len(receipt.passes)
+    assert receipt.flux_evaluations == len(receipt.passes) + sum(
+        item.trials for item in receipt.passes
+    )
     assert receipt.sensor_evaluations == len(receipt.passes) * (TRUTH.size + 1) + 1
     assert [item.index for item in receipt.passes] == list(range(len(receipt.passes)))
     assert receipt.last_flux_update == receipt.passes[-1].flux_update
@@ -318,14 +335,17 @@ def test_the_fitted_conductor_currents_reach_the_laid_down_map():
     np.testing.assert_allclose(
         fitter.profile.instrument.currents, TRUTH_CURRENTS, atol=1e-9
     )
-    assert receipt.flux_evaluations == 1
+    # one cycle for the step and one for the fraction it checks
+    assert receipt.flux_evaluations == 5
+    assert receipt.passes[0].trials == 4
 
 
 def test_a_flux_map_that_loses_its_axis_is_recorded_at_that_pass():
     fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
     # one residual read, one response read per coefficient and one map
     # application, which reads the held map's current through the same reader
-    fitter.profile.instrument.cells_remaining = 2 * (TRUTH.size + 2)
+    calls_per_pass = TRUTH.size + 1 + 1 + 4
+    fitter.profile.instrument.cells_remaining = 2 * calls_per_pass
     receipt = fitter.fit(
         measurement,
         np.zeros(CELLS),
@@ -340,8 +360,9 @@ def test_a_flux_map_that_loses_its_axis_is_recorded_at_that_pass():
 
 def test_a_map_update_beyond_the_span_is_rejected():
     fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
-    # the second map the fit asks for leaves the branch entirely
-    fitter.profile.instrument.map_displacements[1] = 10.0
+    # the second pass's own step leaves the branch entirely: pass 0 spends map
+    # calls 0 (its step) and 1 to 4 (the fractions it checks)
+    fitter.profile.instrument.map_displacements[5] = 10.0
     receipt = fitter.fit(
         measurement,
         np.zeros(CELLS),
@@ -360,6 +381,74 @@ def test_a_map_update_beyond_the_span_is_rejected():
         EXTERNAL + COUPLING @ (_profile_weight(np.zeros(CELLS)) @ first),
         atol=1.0e-12,
     )
+
+
+def test_a_cycle_that_overshoots_is_laid_down_one_converging_fraction_at_a_time():
+    """A whole cycle need not be a contraction; the step the pass lays down is.
+
+    The instrument's cycle returns ``psi + 1.8 * (map(psi) - psi)``, so laying
+    a whole one down moves the map 0.8 of the way past the answer every pass and
+    the iteration leaves the branch. The pass must lay down the fraction whose
+    own residual is lower than the one it was built from, and the same
+    instrument given no backtracking budget must fail instead of recovering.
+    """
+    fitter, measurement, flux, cells = _instrument(initial=TRUTH * 1.05, overshoot=1.8)
+    receipt = fitter.fit(
+        measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+    )
+    assert receipt.converged
+    assert all(item.fraction < 1.0 for item in receipt.passes)
+    assert all(item.trials >= 1 for item in receipt.passes)
+    np.testing.assert_allclose(receipt.coefficients, TRUTH, atol=1.0e-8)
+    np.testing.assert_allclose(receipt.terminal_state.flux, flux, atol=1.0e-9)
+    np.testing.assert_allclose(receipt.terminal_state.cell_current, cells, rtol=1.0e-8)
+    undamped, undamped_measurement, _, _ = _instrument(
+        initial=TRUTH * 1.05, overshoot=1.8
+    )
+    bare = undamped.fit(
+        undamped_measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+        max_backtracks=0,
+        max_passes=6,
+    )
+    assert not bare.converged
+
+
+def test_a_pass_moves_no_amplitude_past_the_trust_radius():
+    """A column the rows barely resolve may not name a profile the data never saw.
+
+    The initial amplitudes are five per cent off, so the unclipped solve asks for
+    a correction well past the radius; with the radius set at one hundredth of
+    the largest held amplitude, the first pass may move no amplitude further
+    than that and the receipt says so in the pass it laid down.
+    """
+    fitter, measurement, _, _ = _instrument(initial=TRUTH * 1.05)
+    held = TRUTH * 1.05
+    receipt = fitter.fit(
+        measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+        max_coefficient_step=1.0e-2,
+        max_passes=1,
+    )
+    radius = 1.0e-2 * float(np.max(np.abs(held)))
+    moved = np.max(np.abs(receipt.passes[0].coefficients - held))
+    assert moved <= radius * (1.0 + 1.0e-12)
+    assert receipt.max_coefficient_step == 1.0e-2
+    grow = fitter.fit(
+        measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+        max_passes=1,
+    )
+    assert np.max(np.abs(grow.passes[0].coefficients - held)) > radius
 
 
 def test_a_scaled_input_leaves_the_plasma_current_band():

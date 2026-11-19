@@ -73,6 +73,13 @@
     "No suite or mutation was re-run during this bounded read-only review; the scoped gate log and the manifest's arms record are read as written.",
     "The builder-vs-extraction 1e-10 agreement is computed by the same _profile_edge_values helper on both sides, so it shows reproducibility of the committed receipt, not agreement with an independent extraction."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-diiid-finite-edge-flux-2ffdb3b1fb99",
+      "recorded_at": "2026-11-19T11:57:46.167392+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_finite_edge_flux/summarize.py",

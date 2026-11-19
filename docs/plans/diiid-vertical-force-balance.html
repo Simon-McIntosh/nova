@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="141">
+<meta name="plan-version" content="142">
 <meta name="plan-modified" content="2026-11-19">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -412,7 +412,10 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
     <div class="r-comment-body"><p>Review of r-20261118T203342822348-diiid-finite-edge-flux at 347a1d2ce over the single commit it gained since its previous review (2ffdb3b1f..347a1d2ce, scripts/prototypes/diiid_finite_edge_flux/summarize.py:30): goal_fidelity 16, evidence 13, scope_discipline 20, durability 8, fit 19, reuse 20, added_failure_count 0, one non-blocking finding on the unguarded summariser parse.</p></div>
 </div>
 <div class="r-comment" data-section="s13" data-id="c-run-r-20261119T125501119571-review-of-diiid-finite-edge-flux-f554985b29e7" data-who="reckon-build" data-when="2026-11-19T12:59:14.218Z">
-    <div class="r-comment-body"><p>Reviewed 347a1d2ce..f554985b2 for r-20261118T203342822348-diiid-finite-edge-flux: the single gained commit adds a parametrized grammar guard (ast.parse at feature_version=(3, 13)) over the six prototype drivers in tests/equilibrium/test_finite_edge_flux_function.py:125-143, the gate re-ran at 13 passed on the head against 7 passed on the base with the same command and 0 failures on each arm, the negative control reddens the guard on the reverted unparenthesised except, and the review records two non-blocking findings (the empty-parametrize hole when the driver directory is absent, and the docstring&#x27;s 3.13-floor claim against pyproject.toml&#x27;s &gt;=3.14).</p></div>
+    <div class="r-comment-body"><p>Reviewed 347a1d2ce..f554985b2 for r-20261118T203342822348-diiid-finite-edge-flux: the single gained commit adds a parametrized grammar guard (ast.parse at feature_version=(3, 13)) over the six prototype drivers in tests/equilibrium/test_finite_edge_flux_function.py:125-143, the gate re-ran at 13 passed on the head against 7 passed on the base with the same command and 0 failures on each arm, the negative control reddens the guard on the reverted unparenthesised except, and the review records two non-blocking findings (the empty-parametrize hole when the driver directory is absent, and the docstring's 3.13-floor claim against pyproject.toml's &gt;=3.14).</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-run-r-20261119T125608487038-review-of-diiid-finite-edge-flux-f554985b29e7-figure" data-who="reckon-build" data-when="2026-11-19T13:04:08.236Z">
+    <div class="r-comment-body"><p>figure review of f554985b29e7 recorded parsed at the reviewed run&#x27;s review-records directory; 4 figures x 6 rubric items answered, 5 non-blocking findings, 0 blocking findings</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

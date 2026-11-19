@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-19T13:04:08.236Z",
   "dispatched_at": "2026-11-19T12:58:20Z",
   "figures": {
     "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-137-diverted-lower-xpoint.svg": {
@@ -40,35 +40,30 @@
   "findings": [
     {
       "file": "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-146-limited-lower-xpoint.svg",
-      "id": "fcc2f8cf27c",
       "line": null,
       "severity": "non-blocking",
       "summary": "The left (base tables) lower-X window is centred on EFIT's null while this arm's solved lower null lies 8.115 cm away, outside the 10 cm window, so the panel draws the solved field only as two disconnected blue stubs at its top edge and no solved-null marker; a reader comparing the two zoom panels sees one null set in the left one. The panel's own note (residual 0.00577; converged 0), the full-field panel beside it and the record's table carry the offset, so the figure as a whole still conveys it."
     },
     {
       "file": "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-137-diverted-lower-xpoint.svg",
-      "id": "f7e5907d9b4",
       "line": null,
       "severity": "non-blocking",
       "summary": "The legend names only the filled blue star ('solved null') and the hollow square ('EFIT null'), but every full-field panel also draws each arm's second qualified null as a hollow blue X nested in a black square (visible at the upper saddle in all four figures), and no legend entry names that hollow X; a reader may take it for a solved-null marker that failed to fill or for a second EFIT null."
     },
     {
       "file": "scripts/prototypes/diiid_finite_edge_flux/render.py",
-      "id": "f88fb4e7032",
       "line": 46,
       "severity": "non-blocking",
       "summary": "The panel notes label the left arm 'base tables' while the evidence fragment's table, caption and body call the same arm 'capped'; a reader moving between the figure and its caption has to infer that the record's 'capped' is the figure's 'base tables'."
     },
     {
       "file": "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-179-limited-lower-xpoint.svg",
-      "id": "fcd0f789344",
       "line": null,
       "severity": "non-blocking",
       "summary": "At the top of both full-field panels the hollow shadow-node circles and a filled solved-axis/null cluster overlap into a single blue blob on the wall line, so none of those marks is separable at a glance; the cluster sits well away from the lower-X subject the figure is about."
     },
     {
       "file": "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-137-diverted-lower-xpoint.svg",
-      "id": "f7e5907d9b4",
       "line": null,
       "severity": "non-blocking",
       "summary": "Along the vessel bottom a chain of hollow shadow nodes overlaps itself and the wall, merging into one tang; the same crowding appears in 146 limited and 179 limited. Secondary to the lower-X subject, but it makes the shadow-node set uncountable at full-field scale."
@@ -82,6 +77,6 @@
   "rubric": "figure",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-19T13:04:12.529014+00:00",
+  "timestamp": "2026-11-19T13:09:27.028402+00:00",
   "total": null
 }

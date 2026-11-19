@@ -78,6 +78,11 @@
       "kind": "folded",
       "node": "diiid-finite-edge-flux",
       "recorded_at": "2026-11-19T12:01:26.758398+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The coordinator corrects the record's negative-control count and the P102-only assertion wording against logs/negative-control.log after landing",
+      "recorded_at": "2026-11-19T12:01:34.447991+00:00"
     }
   },
   "findings": [

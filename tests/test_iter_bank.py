@@ -13,7 +13,9 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
+from nova.biot import polygonanalytic as kernel
 from nova.equilibrium import support_read, topology
+from nova.equilibrium.fixed_points import _source_jets
 from scripts.prototypes.iter_bank.measure import (
     PLASMA_JET_TOLERANCE,
     ZeroField,
@@ -204,6 +206,8 @@ def test_map_check_refuses_nonfinite_and_missing_coils():
         assert_accuracy(expected, np.zeros_like(expected))
 
 
+@pytest.mark.slow
+@pytest.mark.timeout(900)
 @pytest.mark.parametrize("sample", range(3))
 def test_iter_nodal_jets_match_analytic_map(iter_bank, sample):
     """Check the live plasma contraction alone and with runtime coil currents."""
@@ -248,6 +252,8 @@ def test_reentrant_wall_mesh_keeps_all_clipped_fragments():
     assert all(p.difference(vessel).area < 1e-12 for p in cells)
 
 
+@pytest.mark.slow
+@pytest.mark.timeout(900)
 @pytest.mark.parametrize("sample", range(3))
 def test_iter_coil_jets_match_analytic_map(iter_bank, sample):
     """Qualify every driven jet entry against the direct analytic kernels."""
@@ -258,3 +264,210 @@ def test_iter_coil_jets_match_analytic_map(iter_bank, sample):
     errors = assert_accuracy(actual[:active], expected[sample, 1])
     np.testing.assert_array_equal(actual[active:], 0.0)
     print("coil", errors)
+
+
+def extended_line_source():
+    """A plasma cell and a target 1e-12 m from one edge's extended line."""
+    angle = np.pi / 6
+    rotation = np.array(
+        [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
+    )
+    polygon = np.array([[-0.5, -0.6], [0.5, -0.6], [0.5, 0.6], [-0.5, 0.6]])
+    polygon = polygon @ rotation.T + [6, 0]
+    edge = polygon[2] - polygon[1]
+    normal = np.array([edge[1], -edge[0]]) / np.linalg.norm(edge)
+    point = polygon[1] + 2 * edge + 1e-12 * normal
+    return polygon, point
+
+
+def primal_gradient(point, coupling):
+    """Evaluate the analytic gradient without invoking any tangent rule."""
+    rows = kernel.packed_analytic_moments(
+        np,
+        np.asarray([point[0]]),
+        np.asarray([point[1]]),
+        np.asarray(coupling.edge),
+        np.asarray(coupling.weight),
+        np.asarray(coupling.norm),
+        np.asarray(coupling.centre.T),
+        np.asarray(coupling.centre.T),
+        np.asarray(coupling.reflection_axis),
+        np.asarray(coupling.reflection_partner),
+    )
+    stacked = np.stack((np.stack(rows[6:9]), -np.stack(rows[3:6])), axis=-1)
+    return 2 * np.pi * point[0] * stacked[:, 0]
+
+
+def test_plasma_row_hessian_matches_source_gradient_reference():
+    """The bank's plasma row carries a Hessian this edge line does not damage.
+
+    The reference differences the primal analytic gradient at three steps and
+    Richardson-extrapolates it, so it never reads the polygon tangent the row
+    is built from.
+    """
+    polygon, point = extended_line_source()
+    coupling = topology.BiotMomentCoupling.from_polygons((polygon,))
+    moments = np.array([[240000.0, 0.0, 0.0]])
+    row = np.asarray(_source_jets(jnp.asarray(point), coupling))
+    actual = np.einsum("cm,cmq->q", moments, row)
+    estimates = []
+    for step in (0.001, 0.0005, 0.00025):
+        columns = []
+        for direction in np.eye(2):
+            offset = step * direction
+            columns.append(
+                (
+                    primal_gradient(point + offset, coupling)
+                    - primal_gradient(point - offset, coupling)
+                )
+                / (2 * step)
+            )
+        estimates.append(np.stack(columns, axis=-1))
+    fourth = [
+        (4 * estimates[1] - estimates[0]) / 3,
+        (4 * estimates[2] - estimates[1]) / 3,
+    ]
+    sixth = (16 * fourth[1] - fourth[0]) / 15
+    reference = np.einsum("c,cab->ab", moments[0], sixth)
+    mixed, vertical = reference[0, 1], reference[1, 1]
+    errors = np.array(
+        [abs(actual[4] - mixed) / abs(mixed), abs(actual[5] - vertical) / abs(vertical)]
+    )
+    print("plasma_row_hessian", actual[[4, 5]].tolist(), errors.tolist())
+    assert np.all(errors <= 1e-8), f"plasma-row Hessian errors {errors.tolist()}"
+
+
+# The derive_rows instrument backs every first-derivative figure the evidence
+# fragment quotes. These cases pin the three things that figure depends on: the
+# derivative slice it reads, the magnitude window its filtered statistic uses,
+# and the threshold at which an entry is listed; plus the opt-in status that
+# replaced the withdrawn 1e-7 boundary, and the single ownership of the
+# node-aggregated norm the certification script also prints.
+
+from scripts.prototypes.iter_bank import derive_rows, recertify  # noqa: E402
+
+
+def stored_rows(nodes=1, cells=1, moments=1, value=1.0):
+    """A row archive shaped like the published bank's, with every jet at value."""
+    rows = np.full((nodes, cells, moments, 6), value, dtype=np.float64)
+    return rows
+
+
+def test_derive_rows_reads_the_two_first_derivative_components():
+    rows = stored_rows(cells=2)
+    rows[..., 1] = 10.0
+    rows[..., 2] = 20.0
+    head = rows.copy()
+    head[..., 0] = 1.5
+    head[..., 3] = 5.0
+    head[..., 4] = 5.0
+    head[..., 5] = 5.0
+    report = derive_rows.compare(head, rows)
+    assert report["entries"] == 4
+    assert report["components"] == ["dpsi/dR", "dpsi/dZ"]
+    assert report["departing_count"] == 0
+    assert report["unfiltered"]["max_relative"] == 0.0
+    head[..., 2] = 30.0
+    report = derive_rows.compare(head, rows)
+    assert report["departing_count"] == 2
+    assert {row["component"] for row in report["departures"]} == {"dpsi/dZ"}
+    assert report["dpsi/dR"]["above_threshold"] == 0
+    assert report["dpsi/dZ"]["above_threshold"] == 2
+
+
+def test_derive_rows_window_keeps_near_zero_magnitudes_out_of_the_filtered_max():
+    rows = stored_rows(cells=2)
+    rows[0, 1, 0, 1] = 1e-12
+    head = rows.copy()
+    head[0, 0, 0, 1] = 1.0 + 1e-9
+    head[0, 1, 0, 1] = 1e-12 + 1e-16
+    report = derive_rows.compare(head, rows)
+    assert report["unfiltered"]["max_relative"] == pytest.approx(1e-4, rel=1e-6)
+    assert report["filtered"]["max_relative"] == pytest.approx(1e-9, rel=1e-6)
+    # Three entries survive the window: the two 1.0-magnitude entries of cell 0
+    # and the untouched dpsi/dZ entry of cell 1; the 1e-12 entry does not.
+    assert report["filtered"]["count"] == 3
+
+
+def test_derive_rows_lists_only_the_entries_above_the_relative_threshold():
+    rows = stored_rows(cells=3)
+    head = rows.copy()
+    head[0, 0, 0, 1] += 5e-11
+    head[0, 1, 0, 1] += 2e-10
+    head[0, 2, 0, 1] += 9e-11
+    report = derive_rows.compare(head, rows)
+    assert report["departing_count"] == 1
+    assert report["departures"][0]["cell"] == 1
+    assert report["filtered"]["above_threshold"] == 1
+
+
+def test_derive_rows_fails_only_on_a_named_absolute_boundary():
+    rows = stored_rows()
+    head = rows.copy()
+    head[0, 0, 0, 1] += 1e-6
+    quiet = derive_rows.compare(head, rows)
+    assert quiet["material"]["boundary"] is None
+    assert quiet["material"]["present"] is None
+    assert derive_rows.exit_status(quiet) == 0
+    loud = derive_rows.compare(head, rows, boundary=1e-7)
+    assert loud["material"]["present"] is True
+    assert loud["material"]["count"] == 1
+    assert derive_rows.exit_status(loud) == 2
+
+
+def test_derive_rows_shares_the_certification_relative_norm():
+    assert derive_rows.relative is recertify.relative
+
+
+def test_derive_rows_lists_every_exactly_zero_entry():
+    rows = stored_rows(cells=2)
+    rows[0, 0, 0, 1] = 0.0
+    head = rows.copy()
+    head[0, 0, 0, 1] = 3.5e-9
+    entries = derive_rows.zero_entries(head, rows)
+    assert len(entries) == 1
+    assert entries[0]["node"] == 0
+    assert entries[0]["cell"] == 0
+    assert entries[0]["moment"] == 0
+    assert entries[0]["component"] == "dpsi/dR"
+    assert entries[0]["current_value"] == 0.0
+    assert entries[0]["head_value"] == pytest.approx(3.5e-9)
+
+
+def test_derive_rows_zero_entries_honour_the_active_count():
+    # The archives carry padding rows past active_nodes whose zeros are not
+    # measurements; the instrument's own clamp is what keeps them out of the
+    # quoted count, so the clamp is what this case drives.
+    rows = stored_rows(nodes=3)
+    head = stored_rows(nodes=3)
+    head[0, 0, 0, 1] = 3.5e-9
+    rows[2, 0, 0, 2] = 0.0
+    assert derive_rows.zero_entries(head, rows, active=2) == []
+    assert len(derive_rows.zero_entries(head, rows)) == 1
+    wider = derive_rows.zero_entries(head, rows, active=3)
+    assert [(entry["node"], entry["component"]) for entry in wider] == [(2, "dpsi/dZ")]
+
+
+def test_derive_rows_measures_with_the_repository_segment_distance(monkeypatch):
+    from nova.equilibrium import boundary_comparison
+
+    calls = []
+    owner = boundary_comparison._point_to_segment_distances
+
+    def recorded(points, polyline):
+        calls.append((points.shape, polyline.shape))
+        return owner(points, polyline)
+
+    monkeypatch.setattr(boundary_comparison, "_point_to_segment_distances", recorded)
+    square = np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    assert derive_rows.segment_distance(np.array([0.25, 0.5]), square) == (
+        pytest.approx(0.25)
+    )
+    assert calls == [((1, 2), (5, 2))]
+
+
+def test_derive_rows_evaluates_through_the_repository_row_program():
+    runner = derive_rows._ZERO_KERNEL_RUNNER
+    assert "from nova.equilibrium.fixed_points import _row_program" in runner
+    assert "jax.jit(" not in runner
+    assert "jax.vmap(" not in runner

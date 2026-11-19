@@ -13,13 +13,21 @@ matplotlib.use("Agg")
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.colors import to_rgb
 from matplotlib.figure import Figure
-from matplotlib.lines import Line2D
+from matplotlib.lines import Line2D, _get_dash_pattern
 from matplotlib.text import Text
 from matplotlib.transforms import Bbox
 import numpy as np
 
 from nova.media.ink import DEFAULT_INK, poloidal_axes
 from nova.media.poloidal import draw_coils, draw_plasma_cells, draw_wall
+
+# The first wall is drawn over the clipped cell outlines in its own mark: a
+# desaturated blue-grey dash, lighter than the plasma and distinct from the
+# solid coil grey, so each legend entry names exactly one component.
+WALL_COLOR = "#9aa2ab"
+WALL_LINESTYLE = (0, (5.0, 2.5))
+WALL_GID = "first-wall"
+COIL_GID = "coil-sections"
 
 
 def checked_save(figure, output):
@@ -190,12 +198,75 @@ def check_scene(figure, expected_labels):
         for colour in reference_colours
     ):
         raise ValueError("reference geometry is darker than the plasma mesh")
+    walls = [
+        line
+        for ax in figure.axes
+        for line in ax.lines
+        if (line.get_gid() or "").startswith(WALL_GID)
+    ]
+    cells = [
+        collection
+        for ax in figure.axes
+        for collection in ax.collections
+        if (collection.get_gid() or "").startswith("plasma-cells-")
+    ]
+    wall_orders = [line.get_zorder() for line in walls]
+    cell_orders = [collection.get_zorder() for collection in cells]
+    if not walls or min(wall_orders) <= max(cell_orders):
+        raise ValueError(
+            f"first wall is not drawn above the cell outlines: "
+            f"{wall_orders} against {cell_orders}"
+        )
+    coils_artist = next(
+        collection
+        for collection in overview.collections
+        if collection.get_gid() == COIL_GID
+    )
+    wall_mark = mark(walls[0], walls[0].get_color())
+    coil_mark = mark(coils_artist, coils_artist.get_edgecolors()[0, :3])
+    if wall_mark == coil_mark or wall_mark[0] == coil_mark[0]:
+        raise ValueError(f"first wall mark duplicates the coil mark: {wall_mark}")
+    if len(figure.legends) != 1:
+        raise ValueError(f"expected one legend, observed {len(figure.legends)}")
+    handles = figure.legends[0].legend_handles
+    labels = [handle.get_label() for handle in handles]
+    if len(set(labels)) != len(labels) or set(labels) != {
+        "plasma cells",
+        "coil sections",
+        "first wall",
+    }:
+        raise ValueError(f"legend entries do not name one component each: {labels}")
+    marks = {
+        "plasma cells": mark(cells[0], cells[0].get_edgecolors()[0, :3]),
+        "coil sections": coil_mark,
+        "first wall": wall_mark,
+    }
+    for handle in handles:
+        observed_mark = mark(handle, handle.get_color())
+        if observed_mark != marks[handle.get_label()]:
+            raise ValueError(
+                f"legend entry {handle.get_label()!r} does not carry its component's "
+                f"mark: {observed_mark} against {marks[handle.get_label()]}"
+            )
     return {
         **metrics,
         "sections": sections,
         "labelled": len(observed),
         "detail_coils": detail_coils,
     }
+
+
+def mark(artist, colour):
+    """Return an artist's mark as a comparable (colour, normalised dash)."""
+    return (tuple(to_rgb(colour)), _dash(artist.get_linestyle()))
+
+
+def _dash(value):
+    """Reduce a line or collection linestyle to one dash-pattern vocabulary."""
+    if isinstance(value, str):
+        return _get_dash_pattern(value)
+    offset, sequence = value[0]
+    return (float(offset), sequence)
 
 
 def build_figure(geometry):
@@ -210,8 +281,9 @@ def build_figure(geometry):
         zorder_plasma=5,
         coil_edgecolor="#929292",
         coil_linewidth=1.4,
-        wall_color="#929292",
-        wall_linewidth=1.3,
+        wall_color=WALL_COLOR,
+        wall_linewidth=1.7,
+        zorder_wall=6,
     )
     all_points = np.concatenate((*coils, wall))
     overview = np.array([all_points.min(0), all_points.max(0)])
@@ -237,14 +309,20 @@ def build_figure(geometry):
         )
         axes.append(ax)
         poloidal_axes(ax, style)
-        draw_wall(ax, units=(wall,), style=style)
+        draw_wall(
+            ax,
+            units=(wall,),
+            style=style,
+            linestyle=WALL_LINESTYLE,
+            gid=f"{WALL_GID}-{panel}",
+        )
         draw_plasma_cells(
             ax, cells, style=style, facecolor="none", gid=f"plasma-cells-{panel}"
         )
         ax.set_xlim(bounds[:, 0])
         ax.set_ylim(bounds[:, 1])
         left += width + 0.7
-    draw_coils(axes[0], coils, style=style, gid="coil-sections")
+    draw_coils(axes[0], coils, style=style, gid=COIL_GID)
     for index, (polygon, name) in enumerate(zip(coils, labels, strict=True)):
         low, high = polygon.min(0), polygon.max(0)
         centre = (low + high) / 2
@@ -285,6 +363,7 @@ def build_figure(geometry):
                 [],
                 color=style.wall_color,
                 linewidth=style.wall_linewidth,
+                linestyle=WALL_LINESTYLE,
                 label="first wall",
             ),
         ],

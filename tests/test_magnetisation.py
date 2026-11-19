@@ -1865,3 +1865,69 @@ def test_linear_fill_and_cross_field_match_affine_tensor(monkeypatch, fill):
             np.testing.assert_array_equal(
                 getattr(result, name), getattr(implicit, name)
             )
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(3600)
+def test_linear_volume_rule_holds_the_demagnetisation_bound(monkeypatch):
+    """The near-field volume rule holds the bound where the delivered rule does not.
+
+    The volume potential integrates a section quadrature of a logarithmic
+    self-term. Six nodes per triangle, the delivered rule, leaves the assembled
+    form non-dissipative on a 40 mm graded mesh. The shipped rule integrates
+    twelve nodes against the pairs inside eight least widths of each other and
+    six elsewhere; it must reproduce the global twelve-node operator to 1e-10
+    relative while the delivered six-node rule everywhere fails the same bound.
+    """
+    from nova.biot import tiledassembly
+
+    region = (
+        shapely.Point(0, 0)
+        .buffer(0.4, 2)
+        .difference(shapely.Point(0, 0).buffer(0.28, 2))
+        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
+    )
+    field = iron.graded_cell_size(
+        [0.28, 0.4], [-0.4, 0.4], fine=0.04, coarse=0.08, cells_across=20
+    )
+    cells = iron._mesh(region, field)
+    assert len(cells.polygons) > 40
+
+    def assemble():
+        return np.asarray(iron._galerkin_interaction(cells, basis="linear"))
+
+    def bound(operator):
+        return float(iron.galerkin_spectrum(cells, operator, basis="linear")["maximum"])
+
+    def everywhere(flag):
+        return lambda polygons: np.full(
+            (len(polygons), len(polygons)), flag, dtype=bool
+        )
+
+    shipped = tiledassembly._volume_near_mask
+    targeted = assemble()
+    with monkeypatch.context() as patch:
+        patch.setattr(tiledassembly, "_volume_near_mask", everywhere(True))
+        twelve = assemble()
+    difference = targeted - twelve
+    relative = float(np.max(np.abs(difference)) / np.max(np.abs(twelve)))
+    delivered_bound = None
+    with monkeypatch.context() as patch:
+        patch.setattr(tiledassembly, "_volume_near_mask", everywhere(False))
+        delivered = assemble()
+        delivered_bound = bound(delivered)
+    assert tiledassembly._volume_near_mask is shipped
+    print(
+        "volume rule bound",
+        json.dumps(
+            dict(
+                cells=len(cells.polygons),
+                targeted=bound(targeted),
+                delivered=delivered_bound,
+                operator_relative=relative,
+            )
+        ),
+    )
+    assert bound(targeted) <= 1.0
+    assert delivered_bound > 1.0
+    assert relative <= 1e-10

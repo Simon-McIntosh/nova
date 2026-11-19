@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="polygon-symmetry-violation">
+<meta name="plan-title" content="Polygon symmetry violations: a value displaced from its own limit">
+<meta name="plan-summary" content="At 23 up-down symmetric nodes the booked Z gradient takes the kernel's exact-zero branch while its one-sided limit is zero by parity; the flux row is bit-identical between kernels and neither the stencil nor the stable routing causes it">
+<meta name="plan-status" content="complete">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s7">
+<title>Polygon symmetry violations | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<article id="polygon-symmetry-violation-result">
+<h3 id="polygon-symmetry-violation-title">A value displaced from its own one-sided limit</h3>
+<p><strong>On the up-down plane the packed reduction returns a Z gradient that its own two-sided limit does not have.</strong> The two branches offered as suspects are excluded by construction: turning off the corner-height stencil and turning off the joint corner layer leave every booked value bit-identical, and enabling the stable pole product on the value row moves the largest violation from <code>6.06230122870705e-6</code> to <code>4.546725922061994e-6</code> without removing it. What remains is a one-sided comparison: at node <code>1770</code> the booked gradient is <code>4.54672592175249e-6</code> at <code>+1 nm</code>, <code>-4.546725921491127e-6</code> at <code>-1 nm</code>, and <code>6.06230122870705e-6</code> at zero. The offset pair is odd, so the limit at the plane is zero &mdash; which is what up-down symmetry demands &mdash; and the value at exactly zero is displaced from that limit by the whole <code>6.06e-6</code>. The file contains exactly this kind of branch, an exact-equality special case on the corner level whose comment at <code>polygonanalytic.py:612</code> says the configuration is evaluated "rather than approached". The measurement says the value taken at exact equality is not the limit it was written to be. Which exact-equality comparison produces it is not established here: the small-corner arc's own selector at <code>:425</code> belongs to the band the no-layer arm excludes, so the search for the comparison that fires at these targets is the next step, not a claim of this node.</p>
+
+<h4 id="polygon-symmetry-violation-split">The receipt's split reproduces exactly</h4>
+<p>Job <code>1332037</code> recomputed the split from the receipt and the cell geometry in one batch job and reproduced the recorded counts and maxima: 867 group-A entries, largest repaired value <code>3.599752728245958e-06</code> against a base of <code>3.0791e-16</code>, with 23 entries above <code>1e-12</code>; 745 group-B entries, median <code>7.7904e-07</code>, largest <code>8.457795e-06</code>, all exactly <code>0.0</code> in the base kernel. All 867 group-A entries sit at a corner height (<code>near_corner</code> true); 6 of the 745 group-B entries do. Group A is entirely moment 1; group B is 739 moment 1 and 6 moment 0.</p>
+<table id="polygon-symmetry-violation-groups"><thead><tr><th>Group</th><th>Entries</th><th>Near-corner</th><th>Base maximum</th><th>Repaired maximum</th></tr></thead><tbody>
+<tr><td>A, on the symmetry plane</td><td>867</td><td>867</td><td>3.0791e-16</td><td>3.599752728245958e-06</td></tr>
+<tr><td>B, off the plane</td><td>745</td><td>6</td><td>0.0</td><td>8.457795e-06</td></tr>
+</tbody></table>
+
+<h4 id="polygon-symmetry-violation-scale">The violations carry the size of real off-plane signal, not round-off</h4>
+<p>The split is not a rounding tail. Sampled at the same cell and moment on the bank's own node grid, the booked Z gradient runs from <code>5.999587892245612e-07</code> at <code>dz = -1 m</code> to <code>-3.5997527300783506e-06</code> at <code>dz = +0.5 m</code>. The largest group-A violation, <code>3.6e-6</code> to <code>6.06e-6</code>, is the same size as those legitimate values, so a reader cannot dismiss the on-plane entries as arithmetic noise, and any repair has to be judged against a signal of that magnitude.</p>
+
+<h4 id="polygon-symmetry-violation-parity">The plane value is discontinuous, and its neighbours are not</h4>
+<p>Job <code>1332230</code> evaluated the booked moment-1 Z gradient on a ladder that straddles each entry's height &mdash; <code>&plusmn;1 mm</code>, <code>&plusmn;1 &micro;m</code>, <code>&plusmn;1 nm</code> and zero. Sixteen of the 23 group-A entries have a value at zero that is displaced from their own <code>&plusmn;1 nm</code> pair mean by more than half the value; two are exact zeros. The worst displacement is <code>6.062301228576368e-06</code>, i.e. the whole value. The largest pair mean across group A is <code>1.96e-06</code> and across group B <code>6.53e-06</code>.</p>
+<p>Node <code>1770</code>, cell and moment as booked:</p>
+<table id="polygon-symmetry-violation-ladder"><thead><tr><th>Height offset [m]</th><th>Booked Z gradient [Wb/m]</th><th>Flux row [Wb]</th></tr></thead><tbody>
+<tr><td>-1e-3</td><td>3.0311506147979305e-06</td><td>2.308571141607994e-06</td></tr>
+<tr><td>-1e-6</td><td>-7.577876535400247e-06</td><td>2.308571240605434e-06</td></tr>
+<tr><td>-1e-9</td><td>-4.546725921491127e-06</td><td>2.3085712406066294e-06</td></tr>
+<tr><td>0</td><td>6.06230122870705e-06</td><td>2.3085712406060314e-06</td></tr>
+<tr><td>1e-9</td><td>4.54672592175249e-06</td><td>2.3085712406060314e-06</td></tr>
+<tr><td>1e-6</td><td>-3.0311506139175596e-06</td><td>2.308571240604836e-06</td></tr>
+<tr><td>1e-3</td><td>-3.0311506145365675e-06</td><td>2.3085711416062e-06</td></tr>
+</tbody></table>
+<p>The <code>&plusmn;1 nm</code> and <code>&plusmn;1 mm</code> pairs are each odd to <code>2.613630273036287e-16</code>, so the reduction is parity-exact at those offsets and the limit at the plane is zero. The <code>&plusmn;1 &micro;m</code> pair is not odd: its even part is <code>-5.304513574658904e-06</code> and its odd part <code>-1.0609027149317807e-05</code>. The flux row on the same ladder carries no height dependence at all &mdash; it spans <code>-1.794015782284608e-18</code> over <code>&plusmn;1 mm</code>, one ulp of its value &mdash; so at this node the booked gradient is the only place any height structure appears, and its structure is a staircase: exact parity at <code>1 nm</code>, parity broken by <code>1e-5</code> at <code>&micro;m</code>. Values repeat across the ladder, <code>|3.0311506e-06|</code> at <code>-1 &micro;m</code> and at <code>+1 mm</code>, which is the signature of a branch selected by the target's height classification rather than of a smooth function of the offset.</p>
+
+<h4 id="polygon-symmetry-violation-exclusions">Three candidate mechanisms, excluded by construction</h4>
+<p>Each arm is a copy of the head tree with one textual substitution, run through the same batched program over the same 1,472 points and 9 cells.</p>
+<table id="polygon-symmetry-violation-arms"><thead><tr><th>Arm</th><th>Substitution</th><th>Group-A maximum</th><th>Group-B maximum</th></tr></thead><tbody>
+<tr><td>current, head</td><td>none</td><td>6.06230122870705e-06</td><td>8.777794110961234e-06</td></tr>
+<tr><td>base kernel</td><td><code>029979051</code> restored by <code>git show</code></td><td>6.06230122870705e-06</td><td>8.777794110961234e-06</td></tr>
+<tr><td>no corner stencil</td><td><code>near_corner = nearest &lt; 0.0</code></td><td>6.06230122870705e-06</td><td>8.777794110961234e-06</td></tr>
+<tr><td>no corner layer</td><td><code>hypot(level, offset) &lt; 0.0 * radius</code></td><td>6.06230122870705e-06</td><td>8.777794110961234e-06</td></tr>
+<tr><td>stable primal</td><td><code>stable_poles=True</code> on the value row</td><td>4.546725922061994e-06</td><td>9.914998345318355e-06</td></tr>
+</tbody></table>
+<p>The first three arms are bit-identical to the current head. The no-stencil substitution sits in the custom JVP, which does not feed the booked value row at all; the no-layer substitution does sit in the value path, and still changes nothing, so that band is not selected at these points. The stable primal arm does reach the value row and changes it, but the largest group-A violation survives at 75% of its size, so the stable pole product is not the mechanism either. The flux row is identical between the current and base kernels (<code>psi_current_vs_base_max_abs = 0.0</code>), so nothing in the repair touched the channel that parity protects.</p>
+
+<h4 id="polygon-symmetry-violation-group-b">Group B: neither kernel's values are correct</h4>
+<p>The independent reference is a central difference in Z of the kernel's own flux row, taken on the head tree whose flux row is bit-identical to the base kernel's. Its step-convergence envelope on the eleven-step ladder ends below <code>3.0e-12</code> for every group-A entry, and for group B it converges to a median <code>3.212122448040574e-07</code> with a largest value <code>4.921537812515756e-07</code>. Against that, the booked values are a median <code>2.570816423826914e-06</code>, and the worst entry differs from the reference by a relative <code>74.76</code>. The base kernel's exact <code>0.0</code> is a defect &mdash; the flux row does move with Z at those nodes &mdash; but the repaired values are not that derivative either: they are larger by roughly an order of magnitude and do not follow the reference. Two conclusions follow. The base zeros were a dropped contribution, not a cancellation. The repair replaced a dropped contribution with a value the kernel's own flux row does not support.</p>
+
+<h4 id="polygon-symmetry-violation-receipt">The receipt does not reproduce its own base column</h4>
+<p>At the receipt's own coordinates the base kernel and the repaired kernel return the same group-A values (<code>6.06230122870705e-06</code> in both), while the receipt records base values near <code>3e-16</code> for those entries. Only 9 of the 23 violations reproduce as the receipt's <code>head_value</code> through this route; the remainder match other sweep offsets. The booking route here is the one <code>nova/equilibrium/fixed_points.py::_source_jets</code> uses &mdash; the nine packed rows, the <code>2&pi;r(B_z, -B_r)</code> gradient and the same <code>einsum("cbq,cbm-&gt;cmq")</code> against the inverse second moment &mdash; so the disagreement is in the receipt's recorded route or its staleness, not in the reproduction of the split, which matches to the last digit.</p>
+
+<h4 id="polygon-symmetry-violation-recommendation">The smallest change, and what it costs</h4>
+<p>A target exactly level with a corner already has an exact symmetric construction in this file: on the cell's reflection plane the flux channel builds its vertical row from the reflected edge pairing (<code>reflected_vertical</code>, applied under <code>on_reflection</code>), and the field rows have no such construction. The smallest supporting change is to extend that existing <code>where(on_reflection, …)</code> to the basis-1 radial field row, so the booked Z gradient on the plane is the exact symmetric value &mdash; zero &mdash; instead of the exact-zero branch's value. That removes all 23 group-A violations by parity, and it cannot touch group B, whose nodes are off the plane and therefore never select the branch.</p>
+<p>Cost is bounded by the mechanism: the flux channel already forms <code>pair_weight * (edge_flux + partner_flux)</code> over the live edges, so the same reduction for the field terms is one more weighted sum over per-edge field values that are already materialised in the graph, plus one <code>where</code> on the returned row. It adds no program to the compiled set. Estimate: instruction count within <code>1%</code> of head and cold compile wall unchanged within noise, to be measured if the change is implemented. The measured anchors are the production row's <code>1.565208</code>&times; instructions and <code>1.871670</code>&times; cold compile against main, both inside the unchanged <code>2.3</code> limits of <code>polygon-stable-evaluator.html</code>.</p>
+<p>Two limits are stated plainly. First, this is a construction fix rather than a limit fix: the honest repair of the branch would evaluate the ordinary expression at <code>level == 0</code>, which requires proving the ordinary expression is finite there, and this node did not attempt it. Second, group B remains wrong after the change; the near-corner field rows disagree with the flux row's own derivative by up to <code>74.76</code> relative off the plane, and that disagreement is a separate defect that survives the repair.</p>
+<p>The reproduction, the four arms, the eleven-step ladders and the plane ladder are the committed prototypes <code>scripts/prototypes/polygon_symmetry_violation/{split,compare,plane,crosscheck}.py</code>, run as batch jobs <code>1332037</code> (split and arms), <code>1332172</code> (stable primal) and <code>1332230</code> (plane ladder) on the <code>rigel</code> partition. No product source changed in this node.</p>
+</article>
+</main></body></html>

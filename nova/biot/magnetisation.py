@@ -267,8 +267,8 @@ def _galerkin_interaction(cells, plan=_PLAN, *, basis="constant"):
 
 
 def _geometry_digest(cells, basis):
-    if basis not in {"constant", "linear"}:
-        raise ValueError("basis must be constant or linear")
+    if basis not in {"constant", "linear", "coil"}:
+        raise ValueError("basis must be constant, linear or coil")
     digest = hashlib.sha256(basis.encode("ascii"))
     for polygon in cells.polygons:
         vertices = np.asarray(polygon, dtype="<f8")
@@ -292,9 +292,10 @@ class MagnetisationInteraction:
             or self.basis != basis
         ):
             raise ValueError("interaction geometry digest does not match the mesh")
-        unknowns = len(cells.polygons) * (6 if basis == "linear" else 2)
-        if self.matrix.shape != (unknowns, unknowns):
-            raise ValueError("interaction shape does not match the mesh and basis")
+        if basis != "coil":
+            unknowns = len(cells.polygons) * (6 if basis == "linear" else 2)
+            if self.matrix.shape != (unknowns, unknowns):
+                raise ValueError("interaction shape does not match the mesh and basis")
         if (
             self.matrix.dtype != np.dtype("float64")
             or not np.isfinite(self.matrix).all()
@@ -303,12 +304,15 @@ class MagnetisationInteraction:
 
 
 def save_magnetisation_interaction(
-    path, matrix, *, region, cell_size, basis="constant"
+    path, matrix, *, region, cell_size, basis="constant", coil_key=None
 ):
     """Persist a float64 response and its mesh identity as NPY and JSON.
 
-    The caller supplies the Galerkin matrix assembled on this exact mesh.
-    No currents, material law or time slice enter the geometry identity.
+    The caller supplies the Galerkin matrix assembled on this exact mesh. No
+    currents, material law or time slice enter the geometry identity. A
+    ``coil_key`` records the coil set whose external field the payload is, in
+    the same container, with the same digest rule and the same refusal family,
+    so the package keeps one response cache rather than one per consumer.
     """
     cells = _mesh(region, cell_size)
     response = MagnetisationInteraction(
@@ -318,19 +322,24 @@ def save_magnetisation_interaction(
     path = Path(path)
     with path.open("wb") as stream:
         np.save(stream, response.matrix, allow_pickle=False)
-    path.with_suffix(".json").write_text(
-        json.dumps(dict(geometry_digest=response.geometry_digest, basis=basis)) + "\n"
-    )
+    metadata = dict(geometry_digest=response.geometry_digest, basis=basis)
+    if coil_key is not None:
+        metadata["coil_key"] = coil_key
+    path.with_suffix(".json").write_text(json.dumps(metadata) + "\n")
     return response
 
 
-def load_magnetisation_interaction(path, *, region, cell_size, basis="constant"):
-    """Load a response only when the ordered mesh geometry and basis match."""
+def load_magnetisation_interaction(
+    path, *, region, cell_size, basis="constant", coil_key=None
+):
+    """Load a response only when the mesh geometry, basis and key match."""
     path = Path(path)
     metadata = json.loads(path.with_suffix(".json").read_text())
     cells = _mesh(region, cell_size)
     if metadata["geometry_digest"] != _geometry_digest(cells, basis):
         raise ValueError("interaction geometry digest does not match the mesh")
+    if coil_key is not None and metadata.get("coil_key") != coil_key:
+        raise ValueError("magnetisation response serves another coil set")
     response = MagnetisationInteraction(
         np.load(path, mmap_mode="r", allow_pickle=False),
         metadata["geometry_digest"],

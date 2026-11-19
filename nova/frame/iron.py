@@ -82,7 +82,9 @@ def insert_iron(coilset, solution, label: str = "iron"):
     column[reference] = source
     coilset.subframe[IRON_COLUMN] = column
     # the frame grew, so every locator already built over the old source index
-    # is stale: rebuild them lazily against the new subspace
+    # is stale: FrameSetLoc owns that rule and applies it from the subframe
+    # index version, so each holder is asked to recheck rather than editing
+    # the three cached names here.
     from nova.frame.framesetloc import FrameSetLoc
 
     holders = [
@@ -91,8 +93,7 @@ def insert_iron(coilset, solution, label: str = "iron"):
         if isinstance(value, FrameSetLoc)
     ]
     for holder in holders:
-        for name in ("aloc", "saloc", "aloc_hash"):
-            holder.__dict__.pop(name, None)
+        holder.update_loc_indexer()
     current = np.zeros(len(coilset.subframe.subspace.index))
     current[: len(before)] = before
     current[iron_positions(coilset, label)] = source.currents

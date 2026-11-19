@@ -24,6 +24,7 @@ from nova.biot.polysection import (
     TiledPolySection,
 )
 from nova.biot.groupset import GroupSet
+from nova.biot.tiledassembly import linear_cell_flux, linear_cell_interaction
 
 
 _PLASMA_MOMENT_ATTRIBUTES = frozenset({"PsiR", "PsiZ", "BrR", "BrZ", "BzR", "BzZ"})
@@ -422,13 +423,29 @@ class Solve(GroupSet):
             for begin in range(0, len(points), IRON_TARGET_BLOCK):
                 block = points[begin : begin + IRON_TARGET_BLOCK]
                 if attr == "Psi":
-                    values = source.psi(block)
+                    values = linear_cell_flux(
+                        source.polygons,
+                        block,
+                        plan=source.plan,
+                        geometry=source.geometry,
+                    )
                 elif attr in {"Br", "Bz"}:
                     component = 0 if attr == "Br" else 1
-                    values = source.field(block)[:, component]
+                    matrix = linear_cell_interaction(
+                        source.polygons,
+                        block,
+                        plan=source.plan,
+                        geometry=source.geometry,
+                    )
+                    values = matrix.reshape(2, len(block), -1)[component]
                 else:  # Aphi = psi / (2 pi R), zero on the axis like the sections
                     radius = block[:, :1]
-                    psi = source.psi(block)
+                    psi = linear_cell_flux(
+                        source.polygons,
+                        block,
+                        plan=source.plan,
+                        geometry=source.geometry,
+                    )
                     values = np.zeros_like(psi)
                     np.divide(psi, 2 * np.pi * radius, out=values, where=radius != 0)
                 if self.target_quadrature is not None:

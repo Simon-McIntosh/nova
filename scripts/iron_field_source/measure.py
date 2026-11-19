@@ -142,29 +142,37 @@ def coil_set_key(data):
 
 
 def persist_coil_field(points, rows, mesh_digest, coil_key):
-    """Persist the coils' field at the mesh quadrature, or reuse a matching one.
+    """Persist the coils' field through the package's response cache.
 
-    A stored response is reused only for the mesh and the coil set it was
-    written for; any other combination raises rather than serving the response
-    of a different problem.
+    The cache owner holds one container and one digest rule: the mesh identity
+    names the ordered quadrature and the recorded coil key names the coil set.
+    A request carrying either a different mesh or a different coil set raises
+    the owner's refusal rather than serving another problem's field.
     """
+    from nova.biot.magnetisation import (
+        load_magnetisation_interaction,
+        save_magnetisation_interaction,
+    )
+
+    region, _, _, _ = west_region()
     COIL_RESPONSE.mkdir(parents=True, exist_ok=True)
-    path = COIL_RESPONSE / f"{mesh_digest[:16]}.npz"
+    path = COIL_RESPONSE / f"coil-{mesh_digest[:16]}-{coil_key[:16]}.npy"
     if path.exists():
-        with np.load(path) as stored:
-            if stored["mesh_digest"].item() != mesh_digest:
-                raise ValueError(f"coil response {path} serves another mesh")
-            if stored["coil_key"].item() != coil_key:
-                raise ValueError(f"coil response {path} serves another coil set")
-            if not np.array_equal(stored["points"], points):
-                raise ValueError(f"coil response {path} serves another quadrature")
-            return np.asarray(stored["values"]), True
+        stored = load_magnetisation_interaction(
+            path,
+            region=region,
+            cell_size=CELL_SIZE,
+            basis="coil",
+            coil_key=coil_key,
+        )
+        return np.asarray(stored.matrix), True
     values = field_at(points, rows)
-    np.savez(
+    save_magnetisation_interaction(
         path,
-        values=values,
-        points=points,
-        mesh_digest=mesh_digest,
+        values,
+        region=region,
+        cell_size=CELL_SIZE,
+        basis="coil",
         coil_key=coil_key,
     )
     return values, False

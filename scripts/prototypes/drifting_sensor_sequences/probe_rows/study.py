@@ -1002,28 +1002,28 @@ def run_efit(args) -> None:
 
 
 def wall_npz(path: Path, machine_uri: str = MACHINE_URI) -> Path:
-    """Write the machine's limiter ring as a two-column wall array."""
+    """Write the machine's limiter ring as a two-column wall array.
+
+    The limiter units are read by
+    :func:`nova.equilibrium.wall_mask.wall_units_from_ids`, which owns the IDS
+    walk, the unit kind and the closure test; this function only chooses the
+    first unit that carries a contour and writes it beside the flux maps.
+    """
 
     import imas
 
-    if path.exists():
-        path.unlink()
+    from nova.equilibrium.wall_mask import wall_units_from_ids
+
     entry = imas.DBEntry(machine_uri, "r", dd_version=DD_VERSION)
-    wall = entry.get("wall")
-    rings = []
-    for description in wall.description_2d:
-        try:
-            units = description.limiter.unit
-        except AttributeError:
-            continue
-        for unit in units:
-            radius = np.asarray(unit.outline.r, dtype=float)
-            height = np.asarray(unit.outline.z, dtype=float)
-            if radius.size >= 3:
-                rings.append(np.column_stack([radius, height]))
-    entry.close()
+    try:
+        units = wall_units_from_ids(entry.get("wall"))
+    finally:
+        entry.close()
+    rings = [unit.vertices for unit in units if unit.vertices.shape[0] >= 3]
     if not rings:
         raise RuntimeError("the machine carries no limiter ring")
+    if path.exists():
+        path.unlink()
     np.savez(path, wall=rings[0])
     return path
 

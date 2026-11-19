@@ -83,6 +83,11 @@
       "kind": "exempted",
       "reason": "The coordinator corrects the record's negative-control count and the P102-only assertion wording against logs/negative-control.log after landing",
       "recorded_at": "2026-11-19T12:01:34.447991+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The builder's edge prescription is checked against the committed psi_N=1 extraction to 4e-16 relative in the record and exercised by all four reruns; a builder-level regression test is added with the pinned re-registration that touches the same builder",
+      "recorded_at": "2026-11-19T12:01:42.066843+00:00"
     }
   },
   "findings": [

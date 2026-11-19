@@ -24,6 +24,12 @@
       "recorded_at": "2026-11-19T15:31:21.055686+00:00",
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261119T120513777963-cached-point-program-remeasure"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-19T15:31:21.055686+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261119T120513777963-cached-point-program-remeasure"
     }
   },
   "findings": [

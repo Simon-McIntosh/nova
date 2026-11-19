@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "assertion": "ast.parse(source, filename=..., feature_version=(3, 13)) raises no SyntaxError",
+      "fails_if": "any driver in the directory carries syntax older-than-3.14 interpreters reject, above all the reverted unparenthesised except at scripts/prototypes/diiid_finite_edge_flux/summarize.py:30; logs/repair-negative-control-2.log records exactly that revert reddening this arm with the interpreter's own message, and a local probe reproduced the rejection at feature_version=(3, 13) while the parenthesised form parsed and the unparenthesised form parsed at (3, 14).",
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "independent_of_input": true,
+      "line": 143,
+      "test": "test_the_drivers_parse_at_the_oldest_supported_grammar[<driver>]"
+    }
+  ],
+  "assertion_independence": "The gained test emits no value-under-test comparison: its single condition is that the interpreter's 3.13 grammar accepts the driver source read from disk, and the negative control shows a SyntaxError there, so reinstating the regression reddens it. No input-echo assertion was added by this commit.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-19T12:59:14.218Z",
+  "dispatched_at": "2026-11-19T12:56:21Z",
+  "evidence_inputs": "The gained commit answers the 347a1d2ce review's own durability finding (an unguarded summariser repair) with a gate assertion; the guard's mechanism was confirmed by a local grammar probe and the run's negative control, and the one hole left is the empty-parametrize case recorded as a non-blocking finding.",
+  "evidence_limits": [
+    "added_failure_count 0 is read from the reviewed run's own recorded arms: suite-arms/base-arm-347a1d2ce.log and suite-arms/after-arm-f554985b2.log both report 0 failures, and both ran the identical command, so the delta is one command at two revisions.",
+    "No suite was re-run in this review; two bounded probes ran in a TMPDIR scratch directory (the ast feature_version behaviour, and an empty parametrize against a missing directory) and neither touched the reviewed tree.",
+    "The base arm ran in the reviewed run's scratch tree (its header names .../scratch/base-347a1d2ce/scripts/prototypes/diiid_finite_edge_flux/summarize.py), so its 7 passed are that extraction's, not the delivered base tree's."
+  ],
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": "130",
+      "severity": "non-blocking",
+      "text": "non-blocking: the parametrize argvalues are computed once from DRIVER_DIRECTORY.glob('*.py'), so an absent or emptied scripts/prototypes/diiid_finite_edge_flux collects an empty parameter set; measured on the same construct against a missing directory, pytest reports '1 skipped' and exits 0, so the guard cannot fire in the state where the receipt generator it protects has moved or been removed, and a rename of the directory passes the gate."
+    },
+    {
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": "138",
+      "severity": "non-blocking",
+      "text": "non-blocking: the docstring names (3, 13) 'the oldest supported grammar' while pyproject.toml:7 declares requires-python >=3.14, so the guard forbids a construct the project's own floor permits; the justification should name the construct it forbids (an unparenthesised except clause, PEP 758) rather than a supported-interpreter claim a reader will take as the project's floor."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "answered - none: the gain is a test file and no production module imports a test, so there is no production call site of the change.",
+    "diff": "answered - 347a1d2ce..f554985b2 is one commit and one file (+22 lines): an ast import, a DRIVER_DIRECTORY constant, and a parametrized ast.parse at feature_version=(3, 13); nothing else landed.",
+    "done_when": "answered - done_when names a committed finite-edge test, a negative control and four-row boundary agreement; the manifest records the gate at suite-arms/base-arm-347a1d2ce.log (7 passed) and suite-arms/after-arm-f554985b2.log (13 passed, EXIT=0) plus logs/repair-negative-control-2.log (1 failed, EXIT=1).",
+    "goal": "answered - dispatch-detail.json goal is the finite-edge SampledFluxFunction used by the builder; the gained commit f554985b2 touches only tests/equilibrium/test_finite_edge_flux_function.py:14,125-143, a guard on the receipt generator rather than goal code, and scripts/prototypes/diiid_finite_edge_flux/summarize.py:30 carries the repaired parenthesised except at head.",
+    "manifest": "answered - read at the reviewed run's manifest.md: status complete, both arms recorded at their own revisions with 0 failures, and the repair negative control named.",
+    "write_paths": "answered - the seven declared paths include tests/equilibrium/test_finite_edge_flux_function.py, and the gained commit's only path lies inside it."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal in dispatch-detail.json is the finite-edge SampledFluxFunction used by the DIII-D builder; the commit gained since the last review, f554985b2, changes only tests/equilibrium/test_finite_edge_flux_function.py:14,125-143, adding a grammar guard rather than goal code, and the goal surface it protects (scripts/prototypes/diiid_finite_edge_flux/summarize.py:30) is intact at head.\nVERDICT done_when: done_when asks for a committed finite-edge test, a negative control and four-row boundary agreement; the manifest records suite-arms/base-arm-347a1d2ce.log at 7 passed and suite-arms/after-arm-f554985b2.log at 13 passed, EXIT=0, plus logs/repair-negative-control-2.log at 1 failed, EXIT=1.\nVERDICT write_paths: the seven declared paths in dispatch-detail.json include tests/equilibrium/test_finite_edge_flux_function.py, and the gained commit's only path, tests/equilibrium/test_finite_edge_flux_function.py:14,125-143, lies inside them.\nVERDICT manifest: read the reviewed run's manifest.md; it records status complete, both arms at revisions 347a1d2ce and f554985b2 with 0 failures, and names the repair negative control log.\nVERDICT diff: read 347a1d2ce..f554985b2 commit by commit; one commit, one file, +22 lines - an ast import, a DRIVER_DIRECTORY constant at line 125 and a parametrized ast.parse at feature_version=(3, 13) at line 143 - with nothing else landed.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the gain is confined to tests/equilibrium/test_finite_edge_flux_function.py:133-143 and re-tests the receipt generator rather than the finite-edge behaviour of nova/equilibrium/solve_request.py:SampledFluxFunction.\nSCORE evidence: 18\nJUSTIFICATION evidence: both arms re-ran the identical command at their own revisions and are recorded (suite-arms/base-arm-347a1d2ce.log 7 passed, suite-arms/after-arm-f554985b2.log 13 passed), so added_failure_count 0 is derived from logs rather than claimed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single path in 347a1d2ce..f554985b2, tests/equilibrium/test_finite_edge_flux_function.py, is one of the seven declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: the ast.parse at tests/equilibrium/test_finite_edge_flux_function.py:143 reddens on the regression the repair made - logs/repair-negative-control-2.log shows the reverted except failing that arm - but the glob at line 131 yields an empty, skipped parameter set when the driver directory is absent, measured as 1 skipped and EXIT=0, so a directory rename passes the gate.\nSCORE fit: 17\nJUSTIFICATION fit: the added import sits inside the file's declared ruff E402 block at tests/equilibrium/test_finite_edge_flux_function.py:14 and the test name follows the file's sentence-style naming, though the docstring at line 138 claims a 3.13 floor where pyproject.toml:7 declares >=3.14.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner for grammar-version parsing exists - a search of f554985b2 for feature_version matches only line 143, and the existing ast.parse sites (scripts/analytic_oracle_fixtures/measure.py:442) inspect structure, not grammar.\nFINDING tests/equilibrium/test_finite_edge_flux_function.py:130 non-blocking: the parametrize argvalues come from DRIVER_DIRECTORY.glob('*.py') at import, so an absent or emptied scripts/prototypes/diiid_finite_edge_flux collects an empty parameter set; measured on the same construct against a missing directory, pytest reports '1 skipped' and exits 0, so a moved or renamed driver directory passes the gate and the guard silently covers nothing.\nFINDING tests/equilibrium/test_finite_edge_flux_function.py:138 non-blocking: the docstring calls (3, 13) 'the oldest supported grammar' while pyproject.toml:7 declares requires-python >=3.14, so the guard forbids a form the project's floor permits; it should name the construct it forbids rather than claim a supported-interpreter floor.\n",
+  "reuse_search": {
+    "capabilities": [
+      "parsing a Python source at a specific grammar version to refuse older-than-current syntax"
+    ],
+    "judgement": "Searched f554985b2 for feature_version and py_compile: the only feature_version match is the added line, there is no py_compile in tests/ or scripts/, and the repository's existing ast.parse sites (scripts/analytic_oracle_fixtures/measure.py:442, scripts/prototypes/bank_fold_vertical/check_contract.py:20) inspect structure rather than grammar version. No capability is forked and no owner exists.",
+    "owners_opened": [
+      "tests/equilibrium/test_finite_edge_flux_function.py:130-143"
+    ]
+  },
+  "review_run_id": "r-20261119T125501119571-review-of-diiid-finite-edge-flux-f554985b29e7",
+  "review_scope": "delta",
+  "review_scope_note": "The run was reviewed at 2ffdb3b1f and again at 347a1d2ce; this record reads only the one commit gained since the last review, 347a1d2ce..f554985b2, whose whole change is tests/equilibrium/test_finite_edge_flux_function.py (+22 lines), and confirms against the delivered base d0947cef that nothing else landed.",
+  "reviewed_base_sha": "347a1d2cedf512ff4d8f391eb0a96d895148c944",
+  "reviewed_head_sha": "f554985b29e7e9e13f8dcfef48764b0f880647c6",
+  "reviewed_run_id": "r-20261118T203342822348-diiid-finite-edge-flux",
+  "reviewed_worker_commits": [
+    "f554985b2"
+  ],
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T13:08:45.228358+00:00",
+  "total": 109
+}

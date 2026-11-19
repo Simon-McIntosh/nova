@@ -22,6 +22,8 @@ import json
 
 import numpy as np
 
+from scripts.prototypes.polygon_symmetry_violation.compare import central_step
+
 
 def by_key(data):
     """One record per (node, cell, moment), with its three arms merged."""
@@ -67,11 +69,7 @@ def by_key(data):
 
 def central(record, step):
     """The psi central difference at one step magnitude, or None."""
-    forward = dict(record["psi"]).get(step)
-    backward = dict(record["psi"]).get(-step)
-    if forward is None or backward is None:
-        return None
-    return (forward - backward) / (2.0 * step)
+    return central_step(record["psi"], step)
 
 
 def parity(record, step):

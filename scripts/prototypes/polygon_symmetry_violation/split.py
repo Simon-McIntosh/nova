@@ -22,6 +22,8 @@ import json
 
 import numpy as np
 
+from nova.biot.polygonanalytic import _horizontal_reflection
+
 RECEIPT = (
     "/home/ITER/mcintos/.config/reckon/crew/runs/"
     "r-20261117T110237355670-iter-bank-recertify/receipts/zero-entries.json"
@@ -37,22 +39,27 @@ def polygons(geometry):
     return tuple(vertices[index, : int(count)] for index, count in enumerate(counts))
 
 
-def mirror_gap(cell, centre_z):
-    """How far a cell's vertex set departs from its mirror image about Z."""
-    cell = np.asarray(cell, dtype=float)
-    reflected = cell.copy()
-    reflected[:, 1] = 2.0 * centre_z - reflected[:, 1]
-    gaps = [np.min(np.hypot(*(cell - point).T)) for point in reflected]
-    return float(np.max(gaps))
+def mirror_gap(cell):
+    """How far a cell's vertex set departs from the owner's mirror pairing.
+
+    ``_horizontal_reflection`` is the repository's own mirror gap and
+    ``BiotMomentCoupling`` fills ``reflection_axis`` from it, so this reads the
+    pairing it found instead of re-deriving one with a second threshold.  A
+    cell the owner does not pair has no gap to report and yields infinity.
+    """
+    reflection = _horizontal_reflection(cell)
+    if reflection is None:
+        return float("inf")
+    axis, partner = reflection
+    section = np.asarray(cell, dtype=np.float64)
+    reflected_z = 2.0 * axis - section[:, 1]
+    return float(np.max(np.abs(section[partner, 1] - reflected_z)))
 
 
 def symmetric_cells(geometry):
-    """One mirror gap per cell, about that cell's own centre Z."""
-    centre = np.asarray(geometry["centre"])
+    """One mirror gap per cell, taken from the owner's horizontal reflection."""
     cells = polygons(geometry)
-    return np.array(
-        [mirror_gap(cell, centre[index, 1]) for index, cell in enumerate(cells)]
-    )
+    return np.array([mirror_gap(cell) for cell in cells])
 
 
 def classify(entries, geometry, *, plane=PLANE):
@@ -123,6 +130,13 @@ KEYS = (
 )
 
 
+def print_rows(name, entries):
+    """Print one labelled table, one JSON row per entry."""
+    print(name)
+    for entry in entries:
+        print(json.dumps({key: entry[key] for key in KEYS}))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--receipt", default=RECEIPT)
@@ -173,10 +187,8 @@ def main():
             indent=1,
         )
     )
-    print("VIOLATIONS_A")
-    for entry in violations:
-        print(json.dumps({key: entry[key] for key in KEYS}))
-    print("WORST_B")
+    print_rows("VIOLATIONS_A", violations)
+    print_rows("WORST_B", worst)
     if args.output:
         with open(args.output, "w") as stream:
             json.dump(report, stream, indent=1)

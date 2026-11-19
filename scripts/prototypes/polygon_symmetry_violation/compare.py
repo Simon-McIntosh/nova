@@ -301,15 +301,57 @@ def acquire(rows, record, local, moment, quantity):
     return float(rows[record["index"], local, moment, quantity])
 
 
+def central_step(ladder, step):
+    """One psi central difference at a step magnitude, or None if unpaired."""
+    values = dict(ladder)
+    forward, backward = values.get(step), values.get(-step)
+    if forward is None or backward is None:
+        return None
+    return (forward - backward) / (2.0 * step)
+
+
 def central(ladder):
     """Pair the psi values into a central difference per step magnitude."""
-    forward = {step: value for step, value in ladder if step > 0.0}
-    backward = {step: value for step, value in ladder if step < 0.0}
     return [
-        dict(step=step, derivative=(forward[step] - backward[-step]) / (2.0 * step))
-        for step in sorted(forward, reverse=True)
-        if -step in backward
+        dict(step=step, derivative=central_step(ladder, step))
+        for step in sorted({step for step, _ in ladder if step > 0.0}, reverse=True)
+        if central_step(ladder, step) is not None
     ]
+
+
+def psi_identity(values, records, entries, local_of):
+    """Largest flux-row difference between the current and base trees.
+
+    Every ladder record the plan emits is examined: a record whose arm is not
+    ``psi`` is skipped with ``continue``, never with ``break``, because the plan
+    emits the direct records first and a ``break`` would leave the measurement
+    at zero without touching a single ladder point.  The examined count is
+    returned so the caller can refuse a vacuous measurement instead of
+    reporting a difference that was never formed.
+    """
+    if "base" not in values:
+        return 0.0, 0.0
+    gap = 0.0
+    examined = 0
+    for record in records:
+        if record["arm"] != "psi":
+            continue
+        entry = entries[record["entry"]]
+        local, moment = local_of[int(entry["cell"])], int(entry["moment"])
+        gap = max(
+            gap,
+            abs(
+                acquire(values["current"], record, local, moment, 0)
+                - acquire(values["base"], record, local, moment, 0)
+            ),
+        )
+        examined += 1
+    expected = sum(1 for record in records if record["arm"] == "psi")
+    if examined != expected or examined == 0:
+        raise SystemExit(
+            f"psi identity examined {examined} of {expected} ladder records"
+        )
+    return gap, float(examined)
 
 
 def per_entry(entries, values, records, local_of):
@@ -498,25 +540,14 @@ def main():
             points, selected, tree, directory / "run" / name, args.batch
         )
 
-    psi_gap = 0.0
-    for record in records:
-        if record["arm"] != "psi" or "base" not in values:
-            break
-        entry = entries[record["entry"]]
-        local, moment = local_of[int(entry["cell"])], int(entry["moment"])
-        psi_gap = max(
-            psi_gap,
-            abs(
-                acquire(values["current"], record, local, moment, 0)
-                - acquire(values["base"], record, local, moment, 0)
-            ),
-        )
+    psi_gap, psi_examined = psi_identity(values, records, entries, local_of)
 
     group_rows = per_entry(entries, values, records, local_of)
     payload = dict(
         trees={name: str(tree) for name, tree in trees.items()},
         base_revision=args.base_revision,
         psi_current_vs_base_max_abs=psi_gap,
+        psi_records_examined=psi_examined,
         steps=list(STEPS),
         offsets=list(OFFSETS),
         group_a=group_rows[: len(violations)],

@@ -28,18 +28,7 @@ import json
 import numpy as np
 
 from nova.biot.polygonanalytic import polygon_analytic_greens
-from scripts.prototypes.polygon_symmetry_violation.compare import plan
-
-
-def central(ladder):
-    """Pair a ladder's values into one central difference per step magnitude."""
-    forward = {step: value for step, value in ladder if step > 0.0}
-    backward = {step: value for step, value in ladder if step < 0.0}
-    return [
-        dict(step=step, derivative=(forward[step] - backward[-step]) / (2.0 * step))
-        for step in sorted(forward, reverse=True)
-        if -step in backward
-    ]
+from scripts.prototypes.polygon_symmetry_violation.compare import central, plan
 
 
 def main():

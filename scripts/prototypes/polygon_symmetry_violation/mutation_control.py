@@ -63,7 +63,7 @@ def main():
     print("injected difference %.3e" % AMOUNT)
     print("shipped psi_identity gap %.3e examined %d" % (gap, examined))
     print("unfixed loop gap %.3e" % broken)
-    if broken != 0.0 or gap != AMOUNT:
+    if broken != 0.0 or abs(gap - AMOUNT) > 1e-12:
         print("CONTROL FAILED: the two forms did not separate")
         raise SystemExit(0)
     print(

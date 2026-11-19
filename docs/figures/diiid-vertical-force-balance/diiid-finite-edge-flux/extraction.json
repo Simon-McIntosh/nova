@@ -1,0 +1,83 @@
+{
+  "corpus": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train",
+  "extraction": "nova.equilibrium.map_extraction.extract_flux_functions on the 0.05-spaced shell centres continued to psi_norm = 1, through benchmarks.diiid_forward_gs_match._profile_edge_values",
+  "rows": {
+    "P102": {
+      "branch": "pinned seed frame",
+      "ff_prime": 0.005842247232267696,
+      "ff_prime_sha256": "e31fd92fb679eb378814772a57f3c6dd74a2b9976b7f03ae574a51800538f242",
+      "frame": 102,
+      "p_prime": -2319.33255534632,
+      "p_prime_sha256": "94b2bee67e6cae66cc3f8d3f11ca9d6d3132a11e5732171503eb521630364f5b",
+      "path": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000c4a7b.parquet",
+      "psi_norm": 1.0,
+      "shot": "d3d_shot_00000c4a7b"
+    },
+    "R137D": {
+      "branch": "diverted",
+      "ff_prime": -0.03856068650596384,
+      "ff_prime_sha256": "fb5d5f905049f8c39aa061d0b8e4390ccc10b67e2ce22235f07d18478592ed5f",
+      "frame": 137,
+      "p_prime": -26045.143809357047,
+      "p_prime_sha256": "c79de485d7f6a6033e86b9a8bf289db3e61b9a1bba55cf38d7af5c95d415a499",
+      "path": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_0040ca9bdc.parquet",
+      "psi_norm": 1.0,
+      "shot": "d3d_shot_0040ca9bdc"
+    },
+    "R146D": {
+      "branch": "diverted",
+      "ff_prime": -0.017640573133397553,
+      "ff_prime_sha256": "ebff813ed2ff4ae2bf34344b9abe898c5d2f874ce90945b94cb91a912ed0c739",
+      "frame": 146,
+      "p_prime": -34562.24879756775,
+      "p_prime_sha256": "4b83e8468c70b0c76602bdf6f108d32affae14e19cfa78ebe0bfc04f1efb0b83",
+      "path": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_002495e835.parquet",
+      "psi_norm": 1.0,
+      "shot": "d3d_shot_002495e835"
+    },
+    "R146L": {
+      "branch": "limited",
+      "ff_prime": -0.017640573133397553,
+      "ff_prime_sha256": "ebff813ed2ff4ae2bf34344b9abe898c5d2f874ce90945b94cb91a912ed0c739",
+      "frame": 146,
+      "p_prime": -34562.24879756775,
+      "p_prime_sha256": "4b83e8468c70b0c76602bdf6f108d32affae14e19cfa78ebe0bfc04f1efb0b83",
+      "path": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_002495e835.parquet",
+      "psi_norm": 1.0,
+      "shot": "d3d_shot_002495e835"
+    },
+    "R179L": {
+      "branch": "limited",
+      "ff_prime": 0.022715025366450453,
+      "ff_prime_sha256": "1b29cadd88f740063ba52831f5cad26e5da67cfc527daabc88674505c76ba82e",
+      "frame": 179,
+      "p_prime": -37395.8761756233,
+      "p_prime_sha256": "7723cb2307adcae4d56f01f325198229c4bbc150e3a84301a4cfadabd929c72f",
+      "path": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000c4a7b.parquet",
+      "psi_norm": 1.0,
+      "shot": "d3d_shot_00000c4a7b"
+    }
+  },
+  "surfaces": [
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5,
+    0.55,
+    0.6,
+    0.65,
+    0.7,
+    0.75,
+    0.8,
+    0.85,
+    0.9,
+    0.95,
+    1.0
+  ]
+}

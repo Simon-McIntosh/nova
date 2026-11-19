@@ -11,6 +11,7 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
+import ast
 import json
 from pathlib import Path
 
@@ -119,3 +120,24 @@ def test_builder_reads_the_boundary_shell_the_record_commits():
     _, surfaces, values, _ = bench._label_state(row, record["frame"])
     profile = SampledFluxFunction(surfaces, values, edge_value=p_prime)
     assert float(profile(jnp.asarray(1.0))) == p_prime
+
+
+DRIVER_DIRECTORY = (
+    Path(__file__).resolve().parents[2] / "scripts/prototypes/diiid_finite_edge_flux"
+)
+
+
+@pytest.mark.parametrize(
+    "driver", sorted(path.name for path in DRIVER_DIRECTORY.glob("*.py"))
+)
+def test_the_drivers_parse_at_the_oldest_supported_grammar(driver):
+    """A driver the record cites must parse where the project's readers run.
+
+    CPython 3.14 accepts ``except TypeError, ValueError``, so importing the
+    module proves nothing about older interpreters and a regression there
+    would pass every arm silently. Parsing at the 3.13 grammar keeps the
+    driver readable wherever the receipt is regenerated.
+    """
+
+    source = (DRIVER_DIRECTORY / driver).read_text()
+    ast.parse(source, filename=str(DRIVER_DIRECTORY / driver), feature_version=(3, 13))

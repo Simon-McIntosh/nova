@@ -125,8 +125,15 @@ def sensor_geometry() -> dict:
     return dict(loop=loop, probe=probe, angle=angle, b0=b0, axis=axis, r0=r0)
 
 
-def build_case(cells: int = 500) -> dict:
-    """Solve the generating state and evaluate its noise-free rows."""
+def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
+    """Solve the generating state and evaluate its noise-free rows.
+
+    ``reuse_rows`` loads the rows a previous build of the same state and the
+    same sensor set persisted, which skips the two Biot-Savart row evaluations
+    (about half an hour at 500 cells on four cores) on a card that needs the
+    fits, not the rows.  The state itself is still solved: the fit needs the
+    generating flux as its seed.
+    """
     import importlib
 
     from nova.equilibrium.measurement import Magnetics
@@ -182,12 +189,21 @@ def build_case(cells: int = 500) -> dict:
     )
     magnetic_source = tm._PlasmaDiagnosticSource(sections)
     known_field = tm._known_field_reader(known, magnetic_source)
-    total, vacuum, plasma, scales = tm._total_observations(
-        magnetic_source, generated, sensors, known_field
-    )
-    total_prior = tm._total_observations(
-        magnetic_source, generated, prior_sensors, known_field
-    )[0]
+    stored = STUDY / "rows.npz"
+    if reuse_rows and stored.exists():
+        cached = np.load(stored)
+        total = np.asarray(cached["total"], dtype=float)
+        total_prior = np.asarray(cached["total_prior"], dtype=float)
+        vacuum = np.asarray(cached["vacuum"], dtype=float)
+        plasma = np.asarray(cached["plasma"], dtype=float)
+        print("ROWS-REUSED " + str(stored), flush=True)
+    else:
+        total, vacuum, plasma, scales = tm._total_observations(
+            magnetic_source, generated, sensors, known_field
+        )
+        total_prior = tm._total_observations(
+            magnetic_source, generated, prior_sensors, known_field
+        )[0]
     loops = np.asarray(sensors.flux_loop, dtype=bool)
     sigma_loop = float(np.sqrt(np.mean(plasma[loops] ** 2)))
     sigma_probe = float(np.sqrt(np.mean(plasma[~loops] ** 2)))
@@ -499,7 +515,7 @@ def run_nova(args) -> None:
 
     serial_pools()
 
-    case = build_case(args.cells)
+    case = build_case(args.cells, reuse_rows=args.reuse_rows)
     if args.shard == 0 or args.shards == 1:
         write_prepare(case)
     reference = case["reference"]
@@ -519,14 +535,19 @@ def run_nova(args) -> None:
         flush=True,
     )
 
+    # The coefficient jacobian serves the covariance ratio alone, which this
+    # node's measure does not read; it costs two full solves on the card the
+    # sequence needs, so it is computed only when asked for.
     stored = STUDY / "jacobian.json"
     if stored.exists() and args.cells == 500:
         jacobian = json.loads(stored.read_text())
         print("JACOBIAN-REUSED " + json.dumps(jacobian), flush=True)
-    else:
+    elif args.jacobian:
         jacobian = coefficient_jacobian(case)
         stored.write_text(json.dumps(jacobian, indent=2))
         print("JACOBIAN " + json.dumps(jacobian), flush=True)
+    else:
+        print("JACOBIAN-SKIPPED", flush=True)
 
     sigma = np.r_[np.full(24, case["sigma_loop"]), np.full(48, case["sigma_probe"])]
     sigma_ip = args.factor * abs(reference["plasma_current"])
@@ -690,7 +711,7 @@ def run_overlay(args) -> None:
 
     serial_pools()
 
-    case = build_case(args.cells)
+    case = build_case(args.cells, reuse_rows=True)
     reference = case["reference"]
     sigma = np.r_[np.full(24, case["sigma_loop"]), np.full(48, case["sigma_probe"])]
     sigma_ip = args.factor * abs(reference["plasma_current"])
@@ -1038,6 +1059,8 @@ def main(argv=None) -> int:
     nova.add_argument("--corner-sweep", default="")
     nova.add_argument("--cells", type=int, default=500)
     nova.add_argument("--sweep-part", default="both")
+    nova.add_argument("--jacobian", action="store_true")
+    nova.add_argument("--reuse-rows", action="store_true")
     nova.set_defaults(handler=run_nova)
     efit = commands.add_parser("efit")
     efit.add_argument("--slices", type=int, default=200)

@@ -66,12 +66,18 @@ def efit_x_points(output: Path, index: int) -> np.ndarray:
 
     entry = imas.DBEntry(f"imas:hdf5?path={output}", "r", dd_version="4.1.0")
     try:
-        boundary = entry.get("equilibrium").time_slice[index].boundary
-        radius = np.asarray(boundary.x_point.r, dtype=float)
-        height = np.asarray(boundary.x_point.z, dtype=float)
+        constraints = entry.get("equilibrium").time_slice[index].constraints
+        points = [
+            (
+                float(point.position_reconstructed.r),
+                float(point.position_reconstructed.z),
+            )
+            for point in constraints.x_point
+        ]
     finally:
         entry.close()
-    return np.column_stack([radius, height])
+    rows = [pair for pair in points if np.all(np.isfinite(pair))]
+    return np.asarray(rows, dtype=float).reshape(-1, 2)
 
 
 def main() -> int:

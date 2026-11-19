@@ -141,14 +141,12 @@ def square(centre_z, radius=0.5):
     )
 
 
-def test_mirror_gap_reads_the_owner_reflection():
-    assert mirror_gap(square(0.25)) == pytest.approx(0.0)
+def test_mirror_gap_measures_the_departure_about_the_cell_axis():
+    assert mirror_gap(square(0.25), 0.25) == pytest.approx(0.0)
 
 
-def test_mirror_gap_reports_no_pairing_for_a_skewed_cell():
-    skewed = square(0.0).copy()
-    skewed[0, 1] -= 0.05
-    assert mirror_gap(skewed) == float("inf")
+def test_mirror_gap_reports_how_far_a_skewed_cell_departs():
+    assert mirror_gap(skewed(0.0), 0.0) > 0.01
 
 
 def skewed(centre_z, radius=0.5):

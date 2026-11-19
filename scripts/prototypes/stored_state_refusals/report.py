@@ -37,24 +37,19 @@ CASES = {
 
 def records():
     merged = {}
-    for path in sorted(RUN.glob("*/measurement.json")):
+    # Runs are read oldest first so the newest measurement of a key wins: an
+    # arm re-measured by a repair job replaces the arm it supersedes, and every
+    # case an older run measured still survives.
+    paths = sorted(
+        RUN.glob("*/measurement.json"),
+        key=lambda path: (path.stat().st_mtime, str(path)),
+    )
+    for path in paths:
         for key, value in json.loads(path.read_text()).items():
-            if isinstance(value, dict) and "label" in value:
+            if isinstance(value, dict):
                 merged.setdefault(key, {})
                 merged[key].update(value)
-            elif isinstance(value, dict):
-                # A per-case mapping such as stored_coefficients or meshes is
-                # unioned across runs: a later job that measured one case must
-                # not drop the cases an earlier job measured.
-                merged.setdefault(key, {})
-                merged[key].update(
-                    {
-                        name: item
-                        for name, item in value.items()
-                        if name not in merged[key]
-                    }
-                )
-            elif key not in merged:
+            else:
                 merged[key] = value
     for label in LABELS:
         arm = merged.get(label)

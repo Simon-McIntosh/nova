@@ -26,10 +26,14 @@ Run it from the repository root with ``PYTHONPATH=.``, so the shared helper
 ``--zero-entries`` answers a different question about the same two archives:
 every first-derivative entry whose current-bank value is exactly zero, its value
 in each bank, and a direct evaluation of the same jet from this tree's kernel and
-from ``--base-tree``'s kernel (run in a subprocess that imports that tree). Each
-entry also carries the distance from its node to the source cell's boundary and
-to that cell's nearest vertex, so an entry that sits on the source can be told
-from one that does not.
+from ``--base-tree``'s kernel. Both evaluations run the repository's own row
+program, ``nova.equilibrium.fixed_points._row_program``, in a subprocess whose
+``PYTHONPATH`` names the tree being evaluated, so the batching loop and the
+compiled program have one owner each rather than a copy here. Each entry also
+carries the distance from its node to the source cell's boundary and to that
+cell's nearest vertex — the first measured by
+``nova.equilibrium.boundary_comparison._point_to_segment_distances`` — so an
+entry that sits on the source can be told from one that does not.
 """
 
 from __future__ import annotations
@@ -47,6 +51,7 @@ COMPONENT = {0: "dpsi/dR", 1: "dpsi/dZ"}
 DEFAULT_THRESHOLD = 1e-10
 DEFAULT_WINDOW = 1e-3
 DEFAULT_BOUNDARY = None
+REPOSITORY = Path(__file__).resolve().parents[3]
 
 
 def load(path):
@@ -199,8 +204,17 @@ def exit_status(report):
     return 2 if report["material"]["present"] else 0
 
 
-def zero_entries(head_rows, current_rows, components=DERIVATIVE):
-    """Every first-derivative entry whose current-bank magnitude is exactly zero."""
+def zero_entries(head_rows, current_rows, components=DERIVATIVE, active=None):
+    """Every first-derivative entry whose current-bank magnitude is exactly zero.
+
+    ``active`` is the node count the archives' rows are meaningful up to: the
+    stored arrays carry padding rows past it whose zeros are not measurements,
+    so a scan over the whole array reports them as entries. Passing it is what
+    keeps the count the instrument quotes the count of real entries.
+    """
+    if active is not None:
+        head_rows = np.asarray(head_rows)[:active]
+        current_rows = np.asarray(current_rows)[:active]
     current = np.asarray(current_rows)[:, :, :, components]
     head = np.asarray(head_rows)[:, :, :, components]
     entries = []
@@ -231,27 +245,6 @@ def geometry_polygons(path):
     )
 
 
-def kernel_rows(points, polygons, batch=4):
-    """Evaluate this tree's kernel jets at every point, for every cell."""
-    import jax
-    import jax.numpy as jnp
-    from nova.equilibrium import topology
-    from nova.equilibrium.fixed_points import _source_jets
-
-    coupling = topology.BiotMomentCoupling.from_polygons(polygons)
-    program = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
-    rows = np.zeros((len(points), len(polygons), 3, 6))
-    for first in range(0, len(points), batch):
-        block = np.asarray(points[first : first + batch], dtype=np.float64)
-        size = len(block)
-        if size < batch:
-            block = np.concatenate((block, np.repeat(block[-1:], batch - size, axis=0)))
-        rows[first : first + size] = np.asarray(program(jnp.asarray(block), coupling))[
-            :size
-        ]
-    return rows
-
-
 _ZERO_KERNEL_RUNNER = '''
 """Evaluate one revision of the polygon kernel at a list of points."""
 import sys
@@ -262,10 +255,9 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
-import jax
 import jax.numpy as jnp
 from nova.equilibrium import topology
-from nova.equilibrium.fixed_points import _source_jets
+from nova.equilibrium.fixed_points import _row_program
 
 inputs = np.load(sys.argv[1])
 batch = int(sys.argv[2]) if len(sys.argv) > 2 else 4
@@ -274,14 +266,13 @@ vertices = np.asarray(inputs["vertices"])
 counts = np.asarray(inputs["vertex_count"])
 polygons = tuple(vertices[i, : int(n)] for i, n in enumerate(counts))
 coupling = topology.BiotMomentCoupling.from_polygons(polygons)
-program = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
 rows = np.zeros((len(points), len(polygons), 3, 6))
 for first in range(0, len(points), batch):
     block = points[first : first + batch]
     size = len(block)
     if size < batch:
         block = np.concatenate((block, np.repeat(block[-1:], batch - size, axis=0)))
-    rows[first : first + size] = np.asarray(program(jnp.asarray(block), coupling))[
+    rows[first : first + size] = np.asarray(_row_program(jnp.asarray(block), coupling))[
         :size
     ]
 np.savez(sys.argv[3], rows=rows)
@@ -300,8 +291,8 @@ def stack_polygons(polygons):
     return dict(vertices=vertices, vertex_count=counts)
 
 
-def base_kernel_rows(points, polygons, tree, directory, batch=4):
-    """Evaluate another revision's kernel in a subprocess that imports that tree."""
+def kernel_rows(points, polygons, tree, directory, batch=4):
+    """Evaluate one tree's kernel jets, through the program that tree owns."""
     import os
     import subprocess
     import sys
@@ -331,15 +322,16 @@ def base_kernel_rows(points, polygons, tree, directory, batch=4):
 
 
 def segment_distance(point, polygon):
-    """Distance from one point to a closed polygon's boundary."""
-    start = np.asarray(polygon, dtype=np.float64)
-    end = np.asarray(np.roll(start, -1, axis=0), dtype=np.float64)
-    direction = end - start
-    denominator = np.sum(direction * direction, axis=-1)
-    safe = np.where(denominator > 0.0, denominator, 1.0)
-    projection = np.clip(np.sum((point - start) * direction, axis=-1) / safe, 0.0, 1.0)
-    nearest = start + projection[:, None] * direction
-    return float(np.min(np.sqrt(np.sum((point - nearest) ** 2, axis=-1))))
+    """Distance from one point to a closed polygon's boundary, by its owner."""
+    from nova.equilibrium.boundary_comparison import _point_to_segment_distances
+
+    ring = np.asarray(polygon, dtype=np.float64)
+    ring = np.vstack((ring, ring[0]))
+    return float(
+        _point_to_segment_distances(np.asarray(point, dtype=np.float64)[None, :], ring)[
+            0
+        ]
+    )
 
 
 def vertex_distance(point, polygon):
@@ -349,12 +341,19 @@ def vertex_distance(point, polygon):
 
 
 def zero_entry_report(
-    head, current, geometry_path, *, base_tree=None, directory=None, batch=4
+    head,
+    current,
+    geometry_path,
+    *,
+    base_tree=None,
+    head_tree=None,
+    directory=None,
+    batch=4,
 ):
     """Attribute every exactly-zero first-derivative entry to a kernel."""
     active = min(head["active_nodes"], current["active_nodes"])
     geometry = geometry_polygons(geometry_path)
-    entries = zero_entries(head["rows"][:active], current["rows"][:active])
+    entries = zero_entries(head["rows"], current["rows"], active=active)
     nodes = np.asarray(current["nodes"][:active], dtype=np.float64)
     unique = sorted({entry["node"] for entry in entries})
     position_of = {node: position for position, node in enumerate(unique)}
@@ -369,10 +368,12 @@ def zero_entry_report(
         ),
         flush=True,
     )
-    repaired = kernel_rows(points, selected, batch=batch)
+    tree = Path(head_tree) if head_tree is not None else REPOSITORY
+    workspace = Path(directory) if directory is not None else Path.cwd()
+    repaired = kernel_rows(points, selected, tree, workspace / "head", batch=batch)
     base = None
     if base_tree is not None and directory is not None:
-        base = base_kernel_rows(points, selected, base_tree, directory, batch=batch)
+        base = kernel_rows(points, selected, base_tree, workspace / "base", batch=batch)
     nearest = np.argmin(
         np.sum((points[:, None, :] - geometry["centre"][None, :, :]) ** 2, axis=-1),
         axis=1,
@@ -384,8 +385,8 @@ def zero_entry_report(
         jet = 1 if entry["component"] == "dpsi/dR" else 2
         polygon = geometry["polygons"][cell]
         entry["coordinates"] = points[position].tolist()
-        entry["own_cell"] = int(nearest[position])
-        entry["node_belongs_to_this_cell"] = bool(int(nearest[position]) == cell)
+        entry["nearest_cell_centre"] = int(nearest[position])
+        entry["nearest_centre_is_this_cell"] = bool(int(nearest[position]) == cell)
         entry["distance_to_cell_boundary"] = segment_distance(points[position], polygon)
         entry["distance_to_nearest_vertex"] = vertex_distance(points[position], polygon)
         local = local_of[cell]
@@ -448,6 +449,12 @@ def main():
         help="tree whose kernel --zero-entries also evaluates, in a subprocess",
     )
     parser.add_argument(
+        "--head-tree",
+        type=Path,
+        default=None,
+        help="tree whose kernel --zero-entries evaluates as the repaired one",
+    )
+    parser.add_argument(
         "--batch",
         type=int,
         default=4,
@@ -472,6 +479,7 @@ def main():
             current,
             args.geometry,
             base_tree=args.base_tree,
+            head_tree=args.head_tree,
             directory=args.work_directory,
             batch=args.batch,
         )

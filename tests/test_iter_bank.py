@@ -434,10 +434,40 @@ def test_derive_rows_lists_every_exactly_zero_entry():
     assert entries[0]["head_value"] == pytest.approx(3.5e-9)
 
 
-def test_derive_rows_zero_entries_ignore_rows_past_the_active_count():
+def test_derive_rows_zero_entries_honour_the_active_count():
+    # The archives carry padding rows past active_nodes whose zeros are not
+    # measurements; the instrument's own clamp is what keeps them out of the
+    # quoted count, so the clamp is what this case drives.
     rows = stored_rows(nodes=3)
-    head = rows.copy()
+    head = stored_rows(nodes=3)
     head[0, 0, 0, 1] = 3.5e-9
-    rows[2] = 0.0
-    assert derive_rows.zero_entries(head[:2], rows[:2]) == []
-    assert len(derive_rows.zero_entries(head, rows)) == 2
+    rows[2, 0, 0, 2] = 0.0
+    assert derive_rows.zero_entries(head, rows, active=2) == []
+    assert len(derive_rows.zero_entries(head, rows)) == 1
+    wider = derive_rows.zero_entries(head, rows, active=3)
+    assert [(entry["node"], entry["component"]) for entry in wider] == [(2, "dpsi/dZ")]
+
+
+def test_derive_rows_measures_with_the_repository_segment_distance(monkeypatch):
+    from nova.equilibrium import boundary_comparison
+
+    calls = []
+    owner = boundary_comparison._point_to_segment_distances
+
+    def recorded(points, polyline):
+        calls.append((points.shape, polyline.shape))
+        return owner(points, polyline)
+
+    monkeypatch.setattr(boundary_comparison, "_point_to_segment_distances", recorded)
+    square = np.array([[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]])
+    assert derive_rows.segment_distance(np.array([0.25, 0.5]), square) == (
+        pytest.approx(0.25)
+    )
+    assert calls == [((1, 2), (5, 2))]
+
+
+def test_derive_rows_evaluates_through_the_repository_row_program():
+    runner = derive_rows._ZERO_KERNEL_RUNNER
+    assert "from nova.equilibrium.fixed_points import _row_program" in runner
+    assert "jax.jit(" not in runner
+    assert "jax.vmap(" not in runner

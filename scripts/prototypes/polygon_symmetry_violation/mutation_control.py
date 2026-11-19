@@ -10,8 +10,6 @@ ends ``EXIT=1`` and records that the check fails without the repair.
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
 
 from scripts.prototypes.polygon_symmetry_violation.compare import psi_identity
@@ -58,23 +56,13 @@ def unfixed_gap(values):
     return gap
 
 
-def shipped_source():
-    """The shipped loop, read out of compare.py so the copy cannot drift."""
-    source = Path(__file__).with_name("compare.py").read_text()
-    start = source.index("def psi_identity")
-    return source[start : source.index("\ndef ", start)]
-
-
 def main():
     values = table()
     gap, examined = psi_identity(values, records(), [dict(cell=0, moment=1)], {0: 0})
     broken = unfixed_gap(values)
-    body = shipped_source()
     print("injected difference %.3e" % AMOUNT)
     print("shipped psi_identity gap %.3e examined %d" % (gap, examined))
     print("unfixed loop gap %.3e" % broken)
-    print("shipped loop carries break: %s" % ("break" in body))
-    print("shipped loop carries continue: %s" % ("continue" in body))
     if broken != 0.0 or gap != AMOUNT:
         print("CONTROL FAILED: the two forms did not separate")
         raise SystemExit(0)

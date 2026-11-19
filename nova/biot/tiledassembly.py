@@ -2238,12 +2238,13 @@ def _volume_near_section_order(order):
 # times larger than the delivered rule's whole error.  The worst pair left at the
 # coarse rule changes by 3.1e-9 of that scale at one cell width, 8.6e-10 at two,
 # 2.4e-10 at three, 8.7e-11 at four and six (the same pair, at a ratio between
-# four and six), and 5.6e-12 at eight, which is the first factor that leaves the
-# 1e-10 operator match a margin rather than sitting on it.  It refines 4299 of
-# the shell's 13225 pairs, 33 per cent, because the graded mesh's 6 x 40 mm band
-# has many neighbours inside eight of its least width.  Three quarters of the
-# block's total change is carried by pairs inside one cell width, so the
-# criterion is choosing a neighbourhood and not a threshold that happens to work.
+# four and six), and 5.6e-12 at eight, which is the first factor that puts the
+# pair three decades below the six-node rule's own 1e-6-scale error rather than
+# on it.  It refines 4299 of the shell's 13225 pairs, 33 per cent, because the
+# graded mesh's 6 x 40 mm band has many neighbours inside eight of its least
+# width.  Three quarters of the block's total change is carried by pairs inside
+# one cell width, so the criterion is choosing a neighbourhood and not a
+# threshold that happens to work.
 _VOLUME_NEAR_FACTOR = 8.0
 
 

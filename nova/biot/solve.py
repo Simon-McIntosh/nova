@@ -422,15 +422,13 @@ class Solve(GroupSet):
             for begin in range(0, len(points), IRON_TARGET_BLOCK):
                 block = points[begin : begin + IRON_TARGET_BLOCK]
                 if attr == "Psi":
-                    values = source.psi_matrix(block)
+                    values = source.psi(block)
                 elif attr in {"Br", "Bz"}:
                     component = 0 if attr == "Br" else 1
-                    values = source.field_matrix(block).reshape(2, len(block), -1)[
-                        component
-                    ]
+                    values = source.field(block)[:, component]
                 else:  # Aphi = psi / (2 pi R), zero on the axis like the sections
                     radius = block[:, :1]
-                    psi = source.psi_matrix(block)
+                    psi = source.psi(block)
                     values = np.zeros_like(psi)
                     np.divide(psi, 2 * np.pi * radius, out=values, where=radius != 0)
                 if self.target_quadrature is not None:

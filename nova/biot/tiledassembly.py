@@ -2245,18 +2245,26 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
     return operator, blocks
 
 
-def linear_cell_interaction(polygons, points, *, plan: TilePlan, order: int = 24):
+def linear_cell_interaction(
+    polygons, points, *, plan: TilePlan, order: int = 24, geometry=None
+):
     """Evaluate affine M through closed uniform sheets and ring first moments.
 
-    Only the zero-mean affine edge remainder uses ring quadrature; the constant
+    Only the zero-mean affine edge current uses ring quadrature; the constant
     sheet uses the existing exact sheet tile. The curl contribution uses the
-    uniform polygon section kernel.
+    uniform polygon section kernel. Column ``2*a`` of each response row is atom
+    ``a`` so the result is linear in the affine state the material solve writes.
+
+    ``geometry`` is the output of :func:`linear_magnetisation_geometry`, passed
+    by a caller that has already built it (a source carrying its own geometry)
+    so the same cells are not measured twice.
     """
     from nova.biot.greens import traced_filament_greens
     import jax
     import jax.numpy as jnp
 
-    geometry = linear_magnetisation_geometry(polygons)
+    if geometry is None:
+        geometry = linear_magnetisation_geometry(polygons)
     atoms = geometry["atoms"]
     edge = geometry["edge_coefficient"]
     radial, vertical = sheet_edge_field(
@@ -2298,3 +2306,65 @@ def linear_cell_interaction(polygons, points, *, plan: TilePlan, order: int = 24
     for component in range(2):
         response[component] += current[component + 1] @ geometry["volume_coefficient"].T
     return np.concatenate(response)
+
+
+def _linear_ring_moments(atoms, points, order):
+    """Return the ring-quadrature ``psi`` pieces of each affine edge current.
+
+    Moved here from the source that used to carry its own evaluator, unchanged:
+    the uniform sheet's ``psi`` moment and its zero-mean affine remainder about
+    the sheet's midpoint, each summed at the Gauss nodes of the edge and scaled
+    by the edge length.
+    """
+    from nova.biot.greens import traced_filament_greens
+    import jax
+    import jax.numpy as jnp
+
+    nodes, weights = np.polynomial.legendre.leggauss(order)
+    parameter, weights = (nodes + 1) / 2, weights / 2
+    source = atoms[:, :1] + parameter[None, :, None] * (atoms[:, 1:] - atoms[:, :1])
+    lengths = np.linalg.norm(atoms[:, 1] - atoms[:, 0], axis=-1)
+
+    @jax.jit
+    def integrate(target, source):
+        psi, radial, height = traced_filament_greens(
+            jnp,
+            target[:, None, None, 0],
+            target[:, None, None, 1],
+            source[None, :, :, 0],
+            source[None, :, :, 1],
+        )
+        uniform = jnp.asarray(weights)
+        centred = jnp.asarray(weights * (parameter - 0.5))
+        return jnp.stack(
+            (
+                psi @ uniform,
+                psi @ centred,
+                radial @ centred,
+                height @ centred,
+            )
+        )
+
+    return (
+        np.asarray(integrate(jnp.asarray(points), jnp.asarray(source)))
+        * lengths[None, None]
+    )
+
+
+def linear_cell_flux(
+    polygons, points, *, plan: TilePlan, order: int = 24, geometry=None
+):
+    """Return the ``(T, unknowns)`` poloidal flux [Wb per unit state].
+
+    The flux companion of :func:`linear_cell_interaction`, sharing its geometry
+    and its edge pairing. ``geometry`` is the output of
+    :func:`linear_magnetisation_geometry`, passed by a source that carries it.
+    """
+    if geometry is None:
+        geometry = linear_magnetisation_geometry(polygons)
+    moments = _linear_ring_moments(geometry["atoms"], points, order)
+    paired = np.stack((moments[0], moments[0] / 2 + moments[1]), axis=-1)
+    paired = paired.reshape(len(points), -1)
+    flux = paired @ geometry["edge_coefficient"].T
+    current = _polygon_current_response(polygons, points, plan, flux_only=True)
+    return flux + np.asarray(current[0] @ geometry["volume_coefficient"].T)

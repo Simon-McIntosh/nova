@@ -11,6 +11,7 @@ stay inside this module. Fields and magnetisations use component order
 from __future__ import annotations
 
 from collections.abc import Callable
+from functools import cached_property
 from dataclasses import dataclass, field, replace
 import hashlib
 import json
@@ -23,17 +24,15 @@ import numpy as np
 from scipy.interpolate import PchipInterpolator
 import shapely
 
-from nova.biot.greens import traced_filament_greens
 from nova.biot.sectionaverage import section_nodes
 from nova.biot.tiledassembly import (
     TilePlan,
-    _polygon_current_response,
     cell_interaction,
     galerkin_cell_interaction,
+    linear_cell_flux,
     linear_cell_interaction,
     linear_galerkin_cell_interaction,
     linear_magnetisation_geometry,
-    sheet_edge_field,
 )
 from nova.jax.config import configure_dtypes
 
@@ -419,92 +418,6 @@ def _average_external(cells, external_field, order=6):
     np.add.at(average, owners, values * weights[:, None])
     np.add.at(normalisation, owners, weights)
     return average / normalisation[:, None]
-
-
-def _ring_moments(atoms, points, order):
-    """Return the ring-quadrature pieces of one affine edge current.
-
-    A straight edge sheet is split into its uniform part and a zero-mean
-    remainder about the sheet's midpoint, the pairing the affine incidence of
-    :func:`linear_magnetisation_geometry` carries. The uniform sheet has a
-    closed-form field, so only ``psi`` needs it here; every piece travels
-    through the executable ring kernel at the Gauss nodes of the edge.
-    """
-    nodes, weights = np.polynomial.legendre.leggauss(order)
-    parameter, weights = (nodes + 1) / 2, weights / 2
-    source = atoms[:, :1] + parameter[None, :, None] * (atoms[:, 1:] - atoms[:, :1])
-    lengths = np.linalg.norm(atoms[:, 1] - atoms[:, 0], axis=-1)
-
-    @jax.jit
-    def integrate(target, source):
-        """Return uniform and zero-mean ``psi`` and the zero-mean field."""
-        psi, radial, height = traced_filament_greens(
-            jnp,
-            target[:, None, None, 0],
-            target[:, None, None, 1],
-            source[None, :, :, 0],
-            source[None, :, :, 1],
-        )
-        uniform = jnp.asarray(weights)
-        centred = jnp.asarray(weights * (parameter - 0.5))
-        return jnp.stack(
-            (
-                psi @ uniform,
-                psi @ centred,
-                radial @ centred,
-                height @ centred,
-            )
-        )
-
-    return (
-        np.asarray(integrate(jnp.asarray(points), jnp.asarray(source)))
-        * lengths[None, None]
-    )
-
-
-def _affine_sheet_field(atoms, points, plan, order=24):
-    """Return the ``(2, T, 2*A)`` field response of each affine edge current.
-
-    Column ``2*a`` is atom ``a``'s uniform sheet and ``2*a + 1`` its affine
-    remainder about the sheet's midpoint. The uniform part is the closed form
-    of :func:`sheet_edge_field`, the same kernel the Galerkin operator pairs
-    against; only the zero-mean remainder is integrated, so a straight edge's
-    affine current is exact at every target off the segment.
-    """
-    radial, height = sheet_edge_field(
-        points[:, 0],
-        points[:, 1],
-        atoms[:, 0, 0],
-        atoms[:, 0, 1],
-        atoms[:, 1, 0],
-        atoms[:, 1, 1],
-        plan=plan,
-    )
-    moments = _ring_moments(atoms, points, order)
-    return np.stack(
-        [
-            np.stack((constant, constant / 2 + rest), axis=-1).reshape(len(points), -1)
-            for constant, rest in (
-                (radial, moments[2]),
-                (height, moments[3]),
-            )
-        ]
-    )
-
-
-def _affine_sheet_flux(atoms, points, order=24):
-    """Return the ``(T, 2*A)`` poloidal flux of each affine edge current [Wb].
-
-    No closed-form flux tile exists for the edge sheet, so both columns ride the
-    ring kernel at the Gauss nodes of the edge: the uniform sheet as the plain
-    ``psi`` moment, its affine remainder as the same moment about the sheet's
-    midpoint. The pairing of the two columns is the one
-    :func:`_affine_sheet_field` uses.
-    """
-    moments = _ring_moments(atoms, points, order)
-    return np.stack((moments[0], moments[0] / 2 + moments[1]), axis=-1).reshape(
-        len(points), -1
-    )
 
 
 def _fit_law(b_field, permeability_relative):
@@ -1068,41 +981,46 @@ class BoundCurrents:
         """
         return self.set_currents(np.zeros(self.unknowns))
 
-    def field_matrix(self, points: np.ndarray, order: int = 24) -> np.ndarray:
-        """Return the ``(2T, unknowns)`` field [T per unit state] at points."""
-        points = _points(points)
-        sheet = _affine_sheet_field(self.atoms, points, self.plan, order)
-        current = _polygon_current_response(self.polygons, points, self.plan)
-        rows = []
-        for component in range(2):
-            rows.append(
-                np.asarray(sheet[component] @ self.edge.T)
-                + np.asarray(current[component + 1] @ self.volume.T)
-            )
-        return np.concatenate(rows)
-
-    def psi_matrix(self, points: np.ndarray, order: int = 24) -> np.ndarray:
-        """Return the ``(T, unknowns)`` poloidal flux [Wb per unit state]."""
-        points = _points(points)
-        sheet = _affine_sheet_flux(self.atoms, points, order)
-        current = _polygon_current_response(
-            self.polygons, points, self.plan, flux_only=True
+    @cached_property
+    def geometry(self) -> dict:
+        """Return the interaction geometry this source's cells carry."""
+        return dict(
+            atoms=self.atoms,
+            edge_coefficient=self.edge,
+            volume_coefficient=self.volume,
         )
-        return np.asarray(sheet @ self.edge.T) + np.asarray(current[0] @ self.volume.T)
 
     def field(self, points: np.ndarray, order: int = 24) -> np.ndarray:
-        """Return the iron's (B_R, B_Z) [T] at (R, Z) points [m]."""
+        """Return the iron's (B_R, B_Z) [T] at (R, Z) points [m].
+
+        The evaluation is :func:`nova.biot.tiledassembly.linear_cell_interaction`,
+        so a source and the linear operator share one evaluator.
+        """
         points = _points(points)
         if not len(points):
             return np.empty((0, 2))
-        return (self.field_matrix(points, order) @ self.currents).reshape(2, -1).T
+        response = linear_cell_interaction(
+            self.polygons, points, plan=self.plan, order=order, geometry=self.geometry
+        )
+        return (response @ self.currents).reshape(2, -1).T
 
     def psi(self, points: np.ndarray, order: int = 24) -> np.ndarray:
-        """Return the iron's poloidal flux [Wb] at (R, Z) points [m]."""
+        """Return the iron's poloidal flux [Wb] at (R, Z) points [m].
+
+        The flux companion of :meth:`field`, evaluated by
+        :func:`nova.biot.tiledassembly.linear_cell_flux`'s sibling.
+        """
         points = _points(points)
         if not len(points):
             return np.empty(0)
-        return self.psi_matrix(points, order) @ self.currents
+        response = linear_cell_flux(
+            self.polygons,
+            points,
+            plan=self.plan,
+            order=order,
+            geometry=self.geometry,
+        )
+        return response @ self.currents
 
 
 def bound_currents(solution: MagnetisationSolution) -> BoundCurrents:

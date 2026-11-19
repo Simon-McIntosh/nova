@@ -43,10 +43,15 @@ def test_point_program_first_call_is_served_from_the_warm_cache():
     receipts = _receipts("NOVA_CACHED_POINT_REMEASURE_WARM")
     assert sorted(row["arm"] for row in receipts) == ARMS
     for row in receipts:
+        # The miss is the load clause's own failure mode and is asserted before
+        # the provenance fields, so a root that served nothing reports the
+        # compile it paid rather than only that the receipt came from elsewhere.
+        assert row["misses"] == 0, (
+            f"{row['misses']} misses: compiled instead of loading"
+        )
         assert row["role"] == "warm", row["arm"]
         assert "H200" in row["device"], row["arm"]
         assert row["cache_enabled"] is True, row["arm"]
-        assert row["misses"] == 0, f"{row['arm']} compiled instead of loading"
         assert row["first_call_seconds"] <= SECOND_BOUND, row["arm"]
         assert row["first_call_peak_rss_bytes"] <= BYTE_BOUND, row["arm"]
 

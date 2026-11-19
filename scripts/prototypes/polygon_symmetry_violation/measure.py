@@ -22,7 +22,8 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve()
-ROOT = HERE.parents[2]
+PACKAGE = HERE.parent
+ROOT = HERE.parents[3]
 RECEIPT = (
     "/home/ITER/mcintos/.config/reckon/crew/runs/"
     "r-20261117T110237355670-iter-bank-recertify/receipts/zero-entries.json"
@@ -123,6 +124,8 @@ def main():
             batch = argv[index + 1]
     if worktree is None or output is None:
         raise SystemExit("--worktree and --output are required")
+    if not (ROOT / "nova").is_dir():
+        raise SystemExit(f"no package under the resolved tree root {ROOT}")
 
     destination = Path(output)
     destination.mkdir(parents=True, exist_ok=True)
@@ -138,7 +141,7 @@ def main():
     run(
         [
             sys.executable,
-            str(ROOT / "scripts/prototypes/polygon_symmetry_violation/split.py"),
+            str(PACKAGE / "split.py"),
             "--receipt",
             RECEIPT,
             "--geometry",
@@ -152,7 +155,7 @@ def main():
     run(
         [
             sys.executable,
-            str(ROOT / "scripts/prototypes/polygon_symmetry_violation/compare.py"),
+            str(PACKAGE / "compare.py"),
             "--split",
             str(split),
             "--geometry",

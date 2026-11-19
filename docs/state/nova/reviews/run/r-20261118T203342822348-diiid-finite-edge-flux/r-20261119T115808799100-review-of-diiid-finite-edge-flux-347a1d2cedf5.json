@@ -1,0 +1,85 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "note": "The gained commit adds no assertion. Durability is scored on that absence: no test fails if the unparenthesised form returns.",
+      "test": "(none added by 347a1d2ce)"
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-19T12:22:17.033Z",
+  "dispatched_at": "2026-11-19T12:21:50Z",
+  "evidence_limits": [
+    "The suite delta is read from the reviewed run's recorded arms (0 failures at both revisions), so added_failure_count is 0; no suite was re-run here.",
+    "The gate file does not import the summariser, so the suite carries no evidence about the repaired line; the negative control and the table regeneration are the evidence that does.",
+    "The project declares requires-python >=3.14, where the unparenthesised form was legal; the repair is portability below the declared floor."
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_finite_edge_flux/summarize.py",
+      "line": "30",
+      "severity": "non-blocking",
+      "text": "non-blocking: the repair is unguarded \u2014 no committed assertion parses the summariser at the grammar it was repaired for, and because the gate never imports this file a reintroduced unparenthesised except passes every recorded 7-test arm silently; one ast.parse assertion with feature_version=(3, 13) in the node's declared tests/equilibrium/test_finite_edge_flux_function.py would redden on the reverted line."
+    }
+  ],
+  "item_audit": {
+    "call_sites": "answered - no production call site references the summariser.",
+    "diff": "answered - one commit, one exception-clause line.",
+    "done_when": "answered - both arms and the repair negative control read.",
+    "goal": "answered - gained commit touches only the receipt generator.",
+    "manifest": "answered - 7 passed both arms, repair log named.",
+    "write_paths": "answered - the gained path is inside the declared directory."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source run's goal is a finite-edge sampled flux-function form used by the DIII-D builder; the single commit it gained since its last review touches only scripts/prototypes/diiid_finite_edge_flux/summarize.py:30, the receipt generator the landing cites, so the delta is a portability repair rather than new goal work.\nVERDICT done_when: the done_when asks for a committed finite-edge test, a negative control and four-row boundary agreement; the manifest records tests/equilibrium/test_finite_edge_flux_function.py at both revisions with 7 passed each and logs/repair-negative-control.log for the summariser.\nVERDICT write_paths: read the seven declared paths; the gained commit's only path, scripts/prototypes/diiid_finite_edge_flux/summarize.py, lies inside the declared scripts/prototypes/diiid_finite_edge_flux.\nVERDICT manifest: read; it records both arms of the same pytest command (2ffdb3b1f and 347a1d2ce, 7 passed, EXIT=0), the repair commit 347a1d2ce, and the summariser negative control at logs/repair-negative-control.log.\nVERDICT diff: read the one gained commit 347a1d2ce (2ffdb3b1f..347a1d2ce) against the delivered base d0947cef; it rewrites the exception clause at scripts/prototypes/diiid_finite_edge_flux/summarize.py:30 and adds no test.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: scripts/prototypes/diiid_finite_edge_flux/summarize.py:30 now writes the tuple as a tuple, and at 347a1d2ce I regenerated the committed table.json byte-identically (cmp clean, EXIT=0 in review-check.log).\nSCORE evidence: 13\nJUSTIFICATION evidence: both arms in the reviewed run's manifest end \"7 passed\" at suite-arms/base-arm-2ffdb3b1f.log and suite-arms/after-arm-347a1d2ce.log, but the gate is tests/equilibrium/test_finite_edge_flux_function.py and never imports summarize.py, so the repaired file is measured only by the negative control I reproduced in grammar-check.log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the gained commit changes one line at scripts/prototypes/diiid_finite_edge_flux/summarize.py:30 and touches no other path.\nSCORE durability: 8\nJUSTIFICATION durability: 347a1d2ce adds no assertion, and reinstating the unparenthesised except at summarize.py:30 leaves all seven gate tests green on this 3.14 interpreter, so the only guard is the hand-run logs/repair-negative-control.log.\nSCORE fit: 19\nJUSTIFICATION fit: the parenthesised tuple at scripts/prototypes/diiid_finite_edge_flux/summarize.py:30 is the standard form the rest of the repository uses, and the module keeps its unannotated helper style.\nSCORE reuse: 20\nJUSTIFICATION reuse: no definition is added; termination_name at scripts/prototypes/diiid_finite_edge_flux/summarize.py:23 keeps its body and only its exception clause changes, and no repository owner for a source-parseability check exists to extend.\nFINDING scripts/prototypes/diiid_finite_edge_flux/summarize.py:30 non-blocking: the repair is unguarded \u2014 no committed assertion parses the summariser at the grammar it was repaired for, and because the gate never imports this file a reintroduced unparenthesised except passes every recorded 7-test arm silently; one ast.parse assertion with feature_version=(3, 13) in the node's declared tests/equilibrium/test_finite_edge_flux_function.py would redden on the reverted line.",
+  "reuse_search": {
+    "capabilities": [],
+    "judgement": [
+      "The gained commit adds no function, class or module; it rewrote one exception clause in place, so no capability is introduced or forked."
+    ],
+    "owners_opened": []
+  },
+  "review_run_id": "r-20261119T115808799100-review-of-diiid-finite-edge-flux-347a1d2cedf5",
+  "review_scope": "delta",
+  "review_scope_note": "The run was reviewed at 2ffdb3b1f as r-20261119T104441722179-review-of-diiid-finite-edge-flux-2ffdb3b1fb99; this record reads only the one commit gained since, 2ffdb3b1f..347a1d2ce, whose whole change is scripts/prototypes/diiid_finite_edge_flux/summarize.py:30, and confirms against the delivered base d0947cef that nothing else landed.",
+  "reviewed_base_sha": "2ffdb3b1fb9979aa098aa49b11629a4d2df14bb2",
+  "reviewed_head_sha": "347a1d2cedf512ff4d8f391eb0a96d895148c944",
+  "reviewed_run_id": "r-20261118T203342822348-diiid-finite-edge-flux",
+  "reviewed_worker_commits": [
+    "347a1d2ce"
+  ],
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 19,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_finite_edge_flux_function.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T203342822348-diiid-finite-edge-flux/suite-arms/after-arm-347a1d2ce.log",
+      "revision": "347a1d2cedf512ff4d8f391eb0a96d895148c944"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_finite_edge_flux_function.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T203342822348-diiid-finite-edge-flux/suite-arms/base-arm-2ffdb3b1f.log",
+      "revision": "2ffdb3b1fb9979aa098aa49b11629a4d2df14bb2"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T12:47:35.172525+00:00",
+  "total": 96
+}

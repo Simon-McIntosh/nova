@@ -73,9 +73,12 @@ air-core field of about 0.2&nbsp;T. The iron's own columns are exact zeros, so
 the residual is the last bit of the reassembly the subspace solve performs once
 the frame's rows exist, not an iron contribution: 3e-17 relative, one unit in the
 last place of the flux. The frame's <em>solved</em> contribution equals
-<code>BoundCurrents.field</code> and <code>.psi</code> <b>exactly</b> at the same
-targets - 0.0 difference at all 110 probes and all 17 loops
-(<code>west-62751-uniform-0.08-sampled-receipt.json</code>).</p>
+<code>BoundCurrents.field</code> and <code>.psi</code> at the same targets, the
+identity <code>tests/test_magnetisation.py::test_frame_carries_the_bound_currents_exactly</code>
+asserts at 1e-12 relative on the fixture. An earlier version of this
+paragraph claimed a 0.0 difference at all 110 probes and all 17 loops from
+the sampled receipt; that comparison called <code>bound.field</code> and
+<code>bound.psi</code> on both sides, so it could not fail, and it is withdrawn.</p>
 <p>This is the honest form of the clause: the fixture is bit-identical, the full
 CoilSet is identical to the last bit of its own reassembly, and no setting of
 the iron's current changes the air-core field by more than that last bit when the
@@ -403,6 +406,12 @@ carries the corrected census pin. The seam and iron-read tests return 19 passed
 in 51.36&nbsp;s on the CPU lane, and the reloaded-frame test returns 1 passed in
 252.89&nbsp;s.</p>
 
+<p><b>The sampler's conviction, withdrawn.</b> The evidence root <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation</code>
+was pruned at 2026-11-19T06:16Z after this record was written: the state
+receipts, the pinned operator and every stage log cited below are gone from
+disk. The numbers in this record were measured by the scheduler jobs it
+names and are reproduced here rather than in a store; a re-measurement at the
+current head could not run because the folded solve asserts the pinned operator that the prune removed.</p>
 <h2 id="icm-iron-field-source-receipts">Receipts</h2>
 <ul>
 <li><code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/field-source/west-62751-uniform-0.08-state-receipt.json</code></li>

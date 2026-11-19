@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "a3293148df495f45cdb50bef9aaba06f4cc81f69",
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/h200_test_lane/prewarm.sh:146 compile_row rows invoke measure.py",
+    "scripts/h200_test_lane/prewarm_row.py receipt wrapper invoked by both launchers",
+    "scripts/prototypes/cached_point_remeasure/run_job.sh:104 runs the same driver under a job-local root"
+  ],
+  "completed_at": "2026-11-19T15:04:50.301Z",
+  "dispatched_at": "2026-11-19T15:04:34Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-19T15:31:21.055686+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261119T120513777963-cached-point-program-remeasure"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/h200_test_lane/prewarm.sh",
+      "line": "146",
+      "severity": "non-blocking",
+      "text": "the four added rows that would fill the pinned pre-warm cache were never executed: the brief forbids running this script against the shared root, so the pinned-cache path clause (1) names is unverified, and only the same driver under run_job.sh's job-local roots was measured (warm receipts name /tmp/mcintos-1330924-bycX, not the pinned root)."
+    },
+    {
+      "file": "scripts/prototypes/cached_point_remeasure/run_job.sh",
+      "line": "99",
+      "severity": "non-blocking",
+      "text": "the control step's status is printed but never folded into the job's own status, so a control that wrongly exits 0 (a cold start passing as a warm load) leaves JOB_EXIT=0 and the job claims success; only test_control_receipts_record_the_miss_they_are_supposed_to_record catches that, and only when the receipt suite is run."
+    },
+    {
+      "file": "tests/test_cached_point_remeasure.py",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "ARMS duplicates the arm list owned by scripts/prototypes/cached_point_remeasure/arms.py:40, so a new or renamed arm in the owner is neither measured by the job's default set nor noticed by the test."
+    },
+    {
+      "file": "tests/test_cached_point_remeasure.py",
+      "line": "75",
+      "severity": "non-blocking",
+      "text": "no assertion covers done_when clause (3): the 500-cell census test's pass is recorded only in census-test.log and the fragment, so a regression that removes or breaks that step leaves the receipt suite green."
+    }
+  ],
+  "head_log_revision": "14c0d279c694a6e20c1c3ac16fd54789dc22b409",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "examined the three runtime entry points that reach the added code: prewarm.sh's compile_row block, run_job.sh's step loop, and prewarm_row.py as the receipt wrapper both invoke; no nova package module imports the added scripts.",
+    "diff": "read commit by commit against a3293148df: bf8e4a5dd adds arms.py, measure.py, run_job.sh and the test plus the prewarm rows (800 lines), 77fbf6ca9 adds the 28-line fragment, and 14c0d279c moves the misses assertion ahead of the role assertion and ends the test file's missing newline; nothing removes or writes under /work.",
+    "done_when": "the plan's clause (1) is the 60 s / 64 GB / zero-miss first call at 282 cells and 2,132 nodes, clause (2) bit-identity at every 282-cell node and 64 of 2,132, clause (3) the 500-cell census test inside 900 s; tests/test_cached_point_remeasure.py:41-72 asserts clauses (1) and (2) from receipts, clause (3) is recorded only in census-test.log ('2 passed in 329.68s', EXIT=0), and clause (1)'s pinned cache is measured on a job-local root (/tmp/mcintos-1330924-bycX) because the pinned root was destroyed in the incident the brief describes.",
+    "goal": "the node's goal is that the production point program is served from the pre-warm cache in a fresh measurement; scripts/h200_test_lane/prewarm.sh:146 adds the four arms as pre-warm rows and run_job.sh measures a warm first call for each, recorded in the fragment's table.",
+    "manifest": "read at runs/r-20261119T120513777963-cached-point-program-remeasure/manifest.md; status complete, commits bf8e4a5dd, 77fbf6ca9, 14c0d279c, the receipt-backed gate command with test_logs naming scoped-gate-1795096080028371213.log, baseline_suite and after_suite both completed with failure_count 0, and the green negative control named with EXIT=1.",
+    "write_paths": "the declared fence was scripts/h200_test_lane, scripts/prototypes/cached_point_remeasure, tests/test_cached_point_remeasure.py, the evidence fragment and the figures directory; git diff --stat a3293148df..14c0d279c lists six paths, all inside it, and no figure was needed."
+  },
+  "justifications": {
+    "durability": "the negative control at negative-control.log fails the zero-miss assertion ('1 misses: compiled instead of loading) with EXIT=1, but no assertion covers the census clause and tests/test_cached_point_remeasure.py:22 hardcodes the arm list instead of reading scripts/prototypes/cached_point_remeasure/arms.py:40.",
+    "evidence": "tests/test_cached_point_remeasure.py:41-72 asserts the 60 s, 64 GB and zero-miss clauses and the bit-identity clauses against receipts, and scoped-gate-1795096080028371213.log:8 records 3 passed with EXIT=0, while the census clause rests only on census-test.log's '2 passed in 329.68s, EXIT=0'.",
+    "fit": "scripts/prototypes/cached_point_remeasure/measure.py:1-30 follows the neighbouring prototype driver idiom (configure_dtypes before array imports, ruff noqa E402, receipt dict per step) and adds no name the repository conventions forbid.",
+    "goal_fidelity": "scripts/h200_test_lane/prewarm.sh:146 adds the four point-program pre-warm rows and scripts/prototypes/cached_point_remeasure/measure.py:127 measures each arm in its own process, but the warm loads ran against /tmp/mcintos-1330924-bycX rather than the pinned root the plan clause names.",
+    "reuse": "measure.py and run_job.sh call the existing owners scripts/h200_test_lane/cache_guard.py, scripts/h200_test_lane/prewarm_row.py and nova.jax.config.default_persistent_compilation_cache_root rather than re-implementing them; the only new helper, measure.py:107 bitwise_equal, has no repo-wide owner (tests/test_equilibrium_forward_reference.py:1114 is HexMachine-specific).",
+    "scope_discipline": "git diff --stat a3293148df..14c0d279c lists only prewarm.sh, the three cached_point_remeasure scripts, tests/test_cached_point_remeasure.py and the fragment, every one inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that the production point program is served from the pre-warm cache in a fresh measurement; scripts/h200_test_lane/prewarm.sh:146 adds the four arms as pre-warm rows and scripts/prototypes/cached_point_remeasure/run_job.sh runs a warm first call for each, recorded in docs/evidence/fragments/kernel-compile-barrier/cached-point-program-remeasure.html.\nVERDICT done_when: the plan's clause (1) is the 60 s / 64 GB / zero-miss first call at 282 cells and 2,132 nodes, clause (2) bit-identity at every 282-cell node and 64 of 2,132, clause (3) the 500-cell census test inside 900 s; tests/test_cached_point_remeasure.py:41-72 asserts clauses (1) and (2) from receipts, clause (3) is recorded only in census-test.log ('2 passed in 329.68s', EXIT=0), and clause (1)'s pinned cache is measured on a job-local root (/tmp/mcintos-1330924-bycX) because the pinned root was destroyed in the incident the brief describes.\nVERDICT write_paths: the declared fence was scripts/h200_test_lane, scripts/prototypes/cached_point_remeasure, tests/test_cached_point_remeasure.py, the evidence fragment and the figures directory; git diff --stat a3293148df..14c0d279c lists exactly six paths, all inside it, and no figure was needed.\nVERDICT manifest: read at runs/r-20261119T120513777963-cached-point-program-remeasure/manifest.md; status complete, commits bf8e4a5dd, 77fbf6ca9, 14c0d279c, the receipt-backed gate command with test_logs naming scoped-gate-1795096080028371213.log, baseline_suite and after_suite both completed with failure_count 0, and the negative control named with 1 failed and EXIT=1.\nVERDICT diff: read commit by commit against a3293148df: bf8e4a5dd adds arms.py, measure.py, run_job.sh and the test plus the prewarm rows, 77fbf6ca9 adds the 28-line fragment, and 14c0d279c moves the misses assertion ahead of the role assertion and ends the test file's missing newline; nothing removes or writes under /work.\nCALL_SITES: scripts/h200_test_lane/prewarm.sh:146 compile_row rows invoke measure.py, scripts/h200_test_lane/prewarm_row.py receipt wrapper invoked by both launchers, scripts/prototypes/cached_point_remeasure/run_job.sh:104 runs the same driver under a job-local root\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: scripts/h200_test_lane/prewarm.sh:146 adds the four point-program pre-warm rows and measure.py:127 measures each arm in its own process, but the warm loads ran against /tmp/mcintos-1330924-bycX rather than the pinned root the plan clause names.\nSCORE evidence: 17\nJUSTIFICATION evidence: tests/test_cached_point_remeasure.py:41-72 asserts the 60 s, 64 GB and zero-miss clauses and the bit-identity clauses against receipts, and scoped-gate-1795096080028371213.log:8 records 3 passed with EXIT=0, while the census clause rests only on census-test.log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat a3293148df..14c0d279c lists only prewarm.sh, the three cached_point_remeasure scripts, tests/test_cached_point_remeasure.py and the fragment, every one inside the declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: the negative control at negative-control.log fails the zero-miss assertion ('1 misses: compiled instead of loading') with EXIT=1, but no assertion covers the census clause and tests/test_cached_point_remeasure.py:22 hardcodes the arm list instead of reading arms.py:40.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/cached_point_remeasure/measure.py:1-30 follows the neighbouring prototype driver idiom (configure_dtypes before array imports, ruff noqa E402, a receipt dict per step) and adds no name the repository conventions forbid.\nSCORE reuse: 19\nJUSTIFICATION reuse: measure.py and run_job.sh call the existing owners cache_guard.py, prewarm_row.py and nova.jax.config.default_persistent_compilation_cache_root, and the only new helper measure.py:107 bitwise_equal has no repo-wide owner (tests/test_equilibrium_forward_reference.py:1114 is HexMachine-specific).\nFINDING scripts/h200_test_lane/prewarm.sh:146 non-blocking: the four added rows that would fill the pinned pre-warm cache were never executed, because the brief forbids running this script against the shared root, so the pinned-cache path clause (1) names is unverified and only the same driver under job-local roots was measured.\nFINDING scripts/prototypes/cached_point_remeasure/run_job.sh:99 non-blocking: the control step's status is printed but never folded into the job's own status, so a control that wrongly exits 0 leaves JOB_EXIT=0 and the job claims success.\nFINDING tests/test_cached_point_remeasure.py:22 non-blocking: ARMS duplicates the arm list owned by scripts/prototypes/cached_point_remeasure/arms.py:40, so a new or renamed arm in the owner is neither measured by the job's default set nor noticed by the test.\nFINDING tests/test_cached_point_remeasure.py:75 non-blocking: no assertion covers done_when clause (3), so a regression that removes or breaks the 500-cell census step leaves the receipt suite green.",
+  "review_run_id": "r-20261119T150256898393-review-of-cached-point-program-remeasure-14c0d279c694",
+  "reviewed_base_sha": "a3293148df495f45cdb50bef9aaba06f4cc81f69",
+  "reviewed_head_sha": "14c0d279c694a6e20c1c3ac16fd54789dc22b409",
+  "reviewed_run_id": "r-20261119T120513777963-cached-point-program-remeasure",
+  "reviewer": {
+    "backend": "local",
+    "effort": "default",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261119T150256898393-review-of-cached-point-program-remeasure-14c0d279c694"
+  },
+  "reviewer_run_id": "r-20261119T150256898393-review-of-cached-point-program-remeasure-14c0d279c694",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T15:23:22.221057+00:00",
+  "total": 105
+}

@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="forward-solve-near-stored-states">
   <meta name="plan-title" content="Forward Solve Near Stored States — qualify the solves a reconstruction asks for beside an imas-efit equilibrium">
   <meta name="plan-summary" content="Forward solves started at or beside a stored imas-efit state refuse on MAST-U, TCV and ITER; reproduce, attribute and repair them.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="in-progress">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="20.0">
   <meta name="plan-capability-version" content="1.0">
@@ -25,8 +25,8 @@
   <title>Forward Solve Near Stored States | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
-<meta name="plan-modified" content="2026-11-18">
+<meta name="plan-version" content="14">
+<meta name="plan-modified" content="2026-11-19">
 </head>
 <body>
   <main class="plan-doc">
@@ -115,6 +115,11 @@
     <pre class="r-fu-prompt">/reckon-build forward-solve-near-stored-states §1</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261119T070256263324-review-of-stored-state-refusals-fbfeafd36316" data-who="reckon-build" data-when="2026-11-19T07:16:40.310Z">
+    <div class="r-comment-body"><p>Reviewed a148a0a9d176713a90cd24ffa7de2966b0c55654..fbfeafd36316f86b924745f2cf343733ee35cc63 (eight commits, twelve paths) against the six checklist items and stored a parsed record scoring goal_fidelity 11, evidence 9, scope_discipline 19, durability 5, fit 12, reuse 4. Two blocking findings: report.py:37 drops the TCV and ITER coefficient vectors from the landed fragment by first-writer-wins merge, and run_cases.py:219 invents the displaced step so the mastu-displaced arms do not stand up the comparison&#x27;s displaced coefficients. Four non-blocking findings: report.py:56 carries no finite residual operand, run_cases.py:78 re-implements the _write the imported comparison module owns, submit.sh:80 submits a raw --wrap with no --job-name, and the reviewed manifest.md:10 records an unsubstituted {node_test_files} placeholder. added_failure_count 0 from 4 passed in both arms. The section&#x27;s own positive control refused (mastu-stored-continuation qualified=no at 489.56 s), which is recorded in the goal_fidelity justification rather than as a defect.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

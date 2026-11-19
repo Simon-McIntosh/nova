@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-19T07:16:40.310Z",
+  "dispatched_at": "2026-11-19T07:16:17Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/stored_state_refusals/report.py",
+      "line": 37,
+      "severity": "blocking",
+      "text": "records() merges each key first-writer-wins, so the stored_coefficients mapping of tcv-iter-long/measurement.json is dropped once mastu-titan2/measurement.json has set stored_coefficients, and the landed fragment prints coefficients=[] for TCV and ITER instead of the coefficient vector done_when (3) requires."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/run_cases.py",
+      "line": 219,
+      "severity": "blocking",
+      "text": "the displaced step is DIFFERENCE_STEP * max(abs(raw[0]), 1.0) = 1e-4 on a coefficient stored as 0.0, and tests/test_magnetics_fit_efit_comparison.py defines no displacement at all, so the arm is not the displaced coefficients the comparison's fit asked for and its NoQualifiedAxisError does not reproduce the banked active-set refusal at 1.2e-4."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/report.py",
+      "line": 56,
+      "severity": "non-blocking",
+      "text": "a non-finite terminal residual prints as the literal 'nonfinite' and no last finite residual is carried, although mastu-titan2/comparison/mastu-stored-default-generating-failure.json records finite_residual_entries: 8, so the record holds no operand a reader could compare against the banked 4.9e-10."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/run_cases.py",
+      "line": 78,
+      "severity": "non-blocking",
+      "text": "_write and _json_safe re-implement the _write that tests/test_magnetics_fit_efit_comparison.py:107 already owns \u2014 a module this script imports four helpers from \u2014 and collapse the finite/nan/unavailable distinction its _residual_fields keeps, so a refused arm stores residual: null, which reads the same as an arm that never produced a residual."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/submit.sh",
+      "line": 80,
+      "severity": "non-blocking",
+      "text": "the raw sbatch --wrap carries no --job-name, against the binding rule that a raw --wrap submission names the work beside its explicit --mem and core sizing."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/manifest.md",
+      "line": 10,
+      "severity": "non-blocking",
+      "text": "the recorded tests: line carries the unsubstituted {node_test_files} placeholder instead of a literal command, so the gate receipt promotion fills from it cannot be re-run."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the section's deliverable in docs/plans/forward-solve-near-stored-states.html:63-79 beside the landed change; all six arms are stood up from stored inputs and assembled into docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html, but the positive control mastu-stored-continuation refuses rather than qualifying, and no arm reaches the plan's banked residuals.\nVERDICT done_when: the done_when pins 4.9e-10, 1.2e-4 with an active-set step refused, 0.030, one qualifying positive control and one batch job over the cases; the landed record reports residual 'nonfinite', reason 3 for all six arms and qualified=no for the continuation, and the gate the manifest records (tests/test_unqualified_axis_eager_routes.py) asserts none of those numbers.\nVERDICT write_paths: read the declared scope (docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html, docs/figures/forward-solve-near-stored-states/stored-state-refusals, scripts/prototypes/stored_state_refusals) against the twelve paths of a148a0a9..fbfeafd36; every path lies inside it and nothing outside was touched.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/manifest.md; it records armed-baseline.log (4 passed at a148a0a9) and armed-after2.log (4 passed at fbfeafd36) with completed: true and zero failures, states in its landing line that the section's target is not met, and carries the unsubstituted {node_test_files} placeholder on its tests: line.\nVERDICT diff: read all eight commits (707d711c4, 03aedc117, dd139e779, d4cf880b1, 029155654, ed2631e1f, c0253f704, fbfeafd36) against base a148a0a9; they add three prototype scripts (run_cases.py, report.py, submit.sh), one evidence fragment and nine panel files, all inside the declared write paths.\nCALL_SITES: none\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: the arms run and the record is honest, but docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html shows mastu-stored-continuation qualified 'no' at 489.56 s, so the section's positive control is measured as failing, not shown qualifying below 1e-10.\nSCORE evidence: 9\nJUSTIFICATION evidence: the gate recorded in the manifest is tests/test_unqualified_axis_eager_routes.py, whose four tests assert only that eager profile reads name the unqualified-axis refusal, so a green run proves the refusal class still raises and asserts no clause of the done_when.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all twelve paths in a148a0a9..fbfeafd36 lie under the three declared write paths, with no library change, no test change and no plan edit.\nSCORE durability: 5\nJUSTIFICATION durability: the diff adds no test, and its only assertions are run_cases.py:275-276 on jax_enable_x64 and the default backend, which redden on a CPU or single-precision lane but not on a regression of report.py:37's dropped coefficient vectors.\nSCORE fit: 12\nJUSTIFICATION fit: the scripts sit in the prototype convention of scripts/prototypes and avoid the forbidden naming vocabulary, but run_cases.py:35-40 mutates os.environ and creates two directories at import, and run_cases.py:54-58 imports a 2021-line pytest module for its helpers.\nSCORE reuse: 4\nJUSTIFICATION reuse: run_cases.py imports _attempt, _problem, _read_case and _panel from tests/test_magnetics_fit_efit_comparison.py, then re-implements that module's _write at run_cases.py:78 and its continuation policy literal at run_cases.py:198-203 instead of extending the owner.\nFINDING scripts/prototypes/stored_state_refusals/report.py:37 blocking: records() merges each key first-writer-wins, so the stored_coefficients mapping of tcv-iter-long/measurement.json is dropped once mastu-titan2/measurement.json has set stored_coefficients, and the landed fragment prints coefficients=[] for TCV and ITER instead of the coefficient vector done_when (3) requires.\nFINDING scripts/prototypes/stored_state_refusals/run_cases.py:219 blocking: the displaced step is DIFFERENCE_STEP * max(abs(raw[0]), 1.0) = 1e-4 on a coefficient stored as 0.0, and tests/test_magnetics_fit_efit_comparison.py defines no displacement at all, so the arm is not the displaced coefficients the comparison's fit asked for and its NoQualifiedAxisError does not reproduce the banked active-set refusal at 1.2e-4.\nFINDING scripts/prototypes/stored_state_refusals/report.py:56 non-blocking: a non-finite terminal residual prints as the literal 'nonfinite' and no last finite residual is carried, although mastu-titan2/comparison/mastu-stored-default-generating-failure.json records finite_residual_entries: 8, so the record holds no operand a reader could compare against the banked 4.9e-10.\nFINDING scripts/prototypes/stored_state_refusals/run_cases.py:78 non-blocking: _write and _json_safe re-implement the _write that tests/test_magnetics_fit_efit_comparison.py:107 already owns \u2014 a module this script imports four helpers from \u2014 and collapse the finite/nan/unavailable distinction its _residual_fields keeps, so a refused arm stores residual: null, which reads the same as an arm that never produced a residual.\nFINDING scripts/prototypes/stored_state_refusals/submit.sh:80 non-blocking: the raw sbatch --wrap carries no --job-name, against the binding rule that a raw --wrap submission names the work beside its explicit --mem and core sizing.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/manifest.md:10 non-blocking: the recorded tests: line carries the unsubstituted {node_test_files} placeholder instead of a literal command, so the gate receipt promotion fills from it cannot be re-run.",
+  "review_run_id": "r-20261119T070256263324-review-of-stored-state-refusals-fbfeafd36316",
+  "reviewed_base_sha": "a148a0a9d176713a90cd24ffa7de2966b0c55654",
+  "reviewed_head_sha": "fbfeafd36316f86b924745f2cf343733ee35cc63",
+  "reviewed_run_id": "r-20261118T112812127189-stored-state-refusals",
+  "scores": {
+    "durability": 5,
+    "evidence": 9,
+    "fit": 12,
+    "goal_fidelity": 11,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T07:41:47.812918+00:00",
+  "total": 60
+}

@@ -102,10 +102,18 @@ def summarise(rows: list[dict], truth: dict, jacobian: dict) -> dict:
         var_q95 = float(jac_q95 @ covariance @ jac_q95)
         block_axis = block_error(values["axis"], axis_truth)
         block_q95 = block_error(values["q95"], np.array([q95_truth]))
-        record["axis_covariance_ratio"] = float((block_axis**2) / (var_axis / BLOCK))
-        record["q95_covariance_ratio"] = float((block_q95**2) / (var_q95 / BLOCK))
-        record["axis_stated_sigma"] = float(np.sqrt(var_axis))
-        record["q95_stated_sigma"] = float(np.sqrt(var_q95))
+        # The covariance ratio needs the coefficient jacobian, which the
+        # probe-row study skips: two more solves on the card buy a quantity this
+        # measure does not read.  Without it the design derivative is zero and
+        # the ratio is undefined rather than infinite.
+        if var_axis > 0.0:
+            record["axis_covariance_ratio"] = float(
+                (block_axis**2) / (var_axis / BLOCK)
+            )
+            record["axis_stated_sigma"] = float(np.sqrt(var_axis))
+        if var_q95 > 0.0:
+            record["q95_covariance_ratio"] = float((block_q95**2) / (var_q95 / BLOCK))
+            record["q95_stated_sigma"] = float(np.sqrt(var_q95))
     return record
 
 

@@ -56,8 +56,8 @@ coilset stored and reloaded from its cache:</p>
 <table><thead><tr><th>Check</th><th>Measured</th><th>Bound</th></tr></thead><tbody>
 <tr><td>zero state against air-core, field</td><td>0.0 T (bit-identical)</td><td>exact</td></tr>
 <tr><td>zero state against air-core, flux</td><td>0.0 Wb/rad (bit-identical)</td><td>exact</td></tr>
-<tr><td>frame contribution against <code>BoundCurrents.field</code></td><td>2.28e-17 T (6.2e-12 of the contribution)</td><td>1e-12 relative</td></tr>
-<tr><td>frame contribution against <code>BoundCurrents.psi</code></td><td>bit-identical</td><td>1e-12 relative</td></tr>
+<tr><td>frame contribution against <code>BoundCurrents.field</code></td><td>2.279e-17 T, 1.10e-13 of the <b>2.065e-4 T</b> contribution</td><td>1e-12 relative</td></tr>
+<tr><td>frame contribution against <code>BoundCurrents.psi</code></td><td>5.19e-16 Wb/rad, 5.04e-13 of the <b>1.030e-3 Wb/rad</b> contribution</td><td>1e-12 relative</td></tr>
 <tr><td>solved state's change to the field</td><td>2.06e-4 T on a 0.25 T air field</td><td>non-zero</td></tr>
 </tbody></table>
 <p>The zero state is exact because the added columns multiply a zero current
@@ -187,7 +187,11 @@ Z&nbsp;=&nbsp;&plusmn;0.637&nbsp;m) from the iron's outer edge out to
 R&nbsp;=&nbsp;16&nbsp;m, 40 radii per plane, from the prototype's coil and plasma
 quadrature plus <code>BoundCurrents</code>:
 <figure><img src="/nova/figures/west-stray-field/west-62751-iron-stray-field.png" alt="WEST 62751 outboard stray field with and without the iron, the iron share, and the iron contribution at the in-vessel probes"></figure>
-The upper panel is the total field with the iron (solid, one colour per plane)
+<p>The same figure is published under this section's own path,
+<code>/nova/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png</code>,
+and the plan's <code>done_when</code> names
+<code>/nova/figures/west-stray-field/</code>; both resolve to the same bytes.</p>
+<p>The upper panel is the total field with the iron (solid, one colour per plane)
 over the air-core field (dashed grey); the middle panel is the iron's share in
 per cent; the lower panel is the iron's contribution at every in-vessel poloidal
 probe against the air-core field there.</p>
@@ -353,12 +357,15 @@ terms.</p>
 
 <h2 id="icm-iron-field-source-census">The census count pinned independently</h2>
 <p><code>tests/test_imas_iron_read.py::test_census_mesh_matches_previous_read</code>
-compared two counts that both came from the production <code>_mesh</code>, so a
-change in the reader moved both sides together unseen. It now pins the
-production count itself (<code>CENSUS_CELLS = 1694</code> at 0.08&nbsp;m) and
-carries a negative control: the same reader on the same six outlines at
-0.04&nbsp;m returns a different count, so the pin is a measurement of that mesh
-rather than a constant the assertion could satisfy without reading the outlines.</p>
+compared two counts that both came from the production <code>count <_mesh> so a
+change in the reader moved both sides together unseen. The version now on main —
+landed by the sibling node that owns the iron read, and taken from
+<code>origin/main</code> at the merge <code>20a660ed3</code> rather than written
+here — asserts the production count against the literal <b>1694</b> at
+0.08&nbsp;m inline (<code>len(actual) == len(expected) == 1694</code>, no named
+constant) and adds an ordered-vertex digest of the six outlines, so a reader
+that changed the mesh cannot satisfy the digest. The count is that node's
+measurement, quoted here for the mesh this node's figures draw.</p>
 
 <h2 id="icm-iron-field-source-walls">Walls</h2>
 <table><thead><tr><th>Step</th><th>Wall [s]</th><th>Where</th></tr></thead><tbody>
@@ -377,27 +384,24 @@ same process are much cheaper per target than the first.</p>
 
 <h2 id="icm-iron-field-source-suite">Tests</h2>
 <p>The suite arms for <code>tests/test_magnetisation.py</code> ran as scheduler
-jobs on rigel, each over its own tree and with
-<code>PYTHONPATH=. JAX_PLATFORMS=cpu … -m pytest -p no:cacheprovider -q
-tests/test_magnetisation.py</code>. <b>Baseline at <code>9b0161261</code>:
-1 failed, 92 passed in 8652.31&nbsp;s</b> — the failure is
-<code>test_linear_shell_operator_pin[compact]</code>, which shells out to
-<code>git show</code> and found no objects in a tree exported without
-<code>.git</code>; the runner now clones the base revision, so the arm is
-re-run in a tree where that test can pass. <b>After: 95 passed in
-9215.26&nbsp;s</b>. The first after arm had recorded one failure, this node's own
-regression: the seam dropped the <code>linear_cell_interaction</code> re-export
-from the package, and restoring it took that arm to 95 passed. Both arms are
-recorded again at the fence revisions, the baseline in a clone of the base
-revision and the after arm in this checkout.</p>
+jobs on rigel, each over its own tree, each with the command resolved over that
+tree: <code>PYTHONPATH=. JAX_PLATFORMS=cpu
+/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
+tests/test_magnetisation.py</code>. <b>Baseline at <code>9b0161261</code>: 93
+passed in 8543.15&nbsp;s.</b> <b>After: 95 passed in 9104.13&nbsp;s</b> at head
+<code>1d739e7ec</code>. The two extra tests are this node's seam contracts — the
+frame carrying the bound currents exactly, and the same on a stored and reloaded
+coilset. Two earlier defects of the harness are worth stating because they look
+like suite failures and are not: a tree exported with <code>git show</code>'s
+objects missing made the pinned-source test fail, and two arms sharing one clone
+path deleted each other mid-checkout.</p>
 <p><code>tests/test_magnetisation.py::test_frame_carries_the_bound_currents_exactly</code>
 is the new seam contract and
 <code>::test_reloaded_coilset_accepts_the_iron_frame</code> is the same contract
 on a stored and reloaded coilset; <code>tests/test_imas_iron_read.py</code>
 carries the corrected census pin. The seam and iron-read tests return 19 passed
 in 51.36&nbsp;s on the CPU lane, and the reloaded-frame test returns 1 passed in
-252.89&nbsp;s. The full <code>tests/test_magnetisation.py</code> file was not run
-to completion in this allocation; it is not claimed as a green suite arm here.</p>
+252.89&nbsp;s.</p>
 
 <h2 id="icm-iron-field-source-receipts">Receipts</h2>
 <ul>

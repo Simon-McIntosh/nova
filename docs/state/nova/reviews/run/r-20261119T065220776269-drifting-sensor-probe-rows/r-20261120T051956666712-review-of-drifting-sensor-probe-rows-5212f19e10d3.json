@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "logs/baseline_suite.log runs at eda6cfd6e in an empty scratch tree and exits 4 with 'file or directory not found', collecting no tests, so its failure_ids are empty and completed is false; logs/after_suite.log at 5212f19e1 records '9 passed', EXIT=0; added_failure_ids is the head arm's failing ids minus the base arm's, hence [] and added_failure_count 0.",
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1036"
+  ],
+  "completed_at": "2026-11-20T05:20:58.332Z",
+  "dispatched_at": "2026-11-20T05:20:39Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/test_fragment_tables.py",
+      "id": "f2158c2dfb5",
+      "line": "44",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion compares np.corrcoef of a series with np.corrcoef of the same series divided by one constant, an exact scale invariance of Pearson correlation, so no change to study.py or lag_table.py can redden it and it guards nothing."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/lag_table.py",
+      "id": "f2078dc1b73",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "non-blocking: GENERATING_AXIS copies the axis study.py:308 writes to study/generating.json and analyse.py:159 reads from there, so a rebuilt study is checked against a stale constant and a failing RMSE names the wrong truth."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/lag_table.py",
+      "id": "f0748438bfd",
+      "line": "66",
+      "severity": "non-blocking",
+      "text": "non-blocking: the jsonl is opened inline and never closed, leaking a descriptor per sequence and producing the two ResourceWarnings recorded in logs/after_suite.log."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/test_fragment_tables.py",
+      "id": "f949e7b7424",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "non-blocking: the guard skips whenever ~/.config/reckon/crew/runs lacks the arms, which is the state under a reckon worker whose HOME is the run's omp-home, so it reports green without checking in the environment that runs gates."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read the single commit 5212f19e1 against 416468ca2, lag_table.py +122, test_fragment_tables.py +44, test_probe_rows.py +32/-6, and the table guard reddens independently: lag_table.py run over the 06f50708c fragment prints two FAIL lines naming the prior-head triplets and exits 1.",
+    "done_when": "clause (1) requires the record's lag-one figures beside the loops-only arm, and the new gate compares all six rows of docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html against both arms' study/summary.json plus the slice-matched imas-efit RMSE, recorded as 9 passed at EXIT=0 in logs/after_suite.log.",
+    "goal": "the reviewed node's goal is the imas-efit measurement of both 200-slice drifting-sensor sequences beside a nova column on the slices one titan job holds, and the delta 416468ca2..5212f19e1 adds no measurement of its own but commits the guard the prior review's durability finding asked for, at scripts/prototypes/drifting_sensor_sequences/probe_rows/test_fragment_tables.py:34 and test_probe_rows.py:111.",
+    "manifest": "read docs/.../r-20261119T065220776269-drifting-sensor-probe-rows/manifest.md; it records after_suite as 9 passed EXIT=0 at 5212f19e1, baseline_suite as exit 4 completed:false on an empty base tree, added_failure_count 0, and two round-2 negative-control logs at EXIT=1.",
+    "write_paths": "the delta's three paths, lag_table.py, test_fragment_tables.py and test_probe_rows.py under scripts/prototypes/drifting_sensor_sequences/probe_rows/, all lie inside the declared scripts/prototypes/drifting_sensor_sequences path."
+  },
+  "justifications": {
+    "durability": "test_fragment_tables.py:34 reddens on the reinstated 06f50708c cells and test_probe_rows.py:111 reddens on a second IDS walk (1 failed, 6 passed, EXIT=1), but test_fragment_tables.py:44 asserts a mathematical invariant of numpy with no repository code under it.",
+    "evidence": "logs/after_suite.log records 9 passed EXIT=0 at 5212f19e1 and the round-2 negative-control logs record 1 failed of 2 and 1 failed of 7 at EXIT=1, while logs/baseline_suite.log is EXIT=4 completed:false so the added-failure count rests on the head arm.",
+    "fit": "lag_table.py:77-82 follows the regex-over-fragment idiom of scripts/prototypes/diiid_xpoint_profile_extent/check_profile_table.py:29-34 but leaves the jsonl handle open at lag_table.py:66.",
+    "goal_fidelity": "lag_table.py:76-96 and test_probe_rows.py:82-112 guard the record's published numbers and the wall delegation the goal's report rests on, all inside scripts/prototypes/drifting_sensor_sequences.",
+    "reuse": "no shared owner of fragment-table checking exists (each sibling prototype owns its own checker) and the sentinel test extends nova.equilibrium.wall_mask.wall_units_from_ids, but GENERATING_AXIS at lag_table.py:25 duplicates the study/generating.json axis that analyse.py:159 reads.",
+    "scope_discipline": "every path in the diff (lag_table.py, test_fragment_tables.py, test_probe_rows.py) is inside the declared scripts/prototypes/drifting_sensor_sequences path and no other file moved."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is the imas-efit measurement of both 200-slice drifting-sensor sequences beside a nova column on the slices one titan job holds, and the delta 416468ca2..5212f19e1 adds no measurement of its own but commits the guard the prior review's durability finding asked for, at scripts/prototypes/drifting_sensor_sequences/probe_rows/test_fragment_tables.py:34 and test_probe_rows.py:111.\nVERDICT done_when: clause (1) requires the record's lag-one figures beside the loops-only arm, and the new gate compares all six rows of docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html against both arms' study/summary.json plus the slice-matched imas-efit RMSE, recorded as 9 passed at EXIT=0 in logs/after_suite.log.\nVERDICT write_paths: the delta's three paths, lag_table.py, test_fragment_tables.py and test_probe_rows.py under scripts/prototypes/drifting_sensor_sequences/probe_rows/, all lie inside the declared scripts/prototypes/drifting_sensor_sequences path.\nVERDICT manifest: read docs/.../r-20261119T065220776269-drifting-sensor-probe-rows/manifest.md; it records after_suite as 9 passed EXIT=0 at 5212f19e1, baseline_suite as exit 4 completed:false on an empty base tree, added_failure_count 0, and two round-2 negative-control logs at EXIT=1.\nVERDICT diff: read the single commit 5212f19e1 against 416468ca2, lag_table.py +122, test_fragment_tables.py +44, test_probe_rows.py +32/-6, and the table guard reddens independently: lag_table.py run over the 06f50708c fragment prints two FAIL lines naming the prior-head triplets and exits 1.\nCALL_SITES: scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1036, lag_table.py has no production caller (only its own CLI and test_fragment_tables.py)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: lag_table.py:76-96 and test_probe_rows.py:82-112 guard the record's published numbers and the wall delegation the goal's report rests on, all inside scripts/prototypes/drifting_sensor_sequences.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/after_suite.log records 9 passed EXIT=0 at 5212f19e1 and the round-2 negative-control logs record 1 failed of 2 and 1 failed of 7 at EXIT=1, while logs/baseline_suite.log is EXIT=4 completed:false so the added-failure count rests on the head arm.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff (lag_table.py, test_fragment_tables.py, test_probe_rows.py) is inside the declared scripts/prototypes/drifting_sensor_sequences path and no other file moved.\nSCORE durability: 16\nJUSTIFICATION durability: test_fragment_tables.py:34 reddens on the reinstated 06f50708c cells and test_probe_rows.py:111 reddens on a second IDS walk (1 failed, 6 passed, EXIT=1), but test_fragment_tables.py:44 asserts a mathematical invariant of numpy with no repository code under it.\nSCORE fit: 15\nJUSTIFICATION fit: lag_table.py:77-82 follows the regex-over-fragment idiom of scripts/prototypes/diiid_xpoint_profile_extent/check_profile_table.py:29-34 but leaves the jsonl handle open at lag_table.py:66.\nSCORE reuse: 16\nJUSTIFICATION reuse: no shared owner of fragment-table checking exists (each sibling prototype owns its own checker) and the sentinel test extends nova.equilibrium.wall_mask.wall_units_from_ids, but GENERATING_AXIS at lag_table.py:25 duplicates the study/generating.json axis that analyse.py:159 reads.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/test_fragment_tables.py:44 non-blocking: the assertion compares np.corrcoef of a series with np.corrcoef of the same series divided by one constant, an exact scale invariance of Pearson correlation, so no change to study.py or lag_table.py can redden it and it guards nothing.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/lag_table.py:25 non-blocking: GENERATING_AXIS copies the axis study.py:308 writes to study/generating.json and analyse.py:159 reads from there, so a rebuilt study is checked against a stale constant and a failing RMSE names the wrong truth.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/lag_table.py:66 non-blocking: the jsonl is opened inline and never closed, leaking a descriptor per sequence and producing the two ResourceWarnings recorded in logs/after_suite.log.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/test_fragment_tables.py:31 non-blocking: the guard skips whenever ~/.config/reckon/crew/runs lacks the arms, which is the state under a reckon worker whose HOME is the run's omp-home, so it reports green without checking in the environment that runs gates.\n",
+  "review_run_id": "r-20261120T051956666712-review-of-drifting-sensor-probe-rows-5212f19e10d3",
+  "reviewed_base_sha": "416468ca210223b4accbc6df4c543847d5b963d0",
+  "reviewed_head_sha": "5212f19e10d324f266aade0c731f53c38fd6b5a1",
+  "reviewed_run_id": "r-20261119T065220776269-drifting-sensor-probe-rows",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T05:29:40.182264+00:00",
+  "total": 101
+}

@@ -25,7 +25,7 @@
   <title>Forward Solve Near Stored States | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-modified" content="2026-11-20">
 </head>
 <body>
@@ -129,7 +129,10 @@
     <div class="r-comment-body"><p>figure review at cbcba328 — 6 SVG-rendered panels pass all six rubric items, 2 published previews fail legibility (blue nova series advertised in the legend, drawn nowhere), 3 non-blocking findings; parsed record at both write paths.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261120T072617915276-review-of-stored-state-refusals-cbcba328b6a7" data-who="reckon-build" data-when="2026-11-20T07:27:28.560Z">
-    <div class="r-comment-body"><p>Reviewed run r-20261118T112812127189-stored-state-refusals at head cbcba328b6a7ed6561cfceeb641961725c2132a6 over base a148a0a9d176713a90cd24ffa7de2966b0c55654, focusing on the two commits gained since the bddfb05ef review: scores goal_fidelity 13, evidence 11, scope_discipline 18, durability 12, fit 15, reuse 10; one blocking finding (records.py:42 next_sequence globs the job leaf directory so every new receipt writes sequence 1) and four non-blocking findings, with the panel defect answered (all six committed SVGs carry 8-15 imas-efit and 13-17 nova contoured levels) and §1&#x27;s residual and positive-control clauses recorded as unmet.</p></div>
+    <div class="r-comment-body"><p>Reviewed run r-20261118T112812127189-stored-state-refusals at head cbcba328b6a7ed6561cfceeb641961725c2132a6 over base a148a0a9d176713a90cd24ffa7de2966b0c55654, focusing on the two commits gained since the bddfb05ef review: scores goal_fidelity 13, evidence 11, scope_discipline 18, durability 12, fit 15, reuse 10; one blocking finding (records.py:42 next_sequence globs the job leaf directory so every new receipt writes sequence 1) and four non-blocking findings, with the panel defect answered (all six committed SVGs carry 8-15 imas-efit and 13-17 nova contoured levels) and §1's residual and positive-control clauses recorded as unmet.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261120T202326050164-review-of-stored-state-refusals-3abe68a77fb0-figure" data-who="reckon-build" data-when="2026-11-20T21:00:39.105Z">
+    <div class="r-comment-body"><p>figure review of r-20261118T112812127189-stored-state-refusals at head 3abe68a77fb01 is parsed, read-only, with no blocking finding: the prior head&#x27;s blocking defect (no blue nova series in either preview PNG) is answered — both previews now carry the blue series (6829 and 8198 blue pixels below the legend row) — and five non-blocking findings are recorded (four byte-identical MAST-U renders, the subject series drawn at 1.0 pt against a 2.6 pt reference, each panel filling 14-20 percent of a fixed 14x7.2 in canvas, contours that overshoot or stop short of the drawn wall, and blunt-capped contour ends where the source grid ends).</p></div>
 </div>
 </section>
 </main>

@@ -19,6 +19,11 @@
       "kind": "exempted",
       "reason": "count wording only: the log's twenty COMPARE rows all pass; the fragment's nineteen understates them and changes no verdict",
       "recorded_at": "2026-11-20T11:07:46.444456+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "by design: the shared-root path node (kernel-compile-barrier s3) owns repointing REFERENCE; the fragment discloses that production west_inputs() waits on it",
+      "recorded_at": "2026-11-20T11:07:59.773173+00:00"
     }
   },
   "findings": [

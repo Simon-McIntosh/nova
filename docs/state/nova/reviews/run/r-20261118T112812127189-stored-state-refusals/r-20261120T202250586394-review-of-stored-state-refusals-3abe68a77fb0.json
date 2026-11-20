@@ -63,7 +63,14 @@
     "The published-preview caveat: the gain commit refreshed two PNGs; their pixel counts were measured with panels.preview_series (4876 and 5961 nova below the legend band) and the cbcba328 blobs measured 0, matching the commit's stated negative control.",
     "The source worktree used for the single-test re-run is /home/ITER/mcintos/Code/.reckon-worktrees/.../stored-state-refusals at 3abe68a; this review's own worktree sits at db7cca0 and does not carry the run's commits as ancestors."
   ],
-  "finding_dispositions": [],
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-20T21:08:10.309069+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261118T112812127189-stored-state-refusals"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html",

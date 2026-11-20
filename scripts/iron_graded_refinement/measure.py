@@ -21,7 +21,6 @@ import json
 from pathlib import Path
 import pickle
 import shlex
-import subprocess
 import sys
 import time
 
@@ -80,7 +79,8 @@ def provenance(script: Path, revision: str | None, blob: str | None) -> dict:
     A job launched from an archive extracted into its scratch space has no
     repository to consult, so the launcher passes the revision and blob it
     read from the clean checkout and this function re-hashes the extracted
-    script. A direct run inspects the checkout it sits in.
+    script. A direct run inspects the checkout it sits in, through the refusal
+    the WEST scripts share.
     """
     actual = blob_sha(script)
     root = script.parents[2]
@@ -92,23 +92,15 @@ def provenance(script: Path, revision: str | None, blob: str | None) -> dict:
             )
         return dict(revision=revision, measure_py_blob=actual, tree=str(root))
 
-    def git(*arguments):
-        return subprocess.check_output(
-            ["git", "-C", str(root), *arguments], text=True
-        ).strip()
+    from scripts.west_iron_galerkin_pair.measure import code_provenance
 
-    dirty = git("status", "--porcelain", "--untracked-files=no")
-    if dirty:
-        raise SystemExit("refusing to measure a dirty tree:\n" + dirty)
-    revision = git("rev-parse", "HEAD")
-    committed = git("rev-parse", f"{revision}:{script.relative_to(root)}")
-    blob = actual
-    if blob != committed:
+    revision, blob = code_provenance(script)
+    if blob != actual:
         raise SystemExit(
-            f"refusing to measure {script} at blob {blob}: revision {revision} "
-            f"commits blob {committed}"
+            f"refusing to measure {script} at blob {actual}: "
+            f"the checkout commits blob {blob}"
         )
-    return dict(revision=revision, measure_py_blob=blob)
+    return dict(revision=revision, measure_py_blob=blob, tree=str(root))
 
 
 def install_assembly_cache():

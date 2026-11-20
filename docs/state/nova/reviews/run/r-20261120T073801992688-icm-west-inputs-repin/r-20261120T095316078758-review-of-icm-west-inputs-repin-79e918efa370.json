@@ -39,6 +39,11 @@
       "kind": "exempted",
       "reason": "the missing-pin control is what the brief asked for; the record-misread control is a manifest overstatement, not a missing guard on a delivered claim",
       "recorded_at": "2026-11-20T11:08:22.847187+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "the verify job's log carries the pass and fail evidence the done-when names; the pytest file runs in the nova suite on its next arm",
+      "recorded_at": "2026-11-20T11:08:31.594265+00:00"
     }
   },
   "findings": [

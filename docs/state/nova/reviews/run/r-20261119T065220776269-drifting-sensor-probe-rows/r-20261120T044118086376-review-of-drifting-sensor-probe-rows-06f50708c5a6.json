@@ -11,6 +11,13 @@
   ],
   "completed_at": "2026-11-20T04:42:57.341Z",
   "dispatched_at": "2026-11-20T04:42:30Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-drifting-sensor-probe-rows-06f50708c5a6",
+      "recorded_at": "2026-11-20T05:03:37.468115+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html",

@@ -7,8 +7,8 @@
 <p>One generating state is held fixed: axis (6.288633, 0.498205) m, q95 2.955747, boundary flux 2.811282 Wb over a span of 76.703791 Wb, plasma current -13.705 MA, and the fixture's own row sigmas 83.969 Wb on the 24 flux loops and 0.6731 T on the 48 poloidal probes. Each arm is 100 slices one second apart; noise is drawn per sensor from one white draw of the study's seed, so a size arm is that draw scaled and a spectrum arm is the same draw shaped — the points are nested realisations, not independent ones. The reference spectrum is spectral index 1 with a corner frequency of 0.02 Hz (two corner cycles across the 100 slices), which is the corner the upstream 200-slice reference sequence carried (four cycles across 200 slices). The size sweep holds the reference spectrum and varies the factor over 0.01, 0.02, 0.05, 0.1, 0.2 and 0.4; the index sweep holds the reference size and corner and varies the index over 0, 0.5, 1 and 2; the corner sweep holds index 1 and varies the corner over 0.002, 0.02 and 0.2 Hz, a span of two decades. A white arm at the reference size is the control: a hundred slices of independent Gaussian noise through the same pulse and the same reader.</p>
 <p>Reported quantities are the root-mean-square error against the generating state over every slice; the same error taken on the mean of each 50-slice block; their ratio, which is <code>1/sqrt(50) = 0.141</code> when the slices are independent and 1.0 when they carry one common offset; and the lag-one correlation of the reconstructed series. The imas-efit reader returns no per-slice covariance matrix, so the ratio here is the measured one — the error of the 50-slice mean divided by the single-slice error — and not a spread predicted from a stated covariance.</p>
 
-<h3 id="drift-spectrum-sweep-size">The size sweep: the axis crossing sits between 0.02 and 0.05</h3>
-<table id="drift-spectrum-sweep-size">
+<h3 id="drift-spectrum-sweep-size-section">The size sweep: the axis crossing sits between 0.02 and 0.05</h3>
+<table id="drift-spectrum-sweep-size-table">
 <tr><th>factor</th><th>axis RMSE [m]</th><th>axis 50-slice-mean error [m]</th><th>axis mean/slice ratio</th><th>q95 RMSE</th><th>q95 50-slice-mean error</th><th>q95 mean/slice ratio</th><th>slices with a usable state</th></tr>
 <tr><td>0.01</td><td>0.0121</td><td>0.0068</td><td>0.563</td><td>0.0462</td><td>0.0403</td><td>0.873</td><td>100 of 100</td></tr>
 <tr><td>0.02</td><td>0.0243</td><td>0.0183</td><td>0.752</td><td>0.0569</td><td>0.0424</td><td>0.744</td><td>100 of 100</td></tr>
@@ -19,8 +19,8 @@
 </table>
 <p>The axis error first exceeds 0.05 m at factor 0.05 (0.0850 m on 100 slices), the point after 0.02 (0.0243 m); the q95 error first exceeds 0.2 at factor 0.10 (0.2193) after 0.05 (0.1345). The 50-slice mean does not remove the error at any size — the axis ratio stays between 0.563 and 0.922, well above the 0.141 an average over independent slices would give, and it is above 0.14 at every size, so the per-slice spread understates the mean's error everywhere the crossing is read. At factors 0.2 and 0.4 the reconstruction itself gives out: imas-efit stores no global quantities on 77 of the 100 slices at 0.2 and 59 of the 100 at 0.4, so those rows are the surviving subset and the large errors there are censored, not representative.</p>
 
-<h3 id="drift-spectrum-sweep-spectrum">The spectrum sweeps: index and corner move the correlation, not the mean error</h3>
-<table id="drift-spectrum-sweep-spectrum">
+<h3 id="drift-spectrum-sweep-spectrum-section">The spectrum sweeps: index and corner move the correlation, not the mean error</h3>
+<table id="drift-spectrum-sweep-spectrum-table">
 <tr><th>swept</th><th>index</th><th>corner [Hz]</th><th>axis lag-one</th><th>flux lag-one</th><th>q95 lag-one</th><th>axis 50-slice-mean error [m]</th><th>q95 50-slice-mean error</th></tr>
 <tr><td>index</td><td>0.0</td><td>0.020</td><td>-0.014</td><td>0.125</td><td>0.100</td><td>0.0129</td><td>0.0460</td></tr>
 <tr><td>index</td><td>0.5</td><td>0.020</td><td>0.211</td><td>0.362</td><td>0.393</td><td>0.0099</td><td>0.0440</td></tr>

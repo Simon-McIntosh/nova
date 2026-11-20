@@ -25,11 +25,11 @@ export JAX_PLATFORMS=cpu
 export DRIFT_STUDY=${DRIFT_STUDY:?set DRIFT_STUDY to the sweep study directory}
 
 {
-  echo "# revision $revision"
-  echo "# tree $tree"
-  echo "# module $python -c 'import nova.imas.mast_efit_referee'"
-  echo "# cwd $(pwd)"
-  echo "# command bash $0 $command_name $log"
+  echo "# revision: $revision"
+  echo "# tree: $tree"
+  echo "# module: $python -c 'import nova.imas.mast_efit_referee'"
+  echo "# cwd: $(pwd)"
+  echo "# command: DRIFT_STUDY=$DRIFT_STUDY WORKERS=$workers bash $0 $command_name $log"
 } > "$log"
 
 status=0

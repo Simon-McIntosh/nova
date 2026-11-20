@@ -273,6 +273,40 @@ class FluxIterationFit:
         """
         return float(np.max(np.abs(self._cycle(coefficients, flux) - flux)) / span)
 
+    def _coupled_merit(
+        self, coefficients, flux, target, weight, span
+    ) -> tuple[float, float]:
+        """Return the flux-equation residual and the whitened row misfit.
+
+        The two equations a pass must satisfy are that the held map is the fixed
+        point of the operator its coefficients describe and that the rows that
+        map drives match the measurement. The first is the operator's own
+        residual divided by the span, the quantity the free-boundary solve
+        measures; the second is the whitened misfit a map and a coefficient set
+        produce. A step criterion read from both descends the coupled system,
+        where one read from the flux residual alone descends the fixed point of
+        whichever coefficients happen to be held and can walk away from the rows.
+        """
+        active = self._profile(coefficients)
+        conductor = (
+            jnp.asarray(coefficients[self._profile_count :])
+            if self._conductor_count
+            else None
+        )
+        if self._prescribed_current is None:
+            mapped = active.operator(jnp.asarray(flux), conductor)
+        else:
+            mapped = active.operator(
+                jnp.asarray(flux),
+                conductor,
+                None,
+                None,
+                jnp.asarray(self._prescribed_current),
+            )
+        flux_residual = float(np.max(np.abs(np.asarray(mapped) - flux)) / span)
+        row_misfit = self._whitened_misfit(coefficients, flux, target, weight)
+        return flux_residual, row_misfit
+
     def fit(
         self,
         measurement: SliceMeasurement,
@@ -286,6 +320,7 @@ class FluxIterationFit:
         max_update: float = 1.0,
         max_coefficient_step: float = 1.0,
         max_backtracks: int = 3,
+        step_rule: str = "contraction",
         on_pass: Callable[[int, float, float], None] | None = None,
     ) -> FluxIterationReceipt:
         """Return one reconstruction from the held-map least-squares passes.
@@ -469,26 +504,43 @@ class FluxIterationFit:
             delta = updated - flux
             residual_at_hold = float(np.max(np.abs(delta)) / span)
             fraction = relaxation
-            # the pass lays down the ladder's fraction that leaves the held map
-            # closest to the map its own coefficients describe; the whole cycle
-            # is the fixed-point iteration itself and some fraction of it is the
-            # largest step the branch the rows were measured on supports
+            if step_rule not in ("contraction", "cycle", "picard"):
+                raise ValueError(f"unknown step rule {step_rule!r}")
+            # the pass lays down a fraction of the one-cycle update. Which
+            # fraction is the whole question: a whole cycle is the fixed point
+            # iteration itself, and from a starting field more than a span from
+            # its answer it leaves the branch the rows were measured on. The
+            # ``cycle`` rule descends the cycle's own residual, which is right
+            # only while the coefficients are close; the ``contraction`` rule
+            # descends the coupled merit of the flux equation and the rows, so a
+            # step that fits the operator at coefficients the rows did not
+            # choose is not preferred over one that fits the data.
             accepted = residual_at_hold <= flux_tolerance
             trials = 0
             best_fraction = 1.0 if accepted else 0.0
             best_residual = residual_at_hold
-            while not accepted and trials <= max_backtracks:
+            if step_rule == "picard":
+                # a fixed relaxed step, the rule the free-boundary solve uses
+                best_fraction = fraction
+            while step_rule != "picard" and not accepted and trials <= max_backtracks:
+                trial_flux = flux + fraction * delta
                 try:
-                    residual_at_trial = self._cycle_residual(
-                        coefficients, flux + fraction * delta, span
-                    )
-                    flux_evaluations += 1
+                    if step_rule == "cycle":
+                        score = self._cycle_residual(coefficients, trial_flux, span)
+                        flux_evaluations += 1
+                    else:
+                        flux_residual, row_misfit = self._coupled_merit(
+                            coefficients, trial_flux, target, weight, span
+                        )
+                        flux_evaluations += 1
+                        sensor_evaluations += 1
+                        score = max(flux_residual, row_misfit)
                 except ValueError:  # the trial map carries no usable axis
-                    residual_at_trial = np.inf
+                    score = np.inf
                 trials += 1
-                if residual_at_trial < best_residual:
+                if score < best_residual:
                     best_fraction = fraction
-                    best_residual = residual_at_trial
+                    best_residual = score
                 fraction *= 0.5
             if not best_fraction:
                 stalled_pass = index

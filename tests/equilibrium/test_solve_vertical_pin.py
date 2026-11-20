@@ -370,7 +370,17 @@ def test_one_augmented_newton_program_serves_free_and_pinned_requests():
 def test_compensator_image_and_tangent_on_every_proposal_route(
     route, source, shadowed, active, monkeypatch
 ):
-    """Observe every scored proposal, including off-root inactive unknowns."""
+    """Observe every scored proposal, including off-root inactive unknowns.
+
+    Two readings are taken at every scored candidate. ``images`` records the
+    bound flux image the applied image owner returns: rounding cannot enter it,
+    so an inactive binding must slice exactly zero. ``route_images`` reads the
+    same quantity from the outside, as the difference between a route's own map
+    at this state and that map with the compensator unknown held at zero, which
+    proves the image reached the route rather than only the owner; a map
+    difference carries roundoff, so it is held to the double-precision floor.
+    The unknown-direction tangent is the route map's JVP.
+    """
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     profile = _profile()
@@ -403,7 +413,7 @@ def test_compensator_image_and_tangent_on_every_proposal_route(
         requested_class=None,
         target_current=None,
     )
-    images, tangents, frozen_changes = [], [], []
+    images, route_images, tangents, frozen_changes = [], [], [], []
     original_image = type(pair).flux_delta
 
     def observed_image(*args):
@@ -429,6 +439,11 @@ def test_compensator_image_and_tangent_on_every_proposal_route(
             jax.debug.callback(
                 lambda value: frozen_changes.append(np.asarray(value)),
                 mapped[4] - state[4],
+            )
+            held = state.at[-1].set(0.0)
+            jax.debug.callback(
+                lambda value: route_images.append(np.asarray(value)),
+                mapped[: system.flux_size] - raw_map(held)[: system.flux_size],
             )
             unknown_direction = jnp.zeros_like(state).at[-1].set(1.0)
             tangent = jax.jvp(raw_map, (state,), (unknown_direction,))[1]
@@ -487,6 +502,7 @@ def test_compensator_image_and_tangent_on_every_proposal_route(
         assert bool(proposal.recovery_activated) == (route == "continuation")
     assert len(images) > 1 and len(tangents) > 1, "candidate evaluations must run"
     images, tangents = np.stack(images), np.stack(tangents)
+    route_images = np.stack(route_images)
     if shadowed:
         np.testing.assert_allclose(frozen_changes, 0.0, rtol=0, atol=1e-15)
         np.testing.assert_array_equal(tangents[:, 4], 0.0)
@@ -495,9 +511,11 @@ def test_compensator_image_and_tangent_on_every_proposal_route(
     if active:
         assert np.any(images != 0), "active source is the known-present control"
         assert np.any(tangents != 0), "active tangent is the known-present control"
+        assert np.any(np.abs(route_images) > 1e-12), "the route must apply the image"
     else:
         np.testing.assert_array_equal(images, np.zeros_like(images))
         np.testing.assert_array_equal(tangents, np.zeros_like(tangents))
+        np.testing.assert_allclose(route_images, 0.0, rtol=0, atol=1e-15)
 
 
 @pytest.mark.parametrize("active", [False, True])

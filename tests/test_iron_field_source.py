@@ -14,8 +14,11 @@ import importlib.util
 import json
 from pathlib import Path
 
+from nova.biot.magnetisation import load_magnetisation_interaction
+
 import numpy as np
 import pytest
+import shapely.affinity
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -65,13 +68,21 @@ def _relocate(measure, directory, mesh, coil, new_mesh, new_coil):
 
 
 def test_another_mesh_is_refused(store):
-    """A response written for one mesh cannot serve another."""
+    """A stored response is refused when the requested mesh is another one."""
     measure, directory = store
     points = _points()
     measure.persist_coil_field(points, None, "a" * 64, "b" * 64)
-    _relocate(measure, directory, "a" * 64, "b" * 64, "c" * 64, "b" * 64)
-    with pytest.raises(ValueError, match="serves another"):
-        measure.persist_coil_field(points, None, "c" * 64, "b" * 64)
+    path = next(directory.glob("coil-*.npy"))
+    region = measure.west_region()[0]
+    other = shapely.affinity.translate(region, 0.05, 0.0)
+    with pytest.raises(ValueError, match="does not match the mesh"):
+        load_magnetisation_interaction(
+            path,
+            region=other,
+            cell_size=measure.CELL_SIZE,
+            basis="coil",
+            coil_key="b" * 64,
+        )
 
 
 def test_another_coil_set_is_refused(store):

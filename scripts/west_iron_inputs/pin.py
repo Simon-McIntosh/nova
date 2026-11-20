@@ -15,7 +15,6 @@ import hashlib
 import json
 from pathlib import Path
 import pickle
-import subprocess
 import sys
 
 import numpy as np
@@ -30,6 +29,7 @@ from scripts.west_iron_galerkin_pair.measure import (  # noqa: E402
     DISTANCES,
     SOURCE,
     SOURCE_SHA256,
+    code_provenance,
     machine_source,
     save,
     source_field,
@@ -42,41 +42,11 @@ LAW = (
 )
 
 
-def code_provenance():
-    """Return the revision, tree and blob of the code this run executes."""
-    script = Path(__file__).resolve()
-    dirty = subprocess.check_output(
-        ["git", "-C", str(ROOT), "status", "--porcelain", "--untracked-files=no"],
-        text=True,
-    ).strip()
-    if dirty:
-        raise SystemExit(
-            "refusing to write the pin from a dirty tree; commit these paths first:\n"
-            + dirty
-        )
-    revision = subprocess.check_output(
-        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
-    ).strip()
-    blob = subprocess.check_output(
-        ["git", "-C", str(ROOT), "hash-object", "--", str(script)], text=True
-    ).strip()
-    committed = subprocess.check_output(
-        ["git", "-C", str(ROOT), "rev-parse", f"{revision}:{script.relative_to(ROOT)}"],
-        text=True,
-    ).strip()
-    if blob != committed:
-        raise SystemExit(
-            f"refusing to write the pin: the script blob {blob} is not the "
-            f"blob {committed} committed at {revision}"
-        )
-    return revision, blob
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    revision, blob = code_provenance()
+    revision, blob = code_provenance(Path(__file__))
     print(
         f"# revision: {revision} pin_py_blob: {blob} tree: {ROOT} "
         f"cwd: {Path.cwd().resolve()}",

@@ -1,19 +1,19 @@
-"""Profile one bank pair's radial gradient against radius under each arm.
+"""Profile one bank pair's jet against radius under each arm.
 
 The second derivative in R is unbounded at an offending pair. An unbounded
-second derivative has exactly two possible sources: a jump in the first
-derivative, or a divergent term in the differentiated expression. This script
-separates them by evaluating the booked radial gradient at points straddling
-the target radius and reporting the step-to-step change at shrinking offsets.
+second derivative has two possible sources: a jump in the first derivative, or
+a divergent term in the differentiated expression. This script separates them
+by evaluating the shared jet program at points straddling the target radius and
+recording the booked rows there, so the step in the gradient and the step in the
+value can both be followed as the offset shrinks.
 
-A jump that holds its size as the booked gradient shrinks is a discontinuity in
-the first derivative. A difference that falls with the offset is a smooth row
-value.
+A gradient step that holds its size as the offset shrinks is a discontinuity in
+the first derivative. A step that falls with the offset is a smooth row
+program.
 
-The booked radial gradient is the first component of the gradient the shared jet
-program ``nova.equilibrium.fixed_points._source_jets`` returns, so this script
-reads ``2 pi R rows[6:9]`` from that program rather than assembling the rows
-itself. Arms are the row programs the jet comparison swaps in.
+Every number comes from the repository's own jet program,
+``nova.equilibrium.fixed_points._source_jets``; an arm is that program with its
+row function swapped, which is what ``kernel.row_program`` supplies.
 """
 
 import argparse
@@ -25,7 +25,6 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
-import jax  # noqa: E402
 import jax.numpy as jnp  # noqa: E402
 
 from nova.equilibrium.fixed_points import _source_jets  # noqa: E402
@@ -42,14 +41,14 @@ CERTIFIED = (
     "81ee8fdf8056855f0846f0e00b7213434451be8e9557369b74ef35a23a62fd4f/bank.npz"
 )
 OFFSETS = (1e-3, 1e-6, 1e-9, 1e-12)
+VALUE_ENTRY = 0
+RADIAL_ENTRY = 1
 
 
-def radial_gradient(coupling, arm):
-    def radial(point):
-        with row_program(arm):
-            return _source_jets(jnp.asarray(point), coupling)[..., 0, :]
-
-    return jax.jit(radial)
+def booked(coupling, arm, target, cell):
+    with row_program(arm):
+        jets = _source_jets(jnp.asarray(target), coupling)
+    return [float(value) for value in np.asarray(jets[cell]).reshape(-1)]
 
 
 def main():
@@ -73,34 +72,19 @@ def main():
         point=[float(value) for value in origin],
         certified=[float(value) for value in certificate.reshape(-1)],
         offsets=list(OFFSETS),
+        value_entry=VALUE_ENTRY,
+        radial_entry=RADIAL_ENTRY,
         arms={},
     )
     for arm in ARMS:
-        gradient = radial_gradient(coupling, arm)
-        pair = {}
+        arm_rows = {}
         for offset in (0.0, *OFFSETS, *(-value for value in OFFSETS)):
-            point = jnp.asarray([origin[0] + offset, origin[1]])
-            pair[f"{offset:+.0e}"] = [
-                float(value) for value in np.asarray(gradient(point))[arguments.cell]
-            ]
-        record["arms"][arm] = pair
-        centre = pair[f"{0.0:+.0e}"]
-        print(
-            "ARM",
-            arm,
-            "dR(m0,m1,m2)",
-            " ".join(f"{value:.9e}" for value in centre),
-            flush=True,
-        )
-        for offset in OFFSETS:
-            up = pair[f"{offset:+.0e}"]
-            down = pair[f"{-offset:+.0e}"]
-            jumps = [a - b for a, b in zip(up, down, strict=True)]
+            target = jnp.asarray([origin[0] + offset, origin[1]])
+            arm_rows[f"{offset:+.0e}"] = booked(coupling, arm, target, arguments.cell)
             print(
-                "  offset %.0e jump" % offset,
-                " ".join(f"{value:+.6e}" for value in jumps),
-                flush=True,
+                "ARM", arguments.node, arguments.cell, arm, "%+.0e" % offset, flush=True
             )
+        record["arms"][arm] = arm_rows
 
     with open(arguments.output, "w") as handle:
         json.dump(record, handle, indent=2)

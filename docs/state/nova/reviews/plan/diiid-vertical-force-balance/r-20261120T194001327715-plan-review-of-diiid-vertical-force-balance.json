@@ -66,6 +66,13 @@
       "finding": "wiring-1",
       "reason": "The eleven-row refresh is owned by millisecond-converged-solve \u00a72; declined in earlier rounds for the same reason",
       "when": "2026-11-20T20:04:05.004592+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "Same \u00a73 refresh, owned by millisecond-converged-solve; this round builds \u00a79 and \u00a711",
+      "when": "2026-11-20T20:04:14.121389+00:00"
     }
   ],
   "responses": {
@@ -77,6 +84,12 @@
       "note": "Comment c-s13-frame102-moved on \u00a713 records that the frame-102 boundary extraction moved to \u00a711, which commits it; one owner, no duplicate",
       "reason": "",
       "when": "2026-11-20T20:03:55.576275+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Same \u00a73 refresh, owned by millisecond-converged-solve; this round builds \u00a79 and \u00a711",
+      "when": "2026-11-20T20:04:14.121389+00:00"
     },
     "wiring-1": {
       "action": "declined",

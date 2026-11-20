@@ -1009,12 +1009,14 @@ def wall_npz(path: Path, machine_uri: str = MACHINE_URI) -> Path:
     walk, the unit kind and the closure test; this function only chooses the
     first unit that carries a contour and writes it beside the flux maps.
 
-    A file already on disk is reused: the sweep runs several arms as separate
-    processes against one study directory, and an unconditional rewrite leaves
-    a reader with a truncated array.
+    A file already on disk is reused, and a missing one is written beside its
+    final name and renamed into place: the sweep runs one imas-efit process per
+    arm against one study directory, so a reader must never observe a partially
+    written array, and renaming a complete file is what makes the test above
+    safe.
     """
 
-    if path.exists():
+    if path.is_file():
         return path
 
     import imas
@@ -1029,9 +1031,10 @@ def wall_npz(path: Path, machine_uri: str = MACHINE_URI) -> Path:
     rings = [unit.vertices for unit in units if unit.vertices.shape[0] >= 3]
     if not rings:
         raise RuntimeError("the machine carries no limiter ring")
-    if path.exists():
-        path.unlink()
-    np.savez(path, wall=rings[0])
+    temporary = path.with_name("%s.%d.tmp" % (path.name, os.getpid()))
+    with temporary.open("wb") as stream:
+        np.savez(stream, wall=rings[0])
+    os.replace(temporary, path)
     return path
 
 

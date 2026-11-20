@@ -382,6 +382,90 @@ def analysis(study, analyse):
     return payload
 
 
+CHECKS = (
+    "arms",
+    "slices",
+    "generator-control",
+    "white-control",
+    "crossing",
+    "nova",
+)
+
+
+def validate(payload):
+    """Return one note per check that the payload fails.
+
+    The sweep's own numbers decide whether the gate is green: a control that
+    stopped reproducing the white draw, an arm that never completed, or a sweep
+    whose crossing vanished is a failed measurement rather than a table to
+    publish, so the analyse step exits nonzero and the payload is not written.
+    """
+    failures = []
+    table = payload["arms"]
+    expected = {arm["name"] for arm in arms()}
+    missing = sorted(expected - set(table))
+    if missing:
+        failures.append("arms: missing " + ", ".join(missing))
+    short = sorted(name for name, row in table.items() if row["slices"] != SLICES)
+    if short:
+        failures.append("slices: " + ", ".join(short) + " not at %d" % SLICES)
+    for name, row in table.items():
+        factor = row["factor"]
+        if factor is None or factor > 0.1:
+            continue
+        if row["slices_with_boundary"] < SLICES:
+            failures.append(
+                "slices: %s carries a boundary on only %d of %d"
+                % (name, row["slices_with_boundary"], SLICES)
+            )
+    for name, row in table.items():
+        if row["slices_with_boundary"] < SLICES // 5:
+            failures.append(
+                "slices: %s lost more than four fifths of its states" % name
+            )
+    control = payload["generator_control"]
+    if abs(control["index0_minus_white"]) > 0.01:
+        failures.append(
+            "generator-control: index 0 minus white exceeds 0.01 (%.5f)"
+            % control["index0_minus_white"]
+        )
+    if control["zero_lag1_max_abs"] > 0.15:
+        failures.append(
+            "generator-control: per-sensor index-0 lag-one exceeds 0.15 (%.4f)"
+            % control["zero_lag1_max_abs"]
+        )
+    if control["index1_lag1"] < 0.5:
+        failures.append(
+            "generator-control: index-1 lag-one fell below 0.5 (%.4f)"
+            % control["index1_lag1"]
+        )
+    if control["slices"] < 1000:
+        failures.append("generator-control: %d slices is too few" % control["slices"])
+    white = table.get("white-reference")
+    if white is None:
+        failures.append("white-control: the white arm was not reduced")
+    else:
+        for stream in ("axis", "flux", "q95"):
+            value = white[stream + "_lag1"]
+            if not abs(value) <= 0.15:
+                failures.append(
+                    "white-control: %s lag-one %s outside +/-0.15" % (stream, value)
+                )
+    for key, limit in (("axis_0p05_m", 0.05), ("q95_0p2", 0.2)):
+        crossing = payload["crossing"][key]
+        if crossing["factor"] is None:
+            failures.append("crossing: %s never exceeds %.2f" % (key, limit))
+        elif crossing["value"] <= limit:
+            failures.append("crossing: %s reports a value under its limit" % key)
+    for sequence, row in payload["nova"].items():
+        if not row["source_exists"]:
+            failures.append("nova: no receipt file for the %s sequence" % sequence)
+            continue
+        if row["metrics"] is None:
+            failures.append("nova: the %s sequence reduced nothing" % sequence)
+    return failures
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
@@ -410,10 +494,16 @@ def main(argv=None):
         return 0
     if arguments.command == "analyse":
         study, analyse = import_study()
-        study, analyse = import_study()
         payload = analysis(study, analyse)
         print(json.dumps(payload, indent=2))
+        failures = validate(payload)
+        for note in failures:
+            print("CHECK-FAILED " + note, flush=True)
+        if failures:
+            print("%d check(s) failed; payload not written" % len(failures))
+            return 1
         (STUDY / "spectrum-summary.json").write_text(json.dumps(payload, indent=2))
+        print("CHECKS-PASSED %d" % len(CHECKS), flush=True)
         return 0
     logdir = STUDY / "logs"
     logdir.mkdir(parents=True, exist_ok=True)

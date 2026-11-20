@@ -1,4 +1,4 @@
-"""Draw the four terminal flux states and the observed limited-row trajectory."""
+"""Draw the four masked terminal flux states beside EFIT and mark both null sets."""
 
 from __future__ import annotations
 
@@ -200,66 +200,9 @@ def panel(folder, output, previews):
     plt.close(figure)
 
 
-def trajectory(root, diagnosis, output, previews):
-    current = json.loads((root / "edge/frame-146-limited/trips.json").read_text())
-    previous = json.loads(diagnosis.read_text())
-    figure, axes = plt.subplots(1, 2, figsize=CANVAS, dpi=100)
-    figure.subplots_adjust(left=0.1, right=0.96, bottom=0.17, top=0.83, wspace=0.3)
-    current_cells = [row["returned"]["connected_cells"] for row in current["trips"]]
-    current_heights = [row["returned"]["axis_rz_m"][1] for row in current["trips"]]
-    for cells, heights, color, dash, label in (
-        (
-            previous["connected_cells"],
-            previous["axis_height_m"],
-            WALL,
-            "--",
-            "diagnosis",
-        ),
-        (current_cells, current_heights, SOLVED, "-", "inactive image masked"),
-    ):
-        height = [100 * value for value in heights]
-        for ax, values in zip(axes, (cells, height), strict=True):
-            ax.plot(
-                np.arange(1, len(cells) + 1),
-                values,
-                color=color,
-                ls=dash,
-                lw=3.0 if label == "inactive image masked" else 2.6,
-                zorder=3 if label == "inactive image masked" else 2,
-                marker="o",
-                label=label,
-            )
-            ax.set_xlabel("outer trip")
-            ax.set_xticks(
-                np.arange(
-                    1, max(len(current_cells), len(previous["connected_cells"])) + 1
-                )
-            )
-    axes[0].set_ylabel("connected cells")
-    axes[1].set_ylabel("axis height [cm]")
-    axes[1].set_ylim(-10, 75)
-    axes[1].set_yticks(np.arange(-10, 71, 10))
-    figure.legend(
-        *axes[0].get_legend_handles_labels(),
-        ncol=2,
-        loc="upper center",
-        bbox_to_anchor=(0.5, 0.99),
-        frameon=False,
-    )
-    save(
-        figure,
-        [],
-        [],
-        output / "limited-trajectory.svg",
-        previews / "limited-trajectory.png",
-    )
-    plt.close(figure)
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
-    parser.add_argument("--diagnosis", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--previews", type=Path, required=True)
     args = parser.parse_args()
@@ -267,9 +210,10 @@ def main():
     plt.rcParams.update({"svg.fonttype": "none"})
     for frame, branch in ROWS:
         panel(
-            args.input / "edge" / f"frame-{frame}-{branch}", args.output, args.previews
+            args.input / "masked" / f"frame-{frame}-{branch}",
+            args.output,
+            args.previews,
         )
-    trajectory(args.input, args.diagnosis, args.output, args.previews)
 
 
 if __name__ == "__main__":

@@ -67,8 +67,9 @@ the property a tiny epsilon would not have.</p>
 <h2 id="icm-iron-field-source-west-control">The zero control on the production WEST CoilSet</h2>
 <p>The bit-identical control above is measured on a fixture. On the production
 CoilSet - the 80&nbsp;mm frame inserted into the WEST 62751 coilset, 10&nbsp;170
-auxiliary rows, 18 plane targets - the zero-magnetisation frame moves the field
-by <b>6.94e-18&nbsp;T</b> and the flux by <b>2.22e-16&nbsp;Wb/rad</b>, against an
+auxiliary rows, 18 plane targets, re-measured at the folded head in job
+1333784 - the zero-magnetisation frame moves the field by
+<b>1.388e-17&nbsp;T</b> and the flux by <b>4.441e-16&nbsp;Wb/rad</b>, against an
 air-core field of about 0.2&nbsp;T. The iron's own columns are exact zeros, so
 the residual is the last bit of the reassembly the subspace solve performs once
 the frame's rows exist, not an iron contribution: 3e-17 relative, one unit in the
@@ -78,7 +79,16 @@ identity <code>tests/test_magnetisation.py::test_frame_carries_the_bound_current
 asserts at 1e-12 relative on the fixture. An earlier version of this
 paragraph claimed a 0.0 difference at all 110 probes and all 17 loops from
 the sampled receipt; that comparison called <code>bound.field</code> and
-<code>bound.psi</code> on both sides, so it could not fail, and it is withdrawn.</p>
+<code>bound.psi</code> on both sides, so it could not fail, and it is withdrawn.
+The regenerated receipt shows what is left after the fold: the probe comparison
+still reads <b>0.0</b>, now for a second reason - the owner
+<code>tiledassembly.linear_cell_interaction</code> is the call
+<code>BoundCurrents.field</code> makes, so the two sides coincide by
+construction and that row is reported, not claimed; the flux comparison against
+the radial integral of that same field reads <b>1.015e-2</b> relative, which is
+the trapezoid resolution of the integral over 257 radial samples across a field
+that turns every 0.1&nbsp;m at the iron, and it is recorded at that value rather
+than at the 1e-13 the withdrawn claim carried.</p>
 <p>This is the honest form of the clause: the fixture is bit-identical, the full
 CoilSet is identical to the last bit of its own reassembly, and no setting of
 the iron's current changes the air-core field by more than that last bit when the
@@ -405,7 +415,7 @@ tree: <code>PYTHONPATH=. JAX_PLATFORMS=cpu
 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
 tests/test_magnetisation.py</code>. <b>Baseline at <code>9b0161261</code>: 93
 collected, 86 passed in 8148.66&nbsp;s.</b> <b>After: 95 collected, 88 passed in
-8608.98&nbsp;s</b> at head <code>c88943d82</code>. The seven that fail in each
+8695.09&nbsp;s</b> at head <code>6d1132bf4</code>. The seven that fail in each
 arm are the same seven and all raise <code>FileNotFoundError</code> on
 <code>evidence/iron-limb-fill/case.json</code>, a pinned input the overnight
 delete removed; the collected count rises by the two seam contracts and every

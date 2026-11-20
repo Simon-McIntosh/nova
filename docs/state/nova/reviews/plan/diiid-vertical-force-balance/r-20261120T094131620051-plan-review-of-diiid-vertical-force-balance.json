@@ -116,6 +116,13 @@
       "finding": "anchors_resolve-1",
       "reason": "The triage pointer is historical; the three facts it was cited for are restated in the same paragraph and in \u00a72, as the review notes",
       "when": "2026-11-20T14:16:36.461051+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The review judges it changes nothing: fit.py and the entry point are the committed instruments the receipts must be reproducible from",
+      "when": "2026-11-20T14:19:00.271315+00:00"
     }
   ],
   "responses": {
@@ -151,6 +158,12 @@
       "note": "The commit body now names the finite-edge flux-function form by mechanism, not by section",
       "reason": "",
       "when": "2026-11-20T14:10:22.141182+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The review judges it changes nothing: fit.py and the entry point are the committed instruments the receipts must be reproducible from",
+      "when": "2026-11-20T14:19:00.271315+00:00"
     },
     "wiring-1": {
       "action": "declined",

@@ -57,7 +57,12 @@ def test_prior_convention_is_the_reflection() -> None:
 
 
 def test_wall_ring_is_the_machines_own_limiter_unit(tmp_path) -> None:
-    """The written wall is the first limiter contour the shared reader returns."""
+    """The written wall is the vessel unit the shared reader classifies.
+
+    A reader that walks the limiter units itself would also have to repeat the
+    closure and unit-kind rules to land on this unit, which is what the shared
+    reader owns.
+    """
 
     import imas
 
@@ -68,9 +73,14 @@ def test_wall_ring_is_the_machines_own_limiter_unit(tmp_path) -> None:
         units = wall_units_from_ids(entry.get("wall"))
     finally:
         entry.close()
-    expected = next(unit.vertices for unit in units if unit.vertices.shape[0] >= 3)
+    drawn = next(unit for unit in units if unit.vertices.shape[0] >= 3)
+    expected = drawn.vertices
     path = study.wall_npz(tmp_path / "wall.npz")
     with np.load(path) as stored:
         wall = np.asarray(stored["wall"], dtype=float)
     assert wall.shape[0] >= 3
     assert np.array_equal(wall, expected)
+    # The unit this machine presents is an open material contour; a reader that
+    # skipped the shared closure and kind rules would classify it differently.
+    assert drawn.kind == "material"
+    assert drawn.closed is False

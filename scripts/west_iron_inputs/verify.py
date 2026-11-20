@@ -86,7 +86,7 @@ def main():
             float(probes[index, 1]),
             0.0,
         )
-    reach = ["+1", "2", "4"]
+    reach = ["1", "2", "4"]
     for index, value in enumerate(committed.air_millitesla_solve()):
         check(
             f"air |B| at +{reach[index]} m [mT]",

@@ -18,7 +18,6 @@ from pathlib import Path
 import time
 
 import numpy as np
-import shapely
 
 from nova.jax.config import configure_dtypes
 
@@ -38,16 +37,6 @@ LABELS = (
 )
 
 
-def gate_shell():
-    """Return the closed octagonal shell of the linear spectral gate."""
-    return (
-        shapely.Point(0, 0)
-        .buffer(0.4, 2)
-        .difference(shapely.Point(0, 0).buffer(0.28, 2))
-        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
-    )
-
-
 def distance(actual, reference):
     """Return the Frobenius and entrywise distances relative to the reference."""
     difference = np.asarray(actual) - np.asarray(reference)
@@ -65,7 +54,7 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     receipt = args.output / f"compare-{args.tag}.jsonl"
-    region = gate_shell()
+    region = iron.gate_shell()
     shipped = tiledassembly._volume_near_mask
     for label, fine, coarse in LABELS:
         if label not in args.labels:

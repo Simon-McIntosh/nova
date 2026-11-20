@@ -45,16 +45,6 @@ from nova.biot.tiledassembly import (  # noqa: E402
 assert jax.config.jax_enable_x64
 
 
-def gate_shell():
-    """Return the closed octagonal shell of the linear spectral gate."""
-    return (
-        shapely.Point(0, 0)
-        .buffer(0.4, 2)
-        .difference(shapely.Point(0, 0).buffer(0.28, 2))
-        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
-    )
-
-
 def context(polygons):
     """Return the geometry and packed volume sources every block shares."""
     return dict(
@@ -209,7 +199,7 @@ def main():
     field = iron.graded_cell_size(
         [0.28, 0.4], [-0.4, 0.4], fine=args.fine, coarse=args.coarse, cells_across=20
     )
-    cells = iron._mesh(gate_shell(), field)
+    cells = iron._mesh(iron.gate_shell(), field)
     polygons = cells.polygons
     print(f"mesh {len(polygons)} cells", flush=True)
     shared = context(polygons)

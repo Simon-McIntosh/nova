@@ -335,7 +335,23 @@ def load_magnetisation_interaction(path, *, region, cell_size, basis="constant")
     return response
 
 
-def galerkin_spectrum(cells, gram, *, basis="constant"):
+def gate_shell():
+    """Return the closed octagonal shell of the linear spectral gate.
+
+    A 0.4 m radius octagon with a 0.28 m bore, clipped to the upper half-plane.
+    The spectral gate, the near-field study and the suite's bound test all
+    measure this shape, so it is defined once here rather than rebuilt beside
+    each measurement; a change to the gate is a change to this function.
+    """
+    return (
+        shapely.Point(0, 0)
+        .buffer(0.4, 2)
+        .difference(shapely.Point(0, 0).buffer(0.28, 2))
+        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
+    )
+
+
+def galerkin_spectrum(cells, gram, *, basis="constant", witness=False):
     """Return the symmetric spectrum of the volume-weighted Galerkin operator.
 
     ``gram`` is the cell interaction returned by :func:`_galerkin_interaction`,
@@ -345,15 +361,25 @@ def galerkin_spectrum(cells, gram, *, basis="constant"):
     ``eigvalsh`` off ``G`` alone reads one triangle of an unsymmetric matrix and
     reports a range the projection does not have. For ``basis="linear"``,
     solve the generalised eigenproblem for the energy against the full local
-    polynomial Gram blocks, including their off-diagonal volume moments.
+    polynomial Gram blocks, including their off-diagonal volume moments.  With
+    ``witness`` the linear branch also returns the eigenvector of the maximum,
+    which is the state a bound statement is read from; the default returns the
+    eigenvalues alone, so a caller that reports only the extremes does not pay
+    for the vectors.
     """
     if basis == "linear":
-        from scipy.linalg import block_diag, eigvalsh
+        from scipy.linalg import block_diag, eigh, eigvalsh
 
         blocks = linear_magnetisation_geometry(cells.polygons)["gram"]
         metric = block_diag(*blocks, *blocks)
         energy = metric @ np.asarray(gram) / _MU0
-        eigenvalues = eigvalsh((energy + energy.T) / 2, metric)
+        symmetric = (energy + energy.T) / 2
+        if witness:
+            eigenvalues, vectors = eigh(symmetric, metric)
+            extremes = dict(witness=vectors[:, -1])
+        else:
+            eigenvalues = eigvalsh(symmetric, metric)
+            extremes = {}
         return dict(
             cells=int(len(cells.centroids)),
             volume_symmetry=float(
@@ -361,6 +387,7 @@ def galerkin_spectrum(cells, gram, *, basis="constant"):
             ),
             minimum=float(eigenvalues[0]),
             maximum=float(eigenvalues[-1]),
+            **extremes,
         )
     if basis != "constant":
         raise ValueError("basis must be constant or linear")

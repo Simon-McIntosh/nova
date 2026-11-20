@@ -35,12 +35,7 @@ def per_cell(polygons, plan):
     return rows
 
 
-region = (
-    shapely.Point(0, 0)
-    .buffer(0.4, 2)
-    .difference(shapely.Point(0, 0).buffer(0.28, 2))
-    .intersection(shapely.box(0, -0.4, 0.4, 0.4))
-)
+region = iron.gate_shell()
 for fine, coarse, label in ((0.04, 0.04, "uniform-40"), (0.016, 0.08, "graded-16-80")):
     field = iron.graded_cell_size(
         [0.28, 0.4], [-0.4, 0.4], fine=max(fine, 0.0), coarse=coarse, cells_across=20

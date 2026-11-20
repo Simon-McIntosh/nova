@@ -17,7 +17,6 @@ import json
 from pathlib import Path
 import time
 
-import shapely
 
 from nova.jax.config import configure_dtypes
 
@@ -43,16 +42,6 @@ LABELS = (
     ("graded-16-80", 0.016, 0.08),
     ("graded-8-40", 0.008, 0.04),
 )
-
-
-def gate_shell():
-    """Return the closed octagonal shell of the linear spectral gate."""
-    return (
-        shapely.Point(0, 0)
-        .buffer(0.4, 2)
-        .difference(shapely.Point(0, 0).buffer(0.28, 2))
-        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
-    )
 
 
 def main():
@@ -82,7 +71,7 @@ def main():
             coarse=coarse,
             cells_across=20,
         )
-        cells = iron._mesh(gate_shell(), field)
+        cells = iron._mesh(iron.gate_shell(), field)
         interaction = iron._galerkin_interaction(cells, basis="linear")
         spectrum = iron.galerkin_spectrum(cells, interaction, basis="linear")
         row = dict(

@@ -28,41 +28,8 @@ import jax  # noqa: E402
 
 from nova.biot import magnetisation as iron  # noqa: E402
 from nova.biot import tiledassembly  # noqa: E402
-from nova.biot.sectionaverage import section_nodes  # noqa: E402
 
 assert jax.config.jax_enable_x64
-
-
-def gate_shell():
-    """Return the closed octagonal shell of the linear spectral gate."""
-    return (
-        shapely.Point(0, 0)
-        .buffer(0.4, 2)
-        .difference(shapely.Point(0, 0).buffer(0.28, 2))
-        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
-    )
-
-
-def volume_mutual(polygons, plan, packed, order):
-    """Return the volume potential of every cell's section quadrature."""
-    response = np.empty((len(polygons), len(polygons)))
-    pending, weights, first, count = [], [], 0, 0
-    for cell, polygon in enumerate(polygons):
-        points, weight = section_nodes(polygon, order)
-        pending.append(points)
-        weights.append(weight)
-        count += len(points)
-        if count < 4096 and cell + 1 < len(polygons):
-            continue
-        flux = tiledassembly._polygon_current_response(
-            polygons, np.concatenate(pending), plan, packed=packed, flux_only=True
-        )[0]
-        offset = 0
-        for local, weight in enumerate(weights):
-            response[first + local] = weight @ flux[offset : offset + len(weight)]
-            offset += len(weight)
-        pending, weights, first, count = [], [], cell + 1, 0
-    return response
 
 
 def geometry(polygons):
@@ -96,10 +63,14 @@ def geometry(polygons):
 def study(label, polygons, plan, order_low=6, order_high=12):
     packed = tiledassembly._polygon_current_geometry(polygons)
     clock = time.perf_counter()
-    low = volume_mutual(polygons, plan, packed, order_low)
+    low = tiledassembly.volume_mutual(
+        polygons, plan, packed=packed, section_order=order_low
+    )
     middle = time.perf_counter()
     print(json.dumps(dict(label=label, low_done=True, wall=middle - clock)), flush=True)
-    high = volume_mutual(polygons, plan, packed, order_high)
+    high = tiledassembly.volume_mutual(
+        polygons, plan, packed=packed, section_order=order_high
+    )
     done = time.perf_counter()
     delta = high - low
     scale = float(np.abs(high).max())
@@ -205,7 +176,7 @@ def study(label, polygons, plan, order_low=6, order_high=12):
         )
 
 
-region = gate_shell()
+region = iron.gate_shell()
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--output", type=Path, required=True)
 parser.add_argument("--labels", nargs="+", default=["graded-16-80"])

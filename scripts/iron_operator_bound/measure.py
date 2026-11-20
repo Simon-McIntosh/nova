@@ -66,23 +66,29 @@ def metric_operator(blocks):
     return LinearOperator((size, size), matvec=matvec, dtype=np.float64)
 
 
-def extreme(operator, blocks, *, dense_limit=6000):
-    """Return the extreme quotients of ``operator`` in the Gram metric."""
+def extreme(cells, operator, *, dense_limit=6000):
+    """Return the extreme quotients of ``operator`` in the Gram metric.
+
+    The dense branch is the owner's answer rather than a second copy of it:
+    :func:`nova.biot.magnetisation.galerkin_spectrum` solves the same
+    generalised eigenproblem for the linear basis and, asked for the witness,
+    returns the eigenvector of the maximum beside the extremes.  The Lanczos
+    branch is what this script adds: the large meshes hold tens of gigabytes of
+    operator, so the metric is applied block by block and never materialised
+    beside it.
+    """
     count = len(operator)
     if count <= dense_limit:
-        from scipy.linalg import block_diag, eigh
-
-        metric = block_diag(*blocks, *blocks)
-        weighted = np.asarray(metric @ operator) / iron._MU0
-        values, vectors = eigh((weighted + weighted.T) / 2, metric)
+        spectrum = iron.galerkin_spectrum(cells, operator, basis="linear", witness=True)
         return dict(
             method="dense",
-            maximum=float(values[-1]),
-            minimum=float(values[0]),
-            witness=vectors[:, -1],
+            maximum=spectrum["maximum"],
+            minimum=spectrum["minimum"],
+            witness=spectrum["witness"],
         )
     from scipy.sparse.linalg import LinearOperator, eigsh
 
+    blocks = iron.linear_magnetisation_geometry(cells.polygons)["gram"]
     metric = metric_operator(blocks)
 
     def matvec(vector):
@@ -131,14 +137,14 @@ def main():
     )
     print(json.dumps(row), flush=True)
     started = time.monotonic()
-    operator, blocks = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
+    operator, _ = iron.linear_galerkin_cell_interaction(polygons, plan=iron._PLAN)
     row["assemble_seconds"] = time.monotonic() - started
     print(f"assembled {row['assemble_seconds']:.1f} s", flush=True)
     if args.save_operator:
         path = args.output / f"operator-{args.label}.npy"
         np.save(path, operator)
         row["operator_path"] = str(path)
-    spectrum = extreme(operator, blocks)
+    spectrum = extreme(cells, operator)
     row["method"] = spectrum.pop("method")
     row.update(
         {

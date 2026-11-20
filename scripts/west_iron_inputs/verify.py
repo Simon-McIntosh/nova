@@ -1,11 +1,11 @@
-"""Check a regenerated WEST 62751 solve-inputs pin against committed values.
+"""Check a regenerated WEST 62751 solve-inputs pin against the committed records.
 
 The pin's value is that it was written before later code changes, so writing
-it again proves nothing on its own. This script compares the regenerated
-probe positions, CEA B-H table and air-core field against the numbers already
-committed in the evidence fragments, the plan and the material test, then
-runs west_inputs() against the pin and, with the pin absent in a scratch
-copy, without it.
+it again proves nothing on its own. This script compares the regenerated probe
+positions, CEA B-H table and air-core field against the values the committed
+records state, reading each out of the record that owns it rather than from a
+copy transcribed here, then runs west_inputs() against the pin and, with the
+pin absent in a scratch copy, without it.
 
     python scripts/west_iron_inputs/verify.py --pin <pin> --receipt <receipt>
 """
@@ -28,23 +28,10 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import scripts.iron_graded_refinement.measure as graded  # noqa: E402
-
-# Committed values, each with the record that holds it. The air-core field is
-# quoted twice at different precision, and the plan quotes it rounded to
-# microtesla, so each is compared at the precision it was written to.
-COMMITTED_PROBE_R = [5.52, 6.52, 8.52]
-COMMITTED_AIR_MT = [7.02407743131, 4.39682051236, 1.79996152911]
-COMMITTED_AIR_UT = [7024.08, 4396.82, 1799.96]
-COMMITTED_AIR_PLAN_UT = 7024.0
-COMMITTED_B_KNOTS = {0: 0.0, 1: 0.5}
-COMMITTED_MU = {0: 215.11019, 1: 1037.9637, "max": 1692.4}
-COMMITTED_TIME_S = 38.4395796373
-SOLVE_FRAGMENT = (
-    "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-solve.html"
+from scripts.west_iron_galerkin_pair.measure import (  # noqa: E402
+    REFERENCE as PRODUCTION_REFERENCE,
 )
-PAIR_FRAGMENT = (
-    "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-galerkin-pair.html"
-)
+from scripts.west_iron_inputs import committed  # noqa: E402
 
 
 def compare(rows, quantity, source, expected, measured, tolerance):
@@ -73,102 +60,100 @@ def main():
     args = parser.parse_args()
     pin = json.loads(args.pin.read_text())
     rows, failures = [], []
+
     probes = np.asarray(pin["probes_m"])
     air_magnitude = np.asarray(pin["air_magnitude_T"])
     table_b = np.asarray(pin["table_b_T"])
     table_mu = np.asarray(pin["table_mu_relative"])
 
-    for index, radius in enumerate(COMMITTED_PROBE_R):
-        if not compare(
-            rows,
+    def check(quantity, source, expected, measured, tolerance):
+        if not compare(rows, quantity, source, expected, measured, tolerance):
+            failures.append(quantity)
+
+    radii = committed.probe_radii()
+    for index, radius in enumerate(radii):
+        check(
             f"probe radius {index + 1} [m]",
-            PAIR_FRAGMENT,
+            committed.PAIR_FRAGMENT,
             radius,
             float(probes[index, 0]),
             0.0,
-        ):
-            failures.append(rows[-1]["quantity"])
-        if not compare(
-            rows,
+        )
+        check(
             f"probe height {index + 1} [m]",
-            SOLVE_FRAGMENT,
+            committed.SOLVE_FRAGMENT,
             0.0,
             float(probes[index, 1]),
             0.0,
-        ):
-            failures.append(rows[-1]["quantity"])
-    for index, value in enumerate(COMMITTED_AIR_MT):
-        if not compare(
-            rows,
-            f"air |B| at +{[1, 2, 4][index]} m [mT]",
-            SOLVE_FRAGMENT,
+        )
+    reach = ["+1", "2", "4"]
+    for index, value in enumerate(committed.air_millitesla_solve()):
+        check(
+            f"air |B| at +{reach[index]} m [mT]",
+            committed.SOLVE_FRAGMENT,
             value,
             float(air_magnitude[index]) * 1e3,
             1e-11,
-        ):
-            failures.append(rows[-1]["quantity"])
-    for index, value in enumerate(COMMITTED_AIR_UT):
-        if not compare(
-            rows,
-            f"air |B| at +{[1, 2, 4][index]} m [uT]",
-            PAIR_FRAGMENT,
+        )
+    for index, value in enumerate(committed.air_microtesla_pair()):
+        check(
+            f"air |B| at +{reach[index]} m [uT]",
+            committed.PAIR_FRAGMENT,
             value,
             float(air_magnitude[index]) * 1e6,
             1e-5,
-        ):
-            failures.append(rows[-1]["quantity"])
-    if not compare(
-        rows,
-        "air |B| at +1 m, plan section 4 [uT]",
-        "plan section 4",
-        COMMITTED_AIR_PLAN_UT,
+        )
+    check(
+        "air |B| at +1 m, plan [uT]",
+        committed.PLAN,
+        committed.air_plan_microtesla(),
         float(air_magnitude[0]) * 1e6,
         5e-4,
-    ):
-        failures.append(rows[-1]["quantity"])
-    for index, value in COMMITTED_B_KNOTS.items():
-        if not compare(
-            rows,
+    )
+    for index, value in enumerate(committed.table_b_knots()):
+        check(
             f"table B knot {index} [T]",
-            SOLVE_FRAGMENT,
+            committed.SOLVE_FRAGMENT,
             value,
             float(table_b[index]),
             0.0,
-        ):
-            failures.append(rows[-1]["quantity"])
-    tolerances = {0: 1e-9, 1: 1e-7, "max": 1e-4}
-    for key, value in COMMITTED_MU.items():
-        if key == "max":
-            source = PAIR_FRAGMENT
-            label = "table mu_relative maximum"
-            measured = float(table_mu.max())
-        else:
-            source = (
-                "tests/test_magnetisation.py west_material"
-                if key == 0
-                else SOLVE_FRAGMENT
-            )
-            label = f"table mu_relative knot {key}"
-            measured = float(table_mu[key])
-        if not compare(
-            rows,
-            label,
-            source,
-            value,
-            measured,
-            tolerances[key],
-        ):
-            failures.append(rows[-1]["quantity"])
-    compare(
-        rows,
+        )
+    origin = committed.table_mu_origin()
+    check(
+        "table mu_relative knot 0",
+        committed.SOLVE_FRAGMENT,
+        origin[0],
+        float(table_mu[0]),
+        1e-9,
+    )
+    check(
+        "table mu_relative knot 1",
+        committed.SOLVE_FRAGMENT,
+        origin[1],
+        float(table_mu[1]),
+        1e-7,
+    )
+    check(
+        "table mu_relative maximum",
+        committed.PAIR_FRAGMENT,
+        committed.table_mu_maximum(),
+        float(table_mu.max()),
+        1e-4,
+    )
+    check(
+        "material test origin permeability",
+        committed.MATERIAL_TEST,
+        committed.material_test_mu_origin(),
+        float(table_mu[0]),
+        1e-9,
+    )
+    check(
         "source time [s]",
-        SOLVE_FRAGMENT,
-        COMMITTED_TIME_S,
+        committed.SOLVE_FRAGMENT,
+        committed.source_time(),
         float(pin["time_s"]),
         1e-12,
     )
-    if not rows[-1]["passed"]:
-        failures.append(rows[-1]["quantity"])
 
     for row in rows:
         print(
@@ -182,11 +167,27 @@ def main():
         print("MISMATCH " + json.dumps(failures), flush=True)
         return 2
 
+    production = dict(
+        path=str(PRODUCTION_REFERENCE),
+        exists=PRODUCTION_REFERENCE.is_file(),
+    )
+    print(
+        f"PRODUCTION_REFERENCE path={production['path']} exists={production['exists']}",
+        flush=True,
+    )
+    if not production["exists"]:
+        print(
+            "PRODUCTION_REFERENCE_BLOCKED the tracked constant still resolves "
+            "under the retired root, so west_inputs() needs the in-process "
+            "override below until the shared-root path change lands",
+            flush=True,
+        )
+
     graded.REFERENCE = args.pin
     inputs = graded.west_inputs()
     print(
         "WEST_INPUTS_PASS pin_air_drift="
-        f"{inputs['air_drift']:.3e} probes={inputs['probes'].tolist()} "
+        f"{inputs['air_drift']:.3f} probes={inputs['probes'].tolist()} "
         f"segments={len(inputs['region'].geoms)}",
         flush=True,
     )
@@ -196,7 +197,6 @@ def main():
     shutil.copyfile(args.pin, control_path)
     graded.REFERENCE = control_path
     control_path.unlink()
-    control = None
     try:
         graded.west_inputs()
     except FileNotFoundError as error:
@@ -205,7 +205,8 @@ def main():
     else:
         control = dict(outcome="did-not-fail")
         print(
-            "NEGATIVE_CONTROL_FAIL west_inputs() passed with the pin absent", flush=True
+            "NEGATIVE_CONTROL_FAIL west_inputs() passed with the pin absent",
+            flush=True,
         )
     finally:
         scratch.rmdir()
@@ -218,7 +219,8 @@ def main():
         pin_revision=pin["revision"],
         pin_py_blob=pin["pin_py_blob"],
         source_sha256=pin["source_sha256"],
-        source_control_max_relative=pin["source_control_max_relative"],
+        records_root=str(committed.record_root()),
+        production_reference=production,
         comparisons=rows,
         all_matched=not failures,
         west_inputs=dict(

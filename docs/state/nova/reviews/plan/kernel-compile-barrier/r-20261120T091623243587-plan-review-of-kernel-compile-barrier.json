@@ -123,6 +123,13 @@
       "note": "the regular-Hessian lever is stated as measured by node (b): 119.2 s of 223.7 s",
       "reason": "",
       "when": "2026-11-20T09:36:58.267271+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "finding": "reasoning-2",
+      "reason": "the sentence describes the production caller; the prototype call sites it omits change no node's work, as the finding itself says",
+      "when": "2026-11-20T09:37:06.518473+00:00"
     }
   ],
   "responses": {
@@ -161,6 +168,12 @@
       "note": "the regular-Hessian lever is stated as measured by node (b): 119.2 s of 223.7 s",
       "reason": "",
       "when": "2026-11-20T09:36:58.267271+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "reason": "the sentence describes the production caller; the prototype call sites it omits change no node's work, as the finding itself says",
+      "when": "2026-11-20T09:37:06.518473+00:00"
     },
     "wiring-1": {
       "action": "acted",

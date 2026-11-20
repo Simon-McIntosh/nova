@@ -28,33 +28,29 @@
     "nova/equilibrium/reduced_newton.py:2396",
     "nova/equilibrium/reduced_newton.py:594"
   ],
-  "completed_at": "",
+  "completed_at": "2026-11-20T14:04:44.385Z",
   "dispatched_at": "2026-11-20T14:04:24Z",
   "findings": [
     {
       "file": "tests/equilibrium/test_solve_vertical_pin.py",
-      "id": "f5c18972bf4",
       "line": "556",
       "severity": "non-blocking",
       "text": "in the active branch the control is replace(pair, binding=replace(pair.binding, payload=jnp.asarray(True))) applied to a pair whose payload is already True, so assert_array_equal(image, control_image) and the tangent twin compare two calls of the same function on equal inputs and hold whatever the code does; the inactive branch at :559-561 is the assertion that actually guards the regression."
     },
     {
       "file": "nova/equilibrium/constraint.py",
-      "id": "f0d0334ae26",
       "line": "2235",
       "severity": "non-blocking",
       "text": "constraint_records re-derives the activity predicate inline (isinstance(pair.functional, CurrentCentroidConstraint) and binding.payload is not None) instead of calling active_payload_mask, so the docstring claim at :166 that a future functional publishing an activity flag changes one function is wrong and the record path can drift from the residual and image owners."
     },
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge.html",
-      "id": "f856794fef6",
       "line": "43",
       "severity": "non-blocking",
       "text": "the report that the inactive compensator's field is zero 'in the control arm as well as the masked one' rests on a column that is 0.0 in all eight arm receipts with pin_unknown 0.0 at every recorded endpoint, so no reading shows the cohort instrument can observe a nonzero pin field; the only demonstrated arm difference is 146D's residual at 2.307e-14 against 2.281e-14, and the attribution of any movement therefore rests on the unit contract rather than on the row experiment."
     },
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge.html",
-      "id": "f6340282e02",
       "line": "31",
       "severity": "non-blocking",
       "text": "done_when item (2) asks for one job, while the receipt spans three titan allocations (1333254, 1333385, 1333434) after a 16 GB P100 ran out of memory; the fragment discloses the retries and each row's receipt persisted, but the run is not the single job the measure names."
@@ -128,6 +124,6 @@
     }
   },
   "times_source": "run-record",
-  "timestamp": "2026-11-20T14:11:37.511784+00:00",
+  "timestamp": "2026-11-20T14:12:13.761416+00:00",
   "total": 102
 }

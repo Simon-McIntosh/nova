@@ -207,6 +207,77 @@ def policy_table(records_map):
     )
 
 
+COMPARISON = "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html"
+
+
+def harness_rows(records_map):
+    """Return one row per solve input that differs from the comparison record."""
+    meshes = dict(records_map.get("meshes") or {})
+    mastu = records_map.get("mesh")
+    if mastu:
+        meshes["mastu"] = mastu
+    described = [
+        "%s: %s of %s nodes and %s stencil rows"
+        % (
+            name,
+            (meshes.get(name) or {}).get("kind"),
+            (meshes.get(name) or {}).get("nodes"),
+            (meshes.get(name) or {}).get("stencil_rows"),
+        )
+        for name in ("mastu", "tcv", "iter")
+        if meshes.get(name)
+    ]
+    coefficients = records_map.get("stored_coefficients") or {}
+    live = [
+        "%s: %d of %d coefficients live"
+        % (
+            name,
+            sum(1 for value in coefficients[name] if value),
+            len(coefficients[name]),
+        )
+        for name in ("mastu", "tcv", "iter")
+        if coefficients.get(name)
+    ]
+    return (
+        (
+            "machine description",
+            "each case's stored EFIT configuration in imas-efit, at the commit "
+            "the comparison record cites",
+            "rebuilt in nova from the case's described coils and wall; the "
+            "machine cache receipt here names the store, key, hit and build "
+            "seconds",
+        ),
+        (
+            "mesh",
+            "the case's own flux grid: imas-efit's MAST-U density is nonzero at "
+            "3604 grid nodes and the earlier ITER terminal flux holds 1568 "
+            "finite values",
+            "; ".join(described),
+        ),
+        (
+            "live functions",
+            "imas-efit Bernstein pp/FF at the manifest dimension per attempt "
+            "(TCV ndeg 2/2, then the corrected 0/2; ITER ndeg 2/3)",
+            "the stored functions carried as nova polynomial flux-function "
+            "coefficients; " + "; ".join(live),
+        ),
+        (
+            "seed",
+            "the stored flux map as the public stored-field seed, beside two "
+            "cold seeds per case",
+            "the stored flux map as ExplicitSolveSeed only; the continuation "
+            "control starts from the first solve's terminal state",
+        ),
+        (
+            "device and wall",
+            "titan P100 walls the comparison states include geometry and "
+            "compilation (TCV 4857.176419 s, ITER 4857.785 s)",
+            "execute-only arm walls on a recorded cuda:0 device with the "
+            "machine loaded from its cache; not comparable to those walls",
+        ),
+    )
+
+
 def assemble(records_map):
     parts = ['<section id="stored-state-refusals-record">']
     parts.append("<h2>Forward-solve refusals beside stored imas-efit states</h2>")
@@ -273,6 +344,22 @@ def main(run):
             + "</pre>"
         )
     parts.append("</section>")
+    parts.append(
+        '<section id="stored-state-refusals-harness">'
+        "<h3>Where this harness differs from the earlier comparison record</h3>"
+        "<p>The cases, their time slices (MAST-U 0.2 s, TCV 0.4 s, ITER 75 s), "
+        "their DD pins and the 1e-10 qualification threshold are the comparison "
+        "record's own, at <code>"
+        + COMPARISON
+        + "</code>. Every other solve input differs, and each is named here.</p>"
+        "<table><thead><tr><th>input</th><th>earlier comparison record</th>"
+        "<th>this harness</th></tr></thead><tbody>"
+        + "".join(
+            "<tr><td>" + name + "</td><td>" + theirs + "</td><td>" + ours + "</td></tr>"
+            for name, theirs, ours in harness_rows(records_map)
+        )
+        + "</tbody></table></section>"
+    )
     displaced = records_map.get("displacement") or {}
     if displaced:
         parts.append(

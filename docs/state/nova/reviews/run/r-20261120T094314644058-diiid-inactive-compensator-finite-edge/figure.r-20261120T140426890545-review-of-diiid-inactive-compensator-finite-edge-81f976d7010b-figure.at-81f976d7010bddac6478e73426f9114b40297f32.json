@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-20T14:11:22.894Z",
+  "dispatched_at": "2026-11-20T14:05:19Z",
+  "figures": {
+    "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-137-diverted.svg": {
+      "contrast": "passes: dark grey legend and note text on white, black dashed EFIT contours, blue solved contours, all clearly readable.",
+      "data_ink": "passes: line contours, markers and the first wall carry all the ink; the plot area holds nothing decorative.",
+      "decoration": "passes: no gridlines, frame, background fill or gradient; axes are off.",
+      "label_collision": "passes: no clipped or overlapping text; the legend, the two panel notes 'full vessel' and 'lower saddle region', and the data are clear of one another.",
+      "legibility": "passes: four-column legend above two panels; the full-vessel panel and the zoomed lower-saddle panel each show the solved and EFIT flux nest and both null sets and read at a glance.",
+      "table_form": "passes: a spatial poloidal flux comparison, not information that is naturally a table."
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-146-diverted.svg": {
+      "contrast": "passes: text and both line styles read clearly on white.",
+      "data_ink": "passes: contours, markers and wall only.",
+      "decoration": "passes: no grid, frame, fill or gradient.",
+      "label_collision": "passes: legend and panel notes do not overlap each other, the contours or the markers.",
+      "legibility": "passes: same layout; the solved lower saddle and EFIT's lower saddle are separately marked and the separatrix crossing is visible in the zoom.",
+      "table_form": "passes: spatial field comparison, not tabular."
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-146-limited.svg": {
+      "contrast": "passes: text and contour colours clear the white background.",
+      "data_ink": "passes: contours, markers and wall only; the sparse zoom carries proportionately little ink.",
+      "decoration": "passes: no grid, frame, fill or gradient.",
+      "label_collision": "passes: no clipped or overlapping text.",
+      "legibility": "passes: the full-vessel panel reads clearly; in the lower-saddle panel the solved flux crosses near EFIT's saddle and both saddle positions are marked, though the solved-side marker is the hollow 'other solved saddle' symbol rather than an admitted one.",
+      "table_form": "passes: spatial field comparison, not tabular."
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-179-limited.svg": {
+      "contrast": "passes: text and contour colours clear the white background.",
+      "data_ink": "passes: contours, markers and wall only.",
+      "decoration": "passes: no grid, frame, fill or gradient.",
+      "label_collision": "passes: the four hollow 'other solved saddle' markers sit clear of the panel notes and the legend; no text is clipped or overlaps.",
+      "legibility": "passes: the full-vessel panel shows the solved axis and several 'other solved saddle' markers, and the zoomed panel shows the solved and EFIT saddle positions at the crossing.",
+      "table_form": "passes: spatial field comparison, not tabular."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-137-diverted.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In the lower-saddle-region panel the inner flux surfaces crowd until their contours merge into a near-solid blue band along the top of the panel, so individual level lines cannot be told apart there. The panel's subject, the saddle crossing at its centre, remains clear, so this does not stop a reader."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-146-diverted.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "As in 137-diverted, the innermost contours of the lower-saddle-region panel merge into a dense blue bundle at the top edge of the zoom, hiding the individual levels in that strip while leaving the saddle crossing itself readable."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-146-limited.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The legend lists 'admitted solved saddle', but this limited-branch figure draws no admitted solved saddle: the solved lower null is carried by the hollow 'other solved saddle' marker, which sits inside the crowded contour bundle. A reader matching legend to panel looks for a marker that does not occur, and the solved-side saddle position is harder to pick out than the EFIT square beside it."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-179-limited.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "As in 146-limited, the legend's 'admitted solved saddle' entry has no counterpart in this limited-branch panel; the solved lower null is drawn with the hollow 'other solved saddle' marker, adjacent to EFIT's hollow square, so the two hollow saddle symbols must be distinguished without a filled reference marker."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261120T140426890545-review-of-diiid-inactive-compensator-finite-edge-81f976d7010b-figure",
+  "reviewed_base_sha": "789479f7dbaa97933495e8c0f82b9dfa1dc0fc75",
+  "reviewed_head_sha": "81f976d7010bddac6478e73426f9114b40297f32",
+  "reviewed_run_id": "r-20261120T094314644058-diiid-inactive-compensator-finite-edge",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T14:11:41.062189+00:00",
+  "total": null
+}

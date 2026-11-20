@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="154">
+<meta name="plan-version" content="155">
 <meta name="plan-modified" content="2026-11-20">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -417,6 +417,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s7" data-id="c-restated-s7-finite-edge" data-who="35a66cc6-f4f1-4358-8dbb-99c9333c7249" data-when="2026-11-19T13:20:00+00:00">
     <div class="r-comment-body"><p>Done-when (2) restated by lead decision on 2026-11-19. The retry is measured on §13's finite-edge profiles, where all four rows converge without the mask, and it must keep all four converged with the mask, each lower X-point within 1 mm of its unmasked solve. The section no longer waits on §12, which is closed.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261120T140426890545-review-of-diiid-inactive-compensator-finite-edge-81f976d7010b-figure" data-who="reckon-build" data-when="2026-11-20T14:11:22.894Z">
+    <div class="r-comment-body"><p>figure review of the four inactive-compensator flux panels at 81f976d70 against base 789479f7d: rubric parsed with all six items answered for all four figures, four non-blocking findings (two contour-crowding notes on the diverted zooms, two legend-versus-panel notes on the limited rows), no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261117T181148491733-review-of-diiid-adapter-current-refusal-carried-4edca23a248c" data-who="reckon-build" data-when="2026-11-17T18:14:22.145Z">
     <div class="r-comment-body"><p>Review of r-20261116T220122530645-diiid-adapter-current-refusal-carried at head 4edca23a: scores goal_fidelity 13, evidence 13, scope_discipline 20, durability 18, fit 18, reuse 17; added_failure_count 0; one blocking finding (the caller inventory scans only benchmarks/ and scripts/, omitting the corpus caller docs/figures/primary-xpoint-evidence/real_equilibria_reachability.py:225 from clause 2) and one non-blocking finding (tests/imas/test_diiid_current.py:394 compares the build-current diagnostic against the value the test itself injected).</p></div>

@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1036 read_efit",
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh:38"
+  ],
+  "completed_at": "2026-11-20T22:31:19.704Z",
+  "dispatched_at": "2026-11-20T22:30:54Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py",
+      "line": "249",
+      "severity": "non-blocking",
+      "text": "non-blocking: lag_one, rms_error (208), block_mean_error (229), crossing_of (466) and reduce_arm (273) duplicate the reduction capability analyse.py owns at lines 30, 40, 44, 148 and 60, a file inside the same declared write path that could have carried the nan-aware handling, so two reductions can now drift apart."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py",
+      "line": "1017",
+      "severity": "non-blocking",
+      "text": "non-blocking: the if path.exists() early return is check-then-act, so among the five concurrent arms one can return the path while another is inside the unlink/np.savez pair at 1031-1035 and hand a trace reader the truncated array the docstring says the guard prevents."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py",
+      "line": "486",
+      "severity": "non-blocking",
+      "text": "non-blocking: analysis() writes the payload and main() returns 0 whatever the numbers, so a generator control that broke or a dropped arm would still print EXIT=0 through gate.sh:45 and publish a wrong table rather than reddening the gate."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html",
+      "line": "52",
+      "severity": "non-blocking",
+      "text": "non-blocking: the record measures 100 slices where plan section 7's done-when asks at least 200, and the plan's clause that every 1/f lag-one exceed 0.5 is unmet (axis 0.432 at the reference, line 27); both are stated in the record rather than hidden, so the gap is with the plan clause."
+    }
+  ],
+  "item_verdicts": {},
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to sweep the noise size, the spectral index and the corner frequency for imas-efit on the held ITER state; scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:52-54 fixes the three grids and the twelve arm records in the study's spectrum-summary.json carry one measured point each on 100 slices of the held state.\nVERDICT done_when: the done_when asks for five or more noise sizes, three or more index values from 0.5 to 2, three or more corner values over two decades, an index-0 control within 0.15 of the white lag-one correlation and nova at the reference point only; the fragment's three tables carry 6 size, 3 index, 2 corner points beside the reference and the white arm, the generator control reads 0.00150 against 0.00150 with a largest per-sensor value of 0.0487, and the nova table carries two slices, all reconciled with study/spectrum-summary.json.\nVERDICT write_paths: the declared scope was the drift-spectrum-sweep fragment, a figures directory and scripts/prototypes/drifting_sensor_sequences; all four changed paths lie inside the fragment and the scripts prefix, and the declared figures directory received no file.\nVERDICT manifest: read; it reports status complete, commits d537b5032, 441be4723 and ace04f820, twelve arms of 100 slices, both gate logs ending EXIT=0 at ace04f820, two scaffolding retry failures with causes, and no suite arms, matching the node's unarmed SUITE fence.\nVERDICT diff: read all three commits against 54cc8f94 - sweep.py adds the arm grid, launcher, salvage path and reduction (577 lines), gate.sh the logged wrapper (46 lines), study.py a seven-line reuse guard in wall_npz, and the fragment the 53-line record.\nCALL_SITES: scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1036 read_efit, scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh:38\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: spectrum_summary.json records six size arms, three index arms, two corner arms and one white arm against the held state at scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:52-54, which is the swept model the goal names.\nSCORE evidence: 13\nJUSTIFICATION evidence: logs/sweep-run.log and logs/sweep-analyse.log at revision ace04f820 end EXIT=0 and every fragment cell reconciles with study/spectrum-summary.json, but logs/sweep-run.log records all twelve arms as \"reused\" so nothing was re-measured at the reviewed head and no exit status asserts the crossing or the control.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 54cc8f94..ace04f82 touches only the fragment and files under scripts/prototypes/drifting_sensor_sequences, both declared prefixes, and the study.py change at line 1017 is the concurrency fix the concurrent arms need.\nSCORE durability: 3\nJUSTIFICATION durability: the diff adds no assertion at all - gate.sh:36-45 exits on the subprocess status alone - and test_probe_rows.py hands wall_npz a fresh tmp_path so the new study.py:1017 branch is never exercised, while the sibling fragment's guard in test_fragment_tables.py:28 was not extended to this fragment.\nSCORE fit: 16\nJUSTIFICATION fit: sweep.py follows study.py's percent-format and docstring idiom and introduces no forbidden name, but study.py:1005 still opens \"Write the machine's limiter ring\" for a function that may now return without writing.\nSCORE reuse: 4\nJUSTIFICATION reuse: analysis.py:30/40/44/148/60 own lag_one, error, block_error, crossing and summarise, and sweep.py:208/229/249/466 re-implement all five in the same declared write scope rather than extending them with nan-aware handling.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:249 non-blocking: lag_one, rms_error (208), block_mean_error (229), crossing_of (466) and reduce_arm (273) duplicate the reduction capability analyse.py owns at lines 30, 40, 44, 148 and 60, a file inside the same declared write path that could have carried the nan-aware handling, so two reductions can now drift apart.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1017 non-blocking: the if path.exists() early return is check-then-act, so among the five concurrent arms one can return the path while another is inside the unlink/np.savez pair at 1031-1035 and hand a reader the truncated array the docstring says the guard prevents.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:486 non-blocking: analysis() writes the payload and main() returns 0 whatever the numbers, so a generator control that broke or a dropped arm would still print EXIT=0 through gate.sh:45 and publish a wrong table rather than reddening the gate.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html:52 non-blocking: the record measures 100 slices where plan section 7's done-when asks at least 200, and the plan's clause that every 1/f lag-one exceed 0.5 is unmet (axis 0.432 at the reference, line 27); both are stated in the record rather than hidden, so the gap is with the plan clause.",
+  "review_run_id": "r-20261120T223011590851-review-of-drift-spectrum-sweep-ace04f820bec",
+  "reviewed_base_sha": "54cc8f94f3ff8fafc359291fb5e18e88ae7bf7a8",
+  "reviewed_head_sha": "ace04f820bec4d2d08ac7dcf1a7f0b0eb02c6c93",
+  "reviewed_run_id": "r-20261119T065419793680-drift-spectrum-sweep",
+  "reviewer_run_id": "r-20261120T223011590851-review-of-drift-spectrum-sweep-ace04f820bec",
+  "scores": {
+    "durability": 3,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T22:42:09.101571+00:00",
+  "total": 73
+}

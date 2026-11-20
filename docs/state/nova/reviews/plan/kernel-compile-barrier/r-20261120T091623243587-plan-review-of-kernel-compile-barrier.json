@@ -73,7 +73,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 115,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "s3 node (e) is one pre-warm after s7 lands; the pre-warm after s4 node (a) is s4's own closing step, so nothing in s3 waits on s4",
+      "reason": "",
+      "when": "2026-11-20T09:36:19.333559+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "note": "s3 node (e) is one pre-warm after s7 lands; the pre-warm after s4 node (a) is s4's own closing step, so nothing in s3 waits on s4",
+      "reason": "",
+      "when": "2026-11-20T09:36:19.333559+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261120T091623243587-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261120T091623243587-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "c66fad85b825c9f84b34e0b22e175a29b2c5074c",
   "rubric": "content",

@@ -41,7 +41,30 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 156,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5c822cbd9fdca849dd7581d812eca9fc3b4280aa",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a711 done-when (1) now names ~/.cache/nova-diiid-pinned-reregistration/ and forbids the committed pinned-cohort receipt directory",
+      "reason": "",
+      "when": "2026-11-20T19:36:49.808001+00:00"
+    }
+  ],
+  "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5c822cbd9fdca849dd7581d812eca9fc3b4280aa",
+      "commit_basis": "edit",
+      "note": "\u00a711 done-when (1) now names ~/.cache/nova-diiid-pinned-reregistration/ and forbids the committed pinned-cohort receipt directory",
+      "reason": "",
+      "when": "2026-11-20T19:36:49.808001+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T142114114159-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261120T142114114159-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "ba2e3534dee8ce89ebe44c1cce255add8ed100e8",
   "rubric": "content",

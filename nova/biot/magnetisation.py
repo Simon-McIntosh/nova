@@ -353,7 +353,7 @@ def gate_shell():
     )
 
 
-def galerkin_block_spectrum(blocks, energy, *, witness=False):
+def galerkin_block_spectrum(blocks, energy, *, witness=False, scale=True):
     """Return the generalised spectrum of ``energy`` against its Gram blocks.
 
     ``blocks`` is the per-cell Gram block list; the volume measure repeats it
@@ -365,12 +365,20 @@ def galerkin_block_spectrum(blocks, energy, *, witness=False):
     ``energy`` enters as the assembled interaction; the returned ``metric`` is
     the block-diagonal form the solve used, so a caller decomposing a witness
     weighs it with the same operator the quotient was read against.
+
+    ``scale`` premultiplies the energy by the metric, which is this module's
+    convention: the assembled interaction already carries the volume measure in
+    its energy form, so the eigenproblem reads ``M E x = lambda M x``.  A caller
+    whose blocks are already in the metric's scale passes ``scale=False``.
     """
     from scipy.linalg import block_diag, eigh, eigvalsh
 
     metric = block_diag(*blocks, *blocks)
     assembled = np.asarray(energy)
-    symmetric = (assembled + assembled.T) / 2 / _MU0
+    if scale:
+        assembled = metric @ assembled
+    normalised = assembled / _MU0
+    symmetric = (normalised + normalised.T) / 2
     if witness:
         values, vectors = eigh(symmetric, metric)
         extremes = dict(witness=vectors[:, -1])

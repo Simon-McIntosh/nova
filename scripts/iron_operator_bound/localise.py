@@ -113,10 +113,11 @@ def quotient(gram, energy):
 
     The solve is the owner's: :func:`nova.biot.magnetisation.galerkin_block_spectrum`
     applies the block metric and the ``1/mu0`` normalisation, so this study and
-    the assembler's spectrum cannot drift apart.  The metric it returns is the
-    one the witness is weighed with below.
+    the assembler's spectrum cannot drift apart.  The block energies here are
+    already in the metric's scale, so the call passes ``scale=False``; the
+    metric it returns is the one the witness is weighed with below.
     """
-    return iron.galerkin_block_spectrum(gram, energy, witness=True)
+    return iron.galerkin_block_spectrum(gram, energy, witness=True, scale=False)
 
 
 def pair_matrix(energy, witness, blocks):

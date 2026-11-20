@@ -13,6 +13,13 @@
     "scripts/prototypes/drifting_sensor_sequences/probe_rows/analyse.py:131-135"
   ],
   "completed_at": "2026-11-20T23:31:41.582Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-drift-spectrum-sweep-4b1b78d0ba51",
+      "recorded_at": "2026-11-20T23:50:05.832650+00:00"
+    }
+  },
   "dispatched_at": "2026-11-20T23:31:21Z",
   "findings": [
     {

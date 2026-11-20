@@ -51,6 +51,26 @@
       "note": "the ceiling-return requirement is retired: no folded form was accepted, so the ceiling stays at 10,000,000 bytes",
       "reason": "",
       "when": "2026-11-20T09:13:02.306824+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "the sentence gating clauses (2) and (3) on a folded form is replaced: node (d) measures all three clauses on the cached program, which is the repaired kernel's own",
+      "reason": "",
+      "when": "2026-11-20T09:13:11.512958+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "the scan lever is recorded as decided by the attribution (term order unrolled, 4,744 call sites over 662 bodies) and as not pursued after the ruling that ends compile-shrinking",
+      "reason": "",
+      "when": "2026-11-20T09:13:16.811984+00:00"
     }
   ],
   "responses": {
@@ -62,6 +82,24 @@
       "note": "the ceiling-return requirement is retired: no folded form was accepted, so the ceiling stays at 10,000,000 bytes",
       "reason": "",
       "when": "2026-11-20T09:13:02.306824+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+      "commit_basis": "edit",
+      "note": "the sentence gating clauses (2) and (3) on a folded form is replaced: node (d) measures all three clauses on the cached program, which is the repaired kernel's own",
+      "reason": "",
+      "when": "2026-11-20T09:13:11.512958+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+      "commit_basis": "edit",
+      "note": "the scan lever is recorded as decided by the attribution (term order unrolled, 4,744 call sites over 662 bodies) and as not pursued after the ruling that ends compile-shrinking",
+      "reason": "",
+      "when": "2026-11-20T09:13:16.811984+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261120T073752442954-plan-review-of-kernel-compile-barrier.json",

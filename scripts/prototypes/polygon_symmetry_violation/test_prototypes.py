@@ -17,7 +17,7 @@ from scripts.prototypes.polygon_symmetry_violation.compare import (
     central_step,
     psi_identity,
 )
-from scripts.prototypes.polygon_symmetry_violation import mutation_control
+from scripts.prototypes.polygon_symmetry_violation import arms, mutation_control
 from scripts.prototypes.polygon_symmetry_violation.split import (
     mirror_gap,
     paired_cells,
@@ -198,6 +198,18 @@ def test_print_report_emits_rows_under_both_headers(capsys):
     assert len(lines[1:worst]) == 1
     assert len(lines[worst + 1 :]) == 2
     assert [json.loads(line)["node"] for line in lines[worst + 1 :]] == [12, 13]
+
+
+def test_red_arms_names_every_red_arm_but_an_expected_absence():
+    table = dict(
+        base=dict(exit_status=4, absent=True),
+        head=dict(exit_status=0, absent=False),
+    )
+    assert arms.red_arms(table, {"base"}) == []
+    table["head"]["exit_status"] = 1
+    assert arms.red_arms(table, {"base"}) == ["head"]
+    table["base"]["exit_status"] = 4
+    assert arms.red_arms(table, set()) == ["base", "head"]
 
 
 def test_control_exits_zero_only_when_the_guard_separates():

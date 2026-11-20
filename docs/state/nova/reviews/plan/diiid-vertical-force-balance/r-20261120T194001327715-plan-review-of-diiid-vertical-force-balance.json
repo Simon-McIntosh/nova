@@ -59,6 +59,13 @@
       "note": "Comment c-s13-frame102-moved on \u00a713 records that the frame-102 boundary extraction moved to \u00a711, which commits it; one owner, no duplicate",
       "reason": "",
       "when": "2026-11-20T20:03:55.576275+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "The eleven-row refresh is owned by millisecond-converged-solve \u00a72; declined in earlier rounds for the same reason",
+      "when": "2026-11-20T20:04:05.004592+00:00"
     }
   ],
   "responses": {
@@ -70,6 +77,12 @@
       "note": "Comment c-s13-frame102-moved on \u00a713 records that the frame-102 boundary extraction moved to \u00a711, which commits it; one owner, no duplicate",
       "reason": "",
       "when": "2026-11-20T20:03:55.576275+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The eleven-row refresh is owned by millisecond-converged-solve \u00a72; declined in earlier rounds for the same reason",
+      "when": "2026-11-20T20:04:05.004592+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T194001327715-plan-review-of-diiid-vertical-force-balance.json",

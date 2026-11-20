@@ -1376,13 +1376,7 @@ def test_compatibility_comparison_resolves_reference_scale():
 @pytest.mark.parametrize("size", [0.20, 0.16])
 def test_linear_shell_spectrum_uses_its_volume_gram(size):
     """The affine B projection is reciprocal and bounded in its own metric."""
-    region = (
-        shapely.Point(0, 0)
-        .buffer(0.4, 2)
-        .difference(shapely.Point(0, 0).buffer(0.28, 2))
-        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
-    )
-    cells = iron._mesh(region, size)
+    cells = iron._mesh(iron.gate_shell(), size)
     operator = iron._galerkin_interaction(cells, basis="linear")
     spectrum = iron.galerkin_spectrum(cells, operator, basis="linear")
     print("linear shell spectrum", size, spectrum)
@@ -1894,12 +1888,7 @@ def test_linear_volume_rule_holds_the_demagnetisation_bound(monkeypatch):
     """
     from nova.biot import tiledassembly
 
-    region = (
-        shapely.Point(0, 0)
-        .buffer(0.4, 2)
-        .difference(shapely.Point(0, 0).buffer(0.28, 2))
-        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
-    )
+    region = iron.gate_shell()
     field = iron.graded_cell_size(
         [0.28, 0.4], [-0.4, 0.4], fine=0.04, coarse=0.08, cells_across=20
     )

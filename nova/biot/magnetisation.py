@@ -40,7 +40,9 @@ __all__ = [
     "MagnetisationInteraction",
     "load_magnetisation_interaction",
     "save_magnetisation_interaction",
+    "galerkin_block_spectrum",
     "galerkin_spectrum",
+    "gate_shell",
     "graded_cell_size",
     "solve_magnetisation",
 ]
@@ -351,6 +353,38 @@ def gate_shell():
     )
 
 
+def galerkin_block_spectrum(blocks, energy, *, witness=False):
+    """Return the generalised spectrum of ``energy`` against its Gram blocks.
+
+    ``blocks`` is the per-cell Gram block list; the volume measure repeats it
+    for the two in-plane components, so the metric is that repetition.  This is
+    the owner of the normalisation: every caller that reports a quotient reads
+    the same ``1/mu0`` and the same symmetrisation here rather than solving the
+    generalised eigenproblem again beside its own measurement.
+
+    ``energy`` enters as the assembled interaction; the returned ``metric`` is
+    the block-diagonal form the solve used, so a caller decomposing a witness
+    weighs it with the same operator the quotient was read against.
+    """
+    from scipy.linalg import block_diag, eigh, eigvalsh
+
+    metric = block_diag(*blocks, *blocks)
+    assembled = np.asarray(energy)
+    symmetric = (assembled + assembled.T) / 2 / _MU0
+    if witness:
+        values, vectors = eigh(symmetric, metric)
+        extremes = dict(witness=vectors[:, -1])
+    else:
+        values = eigvalsh(symmetric, metric)
+        extremes = {}
+    return dict(
+        minimum=float(values[0]),
+        maximum=float(values[-1]),
+        metric=metric,
+        **extremes,
+    )
+
+
 def galerkin_spectrum(cells, gram, *, basis="constant", witness=False):
     """Return the symmetric spectrum of the volume-weighted Galerkin operator.
 
@@ -368,26 +402,16 @@ def galerkin_spectrum(cells, gram, *, basis="constant", witness=False):
     for the vectors.
     """
     if basis == "linear":
-        from scipy.linalg import block_diag, eigh, eigvalsh
-
         blocks = linear_magnetisation_geometry(cells.polygons)["gram"]
-        metric = block_diag(*blocks, *blocks)
+        spectrum = galerkin_block_spectrum(blocks, gram, witness=witness)
+        metric = spectrum.pop("metric")
         energy = metric @ np.asarray(gram) / _MU0
-        symmetric = (energy + energy.T) / 2
-        if witness:
-            eigenvalues, vectors = eigh(symmetric, metric)
-            extremes = dict(witness=vectors[:, -1])
-        else:
-            eigenvalues = eigvalsh(symmetric, metric)
-            extremes = {}
         return dict(
             cells=int(len(cells.centroids)),
             volume_symmetry=float(
                 np.linalg.norm(energy - energy.T) / np.linalg.norm(energy)
             ),
-            minimum=float(eigenvalues[0]),
-            maximum=float(eigenvalues[-1]),
-            **extremes,
+            **spectrum,
         )
     if basis != "constant":
         raise ValueError("basis must be constant or linear")

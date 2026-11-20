@@ -2,7 +2,6 @@
 
 import numpy as np
 import shapely
-from scipy.linalg import block_diag, eigh
 
 from nova.jax.config import configure_dtypes
 
@@ -18,15 +17,13 @@ def per_cell(polygons, plan):
     rows = []
     for cell, polygon in enumerate(polygons):
         operator, blocks = iron.linear_galerkin_cell_interaction((polygon,), plan=plan)
-        metric = block_diag(blocks[0], blocks[0])
-        energy = metric @ np.asarray(operator) / iron._MU0
-        values = eigh((energy + energy.T) / 2, metric, eigvals_only=True)
+        spectrum = iron.galerkin_block_spectrum(blocks, operator)
         body = shapely.Polygon(polygon)
         rows.append(
             dict(
                 cell=cell,
-                maximum=float(values[-1]),
-                minimum=float(values[0]),
+                maximum=spectrum["maximum"],
+                minimum=spectrum["minimum"],
                 area=float(body.area),
                 width=float(body.bounds[2] - body.bounds[0]),
                 height=float(body.bounds[3] - body.bounds[1]),
@@ -55,9 +52,14 @@ for width, height in ((0.008, 0.04), (0.04, 0.04), (0.04, 0.008), (0.008, 0.008)
     operator, blocks = iron.linear_galerkin_cell_interaction(
         (polygon,), plan=iron._PLAN
     )
-    metric = block_diag(blocks[0], blocks[0])
-    energy = metric @ np.asarray(operator) / iron._MU0
-    values = eigh((energy + energy.T) / 2, metric, eigvals_only=True)
+    spectrum = iron.galerkin_block_spectrum(blocks, operator)
     print(
-        "cell", width, height, "maximum", values[-1], "minimum", values[0], flush=True
+        "cell",
+        width,
+        height,
+        "maximum",
+        spectrum["maximum"],
+        "minimum",
+        spectrum["minimum"],
+        flush=True,
     )

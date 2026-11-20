@@ -17,7 +17,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
-from scipy.linalg import block_diag, eigh
 
 from nova.jax.config import configure_dtypes
 
@@ -34,11 +33,14 @@ def repaired_rule(order):
 
 
 def quotient(interaction, gram):
-    """Return the extreme metric-weighted quotients of one operator."""
-    metric = block_diag(*gram, *gram)
-    energy = metric @ np.asarray(interaction) / iron._MU0
-    values = eigh((energy + energy.T) / 2, metric)[0]
-    return float(values[0]), float(values[-1])
+    """Return the extreme metric-weighted quotients of one operator.
+
+    The generalised solve is the owner's
+    (:func:`nova.biot.magnetisation.galerkin_block_spectrum`), so this receipt
+    reports the same quotient the assembler's spectrum does.
+    """
+    spectrum = iron.galerkin_block_spectrum(gram, interaction)
+    return spectrum["minimum"], spectrum["maximum"]
 
 
 def main():

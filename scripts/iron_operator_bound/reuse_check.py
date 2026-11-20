@@ -8,11 +8,16 @@ owners were named, and this check fails when any of them is copied again:
   :func:`nova.biot.tiledassembly.volume_mutual`;
 * the closed octagonal gate mesh belongs to
   :func:`nova.biot.magnetisation.gate_shell`;
-* the dense generalised eigenproblem belongs to
-  :func:`nova.biot.magnetisation.galerkin_spectrum`, which the measurement may
-  call but must not solve again;
+* the dense generalised eigenproblem — its block metric, its ``1/mu0``
+  normalisation and its solve — belongs to
+  :func:`nova.biot.magnetisation.galerkin_block_spectrum`, which
+  :func:`~nova.biot.magnetisation.galerkin_spectrum` and every study call;
 * inside ``_polygon_current_response`` the caller's ``columns`` mask and the
   tile loop's index vector are different names.
+
+The scan covers the whole study tree (``scripts/iron_operator_bound``,
+recursively) and ``tests/``, because a copy in a test is the same defect as a
+copy in a script: the test would then measure its own block.
 
     python scripts/iron_operator_bound/reuse_check.py
 
@@ -28,11 +33,17 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = ROOT / "scripts" / "iron_operator_bound"
+TESTS = ROOT / "tests"
+TILED = ROOT / "nova" / "biot" / "tiledassembly.py"
+MAGNETISATION = ROOT / "nova" / "biot" / "magnetisation.py"
 OWNERS = {
-    "volume_mutual": ROOT / "nova" / "biot" / "tiledassembly.py",
-    "gate_shell": ROOT / "nova" / "biot" / "magnetisation.py",
-    "galerkin_spectrum": ROOT / "nova" / "biot" / "magnetisation.py",
+    "volume_mutual": TILED,
+    "gate_shell": MAGNETISATION,
+    "galerkin_spectrum": MAGNETISATION,
+    "galerkin_block_spectrum": MAGNETISATION,
 }
+SOLVE = re.compile(r"\b(eigh|eigvalsh|block_diag)\s*\(")
+GATE = re.compile(r"buffer\(\s*0\.(?:28|4)\s*,\s*2\s*\)")
 
 
 def definitions(path: Path) -> set[str]:
@@ -53,24 +64,44 @@ def callers(path: Path) -> set[str]:
     }
 
 
+def scanned() -> list[Path]:
+    """The files the check reads: the study tree and the test tree."""
+    return sorted(SCRIPTS.rglob("*.py")) + sorted(TESTS.rglob("*.py"))
+
+
 def main() -> int:
     findings = []
     for name, owner in OWNERS.items():
         if name not in definitions(owner):
             findings.append(f"{name} has no owner: {owner} does not define it")
-        for path in sorted(SCRIPTS.glob("*.py")):
-            if path.name == "reuse_check.py":
+        for path in scanned():
+            if path.name == "reuse_check.py" or path == owner:
                 continue
-            if name in definitions(path) and path != owner:
+            if name in definitions(path):
                 findings.append(f"{name} is defined again in {path}")
-    measure = SCRIPTS / "measure.py"
-    if "eigh" in (measure.read_text()) and "galerkin_spectrum" not in callers(measure):
-        findings.append(
-            f"{measure} solves the generalised eigenproblem itself instead of "
-            "calling the owner's galerkin_spectrum"
-        )
-    tiled = OWNERS["volume_mutual"].read_text()
-    body = tiled.split("def _polygon_current_response(", 1)[-1].split("\ndef ", 1)[0]
+    for path in sorted(SCRIPTS.rglob("*.py")):
+        if path.name == "reuse_check.py":
+            continue
+        text = path.read_text()
+        if SOLVE.search(text) and "galerkin_block_spectrum" not in callers(path):
+            findings.append(
+                f"{path} builds a block metric or solves the generalised "
+                "eigenproblem itself instead of calling the owner's "
+                "galerkin_block_spectrum"
+            )
+        if GATE.search(text):
+            findings.append(
+                f"{path} rebuilds the octagonal gate region inline instead of "
+                "calling magnetisation.gate_shell()"
+            )
+    for path in sorted(TESTS.rglob("*.py")):
+        if GATE.search(path.read_text()):
+            findings.append(
+                f"{path} rebuilds the octagonal gate region inline instead of "
+                "calling magnetisation.gate_shell()"
+            )
+    body = TILED.read_text().split("def _polygon_current_response(", 1)[-1]
+    body = body.split("\ndef ", 1)[0]
     if re.search(r"(?<!tile_)columns = np\.arange", body):
         findings.append(
             "nova/biot/tiledassembly.py:_polygon_current_response rebinds the "

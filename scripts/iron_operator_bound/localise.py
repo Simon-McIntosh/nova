@@ -23,7 +23,6 @@ from pathlib import Path
 import time
 
 import numpy as np
-from scipy.linalg import block_diag, eigh
 import shapely
 
 from nova.jax.config import configure_dtypes
@@ -33,7 +32,7 @@ configure_dtypes()
 import jax  # noqa: E402
 
 from nova.biot import magnetisation as iron  # noqa: E402
-from nova.biot.sectionaverage import section_nodes  # noqa: E402
+from nova.biot import tiledassembly  # noqa: E402
 from nova.biot.tiledassembly import (  # noqa: E402
     _linear_edge_mutual,
     _polygon_current_geometry,
@@ -96,43 +95,28 @@ def cross_block(polygons, shared, plan, boundary_order):
 
 
 def volume_block(polygons, shared, plan, volume_order):
-    """Return the uniform volume-current energy at one section rule."""
+    """Return the uniform volume-current energy at one section rule.
+
+    The block is the owner's: :func:`nova.biot.tiledassembly.volume_mutual`
+    integrates the section rule this study asks for, and this wrapper only
+    weights it by the volume coefficient of the energy.
+    """
     volume = shared["geometry"]["volume_coefficient"]
-    volume_mutual = np.empty((len(polygons), len(polygons)))
-    pending, pending_weights, first, point_count = [], [], 0, 0
-    for cell, polygon in enumerate(polygons):
-        points, weights = section_nodes(polygon, volume_order)
-        pending.append(points)
-        pending_weights.append(weights)
-        point_count += len(points)
-        if point_count < 4096 and cell + 1 < len(polygons):
-            continue
-        flux = _polygon_current_response(
-            polygons,
-            np.concatenate(pending),
-            plan,
-            packed=shared["packed"],
-            flux_only=True,
-        )[0]
-        offset = 0
-        for local, weight in enumerate(pending_weights):
-            volume_mutual[first + local] = weight @ flux[offset : offset + len(weight)]
-            offset += len(weight)
-        pending, pending_weights, first, point_count = [], [], cell + 1, 0
-    return np.asarray((volume @ volume_mutual) @ volume.T)
-
-
-def quotient(energy, gram):
-    """Return the extreme metric-weighted quotients and the top witness."""
-    metric = block_diag(*gram, *gram)
-    total = (energy + energy.T) / 2
-    values, vectors = eigh(total / iron._MU0, metric)
-    return dict(
-        minimum=float(values[0]),
-        maximum=float(values[-1]),
-        witness=vectors[:, -1],
-        metric=metric,
+    mutual = tiledassembly.volume_mutual(
+        polygons, plan, packed=shared["packed"], section_order=volume_order
     )
+    return np.asarray((volume @ mutual) @ volume.T)
+
+
+def quotient(gram, energy):
+    """Return the extreme metric-weighted quotients and the top witness.
+
+    The solve is the owner's: :func:`nova.biot.magnetisation.galerkin_block_spectrum`
+    applies the block metric and the ``1/mu0`` normalisation, so this study and
+    the assembler's spectrum cannot drift apart.  The metric it returns is the
+    one the witness is weighed with below.
+    """
+    return iron.galerkin_block_spectrum(gram, energy, witness=True)
 
 
 def pair_matrix(energy, witness, blocks):
@@ -225,7 +209,7 @@ def main():
     default_volume = volumes[args.volume_orders[0]]
     owner, blocks = linear_galerkin_cell_interaction(polygons, plan=plan)
     mirrored = default_edge + default_cross + default_cross.T + default_volume
-    metric = block_diag(*gram, *gram)
+    metric = iron.galerkin_block_spectrum(gram, mirrored)["metric"]
     record = dict(
         cells=len(polygons),
         owner_mirror_defect=float(
@@ -238,7 +222,7 @@ def main():
         for key_c, cross in crosses.items():
             for key_v, volume in volumes.items():
                 energy = edge + cross + cross.T + volume
-                measured = quotient(energy, gram)
+                measured = quotient(gram, energy)
                 label = f"edge-{key_e}-boundary-{key_c}-volume-{key_v}"
                 record["arms"][label] = dict(
                     maximum=measured["maximum"], minimum=measured["minimum"]

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="sub-millisecond-forward-path">
+<meta name="plan-verifies" content="sub-millisecond-forward-path#s3">
+<meta name="plan-verdict" content="negative">
+<title>Bank-backed Newton step on the diverted certificate | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<h1 id="smfp-autodiff-free-newton-landing">Bank-backed Newton step on the diverted certificate</h1>
+<p id="smfp-autodiff-free-newton-summary">The autodiff-free step is measured on the diverted 550-cell certificate with its own bank, and it does not meet the section's gate. The fresh-read residual falls from 0.02618 to 0.02305 over eight accepted steps and stops there, against a 1e-10 target. The step's Jacobian and its JVP agree with each other to 1e-12 and with central differences of the full fresh-read residual to 1.027 relative at the smallest displacement that keeps both perturbed reads valid, against a 1e-6 target. The warm step is 35.03 ms and 9940 kernel launches on an H200, against 0.5 ms and 100 launches. The analytic-oracle budget is met (axis 2.21e-7, saddle 5.82e-7, boundary 5.90e-8 relative), and the step's cold compile is 21.63 s with a 2.08 MB executable, inside both compile clauses.</p>
+
+<section id="smfp-autodiff-free-newton-clauses">
+<h2>The section's clauses, as measured</h2>
+<table id="smfp-autodiff-free-newton-clause-table"><thead><tr><th>Clause</th><th>Target</th><th>Measured</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>Fresh-read solved-equation residual from the diverted 550-cell certificate seed</td><td>&le; 1e-10</td><td>0.02304945 after eight accepted steps (seed 0.02617859)</td><td>unmet</td></tr>
+<tr><td>Jacobian and JVP against central differences of the full fresh-read residual, trial and converged states</td><td>&le; 1e-6 relative</td><td>1.0274 at displacement fraction 1e-8, both states; 2.8619 at 1e-7; larger displacements leave the read's validity window</td><td>unmet</td></tr>
+<tr><td>Analytic-oracle precision budget</td><td>axis and saddle &le; 5e-4, boundary &le; 1e-4 relative</td><td>axis 2.212e-7, saddle 5.815e-7, boundary 5.896e-8</td><td>met</td></tr>
+<tr><td>Warm step wall, read excluded, on an H200</td><td>&le; 0.5 ms</td><td>35.031 ms median of eight calls (34.37&ndash;35.42 ms)</td><td>unmet, 70&times;</td></tr>
+<tr><td>Warm-step kernel launches, read excluded</td><td>&le; 100</td><td>9940 kernels and 558 copies, 29.008 ms of device time</td><td>unmet, 99&times;</td></tr>
+<tr><td>Cold compile of the step program</td><td>&le; 60 s</td><td>21.630 s</td><td>met</td></tr>
+<tr><td>Serialised executable size</td><td>&lt; 50 MB</td><td>2077515 bytes</td><td>met</td></tr>
+</tbody></table>
+<p>The measurement runs on one reserved H200 (98dci4-gpu-0003, one NVIDIA H200 NVL, 143771 MiB) at revision <code>78212e86a</code> with <code>JAX_PLATFORMS=cuda</code> and <code>jax_enable_x64</code> true. The timing arm runs in its own process with the persistent compilation cache disabled and the compilation-cache minimum raised to 1e9 s, so the wall is a warm execute and the compile is the cold compile of the same program. The bank is <code>sha256:0ac2c113f4a8d8361c3ddec70a9cce83a89f8bdc937985bb960f444c8043b6d0</code>, 1741 active nodes in a 2048-row bucket over 550 cells.</p>
+</section>
+
+<section id="smfp-autodiff-free-newton-read">
+<h2>The read at the certificate seed</h2>
+<p>The first attempt at this gate could not measure anything: every read at the certificate state returned <code>valid False</code> at this tree's head. The cause is in the operand bank's representation, not the read. The bank's exterior absorbs <code>analytic jets - rows &middot; reference moments</code>, the rows reach 1.37e12, and the exterior reaches 1.10e10, while the flux they recover near the X-point is 1e-4. A bank built around the operator prototype's production booking differs from the certificate's vertex booking by 0.08058 in the clipped current moment, and the contraction amplified that difference to 16&ndash;80 in the Hessian <code>xx</code> channel: at the analytic X-point the bank gave Hessian determinant &minus;349 where the analytic field gives &minus;0.142, with value 1.68e-3 against &minus;7e-16. The read then found a positive-determinant critical point 0.017 m from the X-point and reported <code>WRONG_ROOT</code> with no clipped cells. Every other jet component at the same nodes matched analytic to 1e-8, so the defect is the cancellation in that one channel.</p>
+<p>Re-referencing the bank onto the certificate's own booking fixes it without rebuilding the jet matrix, because the rows do not depend on the reference: <code>exterior' = exterior + rows &middot; (m_old - m_new)</code> is exactly the exterior a fresh build around the new reference would produce (<code>scripts/prototypes/smfp_autodiff_step/shift.py</code>). With the reference moved, the certificate read is valid and qualified at the seed: axis (1.78706469, 0.04677346) and X-point (1.50252830, &minus;1.01727963) against the analytic roots (1.7870647, 0.04677363) and (1.502528, &minus;1.01728), 236 clipped cells, and a seed residual of 0.02617859.</p>
+<p>The consequence for any earlier number from this fixture is that a 10.57 ms step wall measured before the repair carried <code>NaN</code> through the booking (<code>linear_residual NaN</code>, <code>update_finite false</code>) and ran a different program: with a valid support the same step is 35.03 ms and 9940 launches. The 10.57 ms figure is withdrawn by this record.</p>
+</section>
+
+<section id="smfp-autodiff-free-newton-solve">
+<h2>The solve arm</h2>
+<table id="smfp-autodiff-free-newton-solve-table"><thead><tr><th>Step</th><th>Accepted length</th><th>Fresh residual</th><th>Krylov iterations</th><th>Krylov condition</th><th>Linear residual</th></tr></thead><tbody>
+<tr><td>0</td><td>0.0625</td><td>0.02454146</td><td>400</td><td>1.730e5</td><td>0.12890</td></tr>
+<tr><td>1</td><td>0.03125</td><td>0.02377408</td><td>400</td><td>1.734e5</td><td>0.14166</td></tr>
+<tr><td>2</td><td>0.015625</td><td>0.02340235</td><td>400</td><td>1.731e5</td><td>0.15124</td></tr>
+<tr><td>3</td><td>0.0078125</td><td>0.02321934</td><td>400</td><td>1.729e5</td><td>0.15533</td></tr>
+<tr><td>4</td><td>0.00390625</td><td>0.02312859</td><td>400</td><td>1.739e5</td><td>0.15668</td></tr>
+<tr><td>5</td><td>0.001953125</td><td>0.02308339</td><td>400</td><td>1.730e5</td><td>0.15237</td></tr>
+<tr><td>6</td><td>0.0009765625</td><td>0.02306078</td><td>400</td><td>1.732e5</td><td>0.15495</td></tr>
+<tr><td>7</td><td>0.00048828125</td><td>0.02304945</td><td>400</td><td>1.746e5</td><td>0.15537</td></tr>
+</tbody></table>
+<p>Step 8 finds no decreasing candidate and stops. Every accepted length is a halving of the previous one, so the update is close to the direction's own scale and the line search is absorbing an oversized correction rather than following a Newton direction. Each step's Krylov solve ends unconverged at 400 iterations with a linear residual larger than the 0.026 residual it was solving, while its own relative Krylov residual reads about 1.2e-4: the reported linear residual is on the equilibrated system and the returned update does not null the residual it was built for.</p>
+<p>The matrix is not the whole story. Taking the same <code>step_jacobian</code> with <code>fresh_geometry=True</code>, solving it exactly, and applying the full update moves the fresh-read residual from 0.02624626 to 1.81778606e-5 in one step, a factor of 1444, with the perturbed read still valid (<code>scripts/prototypes/smfp_autodiff_step/probe_dense.py</code>). Iterating that exact solve with a line search (<code>scripts/prototypes/smfp_autodiff_step/probe_newton_dense.py</code>) gives 0.02624626 &rarr; 1.81778606e-5 &rarr; 1.18512682e-6 &rarr; 2.25679855e-7, and then no step reduces it further at any length from 1 to 2<sup>-7</sup>. The floor is 2.26e-7, still four orders above the section's 1e-10, and the per-step ratios (6.9e-4, 6.5e-2, 0.19) are linear rather than quadratic, which is what a linearisation that is missing part of the residual's dependence looks like. The matrix's condition number is 2.76e17 throughout, which is why the Krylov arm does not converge it, but the exact solve is usable: the first solve's linear residual is 3.82e-11 and the update norms fall from 0.0138 to 2.4e-8. The frozen-geometry Jacobian, by contrast, has condition 1.147e19, an update of norm 360, and every trial state invalid, so the moving saddle geometry is load-bearing.</p>
+</section>
+
+<section id="smfp-autodiff-free-newton-derivative">
+<h2>The derivative arm</h2>
+<p>At the trial and at the converged state the dense Jacobian and the JVP agree with each other to 1e-12 relative, so the two implementations share one linearisation. Against central differences of the full fresh-read residual the agreement the clause asks for is not reached: at displacement fraction 1e-7 the relative error is 2.8619, at 3e-8 it is 1.4310, and at 1e-8 it is 1.0274. Two measured properties of this seed keep those numbers from being a clean verdict on the derivative. The first is validity: at 1e-6 and above at least one perturbed state leaves the read's validity window, so those lengths measure a different branch rather than a derivative, and the held-read arm &mdash; which perturbs the candidate moments against a fixed support and needs no fresh read &mdash; marks the upper state invalid at every tested length down to 1e-8. The seed sits where a cell's clipped membership flips under a 1e-11 relative perturbation, so the residual is not differentiable in any neighbourhood the finite difference can sample. The second is conditioning: the matrix's condition number is 2.76e17, so the residual's central difference at a 1e-8 moment displacement carries the matrix's own amplification and cannot resolve a derivative to 1e-6. The one measurement that does exercise the linearisation end to end is the exact solve above, which reduces the fresh-read residual by 1444 in a single full step; a linearisation that is wrong by a factor cannot do that.</p>
+</section>
+
+<section id="smfp-autodiff-free-newton-wall">
+<h2>Where the 35 ms goes</h2>
+<p>The measured program is <code>support_read.newton_step</code> with <code>fresh_geometry=True</code> and <code>condition_diagnostics=False</code>, batched over one state. Its launch count is dominated by the linear solve: 400 Krylov iterations at a condition number near 1.7e5, each iteration a short sequence of small kernels over 1650 unknowns, which is 9940 launches for a step that should be a matrix assemble and a factorisation. The section's 0.5 ms is not reachable by trimming kernels in this program: the same device time spread over 100 launches would need each launch to carry 290 &micro;s of work at a size where a single batched eigendecomposition of the 96 fresh-geometry channels already costs several launches per channel.</p>
+</section>
+
+<section id="smfp-autodiff-free-newton-negative">
+<h2>Negative control</h2>
+<p>A scratch copy of the head's source with <code>step_jacobian_vector</code> returning <code>value</code> instead of <code>value - change</code> &mdash; the booking-derivative term dropped &mdash; fails <code>tests/test_bank_newton_step.py::test_bank_jvp_composes_flux_and_level_derivatives</code> at <code>assert_allclose(applied[0], difference, rtol=1e-10)</code> (one failed, exit 1; log <code>logs/negative-control.log</code>). The check has power against the term the clause names.</p>
+</section>
+
+<section id="smfp-autodiff-free-newton-what-this-rules-out">
+<h2>What this rules out</h2>
+<p>The bank reproduces the analytic jets at its own nodes and its read resolves both stationary points at the analytic roots, so the read and the bank are not the obstacle once the reference booking is the certificate's own. What fails is the step around them: the linearisation is not the derivative of the fresh-read residual at this seed, and the Krylov arm does not converge the system it is given. Neither failure is a tolerance question; both are structural, and the section's 0.5 ms and 100-launch clauses cannot be met while the step spends 400 unconverged Krylov iterations per call.</p>
+</section>
+
+</main></body>
+</html>

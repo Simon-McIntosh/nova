@@ -4,7 +4,7 @@ set -u
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
 RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174204179431-smfp-autodiff-free-newton
-STORE=${RUN}/bank-store
+STORE=${SMFP_STORE:-${RUN}/bank-store}
 OUT=${RUN}/logs
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 mkdir -p "$OUT"
@@ -12,7 +12,7 @@ mkdir -p "$OUT"
 export TMPDIR=/tmp
 export PYTHONPATH="$ROOT"
 export SMFP_REVISION=$(git -C "$ROOT" rev-parse HEAD)
-export JAX_PLATFORMS=gpu
+export JAX_PLATFORMS=cuda
 
 LOG=$OUT/step-gate.log
 : > "$LOG"

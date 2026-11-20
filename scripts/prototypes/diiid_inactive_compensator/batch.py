@@ -116,8 +116,11 @@ def main():
                 str(folder),
                 "--trace-helper",
                 str(args.trace_helper),
+                # The interior arm: its table ends inside psi_norm = 1, which
+                # the finite-edge flux function requires because the boundary
+                # value is EFIT's own read rather than an appended knot.
                 "--arm",
-                "edge",
+                "base",
             ]
             stream = (folder / "row.log").open("w")
             stream.write(

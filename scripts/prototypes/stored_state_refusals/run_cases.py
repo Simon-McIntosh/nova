@@ -31,6 +31,9 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+# The job's own output directory. The run directory that holds every job is its
+# parent, and that is what a written sequence is counted against: a job that
+# counted only itself would write sequence 1 on every submission.
 OUTPUT = Path(os.environ["STORED_STATE_REFUSALS_OUTPUT"]).resolve()
 FIGURES = Path(os.environ["STORED_STATE_REFUSALS_FIGURES"]).resolve()
 (OUTPUT / "comparison").mkdir(parents=True, exist_ok=True)
@@ -155,8 +158,12 @@ def _arm(data, request, label):
         return record
 
 
-def _report(records):
-    _write(OUTPUT / "measurement.json", records)
+def _report(measurement):
+    # Counted at the moment of the write, over the run directory that holds
+    # every job, so this receipt sorts above all its predecessors and a
+    # re-measured arm supersedes the run it replaces rather than tying it.
+    measurement["sequence"] = next_sequence(OUTPUT.parent)
+    _write(OUTPUT / "measurement.json", measurement)
 
 
 def _mastu(monkeypatch, records):
@@ -298,7 +305,6 @@ def main():
     monkeypatch = pytest.MonkeyPatch()
     records = dict(
         qualification_tolerance=1.0e-10,
-        sequence=next_sequence(OUTPUT),
         device=str(jax.devices()[0]),
         source_revision=os.environ.get("SOURCE_REVISION"),
         measurement_module="/".join(

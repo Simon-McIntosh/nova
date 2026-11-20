@@ -39,11 +39,31 @@ def order_key(path: Path) -> tuple[int, str, str]:
     )
 
 
-def next_sequence(run: Path) -> int:
-    """Return the next written sequence for a receipt under ``run``."""
+def measurement_receipts(directory: Path) -> list[Path]:
+    """Return every measurement receipt that shares ``directory``.
+
+    The run directory holds one subdirectory per job, and each job writes its
+    receipt at that subdirectory's top level. ``directory``'s own receipt is
+    included as well, because a receipt written directly into the directory it
+    is counted against is the shape the job's own output directory has.
+    """
+    return sorted(
+        [*directory.glob("measurement.json"), *directory.glob("*/measurement.json")],
+        key=order_key,
+    )
+
+
+def next_sequence(directory: Path) -> int:
+    """Return the next written sequence among the receipts sharing ``directory``.
+
+    The caller passes the run directory, which holds every job, not the job's
+    own output directory: a job sees only itself through its own directory, so
+    a fresh job would write sequence 1 every time and a re-measured arm would
+    tie the run it replaces instead of superseding it.
+    """
     sequences = [
         int(json.loads(path.read_text()).get("sequence") or 0)
-        for path in run.glob("*/measurement.json")
+        for path in measurement_receipts(directory)
     ]
     return max(sequences, default=0) + 1
 
@@ -61,7 +81,7 @@ def measurements(run: Path) -> dict:
     the arm it replaced.
     """
     merged: dict = {}
-    for path in ordered(run, "*/measurement.json"):
+    for path in measurement_receipts(run):
         for key, value in json.loads(path.read_text()).items():
             if isinstance(value, dict):
                 merged.setdefault(key, {})
@@ -74,7 +94,7 @@ def measurements(run: Path) -> dict:
 def owner(run: Path, label: str) -> Path | None:
     """Return the receipt that holds the newest write of one arm, if any."""
     holder = None
-    for path in ordered(run, "*/measurement.json"):
+    for path in measurement_receipts(run):
         if label in json.loads(path.read_text()):
             holder = path
     return holder

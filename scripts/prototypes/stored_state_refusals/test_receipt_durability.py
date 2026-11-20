@@ -40,6 +40,48 @@ def test_receipts_order_by_written_sequence(tmp_path):
     assert records.next_sequence(tmp_path) == 3
 
 
+def test_a_job_sequences_after_the_run_it_joins(tmp_path):
+    """A job counts the run's receipts, never only its own directory.
+
+    The receipt sits at the top of the job's output directory, one level below
+    the run directory that holds every job. Counting the job directory alone
+    finds nothing there, so every fresh job issues sequence 1 and a re-measured
+    arm ties the run it was meant to supersede.
+    """
+    run = tmp_path / "run"
+    for name, sequence in (("measurement", 1), ("tcv-iter-long", 7)):
+        receipt = run / name / "measurement.json"
+        receipt.parent.mkdir(parents=True)
+        receipt.write_text(json.dumps({"sequence": sequence, "arm": {"value": name}}))
+    assert records.next_sequence(run) == 8
+    job = run / "mastu-titan3"
+    job.mkdir()
+    (job / "measurement.json").write_text(json.dumps({"sequence": 1}))
+    assert records.next_sequence(job) == 2
+
+
+def test_the_receipt_is_written_with_the_runs_next_sequence(tmp_path, monkeypatch):
+    """The sequence the job writes is read back from the receipt it wrote."""
+    run = tmp_path / "run"
+    first = run / "first" / "measurement.json"
+    first.parent.mkdir(parents=True)
+    first.write_text(json.dumps({"sequence": 4}))
+    output = run / "second"
+    output.mkdir()
+    figures = tmp_path / "figures"
+    figures.mkdir()
+    monkeypatch.setenv("STORED_STATE_REFUSALS_OUTPUT", str(output))
+    monkeypatch.setenv("STORED_STATE_REFUSALS_FIGURES", str(figures))
+    run_cases = importlib.reload(importlib.import_module("run_cases"))
+    run_cases._report({"arm": {"value": 5}})
+    written = json.loads((output / "measurement.json").read_text())
+    assert written["sequence"] == 5
+    run_cases._report({"arm": {"value": 6}})
+    written = json.loads((output / "measurement.json").read_text())
+    assert written["sequence"] == 6
+    assert records.measurements(run)["arm"]["value"] == 6
+
+
 def _local_history_readers(module):
     return [
         name

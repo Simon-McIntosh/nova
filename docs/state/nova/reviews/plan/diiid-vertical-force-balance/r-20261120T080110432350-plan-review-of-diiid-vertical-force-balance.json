@@ -67,9 +67,28 @@
       "note": "The plan summary now names the X-point geometry work: finite-edge profiles, one coupling kernel, honest conductor currents",
       "reason": "",
       "when": "2026-11-20T08:31:52.361658+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a711 done-when now records the accepted three-change account and re-registers on the finite-edge head",
+      "reason": "",
+      "when": "2026-11-20T08:32:39.436589+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "note": "\u00a711 done-when now records the accepted three-change account and re-registers on the finite-edge head",
+      "reason": "",
+      "when": "2026-11-20T08:32:39.436589+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

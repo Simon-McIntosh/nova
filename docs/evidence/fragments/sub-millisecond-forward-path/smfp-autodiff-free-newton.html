@@ -59,7 +59,15 @@
 
 <section id="smfp-autodiff-free-newton-wall">
 <h2>Where the 35 ms goes</h2>
-<p>The measured program is <code>support_read.newton_step</code> with <code>fresh_geometry=True</code> and <code>condition_diagnostics=False</code>, batched over one state. Its launch count is dominated by the linear solve: 400 Krylov iterations at a condition number near 1.7e5, each iteration a short sequence of small kernels over 1650 unknowns, which is 9940 launches for a step that should be a matrix assemble and a factorisation. The section's 0.5 ms is not reachable by trimming kernels in this program: the same device time spread over 100 launches would need each launch to carry 290 &micro;s of work at a size where a single batched eigendecomposition of the 96 fresh-geometry channels already costs several launches per channel.</p>
+<p>The measured program is <code>support_read.newton_step</code> with <code>fresh_geometry=True</code> and <code>condition_diagnostics=False</code>, batched over one state. Timing its stages separately in one warm process on the same H200, each stage its own jitted program over the same seed state, attributes the wall:</p>
+<table id="smfp-autodiff-free-newton-stage-table"><thead><tr><th>Stage</th><th>Median wall</th><th>Share of the whole step</th></tr></thead><tbody>
+<tr><td><code>step_residual</code> (bank contraction and booking)</td><td>1.969 ms</td><td>5%</td></tr>
+<tr><td><code>step_jacobian</code>, frozen geometry</td><td>5.341 ms</td><td>15%</td></tr>
+<tr><td><code>step_jacobian</code>, fresh geometry</td><td>5.902 ms</td><td>16%</td></tr>
+<tr><td><code>newton_step</code>, frozen geometry (whole)</td><td>35.70 ms</td><td>&mdash;</td></tr>
+<tr><td><code>newton_step</code>, fresh geometry (whole)</td><td>36.70 ms</td><td>&mdash;</td></tr>
+</tbody></table>
+<p>The Jacobian is six milliseconds of the thirty-six. The remaining twenty-nine are equilibration and the block Krylov arm: 400 unconverged iterations at an equilibrated condition near 1.7e5, each iteration a short sequence of small kernels over 1650 unknowns, which is the 9940 launches. Moving from frozen to fresh geometry changes the whole step by 1 ms while it changes the matrix assembly by 0.6 ms, so the moving saddle geometry is not the cost either. The section's 0.5 ms is not reachable by trimming kernels in this program: spreading the same device time over 100 launches would need each launch to carry 290 &micro;s at a size where a single batched eigendecomposition of the 96 fresh-geometry channels already costs several launches per channel, and 29 ms of that 35 is a solver whose iteration count is set by the matrix's condition.</p>
 </section>
 
 <section id="smfp-autodiff-free-newton-negative">

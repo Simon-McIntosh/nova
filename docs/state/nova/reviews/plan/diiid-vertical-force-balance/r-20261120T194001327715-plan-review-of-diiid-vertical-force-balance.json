@@ -73,9 +73,22 @@
       "finding": "reasoning-1",
       "reason": "Same \u00a73 refresh, owned by millisecond-converged-solve; this round builds \u00a79 and \u00a711",
       "when": "2026-11-20T20:04:14.121389+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "Fixed after \u00a711 is dispatched: the artifact list is document metadata and editing it now would hold \u00a711 behind another review round",
+      "when": "2026-11-20T20:04:23.750358+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Fixed after \u00a711 is dispatched: the artifact list is document metadata and editing it now would hold \u00a711 behind another review round",
+      "when": "2026-11-20T20:04:23.750358+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

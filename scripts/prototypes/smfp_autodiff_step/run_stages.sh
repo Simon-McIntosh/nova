@@ -16,7 +16,7 @@ mkdir -p "$OUT" "$STORE"
 
 export TMPDIR=/tmp
 export PYTHONPATH="$ROOT"
-export JAX_PLATFORMS=gpu
+export JAX_PLATFORMS=cuda
 export SMFP_REVISION=$(git -C "$ROOT" rev-parse HEAD)
 
 {

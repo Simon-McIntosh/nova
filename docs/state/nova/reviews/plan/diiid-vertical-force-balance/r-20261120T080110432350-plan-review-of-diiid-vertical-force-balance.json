@@ -57,7 +57,30 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 146,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The plan summary now names the X-point geometry work: finite-edge profiles, one coupling kernel, honest conductor currents",
+      "reason": "",
+      "when": "2026-11-20T08:31:52.361658+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "note": "The plan summary now names the X-point geometry work: finite-edge profiles, one coupling kernel, honest conductor currents",
+      "reason": "",
+      "when": "2026-11-20T08:31:52.361658+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T080110432350-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261120T080110432350-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "a5fdb9c2fec23c03c9e2ea9d195b51ebe851428c",
   "rubric": "content",

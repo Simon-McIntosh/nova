@@ -67,8 +67,14 @@ def book_analytic(analytic, geometry, profile, convention, policy, quadrature):
     return current.book(psi, reading, geometry, profile, quadrature)
 
 
-def load_bank(store: Path, geometry, graph):
-    """Return the bank and the moments the certificate books at its analytic ψ."""
+def load_bank(store: Path, geometry, graph, reference_moments):
+    """Return the bank, built around the certificate's own booking.
+
+    The bank's exterior absorbs ``analytic jets - rows · moments`` at its
+    reference booking, so a reference the certificate does not book at leaves
+    the contraction subtracting two six-figure numbers to recover a tenth; the
+    reference is the certificate's booking for that reason.
+    """
     mesh_of = fixed_points.build_mesh
     receipt_path = store / "receipt.json"
     if receipt_path.exists():
@@ -95,7 +101,7 @@ def load_bank(store: Path, geometry, graph):
     reference = fixture._kernel_backed_field("diverted", oracle, analytic, geometry)
     started = perf_counter()
     matrix, exterior, nodes, sample_index, build_seconds = build_jet_matrix(
-        reference.coupling, geometry, analytic, reference.moments, persist=False
+        reference.coupling, geometry, analytic, reference_moments, persist=True
     )
     bank = support_read.SupportOperands.from_rows(
         geometry, matrix, exterior, nodes, sample_index, bucket=len(nodes)
@@ -147,7 +153,6 @@ class Certificate:
             self.quadrature,
             self.roots,
         ) = self.graph
-        self.bank, self.mesh = load_bank(store, self.geometry, self.graph)
         booked = book_analytic(
             self.analytic,
             self.geometry,
@@ -157,6 +162,9 @@ class Certificate:
             self.quadrature,
         )
         self.seed_moments = tuple(booked[index] for index in range(3))
+        self.bank, self.mesh = load_bank(
+            store, self.geometry, self.graph, self.seed_moments
+        )
         self.cache = fixed_points.RowCache(
             self.bank.mesh,
             self.bank.nodes,

@@ -51,7 +51,7 @@ def profiled_launches(trace_dir, call, arguments):
     result = call(*arguments)
     jax.block_until_ready(result)
     jax.profiler.stop_trace()
-    paths = sorted(trace_dir.glob("*.trace.json.gz"))
+    paths = sorted(trace_dir.rglob("*.json.gz"))
     if not paths:
         raise RuntimeError("the profiler wrote no trace")
     with gzip.open(paths[-1], "rt") as stream:

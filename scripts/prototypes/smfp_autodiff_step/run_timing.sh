@@ -6,7 +6,7 @@ set -u
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
 RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174204179431-smfp-autodiff-free-newton
-STORE=${RUN}/bank-store
+STORE=${SMFP_STORE:-${RUN}/bank-store}
 OUT=${RUN}/logs
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 mkdir -p "$OUT" "$STORE"

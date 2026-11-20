@@ -324,6 +324,21 @@
   <code>_polygon_current_response</code> the caller's boolean
   <code>columns</code> mask and the tile loop's index vector no longer share a
   name: <code>tile_columns</code> is the loop's.</p>
+  <p>The second review pass found the study solving beside its owners.
+  <code>magnetisation.galerkin_block_spectrum(blocks, energy, *, witness)</code>
+  is now the owner of the dense generalised solve &mdash; the block metric, the
+  <code>1/mu0</code> normalisation, the symmetrisation and the divide-and-conquer
+  solve &mdash; and <code>galerkin_spectrum</code>'s linear branch, plus
+  <code>localise.py</code>, <code>pin.py</code> and
+  <code>selfcell.py</code>, call it instead of carrying a copy.
+  <code>localise.volume_block</code> is a wrapper over
+  <code>volume_mutual</code>, the companion test builds its mesh from
+  <code>gate_shell()</code>, and <code>scripts/iron_operator_bound/reuse_check.py</code>
+  now scans the whole study tree and <code>tests/</code> and exits nonzero on a
+  redefined owner, a block metric or generalised solve outside the owner, or an
+  inline rebuild of the octagonal region. Measured: the owner reproduces the
+  direct scipy solve bit for bit on a six-cell mesh (maximum, minimum and metric
+  identical, delta 0.0).</p>
 
   <h3 id="icm-graded-operator-bound-control">The negative control</h3>
   <p>The delivered rule <em>is</em> the defect, so the delivered column is the

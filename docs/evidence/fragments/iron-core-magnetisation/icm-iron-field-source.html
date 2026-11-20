@@ -110,11 +110,12 @@ carried came from jobs 1324036 and 1324312 and their receipts were deleted with
 the root; the 40&nbsp;mm mesh could not be regenerated here, for the reason
 section&nbsp;3 below records.</p>
 <table><thead><tr><th>Quantity</th><th>Measured at 80 mm</th><th>Contract</th></tr></thead><tbody>
-<tr><td>persisted response against a direct coil evaluation</td><td><b>0.0</b> relative, response reused in the same run that writes it</td><td>1e-12</td></tr>
+<tr><td>persisted response against a direct coil evaluation</td><td><b>0.0</b> relative on the run that reads the store (<code>coil_response_reused=true</code>)</td><td>1e-12</td></tr>
 <tr><td>external term against the prototype's single quadrature</td><td>1.276e-10 pointwise, 5.481e-16 Frobenius</td><td>summation order only</td></tr>
-<tr><td>slice wall with the persisted response</td><td><b>34.45 s</b></td><td>record with</td></tr>
-<tr><td>slice wall with the coils evaluated on the slice</td><td><b>89.80 s</b></td><td>record without</td></tr>
-<tr><td>coils' field, written this run against direct</td><td>22.41 s against 20.22 s</td><td>-</td></tr>
+<tr><td>slice wall with the persisted response</td><td><b>33.92 s</b> read, 34.45 s write</td><td>record with</td></tr>
+<tr><td>slice wall with the coils evaluated on the slice</td><td><b>89.82 s</b></td><td>record without</td></tr>
+<tr><td>coils' field, read against direct</td><td><b>2.45 s against 20.47 s</b></td><td>-</td></tr>
+<tr><td>coils' field, written against direct</td><td>22.41 s against 20.22 s</td><td>-</td></tr>
 <tr><td>plasma's field on the same slice</td><td>37.50 s</td><td>per slice, not persisted</td></tr>
 <tr><td>state difference between the two slices</td><td>2.574e-8 relative</td><td>same solution</td></tr>
 <tr><td>Newton history</td><td>five corrections: 0.998, 1.198e-3, 7.866e-5, 1.063e-5, 5.425e-7, 3.690e-9</td><td>converged</td></tr>
@@ -122,7 +123,9 @@ section&nbsp;3 below records.</p>
 <p>The response pays for itself inside one slice at the 80&nbsp;mm mesh:
 55.35&nbsp;s, 62&nbsp;% of an 89.80&nbsp;s solve, and the two states agree to
 2.574e-8 relative, so the persisted term changes the wall and not the answer.
-The 22.41&nbsp;s above is the write, not a read; the reuse run records the read.</p>
+On a warm store the read drops the coils' field from 20.47&nbsp;s to
+2.45&nbsp;s and the slice from 89.82&nbsp;s to 33.92&nbsp;s, 62&nbsp;% of the
+solve, which is the wall the plan asked for.</p>
 <p><b>Refusals, with a negative control each.</b> The stage exercises both
 refusals on every run and the receipt carries their messages: a request for any
 other quadrature raises <i>the persisted coil response serves another mesh</i>,

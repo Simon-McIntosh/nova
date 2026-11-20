@@ -70,7 +70,7 @@ def test_another_mesh_is_refused(store):
     points = _points()
     measure.persist_coil_field(points, None, "a" * 64, "b" * 64)
     _relocate(measure, directory, "a" * 64, "b" * 64, "c" * 64, "b" * 64)
-    with pytest.raises(ValueError, match="does not match the mesh"):
+    with pytest.raises(ValueError, match="serves another"):
         measure.persist_coil_field(points, None, "c" * 64, "b" * 64)
 
 
@@ -80,7 +80,7 @@ def test_another_coil_set_is_refused(store):
     points = _points()
     measure.persist_coil_field(points, None, "a" * 64, "b" * 64)
     _relocate(measure, directory, "a" * 64, "b" * 64, "a" * 64, "d" * 64)
-    with pytest.raises(ValueError, match="does not match the mesh"):
+    with pytest.raises(ValueError, match="serves another"):
         measure.persist_coil_field(points, None, "a" * 64, "d" * 64)
 
 

@@ -1,0 +1,77 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T14:26:39.314Z",
+  "dispatched_at": "2026-11-20T14:22:57Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:85",
+      "id": "done_when-1",
+      "reason": "\u00a77 is implementable and its done-when is the node's whole acceptance test; the enumeration omits the one route where the plan has already observed the defect, so the section can be declared complete with its own named failure unrepaired. The 2026-11-19 restatement at plan.html:419 changed the measurement head but left the route list unchanged.",
+      "text": "\u00a77's done-when(1) requires each proposal route to contribute exactly zero flux and tangent with the compensator inactive but enumerates only \"Newton, the Levenberg rebuilt-model promotion, continuation and descent recovery\"; the plan's own s7 review record (`c-run-r-20261116T103738381449`, recorded at plan.html:401) measures that \"the reduced route still applies an inactive circuit image (nova/equilibrium/reduced_newton.py:2396)\", so a node satisfying the four named routes passes the clause while the measured instance of the defect persists on the fifth.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:122",
+      "id": "done_when-2",
+      "reason": "the section is the head \u00a711's re-registration is measured on and \u00a711 depends on it; a `done` declaration over an uncommitted clause either hides owed work or, worse, lets \u00a711 build on a finite-edge extraction for `:102` that nobody has committed. The clause is also the only cross-check of the finite-edge values against an independent read, so closing without it removes the section's one external control.",
+      "text": "\u00a713 is declared `done` in the section declarations, but its done-when(2) requires \"the record commits EFIT's p\u2032 and FF\u2032 extracted at \u03c8N=1 for frame `:102` and the four rows \u2026 with frame `:102` checked against the review reading (\u2248\u22122319.18, \u2248+0.00584)\"; the committed record `docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-flux.html` names no frame `:102` (a search of the record for the frame returns nothing) and \u00a713's own body at plan.html:120 says \"no committed record holds that extraction yet\".",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:51 (landed record at plan.html:335, 341, 368)",
+      "id": "reasoning-1",
+      "reason": "the endpoint the section declares it reached is not the endpoint its text set, and the substitution of reference is exactly the decision `no-unphysical-external-constraints` makes the lead's; a later reader comparing \u00a74's stated criterion with the receipt would conclude the section failed, while the declaration says done. The plan should restate the criterion as met at a stated representation with the confirmation recorded, or hold the section open until the lead answers.",
+      "text": "\u00a74's done-when states the criterion as \"the vacuum field from the persisted description reproduces the inclusion ladder's all-conductors rung on frame 89 to roundoff\", and the delivered measurement did not: it read a residual of \u22120.9029 Wb (0.107 of the ladder peak) on frame 89 and \u22120.6378 Wb (0.114) on frame 102, attributed in full to ECOILA's 48 one-turn rings against the ladder's single bulk rectangle; the roundoff claim (`all_frames_within_roundoff_bound true`, worst 4.05e-14) holds against a ladder re-derived on the persisted ECOILA tessellation, and the same record states \"REPRESENTATION CHOICE FOR THE LEAD TO CONFIRM\".",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:109",
+      "id": "evidence_paths-1",
+      "reason": "a worker following the done-when literally can truncate the committed pinned-cohort receipt that the pinned test reads, destroying the registration record the section exists to re-establish; the body's own warning shows the author knows the hazard, so the ambiguity is in the done-when alone and costs one sentence to close.",
+      "text": "\u00a711's done-when(1) says the benchmark entry point \"runs frame `:102` at the head with its output under this node's evidence directory\", while the body at \u00a711:108 requires \"`--output` under `~/.cache/nova-diiid-pinned-reregistration/`, never the committed receipt directory, which the entry point truncates and the pinned test reads\"; the two statements name different destinations for the same run, and \"this node's evidence directory\" is the phrase a worker would most plausibly resolve to `docs/figures/\u2026/pinned-cohort`, the directory the body says the entry point truncates.",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3af3f964bafa75228719cdb567913d84d2506f61",
+  "plan_fingerprint": "81b46fde2f42a78a755681e738f47e9f40c3db07688f753c53f27719bd15b98a",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 156,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261120T142114114159-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "ba2e3534dee8ce89ebe44c1cce255add8ed100e8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every evidence fragment, figure directory, receipt, module path and cited commit resolves (14 spot-checked commits all present; `diiid-137d-refusal.html`, `diiid-inactive-compensator-finite-edge.html`, `diiid-coil-correction-resolve.html` and `diiid-pinned-reregistration.html` are record destinations a node will write, not existing anchors, and \u00a712 states plainly that its own paths were never written).",
+    "done_when": "a finding \u2014 \u00a77's done-when(1) enumerates four proposal routes and omits the reduced Newton route, which the plan's own s7 review record measures still applying the inactive circuit image (\u00a77:85, record at \u00a77 comment `c-run-r-20261116T103738381449`); \u00a713 is declared `done` while done-when(2)'s frame `:102` extraction at \u03c8N=1 is committed nowhere (\u00a713:122).",
+    "evidence_paths": "a finding \u2014 \u00a711 names two different destinations for the same benchmark output (\u00a711:108 vs \u00a711:109), one of which reads as the committed receipt directory the body forbids writing.",
+    "naming": "pass \u2014 the sections name mechanisms by behaviour (`finite-edge`, `inactive-image`, `single-kernel`) and no plan label, stage name or ticket id is required of a new symbol; the section ids (`\u00a76`, `\u00a713`) appear only in plan prose and cross-references.",
+    "reasoning": "a finding \u2014 \u00a74 is declared `done` against a done-when whose literal reference (\"reproduces the inclusion ladder's all-conductors rung \u2026 to roundoff\") was not met; the roundoff was obtained only by taking the persisted ECOILA tessellation as the reference on both sides, and the plan's own record still lists the lead's confirmation of that choice as outstanding (\u00a74:51).",
+    "single_goal": "pass \u2014 s7, s9 and s11 each name one deliverable and each carries three done-when clauses, within the bound; the landed sections' multi-clause done-whens are already reported closed.",
+    "wiring": "pass \u2014 every `depends-on` target (s6, s7, s8, s10, s13) exists and each declared edge matches the prerequisite the section states; \u00a79's need for the \u00a76 head is reached transitively through s7\u2192s6, so no node is released ahead of its input."
+  },
+  "section_digests": {
+    "_document": "642eed59c1a3a539a2002d237f3345e1e11ec13304d06032dac3c8c1ede64780",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "618fc935df2dc006a20b2c6d068ade9d76fd0458fb917a150fdca80fc72e25ca",
+    "s12": "9f0b7de609dddf9cec0eead4c27fef615d5275f0957928c862d35cecbbb23ffe",
+    "s13": "e14df5cf0cb26cb414397b74fb90f493b050e0a424f5b4402cd3a7a7de859cac",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "67010ceabd250e895da0e2866c55016f6d94a692436e98f386fbf5a9a62a3df2",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "537b0cbcc96395fb2592a114308b1220125035f6545b23ec029605353edfd7e6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T14:26:46.950237+00:00",
+  "total": null
+}

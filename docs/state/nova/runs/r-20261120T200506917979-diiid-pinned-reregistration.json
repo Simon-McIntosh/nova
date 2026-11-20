@@ -477,6 +477,24 @@
     "reason": "the admission landing pass advances the run's plan section in its landing beat, after this merge; the impl has not moved at the moment of completion",
     "verdict": "waived"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/imas/test_diiid_current_pinned_forward.py",
+    "integrated_revision": "77ac69ac40bb982455e5a1cc5a3b160ae253f550",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261120T200506917979-diiid-pinned-reregistration/review-landing/gate-77ac69ac40bb982455e5a1cc5a3b160ae253f550.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'PYTHONPATH=. JAX_PLATFORMS=cpu ./.venv/bin/python -m pytest -p no:cacheprovider -q tests/imas/test_diiid_current_pinned_forward.py'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/nova"
+    ]
+  },
   "lane": "clive",
   "lane_advisory": {
     "backend": "clive",

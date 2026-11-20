@@ -20,6 +20,11 @@
       "kind": "exempted",
       "reason": "an analysis-script inefficiency (a discarded spectrum on the localisation study), no effect on the operator, the bound or any reported number",
       "recorded_at": "2026-11-20T16:10:04.543791+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the guard's granularity limit is a tooling refinement; reuse scored 20 with every owner call verified by the review itself",
+      "recorded_at": "2026-11-20T16:10:12.931324+00:00"
     }
   },
   "findings": [

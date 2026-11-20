@@ -1,0 +1,116 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-20T04:55:36.740Z",
+  "dispatched_at": "2026-11-20T04:48:44Z",
+  "figures": {
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/iter-iter-stored-default-preview.png": {
+      "contrast": "legend text and the arm text render in near-black on a white ground, well clear of 4.5:1; the grey #929292 contour lines are the intended 3:1 data grey.",
+      "data_ink": "the contour lines and the vessel outline carry essentially all the ink; no gradient, no filled region and no shading competes with the data.",
+      "decoration": "no gradient, background fill or decorative styling is drawn; the panel is white with line contours, the wall outline and the null markers.",
+      "label_collision": "the single figure legend sits in clear space above the panel and no text artist is clipped by the canvas edge; there are no axis labels to collide with the data.",
+      "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere in the plotting area: of the blue pixels in this PNG every one sits inside the legend swatch at x 737-777, y 20-30, and the count of blue pixels below the legend band is zero. A reader therefore sees only the stored imas-efit contours and cannot compare the terminal nova state against the stored state, which is what the panel exists to show; the blue solved null set is absent for the same reason.",
+      "table_form": "the image is a poloidal flux map with wall and null markers, a spatial relation that no table can carry."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/iter-iter-stored-default.svg": {
+      "contrast": "legend text and the arm text render in near-black on a white ground, well clear of 4.5:1; the grey #929292 contour lines are the intended 3:1 data grey.",
+      "data_ink": "the contour lines and the vessel outline carry essentially all the ink; no gradient, no filled region and no shading competes with the data.",
+      "decoration": "no gradient, background fill or decorative styling is drawn; the panel is white with line contours, the wall outline and the null markers.",
+      "label_collision": "the single figure legend sits in clear space above the panel and no text artist is clipped by the canvas edge; there are no axis labels to collide with the data.",
+      "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere in the plotting area: of the blue pixels in this PNG every one sits inside the legend swatch at x 737-777, y 20-30, and the count of blue pixels below the legend band is zero. A reader therefore sees only the stored imas-efit contours and cannot compare the terminal nova state against the stored state, which is what the panel exists to show; the blue solved null set is absent for the same reason.",
+      "table_form": "the image is a poloidal flux map with wall and null markers, a spatial relation that no table can carry."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-displaced-continuation.svg": {
+      "contrast": "legend text and the arm text render in near-black on a white ground, well clear of 4.5:1; the grey #929292 contour lines are the intended 3:1 data grey.",
+      "data_ink": "the contour lines and the vessel outline carry essentially all the ink; no gradient, no filled region and no shading competes with the data.",
+      "decoration": "no gradient, background fill or decorative styling is drawn; the panel is white with line contours, the wall outline and the null markers.",
+      "label_collision": "the single figure legend sits in clear space above the panel and no text artist is clipped by the canvas edge; there are no axis labels to collide with the data.",
+      "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere in the plotting area: of the blue pixels in this PNG every one sits inside the legend swatch at x 737-777, y 20-30, and the count of blue pixels below the legend band is zero. A reader therefore sees only the stored imas-efit contours and cannot compare the terminal nova state against the stored state, which is what the panel exists to show; the blue solved null set is absent for the same reason.",
+      "table_form": "the image is a poloidal flux map with wall and null markers, a spatial relation that no table can carry."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-displaced-default.svg": {
+      "contrast": "legend text and the arm text render in near-black on a white ground, well clear of 4.5:1; the grey #929292 contour lines are the intended 3:1 data grey.",
+      "data_ink": "the contour lines and the vessel outline carry essentially all the ink; no gradient, no filled region and no shading competes with the data.",
+      "decoration": "no gradient, background fill or decorative styling is drawn; the panel is white with line contours, the wall outline and the null markers.",
+      "label_collision": "the single figure legend sits in clear space above the panel and no text artist is clipped by the canvas edge; there are no axis labels to collide with the data.",
+      "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere in the plotting area: of the blue pixels in this PNG every one sits inside the legend swatch at x 737-777, y 20-30, and the count of blue pixels below the legend band is zero. A reader therefore sees only the stored imas-efit contours and cannot compare the terminal nova state against the stored state, which is what the panel exists to show; the blue solved null set is absent for the same reason.",
+      "table_form": "the image is a poloidal flux map with wall and null markers, a spatial relation that no table can carry."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-continuation.svg": {
+      "contrast": "legend text and the arm text render in near-black on a white ground, well clear of 4.5:1; the grey #929292 contour lines are the intended 3:1 data grey.",
+      "data_ink": "the contour lines and the vessel outline carry essentially all the ink; no gradient, no filled region and no shading competes with the data.",
+      "decoration": "no gradient, background fill or decorative styling is drawn; the panel is white with line contours, the wall outline and the null markers.",
+      "label_collision": "the single figure legend sits in clear space above the panel and no text artist is clipped by the canvas edge; there are no axis labels to collide with the data.",
+      "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere in the plotting area: of the blue pixels in this PNG every one sits inside the legend swatch at x 737-777, y 20-30, and the count of blue pixels below the legend band is zero. A reader therefore sees only the stored imas-efit contours and cannot compare the terminal nova state against the stored state, which is what the panel exists to show; the blue solved null set is absent for the same reason.",
+      "table_form": "the image is a poloidal flux map with wall and null markers, a spatial relation that no table can carry."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-default.svg": {
+      "contrast": "legend text and the arm text render in near-black on a white ground, well clear of 4.5:1; the grey #929292 contour lines are the intended 3:1 data grey.",
+      "data_ink": "the contour lines and the vessel outline carry essentially all the ink; no gradient, no filled region and no shading competes with the data.",
+      "decoration": "no gradient, background fill or decorative styling is drawn; the panel is white with line contours, the wall outline and the null markers.",
+      "label_collision": "the single figure legend sits in clear space above the panel and no text artist is clipped by the canvas edge; there are no axis labels to collide with the data.",
+      "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere in the plotting area: of the blue pixels in this PNG every one sits inside the legend swatch at x 737-777, y 20-30, and the count of blue pixels below the legend band is zero. A reader therefore sees only the stored imas-efit contours and cannot compare the terminal nova state against the stored state, which is what the panel exists to show; the blue solved null set is absent for the same reason.",
+      "table_form": "the image is a poloidal flux map with wall and null markers, a spatial relation that no table can carry."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/tcv-tcv-stored-default-preview.png": {
+      "contrast": "legend text and the arm text render in near-black on a white ground, well clear of 4.5:1; the grey #929292 contour lines are the intended 3:1 data grey.",
+      "data_ink": "the contour lines and the vessel outline carry essentially all the ink; no gradient, no filled region and no shading competes with the data.",
+      "decoration": "no gradient, background fill or decorative styling is drawn; the panel is white with line contours, the wall outline and the null markers.",
+      "label_collision": "the single figure legend sits in clear space above the panel and no text artist is clipped by the canvas edge; there are no axis labels to collide with the data.",
+      "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere in the plotting area: of the blue pixels in this PNG every one sits inside the legend swatch at x 737-777, y 20-30, and the count of blue pixels below the legend band is zero. A reader therefore sees only the stored imas-efit contours and cannot compare the terminal nova state against the stored state, which is what the panel exists to show; the blue solved null set is absent for the same reason.",
+      "table_form": "the image is a poloidal flux map with wall and null markers, a spatial relation that no table can carry."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/tcv-tcv-stored-default.svg": {
+      "contrast": "legend text and the arm text render in near-black on a white ground, well clear of 4.5:1; the grey #929292 contour lines are the intended 3:1 data grey.",
+      "data_ink": "the contour lines and the vessel outline carry essentially all the ink; no gradient, no filled region and no shading competes with the data.",
+      "decoration": "no gradient, background fill or decorative styling is drawn; the panel is white with line contours, the wall outline and the null markers.",
+      "label_collision": "the single figure legend sits in clear space above the panel and no text artist is clipped by the canvas edge; there are no axis labels to collide with the data.",
+      "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere in the plotting area: of the blue pixels in this PNG every one sits inside the legend swatch at x 737-777, y 20-30, and the count of blue pixels below the legend band is zero. A reader therefore sees only the stored imas-efit contours and cannot compare the terminal nova state against the stored state, which is what the panel exists to show; the blue solved null set is absent for the same reason.",
+      "table_form": "the image is a poloidal flux map with wall and null markers, a spatial relation that no table can carry."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-default.svg",
+      "line": null,
+      "severity": "blocking",
+      "summary": "In all six rendered panels the nova series the legend promises is not drawn. Measured on the named PNGs: 175 blue pixels in each SVG render and 127 in each published preview, every one of them inside the legend swatch (x 737-777, y 20-30); zero blue pixels below y=60 in any of the eight. The blue solved contours and the blue solved null set are therefore invisible, so a reader sees a single grey imas-efit field and cannot tell a converging arm from a refused one, which is the comparison these panels exist to make."
+    },
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-continuation.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The four MAST-U panels render as two byte-identical pairs: the stored-default and stored-continuation PNGs share sha1 a79b188c5650, and the displaced-default and displaced-continuation PNGs share bb0c4150dfb5, the two pairs differing by 26 grey pixels across the whole 1399x720 canvas. As rendered, the figures do not let a reader distinguish the arms they are published for; whether that is convergence to one terminal state or a failure to draw the arm cannot be read off the raster."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/report.py",
+      "line": 323,
+      "severity": "non-blocking",
+      "summary": "This is where each panel's caption is composed, and every caption reads '<label>: terminal residual unavailable, reason 3, qualified False' \u2014 the same sentence for all six arms apart from the label. It names neither series and does not say which null set is which, so a reader of the fragment has only the legend to learn what the grey field is and no statement at all about what the blue was meant to be."
+    },
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals/iter-iter-stored-default-preview.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Each panel draws the machine inside roughly x 500-830 of a 1400 px canvas, leaving about three quarters of the width blank. The contours are rendered at roughly a quarter of the size the declared canvas allows, and the fragment places the image at width='100%', so on the page the reader gets the data much smaller than the figure size implies."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261120T044804973844-review-of-stored-state-refusals-bddfb05efe1a-figure",
+  "reviewed_base_sha": "a148a0a9d176713a90cd24ffa7de2966b0c55654",
+  "reviewed_head_sha": "bddfb05efe1a3e06674394fbed4f262a9ae7f0f2",
+  "reviewed_run_id": "r-20261118T112812127189-stored-state-refusals",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "legend text and the arm text render in near-black on a white ground, well clear of 4.5:1; the grey #929292 contour lines are the intended 3:1 data grey.",
+    "data_ink": "the contour lines and the vessel outline carry essentially all the ink; no gradient, no filled region and no shading competes with the data.",
+    "decoration": "no gradient, background fill or decorative styling is drawn; the panel is white with line contours, the wall outline and the null markers.",
+    "label_collision": "the single figure legend sits in clear space above the panel and no text artist is clipped by the canvas edge; there are no axis labels to collide with the data.",
+    "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere in the plotting area: of the blue pixels in this PNG every one sits inside the legend swatch at x 737-777, y 20-30, and the count of blue pixels below the legend band is zero. A reader therefore sees only the stored imas-efit contours and cannot compare the terminal nova state against the stored state, which is what the panel exists to show; the blue solved null set is absent for the same reason.",
+    "table_form": "the image is a poloidal flux map with wall and null markers, a spatial relation that no table can carry."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T04:56:03.449042+00:00",
+  "total": null
+}

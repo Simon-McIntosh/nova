@@ -40,6 +40,14 @@
     "The scoped gate log header records revision b2bc584b8, one docs-only commit behind the reviewed head; the after_suite arm ran at the reviewed head f65c4bb3 and is the arm this verdict rests on.",
     "The declared figure directory received no file; this node produces a current registration table rather than a terminal forward state, so the poloidal flux-panel rule is not engaged."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-20T22:01:18.049371+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261120T200506917979-diiid-pinned-reregistration"
+    }
+  },
   "findings": [
     {
       "file": "tests/imas/test_diiid_current_pinned_forward.py",

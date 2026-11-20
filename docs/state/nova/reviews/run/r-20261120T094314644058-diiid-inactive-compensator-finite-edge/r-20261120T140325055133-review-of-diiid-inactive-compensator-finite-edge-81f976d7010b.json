@@ -45,6 +45,11 @@
       "kind": "exempted",
       "reason": "On the finite-edge profiles the unmasked solves already hold the pin at zero, so the rows cannot show a masked difference; the exact-zero contract test with its reddening control is the measurement of the mask",
       "recorded_at": "2026-11-20T14:20:04.383625+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "A 16 GB P100 ran out of memory; each row's receipt persisted and the fragment discloses the three allocations, which the one-job rule allows for an expiry",
+      "recorded_at": "2026-11-20T14:20:16.240045+00:00"
     }
   },
   "findings": [

@@ -9,6 +9,13 @@
     "scripts/prototypes/polygon_symmetry_violation/measure.py:main (runs split.py and compare.py as subprocesses)"
   ],
   "completed_at": "2026-11-20T21:24:28.822Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-polygon-symmetry-violation-2-eee72b5386d4",
+      "recorded_at": "2026-11-20T22:05:43.831648+00:00"
+    }
+  },
   "dispatched_at": "2026-11-20T21:24:10Z",
   "findings": [
     {

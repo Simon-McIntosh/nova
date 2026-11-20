@@ -38,8 +38,9 @@ TOROIDAL_ENTRY = 10
 SECOND_VERTICAL_ENTRY = 11
 
 FIGURE_WIDTH = 1340
-FIGURE_HEIGHT = 640
-PANEL_TOP = 20
+FIGURE_HEIGHT = 689
+FIGURE_CENTIMETRES = (31.1, 16.0)
+PANEL_TOP = 30
 PANEL_HEIGHT = 580
 PANEL_LEFT = 40
 PANEL_WIDTH = 620
@@ -395,11 +396,13 @@ def figure_svg(attribute):
     leaders = pairs[:3]
     top_cells = [pair["cell"] for pair in leaders]
 
+    centimetres = (
+        f'width="{FIGURE_CENTIMETRES[0]}cm" height="{FIGURE_CENTIMETRES[1]}cm"'
+    )
     payload = [
         f'<svg viewBox="0 0 {FIGURE_WIDTH} {FIGURE_HEIGHT}" '
         'xmlns="http://www.w3.org/2000/svg" role="img" '
-        f'width="{FIGURE_WIDTH}" height="{FIGURE_HEIGHT}" '
-        'style="max-width:100%;height:auto">'
+        f'{centimetres} style="max-width:100%;height:auto">'
     ]
     full = mapper(
         padded(panel_extent(wall), 0.02),
@@ -408,7 +411,7 @@ def figure_svg(attribute):
         PANEL_WIDTH,
         PANEL_HEIGHT,
     )
-    payload.append(label(PANEL_LEFT, PANEL_TOP - 6, "full machine", size=16))
+    payload.append(label(PANEL_LEFT, PANEL_TOP - 8, "full machine", size=18))
     for cell, polygon in enumerate(polygons):
         colour = FEATURE if cell in top_cells else GREY
         width = "1.4" if cell in top_cells else "0.6"
@@ -417,9 +420,12 @@ def figure_svg(attribute):
     for pair in pairs:
         x, y = full(pair["position"])
         payload.append(marker(x, y, "3.0", GREY))
-    for pair in leaders:
+    for index, pair in enumerate(leaders, 1):
         x, y = full(pair["position"])
         payload.append(marker(x, y, "3.4", FEATURE))
+        payload.append(
+            label(x - 9, y + 5, str(index), size=15, colour=FEATURE, anchor="end")
+        )
 
     column_left = PANEL_LEFT + PANEL_WIDTH + PANEL_GAP
     for row, pair in enumerate(leaders):
@@ -429,11 +435,10 @@ def figure_svg(attribute):
         place = mapper(extent, column_left, top, ZOOM_WIDTH, ZOOM_HEIGHT)
         payload.append(
             label(
-                column_left + ZOOM_WIDTH / 2,
-                top - 6,
-                f"cell {pair['cell']}, node {pair['node']}",
-                size=14,
-                anchor="middle",
+                column_left,
+                top - 8,
+                f"{row + 1}   cell {pair['cell']}, node {pair['node']}",
+                size=17,
             )
         )
         clip = f"bank-zoom-{pair['cell']}"
@@ -495,7 +500,8 @@ def part_figure(attribute, census):
         "<figcaption>Left: every polygon source cell of the bank, with the "
         f"first wall in dark grey and the {composition['total']} pairs above "
         f"<code>{bound}</code> marked. Right: the three cells carrying the "
-        f"largest pairs, {listed}, each framed on its own cell with its target "
+        f"largest pairs, {listed}, numbered in the same order as the green "
+        "marks on the left, each framed on its own cell with its target "
         "marked. Grey marks the whole "
         "population; green marks the three leaders, chosen by the largest "
         f"booked second derivative. {sliver}Every marked target lies within "
@@ -750,6 +756,14 @@ def value_steps(jump, arm):
     ]
 
 
+def gradient_steps(jump, arm):
+    rows = jump["arms"][arm]
+    return [
+        step(rows, jump["moment"], jump["radial_entry"], offset)
+        for offset in jump["offsets"]
+    ]
+
+
 def falls(steps):
     return all(later <= earlier for earlier, later in zip(steps, steps[1:]))
 
@@ -779,45 +793,81 @@ def joined(names):
 
 
 def jump_verdict(jump):
-    profiles = {arm: value_steps(jump, arm) for arm in jump["arms"]}
-    falling = [arm for arm, steps in profiles.items() if falls(steps)]
-    holding = [arm for arm in profiles if arm not in falling]
+    value = {arm: value_steps(jump, arm) for arm in jump["arms"]}
+    gradient = {arm: gradient_steps(jump, arm) for arm in jump["arms"]}
     sentences = []
-    if falling:
-        names = joined([arm.replace("_", " ") for arm in falling])
-        verb = "falls" if len(falling) == 1 else "fall"
-        noun = "that row program" if len(falling) == 1 else "each of those row programs"
+
+    smooth_values = [arm for arm, steps in value.items() if falls(steps)]
+    stepped_values = [arm for arm in value if arm not in smooth_values]
+    if smooth_values:
+        names = joined([arm.replace("_", " ") for arm in smooth_values])
+        verb = "falls" if len(smooth_values) == 1 else "fall"
+        widest = max(value[arm][0] for arm in smooth_values)
+        narrowest = max(value[arm][-1] for arm in smooth_values)
         sentences.append(
-            f"The value step of {names} {verb} with the offset, so {noun} "
-            "carries a value that is continuous in R at the probe radius."
+            f"The value step of {names} {verb} with the offset, from "
+            f"<code>{number(widest)}</code> at the widest to "
+            f"<code>{number(narrowest)}</code> at the narrowest, so those row "
+            "values are continuous in R at the probe radius."
         )
-    for arm in holding:
+    for arm in stepped_values:
         sentences.append(
             f"The {arm.replace('_', ' ')} value step does not fall with the "
-            f"offset: it reads <code>{number(profiles[arm][0])}</code> at the "
-            f"widest offset and <code>{number(profiles[arm][-1])}</code> at the "
+            f"offset: it reads <code>{number(value[arm][0])}</code> at the "
+            f"widest offset and <code>{number(value[arm][-1])}</code> at the "
             "narrowest, so that formulation's own value carries a step across "
             "the probe radius."
         )
-    if "shipped" in holding:
+
+    smooth_gradient = [arm for arm, steps in gradient.items() if falls(steps)]
+    stepped_gradient = [arm for arm in gradient if arm not in smooth_gradient]
+    for arm in stepped_gradient:
+        rows = jump["arms"][arm]
+        narrowest = jump["offsets"][-1]
+        above = rows[f"{narrowest:+.0e}"][jump["moment"]][jump["radial_entry"]]
+        below = rows[f"{-narrowest:+.0e}"][jump["moment"]][jump["radial_entry"]]
         sentences.append(
-            "The shipped program's own value therefore carries a step across "
-            "the probe radius, and the booked second derivative is a property "
-            "of that step rather than of the derivative rule alone."
+            f"The {arm.replace('_', ' ')} gradient step does not fall with the "
+            f"offset: it reads <code>{number(gradient[arm][0])}</code> at the "
+            f"widest and <code>{number(gradient[arm][-1])}</code> at the "
+            f"narrowest, where the two sides read <code>{number(above)}</code> "
+            f"and <code>{number(below)}</code>, so that arm's own first "
+            "derivative steps across the probe radius."
         )
-    elif holding:
-        names = joined([arm.replace("_", " ") for arm in holding])
+    if smooth_gradient:
+        names = joined([arm.replace("_", " ") for arm in smooth_gradient])
+        verb = "falls" if len(smooth_gradient) == 1 else "fall"
+        reached = sorted(gradient[arm][-1] for arm in smooth_gradient)
+        reach = (
+            f"<code>{number(reached[0])}</code>"
+            if len(reached) == 1
+            else f"<code>{number(reached[0])}</code> and "
+            f"<code>{number(reached[-1])}</code>"
+        )
         sentences.append(
-            "So the value graph is not common to all three formulations: the "
-            "shipped program's value is continuous across the probe radius and "
-            f"the {names} value is not, and the booked second derivative "
-            "belongs to the shipped derivative rule."
+            f"The gradient step of {names} {verb} with the offset, to {reach} "
+            "at the narrowest, so those first derivatives are continuous."
+        )
+
+    if "shipped" in stepped_gradient:
+        sentences.append(
+            "The booked second derivative is therefore the derivative of the "
+            "shipped program's own step across the probe radius, and not of a "
+            "row every arm differentiates in common."
+        )
+    elif stepped_gradient:
+        names = joined([arm.replace("_", " ") for arm in stepped_gradient])
+        sentences.append(
+            "The booked second derivative therefore belongs to the "
+            f"{names} derivative rule, whose own first derivative steps across "
+            "the probe radius: every arm's value is continuous there, so the "
+            "blow-up is a jump in that rule's derivative rather than in a "
+            "value graph the arms share."
         )
     else:
         sentences.append(
-            "The second derivative booked for this pair therefore belongs to "
-            "the shipped derivative rule rather than to a value graph every "
-            "arm shares."
+            "No arm's first derivative steps across the probe radius, so the "
+            "booked second derivative is not a jump this probe can see."
         )
     return " ".join(sentences)
 

@@ -121,17 +121,52 @@ def test_the_leading_cell_second_moment_is_read_from_the_record():
 
 
 @needs_records
-def test_the_offset_steps_fall_with_the_offset():
-    jump = record("jump.json")
+def offset_steps(jump, arm, entry):
     moment = jump["moment"]
-    value_entry = jump["value_entry"]
     steps = []
     for offset in jump["offsets"]:
-        above = jump["arms"]["shipped"][f"{offset:+.0e}"][moment][value_entry]
-        below = jump["arms"]["shipped"][f"{-offset:+.0e}"][moment][value_entry]
+        above = jump["arms"][arm][f"{offset:+.0e}"][moment][entry]
+        below = jump["arms"][arm][f"{-offset:+.0e}"][moment][entry]
         steps.append(abs(above - below))
-    assert steps == sorted(steps, reverse=True)
-    assert steps[0] > 1000 * steps[-1]
+    return steps
+
+
+@needs_records
+def test_the_offset_steps_fall_with_the_offset():
+    jump = record("jump.json")
+    for arm in jump["arms"]:
+        steps = offset_steps(jump, arm, jump["value_entry"])
+        assert steps == sorted(steps, reverse=True)
+        assert steps[0] > 1000 * steps[-1]
+
+
+@needs_records
+def test_the_page_names_the_arm_whose_gradient_steps():
+    jump = record("jump.json")
+    graded = {
+        arm: offset_steps(jump, arm, jump["radial_entry"]) for arm in jump["arms"]
+    }
+    stepped = [
+        arm for arm, steps in graded.items() if steps != sorted(steps, reverse=True)
+    ]
+    assert stepped == ["stable_poles"]
+    poles = graded["stable_poles"]
+    assert poles[-1] > 100 * poles[-2]
+    assert poles[-1] > poles[0]
+    narrowest = jump["offsets"][-1]
+    row = jump["arms"]["stable_poles"]
+    values = (
+        row[f"{narrowest:+.0e}"][jump["moment"]][jump["radial_entry"]],
+        row[f"{-narrowest:+.0e}"][jump["moment"]][jump["radial_entry"]],
+    )
+    assert values[0] * values[1] < 0
+    for arm in ("shipped", "plain"):
+        assert graded[arm] == sorted(graded[arm], reverse=True)
+        assert graded[arm][0] > graded[arm][-1]
+    text = page()
+    assert "stable poles gradient step does not fall" in text
+    assert "stable poles derivative rule" in text
+    assert number(graded["stable_poles"][-1]) in text
 
 
 def test_the_renderer_types_no_scientific_literals():

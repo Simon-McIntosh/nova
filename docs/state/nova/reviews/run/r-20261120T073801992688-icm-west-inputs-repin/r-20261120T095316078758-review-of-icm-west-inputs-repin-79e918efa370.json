@@ -29,6 +29,11 @@
       "kind": "exempted",
       "reason": "the fallback exists only until the path node repoints REFERENCE; the coordinator removes it when that node lands, so the guard then reads the tracked root alone",
       "recorded_at": "2026-11-20T11:08:07.069510+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "a redundant assertion in a test whose other checks (record values, digest) carry the guard; noted for removal with the fallback above",
+      "recorded_at": "2026-11-20T11:08:14.700170+00:00"
     }
   },
   "findings": [

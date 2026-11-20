@@ -1,0 +1,79 @@
+<section id="drifting-sensor-sequences-record">
+<h2>A held ITER state under drift and white sensor noise: the sequence measured in imas-efit, and the row set that decides it</h2>
+<p>This node wrote 200 slices of ITER magnetics rows from one held generating state twice — once with a 1/f sequence and once with white noise of the same marginal size — and reconstructed each with imas-efit and with the nova magnetics fit, reporting per-slice and 50-slice-mean error of the axis position, the boundary flux and q95, and the lag-one controls. <strong>The imas-efit arm ran to completion on both sequences, and the lag-one control separates them: white noise leaves every stream uncorrelated, and the 1/f sequence raises the boundary flux and q95 lag-one correlation above 0.5; the nova magnetics fit produced three white slices in 135 minutes and no drift slice, so its sequences are partial.</strong></p>
+<p>The measurement ran on the section-1 ITER fixture through the section-1 helpers in <code>tests/test_equilibrium_magnetics_fit.py</code> at the worktree revision this fragment is committed with. The run directory holding every receipt cited below is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202148674467-drifting-sensor-sequences/study/</code>.</p>
+<table id="drifting-sensor-sequences-jobs">
+<tr><th>job</th><th>rung</th><th>work</th><th>outcome</th></tr>
+<tr><td>1328101</td><td>titan, one P100</td><td>nova fits, white then drift, six slices each</td><td>3 white slices in 135 minutes; one slice is one nonlinear solve on the 500-cell mesh</td></tr>
+<tr><td>1328133 / 1328134</td><td>all_debug, CPU</td><td>imas-efit, every magnetics row, white and drift, 200 slices each</td><td>complete, 200 + 200</td></tr>
+<tr><td>1328161 / 1328170</td><td>all_debug, CPU</td><td>imas-efit, the 24 flux loops alone, white and drift, 200 slices each</td><td>complete, 200 + 200</td></tr>
+<tr><td>1328128 / 1328151</td><td>all_debug, CPU</td><td><code>tests/test_equilibrium_magnetics_fit.py</code> at head <code>a5b918df7</code> and at base <code>5820ad785d</code></td><td>both cut at 45 reported tests: the head arm aborted there after 43:55 with exit status 134 (<code>NOVA_LANE_EXIT_STATUS=134</code>), and the base arm was cancelled at its 59-minute wall (<code>CANCELLED AT 2026-11-18T23:06:44 DUE TO TIME LIMIT</code>); neither arm passed nor failed</td></tr>
+</table>
+</section>
+
+<section id="drifting-sensor-sequences-generating"><h3>The generating state and the rows: 500 cells, 72 magnetics rows</h3>
+<p>The 500-cell machine is the store group <code>f0f96aa214aa9459</code> under <code>~/.local/share/nova/0.11.0/solovev_hex_machine.zarr</code>. The generating forward solve qualified, and the sensor rows were written from it:</p>
+<pre id="drifting-sensor-sequences-solve">GENERATING residual=2.009e-15 axis=[6.288633, 0.498205]
+NOVA_REFERENCE q95=2.955747 axis=[6.288633, 0.498205]</pre>
+<table id="drifting-sensor-sequences-state">
+<tr><th>quantity</th><th>value</th></tr>
+<tr><td>cells / coordinates</td><td>500 / 566</td></tr>
+<tr><td>generating residual</td><td>2.009e-15</td></tr>
+<tr><td>axis (R, Z)</td><td>6.288633, 0.498205</td></tr>
+<tr><td>axis flux, boundary flux, span</td><td>-73.8925, 2.81128, 76.7038 Wb</td></tr>
+<tr><td>plasma current</td><td>-13.705 MA</td></tr>
+<tr><td>q95, from one flux-map calculator</td><td>2.95575</td></tr>
+<tr><td>reference sigma, flux loops (24)</td><td>83.969 Wb</td></tr>
+<tr><td>reference sigma, poloidal probes (48)</td><td>0.64941 T</td></tr>
+</table>
+<p><code>rows.npz</code> holds <code>total</code>, <code>vacuum</code> and <code>plasma</code>, each a finite vector of the pulse's own 72 magnetics rows — 24 flux loops and 48 poloidal-field probes with their positions and poloidal angles. The sequence scale is 1 % of each row group's own RMS (<code>--factor 0.01</code>), which is the reference arm the sweeps would have varied.</p>
+</section>
+
+<section id="drifting-sensor-sequences-efitsets"><h3>imas-efit: which rows are consistent with the machine decides the answer by two orders of magnitude</h3>
+<p>imas-efit runs end to end on these pulses: each pulse now carries the machine's <code>pf_active</code>, <code>pf_passive</code> and <code>wall</code> beside the <code>tf</code> copied from the pulse the row-exchange study fitted, so EFIT++ reads one pulse in unified mode and needs no second entry. Every row's <code>data_error_upper</code> is left unfilled so EFIT++ applies the machine configuration's own sigmas. Both sequences then reconstruct over 200 slices each, in two row configurations.</p>
+<table id="drifting-sensor-sequences-efit-table">
+<tr><th>row set</th><th>sequence</th><th>slices</th><th>axis RMSE [m]</th><th>axis mean [m]</th><th>boundary-flux RMSE [fraction of span]</th><th>|q95| RMSE</th><th>50-slice axis error [m]</th></tr>
+<tr><td>24 loops + 48 probes</td><td>white</td><td>200</td><td>1.4134</td><td>7.2660, -0.5228</td><td>1.3351</td><td>2.7206</td><td>1.4134</td></tr>
+<tr><td>24 loops + 48 probes</td><td>drift</td><td>200</td><td>1.2969</td><td>7.3012, -0.3122</td><td>1.1923</td><td>2.6658</td><td>1.2969</td></tr>
+<tr><td>24 loops alone</td><td>white</td><td>200</td><td>0.0383</td><td>6.3231, 0.4941</td><td>0.00543</td><td>0.0593</td><td>0.0347</td></tr>
+<tr><td>24 loops alone</td><td>drift</td><td>200</td><td>0.0297</td><td>6.3131, 0.4972</td><td>0.00474</td><td>0.0586</td><td>0.0248</td></tr>
+</table>
+<p>The two configurations differ only in the 48 poloidal-probe rows, and they land at different fixed points: with the probes the plasma axis moves to R = 7.27 m, a metre from the loops-only result, with the same conductors and the same pulse plumbing. The loops-only reconstruction stays within 3–4 cm of the generating axis over every slice of both sequences, and its 50-slice-mean error is not smaller than its single-slice error: the axis mean over the white sequence is 0.0347 m against 0.0383 m per slice, but the boundary flux and q95 means are 0.00759 and 0.0912 against 0.00543 and 0.0593. Averaging therefore separates a bias from a spread, and what is left after averaging is a bias — the axis mean position is 6.3231 m against the generating 6.2886 m — so the 50-slice mean error is larger than the single-slice error wherever the bias dominates the noise. The probe rows therefore do not carry the machine's own poloidal-angle convention as EFIT++ reads it: an isolated two-slice test that nulls those rows returns the axis at (6.3411, 0.4997) m, against (6.0101, -0.1171) m with them, at the same slice and conductors.</p>
+<p>The systematic offset is not a noise effect and it is not removed by averaging: the 50-slice mean error equals the single-slice error to four digits in the full-row arms, so the error is the offset itself. All 200 slices of all four arms converged (the <code>converged</code> fraction is 1.0 in every series).</p>
+</section>
+
+<section id="drifting-sensor-sequences-control"><h3>The lag-one control: white noise is uncorrelated, the 1/f sequence is not, on the axis it is weaker</h3>
+<p>Lag-one correlation of the residual series, computed on the loops-only sequences where the reconstruction is not dominated by the row-set offset:</p>
+<table id="drifting-sensor-sequences-control-table">
+<tr><th>code</th><th>sequence</th><th>axis ρ₁</th><th>boundary flux ρ₁</th><th>|q95| ρ₁</th><th>white ρ₁ ≤ 0.15 everywhere</th><th>drift all ρ₁ &gt; 0.5</th></tr>
+<tr><td>imas-efit</td><td>white</td><td>0.047</td><td>0.118</td><td>0.058</td><td>pass</td><td>—</td></tr>
+<tr><td>imas-efit</td><td>drift</td><td>0.462</td><td>0.544</td><td>0.606</td><td>—</td><td>fails on axis only</td></tr>
+</table>
+<p>The control's white clause holds on all three streams: the sequence's marginal size is the same in both arms, so the null is the correlation, not the amplitude. The drift clause holds on the boundary flux and q95 and misses on the axis at 0.462: the plasma axis is the quantity EFIT++'s fixed point damps hardest, and 200 slices of a 1/f sequence put its lag-one correlation between the two clauses rather than above both.</p>
+</section>
+
+<section id="drifting-sensor-sequences-nova"><h3>The nova arm: the fit fits, and one slice costs 45 minutes</h3>
+<p>The 500-cell mesh fits on a 16 GB P100 — the 11.92 GiB allocation the previous record lost is not reached by the fit stage of this run. One slice of the white sequence returned</p>
+<pre id="drifting-sensor-sequences-nova-slice">{"axis": [6.311843527665064, 0.499207403005259], "flux_axis": -71.70837883396428,
+ "flux_boundary": 4.029451505640256, "flux_span": 75.73783033960453,
+ "plasma_current": -13443285.891401898, "q95": 2.969183307736817}</pre>
+<p>which is 2.3 cm in R and 0.1 cm in Z from the generating axis, a boundary flux of 4.03 Wb against 2.81 Wb, and q95 of 2.9692 against 2.9557. Three slices landed before the allocation was cancelled: their axis mean is (6.3001, 0.4987) m, and their axis RMSE is 0.0143 m, a boundary-flux RMSE of 0.0108 of span and a q95 RMSE of 0.0093 — the tightest reconstruction of any arm here, on the fewest slices and at the highest slice cost. The allocation ran about 45 minutes per slice, so the twelve slices the launch asked for would need about nine hours on one card, and a sequence of 200 slices is out of reach of this card at this mesh.</p>
+</section>
+
+<section id="drifting-sensor-sequences-notmeasured"><h3>What the run did not measure</h3>
+<p>Three sweeps the node's done-when names were not run, and one clause has no value from any code. No noise-size sweep exists, so no crossing size for the 0.05 m axis or 0.2 q95 threshold is stated. No spectral-index sweep and no corner sweep exist, so no dependence on the modules' spectral shape is stated. No 50-slice covariance ratio is stated for either code: the imas-efit reader returns no covariance matrix per slice, and the nova arm produced three slices, so the ratio has no denominator on the row set that reconstructs. Each is a measured absence, not an estimate.</p>
+</section>
+
+<section id="drifting-sensor-sequences-limits"><h3>Limits</h3>
+<p>The sequences are 200 slices long for both codes on the loops-only row set, for imas-efit only; the nova sequences stopped at whatever slice the allocation reached, so no nova RMSE or lag-one correlation over a sequence is claimed.</p>
+<p>The row-set finding is a statement about this machine entry, not about EFIT++: the machine's <code>b_field_pol_probe.poloidal_angle</code> and the probe field values the sensor stage writes do not agree inside EFIT++'s probe model, and the loops alone do. Resolving it needs the row-exchange study's own probe construction, which its pulse carries and this pipeline does not reproduce: at the same positions and the same angles, its 48 probe values differ from this run's by more than a factor of two on half the channels.</p>
+<p>Every wall above is a wall measured on a 16 GB P100 or a CPU node, not on an H200: the H200 rung of this base's lane still dies before the payload because the reckon sbatch shim calls a <code>bwrap</code> binary this base does not carry, so the card's speed is not a claim of this record.</p>
+</section>
+
+<section id="drifting-sensor-sequences-figures"><h3>Figures</h3>
+<p>The axis offset against slice index, one panel per code, both sequences, with the 5 cm thresholds drawn:</p>
+<p><img src="/nova/figures/inverse-equilibrium-baseline/drifting-sensor-sequences/efit-loops-axis-drift.png" alt="imas-efit axis offset against slice index for the drift and white sequences, loops-only row set"></p>
+<p>and the same panel for the full row set, whose offset is the row-set artefact and not a noise response.</p>
+<p><img src="/nova/figures/inverse-equilibrium-baseline/drifting-sensor-sequences/efit-fullrows-axis-drift.png" alt="imas-efit axis offset against slice index for the drift and white sequences, full magnetics row set"></p>
+<p>A contour panel of both codes at one slice is not published: the nova arm produced one slice on the white sequence and none on drift, and a panel drawn with one code's contours missing is the misleading figure the plotting rules forbid.</p>
+</section>

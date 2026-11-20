@@ -109,9 +109,22 @@
       "finding": "wiring-2",
       "reason": "The review judges it changes nothing: \u00a76 and \u00a713 have landed, so \u00a79's queue order is unaffected",
       "when": "2026-11-20T14:14:17.549325+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "The triage pointer is historical; the three facts it was cited for are restated in the same paragraph and in \u00a72, as the review notes",
+      "when": "2026-11-20T14:16:36.461051+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The triage pointer is historical; the three facts it was cited for are restated in the same paragraph and in \u00a72, as the review notes",
+      "when": "2026-11-20T14:16:36.461051+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

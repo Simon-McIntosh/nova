@@ -36,7 +36,7 @@ def timed(name, call, *arguments, repeats=5):
         result = program(*arguments)
         jax.block_until_ready(result)
         walls.append(1e3 * (perf_counter() - started))
-    emit("STAGE", name=name, median_ms=float(np.median(walls)), walls_ms=walls)
+    emit("STAGE", stage=name, median_ms=float(np.median(walls)), walls_ms=walls)
 
 
 def main():

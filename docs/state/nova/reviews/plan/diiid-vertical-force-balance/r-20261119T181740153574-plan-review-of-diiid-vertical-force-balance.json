@@ -33,7 +33,30 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 145,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f8e7459be0393615d31b3ca56bbbe51ecd8e2694",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Lead decision: the retry is judged against EFIT's lower null, not the unmasked solve, and the record reports the shift and the inactive compensator field at each unmasked terminal state, which separates a disturbing mask from an image the unmasked solve leaned on",
+      "reason": "",
+      "when": "2026-11-20T07:58:16.166829+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f8e7459be0393615d31b3ca56bbbe51ecd8e2694",
+      "commit_basis": "edit",
+      "note": "Lead decision: the retry is judged against EFIT's lower null, not the unmasked solve, and the record reports the shift and the inactive compensator field at each unmasked terminal state, which separates a disturbing mask from an image the unmasked solve leaned on",
+      "reason": "",
+      "when": "2026-11-20T07:58:16.166829+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261119T181740153574-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261119T181740153574-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "d0367b114b5ef4add13f34a76ca4a6bd97db51e0",
   "rubric": "content",

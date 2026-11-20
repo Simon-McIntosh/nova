@@ -25,7 +25,7 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="393">
+<meta name="plan-version" content="394">
 <meta name="plan-modified" content="2026-11-20">
 </head>
 <body>
@@ -1014,6 +1014,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261110T222210460050-review-of-bank-warm-predictor-cd674ece07bd" data-who="reckon-build" data-when="2026-11-10T22:42:56Z">
     <div class="r-comment-body"><p>Independent review of 65315dc89facef18876b46b637a5466fc4a401fa..cd674ece07bd43385152a908329c92d38c8cc439; all six dimensions scored, zero blocking and two non-blocking findings, zero added failures from source suite receipts.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261114T174204179431-smfp-autodiff-free-newton" data-who="reckon-build" data-when="2026-11-20T07:42:27Z">
+    <div class="r-comment-body"><p>The autodiff-free bank step is measured on the diverted 550-cell certificate: its fresh-read residual stalls at 0.02304945 after eight Krylov steps, the same Jacobian solved exactly floors at 2.25679855e-7 after three steps, central differences of the full fresh-read residual agree with the Jacobian to 1.0274 relative at the smallest displacement where both perturbed reads stay valid, and a warm step costs 35.03 ms over 9940 launches on an H200 (0.5 ms and 100 launches claimed); the cold compile is 21.63 s, the executable 2077515 bytes, and the analytic oracle budget passes, so the section&#x27;s performance clause and its residual clause are both unmet and the record states which arm carries each failure.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261113T013133775560-bank-pulse-parallel" data-who="reckon-build" data-when="2026-11-13T02:02:05Z">
     <div class="r-comment-body"><p>Prototype and numerical/refusal controls committed; CPU sequential and anchor pulses certify 2/2 at step 1e-5; paired H200 throughput and inspected SVG remain pending.</p></div>

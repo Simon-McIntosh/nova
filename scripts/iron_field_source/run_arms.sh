@@ -20,7 +20,7 @@ set -euo pipefail
 root=${ICM_ROOT:?export ICM_ROOT with the checkout path before submitting}
 base=9b016126111a5acaebca064c07432042b5a2628c
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
-out=/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/arms
+out=/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms
 scratch=$out/base-tree-${SLURM_JOB_ID:-manual}
 tests=tests/test_magnetisation.py
 

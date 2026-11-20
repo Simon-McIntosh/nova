@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="119">
+<meta name="plan-version" content="120">
 <meta name="plan-modified" content="2026-11-20">
 </head>
 <body>
@@ -334,6 +334,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261120T120704016466-review-of-shared-root-paths-da2abb6c3b3c" data-who="reckon-build" data-when="2026-11-20T12:13:47.058Z">
     <div class="r-comment-body"><p>Independent review of r-20261120T094110687720-shared-root-paths at base 789479f7 and head da2abb6c3 is parsed with scores goal_fidelity 20, evidence 15, scope_discipline 19, durability 8, fit 18, reuse 5 (total 85) and five non-blocking findings; the rename verifies independently at 88 default references across 82 files at base against 0 at head with all 29 corpus lines byte-identical, and both suite arms carry the same six failure ids.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261120T142001243549-review-of-shared-root-paths-0d6b98b3a458" data-who="reckon-build" data-when="2026-11-20T14:28:06.367Z">
+    <div class="r-comment-body"><p>Reviewed the three commits gained since the review recorded at da2abb6c3 (e3726e302, aac823e08, 0d6b98b3a) and stored a parsed record scoring goal_fidelity 18, evidence 9, scope_discipline 20, durability 17, fit 19, reuse 18 with added_failure_count 0: the inventory no-match fix and the new operand-root assertion both verify at head (29 corpus / 0 default; 0 bytes of stdout for an unmatched root; the assertion passes and reddens when the constant is restored to sophelio), but docs/evidence/fragments/kernel-compile-barrier/shared-root.html:41 states that assertion &quot;passes in both arms&quot; when both arms were measured at revisions that do not contain it.</p></div>
 </div>
 </section>
 </main>

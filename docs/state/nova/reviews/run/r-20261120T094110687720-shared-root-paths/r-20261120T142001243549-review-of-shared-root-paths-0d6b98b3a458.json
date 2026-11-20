@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "789479f7dbaa97933495e8c0f82b9dfa1dc0fc75",
+  "completed_at": "2026-11-20T14:28:06.367Z",
+  "dispatched_at": "2026-11-20T14:21:03Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/shared-root.html",
+      "line": "41",
+      "severity": "blocking",
+      "text": "blocking: the fragment states that the new assertion test_default_cache_root_names_the_shared_project_tree 'passes in both arms', but the assertion is added in commit 0d6b98b3a while both arms named in the same paragraph and in the suite table ran at 789479f7d and da2abb6c3, where git show da2abb6c3:tests/test_operand_cache.py holds six tests and not this one, so no recorded arm could have run it; the statement must say it was verified in a standalone run at head, with that run's log."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/shared-root.html",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the paragraph calls the control 'the same classification' and says 'the script that produced it sits beside it', but logs/negative-control.log's first section is plain grep -n output ('30:CARRIER_STORE = ...') rather than inventory.py's 'path:line:kind:path' rows, and the logs/negative_control.sh delivered beside it prints only the 'worktree file, unchanged: (none)' half, so the recorded script cannot regenerate the log it is cited as producing."
+    },
+    {
+      "file": "manifest.md",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "non-blocking: the two head measurements this commit rests on, the standalone pytest run of test_default_cache_root_names_the_shared_project_tree (recorded as '1 passed in 21.47s') and the inventory tool's no-match check, are reported only in narrative fields and appear in no test_logs entry, so a reader has no log to audit; both reproduce for me (1 passed in 7.42s and rc=0 with 0 bytes of stdout), but the node recorded the claims rather than the receipts."
+    }
+  ],
+  "head_log_revision": "da2abb6c3b3cbdf17e82c5af26a819c73d886019",
+  "justifications": {
+    "durability": "tests/test_operand_cache.py:126 fails when OPERAND_CACHE_ROOT is restored to sophelio in a scratch copy (1 failed, '...ima_gpu/sophelio/evidence/operands'.startswith), so it is a real guard; it loses points only because no recorded arm reaches it and the standalone pass has no log.",
+    "evidence": "clause (1) and the inventory claims reproduce independently at 0d6b98b3a (29 corpus / 0 default and rc=0, and 0 bytes of stdout for an unmatched root), but docs/evidence/fragments/kernel-compile-barrier/shared-root.html:41 states the new assertion 'passes in both arms' while both recorded arms ran at 789479f7d and da2abb6c3, and tests/test_operand_cache.py at da2abb6c3 holds six tests and no such assertion.",
+    "fit": "the added test follows the module's existing monkeypatch idiom at tests/test_operand_cache.py:114 and the edited script keeps its scripts/prototypes docstring-invocation shape, with no plan label, ticket id or version suffix in any of the three changed paths.",
+    "goal_fidelity": "all three commits do what the gained-work goal names: scripts/prototypes/shared_root/inventory.py accepts git grep status 1 and exits 0 with an empty listing, tests/test_operand_cache.py:122 pins the operand default under imas_gpu/nova, and docs/evidence/fragments/kernel-compile-barrier/shared-root.html:41 records the operand and inventory behaviour.",
+    "reuse": "the gained diff adds no new mechanism: the test extends the module that already owns operand-cache tests and the script change extends the existing inventory tool, while tests/test_filepath_data_roots.py's DEFAULTS tuple (line 27) does not cover the operand root and asserts the opposite property for the roots it does cover.",
+    "scope_discipline": "git diff --stat da2abb6c3 0d6b98b3a lists exactly three paths and all three sit inside the declared write paths (docs/evidence/fragments/kernel-compile-barrier/shared-root.html, scripts/, tests/), with no plan, state or figure edit."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the gained-work goal is the three paths named for review; scripts/prototypes/shared_root/inventory.py, tests/test_operand_cache.py and docs/evidence/fragments/kernel-compile-barrier/shared-root.html all changed in the aimed direction, and I ran the tool at 0d6b98b3a to confirm it exits 0 for an unmatched root and reports 29 corpus / 0 default for the retired one.\nVERDICT done_when: clause (1) reproduces at 0d6b98b3a (29 rows, all classified corpus under sophelio/raw, 0 default); clause (2) rests on logs/base-arm.log and logs/head-arm-at-da2abb6c3.log, which carry the same six FAILED ids; clause (3) is stated in the manifest's evidence_inputs, and the three commits reach only repository paths, none under /work.\nVERDICT write_paths: the declared scope covers nova, scripts, benchmarks, apps/playable/machines.py, tests, AGENTS.md, the shared-root fragment and a figure directory; git diff --stat da2abb6c3..0d6b98b3a lists exactly three paths (+25 -9) and every one is inside that scope.\nVERDICT manifest: read; it names the three gained commits (e3726e302, aac823e08, 0d6b98b3a), baseline_suite and after_suite both exit 1 with identical six-id failure sets, and records tests/test_operand_cache.py cut short at five passes; its focused_test line records the standalone pass of the new assertion but no log path for it.\nVERDICT diff: read commit by commit; e3726e302 corrects the control line 31 to 30 (verified: benchmarks/mast_response_carrier_warm.py:30 holds CARRIER_STORE at head) and repoints the log path, aac823e08 repoints the suite table and note from b6a97ee4b to da2abb6c3 and states that seven of eight files complete, and 0d6b98b3a makes the tool accept git grep status 1, guards the empty print, adds the operand-root assertion and writes the operand paragraph that overstates what the arms measured.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py, benchmarks/mast_centroid_solve_panels.py, scripts/prototypes/read_route/jets.py, scripts/prototypes/support/certificate_fixtures.py\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: all three changed paths deliver what the goal names, the tool accepting status 1 at scripts/prototypes/shared_root/inventory.py:39 and tests/test_operand_cache.py:122 pinning the default.\nSCORE evidence: 9\nJUSTIFICATION evidence: docs/evidence/fragments/kernel-compile-barrier/shared-root.html:41 claims an arm result for an assertion added after both named arms, and manifest.md:23 records the standalone passes without a log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat da2abb6c3 0d6b98b3a lists exactly the three declared paths with no stray edit.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_operand_cache.py:126 reddens when OPERAND_CACHE_ROOT is restored to sophelio in a scratch copy, but no recorded suite arm reaches the file past five tests.\nSCORE fit: 19\nJUSTIFICATION fit: tests/test_operand_cache.py:122 follows the monkeypatch idiom already at line 114 and introduces no plan label, ticket id or version suffix.\nSCORE reuse: 18\nJUSTIFICATION reuse: the gained change extends the existing operand-cache test module and the existing inventory tool rather than adding a mechanism, and tests/test_filepath_data_roots.py:27's DEFAULTS tuple does not own the operand root.\nFINDING docs/evidence/fragments/kernel-compile-barrier/shared-root.html:41 blocking: the paragraph says the new assertion 'passes in both arms' while the arms ran at 789479f7d and da2abb6c3 and the assertion was added at 0d6b98b3a, so no recorded arm could contain it.\nFINDING docs/evidence/fragments/kernel-compile-barrier/shared-root.html:29 non-blocking: the control is described as 'the same classification' although logs/negative-control.log holds plain grep output, and the script delivered beside it cannot regenerate that log's first section.\nFINDING manifest.md:23 non-blocking: the standalone pass of the new assertion and the inventory no-match check are recorded only as narrative, with no log path in test_logs to audit.\n",
+  "review_run_id": "r-20261120T142001243549-review-of-shared-root-paths-0d6b98b3a458",
+  "reviewed_base_sha": "da2abb6c3b3cbdf17e82c5af26a819c73d886019",
+  "reviewed_head_sha": "0d6b98b3a458b97870d9433724b2f3b045e014e4",
+  "reviewed_run_id": "r-20261120T094110687720-shared-root-paths",
+  "reviewer_run_id": "r-20261120T142001243549-review-of-shared-root-paths-0d6b98b3a458",
+  "scope_note": "re-review of the commits gained since the review recorded at da2abb6c3; the diff read is da2abb6c3..0d6b98b3a (three commits, three files).",
+  "scores": {
+    "durability": 17,
+    "evidence": 9,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T14:28:22.686859+00:00",
+  "total": 101
+}

@@ -348,6 +348,9 @@ def seed_preflight(monkeypatch):
         "description_driven_currents",
         lambda *args: (profile, None, None, {"uses_circuit": True}),
     )
+    monkeypatch.setattr(
+        pinned, "_profile_edge_values", lambda *args: (1.0, -1234.5, -0.0123)
+    )
 
     def refuse_scoring(*args):
         pytest.fail("a seed-only qualification must stop before solver scoring")
@@ -379,6 +382,11 @@ def test_entry_point_records_seed_qualification_before_scoring(
     assert receipt["relative_tolerance"] == 2.0e-6
     assert receipt["frame"] == 102
     assert receipt["inference_current_authority"]["uses_circuit"] is True
+    edge = receipt["prescribed_profile_edge"]
+    assert edge["psi_norm"] == 1.0
+    assert "finite-edge" in edge["source"]
+    assert edge["p_prime"] == -1234.5
+    assert edge["ff_prime"] == -0.0123
 
 
 def test_seed_entry_point_refuses_the_banked_output_directory(monkeypatch) -> None:

@@ -36,6 +36,7 @@ from benchmarks.diiid_forward_gs_match import (
     _CURRENT_COLUMNS,
     _GEOMETRY_COLUMNS,
     _LABEL_COLUMNS,
+    _profile_edge_values,
     _read,
     build_profile,
 )
@@ -92,8 +93,8 @@ REPRESENTATIVE_COHORT = (
         "frame": 102,
         "time_ms": 2200.0,
         "recorded_ip_a": 1283617.6680326462,
-        "unscaled_source_ip_a": 1137702.226779481,
-        "seed_lambda": 1.1282545096762369,
+        "unscaled_source_ip_a": 1119947.2252120043,
+        "seed_lambda": 1.1461412101714519,
     },
     {
         "shot": "d3d_shot_0003ff34e7.parquet",
@@ -789,6 +790,18 @@ def solve_frame(
         "inference_current_authority": current_receipt,
     }
     if preflight_output is not None:
+        edge_psi_norm, edge_p_prime, edge_ff_prime = _profile_edge_values(
+            row, frame_input.frame
+        )
+        preflight["prescribed_profile_edge"] = {
+            "psi_norm": edge_psi_norm,
+            "p_prime": edge_p_prime,
+            "ff_prime": edge_ff_prime,
+            "source": (
+                "EFIT boundary shell on the DIII-D builder's prescribed grid, "
+                "spanned by the finite-edge flux function"
+            ),
+        }
         preflight_output.mkdir(parents=True, exist_ok=True)
         (preflight_output / "seed_preflight.json").write_text(
             json.dumps(preflight, indent=2, sort_keys=True, allow_nan=False) + "\n"

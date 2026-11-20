@@ -1,0 +1,52 @@
+<article id="diiid-pinned-reregistration-outcome">
+<h3>Frame 102 re-registers on the finite-edge head, and the boundary form alone moves it</h3>
+<p><strong>Frame <code>d3d_shot_00000c4a7b.parquet:102</code> now reads
+1119947.225212 A</strong> through the benchmark entry point's own preflight on the
+head, beside the former registration <strong>1137702.226779 A</strong> and the
+point-route probe's <strong>1119994.165 A</strong>. Replacing only the finite-edge
+form with the zero-edge quintic end cap at the same head returns
+<strong>1119833.584176 A</strong>, the entry point's pre-finite-edge reading, so
+the boundary form alone accounts for the 113.641 A difference. The
+<code>2e-6</code> relative tolerance is unchanged.</p>
+
+<h4 id="diiid-pinned-reregistration-changes">Three accepted changes and the finite-edge form</h4>
+<p>The shortfall from the former registration came from three numerical changes
+taken together, none of which the physical input explains: the compact quintic
+end cap that replaced the original endpoint hold on the prescribed flux-function
+tables, the stationary normalisation values and the domain they are read over,
+and the integration route that sums the seed cell currents. The finite-edge form
+keeps the quintic Hermite basis between the last interior knot and the boundary,
+so the value and slope stay continuous at that knot, and it places EFIT's own
+boundary values at normalized flux one instead of reaching zero one sample
+spacing past the last knot.</p>
+<p>Frame 102's prescribed boundary shell sits at
+<code>psi<sub>N</sub> = 1.0</code> with <code>p' = -2319.33255534632</code> and
+<code>FF' = 0.005842247232267696</code>, which the entry point now writes into
+its seed preflight record as <code>prescribed_profile_edge</code>. Those are the
+values the DIII-D builder prescribes; the earlier finite-edge record did not
+carry them.</p>
+
+<table>
+<caption>Frame 102 unscaled seed current [A], same head, same entry point, one
+form substituted.</caption>
+<thead><tr><th>route</th><th>unscaled seed current [A]</th><th>relative difference from the registered reading</th></tr></thead>
+<tbody>
+<tr><td>finite-edge head (registered)</td><td>1119947.2252120043</td><td>0</td></tr>
+<tr><td>zero-edge control</td><td>1119833.5841760210</td><td>-1.0148e-4</td></tr>
+<tr><td>required pre-finite-edge reading</td><td>1119833.5841760212</td><td>control is 2.1e-16 from it</td></tr>
+<tr><td>point-route probe (not used for the control)</td><td>1119994.1652867154</td><td>+4.19e-5</td></tr>
+</tbody></table>
+
+<h4 id="diiid-pinned-reregistration-evidence">Reproduction</h4>
+<p>The entry point run is
+<code>python -m benchmarks.diiid_current_pinned_forward --preflight-frame 102 --output ~/.cache/nova-diiid-pinned-reregistration/entry-head</code>
+and it writes the record it read back; the committed pinned-cohort receipt
+directory is neither read nor truncated. The control drives the same entry point
+with <code>scripts/prototypes/diiid_pinned_reregistration/measure.py</code>, which
+supplies both prescribed profiles without a boundary value so the builder falls
+back to its zero-edge cap, and marks the record to say those prescribed values
+were not the ones the solve used. The entry point refuses a record it cannot
+reproduce within the tolerance, so the control's refusal is the check firing.</p>
+<p>Run root:
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T200506917979-diiid-pinned-reregistration</code>.</p>
+</article>

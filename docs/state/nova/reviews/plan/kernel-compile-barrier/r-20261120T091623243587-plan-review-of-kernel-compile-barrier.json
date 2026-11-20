@@ -130,6 +130,16 @@
       "finding": "reasoning-2",
       "reason": "the sentence describes the production caller; the prototype call sites it omits change no node's work, as the finding itself says",
       "when": "2026-11-20T09:37:06.518473+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "s7 states the full scope (81 tracked files outside docs with a non-raw reference), names the prototype families and raises the estimate",
+      "reason": "",
+      "when": "2026-11-20T09:37:15.462180+00:00"
     }
   ],
   "responses": {
@@ -174,6 +184,15 @@
       "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
       "reason": "the sentence describes the production caller; the prototype call sites it omits change no node's work, as the finding itself says",
       "when": "2026-11-20T09:37:06.518473+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "note": "s7 states the full scope (81 tracked files outside docs with a non-raw reference), names the prototype families and raises the estimate",
+      "reason": "",
+      "when": "2026-11-20T09:37:15.462180+00:00"
     },
     "wiring-1": {
       "action": "acted",

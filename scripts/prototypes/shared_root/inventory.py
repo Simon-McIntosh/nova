@@ -28,12 +28,17 @@ def main(argv: list[str]) -> int:
     corpus_prefix = old_root + "raw/"
     reference = re.compile(re.escape(old_root.rstrip("/")) + r"""[^\s'"`)\]},>]*""")
     search = old_root[len("/work/projects/") :].rstrip("/")
-    listing = subprocess.run(
+    completed = subprocess.run(
         ["git", "grep", "-n", search, "--", ".", ":!docs"],
         capture_output=True,
         text=True,
-        check=True,
-    ).stdout
+    )
+    # git grep reports 1 for "no matches", which is the fully-migrated state
+    # this scan exists to confirm, so only a larger status is an error.
+    if completed.returncode not in (0, 1):
+        print(completed.stderr, file=sys.stderr, end="")
+        return completed.returncode
+    listing = completed.stdout
     rows: list[str] = []
     for record in listing.splitlines():
         location, _, text = record.partition(":")
@@ -44,7 +49,8 @@ def main(argv: list[str]) -> int:
             kind = "corpus" if path.startswith(corpus_prefix) else "default"
             rows.append(f"{location}:{kind}:{path}")
     rows.sort()
-    print("\n".join(rows))
+    if rows:
+        print("\n".join(rows))
     counts = {
         kind: sum(1 for row in rows if row.split(":", 3)[2] == kind)
         for kind in ("corpus", "default")

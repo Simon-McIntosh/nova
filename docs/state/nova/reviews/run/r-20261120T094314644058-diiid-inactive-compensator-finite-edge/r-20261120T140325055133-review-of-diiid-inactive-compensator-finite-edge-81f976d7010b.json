@@ -35,6 +35,11 @@
       "kind": "exempted",
       "reason": "The reviewer names the inactive-branch assertion as the guard that catches the regression; the active-branch comparison is redundant but harmless",
       "recorded_at": "2026-11-20T14:19:34.004473+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "constraint_records only reports which constraints are present and does not drive the image or tangent; the residual and the pair image share active_payload_mask, which is the masking that matters",
+      "recorded_at": "2026-11-20T14:19:49.955177+00:00"
     }
   },
   "findings": [

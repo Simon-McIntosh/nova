@@ -1,0 +1,43 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "789479f7dbaa97933495e8c0f82b9dfa1dc0fc75",
+  "completed_at": "2026-11-20T15:21:18.049Z",
+  "dispatched_at": "2026-11-20T15:17:42Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/shared-root.html",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the control paragraph says both runs 'and the tool's listing over the worktree itself, are recorded by the script that produces them', naming logs/negative_control.sh, logs/negative-control.log and logs/inventory-current.log together, but logs/negative_control.sh ends after its two scratch-copy invocations and never runs the tool over the worktree, so logs/inventory-current.log cannot be regenerated from the script the paragraph points a reader at."
+    }
+  ],
+  "head_log_revision": "0d6b98b3a458b97870d9433724b2f3b045e014e4",
+  "justifications": {
+    "durability": "tests/test_operand_cache.py:122-126 fails if OPERAND_CACHE_ROOT is restored to sophelio and tests/test_filepath_data_roots.py:35 does the same for LABELLER_SESSION_ROOT, but nothing guards the roughly 80 script and benchmark defaults, and scripts/prototypes/shared_root/inventory.py is a one-shot tool that no test invokes, so a future edit can reintroduce the retired root in those files without a red test.",
+    "evidence": "Clause (1) reproduces independently at 23fa51437 (0 default and 29 corpus references, corpus lines byte-identical to the base), clause (2) is carried by logs/base-arm.log and logs/head-arm-at-0d6b98b3a.log with the same six FAILED ids, and clause (3) is stated in the manifest and confirmed against the command stream; it loses points because tests/test_operand_cache.py exits 137 in both arms and is cut short, so the arm pair does not measure the file the new assertion lives in.",
+    "fit": "The added test follows the module's existing monkeypatch-and-assert idiom at tests/test_operand_cache.py:114, inventory.py carries module-docstring usage and no plan label, ticket id or version suffix appears in any changed path, and the AGENTS.md prose edit restates the mechanism rather than naming a run or a section.",
+    "goal_fidelity": "The landed change does exactly what the goal names: nova/database/filepath.py:24 and :82 move the two library defaults to the new root and the 86 remaining tracked defaults move only the root segment, verified by every head sub-path appearing unchanged under imas_gpu/nova.",
+    "reuse": "No owner of a reference-inventory capability exists: a search of scripts/, nova/ and benchmarks/ for git-grep scanning and inventory helpers found none, and the landed inventory.py is the first, while the library constants extend the modules that already own them rather than duplicating a path-helper mechanism.",
+    "scope_discipline": "git diff --name-only 789479f7d..23fa51437 lists 85 paths and every one is under nova/, scripts/, benchmarks/, tests/, apps/playable/machines.py, AGENTS.md or the one declared evidence fragment, with no docs/ plan, state or figure edit."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to move nova's shared-storage defaults from /work/projects/imas_gpu/sophelio to /work/projects/imas_gpu/nova keeping each sub-path and the raw corpus fixed, and that is what the diff does at nova/database/filepath.py:24 and across benchmarks/, scripts/ and apps/playable/machines.py.\nVERDICT done_when: clause (1) reproduces independently at 23fa51437 (0 default references, 29 corpus references and the corpus lines byte-identical to 789479f7d), clause (2) is carried by logs/base-arm.log and logs/head-arm-at-0d6b98b3a.log with six identical FAILED ids, and clause (3) is stated in the manifest's evidence_inputs and holds against the command stream, where no command writing under /work appears.\nVERDICT write_paths: the declared scope covers nova, scripts, benchmarks, apps/playable/machines.py, tests, AGENTS.md, docs/evidence/fragments/kernel-compile-barrier/shared-root.html and the shared-root-paths figure directory, and all 85 changed paths lie inside it.\nVERDICT manifest: read; status complete, baseline_suite and after_suite both exit 1 with the same six failure ids, tests/test_operand_cache.py and tests/equilibrium/test_topology_read.py disclosed as cut short with their job ids, and the after-suite revision 0d6b98b3a is followed only by two evidence-fragment commits.\nVERDICT diff: read commit by commit; 65911dd80 is the mechanical root move plus the stale AGENTS.md prose, b6a97ee4b and 0d6b98b3a build and fix scripts/prototypes/shared_root/inventory.py and add the operand-root assertion, and da2abb6c3, e3726e302, aac823e08, be2ed5cde and 23fa51437 record the gate and its arms in the evidence fragment.\nCALL_SITES: nova/database/filepath.py:58, nova/media/sources/nova_labels.py:42, benchmarks/diiid_forward_gs_match.py:1735, benchmarks/mast_centroid_solve_panels.py:266, scripts/prototypes/read_route/jets.py:58\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every default reference moves only its root segment and the 29 corpus lines survive unchanged, as verified at nova/database/filepath.py:24 and by a full-tree diff of the sub-paths.\nSCORE evidence: 17\nJUSTIFICATION evidence: docs/evidence/fragments/kernel-compile-barrier/shared-root.html records the family counts that reproduce exactly (41/15/12/9/6/2/2 plus one prose) and both arms with identical ids, but tests/test_operand_cache.py exits 137 in both arms and is cut short.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every one of the 85 changed paths is inside the declared write paths and only docs/evidence/fragments/kernel-compile-barrier/shared-root.html is touched under docs/.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_operand_cache.py:126 reddens when the operand default is restored to sophelio, but no test guards the script and benchmark defaults and scripts/prototypes/shared_root/inventory.py is never invoked by the suite.\nSCORE fit: 19\nJUSTIFICATION fit: tests/test_operand_cache.py:122 follows the monkeypatch idiom at line 114 and no changed path or symbol carries a plan label, ticket id or version suffix.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search over scripts/, nova/ and benchmarks/ found no existing reference-inventory tool, so scripts/prototypes/shared_root/inventory.py is the first owner of that mechanism.\nFINDING docs/evidence/fragments/kernel-compile-barrier/shared-root.html:29 non-blocking: logs/negative_control.sh never runs the tool over the worktree, so the paragraph's claim that logs/inventory-current.log is recorded by 'the script that produces them' cannot be reproduced from the script it names.\n",
+  "review_run_id": "r-20261120T151642688872-review-of-shared-root-paths-23fa51437085",
+  "reviewed_base_sha": "789479f7dbaa97933495e8c0f82b9dfa1dc0fc75",
+  "reviewed_head_sha": "23fa514370856986256cab7289c9287768335bed",
+  "reviewed_run_id": "r-20261120T094110687720-shared-root-paths",
+  "reviewer_run_id": "r-20261120T151642688872-review-of-shared-root-paths-23fa51437085",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T15:21:29.973108+00:00",
+  "total": 110
+}

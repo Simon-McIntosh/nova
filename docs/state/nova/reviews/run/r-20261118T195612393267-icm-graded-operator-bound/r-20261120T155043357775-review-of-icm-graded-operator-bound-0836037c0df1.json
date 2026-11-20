@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 7,
+  "call_sites": [
+    "nova/biot/magnetisation.py:414",
+    "scripts/iron_operator_bound/localise.py:120",
+    "scripts/iron_operator_bound/localise.py:213",
+    "scripts/iron_operator_bound/pin.py:80",
+    "scripts/iron_operator_bound/selfcell.py:19",
+    "scripts/iron_graded_refinement/measure.py:157",
+    "scripts/iron_linear_magnetisation/probe.py:22"
+  ],
+  "completed_at": "2026-11-20T15:51:29.567Z",
+  "dispatched_at": "2026-11-20T15:51:10Z",
+  "findings": [
+    {
+      "file": "scripts/iron_operator_bound/localise.py",
+      "line": "213",
+      "severity": "non-blocking",
+      "text": "non-blocking: galerkin_block_spectrum(gram, mirrored) is called only for its returned metric, so a full generalised eigvalsh runs on the study's largest matrix for a result the caller discards, and a LAPACK failure there aborts a step that needs no spectrum."
+    },
+    {
+      "file": "scripts/iron_operator_bound/reuse_check.py",
+      "line": "86",
+      "severity": "non-blocking",
+      "text": "non-blocking: the solve guard is file-level, so a copy added beside an existing owner call exits 0 (reproduced by appending a working eigh(..., metric) solve to localise.py) and callers() counts only attribute calls, so a bare-name owner import beside an unrelated block_diag use would be a false positive."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call site(s)",
+    "diff": "Read the three commits against 1685170fd; seven files, +153/-97, routing localise.py:111/213, pin.py:35 and selfcell.py:19 through the new owner, making localise.py:98 a wrapper over tiledassembly.volume_mutual, replacing the inline gate mesh in tests/test_magnetisation.py:1379/1891 with gate_shell(), widening reuse_check.py and recording the ownership in the fragment.",
+    "done_when": "The done_when asks for the bound to hold with a test whose restored defect fails it; the reviewed manifest records the bound test passing at head and suites-repair/after-suite.log records the pre-fix 703466f4 arm failing it at 247141.8, so the gate asserts the measure and its negative control.",
+    "goal": "The source node's goal is to localise the graded operator's demagnetisation-bound violation, repair it in nova/biot/tiledassembly.py or nova/biot/magnetisation.py, and show the bound holds; the reviewed commits 1685170fd..0836037c0 carry the owner consolidation and the metric-scale fix that put nova/biot/magnetisation.py:356 galerkin_block_spectrum under localise.py, pin.py and selfcell.py.",
+    "manifest": "Read; it declares status complete with baseline_suite at e429aef (7 failed, 91 passed) and after_suite at 0836037c0 (7 failed, 92 passed) over identical failure ids, and states reuse_check exits 0.",
+    "write_paths": "The declared paths are nova/biot/tiledassembly.py, nova/biot/magnetisation.py, tests/test_magnetisation.py, scripts/iron_operator_bound, the fragment and the figures directory; all seven files in git diff 1685170fd..0836037c0 are inside them, while the one out-of-declaration path in the node's full diff (scripts/iron_linear_magnetisation/operator-control.json) predates the reviewed base."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:1376 test_linear_shell_spectrum_uses_its_volume_gram reddened at 703466f4 (assert -91.79 >= -1e-10) and passes at the head, while the reuse_check guard is a script no test invokes.",
+    "evidence": "the reviewed suite-after.log names revision 0836037c0 with 7 failed and 92 passed, the baseline names e429aef with 7 failed and 91 passed over the same seven FAILED ids, and suites-repair/after-suite.log shows the pre-fix arm at 703466f4 failing 10.",
+    "fit": "ruff check passes over all seven changed files and the new galerkin_block_spectrum docstring at nova/biot/magnetisation.py:357 follows the surrounding galerkin_spectrum idiom.",
+    "goal_fidelity": "scripts/iron_operator_bound/localise.py:120, pin.py:35 and selfcell.py:19 now call nova/biot/magnetisation.py:356 galerkin_block_spectrum instead of solving beside it, and 0836037c0 restores the metric-scaled convention in that owner.",
+    "reuse": "the added definition extends nova/biot/magnetisation.py:356, the module that already owns galerkin_spectrum, and my mutation probes of reuse_check.py:86 fired on a copied block solve and a copied gate mesh.",
+    "scope_discipline": "every path in git diff 1685170fd..0836037c0 is inside the declared write paths, with only the pre-base operator-control.json lying outside the declaration in the node's full diff."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source node's goal is to localise the graded operator's demagnetisation-bound violation, repair it in nova/biot/tiledassembly.py or nova/biot/magnetisation.py, and show the bound holds; the reviewed commits 1685170fd..0836037c0 carry the owner consolidation and the metric-scale fix that put nova/biot/magnetisation.py:356 galerkin_block_spectrum under localise.py, pin.py and selfcell.py.\nVERDICT done_when: The done_when asks for the bound to hold with a test whose restored defect fails it; the reviewed manifest records the bound test passing at head and suites-repair/after-suite.log records the pre-fix 703466f4 arm failing it at 247141.8, so the gate asserts the measure and its negative control.\nVERDICT write_paths: The declared paths are nova/biot/tiledassembly.py, nova/biot/magnetisation.py, tests/test_magnetisation.py, scripts/iron_operator_bound, the fragment and the figures directory; all seven files in git diff 1685170fd..0836037c0 are inside them, while the one out-of-declaration path in the node's full diff (scripts/iron_linear_magnetisation/operator-control.json) predates the reviewed base.\nVERDICT manifest: Read; it declares status complete with baseline_suite at e429aef (7 failed, 91 passed) and after_suite at 0836037c0 (7 failed, 92 passed) over identical failure ids, and states reuse_check exits 0.\nVERDICT diff: Read the three commits against 1685170fd; seven files, +153/-97, routing localise.py:111/213, pin.py:35 and selfcell.py:19 through the new owner, making localise.py:98 a wrapper over tiledassembly.volume_mutual, replacing the inline gate mesh in tests/test_magnetisation.py:1379/1891 with gate_shell(), widening reuse_check.py and recording the ownership in the fragment.\nCALL_SITES: nova/biot/magnetisation.py:414, scripts/iron_operator_bound/localise.py:120, scripts/iron_operator_bound/localise.py:213, scripts/iron_operator_bound/pin.py:80, scripts/iron_operator_bound/selfcell.py:19, scripts/iron_graded_refinement/measure.py:157, scripts/iron_linear_magnetisation/probe.py:22\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/iron_operator_bound/localise.py:120, pin.py:35 and selfcell.py:19 now call nova/biot/magnetisation.py:356 galerkin_block_spectrum instead of solving beside it, and 0836037c0 restores the metric-scaled convention in that owner.\nSCORE evidence: 16\nJUSTIFICATION evidence: the reviewed suite-after.log names revision 0836037c0 with 7 failed and 92 passed, the baseline names e429aef with 7 failed and 91 passed over the same seven FAILED ids, and suites-repair/after-suite.log shows the pre-fix arm at 703466f4 failing 10.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 1685170fd..0836037c0 is inside the declared write paths, with only the pre-base operator-control.json lying outside the declaration in the node's full diff.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_magnetisation.py:1376 test_linear_shell_spectrum_uses_its_volume_gram reddened at 703466f4 (assert -91.79 >= -1e-10) and passes at the head, while the reuse_check guard is a script no test invokes.\nSCORE fit: 18\nJUSTIFICATION fit: ruff check passes over all seven changed files and the new galerkin_block_spectrum docstring at nova/biot/magnetisation.py:357 follows the surrounding galerkin_spectrum idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: the added definition extends nova/biot/magnetisation.py:356, the module that already owns galerkin_spectrum, and my mutation probes of reuse_check.py:86 fired on a copied block solve and a copied gate mesh.\nFINDING scripts/iron_operator_bound/localise.py:213 non-blocking: galerkin_block_spectrum(gram, mirrored) is called only for its returned metric, so a full generalised eigvalsh runs on the study's largest matrix for a result the caller discards, and a LAPACK failure there aborts a step that needs no spectrum.\nFINDING scripts/iron_operator_bound/reuse_check.py:86 non-blocking: the solve guard is file-level, so a copy added beside an existing owner call exits 0 (reproduced by appending a working eigh(..., metric) solve to localise.py) and callers() counts only attribute calls, so a bare-name owner import beside an unrelated block_diag use would be a false positive.\n",
+  "review_run_id": "r-20261120T155043357775-review-of-icm-graded-operator-bound-0836037c0df1",
+  "reviewed_base_sha": "1685170fdf29b9ac0babaa259e9a28ae9eb4c1ae",
+  "reviewed_head_sha": "0836037c0df194cf65a9f7ac2231614ea18461c2",
+  "reviewed_run_id": "r-20261118T195612393267-icm-graded-operator-bound",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T16:04:10.325233+00:00",
+  "total": 106
+}

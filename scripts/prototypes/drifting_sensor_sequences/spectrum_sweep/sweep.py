@@ -183,132 +183,6 @@ def launch(arm, python, logdir):
     }
 
 
-def values_of(rows):
-    """Per-slice series, holding an absent boundary outline as NaN."""
-    import numpy as np
-
-    def column(key):
-        return np.array(
-            [float("nan") if row.get(key) is None else row[key] for row in rows],
-            dtype=float,
-        )
-
-    axis = np.array([row["axis"] for row in rows], dtype=float)
-    # DD 4.1 marks an unwritten float with a -9e40 sentinel; a state whose
-    # global_quantities were never filled reads it back here rather than as an
-    # empty node, so it is held absent like a missing boundary.
-    axis[np.abs(axis) > 1e30] = np.nan
-    return {
-        "axis": axis,
-        "flux": column("flux_boundary"),
-        "q95": column("q95"),
-    }
-
-
-def rms_error(value, truth):
-    """Root-mean-square error over the slices that carry a value."""
-    import numpy as np
-
-    value = np.asarray(value, dtype=float)
-    truth = np.asarray(truth, dtype=float).ravel()
-    if value.ndim == 1:
-        residual = value - float(truth[0])
-        finite = np.isfinite(residual)
-        return (
-            float(np.sqrt(np.mean(residual[finite] ** 2)))
-            if finite.any()
-            else float("nan")
-        )
-    residual = value - truth
-    finite = np.isfinite(residual).all(axis=1)
-    if not finite.any():
-        return float("nan")
-    return float(np.sqrt(np.mean(np.sum(residual[finite] ** 2, axis=1))))
-
-
-def block_mean_error(value, truth):
-    """Root-mean-square of each block mean's error, absent slices left out."""
-    import numpy as np
-
-    value = np.asarray(value, dtype=float)
-    truth = np.asarray(truth, dtype=float)
-    errors = []
-    for start in range(0, value.shape[0] - BLOCK + 1, BLOCK):
-        chunk = value[start : start + BLOCK]
-        if chunk.ndim == 1:
-            finite = np.isfinite(chunk)
-            if finite.any():
-                errors.append(float(np.abs(chunk[finite].mean() - truth[0])))
-        else:
-            finite = np.isfinite(chunk).all(axis=1)
-            if finite.any():
-                errors.append(float(np.linalg.norm(chunk[finite].mean(axis=0) - truth)))
-    return float(np.sqrt(np.mean(np.square(errors)))) if errors else float("nan")
-
-
-def lag_one(value):
-    """Slice-to-slice correlation over consecutive finite pairs."""
-    import numpy as np
-
-    value = np.asarray(value, dtype=float)
-    if value.ndim == 2:
-        pair = np.isfinite(value).all(axis=1)
-        value = value[pair]
-        if value.shape[0] == 0:
-            return float("nan")
-        return float(
-            np.mean(
-                [
-                    np.corrcoef(value[:-1, c], value[1:, c])[0, 1]
-                    for c in range(value.shape[1])
-                ]
-            )
-        )
-    value = value[np.isfinite(value)]
-    if value.size < 3 or np.std(value) == 0.0:
-        return float("nan")
-    return float(np.corrcoef(value[:-1], value[1:])[0, 1])
-
-
-def reduce_arm(rows, truth, analyse):
-    """Reduce one arm's per-slice rows to the reported measures."""
-    values = values_of(rows)
-    span = float(truth["flux_span"])
-    axis_truth = [float(value) for value in truth["axis"]]
-    flux = values["flux"] / span
-    flux_truth = [float(truth["flux_boundary"]) / span]
-    q95_truth = [abs(float(truth["q95"]))]
-    axis_rms = rms_error(values["axis"], axis_truth)
-    flux_rms = rms_error(flux, flux_truth)
-    q95_rms = rms_error(values["q95"], q95_truth)
-    axis_mean = block_mean_error(values["axis"], axis_truth)
-    flux_mean = block_mean_error(flux, flux_truth)
-    q95_mean = block_mean_error(values["q95"], q95_truth)
-    return {
-        "slices": len(rows),
-        "slices_with_boundary": int(
-            sum(1 for row in rows if row.get("q95") is not None)
-        ),
-        "converged": float(
-            __import__("numpy").mean([bool(row.get("converged", True)) for row in rows])
-        ),
-        "axis_rms": axis_rms,
-        "axis_mean_50": axis_mean,
-        "axis_mean_ratio": axis_mean / axis_rms,
-        "flux_rms": flux_rms,
-        "flux_mean_50": flux_mean,
-        "flux_mean_ratio": flux_mean / flux_rms,
-        "q95_rms": q95_rms,
-        "q95_mean_50": q95_mean,
-        "q95_mean_ratio": q95_mean / q95_rms,
-        "axis_lag1": lag_one(values["axis"]),
-        "flux_lag1": lag_one(flux),
-        "q95_lag1": lag_one(values["q95"]),
-        "axis_mean": values["axis"].mean(axis=0).tolist(),
-        "q95_mean": float(__import__("numpy").nanmean(values["q95"])),
-    }
-
-
 def salvage(arm):
     """Read a finished imas-efit output slice by slice, absent boundary included.
 
@@ -458,29 +332,9 @@ def nova_column(truth, analyse):
             "slices": [int(row["slice"]) for row in rows],
             "wall_seconds": [float(row["wall_seconds"]) for row in rows],
             "converged": [bool(row["converged"]) for row in rows],
-            "metrics": reduce_arm(rows, truth, analyse) if len(rows) > 1 else None,
+            "metrics": analyse.reduce_arm(rows, truth) if len(rows) > 1 else None,
         }
     return measured
-
-
-def crossing_of(points, key, limit):
-    """The first swept factor whose measure exceeds the limit, and its neighbour."""
-    ordered = sorted(points.values(), key=lambda row: row["factor"])
-    for position, row in enumerate(ordered):
-        if row[key] > limit:
-            previous = ordered[position - 1] if position else None
-            return {
-                "factor": row["factor"],
-                "value": row[key],
-                "previous_factor": None if previous is None else previous["factor"],
-                "previous_value": None if previous is None else previous[key],
-            }
-    return {
-        "factor": None,
-        "value": None,
-        "previous_factor": None,
-        "previous_value": None,
-    }
 
 
 def analysis(study, analyse):
@@ -501,7 +355,7 @@ def analysis(study, analyse):
             if arm["corner_hz"] is None
             else arm["corner_hz"] * SLICES,
         }
-        record.update(reduce_arm(rows, truth, analyse))
+        record.update(analyse.reduce_arm(rows, truth))
         table[arm["name"]] = record
     sizes = {name: value for name, value in table.items() if name.startswith("size-")}
     payload = {
@@ -518,15 +372,13 @@ def analysis(study, analyse):
         },
         "arms": table,
         "crossing": {
-            "axis_0p05_m": crossing_of(sizes, "axis_rms", 0.05),
-            "q95_0p2": crossing_of(sizes, "q95_rms", 0.2),
+            "axis_0p05_m": analyse.crossing(sizes, "axis_rms", 0.05),
+            "q95_0p2": analyse.crossing(sizes, "q95_rms", 0.2),
         },
         "generator_control": generator_control(study, truth),
         "nova": nova_column(truth, analyse),
         "truth": truth,
     }
-    (STUDY / "spectrum-summary.json").write_text(json.dumps(payload, indent=2))
-    print(json.dumps(payload, indent=2))
     return payload
 
 
@@ -558,7 +410,10 @@ def main(argv=None):
         return 0
     if arguments.command == "analyse":
         study, analyse = import_study()
-        analysis(study, analyse)
+        study, analyse = import_study()
+        payload = analysis(study, analyse)
+        print(json.dumps(payload, indent=2))
+        (STUDY / "spectrum-summary.json").write_text(json.dumps(payload, indent=2))
         return 0
     logdir = STUDY / "logs"
     logdir.mkdir(parents=True, exist_ok=True)

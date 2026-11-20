@@ -43,7 +43,13 @@ def segment_distance(point, polygon):
     )
 
 
+def nearest_vertex(point, polygon):
+    """Distance to a polygon's nearest vertex, and that vertex's index."""
+    gaps = np.linalg.norm(np.asarray(polygon) - np.asarray(point), axis=-1)
+    index = int(np.argmin(gaps))
+    return float(gaps[index]), index
+
+
 def vertex_distance(point, polygon):
     """Distance from one point to a polygon's nearest vertex."""
-    gaps = np.linalg.norm(np.asarray(polygon) - np.asarray(point), axis=-1)
-    return float(np.min(gaps))
+    return nearest_vertex(point, polygon)[0]

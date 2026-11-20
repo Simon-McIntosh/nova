@@ -58,10 +58,10 @@ def load(path):
 
 
 def pair_geometry(node, polygon):
-    vertex = np.linalg.norm(polygon - node[None, :], axis=-1)
+    distance_vertex, vertex_index = geometry.nearest_vertex(node, polygon)
     return dict(
-        distance_vertex=float(vertex.min()),
-        vertex_index=int(np.argmin(vertex)),
+        distance_vertex=distance_vertex,
+        vertex_index=vertex_index,
         distance_edge=geometry.segment_distance(node, polygon),
         cell_height_gap=float(np.abs(polygon[:, 1] - node[1]).min()),
     )

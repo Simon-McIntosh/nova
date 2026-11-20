@@ -17,7 +17,7 @@ run=$3
 previous=$4
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export NOVA_OPERAND_CACHE="$HOME/.cache/nova-moment-hessian"
-export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 mkdir -p "$NOVA_OPERAND_CACHE"
 export MEASURE_RUN="$run" MEASURE_PREVIOUS="$previous" MEASURE_DETAIL=1
 

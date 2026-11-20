@@ -32,7 +32,7 @@ from benchmarks.receipt_locations import crew_reports
 
 
 DEFAULT_INPUT = Path(
-    "/work/projects/imas_gpu/sophelio/labeller_sessions/"
+    "/work/projects/imas_gpu/nova/labeller_sessions/"
     "boundary-repair-validation-20260907T1124Z"
 )
 DEFAULT_OUTPUT = Path(

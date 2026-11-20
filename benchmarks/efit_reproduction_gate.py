@@ -58,7 +58,7 @@ DEFAULT_BACKEND_RECEIPT = Path(
 )
 MAIN_BACKEND_RECEIPT = Path("/home/ITER/mcintos/Code/nova") / DEFAULT_BACKEND_RECEIPT
 DEFAULT_DIIID_MACHINE_ARTIFACT_CACHE = Path(
-    "/work/projects/imas_gpu/sophelio/diiid_machine_artifact_cache"
+    "/work/projects/imas_gpu/nova/diiid_machine_artifact_cache"
 )
 MAST_FLOOR = 0.0116147034
 DIIID_FLOOR = 0.0832365867

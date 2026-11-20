@@ -52,7 +52,7 @@ from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.imas.mast_vacuum_response import coil_sections, loop_response_matrix
 
 CENSUS = Path("docs/figures/limited-boundary-census/limited-class-census.npz")
-SESSION_ROOT = Path("/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29")
+SESSION_ROOT = Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29")
 STORE_ROOT = Path("/work/projects/imas_gpu/mast/level1/shots")
 
 #: The stored efm flux grid is a uniform 65 by 65; the forward solve lattice

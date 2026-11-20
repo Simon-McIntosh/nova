@@ -25,7 +25,7 @@ from nova.equilibrium.solve_request import TopologyPolicy
 
 
 ROOT = Path(__file__).resolve().parents[3]
-STORE = Path("/work/projects/imas_gpu/sophelio/nova-assembled-step-bank")
+STORE = Path("/work/projects/imas_gpu/nova/nova-assembled-step-bank")
 
 
 def emit(name, **values):

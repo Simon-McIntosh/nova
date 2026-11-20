@@ -41,7 +41,7 @@ OPERAND_CARRIER = Path(
 )
 WIDTH = 12
 DIIID_MACHINE_ARTIFACT_CACHE = Path(
-    "/work/projects/imas_gpu/sophelio/diiid_machine_artifact_cache"
+    "/work/projects/imas_gpu/nova/diiid_machine_artifact_cache"
 )
 
 

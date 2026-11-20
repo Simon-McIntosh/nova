@@ -13,7 +13,7 @@ import tarfile
 import tempfile
 
 _CONTROL_RECEIPT = Path(
-    "/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/production/"
+    "/work/projects/imas_gpu/nova/evidence/iron-limb-fill/production/"
     "material-refinement-20261114/summary.json"
 )
 _CONTROL_REVISION = "8ab69e765a812f1713129852eb65e4b5d886f26d"

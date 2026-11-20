@@ -30,10 +30,10 @@ from nova.imas.diiid_description import (
 
 DEFAULT_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
 DEFAULT_GATE_ARTIFACT = Path(
-    "/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_vacuum_quiescent_gate.json"
+    "/work/projects/imas_gpu/nova/vacuum-gate/diiid_vacuum_quiescent_gate.json"
 )
 DEFAULT_OUTPUT = Path(
-    "/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_vacuum_composition_audit.json"
+    "/work/projects/imas_gpu/nova/vacuum-gate/diiid_vacuum_composition_audit.json"
 )
 AMBIX_LOADER = Path("/home/ITER/mcintos/Code/imas-ambix/imas_ambix/challenge/loader.py")
 

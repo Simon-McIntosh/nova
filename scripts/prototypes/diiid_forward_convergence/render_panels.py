@@ -37,7 +37,7 @@ from nova.media.poloidal import (
 )
 
 OPERAND_ROOT = Path(
-    "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs"
+    "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs"
 )
 LEVEL_COUNT = 9
 

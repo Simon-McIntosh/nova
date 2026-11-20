@@ -31,9 +31,7 @@ from scripts.labeller_batch.shard import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CORPUS_ROOT = Path(
-    "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29"
-)
+DEFAULT_CORPUS_ROOT = Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29")
 DEFAULT_OUTPUT_DIRECTORY = (
     ROOT / "docs/figures/playable-forward-solve/zero-converged-block"
 )

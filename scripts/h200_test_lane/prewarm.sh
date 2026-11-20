@@ -23,7 +23,7 @@ readonly PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
 # Inside the batch job the shell runs a spooled copy of this file, so the
 # script path there is not the lane directory; the submitter passes it.
 readonly LANE_DIRECTORY="${NOVA_PREWARM_LANE_DIRECTORY:-$(dirname "$(realpath -e -- "${BASH_SOURCE[0]}")")}"
-readonly DEFAULT_PINNED_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+readonly DEFAULT_PINNED_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 
 usage() {
   printf '%s\n' \

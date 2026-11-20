@@ -13,7 +13,7 @@
 set -u
 WT=${WT:?WT must name the worktree the gate runs against}
 RUN=${RUN:?RUN must name the run directory}
-STORE=${STORE:-/work/projects/imas_gpu/sophelio/nova-assembled-step-bank}
+STORE=${STORE:-/work/projects/imas_gpu/nova/nova-assembled-step-bank}
 DIGEST=${DIGEST:-}
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cuda

@@ -28,7 +28,7 @@ from scripts.west_iron_galerkin_pair.measure import (  # noqa: E402
     source_field,
 )
 
-EVIDENCE = Path("/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation")
+EVIDENCE = Path("/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation")
 
 
 def save(path, row):

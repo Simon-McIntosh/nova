@@ -38,9 +38,7 @@ DEFAULT_ACCEPTANCE_OUTPUT = (
     ROOT / "docs/figures/playable-forward-solve/batched-labeller/"
     "h200-acceptance-receipt.json"
 )
-CORPUS_MANIFEST_ROOT = Path(
-    "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29"
-)
+CORPUS_MANIFEST_ROOT = Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29")
 DEVICE_COUNTS = (1, 2, 3)
 BATCH_PER_DEVICE = (16, 64, 256)
 CORPUS_SHOT_COUNT = 48

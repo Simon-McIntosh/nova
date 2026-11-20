@@ -8,7 +8,7 @@ ROOT=$(git rev-parse --show-toplevel)
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp PYTHONPATH="$ROOT" JAX_PLATFORMS=cuda
 export BANK_STEP_TRACE_DIR="$TRACE"
-export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 mkdir -p "$TRACE"
 {
   printf 'ARM=%s REVISION=%s TREE=%s CWD=%s COMMAND=%s\n' "$ARM" \

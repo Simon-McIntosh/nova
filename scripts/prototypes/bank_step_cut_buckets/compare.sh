@@ -6,7 +6,7 @@ RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T063317710937-bank-ste
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 BASE=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T215004202991-bank-step-booking-once/current-cond-preserved.py
 export TMPDIR=/tmp
-export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 SCRATCH=$(mktemp -d "$TMPDIR/cut-buckets-XXXX")
 trap 'rm -rf "$SCRATCH"' EXIT
 

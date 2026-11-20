@@ -31,10 +31,10 @@ from nova.imas.diiid_description import (
 
 DEFAULT_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
 DEFAULT_BANK = Path(
-    "/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_plasma_subtraction_gate.json"
+    "/work/projects/imas_gpu/nova/vacuum-gate/diiid_plasma_subtraction_gate.json"
 )
 DEFAULT_PREREGISTRATION = Path(
-    "/work/projects/imas_gpu/sophelio/vacuum-gate/"
+    "/work/projects/imas_gpu/nova/vacuum-gate/"
     "diiid_plasma_subtraction_preregistration.json"
 )
 DEFAULT_OUTPUT = Path("docs/figures/diiid-forward-onboarding/negative-tail")

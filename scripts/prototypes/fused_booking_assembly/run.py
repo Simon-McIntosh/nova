@@ -38,7 +38,7 @@ def main():
         XLA_PYTHON_CLIENT_PREALLOCATE="false",
         OMP_NUM_THREADS="4",
         OPENBLAS_NUM_THREADS="4",
-        NOVA_COMPILATION_CACHE_ROOT="/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+        NOVA_COMPILATION_CACHE_ROOT="/work/projects/imas_gpu/nova/jax-cache/nova-prewarm",
         JAX_COMPILATION_CACHE_DIR=str(args.output / "compilation-cache"),
         JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS="1",
         JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES="0",

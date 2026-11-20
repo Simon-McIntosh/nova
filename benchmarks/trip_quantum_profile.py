@@ -49,7 +49,7 @@ DEFAULT_REPORT = crew_reports("nova/attribution/trip-quantum-profile.md")
 PARTIAL_TRACE = crew_reports(
     "nova/attribution/trip-quantum-trace/plugins/profile/2026_09_04_14_30_40/perfetto_trace.json.gz"
 )
-DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
+DEFAULT_CACHE = Path("/work/projects/imas_gpu/nova/jax-cache/trip-quantum-profile")
 DEFAULT_TIMER_LOGS = (
     (
         "1262560",

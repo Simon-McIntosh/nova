@@ -69,7 +69,7 @@ def main():
         # Reserve one pool so repeated large solves do not fragment its backing.
         XLA_PYTHON_CLIENT_PREALLOCATE="true",
         XLA_CLIENT_MEM_FRACTION="0.8",
-        NOVA_COMPILATION_CACHE_ROOT="/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+        NOVA_COMPILATION_CACHE_ROOT="/work/projects/imas_gpu/nova/jax-cache/nova-prewarm",
         JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS="1",
         JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES="0",
         JAX_COMPILATION_CACHE_DIR=str(args.output / "compilation-cache"),

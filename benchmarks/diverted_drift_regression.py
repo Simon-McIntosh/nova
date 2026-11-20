@@ -41,7 +41,7 @@ import scipy.stats
 import zarr
 
 CENSUS = Path("docs/figures/limited-boundary-census/limited-class-census.npz")
-SESSION_ROOT = Path("/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29")
+SESSION_ROOT = Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29")
 STORE_ROOT = Path("/work/projects/imas_gpu/mast/level1/shots")
 OUTPUT_DIR = Path("docs/figures/playable-forward-solve/diverted-drift")
 BANDS = (

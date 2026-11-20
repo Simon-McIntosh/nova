@@ -33,7 +33,7 @@ DEFAULTS = (
     (filepath.misfit_hunt_root, CACHE_ROOT / "misfit-hunt"),
     (
         filepath.labeller_session_root,
-        Path("/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29"),
+        Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29"),
     ),
 )
 

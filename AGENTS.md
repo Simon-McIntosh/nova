@@ -87,7 +87,7 @@ add a hundred packages the environment never carried.
   ```bash
   srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=64G \
     bash -lc 'export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=<worktree>:<worktree>/scripts/h200_test_lane; \
-      export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm; \
+      export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm; \
       /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
         -p no:cacheprovider -p cache_guard <targets>' > <log> 2>&1; echo EXIT=$?
   ```
@@ -97,7 +97,7 @@ add a hundred packages the environment never carried.
   is composed from that root alone and the lane and the pre-warm that filled it
   agree on it; with the variable unset the drivers keep the per-user location
   under `$HOME/.cache`. The location is
-  `/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm`, shared storage
+  `/work/projects/imas_gpu/nova/jax-cache/nova-prewarm`, shared storage
   outside every pruner root, distinct from `~/.cache/nova/jax-compilation`. The
   `cache_guard` plugin prints the directory served, the revision the pin was
   compiled for, one row per program with its compile seconds and hit or miss
@@ -144,7 +144,7 @@ snapshot.
 
 Measured 2026-11-19: a worker removing its own private cache directory ran
 `rm -rf <private dir> /work/projects/imas_gpu`, with the second argument a typo
-and the output discarded. It deleted the project's whole `sophelio` directory
+and the output discarded. It deleted the project's whole shared data directory
 (pinned pre-warm cache, operand cache, labeller sessions, evidence receipts)
 and about 24 other top-level entries before it was stopped. The brief had asked
 it to create a directory on shared storage and remove it at the end.
@@ -485,7 +485,7 @@ The launcher submits to `betelgeuse` under `gpu_0003_grpA`, runs pytest from
 the repository's shared environment without invoking uv on the compute node,
 and appends both the pytest wall time and exit status to the named log. It serves
 the pinned pre-warm cache published by `scripts/h200_test_lane/prewarm.sh` under
-`/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm`, prints the cache
+`/work/projects/imas_gpu/nova/jax-cache/nova-prewarm`, prints the cache
 contract and one row per program with its compile seconds and hit or miss
 outcome, and samples GPU utilisation at 10, 30 and 60 seconds from allocation.
 The samples are taken while pytest runs, so a reading above zero is the test

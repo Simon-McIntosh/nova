@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 DIRECTORY = Path(__file__).resolve().parent
-ROOT = DIRECTORY.parents[3]
+ROOT = DIRECTORY.parents[2]
 CACHE = Path("/home/ITER/mcintos/.cache/nova-bank-hessian-blowup")
 PAGE = (
     ROOT

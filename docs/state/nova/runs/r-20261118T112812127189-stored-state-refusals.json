@@ -1218,6 +1218,24 @@
     "reason": "corrective-run:resume",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/stored_state_refusals/test_receipt_durability.py scripts/prototypes/stored_state_refusals/test_panel_visibility.py tests/test_unqualified_axis_eager_routes.py",
+    "integrated_revision": "6a5d7fdd0caf5b009b2b631522ddd747fde470e0",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261118T112812127189-stored-state-refusals/review-landing/gate-6a5d7fdd0caf5b009b2b631522ddd747fde470e0.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'PYTHONPATH=. JAX_PLATFORMS=cpu ./.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/stored_state_refusals/test_receipt_durability.py scripts/prototypes/stored_state_refusals/test_panel_visibility.py tests/test_unqualified_axis_eager_routes.py'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/nova"
+    ]
+  },
   "lane": null,
   "lane_advisory": {
     "backend": "omp-local",

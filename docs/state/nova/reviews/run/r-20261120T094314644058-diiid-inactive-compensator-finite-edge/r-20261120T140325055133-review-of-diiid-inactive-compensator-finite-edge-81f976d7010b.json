@@ -30,6 +30,13 @@
   ],
   "completed_at": "2026-11-20T14:04:44.385Z",
   "dispatched_at": "2026-11-20T14:04:24Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The reviewer names the inactive-branch assertion as the guard that catches the regression; the active-branch comparison is redundant but harmless",
+      "recorded_at": "2026-11-20T14:19:34.004473+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/equilibrium/test_solve_vertical_pin.py",

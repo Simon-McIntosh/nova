@@ -4,6 +4,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-20T09:27:58.130Z",
   "dispatched_at": "2026-11-20T09:13:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-graded-operator-bound",
+      "recorded_at": "2026-11-20T10:13:51.132461+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T195612393267-icm-graded-operator-bound/manifest.md",

@@ -1008,7 +1008,14 @@ def wall_npz(path: Path, machine_uri: str = MACHINE_URI) -> Path:
     :func:`nova.equilibrium.wall_mask.wall_units_from_ids`, which owns the IDS
     walk, the unit kind and the closure test; this function only chooses the
     first unit that carries a contour and writes it beside the flux maps.
+
+    A file already on disk is reused: the sweep runs several arms as separate
+    processes against one study directory, and an unconditional rewrite leaves
+    a reader with a truncated array.
     """
+
+    if path.exists():
+        return path
 
     import imas
 

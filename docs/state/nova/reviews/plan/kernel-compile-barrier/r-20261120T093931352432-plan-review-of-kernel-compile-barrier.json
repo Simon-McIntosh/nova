@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T09:51:22.616Z",
+  "dispatched_at": "2026-11-20T09:40:30Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "done_when-1",
+      "reason": "as written a coordinator closing \u00a73 sees a mandatory unrun control and either holds the section or redispatches a job the lead forbade; the plan should record the waiver beside the negative result.",
+      "text": "node (c) states \"Its control must fail: in the same H200 job as clause (1), the program at 681a6ecd2 is compiled as the base arm and must miss the 60 s bound\", while its own cited record `docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html` says the paired 60 s control \"was not exercised\", the lead \"explicitly accepted this negative result and instructed that no further job be submitted\", and the control \"is waived ... not claimed complete\"",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:65",
+      "id": "reasoning-1",
+      "reason": "it states a live completion path for the cold-compile bound the section retired, and a worker reading \u00a73 could re-open shrinking work the ruling ended.",
+      "text": "the paragraph keeps \"If a form inside clause (2) still misses 60 s, the node delivers the best such form with both arms measured and its per-pass table, and this section stays open on that partial result\" immediately after the edit records that no cheaper form was built and node (c) failed identity, while clause (1) at line 68 says the cold compile \"carries no bound\" and line 65 says the lead's 2026-11-18 ruling ends compile-shrinking, so the sentence instructs a form against a retired bound and names no node that remains to take it",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "208d70f1c54e0023de7f71cb56632f08b6921ee3",
+  "plan_fingerprint": "a87d4e7c108e3ca977cf8ec878b6638271f6f30da53a9a7593bbb74ceda4933d",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 117,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261120T093931352432-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "efa6fbb417360229d5fac2f1b43a2eccd3e239f3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every file, fragment, figure directory and code site s3 names resolves (fragments `ordered-sharing.html`, `point-program-attribution.html`, `one-traced-body.html`, `cached-point-program-remeasure.html` and `polygon-stable-evaluator.html` exist; `fixed_points.py:323/524/546/611`, `read_route/jets.py:262`, `solve.py:121`, `census/row.py:115` and the `10,000,000` ceiling all check out; extensionless plan hrefs resolve as `<path>.html`).",
+    "done_when": "a finding \u2014 node (c) still requires a 60 s base-arm control that its own cited record says the lead waived.",
+    "evidence_paths": "pass \u2014 node (e) names a fragment (`docs/evidence/fragments/kernel-compile-barrier/pinned-point-program.html`) and its pre-warm and lane logs under `~/.cache/nova-kernel-compile-barrier/pinned-point-program/`, both durable.",
+    "naming": "pass \u2014 s3 carries no plan labels, stage names, ticket numbers or version tags.",
+    "reasoning": "a finding \u2014 the paragraph retains a cold-compile form contingency that clause (1) and the lead's 2026-11-18 ruling retired.",
+    "single_goal": "pass \u2014 node (e) has one deliverable, the pinned cache populated and shown serving the point-program rows as hits.",
+    "wiring": "pass \u2014 s3 is declared to depend on s2 and s7 in `plan-section-depends-on`, \u00a77 (`docs/plans/kernel-compile-barrier.html:86`) states that it unblocks node (e), and node (e)'s own ordering sentence matches that declaration, so the \u00a74 conflict raised earlier is resolved by the statement that the \u00a74 pre-warm is \u00a74's own closing step."
+  },
+  "section_digests": {
+    "_document": "4dd0bd0854bd8e84e354b6700ea2df0cf8c65cf370f4b05b8a7ed399ad4e1119",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "548d2b8976362d26473d4558e42b271eb1eca07d7a7dcd903b8170c770775cc3",
+    "s4": "4b8bf6686dd7741ef6ed148a144b3f512eff3f8ad043c934f568a9feb50f76f8",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea",
+    "s7": "6dfe0a01ad8470c02d38d7e3fa33263ff325b87943f260375c61e09e0cfe5db8"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T09:51:33.277237+00:00",
+  "total": null
+}

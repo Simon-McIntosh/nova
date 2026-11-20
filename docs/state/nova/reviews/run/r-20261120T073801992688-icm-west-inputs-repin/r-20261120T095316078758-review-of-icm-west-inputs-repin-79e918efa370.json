@@ -14,6 +14,13 @@
   ],
   "completed_at": "2026-11-20T10:04:12.104Z",
   "dispatched_at": "2026-11-20T09:54:19Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "count wording only: the log's twenty COMPARE rows all pass; the fragment's nineteen understates them and changes no verdict",
+      "recorded_at": "2026-11-20T11:07:46.444456+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/iron-core-magnetisation/icm-west-inputs-repin.html",

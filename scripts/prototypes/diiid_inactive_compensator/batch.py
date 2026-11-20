@@ -43,7 +43,7 @@ def completed(folder):
     return log.read_text().endswith("EXIT=0\n")
 
 
-def row_environment(tree, arm, slot, slots):
+def row_environment(tree, arm, slot, slots, cards):
     """Return the child environment, identical across arms but for the rule."""
     values = dict(
         os.environ,
@@ -53,7 +53,7 @@ def row_environment(tree, arm, slot, slots):
         OPENBLAS_NUM_THREADS="1",
         JAX_ENABLE_COMPILATION_CACHE="0",
         JAX_PERSISTENT_CACHE_ENABLE_XLA_CACHES="none",
-        XLA_PYTHON_CLIENT_MEM_FRACTION=str(0.9 / slots),
+        XLA_PYTHON_CLIENT_MEM_FRACTION=str(0.9 / max(1, slots // max(1, cards))),
         XLA_PYTHON_CLIENT_PREALLOCATE="false",
         CUDA_VISIBLE_DEVICES=str(slot),
     )
@@ -132,7 +132,7 @@ def main():
             process = subprocess.Popen(
                 command,
                 cwd=args.tree,
-                env=row_environment(args.tree, arm, slot, args.slots),
+                env=row_environment(args.tree, arm, slot, args.slots, args.cards),
                 stdout=stream,
                 stderr=subprocess.STDOUT,
             )

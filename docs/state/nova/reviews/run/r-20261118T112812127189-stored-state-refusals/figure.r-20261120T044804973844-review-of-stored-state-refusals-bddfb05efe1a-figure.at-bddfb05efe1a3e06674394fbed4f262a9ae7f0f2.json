@@ -69,6 +69,13 @@
       "table_form": "the image is a poloidal flux map with wall and null markers, a spatial relation that no table can carry."
     }
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-stored-state-refusals-bddfb05efe1a",
+      "recorded_at": "2026-11-20T07:26:17.124668+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-default.svg",

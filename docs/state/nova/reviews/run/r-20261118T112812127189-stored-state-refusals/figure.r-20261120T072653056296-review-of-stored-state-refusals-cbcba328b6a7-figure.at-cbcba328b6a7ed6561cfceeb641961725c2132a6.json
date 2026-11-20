@@ -1,0 +1,123 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-20T07:33:43.615Z",
+  "dispatched_at": "2026-11-20T07:27:42Z",
+  "figures": {
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/iter-iter-stored-default-preview.png": {
+      "contrast": "pass: black legend text on white; the grey contours read at about 3.1:1.",
+      "data_ink": "pass on decoration, but the panel carries a single series while its legend declares two, so an eighth of the intended ink is missing.",
+      "decoration": "pass: no fill, gradient or shading.",
+      "label_collision": "pass: legend in clear space above the panel, nothing clipped.",
+      "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere on the plotting area. Measured on this PNG: 127 blue pixels in the whole 1400x720 image, every one inside the legend swatch at x 737-777, y 21-29; zero blue pixels below y=60. A reader sees only the grey stored imas-efit field and cannot make the comparison the panel exists for.",
+      "table_form": "pass: poloidal flux map."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/iter-iter-stored-default.svg": {
+      "contrast": "pass: near-black legend text on white, #929292 data grey at about 3.1:1, blue at about 5.4:1.",
+      "data_ink": "pass on decoration, with a weight imbalance recorded as a non-blocking finding: contours, wall and nulls only, but the grey reference is about twice the ink of the blue subject.",
+      "decoration": "pass: no fill, gradient or shading.",
+      "label_collision": "pass: legend in clear space above the panel, nothing clipped, no axis text.",
+      "legibility": "pass: both series are drawn and separable at a glance - nested grey stored-state contours with the grey axis triangle and X-point cross, crossed by blue near-vertical terminal-iterate contours; the panel occupies 20% of the canvas width, so it is small on the page but readable.",
+      "table_form": "pass: poloidal flux map."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-displaced-continuation.svg": {
+      "contrast": "pass: near-black text on white; data greys and blue clear 3:1.",
+      "data_ink": "pass on decoration; weight imbalance recorded as a non-blocking finding.",
+      "decoration": "pass: no fill, gradient or shading.",
+      "label_collision": "pass: legend in clear space, no clipped text.",
+      "legibility": "pass as a single panel: both series are drawn and readable; byte-identical to the other three MAST-U renders, recorded as a non-blocking finding.",
+      "table_form": "pass: poloidal flux map."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-displaced-default.svg": {
+      "contrast": "pass: near-black text on white; data greys and blue clear 3:1.",
+      "data_ink": "pass on decoration; weight imbalance recorded as a non-blocking finding.",
+      "decoration": "pass: no fill, gradient or shading.",
+      "label_collision": "pass: legend in clear space, no clipped text.",
+      "legibility": "pass as a single panel: both series are drawn and readable; byte-identical to the other three MAST-U renders, recorded as a non-blocking finding.",
+      "table_form": "pass: poloidal flux map."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-continuation.svg": {
+      "contrast": "pass: near-black text on white; data greys and blue clear 3:1.",
+      "data_ink": "pass on decoration; reference-versus-subject weight imbalance recorded as a non-blocking finding.",
+      "decoration": "pass: no fill, gradient or shading.",
+      "label_collision": "pass: legend in clear space, no clipped text.",
+      "legibility": "pass as a single panel: both series are drawn and readable. Recorded as a non-blocking finding that its render is byte-identical to the other three MAST-U panels, so the four arms are visually indistinguishable.",
+      "table_form": "pass: poloidal flux map."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-default.svg": {
+      "contrast": "pass: near-black legend text on white; data greys and blue clear the 3:1 threshold.",
+      "data_ink": "pass on decoration; the reference-versus-subject weight imbalance is recorded as a non-blocking finding.",
+      "decoration": "pass: no fill, gradient or shading.",
+      "label_collision": "pass: legend in clear space, no clipped text, no axis labels.",
+      "legibility": "pass: grey stored contours with the grey axis triangle and X-point cross, crossed by blue terminal-iterate contours contained inside the wall outline (measured: zero rows where blue ink extends beyond the wall ink).",
+      "table_form": "pass: poloidal flux map."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/tcv-tcv-stored-default-preview.png": {
+      "contrast": "pass: black legend text on white; grey contours at about 3.1:1.",
+      "data_ink": "pass on decoration, but one of the two declared series is entirely absent.",
+      "decoration": "pass: no fill, gradient or shading.",
+      "label_collision": "pass: legend in clear space, nothing clipped.",
+      "legibility": "fails: the legend advertises a blue 'nova' series and no blue mark appears anywhere on the plotting area. Measured on this PNG: 127 blue pixels, every one inside the legend swatch at x 737-777, y 21-29; zero blue pixels below y=60.",
+      "table_form": "pass: poloidal flux map."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/tcv-tcv-stored-default.svg": {
+      "contrast": "pass: near-black legend text on white; greys and blue clear 3:1.",
+      "data_ink": "pass on decoration; the reference-versus-subject weight imbalance is recorded as a non-blocking finding.",
+      "decoration": "pass: no fill, gradient or shading.",
+      "label_collision": "pass: legend in clear space, nothing clipped.",
+      "legibility": "pass: grey stored contours about the axis triangle with the X-point cross low in the vessel, overrun by blue near-vertical terminal-iterate contours. The panel occupies only 14% of the canvas width, the smallest of the set.",
+      "table_form": "pass: poloidal flux map."
+    }
+  },
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals/iter-iter-stored-default-preview.png",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The published preview still shows one series where its legend advertises two. Measured: 127 blue pixels in the whole 1400x720 image, all of them inside the legend swatch (x 737-777, y 21-29) and zero below y=60, so the blue 'nova' terminal iterate and its contours are drawn nowhere. A reader opening this preview sees only the grey stored imas-efit field and cannot tell a refused arm from a converged one, which is the comparison the panel exists to make. The six SVG renders were repaired at this head; the preview beside them was not regenerated, so the fix did not reach every published artifact."
+    },
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals/tcv-tcv-stored-default-preview.png",
+      "line": null,
+      "severity": "blocking",
+      "summary": "Same defect on the TCV preview: 127 blue pixels in the whole 1400x720 image, every one inside the legend swatch at x 737-777, y 21-29, and none below y=60. The legend announces a blue 'nova' series that the image does not contain, so the preview presents a two-field comparison as a single stored field."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/panels.py",
+      "line": 104,
+      "severity": "non-blocking",
+      "summary": "The nova terminal iterate, which is the subject these panels exist to show, is drawn at linewidth=1.0 against the stored reference at 2.6 pt on line 93, so the reference carries about twice the ink (measured 16022 grey against 8176 blue pixels in the MAST-U render). The style guidance sets the headline series at 3.0 pt and other data series at 2.6 pt; at one point the blue contours read as secondary and thin out toward hairline at page width."
+    },
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-default.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "All four MAST-U panels render byte-identically (md5 f7d3f1f632040a8c879dd3bcd8a8f47d for stored-default, stored-continuation, displaced-default and displaced-continuation), and the fragment gives all four the same caption ranges and level counts. As published, the four figures cannot show a reader that the displaced or continuation arms differ from the stored default at all, so three of the four figures add no information the first does not already carry. Whether this is one terminal state across the arms or a shared field being drawn four times cannot be read off the raster."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/panels.py",
+      "line": 82,
+      "severity": "non-blocking",
+      "summary": "Each figure is drawn on the declared 14x7.2 in canvas but the machine occupies only 14-20% of the canvas width (measured content x 560-841 of 1399 px on ITER, x 603-798 on TCV), so roughly three quarters of each canvas is blank and the fragment's width='100%' renders the contours at a fraction of the size the figure size implies."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261120T072653056296-review-of-stored-state-refusals-cbcba328b6a7-figure",
+  "reviewed_base_sha": "a148a0a9d176713a90cd24ffa7de2966b0c55654",
+  "reviewed_head_sha": "cbcba328b6a7ed6561cfceeb641961725c2132a6",
+  "reviewed_run_id": "r-20261118T112812127189-stored-state-refusals",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass: legend text renders in near-black on white (measured darkest text pixels 0,0,0 to 63,63,63, far above 4.5:1); the data greys measure #929292 at about 3.1:1 on white and the blue at about 5.4:1, both clearing the 3:1 non-text threshold.",
+    "data_ink": "all six SVG renders carry data ink only: line contours, the wall outline and the two stored null markers, with no fill, gradient or shading. The blue subject series is drawn at 1.0 pt against the grey reference at 2.6 pt, so the reference carries roughly twice the ink (measured 16022 grey against 8176 blue pixels in the MAST-U render); the plot also occupies only 14-20% of the canvas width, leaving most of the declared canvas blank.",
+    "decoration": "pass: no gradient, background fill, shading band, frame or styled theme appears in any of the eight images; each panel is line contours on white.",
+    "label_collision": "pass: the single frameless figure legend sits in clear white space above the panel, no label is clipped by the canvas edge (measured content lies within x 560-841, y 91-676 of a 1399x720 canvas), and there are no axis labels to collide with each other or with the data.",
+    "legibility": "six of the eight images are legible at a glance: the grey stored imas-efit contours and the blue nova terminal-iterate contours are both drawn, distinguishable by hue and weight, with the wall and the stored null markers visible. The two published *-preview.png files fail: their legend advertises a blue 'nova' series that is drawn nowhere on the plotting area.",
+    "table_form": "pass: every image is a poloidal flux map with machine geometry and null markers, a spatial relationship no table can carry."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T07:34:06.761988+00:00",
+  "total": null
+}

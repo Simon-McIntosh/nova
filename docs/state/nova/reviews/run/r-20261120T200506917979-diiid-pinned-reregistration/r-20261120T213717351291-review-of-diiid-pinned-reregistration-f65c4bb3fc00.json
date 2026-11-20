@@ -1,0 +1,137 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "assertion": "edge[\"psi_norm\"] == 1.0",
+      "fails_if": "the preflight stops writing the prescribed_profile_edge block, or writes a different key; it does not fail if _profile_edge_values returns a wrong psi_norm, because the fixture supplied 1.0 itself.",
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": 386,
+      "test": "test_entry_point_records_seed_qualification_before_scoring"
+    },
+    {
+      "assertion": "'finite-edge' in edge[\"source\"]",
+      "fails_if": "the product literal at benchmarks/diiid_current_pinned_forward.py:800-803 stops naming the finite-edge flux function; this one is independent of the fixture's input.",
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": 387,
+      "test": "test_entry_point_records_seed_qualification_before_scoring"
+    },
+    {
+      "assertion": "edge[\"p_prime\"] == -1234.5 and edge[\"ff_prime\"] == -0.0123",
+      "fails_if": "the key is renamed or the tuple is transposed (p_prime vs ff_prime swapped); it cannot fail on a wrong boundary value because the values are the fixture's own at line 352.",
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": 388,
+      "test": "test_entry_point_records_seed_qualification_before_scoring"
+    }
+  ],
+  "assertion_independence": "Lines 386, 388 and 389 compare the receipt against the tuple the fixture itself fed in at line 352, so they move together; line 387 checks a product-side literal and is independent. No collected assertion checks the real boundary extraction.",
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/diiid_current_pinned_forward.py:1208 main --preflight-frame -> solve_frame",
+    "benchmarks/diiid_current_pinned_forward.py:1111 run -> solve_frame",
+    "scripts/prototypes/diiid_pinned_reregistration/measure.py:42 _entry_point -> pinned.main",
+    "benchmarks/diiid_solenoid_inclusion_ladder.py:99 reads pinned.REPRESENTATIVE_COHORT"
+  ],
+  "completed_at": "2026-11-20T21:53:34.478Z",
+  "dispatched_at": "2026-11-20T21:38:01Z",
+  "evidence_limits": [
+    "Bounded read-only review: no test was re-run and no mutation was applied; the suite arms, the entry-point run, the measurement pair and the negative control were read as recorded.",
+    "The added-failure count is read from the reviewed run's own baseline_suite and after_suite logs (14 passed each, EXIT=0, zero failures) and was not measured independently.",
+    "The scoped gate log header records revision b2bc584b8, one docs-only commit behind the reviewed head; the after_suite arm ran at the reviewed head f65c4bb3 and is the arm this verdict rests on.",
+    "The declared figure directory received no file; this node produces a current registration table rather than a terminal forward state, so the poloidal flux-panel rule is not engaged."
+  ],
+  "findings": [
+    {
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": "388",
+      "text": "non-blocking: the added assertions at :386 and :388-389 compare prescribed_profile_edge against the tuple the same test monkeypatched into pinned._profile_edge_values at :352, so both sides move together and the block stays green whatever the real boundary extraction returns; it guards the new wiring (the key exists and its source string names the head) but not the registration. It is non-blocking because the physics is held by registration_check.py and its recorded red log."
+    },
+    {
+      "file": "scripts/prototypes/diiid_pinned_reregistration/registration_check.py",
+      "line": "21",
+      "text": "non-blocking: the check that holds a record to the 2e-6 registration is not collected by the default suite (pyproject.toml:289-297 sets testpaths to tests and six nova/imas modules) and its DEFAULT_RECORD is an absolute path under one user's home cache, so the re-registration this node lands has no automated guard that runs in CI or for another user."
+    },
+    {
+      "file": "scripts/prototypes/diiid_pinned_reregistration/measure.py",
+      "line": "99",
+      "text": "non-blocking: the cohort-row read preamble (the LABEL/CURRENT/GEOMETRY/PLASMA_CURRENT column tuple, the path join, _read and _source_path) is copied a fourth time here after benchmarks/diiid_current_pinned_forward.py:1071 and :1188 and scripts/prototypes/diiid_pinned_seed_drift/measure.py:55, the same duplication the prior review of this section asked this node to fold into a module constant."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all three commits 00016d35..f65c4bb3 (+277 -2); 1f9fb2be2 moves the cohort constants and adds the prescribed_profile_edge block inside the preflight write at benchmarks/diiid_current_pinned_forward.py:793-804, the two docs commits add scripts/prototypes/diiid_pinned_reregistration/{measure,registration_check}.py and the evidence fragment, and f65c4bb3 corrects a quoted ratio from 1.8e-16 to the measured 2.1e-16 with no measurement changed.",
+    "done_when": "Read all three clauses; clause (1) is met by logs/entry-head.log (EXIT=0, revision f65c4bb3, --output under ~/.cache/nova-diiid-pinned-reregistration/entry-head) with docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-reregistration.html carrying 1119947.225212 A beside 1137702.226779 A and 1119994.165 A plus p' = -2319.33255534632 and FF' = 0.005842247232267696 at psi_N = 1; clause (2) is met by logs/measure-head.log returning 1119833.584176021 A, 2.1e-16 relative from the required 1119833.5841760212 A, with only the boundary form substituted; clause (3) is met by commit 1f9fb2be2's body naming the three accepted changes and the finite-edge mechanism and by COHORT_PREFLIGHT_RELATIVE_TOLERANCE still 2.0e-6 at benchmarks/diiid_current_pinned_forward.py:85, with baseline_suite and after_suite each recording 14 passed and zero failures.",
+    "goal": "The source goal (plan docs/plans/diiid-vertical-force-balance.html section 11) is to re-register frame d3d_shot_00000c4a7b.parquet:102's unscaled seed current on the finite-edge head and to show that the finite-edge boundary form alone accounts for the move from the pre-finite-edge reading; the landed commits 1f9fb2be2..f65c4bb3 do both, moving the cohort registration to 1119947.2252120043 A and returning 1119833.584176 A through a zero-edge control.",
+    "manifest": "Read the source run's manifest.md; it records commits 1f9fb2be2 and f65c4bb3, baseline_suite at 00016d35 with 0 failures and after_suite at f65c4bb3 with 0 failures beside their log paths, an empty failure_attribution and status complete, and its outside_scope names the committed pinned-cohort receipt that still carries the superseded registration.",
+    "write_paths": "The node declared five paths; all five delivered files (benchmarks/diiid_current_pinned_forward.py, tests/imas/test_diiid_current_pinned_forward.py, scripts/prototypes/diiid_pinned_reregistration/{measure,registration_check}.py and the one evidence fragment) lie inside them, and the declared figure directory received no file, which is not engaged because this record carries a current table rather than a terminal poloidal flux state."
+  },
+  "justifications": {
+    "durability": "tests/imas/test_diiid_current_pinned_forward.py:388 asserts a value the fixture itself supplied at :352, and scripts/prototypes/diiid_pinned_reregistration/registration_check.py is outside pyproject testpaths (tests, nova/imas/*.py), so no collected test fails if the registration or the boundary extraction regresses.",
+    "evidence": "logs/entry-head.log and logs/measure-head.log carry the head 1119947.2252120043 A and the zero-edge 1119833.584176021 A with EXIT=0 at f65c4bb3, and the evidence fragment's 2.1e-16 reconciles with the logged values, though the entry-point arm writes to the run's cache root rather than a committed record.",
+    "fit": "benchmarks/diiid_current_pinned_forward.py:793 and scripts/prototypes/diiid_pinned_reregistration/measure.py:40 follow the module's existing argparse/JSON/raise and prototype-driver idiom, and the naming checks find no plan, version or ticket label in the added paths.",
+    "goal_fidelity": "benchmarks/diiid_current_pinned_forward.py:95 now declares 1119947.2252120043 A and :793-804 records the frame's boundary p' and FF' beside the seed current, which is what plan section 11 asks the node to re-register and record.",
+    "reuse": "scripts/prototypes/diiid_pinned_reregistration/measure.py:112 calls the existing gs_match._profile_edge_values and :68-79 substitutes the existing SampledFluxFunction rather than re-deriving either, while :99-110 copies the cohort-row column tuple that already has three construction sites inside the benchmark.",
+    "scope_discipline": "every path in 00016d35..f65c4bb3 lies inside the five declared write paths, with dashboards and every other benchmark left untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source goal (plan docs/plans/diiid-vertical-force-balance.html section 11) is to re-register frame d3d_shot_00000c4a7b.parquet:102's unscaled seed current on the finite-edge head and to show that the finite-edge boundary form alone accounts for the move from the pre-finite-edge reading; the landed commits 1f9fb2be2..f65c4bb3 do both, moving the cohort registration to 1119947.2252120043 A and returning 1119833.584176 A through a zero-edge control.\nVERDICT done_when: Read all three clauses; clause (1) is met by logs/entry-head.log (EXIT=0, revision f65c4bb3, --output under ~/.cache/nova-diiid-pinned-reregistration/entry-head) with docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-reregistration.html carrying 1119947.225212 A beside 1137702.226779 A and 1119994.165 A plus p' = -2319.33255534632 and FF' = 0.005842247232267696 at psi_N = 1; clause (2) is met by logs/measure-head.log returning 1119833.584176021 A, 2.1e-16 relative from the required 1119833.5841760212 A, with only the boundary form substituted; clause (3) is met by commit 1f9fb2be2's body naming the three accepted changes and the finite-edge mechanism and by COHORT_PREFLIGHT_RELATIVE_TOLERANCE still 2.0e-6 at benchmarks/diiid_current_pinned_forward.py:85, with baseline_suite and after_suite each recording 14 passed and zero failures.\nVERDICT write_paths: The node declared five paths; all five delivered files (benchmarks/diiid_current_pinned_forward.py, tests/imas/test_diiid_current_pinned_forward.py, scripts/prototypes/diiid_pinned_reregistration/{measure,registration_check}.py and the one evidence fragment) lie inside them, and the declared figure directory received no file, which is not engaged because this record carries a current table rather than a terminal poloidal flux state.\nVERDICT manifest: Read the source run's manifest.md; it records commits 1f9fb2be2 and f65c4bb3, baseline_suite at 00016d35 with 0 failures and after_suite at f65c4bb3 with 0 failures beside their log paths, an empty failure_attribution and status complete, and its outside_scope names the committed pinned-cohort receipt that still carries the superseded registration.\nVERDICT diff: Read all three commits 00016d35..f65c4bb3 (+277 -2); 1f9fb2be2 moves the cohort constants and adds the prescribed_profile_edge block inside the preflight write at benchmarks/diiid_current_pinned_forward.py:793-804, the two docs commits add scripts/prototypes/diiid_pinned_reregistration/{measure,registration_check}.py and the evidence fragment, and f65c4bb3 corrects a quoted ratio from 1.8e-16 to the measured 2.1e-16 with no measurement changed.\nCALL_SITES: benchmarks/diiid_current_pinned_forward.py:1208 main --preflight-frame -> solve_frame, benchmarks/diiid_current_pinned_forward.py:1111 run -> solve_frame, scripts/prototypes/diiid_pinned_reregistration/measure.py:42 _entry_point -> pinned.main, benchmarks/diiid_solenoid_inclusion_ladder.py:99 reads pinned.REPRESENTATIVE_COHORT\nSCORE goal_fidelity: 18\nSCORE evidence: 17\nSCORE scope_discipline: 19\nSCORE durability: 11\nSCORE fit: 18\nSCORE reuse: 16\nJUSTIFICATION goal_fidelity: benchmarks/diiid_current_pinned_forward.py:95 now declares 1119947.2252120043 A and :793-804 records the frame's boundary p' and FF' beside the seed current, which is what plan section 11 asks the node to re-register and record.\nJUSTIFICATION evidence: logs/entry-head.log and logs/measure-head.log carry the head 1119947.2252120043 A and the zero-edge 1119833.584176021 A with EXIT=0 at f65c4bb3, and the evidence fragment's 2.1e-16 reconciles with the logged values, though the entry-point arm writes to the run's cache root rather than a committed record.\nJUSTIFICATION scope_discipline: every path in 00016d35..f65c4bb3 lies inside the five declared write paths, with dashboards and every other benchmark left untouched.\nJUSTIFICATION durability: tests/imas/test_diiid_current_pinned_forward.py:388 asserts a value the fixture itself supplied at :352, and scripts/prototypes/diiid_pinned_reregistration/registration_check.py is outside pyproject testpaths (tests, nova/imas/*.py), so no collected test fails if the registration or the boundary extraction regresses.\nJUSTIFICATION fit: benchmarks/diiid_current_pinned_forward.py:793 and scripts/prototypes/diiid_pinned_reregistration/measure.py:40 follow the module's existing argparse/JSON/raise and prototype-driver idiom, and the naming checks find no plan, version or ticket label in the added paths.\nJUSTIFICATION reuse: scripts/prototypes/diiid_pinned_reregistration/measure.py:112 calls the existing gs_match._profile_edge_values and :68-79 substitutes the existing SampledFluxFunction rather than re-deriving either, while :99-110 copies the cohort-row column tuple that already has three construction sites inside the benchmark.\nFINDING tests/imas/test_diiid_current_pinned_forward.py:388 non-blocking: the added assertions at :386 and :388-389 compare prescribed_profile_edge against the tuple the same test monkeypatched into pinned._profile_edge_values at :352, so both sides move together and the block stays green whatever the real boundary extraction returns; it guards the new wiring (the key exists and its source string names the head) but not the registration. It is non-blocking because the physics is held by registration_check.py and its recorded red log.\nFINDING scripts/prototypes/diiid_pinned_reregistration/registration_check.py:21 non-blocking: the check that holds a record to the 2e-6 registration is not collected by the default suite (pyproject.toml:289-297 sets testpaths to tests and six nova/imas modules) and its DEFAULT_RECORD is an absolute path under one user's home cache, so the re-registration this node lands has no automated guard that runs in CI or for another user.\nFINDING scripts/prototypes/diiid_pinned_reregistration/measure.py:99 non-blocking: the cohort-row read preamble (the LABEL/CURRENT/GEOMETRY/PLASMA_CURRENT column tuple, the path join, _read and _source_path) is copied a fourth time here after benchmarks/diiid_current_pinned_forward.py:1071 and :1188 and scripts/prototypes/diiid_pinned_seed_drift/measure.py:55, the same duplication the prior review of this section asked this node to fold into a module constant.\n",
+  "reuse_search": {
+    "capabilities": [
+      "reading the prescribed boundary p'/FF' at psi_N = 1",
+      "substituting the zero-edge boundary form on a built profile",
+      "running the benchmark's own preflight entry point",
+      "holding a record to the registered seed current"
+    ],
+    "judgement": "The boundary-value read and the boundary form both call the existing owner (gs_match._profile_edge_values, solve_request.SampledFluxFunction) rather than re-deriving them, and measure.py deliberately drives pinned.main() instead of the point-route that the earlier drift prototype reimplemented. The residual duplication is the cohort-row read preamble, whose column tuple now has a fourth construction site.",
+    "owners_opened": [
+      "benchmarks/diiid_forward_gs_match.py:1172 _profile_edge_values",
+      "nova/equilibrium/solve_request.py:144 SampledFluxFunction",
+      "scripts/prototypes/diiid_pinned_seed_drift/measure.py:52",
+      "benchmarks/diiid_current_pinned_forward.py:1071",
+      "benchmarks/diiid_current_pinned_forward.py:1188"
+    ]
+  },
+  "review_run_id": "r-20261120T213717351291-review-of-diiid-pinned-reregistration-f65c4bb3fc00",
+  "reviewed_base_sha": "00016d35e9a65b06743fb9b8aee3569540491cd5",
+  "reviewed_head_sha": "f65c4bb3fc003951662c208a4b2aed48fde065a1",
+  "reviewed_run_id": "r-20261120T200506917979-diiid-pinned-reregistration",
+  "reviewed_worker_commits": [
+    "1f9fb2be25c9b9360bcda7d78845ab90dc3322d9",
+    "b2bc584b8078a81b485fd38af1540b7b9ba75b0c",
+    "f65c4bb3fc003951662c208a4b2aed48fde065a1"
+  ],
+  "scope_provenance": "The reviewed base 00016d35 is the parent of the first worker commit 1f9fb2be2, so the diff is exactly the three worker commits and inherits no landing.",
+  "scores": {
+    "durability": 11,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/imas/test_diiid_current_pinned_forward.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T200506917979-diiid-pinned-reregistration/after_suite-1795208845016143582.log",
+      "revision": "f65c4bb3fc003951662c208a4b2aed48fde065a1",
+      "summary": "14 passed in 4.30s"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/imas/test_diiid_current_pinned_forward.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T200506917979-diiid-pinned-reregistration/baseline_suite-1795208802323776067.log",
+      "revision": "00016d35e9a65b06743fb9b8aee3569540491cd5",
+      "summary": "14 passed in 4.40s"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T21:53:52.396681+00:00",
+  "total": 99
+}

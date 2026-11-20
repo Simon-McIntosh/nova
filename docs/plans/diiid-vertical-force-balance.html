@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="158">
+<meta name="plan-version" content="159">
 <meta name="plan-modified" content="2026-11-20">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -243,6 +243,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s11" data-id="c-partial-r-20261116T235243862922-diiid-pinned-seed-drift" data-who="35a66cc6-f4f1-4358-8dbb-99c9333c7249" data-when="2026-11-18T06:40:00+00:00">
     <div class="r-comment-body"><p>Run r-20261116T235243862922-diiid-pinned-seed-drift delivered part of this section: the reproduction, the three-change causal account (edge cap, stationary normalization and domain, integration route) accepted by the lead, and the benchmark preflight with its tests. The re-registration remains, owed after §13 gives the flux functions a finite edge, because that moves the value again; the section stays implementable.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261120T213717351291-review-of-diiid-pinned-reregistration-f65c4bb3fc00" data-who="reckon-build" data-when="2026-11-20T21:53:34.478Z">
+    <div class="r-comment-body"><p>Independent review of r-20261120T200506917979-diiid-pinned-reregistration at base 00016d35e9a65b06743fb9b8aee3569540491cd5 and head f65c4bb3fc003951662c208a4b2aed48fde065a1 scores goal_fidelity 18, evidence 17, scope_discipline 19, durability 11, fit 18, reuse 16; all three done_when clauses are delivered and the boundary-form substitution reproduces the pre-finite-edge reading to 2.1e-16, with three non-blocking findings (a test assertion that moves with its own fixture input, an uncollected registration check, and a fourth copy of the cohort-row read preamble).</p></div>
 </div>
 <div class="r-comment" data-section="s12" data-id="c-closed-s12-finite-edge" data-who="35a66cc6-f4f1-4358-8dbb-99c9333c7249" data-when="2026-11-19T13:20:00+00:00">
     <div class="r-comment-body"><p>Closed without diagnosis by lead decision on 2026-11-19. On §13's finite-edge profiles 137D converges at 9.06e-9 with its lower null 1.250 cm from EFIT's, and 146D, 146L and 179L converge as well. The refusal this section set out to explain came from the zeroed edge, not from a solver mechanism that persists on the profiles the solve now uses. No refusal mechanism was measured; run r-20261117T165550735467-diiid-137d-refusal is discarded.</p></div>

@@ -304,6 +304,26 @@
   cent are flagged &mdash; three decades under the delivered rule's own 7.2e-6
   miss, which is the distance a mask that fires nowhere would leave and what the
   tolerance still catches.</p>
+  <p>The repair round that followed the first review moved the pieces this rule
+  needs onto single owners rather than leaving copies beside the measurement.
+  <code>tiledassembly.volume_mutual(polygons, plan, *, packed, section_order,
+  refine_order)</code> now owns the section-quadrature volume block: the Galerkin
+  interaction calls it with the distant and the near section rules, and
+  <code>scripts/iron_operator_bound/nearfield.py</code> calls the same function
+  at six and twelve nodes to measure the per-pair error, so the study can no
+  longer describe a block the assembler does not build.
+  <code>magnetisation.gate_shell()</code> owns the closed octagonal gate mesh
+  that <code>compare.py</code>, <code>localise.py</code>,
+  <code>nearfield.py</code>, <code>shells.py</code> and
+  <code>selfcell.py</code> each rebuilt literally.
+  <code>galerkin_spectrum(..., witness=True)</code> returns the eigenvector of
+  the maximum beside the extremes, so <code>measure.py</code>'s dense branch
+  reports the owner's quotient and witness instead of solving the same
+  generalised problem a second time; its Lanczos branch stays, because it is the
+  capability the dense owner cannot carry at WEST size. In
+  <code>_polygon_current_response</code> the caller's boolean
+  <code>columns</code> mask and the tile loop's index vector no longer share a
+  name: <code>tile_columns</code> is the loop's.</p>
 
   <h3 id="icm-graded-operator-bound-control">The negative control</h3>
   <p>The delivered rule <em>is</em> the defect, so the delivered column is the

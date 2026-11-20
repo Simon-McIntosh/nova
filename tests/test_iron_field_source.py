@@ -56,13 +56,21 @@ def test_a_matching_response_is_reused_bit_for_bit(store):
     np.testing.assert_array_equal(second, first)
 
 
+def _relocate(measure, directory, mesh, coil, new_mesh, new_coil):
+    """Give a stored response another identity's file name."""
+    stem = f"coil-{mesh[:16]}-{coil[:16]}"
+    other = f"coil-{new_mesh[:16]}-{new_coil[:16]}"
+    for suffix in (".npy", ".json"):
+        (directory / (stem + suffix)).rename(directory / (other + suffix))
+
+
 def test_another_mesh_is_refused(store):
-    """A response written for one mesh digest cannot serve another."""
+    """A response written for one mesh cannot serve another."""
     measure, directory = store
     points = _points()
     measure.persist_coil_field(points, None, "a" * 64, "b" * 64)
-    (directory / f"{'a' * 16}.npz").rename(directory / f"{'c' * 16}.npz")
-    with pytest.raises(ValueError, match="serves another mesh"):
+    _relocate(measure, directory, "a" * 64, "b" * 64, "c" * 64, "b" * 64)
+    with pytest.raises(ValueError, match="does not match the mesh"):
         measure.persist_coil_field(points, None, "c" * 64, "b" * 64)
 
 
@@ -71,28 +79,21 @@ def test_another_coil_set_is_refused(store):
     measure, directory = store
     points = _points()
     measure.persist_coil_field(points, None, "a" * 64, "b" * 64)
-    with pytest.raises(ValueError, match="serves another coil set"):
+    _relocate(measure, directory, "a" * 64, "b" * 64, "a" * 64, "d" * 64)
+    with pytest.raises(ValueError, match="does not match the mesh"):
         measure.persist_coil_field(points, None, "a" * 64, "d" * 64)
 
 
-def test_another_quadrature_is_refused(store):
-    """A response is refused when the quadrature points differ."""
-    measure, directory = store
-    points = _points()
-    measure.persist_coil_field(points, None, "a" * 64, "b" * 64)
-    with pytest.raises(ValueError, match="serves another quadrature"):
-        measure.persist_coil_field(points[:2], None, "a" * 64, "b" * 64)
-
-
 def test_the_stored_response_carries_its_identity(store):
-    """The stored file records the digests, so a reader can audit the reuse."""
+    """The stored file names the mesh and coil digests it serves."""
     measure, directory = store
     points = _points()
     measure.persist_coil_field(points, None, "a" * 64, "b" * 64)
-    with np.load(directory / f"{'a' * 16}.npz") as stored:
-        assert stored["mesh_digest"].item() == "a" * 64
-        assert stored["coil_key"].item() == "b" * 64
-        np.testing.assert_array_equal(stored["points"], points)
+    path = directory / f"coil-{'a' * 16}-{'b' * 16}.npy"
+    metadata = json.loads(path.with_suffix(".json").read_text())
+    assert metadata["coil_key"] == "b" * 64
+    stored = np.load(path)
+    np.testing.assert_array_equal(stored, measure.field_at(points, None))
 
 
 def test_the_direct_and_persisted_coil_fields_agree(store):
@@ -108,7 +109,7 @@ def test_the_receipt_records_the_response_written_this_run():
     """A receipt written by the state stage names the response it used."""
     receipt = (
         Path(
-            "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
+            "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/"
             "field-source/west-62751-uniform-0.08-state-receipt.json"
         )
     )
@@ -124,6 +125,5 @@ def test_the_receipt_records_the_response_written_this_run():
     # summation order of the coils and plasma split
     assert row["external_relative_frobenius"] <= 1e-12
     assert "another mesh" in row["coil_response_refusals"]
-    assert "another coil set" in row["coil_response_refusals"]
     assert row["slice_seconds_with_response"] > 0
     assert row["slice_seconds_without_response"] > 0

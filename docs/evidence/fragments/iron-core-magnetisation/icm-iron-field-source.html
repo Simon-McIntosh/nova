@@ -86,36 +86,43 @@ magnetisation is zero.</p>
 
 <h2 id="icm-iron-field-source-external">The external term from a persisted coil response</h2>
 <p>The coils' field at the iron's 127&nbsp;872 volume quadrature points is
-written once per mesh and per coil set and reused across slices. A second run of
-the same stage reports <code>coil_response_reused=true</code> with a maximum
-relative difference of 0.0 against a fresh direct evaluation, i.e. the stored
-response round-trips bit for bit, inside the plan's 1e-12 bar. A request naming
-another mesh raises <code>the persisted coil response serves another mesh</code>;
-one naming another coil set raises <code>coil response …npz serves another coil
-set</code>. Splitting the external term into coils plus plasma changes only the
-summation order: against the prototype's single quadrature set the Frobenius
-relative difference is 5.481e-16, while the maximum pointwise relative
-difference is 1.276e-10, at quadrature points adjacent to a plasma cell where
-the kernel is largest.</p>
+written once per mesh and per coil set and reused across slices. The folded
+cache is the package's own response store, so the file name carries both
+identities (<code>coil-&lt;mesh16&gt;-&lt;key16&gt;.npy</code> with a metadata
+sidecar) and the loader re-derives the mesh digest and compares the recorded
+coil key before serving. A request for another quadrature raises
+<code>the persisted coil response serves another mesh</code> - the refusal the
+regenerated receipt records (job 1333523) - and a file whose sidecar names
+another coil set raises <code>interaction geometry digest does not match the
+mesh</code>. A second run of the same stage reports
+<code>coil_response_reused=true</code> and its difference against a fresh direct
+evaluation is the round-trip error the receipt carries. Splitting the external
+term into coils plus plasma changes only the summation order: against the
+prototype's single quadrature set the Frobenius relative difference is
+5.481e-16, while the maximum pointwise relative difference is 1.276e-10, at
+quadrature points adjacent to a plasma cell where the kernel is largest.</p>
 
 <h2 id="icm-iron-field-source-response">The persisted coil response, its refusals and its slice wall</h2>
-<p>Measured by the state stage on compute nodes, 40&nbsp;mm and 80&nbsp;mm meshes
-(jobs 1324036 and 1324312), from receipts that name their operator, module,
-working directory and x64 flag:</p>
-<table><thead><tr><th>Quantity</th><th>Measured</th><th>Contract</th></tr></thead><tbody>
-<tr><td>persisted response against a direct coil evaluation</td><td><b>0.0</b> relative on both meshes, response reused</td><td>1e-12</td></tr>
-<tr><td>external term against the prototype's single quadrature</td><td>1.93e-9 pointwise, 5.53e-16 Frobenius</td><td>summation order only</td></tr>
-<tr><td>slice wall with the persisted response</td><td><b>926.1 s</b> at 40 mm, <b>23.8 s</b> at 80 mm</td><td>record with</td></tr>
-<tr><td>slice wall with the coils evaluated on the slice</td><td><b>1220.9 s</b> at 40 mm, <b>84.1 s</b> at 80 mm</td><td>record without</td></tr>
-<tr><td>coils' field, persisted read against direct</td><td>0.022 s against 82.9 s (40 mm); 0.011 s against 20.3 s (80 mm)</td><td>-</td></tr>
-<tr><td>plasma's field on the same slice</td><td>156.1 s (40 mm); 38.2 s (80 mm)</td><td>per slice, not persisted</td></tr>
-<tr><td>state difference between the two slices</td><td>8.74e-7 (40 mm); 4.14e-9 (80 mm) relative</td><td>same solution</td></tr>
+<p>Measured by the state stage on a compute node at the 80&nbsp;mm mesh
+(job 1333523, after the evidence prune), from a receipt that names its operator,
+module, working directory and x64 flag. The 40&nbsp;mm numbers this table
+carried came from jobs 1324036 and 1324312 and their receipts were deleted with
+the root; the 40&nbsp;mm mesh could not be regenerated here, for the reason
+section&nbsp;3 below records.</p>
+<table><thead><tr><th>Quantity</th><th>Measured at 80 mm</th><th>Contract</th></tr></thead><tbody>
+<tr><td>persisted response against a direct coil evaluation</td><td><b>0.0</b> relative, response reused in the same run that writes it</td><td>1e-12</td></tr>
+<tr><td>external term against the prototype's single quadrature</td><td>1.276e-10 pointwise, 5.481e-16 Frobenius</td><td>summation order only</td></tr>
+<tr><td>slice wall with the persisted response</td><td><b>34.45 s</b></td><td>record with</td></tr>
+<tr><td>slice wall with the coils evaluated on the slice</td><td><b>89.80 s</b></td><td>record without</td></tr>
+<tr><td>coils' field, written this run against direct</td><td>22.41 s against 20.22 s</td><td>-</td></tr>
+<tr><td>plasma's field on the same slice</td><td>37.50 s</td><td>per slice, not persisted</td></tr>
+<tr><td>state difference between the two slices</td><td>2.574e-8 relative</td><td>same solution</td></tr>
+<tr><td>Newton history</td><td>five corrections: 0.998, 1.198e-3, 7.866e-5, 1.063e-5, 5.425e-7, 3.690e-9</td><td>converged</td></tr>
 </tbody></table>
-<p>The response pays for itself inside one slice at both meshes: 294.8&nbsp;s,
-24&nbsp;% of a 1221&nbsp;s solve at 40&nbsp;mm, and 60.3&nbsp;s, 72&nbsp;% of an 84.1&nbsp;s solve at 80&nbsp;mm, where the
-coils' field read drops from 20.3&nbsp;s to 0.011&nbsp;s. The two states agree to
-8.74e-7 and 4.14e-9 relative respectively, so the persisted term changes the
-wall and not the answer.</p>
+<p>The response pays for itself inside one slice at the 80&nbsp;mm mesh:
+55.35&nbsp;s, 62&nbsp;% of an 89.80&nbsp;s solve, and the two states agree to
+2.574e-8 relative, so the persisted term changes the wall and not the answer.
+The 22.41&nbsp;s above is the write, not a read; the reuse run records the read.</p>
 <p><b>Refusals, with a negative control each.</b> The stage exercises both
 refusals on every run and the receipt carries their messages: a request for any
 other quadrature raises <i>the persisted coil response serves another mesh</i>,
@@ -152,11 +159,14 @@ the CoilSet's <em>frame</em> metaframe. Seeding both closes it:
 <code>test_reloaded_coilset_accepts_the_iron_frame</code> stores a coilset, loads
 it, inserts the frame, and gets the bitwise zero control and the 1e-12 frame
 contract (1 passed in 252.89&nbsp;s).</p>
-<p><b>3. The 40 mm state.</b> The 39&nbsp;792-square dense factor (a 12.67&nbsp;GB
-operator) could not be built in this allocation; the solver process was killed
-twice before the Newton iteration started, at a resident size of 13.0&nbsp;GB.
-The 80&nbsp;mm state solved instead: 1&nbsp;695 cells, 10&nbsp;170 unknowns,
-five Newton corrections in 27.1&nbsp;s, mu_r 218.29 to 1692.49.</p>
+<p><b>3. The 40 mm state.</b> The 12.67&nbsp;GB operator still has no build
+lane. On 2026-11-20 the titan build died at the 24&nbsp;G per-card cap
+(<code>OUT_OF_MEMORY</code>, job 1330936 at 2:05) and two rigel builds ran their
+full six-hour wall and were killed (<code>TIMEOUT</code>, jobs 1332935 and
+1332936): CPU compile is the constraint, as the compute hierarchy says. The
+80&nbsp;mm state is regenerated instead: 1&nbsp;695 cells, 10&nbsp;170 unknowns,
+operator rebuilt on a P100 in 733&nbsp;s, five Newton corrections in
+34.45&nbsp;s, mu_r 218.29 to 1692.49, residual 3.690e-9.</p>
 
 <h2 id="icm-iron-field-source-disagreement">The apparent factor of 28 was a comparison error, and it is closed</h2>
 <p>This node first read its own iron field (6.780, 4.233 and 1.727&nbsp;mT at the
@@ -391,8 +401,12 @@ jobs on rigel, each over its own tree, each with the command resolved over that
 tree: <code>PYTHONPATH=. JAX_PLATFORMS=cpu
 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q
 tests/test_magnetisation.py</code>. <b>Baseline at <code>9b0161261</code>: 93
-passed in 8543.15&nbsp;s.</b> <b>After: 95 passed in 9104.13&nbsp;s</b> at head
-<code>1d739e7ec</code>. The two extra tests are this node's seam contracts — the
+collected, 86 passed in 8148.66&nbsp;s.</b> <b>After: 95 collected, 88 passed in
+8608.98&nbsp;s</b> at head <code>c88943d82</code>. The seven that fail in each
+arm are the same seven and all raise <code>FileNotFoundError</code> on
+<code>evidence/iron-limb-fill/case.json</code>, a pinned input the overnight
+delete removed; the collected count rises by the two seam contracts and every
+one of them passes. The two extra tests are this node's seam contracts — the
 frame carrying the bound currents exactly, and the same on a stored and reloaded
 coilset. Two earlier defects of the harness are worth stating because they look
 like suite failures and are not: a tree exported with <code>git show</code>'s
@@ -406,12 +420,18 @@ carries the corrected census pin. The seam and iron-read tests return 19 passed
 in 51.36&nbsp;s on the CPU lane, and the reloaded-frame test returns 1 passed in
 252.89&nbsp;s.</p>
 
-<p><b>The sampler's conviction, withdrawn.</b> The evidence root <code>/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation</code>
-was pruned at 2026-11-19T06:16Z after this record was written: the state
-receipts, the pinned operator and every stage log cited below are gone from
-disk. The numbers in this record were measured by the scheduler jobs it
-names and are reproduced here rather than in a store; a re-measurement at the
-current head could not run because the folded solve asserts the pinned operator that the prune removed.</p>
+<p><b>Regenerated, and what that means for the numbers.</b> The evidence root
+was pruned at 2026-11-19T06:16Z: the state receipts, the pinned operator and
+every stage log this record cited were deleted. They are rebuilt from the start
+rather than quoted. The pin is a pure function of the mesh, so
+<code>scripts/iron_field_source/regen_pin.py</code> rebuilds the operator and
+records the drive that pins it, and its receipt says
+<code>converged</code> only because that drive ran: the 80&nbsp;mm operator was
+rebuilt on a P100 in 733&nbsp;s and its five Newton corrections reach
+3.690e-9 in 76.5&nbsp;s (job 1333509). The state, diagnostics and figure were
+then re-measured at the folded head (job 1333523). Every number this record
+quotes at 80&nbsp;mm is from those jobs; the 40&nbsp;mm numbers are withdrawn
+where the table says so.</p>
 <h2 id="icm-iron-field-source-receipts">Receipts</h2>
 <ul>
 <li><code>/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/field-source/west-62751-uniform-0.08-state-receipt.json</code></li>

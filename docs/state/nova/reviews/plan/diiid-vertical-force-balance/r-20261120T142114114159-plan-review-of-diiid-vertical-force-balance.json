@@ -68,6 +68,13 @@
       "finding": "done_when-1",
       "reason": "The delivered \u00a77 run routes the full and reduced maps through one image site and carries test_reduced_compensator_image_and_tangent, so the reduced route is covered",
       "when": "2026-11-20T19:38:27.418770+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "\u00a74 landed in September with the representation choice recorded for the lead; reopening it is outside this round, which builds \u00a77, \u00a79 and \u00a711",
+      "when": "2026-11-20T19:39:17.639451+00:00"
     }
   ],
   "responses": {
@@ -94,6 +101,12 @@
       "note": "\u00a711 done-when (1) now names ~/.cache/nova-diiid-pinned-reregistration/ and forbids the committed pinned-cohort receipt directory",
       "reason": "",
       "when": "2026-11-20T19:36:49.808001+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a74 landed in September with the representation choice recorded for the lead; reopening it is outside this round, which builds \u00a77, \u00a79 and \u00a711",
+      "when": "2026-11-20T19:39:17.639451+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T142114114159-plan-review-of-diiid-vertical-force-balance.json",

@@ -230,7 +230,7 @@ def grouped(paths: list[Path]) -> dict[str, list[dict]]:
     return runs
 
 
-def crossing(points: dict, key: str, limit: float) -> dict:
+def crossing_point(points: dict, key: str, limit: float) -> dict:
     """The first swept value whose measure exceeds the limit, and its neighbour."""
     ordered = sorted(points.values(), key=lambda row: row["factor"])
     for position, row in enumerate(ordered):
@@ -243,6 +243,11 @@ def crossing(points: dict, key: str, limit: float) -> dict:
                 previous_value=None if previous is None else previous[key],
             )
     return dict(factor=None, value=None, previous_factor=None, previous_value=None)
+
+
+def crossing(points: dict, key: str, limit: float) -> float | None:
+    """The first swept value whose measure exceeds the limit."""
+    return crossing_point(points, key, limit)["factor"]
 
 
 def main() -> int:
@@ -311,8 +316,6 @@ def main() -> int:
         )
         for code, points in sizes.items()
     }
-    # ``crossing`` returns the first exceeding point with its neighbour, so a
-    # reader of the sweep table reads the same shape here and in the sweep.
 
     spectrum = {"nova": {}, "efit": {}}
     for key, value in summary.items():

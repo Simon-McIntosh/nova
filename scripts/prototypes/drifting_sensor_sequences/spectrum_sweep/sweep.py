@@ -372,8 +372,8 @@ def analysis(study, analyse):
         },
         "arms": table,
         "crossing": {
-            "axis_0p05_m": analyse.crossing(sizes, "axis_rms", 0.05),
-            "q95_0p2": analyse.crossing(sizes, "q95_rms", 0.2),
+            "axis_0p05_m": analyse.crossing_point(sizes, "axis_rms", 0.05),
+            "q95_0p2": analyse.crossing_point(sizes, "q95_rms", 0.2),
         },
         "generator_control": generator_control(study, truth),
         "nova": nova_column(truth, analyse),

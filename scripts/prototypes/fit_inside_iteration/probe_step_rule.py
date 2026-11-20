@@ -43,10 +43,10 @@ def _progress(config):
     return report
 
 
-def _run(rule, relaxation, settle, case, args):
+def _run(rule, relaxation, case, args):
     from nova.equilibrium.flux_iteration import FluxIterationFit
 
-    config = f"{rule}:{relaxation}:{settle}"
+    config = f"{rule}:{relaxation}"
     fitter = FluxIterationFit(
         case["profile"],
         case["magnetics"],
@@ -63,7 +63,6 @@ def _run(rule, relaxation, settle, case, args):
         flux_tolerance=args.flux_tolerance,
         relaxation=relaxation,
         step_rule=rule,
-        settle=settle,
     )
     flux = np.asarray(fitted.terminal_state.flux)
     span = abs(float(case["generated_topology"].flux_span))
@@ -122,11 +121,10 @@ def main(argv=None):
     parser.add_argument("--case", default="solovev")
     parser.add_argument(
         "--configs",
-        default="cycle:1.0,contraction:1.0,contraction:0.5,picard:0.5,picard:0.25",
+        default="coupled:1.0",
     )
     parser.add_argument("--max-passes", type=int, default=64)
     parser.add_argument("--flux-tolerance", type=float, default=1.0e-10)
-    parser.add_argument("--settle", type=float, default=0.05)
     args = parser.parse_args(argv)
     output = Path(args.output).resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -147,14 +145,7 @@ def main(argv=None):
     results = []
     for spec in [item for item in args.configs.split(",") if item]:
         rule, _, value = spec.partition(":")
-        relaxation, _, settle = value.partition(":")
-        row = _run(
-            rule,
-            float(relaxation or 1.0),
-            float(settle or args.settle),
-            case,
-            args,
-        )
+        row = _run(rule, float(value or 1.0), case, args)
         results.append(row)
         (output / f"{row['config'].replace(':', '-')}.json").write_text(
             json.dumps(row, indent=2)

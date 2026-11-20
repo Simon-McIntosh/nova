@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "789479f7dbaa97933495e8c0f82b9dfa1dc0fc75",
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/media/sources/nova_labels.py:42 SESSION_ROOT = labeller_session_root()",
+    "benchmarks/diiid_forward_gs_match.py:1735 operand_cache_root() / diiid-forward-gs",
+    "benchmarks/mast_centroid_solve_panels.py:266 operand_cache_root() / mast-centroid-panel-response",
+    "scripts/prototypes/read_route/jets.py:58 operand_cache_root() / kind",
+    "scripts/prototypes/support/certificate_fixtures.py:75 operand_cache_root() / FIXTURE_KIND_ROOT",
+    "scripts/h200_test_lane/run.sh:19 DEFAULT_PINNED_ROOT consumed by the lane launcher"
+  ],
+  "completed_at": "2026-11-20T12:13:47.058Z",
+  "dispatched_at": "2026-11-20T12:07:53Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/shared_root/inventory.py",
+      "line": "35",
+      "severity": "non-blocking",
+      "text": "non-blocking: subprocess.run(..., check=True) raises CalledProcessError when git grep exits 1, so a tree with no matches at all reports a traceback and exit 1 instead of the zero-reference listing the after-run is meant to show; reproduced by running the committed tool with an unmatched root, which printed CalledProcessError: Command '['git', 'grep', '-n', ...]' returned non-zero exit status 1."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/shared-root.html",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment says the negative control 'reported it at line 31' while logs/negative-control.log records the restored default at line 30 of benchmarks/mast_response_carrier_warm.py, which is where CARRIER_STORE sits at b6a97ee4b and da2abb6c3, so the citation a reader would follow is off by one line."
+    },
+    {
+      "file": "scripts/prototypes/shared_root/inventory.py",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the tool re-implements the tracked-path reference scan the repository already owns at nova/database/filepath.py:270 worktree_path_candidates (git grep enumeration) and :240 worktree_path_offenders (exemption-based classification) instead of taking a root argument there; the brief mandated a separate script, so this is duplication to record, not a redesign."
+    },
+    {
+      "file": "nova/database/filepath.py",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "non-blocking: OPERAND_CACHE_ROOT's new value is asserted by no test \u2014 tests/test_operand_cache.py:119 checks only that the resolved root starts with /work/projects/imas_gpu \u2014 so a later revert of this constant to sophelio leaves every suite green while every benchmark that writes operands points at a deleted directory."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: this is the ninth file importing nova.datum/filepath and it lies outside both suite arms, cut short at a one-hour all_debug limit and then OOM-killed at 64 GB on rigel (logs/topology-base-arm.log EXIT=137), so clause (2)'s delta rests on eight of nine covering files; the repository's scripts/h200_test_lane lane is an untried route for that file."
+    }
+  ],
+  "head_log_revision": "b6a97ee4b2e1f41df562ded546a216a34fce4b40",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified six production consumers of the two changed filepath constants: nova/media/sources/nova_labels.py:42, benchmarks/diiid_forward_gs_match.py:1735, benchmarks/mast_centroid_solve_panels.py:266, scripts/prototypes/read_route/jets.py:58, scripts/prototypes/support/certificate_fixtures.py:75 and scripts/h200_test_lane/run.sh:19 all resolve through the constants, so each inherits the new root without a second edit.",
+    "diff": "read commit by commit against 789479f7: 65911dd80 rewrites 82 files' path literals plus two prose sentences and adds the inventory tool, b6a97ee4b takes the retired root as an argument so the tool carries no reference of its own, and da2abb6c3 adds the evidence fragment.",
+    "done_when": "the done_when is clause (1) a grep showing the old root only under raw, clause (2) no added failure id across the covering tests in fresh CPU-partition arms, and clause (3) no write on /work; the manifest records all three, logs/base-arm.log and logs/head-arm.log carry identical six-id failure sets, and the worker's stream holds no write verb against /work.",
+    "goal": "the goal is to move nova's shared-storage defaults from imas_gpu/sophelio to imas_gpu/nova while leaving the DIII-D corpus under sophelio/raw untouched; nova/database/filepath.py:24 and :78 and the 80 other default-bearing files now name the new root, and 29 corpus references across 20 files remain byte-identical.",
+    "manifest": "read; status in-progress at delivery with a checkpoint line, three commits named (65911dd80, b6a97ee4b, da2abb6c3), baseline_suite and after_suite each exit 1 with the same six ids, negative_control_log present and red-free in the tool's own terms, and the topology file recorded cut short with EXIT=137.",
+    "write_paths": "the declared scope is nova, scripts, benchmarks, apps/playable/machines.py, tests, AGENTS.md, the shared-root evidence fragment and its figure directory; all 84 changed paths fall inside it and the figure directory is correctly left empty because the brief asked for a table and no figure."
+  },
+  "justifications": {
+    "durability": "only tests/test_filepath_data_roots.py:36 pins a moved product default (the labeller session root) against an independent literal, so a revert of nova/database/filepath.py:24 to sophelio stays green: tests/test_operand_cache.py:119 asserts only the /work/projects/imas_gpu prefix, and the other 86 references and the inventory check itself are guarded by no test at all.",
+    "evidence": "clause (1) reproduces independently (88 default references across 82 files at 789479f7, 0 at da2abb6c3, and the 29 corpus lines at da2abb6c3 diff clean against the base), but the negative control at logs/negative-control.log exercises a plain grep rather than inventory.py's classifier, and tests/equilibrium/test_topology_read.py is cut short (logs/topology-base-arm.log EXIT=137) so one covering file is unmeasured in both arms.",
+    "fit": "the change follows the surrounding idiom \u2014 module-level Path constants left as single definitions, the filepath tests' DEFAULTS tuple extended in place, and inventory.py written as a scripts/prototypes one-off with a docstring invocation \u2014 and introduces no plan label, ticket id, version suffix or worktree path.",
+    "goal_fidelity": "git grep over the tracked tree outside docs at da2abb6c3 returns 29 references, all under imas_gpu/sophelio/raw, and 0 defaults against 88 at the base, so every shared-storage default now names imas_gpu/nova at nova/database/filepath.py:24,56 and scripts/h200_test_lane/run.sh:19 with the sub-path unchanged.",
+    "reuse": "scripts/prototypes/shared_root/inventory.py:32 re-implements the tracked-path reference enumeration and exemption classification that nova/database/filepath.py:270 worktree_path_candidates and :240 worktree_path_offenders already own, rather than extending them with a root argument.",
+    "scope_discipline": "git diff --name-only 789479f7 da2abb6c3 lists 84 paths and all are inside the declared write paths: the 82 files carrying a non-raw reference at base, plus docs/evidence/fragments/kernel-compile-barrier/shared-root.html and the new scripts/prototypes/shared_root/inventory.py, with no plan, state or docs/plans edit."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to move nova's shared-storage defaults from imas_gpu/sophelio to imas_gpu/nova while leaving the DIII-D corpus alone; nova/database/filepath.py:24 and :78 and 80 further files now name the new root and 29 corpus references across 20 files are byte-identical to the base.\nVERDICT done_when: clause (1) reproduces independently at 88 default references across 82 files at 789479f7 against 0 at da2abb6c3 with all 29 raw lines unchanged; clause (2) is logs/base-arm.log and logs/head-arm.log carrying the same six failure ids, one covering file cut short; clause (3) holds \u2014 the worker's 97 bash commands contain no write verb against /work.\nVERDICT write_paths: the declared scope covers nova, scripts, benchmarks, apps/playable/machines.py, tests, AGENTS.md, the shared-root fragment and a figure directory; all 84 changed paths in git diff 789479f7..da2abb6c3 fall inside it, and the figure directory is empty as the brief directed.\nVERDICT manifest: read; three commits named (65911dd80, b6a97ee4b, da2abb6c3), baseline_suite and after_suite both exit 1 with identical six-id failure sets, negative_control_log recorded, and tests/equilibrium/test_topology_read.py recorded cut short with EXIT=137.\nVERDICT diff: read commit by commit; 65911dd80 is a mechanical path rewrite across 82 files plus two prose restatements and the new inventory tool, b6a97ee4b makes the tool take the retired root as an argument, and da2abb6c3 adds the evidence fragment.\nCALL_SITES: nova/media/sources/nova_labels.py:42, benchmarks/diiid_forward_gs_match.py:1735, benchmarks/mast_centroid_solve_panels.py:266, scripts/prototypes/read_route/jets.py:58, scripts/prototypes/support/certificate_fixtures.py:75, scripts/h200_test_lane/run.sh:19\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: git grep at da2abb6c3 outside docs returns 29 references all under sophelio/raw and 0 defaults, and nova/database/filepath.py:24 and :78 plus the named scripts now carry imas_gpu/nova with the sub-path unchanged.\nSCORE evidence: 15\nJUSTIFICATION evidence: clause (1) reproduces at 88 defaults across 82 files at base against 0 at head with the 29 corpus lines byte-identical, but logs/negative-control.log exercises plain grep rather than inventory.py's classifier and logs/topology-base-arm.log EXIT=137 leaves one of nine covering files unmeasured.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-only 789479f7 da2abb6c3 lists 84 paths, being exactly the 82 files carrying a non-raw reference at base plus the declared fragment and the new inventory tool, with nothing outside the declared write paths.\nSCORE durability: 8\nJUSTIFICATION durability: only tests/test_filepath_data_roots.py:36 pins a moved default against an independent literal, while tests/test_operand_cache.py:119 asserts only the /work/projects/imas_gpu prefix, so a revert of nova/database/filepath.py:24 to sophelio reddens no test.\nSCORE fit: 18\nJUSTIFICATION fit: the change keeps each root as one definition in place (nova/database/filepath.py:24, scripts/h200_test_lane/run.sh:19), extends tests/test_filepath_data_roots.py:36's DEFAULTS tuple in its existing shape, and adds no plan label, ticket id or version suffix.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/shared_root/inventory.py:32 re-implements git grep enumeration and exemption classification owned by nova/database/filepath.py:270 worktree_path_candidates and :240 worktree_path_offenders rather than extending them with a root argument.\nFINDING scripts/prototypes/shared_root/inventory.py:35 non-blocking: subprocess.run(check=True) raises CalledProcessError when git grep exits 1, so a tree with no matches reports a traceback and exit 1 instead of a zero-reference listing; reproduced by running the committed tool with an unmatched root.\nFINDING docs/evidence/fragments/kernel-compile-barrier/shared-root.html:29 non-blocking: the fragment cites line 31 for the restored default where logs/negative-control.log records line 30, which is where CARRIER_STORE sits at b6a97ee4b.\nFINDING scripts/prototypes/shared_root/inventory.py:29 non-blocking: the tool duplicates the tracked-path reference scan the repository owns at nova/database/filepath.py:270 and :240 instead of extending the owner; the brief mandated a separate script, so this is recorded rather than blocking.\nFINDING nova/database/filepath.py:24 non-blocking: OPERAND_CACHE_ROOT's new value is pinned by no test \u2014 tests/test_operand_cache.py:119 checks only the /work/projects/imas_gpu prefix \u2014 so a revert to sophelio leaves the suite green.\nFINDING tests/equilibrium/test_topology_read.py:1 non-blocking: the ninth file importing the changed module sits outside both arms, cut short at an all_debug limit and OOM-killed at 64 GB on rigel, so clause (2)'s delta covers eight of nine files.\n",
+  "review_run_id": "r-20261120T120704016466-review-of-shared-root-paths-da2abb6c3b3c",
+  "reviewed_base_sha": "789479f7dbaa97933495e8c0f82b9dfa1dc0fc75",
+  "reviewed_head_sha": "da2abb6c3b3cbdf17e82c5af26a819c73d886019",
+  "reviewed_run_id": "r-20261120T094110687720-shared-root-paths",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261120T120704016466-review-of-shared-root-paths-da2abb6c3b3c"
+  },
+  "reviewer_run_id": "r-20261120T120704016466-review-of-shared-root-paths-da2abb6c3b3c",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T12:14:01.571936+00:00",
+  "total": 85
+}

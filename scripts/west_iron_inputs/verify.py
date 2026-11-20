@@ -37,7 +37,7 @@ COMMITTED_AIR_MT = [7.02407743131, 4.39682051236, 1.79996152911]
 COMMITTED_AIR_UT = [7024.08, 4396.82, 1799.96]
 COMMITTED_AIR_PLAN_UT = 7024.0
 COMMITTED_B_KNOTS = {0: 0.0, 1: 0.5}
-COMMITTED_MU = {0: 215.11019, 1: 1037.9637, -1: 1692.4}
+COMMITTED_MU = {0: 215.11019, 1: 1037.9637, "max": 1692.4}
 COMMITTED_TIME_S = 38.4395796373
 SOLVE_FRAGMENT = (
     "docs/evidence/fragments/iron-core-magnetisation/icm-west-62751-solve.html"
@@ -136,22 +136,27 @@ def main():
             0.0,
         ):
             failures.append(rows[-1]["quantity"])
-    tolerances = {0: 1e-9, 1: 1e-7, -1: 1e-4}
-    for index, value in COMMITTED_MU.items():
-        source = (
-            "tests/test_magnetisation.py west_material"
-            if index == 0
-            else SOLVE_FRAGMENT
-            if index == 1
-            else PAIR_FRAGMENT
-        )
+    tolerances = {0: 1e-9, 1: 1e-7, "max": 1e-4}
+    for key, value in COMMITTED_MU.items():
+        if key == "max":
+            source = PAIR_FRAGMENT
+            label = "table mu_relative maximum"
+            measured = float(table_mu.max())
+        else:
+            source = (
+                "tests/test_magnetisation.py west_material"
+                if key == 0
+                else SOLVE_FRAGMENT
+            )
+            label = f"table mu_relative knot {key}"
+            measured = float(table_mu[key])
         if not compare(
             rows,
-            f"table mu_relative knot {index}",
+            label,
             source,
             value,
-            float(table_mu[index]),
-            tolerances[index],
+            measured,
+            tolerances[key],
         ):
             failures.append(rows[-1]["quantity"])
     compare(

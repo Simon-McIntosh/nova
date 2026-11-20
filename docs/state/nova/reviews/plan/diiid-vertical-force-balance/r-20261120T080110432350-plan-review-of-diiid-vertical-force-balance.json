@@ -107,6 +107,13 @@
       "note": "\u00a712's opening closure paragraph states the refusal came from the zeroed edge, per \u00a713's landed result",
       "reason": "",
       "when": "2026-11-20T08:35:01.367240+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-3",
+      "reason": "The committed fit is the only instrument that produces the vector \u00a79's endpoint compares against, so naming it is the endpoint's definition rather than a guessed method; raised and declined in an earlier round",
+      "when": "2026-11-20T08:35:50.248762+00:00"
     }
   ],
   "responses": {
@@ -145,6 +152,12 @@
       "note": "\u00a712's opening closure paragraph states the refusal came from the zeroed edge, per \u00a713's landed result",
       "reason": "",
       "when": "2026-11-20T08:35:01.367240+00:00"
+    },
+    "reasoning-3": {
+      "action": "declined",
+      "by": "",
+      "reason": "The committed fit is the only instrument that produces the vector \u00a79's endpoint compares against, so naming it is the endpoint's definition rather than a guessed method; raised and declined in an earlier round",
+      "when": "2026-11-20T08:35:50.248762+00:00"
     },
     "wiring-1": {
       "action": "acted",

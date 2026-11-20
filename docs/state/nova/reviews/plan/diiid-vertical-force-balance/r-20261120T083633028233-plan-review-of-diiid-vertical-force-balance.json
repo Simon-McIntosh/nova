@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T08:42:55.358Z",
+  "dispatched_at": "2026-11-20T08:37:29Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:37",
+      "id": "reasoning-1",
+      "reason": "a reader or node entering the plan is told the cause is a field error the plan has already closed negative, and the work that remains (\u00a77's compensator image, \u00a79's coil-correction re-solve, \u00a711's seed-current re-registration) is solver-side and current-registration work, so the wrong framing mis-orients every downstream read of the sections that are still open.",
+      "text": "the lede asserts \"The leading mechanism is the external field \u2026 so a few-percent field error is amplified into exactly this kind of whole-plasma vertical excursion\", but \u00a72 (:42-44) records \"Closed negative for the missing-field hypothesis: the tared residual named no missing physical source\", the f-dvf-004 outcome (:146-148) reads the metre-scale axis motion as \"a solver-side branch or vertical-mode result\", and the `plan-summary` rewritten this round (:10) now names finite-edge profiles, one coupling kernel and conductor currents instead \u2014 so the plan's introduction states the mechanism its own body refutes and that its own introduction's summary itself names",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+  "plan_fingerprint": "a399fa0f4e2ded6b2a42bd587f906c471fb53fac066cbaa9d22d737eae705ad5",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 149,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261120T083633028233-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "3c26d026e01e7a7f643fb2eb6e4042c19e7dce12",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited fragment (edge-current refusal, inactive-compensator recovery, external-current propagation, xpoint profile extent, coil correction, pinned seed drift, finite edge flux) resolves under `docs/evidence/fragments/diiid-vertical-force-balance/`; \u00a77's and \u00a712's record paths are declared deliverables rather than existing citations, and \u00a712 states at :113 that its named paths were never written.",
+    "done_when": "pass \u2014 the three remaining implementable sections (\u00a77, \u00a79, \u00a711) each carry a falsifiable measure: \u00a77's masked-vs-unmasked null comparison with a negative control that restores the term, \u00a79's fitted-vs-measured current-vector equality with two controls, and \u00a711's replay that must restore the registration to 1.3e-7.",
+    "evidence_paths": "pass \u2014 \u00a77 names `docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge.html` and its figure directory, \u00a713's declared record and figures exist on disk, and no gate writes to a session scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach any symbol or comment; the section names that remain are descriptive of what they measure.",
+    "reasoning": "a finding \u2014 the lede at :37 still names the external field as the leading mechanism and attributes the metre-scale displacement to it, while the plan's own \u00a72 landed the missing-field hypothesis closed negative and the f-dvf-004 outcome reads the axis motion as solver-side, and this round's rewritten `plan-summary` (:10) has dropped that framing, leaving the document contradicting itself.",
+    "single_goal": "pass \u2014 \u00a77 delivers the inactive-compensator mask behaviour, \u00a79 the coil-correction re-solve, \u00a711 the seed-current re-registration; none carries two deliverables.",
+    "wiring": "pass \u2014 the changed `plan-section-depends-on` now gives \u00a711 both `#s8` and `#s13`, matching \u00a711 done-when (3) \"on the head carrying \u00a713's finite edge\", and every entry resolves to a node that exists."
+  },
+  "section_digests": {
+    "_document": "92c270944f86fcfd5beabaa2b7e98813c9c37506f4922f2391291e990d59d845",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "c28bab71a5b8a98921088e45a4f4e31dfcc1affe12d46bd488a9fa2dac89933f",
+    "s12": "9f0b7de609dddf9cec0eead4c27fef615d5275f0957928c862d35cecbbb23ffe",
+    "s13": "e14df5cf0cb26cb414397b74fb90f493b050e0a424f5b4402cd3a7a7de859cac",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "67010ceabd250e895da0e2866c55016f6d94a692436e98f386fbf5a9a62a3df2",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T08:43:19.830513+00:00",
+  "total": null
+}

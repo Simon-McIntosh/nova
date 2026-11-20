@@ -119,8 +119,13 @@ def test_analyse_refuses_a_control_that_lost_its_correlation(
     assert not (prepared / "spectrum-summary.json").exists()
 
 
-def test_sweep_and_analysis_agree_on_the_white_limit() -> None:
-    """One lag-one limit decides both the sweep check and the analysis clause."""
+def test_sweep_and_analysis_agree_on_the_white_limit(monkeypatch) -> None:
+    """One lag-one limit decides both the sweep check and the analysis clause.
+
+    The sweep's verdict is read while the module constant is moved, so a copy
+    of the old limit left behind as a literal in the driver shows up here: a
+    literal ignores the move and the gate's verdict stops tracking the clause.
+    """
     _, analyse = sweep.import_study()
     payload = {
         "arms": {
@@ -148,17 +153,18 @@ def test_sweep_and_analysis_agree_on_the_white_limit() -> None:
         },
         "nova": {"white": {"source_exists": True, "metrics": {"axis_rms": 1.0}}},
     }
-    limits = (analyse.LAG_ONE_LIMIT - 0.01, analyse.LAG_ONE_LIMIT + 0.01)
-    for value in limits:
-        white = payload["arms"]["white-reference"]
-        white["axis_lag1"] = value
-        white["flux_lag1"] = value
-        white["q95_lag1"] = value
-        failures, _ = sweep.validate(payload, analyse)
-        clause = analyse.thresholds((white, white))["white_lag1_pass"]
-        inside = abs(value) <= analyse.LAG_ONE_LIMIT
-        assert bool(failures) == (not inside)
-        assert clause is inside
+    white = payload["arms"]["white-reference"]
+    for limit in (analyse.LAG_ONE_LIMIT, analyse.LAG_ONE_LIMIT + 0.2):
+        monkeypatch.setattr(analyse, "LAG_ONE_LIMIT", limit)
+        for value in (limit - 0.01, limit + 0.01):
+            white["axis_lag1"] = value
+            white["flux_lag1"] = value
+            white["q95_lag1"] = value
+            failures, _ = sweep.validate(payload, analyse)
+            clause = analyse.thresholds((white, white))["white_lag1_pass"]
+            inside = abs(value) <= limit
+            assert bool(failures) == (not inside)
+            assert clause is inside
 
 
 def test_wall_write_leaves_no_partial_file(monkeypatch, tmp_path) -> None:

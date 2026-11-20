@@ -116,13 +116,24 @@ def block_error(value: np.ndarray, truth: np.ndarray, block: int = BLOCK) -> flo
     return float(np.sqrt(np.mean(np.square(errors))))
 
 
+def axis_distance(rows: list[dict], truth) -> np.ndarray:
+    """Distance of each slice's magnetic axis from the generating state.
+
+    One owner for the per-slice distance: the arm summaries take its RMS and
+    the axis-against-slice figure draws it, so the two cannot disagree about
+    what a slice's axis error is.
+    """
+    centre = np.asarray(truth, dtype=float).ravel()
+    return np.linalg.norm(series(rows)["axis"] - centre, axis=1)
+
+
 def summarise(rows: list[dict], truth: dict, jacobian: dict) -> dict:
     values = series(rows)
     axis_truth = np.array(truth["axis"], dtype=float)
     flux_truth = float(truth["flux_boundary"]) / float(truth["flux_span"])
     q95_truth = abs(float(truth["q95"]))
     flux_fraction = values["flux"] / float(truth["flux_span"])
-    axis_error = np.sqrt(np.mean(np.sum((values["axis"] - axis_truth) ** 2, axis=1)))
+    axis_error = float(np.sqrt(np.mean(axis_distance(rows, axis_truth) ** 2)))
     record = dict(
         slices=len(rows),
         axis_rms=float(axis_error),

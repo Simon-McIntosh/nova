@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-20T07:27:28.560Z",
   "dispatched_at": "2026-11-20T07:27:10Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-stored-state-refusals-cbcba328b6a7",
+      "recorded_at": "2026-11-20T08:08:29.849982+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/stored_state_refusals/records.py",

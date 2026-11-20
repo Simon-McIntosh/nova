@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T07:50:01.018Z",
+  "dispatched_at": "2026-11-20T07:39:32Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261120T073752442954-plan-review-of-kernel-compile-barrier/plan.html:66",
+      "id": "done_when-1",
+      "reason": "as written, a dispatched worker either reports blocked or edits the ceiling to a number its own record says it did not reach, and both outcomes are wrong; the clause must be retired (or made conditional on a raised graph budget) now that the negative result is recorded.",
+      "text": "node (c) is required to \"return the lowered-graph ceiling ... from 10,000,000 bytes to 6,000,000 or below\" (the ceiling test still reads `STABLEHLO_CEILING = 10_000_000` at tests/equilibrium/test_bounded_point_program.py:47), yet the same paragraph records that node (c) \"returned a negative result ... no folded form was accepted and the cold compile was not shrunk\", so the node's done-when can only be met by lowering the guard's ceiling with no shrunken program behind it, which is a guard falsified rather than a bound met",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261120T073752442954-plan-review-of-kernel-compile-barrier/plan.html:66",
+      "id": "reasoning-1",
+      "reason": "s4 depends on s3, and a coordinator dispatching node (d)/(f) cannot tell which program form clauses (2) and (3) are to measure, so the node is either held indefinitely on a form that does not exist or dispatched against an unstated target.",
+      "text": "the node (f) sentence \"Clauses (2) and (3) below are measured on (c)'s form and not before ... so it is spent once, on the form that meets the bound\" gates clauses (2) and (3) on a folded form, while clause (2) at plan.html:68 states \"No folded form was accepted, so the program is the repaired kernel's own and there is no second form to compare\"; the two claims about the same measure cannot both hold",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261120T073752442954-plan-review-of-kernel-compile-barrier/plan.html:64",
+      "id": "reasoning-2",
+      "reason": "with node (c) spent as a negative result, this scan is the section's only remaining lever, and a dispatch brief composed from text calling it undecided will either re-run the attribution or pursue no lever at all.",
+      "text": "the section says the fixed-capacity scan \"is undecided\" and that \"Node (b) counts the repeated per-term bodies in the lowered program, and that count decides this lever\", but node (b) has landed and its record already decides it: docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html reports 4,744 call sites over 662 outlined bodies (one body 246 times) and concludes \"The term order is therefore unrolled inside one point's evaluation, not already folded\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261120T073752442954-plan-review-of-kernel-compile-barrier/plan.html:66",
+      "id": "single_goal-1",
+      "reason": "the migration is a repository-wide path change with its own failure surface and it blocks s4 transitively, so it cannot be reviewed or closed on the jets-build verdict the section exists to produce; it belongs in a section of its own.",
+      "text": "node (e) makes \u00a73 own a shared-storage root migration (117 references in 96 files, including `scripts/h200_test_lane/prewarm.sh:26`, `run.sh:19` and `cache_guard.py:70`, all still naming the deleted `/work/projects/imas_gpu/sophelio`) whose gate is a repository-wide `git grep`, alongside the section's jets-build deliverables",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+  "plan_fingerprint": "e597ea7b495c5938e10d60ca8592b35388ed70db701d3c191c059fe533021ea3",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 113,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261120T073752442954-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "340c29902b660d02256d547196ab370650ea9ae8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/equilibrium/fixed_points.py:323` is `_source_jets`, `:546` is `maintain_rows`, `:611` is the `_row_program` call, `scripts/prototypes/read_route/jets.py:262`, `scripts/prototypes/fixed_points/solve.py:121` and `scripts/prototypes/kernel_compile_census/row.py:115` each hold the cited `jax.jit(jax.vmap(_source_jets ...))`, and commits 35fad5250, b0a2cde51, da28fc4e5 and 681a6ecd2 all resolve on main.",
+    "done_when": "a finding \u2014 \u00a73 node (c) still requires the lowered-graph ceiling in `tests/equilibrium/test_bounded_point_program.py` to fall from 10,000,000 to 6,000,000 bytes while the same paragraph records that node (c) returned a negative result and shrank nothing.",
+    "evidence_paths": "pass \u2014 node (c) names a fragment, a figure directory and receipts, node (d) names its fragment and receipts, and node (e)/(f) are measured by `git grep`, a lane run and the node manifest, all durable.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or changelog prose reach a symbol, file name or comment.",
+    "reasoning": "a finding \u2014 \u00a73 gates clauses (2) and (3) on \"(c)'s form \u2026 the form that meets the bound\" while clause (2) states no folded form was accepted and there is no second form, so the section names both a form and its absence as the basis of the same measurement, and the first paragraph leaves the one remaining lever undecided after node (b) already counted the fact that decides it.",
+    "single_goal": "a finding \u2014 \u00a73 now carries node (e), a repository-wide migration of every shared-storage default path from `imas_gpu/sophelio` to `imas_gpu/nova`, inside a section whose goal is a bounded jets build.",
+    "wiring": "pass \u2014 \u00a73 declares depends-on `kernel-compile-barrier#s2` and links `s2`/`s5`; the `s5` attribution it relies on has landed, and `s4` declares `s3` as its dependency."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "bd481605ddac1b7ae2ecd39b8dcc66c509f80bf016d62f5d5ea6bf876a4cba25",
+    "s4": "2d41b958c1a801e917c3b1945758dd89abb0d4e9421b3e5a498f6dd10e5deddb",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T07:50:08.992687+00:00",
+  "total": null
+}

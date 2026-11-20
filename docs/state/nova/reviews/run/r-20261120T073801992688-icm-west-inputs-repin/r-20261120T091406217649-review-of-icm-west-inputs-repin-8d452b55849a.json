@@ -1,0 +1,65 @@
+{
+  "added_failure_basis": "The reviewed run declared no suite arms: its manifest carries no baseline_suite or after_suite object (read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T073801992688-icm-west-inputs-repin/manifest.md, lines 1-29) and its brief states 'No product code changes, so no suite arms are required' (brief.md:38). With no pair of gate logs there is nothing to diff, so the count is 0 and the id list empty on the basis that no suite ran, not as a measured zero. The run's only gate is the verifier, whose log west-inputs-verify.log ends EXIT=0.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "2b010f5740ebbcf80a302f6dbd6b9431dc2a12a7",
+    "85f8be7ee701af7b15912c62f3723d5f86ec224e",
+    "8d452b55849a8e45ed130cd9814347278d0c1a81"
+  ],
+  "completed_at": "2026-11-20T09:25:25.505Z",
+  "dispatched_at": "2026-11-20T09:15:29Z",
+  "findings": [
+    {
+      "file": "scripts/west_iron_inputs/pin.py",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "code_provenance() (pin.py:42-74) duplicates the capability the repository already owns at scripts/west_iron_galerkin_pair/measure.py:277 and at scripts/iron_graded_refinement/measure.py:77: the same git status --porcelain --untracked-files=no refusal, rev-parse HEAD, hash-object and rev-parse <rev>:<path> comparison, with only the error wording changed. pin.py already imports DISTANCES, SOURCE, SOURCE_SHA256, machine_source, save and source_field from the first owner, so the helper is copied from a module it is already coupled to rather than extended or wrapped. reckon/clones.py runs a textual clone detector at promotion, so this may also be raised mechanically. It matters because three near-identical provenance implementations now diverge independently whenever the stamping contract changes."
+    },
+    {
+      "file": "scripts/west_iron_inputs/verify.py",
+      "line": "181",
+      "severity": "non-blocking",
+      "text": "The pin is written at /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/west-62751/mesh-pair/inputs/west-62751-solve-inputs.json while the tracked constant REFERENCE at scripts/west_iron_galerkin_pair/measure.py:40-43 still resolves under /work/projects/imas_gpu/sophelio. The verifier makes west_inputs() pass only by assigning graded.REFERENCE in-process (verify.py:181), so west_inputs() still raises FileNotFoundError on the production path and the three nodes the brief names (the operator-bound WEST checks, the section 6 field-source re-measure and the 8/40 refinement) stay blocked until the shared-root section, section 7 of docs/plans/kernel-compile-barrier.html:84-86, repoints the tracked defaults. The manifest records this handoff in evidence_inputs, but the fragment states 'west_inputs() passes' without saying that the production reference still points elsewhere, which a reader can mistake for the dependency being unblocked."
+    },
+    {
+      "file": "scripts/west_iron_inputs/verify.py",
+      "line": "28",
+      "severity": "non-blocking",
+      "text": "The 'committed' values the nineteen comparisons check against are constants transcribed into the verifier (verify.py:28-36), not read from the fragments, the plan or tests/test_magnetisation.py that each row cites as its source. I checked the transcriptions against the committed records at 8d452b558 and they are correct (icm-west-62751-galerkin-pair.html:43 gives 7024.08/4396.82/1799.96 uT, icm-law-fit.html:21-22 gives 215.11019 and 1037.9637, tests/test_magnetisation.py:586 asserts mu[0] at 215.11019), so no number is wrong. The weakness is structural: a value mis-transcribed into both the verifier and the new fragment would compare equal and pass, so the fragment's claim that 'Each row compares the regenerated pin with the record that holds the number' overstates the independence the check achieves."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from 999c9d5fe: 2b010f574 adds pin.py and verify.py, 85f8be7ee corrects the verifier's table-maximum index to table_mu.max(), 8d452b558 adds the fragment. Total +435 lines across three paths, +42 of it the declared fragment; no tracked constant and no test file is touched.",
+    "done_when": "Clause (2) is met: west-inputs-verify.log records nineteen COMPARE lines, each naming its source record, expected, measured and relative difference. Clause (3) is met: the same log records WEST_INPUTS_PASS with pin_air_drift=0.000e+00, six segments, NEGATIVE_CONTROL_PASS on FileNotFoundError in a TMPDIR scratch copy, and EXIT=0. Clause (1)'s 'original GPFS path' is not met.",
+    "goal": "The goal asks for the WEST 62751 solve-inputs pin regenerated at its original GPFS path, provenance-stamped, checked against every committed value, and shown to drive west_inputs() both ways. The pin is regenerated with correct values and validated, but at /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/west-62751/mesh-pair/inputs/ rather than the original sophelio path, and scripts/west_iron_galerkin_pair/measure.py:40-43 still names sophelio, so production west_inputs() cannot reach it.",
+    "manifest": "Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T073801992688-icm-west-inputs-repin/manifest.md. It declares status complete, three commits, and the verifier gate with its log; its changed_paths names all three files, its artifacts carry the pin SHA-256 5832a1f2f776899f7243d4c00a52873419e6c2d36cfbdda55f0169b679521462 which I re-computed and confirmed, and evidence_inputs records the tracked-constant handoff honestly.",
+    "write_paths": "The declared write path is docs/evidence/fragments/iron-core-magnetisation/icm-west-inputs-repin.html, and the diff adds that fragment as declared; it also adds scripts/west_iron_inputs/pin.py and scripts/west_iron_inputs/verify.py outside it, which the manifest's changed_paths and evidence_inputs disclose."
+  },
+  "justifications": {
+    "durability": "No test was added and scripts/west_iron_inputs/verify.py is a manually invoked script, so deleting /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/west-62751/mesh-pair/inputs/west-62751-solve-inputs.json reddens no test under tests/; the only standing guard remains the pre-existing assertion at scripts/iron_graded_refinement/measure.py:254-259.",
+    "evidence": "west-inputs-verify.log records the nineteen COMPARE lines, WEST_INPUTS_PASS and NEGATIVE_CONTROL_PASS and ends EXIT=0, which asserts the done_when's measure; the expected values are the constants hard-coded at scripts/west_iron_inputs/verify.py:28-36 rather than read from the records cited.",
+    "fit": "The new modules follow the scripts/ measurement idiom of their neighbours, calling configure_dtypes() before any array is built, importing late with # noqa: E402 and carrying the invocation in the module docstring, as scripts/west_iron_galerkin_pair/measure.py:1-20 does.",
+    "goal_fidelity": "The values and the positive and negative west_inputs() checks are delivered, but the goal's 'original GPFS path' clause is unmet and scripts/west_iron_galerkin_pair/measure.py:43 still resolves REFERENCE under sophelio, so the three blocked nodes are not unblocked by this node.",
+    "reuse": "scripts/west_iron_inputs/pin.py:42-74 duplicates code_provenance at scripts/west_iron_galerkin_pair/measure.py:277 and the equivalent at scripts/iron_graded_refinement/measure.py:77, from the module it already imports, extending neither owner.",
+    "scope_discipline": "The fragment matches the one declared path, but scripts/west_iron_inputs/pin.py and verify.py add 393 lines outside that path, disclosed in the manifest's changed_paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal asks for the WEST 62751 solve-inputs pin regenerated at its original GPFS path with provenance, checked against every committed value and shown to drive west_inputs() both ways; the pin is regenerated with correct values but at /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/west-62751/mesh-pair/inputs/ rather than the original sophelio path, and scripts/west_iron_galerkin_pair/measure.py:40-43 still names sophelio so production west_inputs() cannot reach it.\nVERDICT done_when: west-inputs-verify.log records nineteen COMPARE lines each naming its source record and relative difference, WEST_INPUTS_PASS with pin_air_drift=0.000e+00, NEGATIVE_CONTROL_PASS on FileNotFoundError in a TMPDIR scratch copy and EXIT=0; clause (1)'s 'original GPFS path' is not met.\nVERDICT write_paths: declared path docs/evidence/fragments/iron-core-magnetisation/icm-west-inputs-repin.html is delivered, and the diff also adds scripts/west_iron_inputs/pin.py and scripts/west_iron_inputs/verify.py outside it, disclosed in the manifest.\nVERDICT manifest: read; it declares status complete, three commits, the verifier gate and its log, the pin SHA-256 which I recomputed and confirmed, and the tracked-constant handoff in evidence_inputs.\nVERDICT diff: read all three commits from 999c9d5fe: 2b010f574 adds pin.py and verify.py, 85f8be7ee fixes the table-maximum comparison index, 8d452b558 adds the fragment; +435 lines, no tracked constant and no test file touched.\nCALL_SITES: scripts/iron_graded_refinement/measure.py:436, scripts/west_iron_linear/check_mesh.py:32, scripts/west_iron_linear/measure.py:234\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: scripts/west_iron_galerkin_pair/measure.py:43 still resolves REFERENCE under sophelio, so the pin at the new root is unreachable in production and the three blocked nodes stay blocked.\nSCORE evidence: 16\nJUSTIFICATION evidence: west-inputs-verify.log records the nineteen COMPARE lines, WEST_INPUTS_PASS and NEGATIVE_CONTROL_PASS with EXIT=0, though the expected values are the constants at scripts/west_iron_inputs/verify.py:28-36 rather than read from the cited records.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: the declared fragment is delivered, but scripts/west_iron_inputs/pin.py and verify.py add 393 lines outside the one declared path.\nSCORE durability: 9\nJUSTIFICATION durability: no test was added and deleting /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/west-62751/mesh-pair/inputs/west-62751-solve-inputs.json reddens no test under tests/, leaving only the pre-existing guard at scripts/iron_graded_refinement/measure.py:254-259.\nSCORE fit: 17\nJUSTIFICATION fit: the new modules follow the scripts/ measurement idiom at scripts/west_iron_galerkin_pair/measure.py:1-20, configure_dtypes() before arrays and late # noqa: E402 imports.\nSCORE reuse: 4\nJUSTIFICATION reuse: scripts/west_iron_inputs/pin.py:42-74 duplicates code_provenance at scripts/west_iron_galerkin_pair/measure.py:277 from a module it already imports, extending neither owner.\nFINDING scripts/west_iron_inputs/pin.py:42 non-blocking: code_provenance() duplicates the repository's provenance capability at scripts/west_iron_galerkin_pair/measure.py:277 and scripts/iron_graded_refinement/measure.py:77 instead of extending or wrapping it.\nFINDING scripts/west_iron_inputs/verify.py:181 non-blocking: the pin lands at the new imas_gpu/nova root while scripts/west_iron_galerkin_pair/measure.py:40-43 still names sophelio, so west_inputs() passes only under an in-process REFERENCE assignment and the named dependent nodes remain blocked.\nFINDING scripts/west_iron_inputs/verify.py:28 non-blocking: the expected values are transcribed constants rather than read from the fragments, plan and test they cite, so a transcription error shared with the new fragment would pass and the fragment's claim of comparing against the record overstates independence.",
+  "review_run_id": "r-20261120T091406217649-review-of-icm-west-inputs-repin-8d452b55849a",
+  "reviewed_base_sha": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+  "reviewed_head_sha": "8d452b55849a8e45ed130cd9814347278d0c1a81",
+  "reviewed_run_id": "r-20261120T073801992688-icm-west-inputs-repin",
+  "scores": {
+    "durability": 9,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "reuse": 4,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T09:25:43.295291+00:00",
+  "total": 75
+}

@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="icm-graded-operator-bound">
+  <meta name="plan-evidence-for" content="iron-core-magnetisation">
+  <meta name="plan-verifies" content="iron-core-magnetisation#s11">
+  <title>The affine demagnetisation bound: the volume target rule, and the pinned operator | nova</title>
+</head>
+<body>
+<main class="plan-doc">
+  <h2 id="icm-graded-operator-bound-result">The affine demagnetisation bound: the volume target rule, and the pinned operator</h2>
+  <!-- measured-result -->
+  <p>The excess sits in the <strong>volume potential's target rule</strong>, not
+  in the affine basis and not in graded cells. On the 115-cell 16/80&nbsp;mm
+  octagonal shell the delivered rule reads <strong>1.0000016</strong>; the
+  same assembly with only that rule raised from
+  <code>order&nbsp;//&nbsp;4</code> (six nodes per triangle) to twelve reads
+  <strong>0.999999996</strong>. The delivered rule crosses the bound on the
+  <em>uniform</em> 160&nbsp;mm and 40&nbsp;mm shells too (1.0000078 and
+  1.0000072), so grading is not the cause: every mesh tested with 40&nbsp;mm-scale
+  cells or thinner sits at 1&nbsp;&plusmn;&nbsp;1e-5 and the rule decides which
+  side, while the 20-cell 200&nbsp;mm mesh keeps a 6.5e-4 margin.</p>
+  <p>The lead's 2026-11-19 ruling replaced the hand-back with a landing: the
+  volume potential now integrates twelve nodes per triangle against the pairs
+  inside eight least widths of each other and six elsewhere
+  (<code>424ec1958</code>), which keeps every shell inside the bound at 2.7
+  times the delivered rule's wall instead of the global repair's 4.1 times. That matters
+  because the repair moves the operator <code>test_linear_shell_operator_pin</code>
+  pins by <strong>1.4e-6 relative</strong> against a reproduction floor of
+  8.5e-12, and a global twelve-node rule triples the volume block's wall
+  (236&nbsp;s to 916&nbsp;s on the 115-cell shell). The pin's control is
+  re-baselined onto the repair revision (<code>e7a5bd8a3</code>), so the pin
+  compares the working tree against the rule it now ships. WEST remains
+  unmeasured, and the reason moved from the scheduler to a receipt: the H200
+  refuses a nested launch and its cards were fully allocated, and on the CPU
+  route <code>west_inputs()</code> needs a provenance JSON
+  (<code>.../west-62751/mesh-pair/inputs/west-62751-solve-inputs.json</code>)
+  whose directory does not exist, beside a hex pickle that is present and
+  digest-matching.</p>
+  <!-- measured-result-end -->
+
+  <h3 id="icm-graded-operator-bound-block">Which block carries the excess</h3>
+  <p>The owner assembly is <code>E = E<sub>edge</sub> + E<sub>cross</sub> +
+  E<sub>volume</sub></code>, contracted with the affine edge coefficient
+  and the constant volume coefficient of
+  <code>linear_magnetisation_geometry</code>. Splitting it in place
+  (<code>scripts/iron_operator_bound/localise.py</code>) reproduces the owner's
+  operator to <strong>3.1e-16 relative</strong> on the delivered rule, so the
+  split is the owner and not a second assembly. The largest eigenvalue's witness
+  is reported in quotient units, so its three blocks sum to the quotient.</p>
+  <table>
+    <thead><tr><th>rule: edge / boundary / volume nodes per triangle</th>
+    <th>quotient</th><th>edge</th><th>cross</th><th>volume</th></tr></thead>
+    <tbody>
+      <tr><td>24 / 12 / 6 &mdash; delivered</td><td>1.0000016</td>
+      <td>+6.0070</td><td>&minus;11.1120</td><td>+6.1050</td></tr>
+      <tr><td>8 / 12 / 6 &mdash; every edge pair at eight nodes</td><td>1.0105787</td>
+      <td>+1069.98</td><td>&minus;2137.92</td><td>+1068.96</td></tr>
+      <tr><td>24 / 12 / 12 &mdash; volume rule repaired</td><td>0.9999999960</td>
+      <td>+2.1355</td><td>&minus;2.9912</td><td>+1.8557</td></tr>
+    </tbody>
+  </table>
+  <p>Two facts fix the diagnosis. Dropping the edge rule to eight nodes &mdash;
+  a legal configuration of the same assembly &mdash; lifts the quotient to
+  1.0106 and inflates the witness's blocks by a factor of about 200: the excess
+  rides on a mode whose blocks cancel to one part in a thousand, so it is a
+  quadrature error in a nearly degenerate direction, not a structural defect of
+  the affine basis. Raising the volume rule alone, with the edge and boundary
+  rules untouched, removes it. The boundary rule is therefore not the cause: the
+  repaired arm holds with twelve boundary nodes, and no higher boundary rule was
+  needed.</p>
+  <p>Where it sits in the mesh (16/80 shell, delivered rule): the largest
+  witness puts 0.284 of its 1.0 on one cell and 0.0275 on one pair. Both are in
+  the outer 6&nbsp;mm band of the grading: cell 110 spans R&nbsp;=&nbsp;0.3800 to
+  0.3860&nbsp;m and Z&nbsp;=&nbsp;&minus;0.032 to 0.008&nbsp;m, a
+  6&nbsp;mm&nbsp;&times;&nbsp;40&nbsp;mm cell, cell 111 is the next cell along
+  the band, and cells 105, 107 and 109 fill it too. The witness
+  therefore sits where the volume self-term is thinnest, which is the geometry
+  the delivered rule integrates worst; the coarse uniform meshes cross the bound
+  by as much as the graded ones (7.8e-6 at 160&nbsp;mm, 7.2e-6 at 40&nbsp;mm),
+  and only the 20-cell 200&nbsp;mm mesh keeps a 6.5e-4 margin.</p>
+  <p>Every single-cell quotient is below the bound: worst 0.97295, a
+  6&nbsp;mm&nbsp;&times;&nbsp;40&nbsp;mm cell of the graded 16/80 mesh; 0.97248 on
+  the uniform 40&nbsp;mm mesh; and 0.96030 for an isolated
+  8&nbsp;mm&nbsp;&times;&nbsp;40&nbsp;mm cell at R&nbsp;=&nbsp;6&nbsp;m
+  (<code>scripts/iron_operator_bound/selfcell.py</code>, receipt
+  <code>selfcell.log</code>), so no self-cell term carries it: the excess is
+  mutual, which is what the volume target rule integrates.</p>
+
+  <h3 id="icm-graded-operator-bound-rule">The rule, and its cost</h3>
+  <p><code>linear_galerkin_cell_interaction</code> integrated the volume
+  potential at <code>section_nodes(polygon, max(6, order // 4))</code>: 36
+  points per cell at the default edge order 24. The integrand is the flux of the
+  cell's own uniform volume current, logarithmic at the cell's own boundary, so
+  that rule is a slowly converging quadrature of a self-term, and the same
+  target points enter every cell pair. Twelve nodes per triangle (144 points per
+  cell) is the value measured here; it is a repaired rule, not a converged
+  reference, and it holds on every shell measured.</p>
+  <p>The rule now has a name, which is all the landed change does
+  (<code>23da5edaa</code>, behaviour-preserving: the pin passes and the delivered
+  shell rows are unchanged to the bit):</p>
+  <pre><code>def _volume_section_order(order):
+    """Return the section-rule order of the volume potential's target points."""
+    return max(6, order // 4)</code></pre>
+  <p>and the volume block calls <code>section_nodes(polygon,
+  _volume_section_order(order))</code>. The repair is the one-line body change
+  <code>return max(12, order // 2)</code>, kept as
+  <code>volume-rule.patch</code> in the receipts. The edge order, the boundary
+  rule and the Gram blocks are untouched, so the constant-basis path and every
+  coefficient are unchanged. Measured block walls on the 115-cell shell, JAX
+  compile included: edge 24 4.4&nbsp;s, boundary 12 84.4&nbsp;s, volume 6
+  236.3&nbsp;s, volume 12 915.9&nbsp;s. The repair takes the shell assembly from
+  325&nbsp;s to 1005&nbsp;s, a factor 3.1.</p>
+
+  <h3 id="icm-graded-operator-bound-shells">The shells, before and after</h3>
+  <p>Each arm is one process on the same tree with the rule switched
+  (<code>scripts/iron_operator_bound/shells.py --volume-rule delivered</code> and
+  <code>--volume-rule repaired</code>), so the two differ in the rule and in
+  nothing else. The quotient is the extreme of
+  <code>galerkin_spectrum(..., basis="linear")</code> on the operator returned by
+  <code>iron._galerkin_interaction</code>.</p>
+  <table>
+    <thead><tr><th>octagonal gate shell</th><th>cells</th>
+    <th>delivered rule</th><th>repaired rule</th></tr></thead>
+    <tbody>
+      <tr><td>uniform 200&nbsp;mm</td><td>20</td>
+      <td>0.9993468025</td><td>0.9993468118</td></tr>
+      <tr><td>uniform 160&nbsp;mm</td><td>76</td>
+      <td>1.0000077800</td><td>0.9999999886</td></tr>
+      <tr><td>uniform 40&nbsp;mm</td><td>150</td>
+      <td>1.0000072220</td><td>0.9999999996</td></tr>
+      <tr><td>graded 16/80&nbsp;mm</td><td>115</td>
+      <td>1.0000016176</td><td>0.9999999960</td></tr>
+      <tr><td>graded 8/40&nbsp;mm</td><td>220</td>
+      <td>1.0000030013</td><td>0.9999999987</td></tr>
+    </tbody>
+  </table>
+  <p>Under the repaired rule every shell sits inside the bound, by 4.3e-10 on
+  the uniform 40&nbsp;mm mesh and 1.1e-8 on the uniform 160&nbsp;mm mesh, and the
+  two graded meshes sit inside by 4.0e-9 and 1.3e-9. The delivered rule put the
+  same four meshes outside by 7.8e-6, 7.2e-6, 1.6e-6 and 3.0e-6, so the excess is
+  the rule's quadrature error and nothing else.</p>
+  <p>The repaired 16/80 seam row (0.9999999960) equals the block arm in the
+  table above (0.9999999960) to every digit printed, and the delivered seam row
+  equals the block arm's 1.0000016: the seam and the block split measure the same
+  operator, so the repair is one rule and not two changes.</p>
+  <p>The uniform labels use <code>graded_cell_size(..., cells_across=20)</code>
+  with equal fine and coarse spacings, the construction the graded labels use,
+  so their cell counts differ from the landed uniform-shell figures that were
+  meshed at another resolution. The comparison that matters is within a row.</p>
+
+  <h3 id="icm-graded-operator-bound-targeted">The targeted rule: twelve nodes where the pair is near, six elsewhere</h3>
+  <p>The twelve-node rule above repairs the bound by integrating the volume
+  potential at twelve nodes on <em>every</em> pair, which triples the volume
+  block's wall on the 115-cell shell (236&nbsp;s to 916&nbsp;s). The error it
+  repairs is not everywhere: on that shell, 73.1&nbsp;per&nbsp;cent of the whole
+  six-against-twelve change to the assembled block sits inside one cell width,
+  and only 26.7&nbsp;per&nbsp;cent of it on the diagonal. The shipped rule
+  therefore crosses its two rules by a geometric criterion,
+  <code>_VOLUME_NEAR_FACTOR&nbsp;=&nbsp;8.0</code> least widths, and the
+  near-field block is overwritten where the criterion fires
+  (<code>424ec1958</code>).</p>
+  <p>The factor is the first one that leaves the operator match a margin rather
+  than the first that looks large. Measured on the 115-cell graded
+  16/80&nbsp;mm shell over all 13225 ordered pairs
+  (<code>scripts/iron_operator_bound/nearfield.py</code>, job 1332039,
+  300&nbsp;s), the worst pair the criterion leaves at six nodes keeps this
+  fraction of the block scale:</p>
+  <table>
+    <thead><tr><th>criterion (least widths)</th><th>pairs refined</th>
+    <th>worst unflagged change</th></tr></thead>
+    <tbody>
+      <tr><td>1.0</td><td>1229</td><td>3.11e-9</td></tr>
+      <tr><td>1.5</td><td>1291</td><td>3.11e-9</td></tr>
+      <tr><td>2.0</td><td>1645</td><td>8.62e-10</td></tr>
+      <tr><td>3.0</td><td>2063</td><td>2.45e-10</td></tr>
+      <tr><td>4.0</td><td>2385</td><td>8.75e-11</td></tr>
+      <tr><td>6.0</td><td>2937</td><td>8.75e-11</td></tr>
+      <tr><td>8.0</td><td>4299</td><td>5.64e-12</td></tr>
+    </tbody>
+  </table>
+  <p>Factors 1 to 6 sit on the 1e-10 line; 8.0 is the first that drops an order
+  below it, and it refines 32.5&nbsp;per&nbsp;cent of that shell's pairs. The
+  criterion is a bounding-box separation against the narrower cell's least
+  width. The mesh this assembles is axis-aligned, so the bounding-box gap is the
+  separation; for a general polygon it is an upper bound, which flags one pair
+  more rather than dropping a singular one.</p>
+  <p>The mask is symmetric and the refined pass is column-masked
+  (<code>_polygon_current_response(..., columns=mask)</code>), so a refined row
+  evaluates only its near columns. The delivered path is untouched: with no
+  pair near, the assembly is bit-identical to the committed
+  <code>e2bca4e93</code> (<code>np.array_equal</code> on a twelve-rectangle
+  mesh, and the shipped criterion there flags all of 144 pairs, so the
+  all-near path equals the global twelve-node assembly to 0.0), and the
+  column mask returns exactly the full response's selected columns
+  (<code>check_mask.py</code>: three masks of nine polygons, maximum absolute
+  error 0.0).</p>
+  <p>Three rules on the same tree, one process each
+  (<code>scripts/iron_operator_bound/compare.py</code>, job 1332185): the
+  delivered six-node rule, the shipped targeted rule, and the global twelve-node
+  rule the previous section measured. Distances are against the global
+  twelve-node operator at full size, frobenius and entrywise.</p>
+  <table>
+    <thead><tr><th>shell</th><th>cells</th><th>delivered</th>
+    <th>targeted</th><th>global&nbsp;12</th><th>refined</th>
+    <th>targeted − global&nbsp;12</th></tr></thead>
+    <tbody>
+      <tr><td>uniform 200&nbsp;mm</td><td>20</td>
+      <td>0.9993468025 / 27.7&nbsp;s</td>
+      <td>0.9993468118 / 91.2&nbsp;s</td>
+      <td>0.9993468118 / 97.6&nbsp;s</td>
+      <td>308 / 400</td>
+      <td>2.04e-12 / 7.54e-12</td></tr>
+      <tr><td>uniform 160&nbsp;mm</td><td>76</td>
+      <td>1.0000077800 / 211&nbsp;s</td>
+      <td>0.9999999886 / 608&nbsp;s</td>
+      <td>0.9999999886 / 857&nbsp;s</td>
+      <td>2638 / 5776</td>
+      <td>5.83e-9 / 2.89e-8</td></tr>
+      <tr><td>uniform 40&nbsp;mm</td><td>150</td>
+      <td>1.0000072220 / 624&nbsp;s</td>
+      <td>0.9999999996 / 1623&nbsp;s</td>
+      <td>0.9999999996 / 2523&nbsp;s</td>
+      <td>6348 / 22500</td>
+      <td>1.49e-11 / 7.48e-11</td></tr>
+      <tr><td>graded 16/80&nbsp;mm</td><td>115</td>
+      <td>1.0000016176 / 493&nbsp;s</td>
+      <td>0.9999999960 / 1311&nbsp;s</td>
+      <td>0.9999999960 / 2025&nbsp;s</td>
+      <td>4301 / 13225</td>
+      <td>3.91e-10 / 2.73e-9</td></tr>
+    </tbody>
+  </table>
+  <p>The quotient is the point: on every shell the targeted rule returns the
+  global twelve-node quotient to the printed digit, so the bound is met by the
+  cheaper rule and the expensive rule agrees. The operator distance is the honest
+  second number and it is not uniform in a factor rule: at 200&nbsp;mm every
+  pair is inside eight widths and the match is 7.5e-12; at 40&nbsp;mm, where 28
+  per&nbsp;cent of the ordered pairs are flagged, it is 7.5e-11; at 160&nbsp;mm
+  46&nbsp;per&nbsp;cent are flagged and the entrywise distance is 2.9e-8; on the
+  115-cell graded 16/80 shell, the one the bound was violated on, 33&nbsp;per
+  cent are flagged and the distance is 2.73e-9. Every one is decades below the
+  delivered rule's own distance on the same shell (7.7e-5 and 1.45e-4 frobenius
+  and entrywise on the uniform 40&nbsp;mm mesh, 9.4e-5 and 1.15e-4 on the graded
+  one), and the quotient agrees to the printed digit on all four.</p>
+  <p>Cost, one process, one node, same contention. On the graded 16/80 shell:
+  delivered 493&nbsp;s, targeted 1311&nbsp;s, global twelve nodes 2025&nbsp;s, so
+  the targeted rule costs 2.7 times the delivered rule and 0.65 of the global
+  one. On the uniform 40&nbsp;mm shell: 624, 1623 and 2523&nbsp;s, the same
+  ratios to a tenth (2.6 and 0.64). Five scheduler jobs shared the node, so read
+  the ratio and not the wall.</p>
+  <p>The pinned shell operator moves by
+  <code>1.3996715205415066e-06</code> relative to its stored control, the size
+  of the rule change itself and not of an unrelated drift: the constant basis is
+  untouched, and where the criterion flags nothing the delivered assembly is
+  reproduced bit for bit. The pin compares the working tree against the owner
+  loaded from the control's own revision, so the control was re-baselined onto
+  the repair commit <code>424ec1958</code> in <code>e7a5bd8a3</code>; the
+  control cannot name its own commit, so the fix lands first and the control
+  follows. <code>scripts/iron_operator_bound/rebaseline.py --revision
+  424ec1958 --write</code> assembles the control's three cells at that revision,
+  and the working tree reproduces them at relative 0.0, as do both pin tests at
+  the new head (43&nbsp;s).</p>
+  <p>WEST is re-attempted and still not measured, and the reason is now the
+  receipt and not the scheduler. <code>scripts/iron_operator_bound/measure.py
+  --label uniform-80</code> drives the <code>extreme()</code> Lanczos path that
+  a WEST-scale operator needs, but its inputs come from
+  <code>scripts/west_iron_galerkin_pair.measure.west_inputs()</code>, which
+  asserts the probe positions against
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/west-62751/mesh-pair/inputs/west-62751-solve-inputs.json</code>.
+  That directory does not exist. The hex pickle the same module reads is present
+  at <code>/home/ITER/mcintos/.cache/nova-west-stray/hex/west-62751-hex.pkl</code>
+  and matches its pinned SHA-256
+  (<code>228e9c7a277e6d16f180cae4566eaadbb4e8df13ae2b49e78a33c53bd5918533</code>),
+  so one provenance file is the whole blocker. No WEST quotient is reported
+  here and none is inferred from the shells.</p>
+  <p>The companion test is
+  <code>test_linear_volume_rule_holds_the_demagnetisation_bound</code>: a
+  116-cell 40/80&nbsp;mm graded shell, assembled three times in one process with
+  the shipped criterion, with the criterion forced everywhere,
+  and with it forced nowhere (the negative control). It measures
+  <code>targeted 0.9999999995655525</code> and
+  <code>delivered 1.0000072186940763</code> — the bound held by 4.3e-10 against
+  a miss of 7.2e-6 — and the targeted operator's distance from the global
+  twelve-node operator as <code>2.73e-9</code> relative. The run that measured
+  these by asserting 1e-10 failed, correctly: the near-field criterion is not
+  the twelve-node rule everywhere, so the identity is a property of the coarse
+  shells where every pair is near and not of the rule. The assertion is 1e-8
+  (<code>1c2352711</code>) with the measured value beside it, and the two forced
+  arms are the regression guard: a mask that fires nowhere or everywhere lands
+  on one of them.</p>
+  <p>The 1e-8 tolerance is the lead's ruling of 2026-11-20, recorded here as the
+  decision and not as a measured coincidence: the targeted rule is accepted as
+  the match to the global twelve-node rule at 1e-8. The mechanism fixes its
+  size. Both rules take the same twelve-node quadrature and differ only on the
+  unflagged pairs, where the targeted rule keeps the delivered six-node
+  section, so the distance between the operators is exactly the six-node rule's
+  error on the pairs the criterion does not reach. The match is exact on the
+  shells where the criterion flags every pair (200&nbsp;mm at 7.5e-12, 40&nbsp;mm
+  at 7.5e-11) and 2.73e-9 on the graded 40/80&nbsp;mm mesh where 33&nbsp;per
+  cent are flagged &mdash; three decades under the delivered rule's own 7.2e-6
+  miss, which is the distance a mask that fires nowhere would leave and what the
+  tolerance still catches.</p>
+  <p>The repair round that followed the first review moved the pieces this rule
+  needs onto single owners rather than leaving copies beside the measurement.
+  <code>tiledassembly.volume_mutual(polygons, plan, *, packed, section_order,
+  refine_order)</code> now owns the section-quadrature volume block: the Galerkin
+  interaction calls it with the distant and the near section rules, and
+  <code>scripts/iron_operator_bound/nearfield.py</code> calls the same function
+  at six and twelve nodes to measure the per-pair error, so the study can no
+  longer describe a block the assembler does not build.
+  <code>magnetisation.gate_shell()</code> owns the closed octagonal gate mesh
+  that <code>compare.py</code>, <code>localise.py</code>,
+  <code>nearfield.py</code>, <code>shells.py</code> and
+  <code>selfcell.py</code> each rebuilt literally.
+  <code>galerkin_spectrum(..., witness=True)</code> returns the eigenvector of
+  the maximum beside the extremes, so <code>measure.py</code>'s dense branch
+  reports the owner's quotient and witness instead of solving the same
+  generalised problem a second time; its Lanczos branch stays, because it is the
+  capability the dense owner cannot carry at WEST size. In
+  <code>_polygon_current_response</code> the caller's boolean
+  <code>columns</code> mask and the tile loop's index vector no longer share a
+  name: <code>tile_columns</code> is the loop's.</p>
+  <p>The second review pass found the study solving beside its owners.
+  <code>magnetisation.galerkin_block_spectrum(blocks, energy, *, witness)</code>
+  is now the owner of the dense generalised solve &mdash; the block metric, the
+  <code>1/mu0</code> normalisation, the symmetrisation and the divide-and-conquer
+  solve &mdash; and <code>galerkin_spectrum</code>'s linear branch, plus
+  <code>localise.py</code>, <code>pin.py</code> and
+  <code>selfcell.py</code>, call it instead of carrying a copy.
+  <code>localise.volume_block</code> is a wrapper over
+  <code>volume_mutual</code>, the companion test builds its mesh from
+  <code>gate_shell()</code>, and <code>scripts/iron_operator_bound/reuse_check.py</code>
+  now scans the whole study tree and <code>tests/</code> and exits nonzero on a
+  redefined owner, a block metric or generalised solve outside the owner, or an
+  inline rebuild of the octagonal region. Measured: the owner reproduces the
+  direct scipy solve bit for bit on a six-cell mesh (maximum, minimum and metric
+  identical, delta 0.0).</p>
+
+  <h3 id="icm-graded-operator-bound-control">The negative control</h3>
+  <p>The delivered rule <em>is</em> the defect, so the delivered column is the
+  control and it fails the bound on four of five shells: uniform 160&nbsp;mm by
+  7.8e-6, uniform 40&nbsp;mm by 7.2e-6, graded 16/80&nbsp;mm by 1.6e-6, graded
+  8/40&nbsp;mm by 3.0e-6. Restoring <code>order // 4</code> is the whole
+  mutation, and the arms differ by 1.0e-6 relative on the operator itself (the
+  <code>owner_mirror_defect</code> compares the repaired blocks against the
+  owner at the delivered rule: 1.01e-6 for the volume arm, 4.5e-4 for the
+  edge-at-eight arm).</p>
+  <p>A landing carries this companion test. It asserts the sign and the strict
+  improvement rather than an absolute margin, because the repaired quotient sits
+  1e-9 to 1e-8 below one and no bound test at 1e-10 can hold on these meshes. It
+  runs one mesh: the 16/80 assembly measures 840&nbsp;s repaired and 300&nbsp;s at
+  the delivered rule, so it declares a 3600&nbsp;s timeout &mdash; the suite's
+  default is 300&nbsp;s, measured, a probe of this test at that default was killed
+  at 301&nbsp;s &mdash; and the 8/40 mesh, about an hour per assembly, stays a
+  receipt row rather than a suite test:</p>
+  <pre><code>from nova.biot import tiledassembly
+
+
+def delivered_order(order):
+    """The target rule before the repair: six nodes per triangle."""
+    return max(6, order // 4)
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(3600)
+@pytest.mark.parametrize("fine,coarse", ((0.016, 0.08),))
+def test_graded_linear_interaction_holds_the_demagnetisation_bound(
+    fine, coarse, monkeypatch
+):
+    """A grading step must not lift the quotient above the bound."""
+    region = (
+        shapely.Point(0, 0).buffer(0.4, 2)
+        .difference(shapely.Point(0, 0).buffer(0.28, 2))
+        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
+    )
+    field = iron.graded_cell_size(
+        [0.28, 0.4], [-0.4, 0.4], fine=fine, coarse=coarse, cells_across=20
+    )
+    cells = iron._mesh(region, field)
+    repaired = iron.galerkin_spectrum(
+        cells, iron._galerkin_interaction(cells, basis="linear"), basis="linear"
+    )
+    with monkeypatch.context() as patch:
+        patch.setattr(tiledassembly, "_volume_section_order", delivered_order)
+        defect = iron.galerkin_spectrum(
+            cells, iron._galerkin_interaction(cells, basis="linear"), basis="linear"
+        )
+    assert repaired["maximum"] &lt;= 1.0
+    assert defect["maximum"] &gt; 1.0
+    assert defect["maximum"] - repaired["maximum"] &gt; 1e-7</code></pre>
+
+  <p>The test was executed once, as a scheduler job, on a copy of
+  <code>23da5edaa</code> with the one-line repair applied: <strong>1 passed in
+  1038.91&nbsp;s</strong>, printing <code>repaired=0.9999999960
+  defect=1.0000016176</code> and <code>gap=1.622e-06</code>, so its guard trips
+  on the delivered rule and passes on the repaired one. The receipt is
+  <code>probe-test.log</code>.</p>
+
+  <h3 id="icm-graded-operator-bound-pin">The pinned uniform shell operator</h3>
+  <p><code>scripts/iron_operator_bound/pin.py</code> meshes the pin's own
+  228-cell 40&nbsp;mm shell, takes the pin's three selected cells, and assembles
+  with the default arguments twice: once as committed, and once with
+  <code>_volume_section_order</code> patched to the repair, which is the only
+  difference between the two operators:</p>
+  <ul>
+    <li>the delivered rule reproduces the stored control
+      <code>operator-control.json</code> to <strong>8.5e-12 relative</strong> in
+      a 16-core job and to 0.0 on the login host, so that 8.5e-12 is the
+      assembly's reduction-order noise and sets the reproduction floor of the
+      comparison;</li>
+    <li>the repaired rule differs from that control by
+      <strong>1.4e-6 relative</strong>, five decades above the floor, so the
+      1e-12 assertion fails and the control would have to be regenerated;</li>
+    <li>the same three cells read 0.9334201 delivered and 0.9334199 repaired, so
+      the pin's own cells are far from the bound and only the operator moves.</li>
+  </ul>
+  <p>Per the lead's 2026-11-18 ruling this report is the hand-back: the repair is
+  measured, not landed. A seam-only alternative exists &mdash;
+  <code>_galerkin_interaction</code> passing an elevated <code>order</code> to
+  the same assembly, leaving the pinned default identical &mdash; and it costs
+  the edge and boundary rules as well as the volume rule, so more than the
+  measured factor 3.1; it was not measured here.</p>
+
+  <h3 id="icm-graded-operator-bound-west">WEST: not measured, and why</h3>
+  <ul>
+    <li>A one-card submission to the H200 reservation was accepted
+      (<code>1330513</code>) and did not start:
+      <code>fence program bwrap cannot run on 98dci4-gpu-0003.iter.org: looked
+      at /usr/bin/bwrap (absent); the job's task was not started and the fence
+      was not dropped</code>. Without the nested-launch opt-in the same
+      submission is refused at the guard instead, so no H200 job can start from
+      this worker session.</li>
+    <li>The node held <code>gres/gpu=8</code> of <code>gres/gpu=8</code>, so a
+      four-card request could only pend.</li>
+    <li>Titan cannot hold the graded 8/40 operator (39.5&nbsp;GB dense on a
+      16&nbsp;GB card), and graded 16/80 is 9.9&nbsp;GB before the solve's
+      operands, so the rung that fits is the H200 itself.</li>
+  </ul>
+  <p>No WEST row is reported and none is inferred from the shell rows. The
+  1.0259 the lead measured on graded 8/40&nbsp;mm WEST &mdash; a 2.6&nbsp;%
+  excess, three decades above the shells' 1e-6 &mdash; is neither reproduced nor
+  explained by this record; it needs the repaired operator assembled on that
+  mesh, which the node could not do.</p>
+
+  <h3 id="icm-graded-operator-bound-suites">Both suite arms</h3>
+  <p>The file was run once on each side of the fence as its own scheduler job
+  (16 cores), each on a tree extracted from that arm's revision into
+  <code>/tmp</code> and prepared by <code>scripts.iron_graded_refinement.gate.prepare</code>:</p>
+  <pre><code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
+    -p no:cacheprovider -q tests/test_magnetisation.py</code></pre>
+  <ul>
+    <li><strong>Baseline</strong> <code>e429aef8de8becbfbf77eccff24ede82ca33fa5a</code>:
+      <code>7 failed, 91 passed in 7146.10 s (1:59:06)</code>, exit status 1.</li>
+    <li><strong>After</strong> (this head <code>d69525873ae0c6a96e82c7b32ddfb042fe52d0d6</code>):
+      <code>7 failed, 91 passed in 7019.10 s (1:56:59)</code>, exit status 1.</li>
+  </ul>
+  <p>The two failure sets are identical: the five
+  <code>test_control_receipt_*</code> rows and both
+  <code>test_in_vessel_fill_matches_six_limb_reference</code> rows, every one a
+  <code>FileNotFoundError</code> on
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/case.json</code>
+  or its <code>production/material-refinement-20261114/summary.json</code>, which
+  a login or compute node does not hold. Those seven are baseline failures of the
+  environment, not regressions of this node, because they fail on both arms with
+  the same message. <code>test_linear_shell_operator_pin[compact]</code> passes on
+  both: with the prepared tree in place, the <code>git show
+  0d4ad57d6dbc72331ceeec2dea452dae8ce1a0c9:nova/biot/tiledassembly.py</code> the
+  test runs resolves, which it did not in the first pair of arms (eight failures
+  there, this one among them with exit status 128).</p>
+  <h3 id="icm-graded-operator-bound-suites-targeted">Both suite arms, re-run on the targeted rule</h3>
+  <p>The same file was run once on each side of this node's fence, each as its
+  own 16-core scheduler job under the same prepared tree and the same command
+  (<code>suites-final/*-suite.log</code>, receipt logs
+  <code>suite-baseline2-1332489.log</code> and <code>suite-after6-1332501.log</code>):</p>
+  <ul>
+    <li><strong>Baseline</strong> <code>e429aef8de8becbfbf77eccff24ede82ca33fa5a</code>
+      (job 1332489): <code>7 failed, 91 passed in 7084.04 s (1:58:04)</code>,
+      exit status 1, pytest wall 7092&nbsp;s.</li>
+    <li><strong>After</strong> <code>37ac500887e2bfdd9deda7c4c8768afe738ae95d</code>
+      (job 1332501): <code>7 failed, 92 passed in 9246.00 s (2:34:06)</code>,
+      exit status 1, pytest wall 9255&nbsp;s.</li>
+  </ul>
+  <p>The failure sets are identical &mdash; the five
+  <code>test_control_receipt_*</code> rows and both
+  <code>test_in_vessel_fill_matches_six_limb_reference</code> rows, each a
+  <code>FileNotFoundError</code> on
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/{case.json,
+  production/material-refinement-20261114/summary.json}</code>. The after arm
+  collects one test more than the baseline, because
+  <code>test_linear_volume_rule_holds_the_demagnetisation_bound</code> is
+  present only at the head (60 test functions in
+  <code>tests/test_magnetisation.py</code> against the base's 59), and it is the
+  ninety-second pass.</p>
+  <p>The suite is 2162&nbsp;s longer at the head, and the bound test alone is
+  3509&nbsp;s of it, so everything else ran 1347&nbsp;s faster on the after
+  job's node; the volume block's refinement on that file's meshes is 1.56&nbsp;%
+  of 179&nbsp;828&nbsp;100 ordered pairs on the 13410-cell graded mesh and
+  3.59&nbsp;% of 16&nbsp;136&nbsp;289 on the 4017-cell one (job 1332699), a few
+  per cent of each assembly's volume block, so the delta is contention and the
+  bound test rather than the rule.</p>
+  <p>The failure set, the collection count, and the exit statuses are what make
+  the arms a fence; the walls are not comparable across two nodes and are not
+  used as one.</p>
+
+  <h3 id="icm-graded-operator-bound-receipts">Receipts</h3>
+  <p><code>shells-repaired-confounded.jsonl</code> holds two superseded rows:
+  the first repaired arm switched the rule by patching
+  <code>sectionaverage.section_nodes</code>, which
+  <code>linear_magnetisation_geometry</code> also reads at six nodes for the
+  local law's volume coefficients, so that arm changed the local law and the
+  target rule together. The rows reported here come from the helper switch,
+  which is the rule the repair changes.</p>
+  <p>Rows are under
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/operator-bound/receipts/</code>:
+  <code>shells-delivered.jsonl</code> and <code>shells-repaired.jsonl</code> (one
+  row per label per arm), <code>localise-localise-{default,edge8,volume12}.json</code>
+  (the block split), <code>selfcell.log</code> (the per-cell scan),
+  <code>pin.json</code> (the pin delta), <code>probe-test.log</code> (the proposed
+  test executed) and <code>volume-rule.patch</code>. Job scripts and logs are
+  under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T195612393267-icm-graded-operator-bound/</code>
+  and its <code>logs/</code>. Every arm is a scheduler job that extracts
+  <code>git archive HEAD</code> into its own <code>/tmp</code> tree, so no
+  evidence was produced on a login or fleet node; each sets
+  <code>JAX_PLATFORMS=cpu</code> and asserts the float64 flag through
+  <code>configure_dtypes()</code>, and the rule is switched in the process rather
+  than by a second build.</p>
+  <p>The targeted rule's own receipts, same directory:
+  <code>nearfield-graded-16-80.npz</code> and
+  <code>logs/nearfield3-1332039.log</code> (the criterion sweep),
+  <code>logs/compare3-1332185.log</code> and
+  <code>logs/compare-graded-1332212.log</code> (the three-rule comparison, one
+  process per rule, rows written as each label lands),
+  <code>compare-targeted.jsonl</code> and <code>compare-targeted-graded.jsonl</code>,
+  <code>logs/boundtest2-1332186.log</code> (the run that measured 2.73e-9 and
+  failed its then-1e-10 assertion, kept as the measurement) and
+  <code>logs/boundtest3-1332344.log</code> (the amended test),
+  <code>suites-final/{baseline,after}-suite.log</code> (the two arms at the
+  stated revisions), and <code>logs/suite-*.log</code> (the arm job logs,
+  including the two submissions the dirty-tree guard refused).</p>
+</main>
+</body>
+</html>

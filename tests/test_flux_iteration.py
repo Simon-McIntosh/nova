@@ -248,6 +248,44 @@ def test_the_iteration_recovers_the_state_the_rows_came_from():
     assert fitter.profile.instrument.map_current is None
 
 
+def test_a_far_start_recovers_the_state_the_rows_came_from():
+    """A map far from its answer is walked by its own cycle, not damped to a stop.
+
+    The rows read a current that is strongly flux-dependent, and the start is
+    more than a span from the state they were measured on. The pass fits the
+    coefficients the held map's rows name and lays one cycle of them down,
+    mixing the walk over the steps it has already taken, so the held map and
+    the map its own coefficients describe are brought together rather than the
+    cycle being damped into a stall. The ``cycle`` ladder against the same
+    start stalls with a flux error well above the band, which is what this
+    state cannot afford.
+    """
+    fitter, measurement, flux, cells = _instrument(initial=TRUTH * 1.3, flux_weight=2.0)
+    receipt = fitter.fit(
+        measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+    )
+    assert receipt.converged
+    np.testing.assert_allclose(receipt.coefficients, TRUTH, atol=1.0e-8)
+    np.testing.assert_allclose(receipt.terminal_state.flux, flux, atol=1.0e-9)
+    np.testing.assert_allclose(receipt.terminal_state.cell_current, cells, rtol=1e-8)
+    stalled_fitter, stalled_measurement, _, _ = _instrument(
+        initial=TRUTH * 1.3, flux_weight=2.0
+    )
+    stalled = stalled_fitter.fit(
+        stalled_measurement,
+        np.zeros(CELLS),
+        plasma_current_scale=1.0,
+        flux_tolerance=1.0e-12,
+        step_rule="cycle",
+    )
+    stalled_error = float(np.max(np.abs(stalled.terminal_state.flux - flux)))
+    assert not stalled.converged
+    assert stalled_error > 1.0e-6
+
+
 def test_each_pass_costs_one_flux_map_per_coefficient_plus_the_residual():
     # one residual read and one response column per coefficient per pass, and
     # one cycle for the step the pass lays down plus one for every fraction it
@@ -258,6 +296,7 @@ def test_each_pass_costs_one_flux_map_per_coefficient_plus_the_residual():
         np.zeros(CELLS),
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
+        step_rule="cycle",
     )
     assert receipt.flux_evaluations == len(receipt.passes) + sum(
         item.trials for item in receipt.passes
@@ -281,6 +320,7 @@ def test_the_fitted_conductor_currents_take_their_measured_rows():
         np.zeros(CELLS),
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
+        step_rule="cycle",
     )
     assert receipt.converged
     np.testing.assert_allclose(receipt.coefficients[: TRUTH.size], TRUTH, atol=1e-8)
@@ -305,6 +345,7 @@ def test_one_pass_lays_down_the_map_its_own_coefficients_ask_for():
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
         max_passes=1,
+        step_rule="cycle",
     )
     assert len(receipt.passes) == 1
     assert not receipt.converged
@@ -329,6 +370,7 @@ def test_the_fitted_conductor_currents_reach_the_laid_down_map():
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
         max_passes=1,
+        step_rule="cycle",
     )
     np.testing.assert_allclose(receipt.coefficients[: TRUTH.size], TRUTH, atol=1e-9)
     np.testing.assert_allclose(receipt.conductor_currents, TRUTH_CURRENTS, atol=1e-9)
@@ -352,6 +394,7 @@ def test_a_flux_map_that_loses_its_axis_is_recorded_at_that_pass():
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
         max_passes=8,
+        step_rule="cycle",
     )
     assert not receipt.converged
     assert receipt.axis_lost_pass == 2
@@ -368,6 +411,7 @@ def test_a_map_update_beyond_the_span_is_rejected():
         np.zeros(CELLS),
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
+        step_rule="cycle",
     )
     assert not receipt.converged
     assert receipt.rejected_pass == 1
@@ -398,6 +442,7 @@ def test_a_cycle_that_overshoots_is_laid_down_one_converging_fraction_at_a_time(
         np.zeros(CELLS),
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
+        step_rule="cycle",
     )
     assert receipt.converged
     assert all(item.fraction < 1.0 for item in receipt.passes)
@@ -415,6 +460,7 @@ def test_a_cycle_that_overshoots_is_laid_down_one_converging_fraction_at_a_time(
         flux_tolerance=1.0e-12,
         max_backtracks=0,
         max_passes=6,
+        step_rule="cycle",
     )
     assert not bare.converged
 
@@ -443,6 +489,7 @@ def test_the_pass_lays_down_the_ladder_rung_its_own_cycle_residual_favours():
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
         max_passes=1,
+        step_rule="cycle",
     )
     assert len(readings) == 4
     assert receipt.passes[0].trials == 4
@@ -466,6 +513,7 @@ def test_a_pass_moves_no_amplitude_past_the_trust_radius():
         flux_tolerance=1.0e-12,
         max_coefficient_step=1.0e-2,
         max_passes=1,
+        step_rule="cycle",
     )
     radius = 1.0e-2 * float(np.max(np.abs(held)))
     moved = np.max(np.abs(receipt.passes[0].coefficients - held))
@@ -477,6 +525,7 @@ def test_a_pass_moves_no_amplitude_past_the_trust_radius():
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
         max_passes=1,
+        step_rule="cycle",
     )
     assert np.max(np.abs(grow.passes[0].coefficients - held)) > radius
 
@@ -545,6 +594,7 @@ def test_an_operator_with_a_prescribed_field_takes_its_current_vector():
         plasma_current_scale=1.0,
         flux_tolerance=1.0e-12,
         max_passes=1,
+        step_rule="cycle",
     )
     assert len(receipt.passes) == 1
     held = np.zeros(CELLS)

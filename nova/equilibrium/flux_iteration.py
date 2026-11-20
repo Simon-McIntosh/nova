@@ -57,6 +57,16 @@ class IterationTerminalState(NamedTuple):
     topology: object
 
 
+class RowFit(NamedTuple):
+    """The coefficients the rows at the held map name, and the solve's readings."""
+
+    coefficients: np.ndarray
+    values: np.ndarray
+    covariance: np.ndarray
+    spectrum: np.ndarray
+    null: np.ndarray
+
+
 @dataclass(frozen=True)
 class IterationPass:
     """One pass of the fit-inside-the-iteration loop.
@@ -273,6 +283,120 @@ class FluxIterationFit:
         """
         return float(np.max(np.abs(self._cycle(coefficients, flux) - flux)) / span)
 
+    def _mixed_step(
+        self,
+        state,
+        change,
+        history,
+        *,
+        depth: int = 3,
+        relaxation: float = 0.5,
+    ) -> np.ndarray:
+        """Return the next map of a fixed-point walk from the steps it has taken.
+
+        A plain damped step is what the walk takes until it has two steps to
+        compare; after that the mixing coefficients are the least-squares
+        combination of the recent steps whose images cancel the residual, which
+        is Anderson mixing. The step is capped at twice the damped step and
+        falls back to that step whenever the Gram solve is singular or the
+        mixture is not finite, so an ill-conditioned history cannot throw the
+        walk away.
+        """
+        relaxed = state + relaxation * change
+        if len(history) < 2:
+            return relaxed
+        difference_state = np.column_stack(
+            [history[i + 1][0] - history[i][0] for i in range(len(history) - 1)]
+        )
+        difference_map = np.column_stack(
+            [history[i + 1][1] - history[i][1] for i in range(len(history) - 1)]
+        )
+        gram = difference_map.T @ difference_map
+        gram = gram + 1.0e-10 * (np.trace(gram) / depth + 1.0e-30) * np.eye(
+            gram.shape[0]
+        )
+        try:
+            mixing = np.linalg.solve(gram, difference_map.T @ change)
+        except np.linalg.LinAlgError:
+            return relaxed
+        mixed = (
+            state
+            + relaxation * change
+            - (difference_state + relaxation * difference_map) @ mixing
+        )
+        if not np.all(np.isfinite(mixed)):
+            return relaxed
+        cap = 2.0 * float(np.max(np.abs(relaxed - state)))
+        moved = float(np.max(np.abs(mixed - state)))
+        if moved > cap:
+            mixed = state + (mixed - state) * (cap / moved)
+        return mixed
+
+    def _fit_rows(
+        self,
+        coefficients,
+        flux,
+        target,
+        weight,
+        rcond: float,
+        max_coefficient_step: float,
+    ) -> RowFit:
+        """Return the coefficients the rows at the held map name.
+
+        The measured rows are linear in the coefficients at a fixed map, so one
+        weighted least-squares step solves them exactly; the returned
+        coefficients are that step added to the ones the map was read at. The
+        step is bounded by ``max_coefficient_step`` times the largest amplitude
+        the pass holds, because a column the rows barely resolve answers a
+        residual of its own size with an amplitude the data never saw.
+        """
+        size = self.magnetics.number
+        cells = self._cell_current(self._profile(coefficients), flux)
+        values = self._rows(cells, coefficients[self._profile_count :])
+        columns = []
+        for column in range(self._profile_count):
+            direction = np.zeros_like(coefficients)
+            direction[column] = 1.0
+            stepped = self._cell_current(self._profile(coefficients + direction), flux)
+            difference = stepped - cells
+            columns.append(
+                np.r_[
+                    np.asarray(self.sensor_rows(difference), dtype=np.float64),
+                    float(np.sum(difference)),
+                ]
+            )
+        response = np.column_stack(columns)
+        if self._conductor_count:
+            response = np.vstack(
+                (response, np.zeros((self._conductor_count, response.shape[1])))
+            )
+            conductor = np.zeros(
+                (size + 1 + self._conductor_count, self._conductor_count)
+            )
+            conductor[:size] = self._conductor_response
+            conductor[size + 1 :] = np.eye(self._conductor_count)
+            response = np.column_stack((response, conductor))
+        correction, covariance, spectrum, null = whitened_solve(
+            response,
+            target - values,
+            weight,
+            0.0,
+            diagnostics=True,
+            rcond=rcond,
+        )
+        largest = float(np.max(np.abs(coefficients))) if coefficients.size else 0.0
+        radius = max_coefficient_step * max(largest, 0.0)
+        reached = float(np.max(np.abs(correction))) if correction.size else 0.0
+        if radius > 0.0 and reached > radius:
+            correction = correction * (radius / reached)
+        return RowFit(
+            coefficients=coefficients + correction,
+            values=np.asarray(values, dtype=np.float64),
+            covariance=covariance,
+            spectrum=spectrum,
+            null=null,
+        )
+
     def _coupled_merit(
         self, coefficients, flux, target, weight, span
     ) -> tuple[float, float]:
@@ -320,7 +444,7 @@ class FluxIterationFit:
         max_update: float = 1.0,
         max_coefficient_step: float = 1.0,
         max_backtracks: int = 3,
-        step_rule: str = "contraction",
+        step_rule: str = "coupled",
         on_pass: Callable[[int, float, float], None] | None = None,
     ) -> FluxIterationReceipt:
         """Return one reconstruction from the held-map least-squares passes.
@@ -336,6 +460,20 @@ class FluxIterationFit:
         ``relaxation`` caps the fraction a pass may lay down. Convergence is
         the applied flux update falling to ``flux_tolerance`` of the
         axis-to-boundary span.
+
+        ``step_rule`` selects the fraction. ``cycle`` is the flux residual
+        alone and is right only while the fitted coefficients are close.
+        ``contraction`` descends the coupled merit of the flux residual and the
+        whitened rows. ``picard`` lays a fixed relaxed step and is the rule the
+        free-boundary solve uses. ``coupled`` fits the coefficients the held
+        map's rows name and then lays one whole cycle of them down, mixing the
+        walk over the steps it has taken (Anderson) instead of damping it. It follows
+        the cycle map that the rows and the flux equation agree on: a plain
+        cycle is not a contraction away from its own fixed point, so
+        damping it only slows the walk to a stall, and re-solving the
+        coefficients against a map more than a span from its answer lays the
+        row misfit that map caused to the coefficients and moves a profile the
+        data never asked for.
         """
         started = perf_counter()
         if (
@@ -350,6 +488,7 @@ class FluxIterationFit:
             or max_coefficient_step <= 0.0
             or max_backtracks < 0
             or not 0.0 <= rcond < 1.0
+            or step_rule not in ("contraction", "coupled", "cycle", "picard")
         ):
             raise ValueError("fit budgets and scales must be finite and positive")
         size = self.magnetics.number
@@ -425,69 +564,87 @@ class FluxIterationFit:
         covariance = np.zeros((coefficients.size, coefficients.size))
         misfit = np.inf
         best_update = np.inf
+        history: list[tuple[np.ndarray, np.ndarray]] = []
         stopped_improving: int | None = None
         values = None
         for index in range(max_passes):
-            active = self._profile(coefficients)
-            operator = active.operator
-            columns = []
             try:
-                cells = self._cell_current(active, flux)
-                sensor_evaluations += 1
-                values = self._rows(cells, coefficients[self._profile_count :])
-                for column in range(self._profile_count):
-                    direction = np.zeros_like(coefficients)
-                    direction[column] = 1.0
-                    stepped = self._cell_current(
-                        self._profile(coefficients + direction), flux
-                    )
-                    sensor_evaluations += 1
-                    difference = stepped - cells
-                    columns.append(
-                        np.r_[
-                            np.asarray(self.sensor_rows(difference), dtype=np.float64),
-                            float(np.sum(difference)),
-                        ]
-                    )
-            except ValueError:
+                fitted = self._fit_rows(
+                    coefficients, flux, target, weight, rcond, max_coefficient_step
+                )
+            except ValueError as error:
                 if index == 0:
                     raise
                 axis_lost_pass = index
+                axis_loss_message = f"{type(error).__name__}: {error}"
                 break
+            sensor_evaluations += 1 + self._profile_count
+            values = fitted.values
+            coefficients = fitted.coefficients
+            covariance = fitted.covariance
+            spectrum = fitted.spectrum
+            null = fitted.null
             residual = (values - target) * weight
             misfit = float(np.max(np.abs(residual)))
             if index == 0:
                 first_pass_values = np.array(values, dtype=np.float64)
                 first_pass_residual = np.array(residual, dtype=np.float64)
-            response = np.column_stack(columns)
-            if self._conductor_count:
-                response = np.vstack(
-                    (response, np.zeros((self._conductor_count, response.shape[1])))
+            if step_rule == "coupled":
+                # a pass fits the coefficients the held map's rows name and then
+                # takes one cycle of them, so the map follows its own
+                # coefficients instead of the coefficients chasing a map that
+                # never settles. That cycle map is not a contraction away from
+                # its own fixed point, so the walk is mixed over the steps it
+                # has already taken rather than damped, and what the pass
+                # reports is the residual it found: how far the held map sat
+                # from the map its own coefficients describe.
+                try:
+                    mapped = self._cycle(coefficients, flux)
+                except ValueError as error:
+                    axis_lost_pass = index
+                    axis_loss_message = f"{type(error).__name__}: {error}"
+                    break
+                flux_evaluations += 1
+                change = mapped - flux
+                update = float(np.max(np.abs(change)) / span)
+                history.append((flux, change))
+                if len(history) > max_backtracks + 2:
+                    history.pop(0)
+                candidate = self._mixed_step(
+                    flux,
+                    change,
+                    history,
+                    depth=max_backtracks,
+                    relaxation=relaxation,
                 )
-                conductor = np.zeros(
-                    (size + 1 + self._conductor_count, self._conductor_count)
+                travel = float(np.max(np.abs(candidate - flux)) / span)
+                if passes and travel > max_update:
+                    rejected_pass = index
+                    rejected_message = (
+                        f"the map update {travel:.3g} of the span exceeded "
+                        f"{max_update:g}"
+                    )
+                    break
+                flux = candidate
+                passes.append(
+                    IterationPass(
+                        index=index,
+                        misfit=misfit,
+                        flux_update=update,
+                        coefficients=coefficients.copy(),
+                        fraction=1.0,
+                        trials=len(history),
+                    )
                 )
-                conductor[:size] = self._conductor_response
-                conductor[size + 1 :] = np.eye(self._conductor_count)
-                response = np.column_stack((response, conductor))
-            correction, covariance, spectrum, null = whitened_solve(
-                response,
-                target - values,
-                weight,
-                0.0,
-                diagnostics=True,
-                rcond=rcond,
-            )
-            # a column the rows barely resolve answers a residual of its own
-            # size with an amplitude the data never saw, and the map then moves
-            # to a profile no row asked for; the pass takes a bounded step in
-            # the amplitudes so a nearly invisible direction cannot walk away
-            largest = float(np.max(np.abs(coefficients))) if coefficients.size else 0.0
-            radius = max_coefficient_step * max(largest, 0.0)
-            reached = float(np.max(np.abs(correction))) if correction.size else 0.0
-            if radius > 0.0 and reached > radius:
-                correction = correction * (radius / reached)
-            coefficients = coefficients + correction
+                if on_pass is not None:
+                    on_pass(index, misfit, update)
+                if update <= flux_tolerance:
+                    converged = True
+                    break
+                if update >= best_update and stopped_improving is None:
+                    stopped_improving = index
+                best_update = min(best_update, update)
+                continue
             # the map this pass lays down belongs to the coefficients just
             # fitted, and one whole cycle of it is the fixed-point iteration
             # itself: from a starting field more than a span from the answer it
@@ -504,7 +661,7 @@ class FluxIterationFit:
             delta = updated - flux
             residual_at_hold = float(np.max(np.abs(delta)) / span)
             fraction = relaxation
-            if step_rule not in ("contraction", "cycle", "picard"):
+            if step_rule not in ("contraction", "coupled", "cycle", "picard"):
                 raise ValueError(f"unknown step rule {step_rule!r}")
             # the pass lays down a fraction of the one-cycle update. Which
             # fraction is the whole question: a whole cycle is the fixed point
@@ -519,10 +676,22 @@ class FluxIterationFit:
             trials = 0
             best_fraction = 1.0 if accepted else 0.0
             best_residual = residual_at_hold
-            if step_rule == "picard":
+            if step_rule == "contraction" and not accepted:
+                # the trial rungs are scored on the coupled merit, so the map
+                # they are compared against must be scored the same way: a
+                # flux-only reference stalls the pass on rungs whose flux
+                # residual falls but whose row misfit, which the reference
+                # omits, has not yet fallen with it
+                best_residual = max(
+                    residual_at_hold,
+                    self._whitened_misfit(coefficients, flux, target, weight),
+                )
+                sensor_evaluations += 1
+            fixed = step_rule == "picard"
+            if fixed:
                 # a fixed relaxed step, the rule the free-boundary solve uses
                 best_fraction = fraction
-            while step_rule != "picard" and not accepted and trials <= max_backtracks:
+            while not fixed and not accepted and trials <= max_backtracks:
                 trial_flux = flux + fraction * delta
                 try:
                     if step_rule == "cycle":

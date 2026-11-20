@@ -154,7 +154,7 @@ def command(arm, python):
 
 
 def complete(arm):
-    path = STUDY / (label(arm) + ".jsonl")
+    path = STUDY / ("efit-" + label(arm) + ".jsonl")
     if not path.exists():
         return False
     return len(path.read_text().splitlines()) >= SLICES
@@ -183,42 +183,207 @@ def launch(arm, python, logdir):
     }
 
 
-def reduce_arm(rows, truth, analyse):
-    """Reduce one arm's per-slice rows to the reported measures."""
+def values_of(rows):
+    """Per-slice series, holding an absent boundary outline as NaN."""
     import numpy as np
 
-    values = analyse.series(rows)
-    axis_truth = np.asarray(truth["axis"], dtype=float)
+    def column(key):
+        return np.array(
+            [float("nan") if row.get(key) is None else row[key] for row in rows],
+            dtype=float,
+        )
+
+    axis = np.array([row["axis"] for row in rows], dtype=float)
+    # DD 4.1 marks an unwritten float with a -9e40 sentinel; a state whose
+    # global_quantities were never filled reads it back here rather than as an
+    # empty node, so it is held absent like a missing boundary.
+    axis[np.abs(axis) > 1e30] = np.nan
+    return {
+        "axis": axis,
+        "flux": column("flux_boundary"),
+        "q95": column("q95"),
+    }
+
+
+def rms_error(value, truth):
+    """Root-mean-square error over the slices that carry a value."""
+    import numpy as np
+
+    value = np.asarray(value, dtype=float)
+    truth = np.asarray(truth, dtype=float).ravel()
+    if value.ndim == 1:
+        residual = value - float(truth[0])
+        finite = np.isfinite(residual)
+        return (
+            float(np.sqrt(np.mean(residual[finite] ** 2)))
+            if finite.any()
+            else float("nan")
+        )
+    residual = value - truth
+    finite = np.isfinite(residual).all(axis=1)
+    if not finite.any():
+        return float("nan")
+    return float(np.sqrt(np.mean(np.sum(residual[finite] ** 2, axis=1))))
+
+
+def block_mean_error(value, truth):
+    """Root-mean-square of each block mean's error, absent slices left out."""
+    import numpy as np
+
+    value = np.asarray(value, dtype=float)
+    truth = np.asarray(truth, dtype=float)
+    errors = []
+    for start in range(0, value.shape[0] - BLOCK + 1, BLOCK):
+        chunk = value[start : start + BLOCK]
+        if chunk.ndim == 1:
+            finite = np.isfinite(chunk)
+            if finite.any():
+                errors.append(float(np.abs(chunk[finite].mean() - truth[0])))
+        else:
+            finite = np.isfinite(chunk).all(axis=1)
+            if finite.any():
+                errors.append(float(np.linalg.norm(chunk[finite].mean(axis=0) - truth)))
+    return float(np.sqrt(np.mean(np.square(errors)))) if errors else float("nan")
+
+
+def lag_one(value):
+    """Slice-to-slice correlation over consecutive finite pairs."""
+    import numpy as np
+
+    value = np.asarray(value, dtype=float)
+    if value.ndim == 2:
+        pair = np.isfinite(value).all(axis=1)
+        value = value[pair]
+        if value.shape[0] == 0:
+            return float("nan")
+        return float(
+            np.mean(
+                [
+                    np.corrcoef(value[:-1, c], value[1:, c])[0, 1]
+                    for c in range(value.shape[1])
+                ]
+            )
+        )
+    value = value[np.isfinite(value)]
+    if value.size < 3 or np.std(value) == 0.0:
+        return float("nan")
+    return float(np.corrcoef(value[:-1], value[1:])[0, 1])
+
+
+def reduce_arm(rows, truth, analyse):
+    """Reduce one arm's per-slice rows to the reported measures."""
+    values = values_of(rows)
     span = float(truth["flux_span"])
+    axis_truth = [float(value) for value in truth["axis"]]
     flux = values["flux"] / span
-    flux_truth = float(truth["flux_boundary"]) / span
-    q95_truth = abs(float(truth["q95"]))
-    axis_error = float(
-        np.sqrt(np.mean(np.sum((values["axis"] / 1.0 - axis_truth) ** 2, axis=1)))
-    )
-    flux_error = float(np.sqrt(np.mean((flux - flux_truth) ** 2)))
-    q95_error = float(np.sqrt(np.mean((values["q95"] - q95_truth) ** 2)))
-    axis_mean = float(analyse.block_error(values["axis"], axis_truth, BLOCK))
-    flux_mean = float(analyse.block_error(flux, np.array([flux_truth]), BLOCK))
-    q95_mean = float(analyse.block_error(values["q95"], np.array([q95_truth]), BLOCK))
+    flux_truth = [float(truth["flux_boundary"]) / span]
+    q95_truth = [abs(float(truth["q95"]))]
+    axis_rms = rms_error(values["axis"], axis_truth)
+    flux_rms = rms_error(flux, flux_truth)
+    q95_rms = rms_error(values["q95"], q95_truth)
+    axis_mean = block_mean_error(values["axis"], axis_truth)
+    flux_mean = block_mean_error(flux, flux_truth)
+    q95_mean = block_mean_error(values["q95"], q95_truth)
     return {
         "slices": len(rows),
-        "converged": float(np.mean([bool(row.get("converged", True)) for row in rows])),
-        "axis_rms": axis_error,
+        "slices_with_boundary": int(
+            sum(1 for row in rows if row.get("q95") is not None)
+        ),
+        "converged": float(
+            __import__("numpy").mean([bool(row.get("converged", True)) for row in rows])
+        ),
+        "axis_rms": axis_rms,
         "axis_mean_50": axis_mean,
-        "axis_mean_ratio": axis_mean / axis_error,
-        "flux_rms": flux_error,
+        "axis_mean_ratio": axis_mean / axis_rms,
+        "flux_rms": flux_rms,
         "flux_mean_50": flux_mean,
-        "flux_mean_ratio": flux_mean / flux_error,
-        "q95_rms": q95_error,
+        "flux_mean_ratio": flux_mean / flux_rms,
+        "q95_rms": q95_rms,
         "q95_mean_50": q95_mean,
-        "q95_mean_ratio": q95_mean / q95_error,
-        "axis_lag1": float(analyse.lag_one(values["axis"])),
-        "flux_lag1": float(analyse.lag_one(flux)),
-        "q95_lag1": float(analyse.lag_one(values["q95"])),
+        "q95_mean_ratio": q95_mean / q95_rms,
+        "axis_lag1": lag_one(values["axis"]),
+        "flux_lag1": lag_one(flux),
+        "q95_lag1": lag_one(values["q95"]),
         "axis_mean": values["axis"].mean(axis=0).tolist(),
-        "q95_mean": float(values["q95"].mean()),
+        "q95_mean": float(__import__("numpy").nanmean(values["q95"])),
     }
+
+
+def salvage(arm):
+    """Read a finished imas-efit output slice by slice, absent boundary included.
+
+    imas-efit stores an equilibrium for every requested slice, but above a
+    noise size some of those states carry no boundary outline at all
+    (``boundary.outline`` has shape (0, 2) although the axis is present).  The
+    study's reader refuses such a state, so the per-slice pass here records the
+    axis and leaves the boundary-derived quantities absent, which is what the
+    stored output holds rather than a reconstruction failure.
+    """
+    import imas
+    from nova.imas.mast_efit_referee import q95_from_flux_map, read_equilibrium_state
+
+    study, _analyse = import_study()
+    truth = json.loads((STUDY / "generating.json").read_text())
+    output = STUDY / ("efit-" + label(arm))
+    wall = str(study.wall_npz(STUDY / "conf" / "machine-wall.npz"))
+    entry = imas.DBEntry("imas:hdf5?path=" + str(output), "r", dd_version="4.1.0")
+    equilibrium = entry.get("equilibrium")
+    rows = []
+    for index in range(SLICES):
+        frame = equilibrium.time_slice[index]
+        axis = [
+            float(frame.global_quantities.magnetic_axis.r),
+            float(frame.global_quantities.magnetic_axis.z),
+        ]
+        record = {"slice": index, "axis": axis}
+        try:
+            state = read_equilibrium_state(output, time_index=index, wall_source=wall)
+            q95 = float(q95_from_flux_map(state, vacuum_b0=truth["b0"]))
+        except Exception as error:
+            record.update(
+                flux_axis=None,
+                flux_boundary=None,
+                flux_span=None,
+                plasma_current=None,
+                q95=None,
+                q95_stored=None,
+                converged=False,
+                unavailable=str(error).rsplit(":", 1)[-1].strip(),
+            )
+        else:
+            record.update(
+                flux_axis=float(state.flux_axis),
+                flux_boundary=float(state.flux_boundary),
+                flux_span=float(state.flux_boundary - state.flux_axis),
+                plasma_current=float(state.plasma_current_a),
+                q95=q95,
+                q95_stored=float(state.q95),
+                converged=True,
+            )
+        rows.append(record)
+    entry.close()
+    path = STUDY / ("efit-" + label(arm) + ".jsonl")
+    path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+    return {
+        "arm": arm["name"],
+        "label": label(arm),
+        "rows": len(rows),
+        "unavailable": int(sum(1 for row in rows if row.get("q95") is None)),
+        "path": str(path),
+    }
+
+
+def repair(todo):
+    """Salvage every arm whose jsonl is shorter than the sequence."""
+    done = []
+    for arm in todo:
+        if complete(arm):
+            continue
+        done.append(salvage(arm))
+        # salvaged rows are short of a boundary on some slices, so the file is
+        # complete by slice count but not by the study's own reader
+        done[-1]["status"] = "salvaged"
+    return done
 
 
 def generator_control(study, truth):
@@ -323,7 +488,7 @@ def analysis(study, analyse):
     truth = json.loads((STUDY / "generating.json").read_text())
     table = {}
     for arm in arms():
-        path = STUDY / (label(arm) + ".jsonl")
+        path = STUDY / ("efit-" + label(arm) + ".jsonl")
         rows = analyse.load(path) if path.exists() else []
         if len(rows) < SLICES:
             continue
@@ -353,8 +518,8 @@ def analysis(study, analyse):
         },
         "arms": table,
         "crossing": {
-            "axis_0p05_m": crossing_of(sizes, "axis_mean_50", 0.05),
-            "q95_0p2": crossing_of(sizes, "q95_mean_50", 0.2),
+            "axis_0p05_m": crossing_of(sizes, "axis_rms", 0.05),
+            "q95_0p2": crossing_of(sizes, "q95_rms", 0.2),
         },
         "generator_control": generator_control(study, truth),
         "nova": nova_column(truth, analyse),
@@ -373,6 +538,7 @@ def main(argv=None):
     run.add_argument("--workers", type=int, default=5)
     run.add_argument("--python", default=sys.executable)
     sub.add_parser("analyse")
+    sub.add_parser("salvage")
     arguments = parser.parse_args(argv)
     if arguments.command == "arms":
         for arm in arms():
@@ -385,6 +551,10 @@ def main(argv=None):
                     }
                 )
             )
+        return 0
+    if arguments.command == "salvage":
+        for result in repair(arms()):
+            print(json.dumps(result), flush=True)
         return 0
     if arguments.command == "analyse":
         study, analyse = import_study()

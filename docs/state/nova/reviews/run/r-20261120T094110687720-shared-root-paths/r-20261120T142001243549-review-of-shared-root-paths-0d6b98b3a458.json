@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "base_log_revision": "789479f7dbaa97933495e8c0f82b9dfa1dc0fc75",
   "completed_at": "2026-11-20T14:28:06.367Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "repair-of-shared-root-paths-0d6b98b3a458",
+      "recorded_at": "2026-11-20T14:44:07.134073+00:00"
+    }
+  },
   "dispatched_at": "2026-11-20T14:21:03Z",
   "finding_dispositions": {
     "0": {

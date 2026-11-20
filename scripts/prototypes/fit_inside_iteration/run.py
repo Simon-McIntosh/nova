@@ -4,9 +4,12 @@ Runs the known states of the known-answer recovery record and the stored cases
 of the imas-efit comparison record through
 :class:`nova.equilibrium.flux_iteration.FluxIterationFit`, in sequence inside
 one allocation, and writes a per-case table plus one overlaid line-contour
-panel per case. Each case carries its negative control: every magnetics row,
-the measured plasma current and the measured conductor currents scaled by 1.10
-must leave the 1.5 % plasma-current band when the case converged.
+panel per case. Each case carries its negative control: the row the fit reads
+(``measured - vacuum``), the measured plasma current and the measured conductor
+currents all scaled by 1.10 must leave the 1.5 % plasma-current band when the
+case converged. Both terms of the row are scaled, because scaling the
+measurement alone leaves the row short of the factor wherever the vacuum
+prediction dominates, and the control then tests something else.
 
 The known states reuse the row construction, generating receipts and starting
 fields of the known-answer recovery study; the stored cases reuse the reader,
@@ -150,6 +153,33 @@ def _model_rows(case, fitted):
         return f"{type(refusal).__name__}: {refusal}"
 
 
+GAIN_ERROR = 1.10
+
+
+def _gain_error(measurement, factor=GAIN_ERROR):
+    """Return the measurement with every physical input scaled by ``factor``.
+
+    The row the fit reads is ``measured - vacuum``, so a gain error on the rows
+    scales both terms. Scaling the measurement alone leaves the signature short
+    of the factor wherever the vacuum prediction is the larger term, which is a
+    different test from the one the control claims to be.
+    """
+
+    def scaled(value):
+        return None if value is None else np.asarray(value, dtype=np.float64) * factor
+
+    return replace(
+        measurement,
+        measured=scaled(measurement.measured),
+        vacuum=scaled(measurement.vacuum),
+        scale=scaled(measurement.scale),
+        plasma_current=float(measurement.plasma_current) * factor,
+        vacuum_flux=scaled(measurement.vacuum_flux),
+        conductor_current=scaled(measurement.conductor_current),
+        conductor_scale=scaled(measurement.conductor_scale),
+    )
+
+
 def _fit_summary(fitted):
     """Summarise a fit so a control run is read by what it reached, not inferred."""
     return dict(
@@ -209,25 +239,19 @@ def _run_known(case, args):
         / span
     )
     residual = float(np.max(np.abs(fitted.whitened_residuals)))
-    scaled_measurement = replace(
-        case["measurement"],
-        measured=case["measurement"].measured * 1.10,
-        scale=case["measurement"].scale * 1.10,
-        plasma_current=case["measurement"].plasma_current * 1.10,
-    )
+    scaled_measurement = _gain_error(case["measurement"])
     scaled = fitter.fit(
         scaled_measurement,
         case["initial_flux"],
-        plasma_current_scale=case["plasma_current"] * 1.10,
+        plasma_current_scale=case["plasma_current"] * GAIN_ERROR,
         max_passes=args.max_passes,
         flux_tolerance=args.flux_tolerance,
         relaxation=args.relaxation,
     )
     scaled_current = abs(float(np.sum(scaled.terminal_state.cell_current)))
     control = abs(scaled_current - case["plasma_current"]) / case["plasma_current"]
-    # The rows the fit reads are ``measured - vacuum`` and the vacuum basis is
-    # not scaled, so the control's rows move by less than the factor applied to
-    # the measurement. Record the ratio the fit actually saw.
+    # Record the ratio the rows the fit reads actually moved by, so a control
+    # that stays inside its band cannot be blamed on an unscaled input.
     plain_signature = case["measurement"].signature[case["measurement"].mask]
     scaled_signature = scaled_measurement.signature[case["measurement"].mask]
     resolved = np.abs(plain_signature) > 0.0
@@ -353,18 +377,11 @@ def _run_stored(case, args):
         scores_error = f"{type(error).__name__}: {error}"
     control, control_error = None, None
     try:
-        scaled_measurement = replace(
-            case["measurement"],
-            measured=case["measurement"].measured * 1.10,
-            scale=case["measurement"].scale * 1.10,
-            plasma_current=case["measurement"].plasma_current * 1.10,
-            conductor_current=case["measurement"].conductor_current * 1.10,
-            conductor_scale=case["measurement"].conductor_scale * 1.10,
-        )
+        scaled_measurement = _gain_error(case["measurement"])
         scaled = fitter.fit(
             scaled_measurement,
             case["initial_flux"],
-            plasma_current_scale=float(data["plasma_current_scale"]) * 1.10,
+            plasma_current_scale=float(data["plasma_current_scale"]) * GAIN_ERROR,
             on_pass=_progress(case["name"] + "-control"),
             max_passes=args.max_passes,
             flux_tolerance=args.flux_tolerance,

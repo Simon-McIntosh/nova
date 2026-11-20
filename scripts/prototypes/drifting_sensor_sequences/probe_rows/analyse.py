@@ -12,6 +12,11 @@ import numpy as np
 
 STUDY = Path(os.environ.get("DRIFT_STUDY", str(Path(__file__).resolve().parent)))
 BLOCK = 50
+# One lag-one rule for the controls: the white draw and the index-0
+# colouring must sit within this of zero, and the drift sequence above its
+# complement.
+LAG_ONE_LIMIT = 0.15
+DRIFT_LAG_ONE_FLOOR = 0.5
 
 
 def load(path: Path) -> list[dict]:
@@ -50,11 +55,19 @@ def lag_one(value: np.ndarray) -> float:
         value = value[finite]
         if value.shape[0] < 3:
             return float("nan")
+        # A constant column carries no correlation, and corrcoef reports one
+        # for it; leaving it out keeps a degenerate stream from reading as a
+        # perfect memory.
+        varying = [
+            column for column in range(value.shape[1]) if np.ptp(value[:, column]) > 0.0
+        ]
+        if not varying:
+            return float("nan")
         return float(
             np.mean(
                 [
                     np.corrcoef(value[:-1, column], value[1:, column])[0, 1]
-                    for column in range(value.shape[1])
+                    for column in varying
                 ]
             )
         )
@@ -207,14 +220,14 @@ def thresholds(table: tuple[dict, dict]) -> dict:
     white, drift = table
     return dict(
         white_lag1_pass=bool(
-            abs(white["axis_lag1"]) <= 0.15
-            and abs(white["flux_lag1"]) <= 0.15
-            and abs(white["q95_lag1"]) <= 0.15
+            abs(white["axis_lag1"]) <= LAG_ONE_LIMIT
+            and abs(white["flux_lag1"]) <= LAG_ONE_LIMIT
+            and abs(white["q95_lag1"]) <= LAG_ONE_LIMIT
         ),
         drift_lag1_pass=bool(
-            drift["axis_lag1"] > 0.5
-            and drift["flux_lag1"] > 0.5
-            and drift["q95_lag1"] > 0.5
+            drift["axis_lag1"] > DRIFT_LAG_ONE_FLOOR
+            and drift["flux_lag1"] > DRIFT_LAG_ONE_FLOOR
+            and drift["q95_lag1"] > DRIFT_LAG_ONE_FLOOR
         ),
     )
 

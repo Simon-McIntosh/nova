@@ -260,7 +260,7 @@ def repair(todo):
     return done
 
 
-def generator_control(study, truth):
+def generator_control(study, truth, analyse):
     """Index zero must reproduce the white draw's own lag-one correlation.
 
     Measured on the generator alone over 2000 slices, so the sampling spread of
@@ -295,7 +295,7 @@ def generator_control(study, truth):
     )
 
     def lag(value):
-        return float(np.corrcoef(value[:-1], value[1:])[0, 1])
+        return analyse.lag_one(value)
 
     sensors = flat.shape[1]
     white_lag = np.array([lag(white[:, sensor]) for sensor in range(sensors)])
@@ -375,95 +375,106 @@ def analysis(study, analyse):
             "axis_0p05_m": analyse.crossing_point(sizes, "axis_rms", 0.05),
             "q95_0p2": analyse.crossing_point(sizes, "q95_rms", 0.2),
         },
-        "generator_control": generator_control(study, truth),
+        "generator_control": generator_control(study, truth, analyse),
         "nova": nova_column(truth, analyse),
         "truth": truth,
     }
     return payload
 
 
-CHECKS = (
-    "arms",
-    "slices",
-    "generator-control",
-    "white-control",
-    "crossing",
-    "nova",
-)
+CROSSINGS = {"axis_0p05_m": 0.05, "q95_0p2": 0.2}
 
 
-def validate(payload):
-    """Return one note per check that the payload fails.
+def validate(payload, analyse):
+    """Return the failures and the number of assertions the checks ran.
 
     The sweep's own numbers decide whether the gate is green: a control that
     stopped reproducing the white draw, an arm that never completed, or a sweep
     whose crossing vanished is a failed measurement rather than a table to
     publish, so the analyse step exits nonzero and the payload is not written.
+    The lag-one limits are the analysis module's, so the sweep cannot drift
+    from the thresholds that module publishes for the same control.
     """
     failures = []
+    performed = 0
     table = payload["arms"]
+
+    performed += 1
     expected = {arm["name"] for arm in arms()}
     missing = sorted(expected - set(table))
     if missing:
         failures.append("arms: missing " + ", ".join(missing))
-    short = sorted(name for name, row in table.items() if row["slices"] != SLICES)
-    if short:
-        failures.append("slices: " + ", ".join(short) + " not at %d" % SLICES)
+
     for name, row in table.items():
+        performed += 1
+        if row["slices"] != SLICES:
+            failures.append("slices: %s not at %d" % (name, SLICES))
+        performed += 1
         factor = row["factor"]
-        if factor is None or factor > 0.1:
-            continue
-        if row["slices_with_boundary"] < SLICES:
-            failures.append(
-                "slices: %s carries a boundary on only %d of %d"
-                % (name, row["slices_with_boundary"], SLICES)
-            )
-    for name, row in table.items():
+        if factor is not None and factor <= 0.1:
+            if row["slices_with_boundary"] < SLICES:
+                failures.append(
+                    "slices: %s carries a boundary on only %d of %d"
+                    % (name, row["slices_with_boundary"], SLICES)
+                )
+        performed += 1
         if row["slices_with_boundary"] < SLICES // 5:
             failures.append(
                 "slices: %s lost more than four fifths of its states" % name
             )
+
     control = payload["generator_control"]
+    performed += 1
     if abs(control["index0_minus_white"]) > 0.01:
         failures.append(
             "generator-control: index 0 minus white exceeds 0.01 (%.5f)"
             % control["index0_minus_white"]
         )
-    if control["zero_lag1_max_abs"] > 0.15:
+    performed += 1
+    if control["zero_lag1_max_abs"] > analyse.LAG_ONE_LIMIT:
         failures.append(
-            "generator-control: per-sensor index-0 lag-one exceeds 0.15 (%.4f)"
-            % control["zero_lag1_max_abs"]
+            "generator-control: per-sensor index-0 lag-one exceeds %.2f (%.4f)"
+            % (analyse.LAG_ONE_LIMIT, control["zero_lag1_max_abs"])
         )
-    if control["index1_lag1"] < 0.5:
+    performed += 1
+    if control["index1_lag1"] < analyse.DRIFT_LAG_ONE_FLOOR:
         failures.append(
-            "generator-control: index-1 lag-one fell below 0.5 (%.4f)"
-            % control["index1_lag1"]
+            "generator-control: index-1 lag-one fell below %.2f (%.4f)"
+            % (analyse.DRIFT_LAG_ONE_FLOOR, control["index1_lag1"])
         )
+    performed += 1
     if control["slices"] < 1000:
         failures.append("generator-control: %d slices is too few" % control["slices"])
+
     white = table.get("white-reference")
+    performed += 1
     if white is None:
         failures.append("white-control: the white arm was not reduced")
     else:
         for stream in ("axis", "flux", "q95"):
+            performed += 1
             value = white[stream + "_lag1"]
-            if not abs(value) <= 0.15:
+            if not abs(value) <= analyse.LAG_ONE_LIMIT:
                 failures.append(
-                    "white-control: %s lag-one %s outside +/-0.15" % (stream, value)
+                    "white-control: %s lag-one %s outside +/-%.2f"
+                    % (stream, value, analyse.LAG_ONE_LIMIT)
                 )
-    for key, limit in (("axis_0p05_m", 0.05), ("q95_0p2", 0.2)):
+
+    for key, limit in CROSSINGS.items():
+        performed += 1
         crossing = payload["crossing"][key]
         if crossing["factor"] is None:
             failures.append("crossing: %s never exceeds %.2f" % (key, limit))
         elif crossing["value"] <= limit:
             failures.append("crossing: %s reports a value under its limit" % key)
+
     for sequence, row in payload["nova"].items():
+        performed += 1
         if not row["source_exists"]:
             failures.append("nova: no receipt file for the %s sequence" % sequence)
-            continue
-        if row["metrics"] is None:
+        elif row["metrics"] is None:
             failures.append("nova: the %s sequence reduced nothing" % sequence)
-    return failures
+    return failures, performed
 
 
 def main(argv=None):
@@ -496,14 +507,14 @@ def main(argv=None):
         study, analyse = import_study()
         payload = analysis(study, analyse)
         print(json.dumps(payload, indent=2))
-        failures = validate(payload)
+        failures, performed = validate(payload, analyse)
         for note in failures:
             print("CHECK-FAILED " + note, flush=True)
         if failures:
             print("%d check(s) failed; payload not written" % len(failures))
             return 1
         (STUDY / "spectrum-summary.json").write_text(json.dumps(payload, indent=2))
-        print("CHECKS-PASSED %d" % len(CHECKS), flush=True)
+        print("CHECKS-PASSED %d" % performed, flush=True)
         return 0
     logdir = STUDY / "logs"
     logdir.mkdir(parents=True, exist_ok=True)

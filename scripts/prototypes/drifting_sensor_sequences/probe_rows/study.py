@@ -1032,9 +1032,13 @@ def wall_npz(path: Path, machine_uri: str = MACHINE_URI) -> Path:
     if not rings:
         raise RuntimeError("the machine carries no limiter ring")
     temporary = path.with_name("%s.%d.tmp" % (path.name, os.getpid()))
-    with temporary.open("wb") as stream:
-        np.savez(stream, wall=rings[0])
-    os.replace(temporary, path)
+    try:
+        with temporary.open("wb") as stream:
+            np.savez(stream, wall=rings[0])
+        os.replace(temporary, path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
     return path
 
 

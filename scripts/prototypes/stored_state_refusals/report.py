@@ -8,6 +8,7 @@ import shutil
 import sys
 from pathlib import Path
 
+import panels
 from records import failure_receipts, measurements, residual_fields
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -106,8 +107,17 @@ def copy_figures(records_map):
         if not record.get("terminal_flux"):
             continue
         svg = Path(record.get("panel", ""))
-        if svg.is_file():
-            shutil.copy2(svg, FIGURES / svg.name)
+        if not svg.is_file():
+            continue
+        panel = record.get("panel_record")
+        if panel:
+            # The caption the figure carries is the caption the fragment prints,
+            # rebuilt here from the panel's measurements as the saved file
+            # reports them, so a drawing made before a caption change cannot
+            # disagree with its own record.
+            panel.update(panels.drawn_counts(svg))
+            panels.write_description(svg, panels.caption(panel))
+        shutil.copy2(svg, FIGURES / svg.name)
 
 
 def figure(label, record, caption):
@@ -269,19 +279,21 @@ def main(run):
         '<section id="stored-state-refusals-panels">'
         "<h3>Terminal states on the stored state</h3>"
     )
+    parts.append(
+        "<p>Every panel contours both fields on one shared level array spanning "
+        "the two finite ranges, because a refused iterate leaves the stored "
+        "state's band: on the stored state's own levels the solved series "
+        "crossed none and drew no contour. Neither field is rescaled, so the "
+        "mismatch shows as contours that do not coincide. The solved-null read "
+        "refused with <code>NoQualifiedAxisError</code> on every arm, so no blue "
+        "null marker is drawn: the blue series is contours only, and each "
+        "caption gives both ranges and the shared band.</p>"
+    )
     for label in LABELS:
         record = records_map.get(label) or {}
         if not record.get("terminal_flux"):
             continue
-        caption = (
-            label
-            + ": terminal residual "
-            + number(record.get("residual"))
-            + ", reason "
-            + str(record.get("termination_reason"))
-            + ", qualified "
-            + str(record.get("qualified"))
-        )
+        caption = panels.caption(record.get("panel_record") or {"label": label})
         parts.append(figure(label, record, caption))
     parts.append("</section>")
     parts.append(

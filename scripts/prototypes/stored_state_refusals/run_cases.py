@@ -51,12 +51,13 @@ from nova.equilibrium.solve_request import ExplicitSolveSeed  # noqa: E402
 from records import next_sequence, residual_fields  # noqa: E402
 from tests.test_magnetics_fit_efit_comparison import (  # noqa: E402
     _attempt,
-    _panel,
     _problem,
     _read_case,
     _residual_fields,
     _write,
 )
+
+import panels  # noqa: E402
 
 DIFFERENCE_STEP = 1.0e-4
 
@@ -120,8 +121,17 @@ def _record(data, label, request, receipt, record, started):
         np.savez(path, flux=np.asarray(flux))
         record["terminal_flux"] = str(path)
     try:
-        _panel(data, qualified=receipt is not None, flux=flux, suffix=f"-{label}")
-        record["panel"] = str(FIGURES / f"{data['name']}-{label}.svg")
+        destination = FIGURES / f"{data['name']}-{label}.svg"
+        draw = panels.draw_panel(data, flux, destination, "")
+        draw.update(
+            label=label,
+            residual=data.get("terminal_residual"),
+            reason=data.get("terminal_termination_reason"),
+            qualified=receipt is not None,
+        )
+        panels.write_description(destination, panels.caption(draw))
+        record["panel"] = str(destination)
+        record["panel_record"] = draw
     except Exception as error:
         record["panel_refused"] = f"{type(error).__name__}: {error}"
     _write(OUTPUT / f"{label}.json", record)

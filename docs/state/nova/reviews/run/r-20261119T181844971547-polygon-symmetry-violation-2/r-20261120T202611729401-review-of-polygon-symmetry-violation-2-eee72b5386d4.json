@@ -1,0 +1,78 @@
+{
+  "added_failure_basis": "The reviewed run records no baseline_suite/after_suite JSON pair. Its own gate logs are suite-arms-eee72b538/base-suite.log (revision 7ee4fa804, no test id: the test file is absent at the base, EXIT=4) and head-suite.log (revision eee72b538, '14 passed', EXIT=0). The head arm fails no test and the base arm runs none, so the delta is empty: the count of zero records the absence of any measured failure, not a measured delta of zero.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/polygon_symmetry_violation/crosscheck.py:main (imports compare.central and compare.plan)",
+    "scripts/prototypes/polygon_symmetry_violation/scrutiny.py:main (imports compare.central_step)",
+    "scripts/prototypes/polygon_symmetry_violation/mutation_control.py:run (imports compare.psi_identity)",
+    "scripts/prototypes/polygon_symmetry_violation/measure.py:main (runs split.py and compare.py as subprocesses)"
+  ],
+  "completed_at": "2026-11-20T21:24:28.822Z",
+  "dispatched_at": "2026-11-20T21:24:10Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/compare.py",
+      "line": "184",
+      "severity": "non-blocking",
+      "text": "evaluate() with its embedded RUNNER at line 100 and stack() at line 173 duplicate the batched per-tree kernel evaluation that scripts/prototypes/iter_bank/derive_rows.py owns at kernel_rows:294, with stack_polygons:283 and geometry_polygons:236, and probe.py:159 with its own RUNNER at 117 and stack at 149 is a second copy; the brief orders reuse of derive_rows --zero-entries and not copying it, so the capability should call that owner rather than fork it."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/arms.py",
+      "line": "36",
+      "severity": "non-blocking",
+      "text": "extract() and arm() duplicate the base/head archive-and-run arm owned by scripts/prototypes/diiid_finite_edge_flux/suite_arms.py:36-90 (git archive, pytest under PYTHONPATH, a per-arm log closed with EXIT=) without importing or generalizing that owner; the only additions are an absent-arm record and a red aggregate, both a parameter there would carry."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/test_prototypes.py",
+      "line": "203",
+      "severity": "non-blocking",
+      "text": "test_red_arms exercises only the red_arms aggregate, so the driver exit at arms.py:130 is unguarded: reinstating return 0 there leaves all fourteen tests green, and no log in the run shows the driver exiting 1 on a red arm."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/probe.py",
+      "line": "32",
+      "severity": "non-blocking",
+      "text": "SPLIT defaults to the first attempt's split under the r-20261119T065335613845 run directory, so re-running the committed probe answers a selection the landed record does not use; measure.py names its own split, the probe does not."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T181844971547-polygon-symmetry-violation-2/manifest.md",
+      "line": "33",
+      "severity": "non-blocking",
+      "text": "negative_control_log names logs/control-eee72b538.log, whose verdict is the passing branch (EXIT=0, the guard separated), while the run's red control log logs/control-failing-eee72b538.log (CONTROL FAILED, EXIT=1) is listed only under artifacts, so the direction the control exercised cannot be read from the field a reader opens."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all twenty commits 7ee4fa80..eee72b53 one by one and the twelve-file diff: f23935bda through f39764085 land the split, probe, compare, plane, crosscheck and scrutiny prototypes plus the fragment, bb4e2d45f through 54f3bded7 repair the psi identity loop, the WORST_B rows and the control, 8f0f74434, 5e872c791 and 2d64aa2f6 restore the mis-edited DIII-D arm runner and fix the departure call, and 11ba36c94 with eee72b538 add and cite the node's own arm runner; no product path is touched.",
+    "done_when": "The done_when is 'git diff --stat from the base names no path under nova/, and the fragment recommends one kernel change with an estimated compile-cost effect'; git diff --name-status 7ee4fa80433045b2d3482cdc48ae3dac6bb5ae47 eee72b5386d404f4c7db22f44ba5545aa6d25768 names twelve paths, none under nova/, and polygon-symmetry-violation.html:67-68 carries the row-derivative recommendation with its instruction-count and compile-wall estimate, but the gate the worker ran asserts neither clause.",
+    "goal": "The source briefs (nova-s21-briefs/nov19/polygon-symmetry-violation.md and its -2 extension) ask for the split reproduction, the group-A mechanism, an independent group-B reference and the smallest kernel change with a cost estimate; docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html:21-68 delivers all four and no path under nova/ changed.",
+    "manifest": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T181844971547-polygon-symmetry-violation-2/manifest.md: status complete at line 5, the tests line 24 pytest command whose log logs/gate-final.log records 14 passed and EXIT=0 at eee72b538, and test_logs naming both arm logs; it carries no baseline_suite/after_suite JSON pair and its negative_control_log at line 33 names the green control log while the CONTROL FAILED log (EXIT=1) sits only under artifacts.",
+    "write_paths": "The declared paths are docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html and scripts/prototypes/polygon_symmetry_violation; all twelve changed paths lie under those two, and probe.py, scrutiny.py and run_probe.sh under that directory are the carry-forward the extension brief ordered at 'git checkout 45f4b4c4a'."
+  },
+  "justifications": {
+    "durability": "scripts/prototypes/polygon_symmetry_violation/test_prototypes.py:73-81 fails if compare.py:338's continue is restored to break and test_prototypes.py:192-200 fails if split.py:154 prints a bare WORST_B header again, but no test calls arms.run, so reinstating return 0 at arms.py:130 leaves all fourteen tests green.",
+    "evidence": "logs/gate-final.log records revision eee72b538 and 14 passed, EXIT=0, and suite-arms-eee72b538/head-suite.log the same at the extracted head, but neither run asserts the done_when's two clauses, so the gate measures the prototypes rather than the measure.",
+    "fit": "The added modules follow the scripts/prototypes house idiom (argparse main, from __future__ import annotations, one row per entry) and introduce no forbidden name, though split.py:25 imports the private _horizontal_reflection across modules and run_probe.sh ships without a final newline.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html:55-68 answers the brief's group-B question with an eleven-step central difference and names the smallest supported change, though the cost at line 68 is stated as an estimate rather than measured.",
+    "reuse": "compare.py:184 and probe.py:159 re-implement the batched tree-evaluation runner owned by scripts/prototypes/iter_bank/derive_rows.py:294 with its readers at lines 283 and 236, and arms.py:36 re-implements scripts/prototypes/diiid_finite_edge_flux/suite_arms.py:36-90 without importing either owner.",
+    "scope_discipline": "git diff --name-status 7ee4fa80433045b2d3482cdc48ae3dac6bb5ae47 eee72b5386d404f4c7db22f44ba5545aa6d25768 names only the fragment and scripts/prototypes/polygon_symmetry_violation paths, and scripts/prototypes/diiid_finite_edge_flux/suite_arms.py is restored by 8f0f74434 rather than shipped edited."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source briefs (nova-s21-briefs/nov19/polygon-symmetry-violation.md and its -2 extension) ask for the split reproduction, the group-A mechanism, an independent group-B reference and the smallest kernel change with a cost estimate; docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html:21-68 delivers all four and no path under nova/ changed.\nVERDICT done_when: The done_when is 'git diff --stat from the base names no path under nova/, and the fragment recommends one kernel change with an estimated compile-cost effect'; git diff --name-status 7ee4fa80433045b2d3482cdc48ae3dac6bb5ae47 eee72b5386d404f4c7db22f44ba5545aa6d25768 names twelve paths, none under nova/, and polygon-symmetry-violation.html:67-68 carries the row-derivative recommendation with its instruction-count and compile-wall estimate, but the gate the worker ran asserts neither clause.\nVERDICT write_paths: The declared paths are docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html and scripts/prototypes/polygon_symmetry_violation; all twelve changed paths lie under those two, and probe.py, scrutiny.py and run_probe.sh under that directory are the carry-forward the extension brief ordered at 'git checkout 45f4b4c4a'.\nVERDICT manifest: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T181844971547-polygon-symmetry-violation-2/manifest.md: status complete at line 5, the tests line 24 pytest command whose log logs/gate-final.log records 14 passed and EXIT=0 at eee72b538, and test_logs naming both arm logs; it carries no baseline_suite/after_suite JSON pair and its negative_control_log at line 33 names the green control log while the CONTROL FAILED log (EXIT=1) sits only under artifacts.\nVERDICT diff: Read all twenty commits 7ee4fa80..eee72b53 one by one and the twelve-file diff: f23935bda through f39764085 land the split, probe, compare, plane, crosscheck and scrutiny prototypes plus the fragment, bb4e2d45f through 54f3bded7 repair the psi identity loop, the WORST_B rows and the control, 8f0f74434, 5e872c791 and 2d64aa2f6 restore the mis-edited DIII-D arm runner and fix the departure call, and 11ba36c94 with eee72b538 add and cite the node's own arm runner; no product path is touched.\nCALL_SITES: scripts/prototypes/polygon_symmetry_violation/crosscheck.py:main (imports compare.central and compare.plan), scripts/prototypes/polygon_symmetry_violation/scrutiny.py:main (imports compare.central_step), scripts/prototypes/polygon_symmetry_violation/mutation_control.py:run (imports compare.psi_identity), scripts/prototypes/polygon_symmetry_violation/measure.py:main (runs split.py and compare.py as subprocesses)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html:55-68 answers the brief's group-B question with an eleven-step central difference and names the smallest supported change, though the cost at line 68 is stated as an estimate rather than measured.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/gate-final.log records revision eee72b538 and 14 passed, EXIT=0, and suite-arms-eee72b538/head-suite.log the same at the extracted head, but neither run asserts the done_when's two clauses, so the gate measures the prototypes rather than the measure.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status 7ee4fa80433045b2d3482cdc48ae3dac6bb5ae47 eee72b5386d404f4c7db22f44ba5545aa6d25768 names only the fragment and scripts/prototypes/polygon_symmetry_violation paths, and scripts/prototypes/diiid_finite_edge_flux/suite_arms.py is restored by 8f0f74434 rather than shipped edited.\nSCORE durability: 16\nJUSTIFICATION durability: scripts/prototypes/polygon_symmetry_violation/test_prototypes.py:73-81 fails if compare.py:338's continue is restored to break and test_prototypes.py:192-200 fails if split.py:154 prints a bare WORST_B header again, but no test calls arms.run, so reinstating return 0 at arms.py:130 leaves all fourteen tests green.\nSCORE fit: 17\nJUSTIFICATION fit: The added modules follow the scripts/prototypes house idiom (argparse main, from __future__ import annotations, one row per entry) and introduce no forbidden name, though split.py:25 imports the private _horizontal_reflection across modules and run_probe.sh ships without a final newline.\nSCORE reuse: 4\nJUSTIFICATION reuse: compare.py:184 and probe.py:159 re-implement the batched tree-evaluation runner owned by scripts/prototypes/iter_bank/derive_rows.py:294 with its readers at lines 283 and 236, and arms.py:36 re-implements scripts/prototypes/diiid_finite_edge_flux/suite_arms.py:36-90 without importing either owner.\nFINDING scripts/prototypes/polygon_symmetry_violation/compare.py:184 non-blocking: evaluate() with its embedded RUNNER at line 100 and stack() at line 173 duplicate the batched per-tree kernel evaluation that scripts/prototypes/iter_bank/derive_rows.py owns at kernel_rows:294, with stack_polygons:283 and geometry_polygons:236, and probe.py:159 with its own RUNNER at 117 and stack at 149 is a second copy; the brief orders reuse of derive_rows --zero-entries and not copying it, so the capability should call that owner rather than fork it.\nFINDING scripts/prototypes/polygon_symmetry_violation/arms.py:36 non-blocking: extract() and arm() duplicate the base/head archive-and-run arm owned by scripts/prototypes/diiid_finite_edge_flux/suite_arms.py:36-90 (git archive, pytest under PYTHONPATH, a per-arm log closed with EXIT=) without importing or generalizing that owner; the only additions are an absent-arm record and a red aggregate, both a parameter there would carry.\nFINDING scripts/prototypes/polygon_symmetry_violation/test_prototypes.py:203 non-blocking: test_red_arms exercises only the red_arms aggregate, so the driver exit at arms.py:130 is unguarded: reinstating return 0 there leaves all fourteen tests green, and no log in the run shows the driver exiting 1 on a red arm.\nFINDING scripts/prototypes/polygon_symmetry_violation/probe.py:32 non-blocking: SPLIT defaults to the first attempt's split under the r-20261119T065335613845 run directory, so re-running the committed probe answers a selection the landed record does not use; measure.py names its own split, the probe does not.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T181844971547-polygon-symmetry-violation-2/manifest.md:33 non-blocking: negative_control_log names logs/control-eee72b538.log, whose verdict is the passing branch (EXIT=0, the guard separated), while the run's red control log logs/control-failing-eee72b538.log (CONTROL FAILED, EXIT=1) is listed only under artifacts, so the direction the control exercised cannot be read from the field a reader opens.\n",
+  "review_run_id": "r-20261120T202611729401-review-of-polygon-symmetry-violation-2-eee72b5386d4",
+  "reviewed_base_sha": "7ee4fa80433045b2d3482cdc48ae3dac6bb5ae47",
+  "reviewed_head_sha": "eee72b5386d404f4c7db22f44ba5545aa6d25768",
+  "reviewed_run_id": "r-20261119T181844971547-polygon-symmetry-violation-2",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T21:52:59.958575+00:00",
+  "total": 89
+}

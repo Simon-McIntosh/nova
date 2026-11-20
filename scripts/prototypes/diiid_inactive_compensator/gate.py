@@ -47,31 +47,32 @@ def arm(tree, revision, output, name, targets, extra=()):
 
 
 def negative_control(tree, revision, output, scratch, after):
-    """Restore the inactive image on the augmented-map proposal route only."""
+    """Restore the inactive image at the one site every proposal route shares.
+
+    The rule being tested lives at a single application site: a pair's flux
+    image is masked by its own activity, and Newton, the rebuilt-model
+    promotion, continuation and descent recovery all read it from there. The
+    control deletes that mask, so an inactive compensator's image reappears on
+    every route that consumes the site, while an active binding is unchanged
+    and remains the known-present control.
+    """
     candidate = scratch / "negative"
     extract(candidate, revision, tree)
     source = candidate / "nova/equilibrium/constraint.py"
     original = source.read_text()
-    marker = "delta = pair.flux_delta(profile, context, value)"
-    assert original.count(marker) == 1, "one augmented-map image call site"
-    source.write_text(
-        original.replace(
-            marker,
-            marker + "\n"
-            "                delta = delta + pair.unknown.flux_delta("
-            "profile, context, pair.functional, pair.binding.payload, value)",
-        )
+    marker = (
+        "        mask = active_payload_mask(self.functional, self.binding.payload)\n"
+        "        if mask is None:\n"
+        "            return delta\n"
     )
+    assert original.count(marker) == 1, "one pair-level image mask"
+    source.write_text(original.replace(marker, "        return delta\n", 1))
     record = arm(
         candidate, revision, output, "negative-radial", PIN, ("-k", "compensator")
     )
     failures = set(record["failure_ids"]) - set(after["failure_ids"])
     assert record["completed"] and record["exit_status"] != 0 and failures
-    assert failures, "the restored image must redden the route test"
-    assert all(
-        "test_compensator_image_and_tangent_on_every_proposal_route[False-" in failure
-        for failure in failures
-    ), failures
+    assert all("[False" in failure for failure in failures), failures
     source.write_text(original)
     return record
 

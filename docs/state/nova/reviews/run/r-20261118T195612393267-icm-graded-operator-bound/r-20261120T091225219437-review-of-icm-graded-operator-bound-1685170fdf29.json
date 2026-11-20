@@ -1,0 +1,66 @@
+{
+  "added_failure_basis": "Baseline e429aef8de8becbfbf77eccff24ede82ca33fa5a: 7 failed, 91 passed, EXIT=1 (/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/operator-bound/suites-final/baseline-suite.log). Completed after arm 37ac500887e2bfdd9deda7c4c8768afe738ae95d: 7 failed, 92 passed, EXIT=1 (suites-final/after-suite-37ac50088.log). The two FAILED sets are byte-identical after stripping the exception text (diff of the sorted ids prints nothing), so added_failure_count is 0. No completed arm exists at the code head 98dd9a3d8 or the landed head 1685170fd: the reviewed manifest's after_suite is completed:false and names suite-after.log, which is absent, and suites-final/after-suite.log at 9d4075126 is 31 lines ending in four dots with no summary and no EXIT=. The delta's code commit 98dd9a3d8 postdates the last completed arm, so the count measured above is not taken at the landed head; the bound test alone was re-run at the head by this review (job 1333179, 1 passed in 1937.45 s, EXIT=0).",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-20T09:27:58.130Z",
+  "dispatched_at": "2026-11-20T09:13:17Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T195612393267-icm-graded-operator-bound/manifest.md",
+      "line": "5",
+      "severity": "blocking",
+      "text": "The manifest declares status complete while after_suite reads completed:false with log_path suite-after.log, which does not exist in the run directory, and its tests line says the head arm is in flight (job 1333112) pending a summary. suites-final/after-suite.log at 9d4075126 is 31 lines with no pytest summary and no EXIT=, and the only completed after arm is after-suite-37ac50088.log at 37ac50088, which predates the last code commit 98dd9a3d8. A promotion reading this manifest cannot fill a gate receipt or read the suite delta at the landed head."
+    },
+    {
+      "file": "scripts/iron_operator_bound/reuse_check.py",
+      "line": "61",
+      "severity": "non-blocking",
+      "text": "The guard scans only scripts/iron_operator_bound/*.py and only exact definition names, so it exits 0 at the head while scripts/iron_operator_bound/localise.py:98 volume_block still rebuilds nova/biot/tiledassembly.py:2293 volume_mutual and localise.py:125 quotient still solves the generalised eigenproblem owned by nova/biot/magnetisation.py:354 galerkin_spectrum. The docs commit's claim that the block and the dense spectrum have single owners is therefore unsupported, and the reuse repair leaves two copies of the capabilities it set out to own."
+    },
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": "1897",
+      "severity": "non-blocking",
+      "text": "The bound test rebuilds the closed octagonal gate mesh inline instead of calling nova/biot/magnetisation.py:338 gate_shell(), although that function's docstring says 'the suite's bound test all measure this shape' and 1685170fd says the mesh is owned 'once here'. reuse_check.py does not scan tests/, so this copy is outside the guard as well."
+    },
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": "338",
+      "severity": "non-blocking",
+      "text": "gate_shell is a public name used by five scripts but is missing from the module's __all__ list at lines 37-46, whose docstring names the module's public surface; every other public callable the change relies on is exported."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the two gained commits against 9d4075126: 98dd9a3d8 extracts tiledassembly.volume_mutual, adds magnetisation.gate_shell and galerkin_spectrum(witness=True), points measure.py's dense branch and nearfield.py at the owners, renames the tile index vector to tile_columns, and adds reuse_check.py; 1685170fd is the fragment paragraph claiming those owners. The assembled operator is bit-identical to the base on a 16-cell mesh.",
+    "done_when": "The done_when asks for the bound on the measured meshes with a test whose restored defect fails it; tests/test_magnetisation.py:1872 is that test, it passes at the landed head (review re-run job 1333179, 1 passed in 1937.45 s, EXIT=0), and negative-control.log reddens it with the criterion disabled (targeted 1.0000008692788678 > 1.0, EXIT=1), but the reviewed run records no completed suite arm at the code head.",
+    "goal": "The reviewed node's goal is to localise and repair the graded piecewise-linear interaction's violation of the demagnetisation bound; the gained commits are the reuse repair, moving the volume block to nova/biot/tiledassembly.py:2293 volume_mutual and the gate mesh to nova/biot/magnetisation.py:338 gate_shell, while scripts/iron_operator_bound/localise.py:98 still rebuilds the volume block.",
+    "manifest": "Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T195612393267-icm-graded-operator-bound/manifest.md; it states status complete, but after_suite is completed:false with a log_path that does not exist, the tests line is a pending note, and its baseline_suite failure_ids carry a tests/tests/ prefix and the misspelling 'permeability_suite_specific' that the log does not print.",
+    "write_paths": "The declared paths are nova/biot/tiledassembly.py, nova/biot/magnetisation.py, tests/test_magnetisation.py, scripts/iron_operator_bound, the fragment and the figures directory; every path in the delta 9d4075126..1685170fd is inside that list."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:1944 fails if the near refinement regresses (negative-control.log reddens it with _VOLUME_NEAR_FACTOR set to 0.0 and the delivered arm at :1945 guards the opposite failure), and the refactor's column-masked path feeds that same operator; the delta adds no assertion of its own and its only new guard, scripts/iron_operator_bound/reuse_check.py, is invoked by nothing.",
+    "evidence": "tests/test_magnetisation.py:1944 passes at the landed head (job 1333179, EXIT=0) and negative-control.log reddens on the disabled criterion, but the reviewed run's manifest after_suite is unreadable and no completed after arm exists at the code head 98dd9a3d8.",
+    "fit": "The refactor follows the private-helper style of nova/biot/tiledassembly.py:2293 and renames the tile index vector to tile_columns, but gate_shell at nova/biot/magnetisation.py:338 is public and absent from __all__.",
+    "goal_fidelity": "nova/biot/tiledassembly.py:2293 now owns the volume block and nova/biot/magnetisation.py:338 owns the gate mesh, but scripts/iron_operator_bound/localise.py:98 still rebuilds the block and the docs commit 1685170fd claims single owners.",
+    "reuse": "The added definitions extend owners rather than copying them (volume_mutual extracted from the assembler, gate_shell the first gate-mesh owner, witness added to galerkin_spectrum), while localise.py:98/:125 keep pre-existing copies the new guard cannot see.",
+    "scope_discipline": "Every file in the delta 9d4075126..1685170fd, including scripts/iron_operator_bound/reuse_check.py, lies inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed node's goal is to localise and repair the graded piecewise-linear interaction's violation of the demagnetisation bound; the gained commits 98dd9a3d8 and 1685170fd are the reuse repair, moving the volume block to nova/biot/tiledassembly.py:2293 volume_mutual and the gate mesh to nova/biot/magnetisation.py:338 gate_shell, while scripts/iron_operator_bound/localise.py:98 still rebuilds the block.\nVERDICT done_when: The done_when asks for the bound on the measured meshes with a test whose restored defect fails it; tests/test_magnetisation.py:1872 is that test, it passes at the landed head (review re-run job 1333179, 1 passed in 1937.45 s, EXIT=0), and negative-control.log reddens it with the criterion disabled, but the reviewed run records no completed suite arm at the code head.\nVERDICT write_paths: The declared paths include nova/biot/tiledassembly.py, nova/biot/magnetisation.py, tests/test_magnetisation.py and scripts/iron_operator_bound; every path in the delta 9d4075126..1685170fd lies inside them.\nVERDICT manifest: Read manifest.md; it says status complete, but after_suite is completed:false with log_path suite-after.log absent, the tests line is a pending note, and baseline_suite failure_ids carry a tests/tests/ prefix and the misspelling 'permeability_suite_specific' that the log does not print.\nVERDICT diff: Read both gained commits: 98dd9a3d8 extracts tiledassembly.volume_mutual, adds magnetisation.gate_shell and galerkin_spectrum(witness=True), points measure.py's dense branch and nearfield.py at the owners, renames the tile index vector to tile_columns, and adds reuse_check.py; 1685170fd is the fragment paragraph claiming those owners, and the assembled operator is bit-identical to the base on a 16-cell mesh.\nCALL_SITES: nova/biot/magnetisation.py:_galerkin_interaction, nova/biot/magnetisation.py:solve_magnetisation, scripts/iron_operator_bound/nearfield.py:study, scripts/iron_operator_bound/measure.py:extreme\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: nova/biot/tiledassembly.py:2293 now owns the volume block and nova/biot/magnetisation.py:338 owns the gate mesh, but scripts/iron_operator_bound/localise.py:98 still rebuilds the block and the docs commit 1685170fd claims single owners.\nSCORE evidence: 13\nJUSTIFICATION evidence: tests/test_magnetisation.py:1944 passes at the landed head (job 1333179, EXIT=0) and negative-control.log reddens on the disabled criterion, but the reviewed run's manifest after_suite is unreadable and no completed after arm exists at the code head 98dd9a3d8.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every file in the delta 9d4075126..1685170fd, including scripts/iron_operator_bound/reuse_check.py, lies inside the declared write paths.\nSCORE durability: 11\nJUSTIFICATION durability: tests/test_magnetisation.py:1944 fails if the near refinement regresses (negative-control.log reddens it with _VOLUME_NEAR_FACTOR set to 0.0 and :1945 guards the opposite failure), but the delta adds no assertion and its only new guard at scripts/iron_operator_bound/reuse_check.py is invoked by nothing.\nSCORE fit: 15\nJUSTIFICATION fit: the refactor follows the private-helper style of nova/biot/tiledassembly.py:2293 and renames the tile index vector to tile_columns, but gate_shell at nova/biot/magnetisation.py:338 is public and absent from the __all__ list at lines 37-46.\nSCORE reuse: 16\nJUSTIFICATION reuse: the added definitions extend owners rather than copying them (volume_mutual extracted from the assembler, gate_shell the first gate-mesh owner, witness added to galerkin_spectrum), while scripts/iron_operator_bound/localise.py:98 and :125 keep pre-existing copies the new guard cannot see.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T195612393267-icm-graded-operator-bound/manifest.md:5 blocking: The manifest declares status complete while after_suite reads completed:false with log_path suite-after.log, which does not exist, and its tests line says the head arm is in flight (job 1333112); suites-final/after-suite.log at 9d4075126 is 31 lines with no summary, and the only completed after arm (37ac50088) predates the code commit 98dd9a3d8, so promotion cannot read a suite delta at the landed head.\nFINDING scripts/iron_operator_bound/reuse_check.py:61 non-blocking: The guard scans only scripts/iron_operator_bound/*.py and only exact definition names, so it exits 0 at the head while scripts/iron_operator_bound/localise.py:98 volume_block still rebuilds nova/biot/tiledassembly.py:2293 volume_mutual and localise.py:125 quotient still solves the eigenproblem owned by nova/biot/magnetisation.py:354 galerkin_spectrum; the docs claim of single owners is unsupported.\nFINDING tests/test_magnetisation.py:1897 non-blocking: The bound test rebuilds the closed octagonal gate mesh inline instead of calling nova/biot/magnetisation.py:338 gate_shell(), although that function's docstring says the suite's bound test measures this shape and 1685170fd says the mesh is owned once, and reuse_check.py does not scan tests/.\nFINDING nova/biot/magnetisation.py:338 non-blocking: gate_shell is a public name used by five scripts but is missing from the module's __all__ list at lines 37-46.",
+  "review_run_id": "r-20261120T091225219437-review-of-icm-graded-operator-bound-1685170fdf29",
+  "reviewed_base_sha": "9d4075126d2dc1997c97a8219e94d06953a825d1",
+  "reviewed_head_sha": "1685170fdf29b9ac0babaa259e9a28ae9eb4c1ae",
+  "reviewed_run_id": "r-20261118T195612393267-icm-graded-operator-bound",
+  "scores": {
+    "durability": 11,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T10:12:43.629276+00:00",
+  "total": 89
+}

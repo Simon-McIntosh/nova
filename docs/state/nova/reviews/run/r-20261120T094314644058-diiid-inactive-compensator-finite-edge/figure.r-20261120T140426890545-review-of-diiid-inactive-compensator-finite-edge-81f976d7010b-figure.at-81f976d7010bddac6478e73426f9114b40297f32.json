@@ -37,6 +37,13 @@
       "table_form": "passes: spatial field comparison, not tabular."
     }
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the reviewer confirms the lower-saddle crossing and both null sets stay readable",
+      "recorded_at": "2026-11-20T14:20:29.813890+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-137-diverted.svg",

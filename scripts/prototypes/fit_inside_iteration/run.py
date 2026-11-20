@@ -150,6 +150,21 @@ def _model_rows(case, fitted):
         return f"{type(refusal).__name__}: {refusal}"
 
 
+def _fit_summary(fitted):
+    """Summarise a fit so a control run is read by what it reached, not inferred."""
+    return dict(
+        converged=bool(fitted.converged),
+        passes=len(fitted.passes),
+        last_flux_update=fitted.last_flux_update,
+        coefficients=fitted.coefficients.tolist(),
+        stopped_improving_pass=fitted.stopped_improving_pass,
+        stalled_pass=fitted.stalled_pass,
+        rejected_pass=fitted.rejected_pass,
+        wall_seconds=fitted.wall_seconds,
+        plasma_current_a=float(np.sum(fitted.terminal_state.cell_current)),
+    )
+
+
 def _progress(name):
     """Print each pass as it lands, since a solve-heavy pass can run for minutes."""
 
@@ -210,6 +225,14 @@ def _run_known(case, args):
     )
     scaled_current = abs(float(np.sum(scaled.terminal_state.cell_current)))
     control = abs(scaled_current - case["plasma_current"]) / case["plasma_current"]
+    # The rows the fit reads are ``measured - vacuum`` and the vacuum basis is
+    # not scaled, so the control's rows move by less than the factor applied to
+    # the measurement. Record the ratio the fit actually saw.
+    plain_signature = case["measurement"].signature[case["measurement"].mask]
+    scaled_signature = scaled_measurement.signature[case["measurement"].mask]
+    resolved = np.abs(plain_signature) > 0.0
+    ratio = np.abs(scaled_signature[resolved]) / np.abs(plain_signature[resolved])
+    signature_ratio = float(np.median(ratio))
     shim = SimpleNamespace(
         forward=SimpleNamespace(terminal_state=fitted.terminal_state)
     )
@@ -261,6 +284,9 @@ def _run_known(case, args):
         scaled_control_relative_error=control,
         scaled_control_band=0.015,
         scaled_control_fired=bool(fitted.converged and control > 0.015),
+        scaled_measurement_current_a=float(scaled_measurement.plasma_current),
+        scaled_signature_ratio=signature_ratio,
+        scaled_fit=_fit_summary(scaled),
         relaxed=fitted.relaxation,
         max_coefficient_step=fitted.max_coefficient_step,
         whitened_residuals=np.asarray(fitted.whitened_residuals).tolist(),

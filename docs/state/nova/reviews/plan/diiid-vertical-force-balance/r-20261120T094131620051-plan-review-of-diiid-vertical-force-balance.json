@@ -95,6 +95,13 @@
       "note": "\u00a79 now names docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html and a receipts directory, and forbids writing into the existing coil-correction record",
       "reason": "",
       "when": "2026-11-20T14:11:35.375360+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "The eleven-row refresh is owned by millisecond-converged-solve \u00a72, not a section of this plan; a plan-level wait would report this plan blocked, which is false",
+      "when": "2026-11-20T14:13:00.530356+00:00"
     }
   ],
   "responses": {
@@ -124,6 +131,12 @@
       "note": "The commit body now names the finite-edge flux-function form by mechanism, not by section",
       "reason": "",
       "when": "2026-11-20T14:10:22.141182+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The eleven-row refresh is owned by millisecond-converged-solve \u00a72, not a section of this plan; a plan-level wait would report this plan blocked, which is false",
+      "when": "2026-11-20T14:13:00.530356+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T094131620051-plan-review-of-diiid-vertical-force-balance.json",

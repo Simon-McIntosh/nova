@@ -51,9 +51,28 @@
       "note": "\u00a711 done-when (1) now names ~/.cache/nova-diiid-pinned-reregistration/ and forbids the committed pinned-cohort receipt directory",
       "reason": "",
       "when": "2026-11-20T19:36:49.808001+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5c822cbd9fdca849dd7581d812eca9fc3b4280aa",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The missing frame-102 boundary extraction is now owed by \u00a711, which commits it; \u00a711 is the section that consumes it",
+      "reason": "",
+      "when": "2026-11-20T19:37:37.649625+00:00"
     }
   ],
   "responses": {
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "5c822cbd9fdca849dd7581d812eca9fc3b4280aa",
+      "commit_basis": "edit",
+      "note": "The missing frame-102 boundary extraction is now owed by \u00a711, which commits it; \u00a711 is the section that consumes it",
+      "reason": "",
+      "when": "2026-11-20T19:37:37.649625+00:00"
+    },
     "evidence_paths-1": {
       "action": "acted",
       "by": "",

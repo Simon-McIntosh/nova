@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "by design: the shared-root path node (kernel-compile-barrier s3) owns repointing REFERENCE; the fragment discloses that production west_inputs() waits on it",
       "recorded_at": "2026-11-20T11:07:59.773173+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the fallback exists only until the path node repoints REFERENCE; the coordinator removes it when that node lands, so the guard then reads the tracked root alone",
+      "recorded_at": "2026-11-20T11:08:07.069510+00:00"
     }
   },
   "findings": [

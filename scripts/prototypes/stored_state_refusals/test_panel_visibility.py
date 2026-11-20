@@ -68,3 +68,23 @@ def test_published_panels_draw_both_series():
         ]
         assert descriptions and (descriptions[0].text or "").strip(), path.name
     assert empty == {}
+
+
+def test_published_previews_draw_the_blue_series():
+    """A preview must not advertise a series its own pixels do not contain.
+
+    The repaired SVGs carried the nova contours while the PNG beside them still
+    showed the stored field alone: 127 blue pixels, all of them the legend
+    swatch. The check asks the pixels below the legend band.
+    """
+    previews = {path.name: path for path in PUBLISHED.glob("*-preview.png")}
+    assert {
+        "iter-iter-stored-default-preview.png",
+        "tcv-tcv-stored-default-preview.png",
+    } <= set(previews)
+    empty = {}
+    for name, path in previews.items():
+        counts = panels.preview_series(path)
+        if counts["nova"] < 100:
+            empty[name] = counts
+    assert empty == {}

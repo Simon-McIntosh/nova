@@ -324,3 +324,29 @@ def drawn_series(path) -> dict:
                 if f"stroke: {colour}" in style:
                     counts[series] += 1
     return counts
+
+
+PREVIEW_LEGEND_BAND = 60
+"""Rows above this line hold the legend swatch and no plot ink."""
+
+PREVIEW_INK = {"imas-efit": (146, 146, 146), "nova": (51, 102, 204)}
+"""The RGB each series is stroked with, ``#929292`` and ``#3366cc``."""
+
+
+def preview_series(path, tolerance: int = 60) -> dict:
+    """Count each series' ink in a panel's PNG preview below the legend band.
+
+    The SVG carries the paths, and this asks the same question of the pixels a
+    browsed artifact shows. The legend swatch is excluded by row, because a
+    preview whose only blue is the swatch advertises a series it does not
+    contain, which is how a stale preview survived beside repaired SVGs.
+    """
+    from PIL import Image
+
+    pixels = np.asarray(Image.open(path).convert("RGB"), dtype=int)
+    plot = pixels[PREVIEW_LEGEND_BAND:]
+    counts = {}
+    for series, reference in PREVIEW_INK.items():
+        near = np.abs(plot - np.asarray(reference)).max(axis=-1) <= tolerance
+        counts[series] = int(near.sum())
+    return counts

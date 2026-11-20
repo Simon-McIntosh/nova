@@ -95,11 +95,13 @@ def arm_row(label, record):
 
 
 def copy_figures(records_map):
-    """Copy the panels the fragment cites; the harness previews are not cited.
+    """Copy the panels the fragment cites, with the preview beside each one.
 
-    figure.savefig(preview, dpi=100) writes one byte-identical PNG for every
-    MAST-U arm while the SVGs differ, so a preview adds no evidence and is
-    not published.
+    A preview that is published is refreshed from the panel it previews, so a
+    repaired SVG cannot sit beside a PNG that still shows the defect the repair
+    removed. A panel with no published preview is not given one: the four
+    MAST-U arms render one byte-identical PNG while their SVGs differ, so a new
+    preview would add files and no evidence.
     """
     FIGURES.mkdir(parents=True, exist_ok=True)
     for label in LABELS:
@@ -118,6 +120,10 @@ def copy_figures(records_map):
             panel.update(panels.drawn_counts(svg))
             panels.write_description(svg, panels.caption(panel))
         shutil.copy2(svg, FIGURES / svg.name)
+        preview = svg.parent / (svg.stem + "-preview.png")
+        published = FIGURES / preview.name
+        if preview.is_file() and published.is_file():
+            shutil.copy2(preview, published)
 
 
 def figure(label, record, caption):

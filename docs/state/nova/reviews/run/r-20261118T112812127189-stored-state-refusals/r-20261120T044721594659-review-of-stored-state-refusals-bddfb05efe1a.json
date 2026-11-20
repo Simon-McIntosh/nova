@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-20T04:48:33.625Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-stored-state-refusals-bddfb05efe1a",
+      "recorded_at": "2026-11-20T07:26:10.608875+00:00"
+    }
+  },
   "dispatched_at": "2026-11-20T04:48:04Z",
   "findings": [
     {

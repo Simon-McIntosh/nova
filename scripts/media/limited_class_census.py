@@ -22,7 +22,7 @@ import zarr
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.steering_frames import read_session
 
-SESSION = Path("/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29")
+SESSION = Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29")
 STORE = Path("/work/projects/imas_gpu/mast/level1/shots")
 DEFAULT_OUTPUT = Path.home() / "nova-media-logs/limited_class_census.json"
 

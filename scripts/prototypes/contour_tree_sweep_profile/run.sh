@@ -10,7 +10,7 @@ python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export PYTHONPATH="$worktree" NOVA_WORKTREE="$worktree"
 export CONTOUR_TREE_MODULE="$module"
 export PROFILE_OUTPUT="$output/rows"
-export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export JAX_PLATFORMS=cuda,cpu
 mkdir -p "$output"

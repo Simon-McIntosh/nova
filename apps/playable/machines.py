@@ -27,7 +27,7 @@ from apps.playable.shape import PlasmaShape
 
 #: The shared MAST frozen-six response carrier (digest-verified at load).
 MAST_FROZEN_SIX_CARRIER = Path(
-    "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers"
+    "/work/projects/imas_gpu/nova/mast_frozen_six_response_carriers"
 )
 
 #: The content-addressed MAST machine description the carrier geometry is

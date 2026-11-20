@@ -16,7 +16,7 @@ set -euo pipefail
 
 readonly LANE_DIRECTORY="$(dirname "$(realpath -e -- "${BASH_SOURCE[0]}")")"
 readonly SHARED_PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-readonly DEFAULT_PINNED_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+readonly DEFAULT_PINNED_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 readonly PINNED_ROOT="${NOVA_COMPILATION_CACHE_ROOT:-${DEFAULT_PINNED_ROOT}}"
 
 readonly PAYLOAD_PRELUDE="$(cat <<'PRELUDE'

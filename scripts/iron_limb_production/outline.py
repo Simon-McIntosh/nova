@@ -40,7 +40,7 @@ from scripts.west_iron_galerkin_pair.measure import (  # noqa: E402
 )
 from scripts.west_iron_solve.measure import MACHINE, source_field  # noqa: E402
 
-EVIDENCE = Path("/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill")
+EVIDENCE = Path("/work/projects/imas_gpu/nova/evidence/iron-limb-fill")
 DD_VERSION = "4.1.0"
 SIZES = (0.08, 0.04)
 # The superseded prototype flat arm, stated so a reader can see the section

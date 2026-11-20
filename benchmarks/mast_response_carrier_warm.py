@@ -27,9 +27,7 @@ from typing import Any, Iterator
 import numpy as np
 
 
-CARRIER_STORE = Path(
-    "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers"
-)
+CARRIER_STORE = Path("/work/projects/imas_gpu/nova/mast_frozen_six_response_carriers")
 STORED_CIRCUIT_COUNT = 101
 
 

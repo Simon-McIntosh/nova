@@ -42,7 +42,7 @@ DEFAULT_OPERANDS = crew_reports(
     "nova/bank-regeneration-raw-20260902/current-operands.npz"
 )
 DEFAULT_CACHE = Path(
-    "/work/projects/imas_gpu/sophelio/jax-cache/polish-support-performance"
+    "/work/projects/imas_gpu/nova/jax-cache/polish-support-performance"
 )
 DEFAULT_OUTPUT = Path(
     "docs/figures/polish-support-performance/shared-spline/main-vs-shared.json"

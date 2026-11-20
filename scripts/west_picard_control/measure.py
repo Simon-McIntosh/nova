@@ -52,7 +52,7 @@ from scripts.west_iron_galerkin_pair.measure import (  # noqa: E402
 from tests.test_magnetisation import loop, shell  # noqa: E402
 
 PAIR_RECEIPT = Path(
-    "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
+    "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/"
     "west-62751/mesh-pair/measurement.json"
 )
 NEWTON_TOLERANCE = 1e-10

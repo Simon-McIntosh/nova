@@ -50,7 +50,7 @@ DEFAULT_TABLE = OUTPUT_ROOT / "outer-iterations.csv"
 DEFAULT_FIGURE = OUTPUT_ROOT / "outer-loop-trace.png"
 DEFAULT_EVENT_LOG = OUTPUT_ROOT / "callback-events.jsonl"
 DEFAULT_REPORT = crew_reports("nova/millisecond/compiled-outer-loop-trace.md")
-DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
+DEFAULT_CACHE = Path("/work/projects/imas_gpu/nova/jax-cache/trip-quantum-profile")
 HOST_PROFILE = (
     ROOT / "docs/figures/millisecond-converged-solve/trip-quantum/host-profile/"
     "profile.json"

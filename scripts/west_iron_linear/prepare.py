@@ -109,7 +109,7 @@ def main():
     write(args.output / "shell-preparation.json", row)
     started = time.monotonic()
     reference_path = Path(
-        "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
+        "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/"
         "linear-magnetisation/assembly-cost/paired/assembly-0.04.json"
     )
     reference = json.loads(reference_path.read_text())

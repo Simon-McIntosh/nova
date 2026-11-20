@@ -29,7 +29,7 @@ from nova.jax.config import configure_dtypes
 DEFAULT_OUTPUT = Path("docs/figures/forward-solve-api/raster-receipt.json")
 DEFAULT_FIGURE_DIR = Path("docs/figures/forward-solve-api/raster-receipt")
 FIGURE_IDENTITY = "/nova/figures/forward-solve-api/raster-receipt/flux-and-labels.png"
-DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/raster-receipt")
+DEFAULT_CACHE = Path("/work/projects/imas_gpu/nova/jax-cache/raster-receipt")
 REFERENCE_SHOT = 22086
 MEASURED_LAUNCHES = 5
 

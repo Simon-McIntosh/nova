@@ -8,7 +8,7 @@ COLLAPSED_SOURCE=${4:?collapsed current.py required}
 ROOT=$(git rev-parse --show-toplevel)
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp
-export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 
 mirror() {
   local name=$1 source=$2 tree="${TMPDIR}/pair-$name"

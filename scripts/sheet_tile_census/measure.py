@@ -41,7 +41,7 @@ def main():
     device = jax.devices()[0]
     assert device.platform == "gpu" and "P100" in device.device_kind, device
     root = Path(os.environ["NOVA_COMPILATION_CACHE_ROOT"]).resolve()
-    assert str(root) != "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm"
+    assert str(root) != "/work/projects/imas_gpu/nova/jax-cache/nova-prewarm"
     configuration = tile.configure_production_compilation_cache()
     directory = configuration.resolved_directory
     assert directory.is_relative_to(root), (directory, root)

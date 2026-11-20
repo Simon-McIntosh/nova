@@ -117,7 +117,7 @@ MINIMUM_DEVICE_AVAILABLE_MIB = 32 * 1024
 DEFAULT_CACHE_ROOT = Path(
     os.environ.get(
         "NOVA_COMPILATION_CACHE_ROOT",
-        "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+        "/work/projects/imas_gpu/nova/jax-cache/nova-prewarm",
     )
 )
 

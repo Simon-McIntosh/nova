@@ -25,7 +25,7 @@ from nova.jax.config import configure_dtypes
 
 
 DEFAULT_OUTPUT = Path("docs/figures/forward-solve-api/receipt-topology.json")
-DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/receipt-topology")
+DEFAULT_CACHE = Path("/work/projects/imas_gpu/nova/jax-cache/receipt-topology")
 REFERENCE_SHOT = 21985
 MEASURED_LAUNCHES = 5
 

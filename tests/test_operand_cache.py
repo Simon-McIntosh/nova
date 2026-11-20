@@ -119,6 +119,14 @@ def test_cache_root_honours_the_environment_override(tmp_path, monkeypatch):
     assert str(operand_cache_root()).startswith("/work/projects/imas_gpu")
 
 
+def test_default_cache_root_names_the_shared_project_tree(monkeypatch):
+    """The default root sits under the shared project tree, not a retired one."""
+    monkeypatch.delenv("NOVA_OPERAND_CACHE")
+    root = str(operand_cache_root())
+    assert root.startswith("/work/projects/imas_gpu/nova/")
+    assert "sophelio" not in root
+
+
 def test_values_persist_by_default_and_hit_on_the_second_build():
     """A first build stores the entry; a second call loads it bitwise equal."""
     configure_dtypes()

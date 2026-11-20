@@ -29,7 +29,7 @@ from scripts.prototypes.iron_limb_fill.axisymmetric import (  # noqa: E402
     linear_regions,
 )
 
-EVIDENCE = Path("/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill")
+EVIDENCE = Path("/work/projects/imas_gpu/nova/evidence/iron-limb-fill")
 REFERENCE = EVIDENCE / "reference/six-limb-extended-20261114/six-limb-0.075.json"
 SECTION_WIDTH = 0.8
 SECTION_DEPTH = 1.2

@@ -86,7 +86,7 @@ RASTER_FIELDS = (
 )
 
 CORPUS_SESSION = Path(
-    "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29/29547.nc"
+    "/work/projects/imas_gpu/nova/labeller_sessions/76906a29/29547.nc"
 )
 
 

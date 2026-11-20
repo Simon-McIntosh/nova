@@ -43,7 +43,7 @@ assert jax.config.jax_enable_x64, "the sheet tile's contract is float64"
 
 WEST_MESH = os.environ.get(
     "NOVA_WEST_IRON_MESH",
-    "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
+    "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/"
     "prototype/west-008-table.pkl",
 )
 

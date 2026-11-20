@@ -19,7 +19,7 @@ readonly PORT=18506
 readonly JOB_NAME=nova-playable
 readonly PARTITION=betelgeuse
 readonly RESERVATION=gpu_0003_grpA
-readonly CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/playable-serving
+readonly CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/playable-serving
 #: The one shared environment's interpreter; never uv on the node.
 readonly PYTHON=${PLAYABLE_SERVER_PYTHON:-/home/ITER/mcintos/Code/nova/.venv/bin/python}
 

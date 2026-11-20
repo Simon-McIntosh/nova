@@ -58,7 +58,7 @@ def main():
         JAX_ENABLE_COMPILATION_CACHE="true",
         JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS="1",
         JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES="0",
-        NOVA_COMPILATION_CACHE_ROOT="/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm",
+        NOVA_COMPILATION_CACHE_ROOT="/work/projects/imas_gpu/nova/jax-cache/nova-prewarm",
     )
     for key in ("UV_NO_SYNC", "UV_RUN_RECURSION_DEPTH", "XLA_FLAGS", "PYTEST_ADDOPTS"):
         env.pop(key, None)

@@ -68,7 +68,7 @@ def cached_matrix(nodes, coupling, cache_revision):
     digest.update(source)
     digest.update(Path(polygonanalytic.__file__).read_bytes())
     directory = (
-        Path("/work/projects/imas_gpu/sophelio/evidence/conforming-jets")
+        Path("/work/projects/imas_gpu/nova/evidence/conforming-jets")
         / digest.hexdigest()
     )
     progress = json.loads((directory / "progress.json").read_text())

@@ -83,9 +83,7 @@ FAILING_ROWS = (12, 18, 24, 30, 36, 43, 45)
 #: The deterministic dozen the topology and forward-solve suites referee on.
 BANK_ROWS = (1, 6, 12, 18, 24, 30, 36, 43, 45, 50, 54, 57)
 CARRIER_SHOT = 22086
-DEFAULT_CORPUS_ROOT = Path(
-    "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29"
-)
+DEFAULT_CORPUS_ROOT = Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29")
 DEFAULT_OUTPUT = ROOT / "docs/figures/playable-forward-solve/centroid-attribution"
 RECEIPT_NAME = "centroid-radius-attribution.json"
 FIGURE_NAME = "centroid-radius-attribution.png"

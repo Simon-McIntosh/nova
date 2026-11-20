@@ -55,14 +55,22 @@ def records():
         arm = merged.get(label)
         if not arm:
             continue
-        for path in sorted(RUN.glob(f"*/comparison/*{label}-generating-failure.json")):
+        failures = sorted(
+            RUN.glob(f"*/comparison/*{label}-generating-failure.json"),
+            key=lambda path: (path.stat().st_mtime, str(path)),
+        )
+        for path in failures:
             failure = json.loads(path.read_text())
-            arm["exception"] = failure.get("exception")
-            arm["axis_admitted"] = failure.get("axis_admitted")
-            arm["failure_message"] = failure.get("message")
-            arm["trips"] = failure.get("trips")
-            arm["finite_residual_entries"] = failure.get("finite_residual_entries")
-            arm["last_finite_residual"] = failure.get("last_finite_residual")
+            for name, value in (
+                ("exception", failure.get("exception")),
+                ("axis_admitted", failure.get("axis_admitted")),
+                ("failure_message", failure.get("message")),
+                ("trips", failure.get("trips")),
+                ("finite_residual_entries", failure.get("finite_residual_entries")),
+                ("last_finite_residual", failure.get("last_finite_residual")),
+            ):
+                if value is not None:
+                    arm[name] = value
             for name, value in history_fields(failure.get("history_path")).items():
                 if arm.get(name) is None:
                     arm[name] = value
@@ -105,7 +113,7 @@ def history_fields(path):
 def arm_row(label, record):
     if not record:
         return (
-            "<tr><td><code>" + label + '</code></td><td colspan="12">not run</td></tr>'
+            "<tr><td><code>" + label + '</code></td><td colspan="13">not run</td></tr>'
         )
     cells = [
         "<code>" + label + "</code>",
@@ -114,6 +122,7 @@ def arm_row(label, record):
         number(record.get("residual")),
         html.escape(str(record.get("residual_state") or "-")),
         number(record.get("last_finite_residual")),
+        number(record.get("lowest_recorded_residual")),
         "-"
         if record.get("finite_residual_entries") is None
         else str(record["finite_residual_entries"]),
@@ -240,7 +249,8 @@ def assemble(records_map):
     parts.append(
         "<table><thead><tr><th>arm</th><th>case</th><th>seed</th>"
         "<th>residual</th><th>residual state</th>"
-        "<th>last finite residual</th><th>finite entries</th>"
+        "<th>last finite residual</th><th>lowest recorded</th>"
+        "<th>finite entries</th>"
         "<th>axis admitted</th><th>reason</th>"
         "<th>qualified</th><th>converged</th><th>wall s</th>"
         "<th>failure</th></tr></thead><tbody>"

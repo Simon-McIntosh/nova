@@ -57,12 +57,7 @@ def test_prior_convention_is_the_reflection() -> None:
 
 
 def test_wall_ring_is_the_machines_own_limiter_unit(tmp_path) -> None:
-    """The written wall is the vessel unit the shared reader classifies.
-
-    A reader that walks the limiter units itself would also have to repeat the
-    closure and unit-kind rules to land on this unit, which is what the shared
-    reader owns.
-    """
+    """The written wall is the limiter contour the machine carries."""
 
     import imas
 
@@ -84,3 +79,34 @@ def test_wall_ring_is_the_machines_own_limiter_unit(tmp_path) -> None:
     # skipped the shared closure and kind rules would classify it differently.
     assert drawn.kind == "material"
     assert drawn.closed is False
+
+
+def test_wall_ring_comes_from_the_shared_reader(monkeypatch, tmp_path) -> None:
+    """wall_npz writes what the shared limiter reader returns and nothing else.
+
+    The check replaces the reader with one that returns a sentinel unit: a
+    wall_npz that walks the IDS itself never calls it, writes the machine's own
+    ring instead of the sentinel, and fails here.
+    """
+
+    from nova.equilibrium.wall_mask import WallUnit
+
+    sentinel = WallUnit(
+        r=np.array([1.0, 2.0, 3.0, 1.0]),
+        z=np.array([0.0, 1.0, 0.0, 0.0]),
+        kind="material",
+        closed=True,
+        name="sentinel",
+    )
+    calls = []
+
+    def reader(wall):
+        calls.append(wall)
+        return (sentinel,)
+
+    monkeypatch.setattr("nova.equilibrium.wall_mask.wall_units_from_ids", reader)
+    path = study.wall_npz(tmp_path / "wall.npz")
+    with np.load(path) as stored:
+        wall = np.asarray(stored["wall"], dtype=float)
+    assert len(calls) == 1
+    assert np.array_equal(wall, sentinel.vertices)

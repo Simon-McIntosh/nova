@@ -437,7 +437,7 @@ class FluxIterationFit:
         initial_flux,
         *,
         plasma_current_scale: float,
-        max_passes: int = 64,
+        max_passes: int = 96,
         flux_tolerance: float = 1.0e-10,
         relaxation: float = 1.0,
         rcond: float = 1.0e-8,
@@ -474,6 +474,10 @@ class FluxIterationFit:
         coefficients against a map more than a span from its answer lays the
         row misfit that map caused to the coefficients and moves a profile the
         data never asked for.
+
+        The coupled walk contracts by about three quarters a pass on the known
+        state that starts farthest from its answer, so ``max_passes`` has to
+        cover the decades between the start's residual and ``flux_tolerance``.
         """
         started = perf_counter()
         if (
@@ -610,12 +614,20 @@ class FluxIterationFit:
                 history.append((flux, change))
                 if len(history) > max_backtracks + 2:
                     history.pop(0)
+                # the mixture extrapolates past the step it is given, and that
+                # extrapolation is capped at twice the step, so the step itself
+                # is taken at no more than half a cycle: a whole cycle plus a
+                # doubling of it is two spans of travel, a branch change the
+                # pass would have to reject. A measured walk at a whole cycle
+                # swings between 0.13 and 0.90 of the span and is rejected; at
+                # half it contracts every pass.
+                base = min(relaxation, 0.5)
                 candidate = self._mixed_step(
                     flux,
                     change,
                     history,
                     depth=max_backtracks,
-                    relaxation=relaxation,
+                    relaxation=base,
                 )
                 travel = float(np.max(np.abs(candidate - flux)) / span)
                 if passes and travel > max_update:

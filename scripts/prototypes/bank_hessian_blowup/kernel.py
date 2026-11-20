@@ -45,7 +45,7 @@ from scripts.prototypes.bank_hessian_blowup import geometry  # noqa: E402
 CERTIFIED = (
     "/home/ITER/mcintos/.config/reckon/crew/archive/runs/"
     "r-20261117T110237355670-iter-bank-recertify/h200-head/store/sha256/"
-    "81ee8fdf8056855f0846e00b7213434451be8e9557369b74ef35a23a62fd4f/bank.npz"
+    "81ee8fdf8056855f0846f0e00b7213434451be8e9557369b74ef35a23a62fd4f/bank.npz"
 )
 PRE_REPAIR = (
     "/home/ITER/mcintos/.cache/nova-dina-flattop/inputs/bank/store/sha256/"

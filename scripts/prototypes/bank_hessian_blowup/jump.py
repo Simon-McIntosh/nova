@@ -39,7 +39,7 @@ from scripts.prototypes.bank_hessian_blowup.kernel import (  # noqa: E402
 CERTIFIED = (
     "/home/ITER/mcintos/.config/reckon/crew/archive/runs/"
     "r-20261117T110237355670-iter-bank-recertify/h200-head/store/sha256/"
-    "81ee8fdf8056855f0846e00b7213434451be8e9557369b74ef35a23a62fd4f/bank.npz"
+    "81ee8fdf8056855f0846f0e00b7213434451be8e9557369b74ef35a23a62fd4f/bank.npz"
 )
 OFFSETS = (1e-3, 1e-6, 1e-9, 1e-12)
 

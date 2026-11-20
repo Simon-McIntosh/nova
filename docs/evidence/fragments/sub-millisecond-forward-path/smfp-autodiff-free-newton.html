@@ -78,6 +78,7 @@
 <section id="smfp-autodiff-free-newton-what-this-rules-out">
 <h2>What this rules out</h2>
 <p>The bank reproduces the analytic jets at its own nodes and its read resolves both stationary points at the analytic roots, so the read and the bank are not the obstacle once the reference booking is the certificate's own. What fails is the step around them: the linearisation is not the derivative of the fresh-read residual at this seed, and the Krylov arm does not converge the system it is given. Neither failure is a tolerance question; both are structural, and the section's 0.5 ms and 100-launch clauses cannot be met while the step spends 400 unconverged Krylov iterations per call.</p>
+<p>The next node is the Jacobian mismatch and the Krylov stall. The stage split puts 29 of the 35.70 ms in the equilibration and block Krylov arm and six in the 1650&times;1650 assembly, so a direct factorisation with a carried inverse removes most of the wall before any kernel-level work is attempted, and the remaining gap to 0.5 ms is a different factorisation strategy rather than a kernel count. The Jacobian mismatch is the other half: the exact solve's ratios of 6.9e-4, 6.5e-2 and 0.19 are linear, not quadratic, and the seam is the one the derivative arm could not resolve because the seed's clipped membership flips under a 1e-11 relative perturbation. Both are recorded here as open, not as passing.</p>
 </section>
 
 </main></body>

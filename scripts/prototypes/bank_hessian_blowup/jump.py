@@ -48,7 +48,7 @@ RADIAL_ENTRY = 1
 def booked(coupling, arm, target, cell):
     with row_program(arm):
         jets = _source_jets(jnp.asarray(target), coupling)
-    return [float(value) for value in np.asarray(jets[cell]).reshape(-1)]
+    return [[float(value) for value in moment] for moment in np.asarray(jets[cell])]
 
 
 def main():
@@ -56,6 +56,7 @@ def main():
     parser.add_argument("--output", required=True)
     parser.add_argument("--node", type=int, required=True)
     parser.add_argument("--cell", type=int, required=True)
+    parser.add_argument("--moment", type=int, default=1)
     arguments = parser.parse_args()
 
     coupling = coupling_from_geometry()
@@ -69,6 +70,7 @@ def main():
     record = dict(
         node=arguments.node,
         cell=arguments.cell,
+        moment=arguments.moment,
         point=[float(value) for value in origin],
         certified=[float(value) for value in certificate.reshape(-1)],
         offsets=list(OFFSETS),

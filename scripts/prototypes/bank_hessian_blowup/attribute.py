@@ -20,7 +20,10 @@ Two measurements, each written to the output before the next begins.
 
 import argparse
 import json
+
 import numpy as np
+
+from scripts.prototypes.bank_hessian_blowup import geometry
 
 CERTIFIED = (
     "/home/ITER/mcintos/.config/reckon/crew/archive/runs/"
@@ -31,9 +34,19 @@ PRE_REPAIR = (
     "/home/ITER/mcintos/.cache/nova-dina-flattop/inputs/bank/store/sha256/"
     "fd912554f8e9e7efddce53b119242a46e88f20ac30e029f83781c6253f828425/bank.npz"
 )
-GEOMETRY = "/home/ITER/mcintos/.cache/nova-iter-bank/dina-rerun/bank/geometry.npz"
 HESSIAN = slice(3, 6)
 HEIGHT_TOLERANCE = 1e-7
+SECOND_ENTRIES = {
+    3: (0, "psi_RR"),
+    4: (0, "psi_RZ"),
+    5: (0, "psi_ZZ"),
+    9: (1, "psi_RR"),
+    10: (1, "psi_RZ"),
+    11: (1, "psi_ZZ"),
+    15: (2, "psi_RR"),
+    16: (2, "psi_RZ"),
+    17: (2, "psi_ZZ"),
+}
 
 
 def read(path):
@@ -45,26 +58,23 @@ def read(path):
         )
 
 
-def polygons():
-    with np.load(GEOMETRY, allow_pickle=False) as archive:
-        vertices = np.asarray(archive["vertices"])
-        counts = np.asarray(archive["vertex_count"])
-    return tuple(vertices[index, : int(count)] for index, count in enumerate(counts))
+def second_moment_singular(cells, selected):
+    """Singular values of each selected cell's inverse second moment.
 
+    The bank contracts every source moment against this matrix, so a cell whose
+    singular values are orders above an ordinary cell's magnifies every entry
+    booked against it.
+    """
+    from nova.equilibrium.topology import BiotMomentCoupling
 
-def segment_distance(point, polygon):
-    starts = polygon
-    ends = np.roll(polygon, -1, axis=0)
-    along = ends - starts
-    offset = point[None, :] - starts
-    square = np.sum(along * along, axis=-1)
-    numerator = np.sum(offset * along, axis=-1)
-    fraction = np.where(
-        square > 0.0, numerator / np.where(square > 0.0, square, 1.0), 0.0
-    )
-    fraction = np.clip(fraction, 0.0, 1.0)
-    projection = starts + fraction[:, None] * along
-    return np.linalg.norm(point[None, :] - projection, axis=-1)
+    coupling = BiotMomentCoupling.from_polygons(cells)
+    inverse = np.asarray(coupling.inverse_second_moment)
+    return {
+        str(cell): [
+            float(value) for value in np.linalg.svd(inverse[cell], compute_uv=False)
+        ]
+        for cell in sorted(selected)
+    }
 
 
 def pair_census(certified, pre_repair, cells, bound):
@@ -76,16 +86,20 @@ def pair_census(certified, pre_repair, cells, bound):
         node, cell = int(node), int(cell)
         point = certified["nodes"][node]
         polygon = cells[cell]
-        vertex = np.linalg.norm(polygon - point[None, :], axis=-1)
-        edge = segment_distance(point, polygon)
+        booked = np.asarray(certified["rows"][node, cell]).reshape(-1)
+        index = max(SECOND_ENTRIES, key=lambda i: abs(booked[i]))
+        moment, component = SECOND_ENTRIES[index]
         records.append(
             dict(
                 node=node,
                 cell=cell,
+                moment=moment,
+                component=component,
+                entry_index=index,
                 pair_max=float(pair_max[node, cell]),
                 position=[float(point[0]), float(point[1])],
-                distance_vertex=float(vertex.min()),
-                distance_edge=float(edge.min()) if edge.size else 0.0,
+                distance_vertex=geometry.vertex_distance(point, polygon),
+                distance_edge=geometry.segment_distance(point, polygon),
                 cell_height_gap=float(np.abs(polygon[:, 1] - point[1]).min()),
                 mesh_height_gap=float(np.abs(heights - point[1]).min()),
                 certified=[
@@ -128,6 +142,7 @@ def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--output", required=True)
     parser.add_argument("--bound", type=float, default=1e9)
+    parser.add_argument("--reference-cell", type=int, default=38)
     arguments = parser.parse_args()
 
     certified = read(CERTIFIED)
@@ -137,9 +152,13 @@ def main():
         record["rows"] = record["rows"][:active]
         record["nodes"] = record["nodes"][:active]
 
-    cells = polygons()
-    record = dict(active_nodes=active)
+    cells = geometry.cells()
+    record = dict(active_nodes=active, cells=len(cells))
     record["pairs"] = pair_census(certified, pre_repair, cells, arguments.bound)
+    selected = {pair["cell"] for pair in record["pairs"]}
+    selected.add(arguments.reference_cell)
+    record["inverse_second_moment"] = second_moment_singular(cells, selected)
+    record["reference_cell"] = arguments.reference_cell
     with open(arguments.output, "w") as handle:
         json.dump(record, handle, indent=2)
         handle.write("\n")

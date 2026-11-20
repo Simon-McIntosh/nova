@@ -2,9 +2,10 @@
 
 The bank's six booked rows per moment are the flux value, its gradient, and the
 symmetric Hessian, contracted against the same inverse second moment the row
-builder uses. This script reproduces ``_source_jets`` exactly and swaps only the
-row function, so a difference between arms is a difference between derivative
-constructions and nothing else.
+builder uses. The jet pipeline is the repository's own
+``nova.equilibrium.fixed_points._source_jets``; an arm is that program with its
+row function swapped, so a difference between arms is a difference between the
+row programs and nothing else.
 
 Arms:
 
@@ -12,15 +13,16 @@ Arms:
     ``packed_analytic_moments`` as the bank builder calls it, which routes
     through the stable-height custom JVP.
 ``stable_poles``
-    ``_packed_analytic_moments_primal`` with ``stable_poles=True`` under a plain
-    ``jacfwd``: the stable pole evaluation without the height substitution.
+    ``_packed_analytic_moments_primal`` with ``stable_poles=True``: the stable
+    pole evaluation without the height substitution.
 ``plain``
-    ``_packed_analytic_moments_primal`` under plain ``jacfwd``, which is the
-    pre-repair derivative path.
+    ``_packed_analytic_moments_primal``, which is the pre-repair derivative
+    path.
 """
 
 import argparse
 import json
+from contextlib import contextmanager
 
 import numpy as np
 
@@ -28,20 +30,22 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 
-import jax  # noqa: E402
 import jax.numpy as jnp  # noqa: E402
 
 from nova.biot.polygonanalytic import (  # noqa: E402
     _packed_analytic_moments_primal,
     packed_analytic_moments,
 )
+from nova.equilibrium import fixed_points  # noqa: E402
+from nova.equilibrium.fixed_points import _source_jets  # noqa: E402
 from nova.equilibrium.topology import BiotMomentCoupling  # noqa: E402
 
-GEOMETRY = "/home/ITER/mcintos/.cache/nova-iter-bank/dina-rerun/bank/geometry.npz"
+from scripts.prototypes.bank_hessian_blowup import geometry  # noqa: E402
+
 CERTIFIED = (
     "/home/ITER/mcintos/.config/reckon/crew/archive/runs/"
     "r-20261117T110237355670-iter-bank-recertify/h200-head/store/sha256/"
-    "81ee8fdf8056855f0846f0e00b7213434451be8e9557369b74ef35a23a62fd4f/bank.npz"
+    "81ee8fdf8056855f0846e00b7213434451be8e9557369b74ef35a23a62fd4f/bank.npz"
 )
 PRE_REPAIR = (
     "/home/ITER/mcintos/.cache/nova-dina-flattop/inputs/bank/store/sha256/"
@@ -50,86 +54,36 @@ PRE_REPAIR = (
 ARMS = ("shipped", "stable_poles", "plain")
 
 
+def _stable_poles_primal(xp, *arguments):
+    return _packed_analytic_moments_primal(xp, *arguments, stable_poles=True)
+
+
+ROW_FUNCTIONS = {
+    "shipped": packed_analytic_moments,
+    "stable_poles": _stable_poles_primal,
+    "plain": _packed_analytic_moments_primal,
+}
+
+
+@contextmanager
+def row_program(arm):
+    """Evaluate the shared jet program with ``arm``'s row function."""
+    original = fixed_points.packed_analytic_moments
+    fixed_points.packed_analytic_moments = ROW_FUNCTIONS[arm]
+    try:
+        yield
+    finally:
+        fixed_points.packed_analytic_moments = original
+
+
 def coupling_from_geometry():
-    with np.load(GEOMETRY, allow_pickle=False) as archive:
-        vertices = np.asarray(archive["vertices"])
-        counts = np.asarray(archive["vertex_count"])
-    polygons = tuple(
-        vertices[index, : int(count)] for index, count in enumerate(counts)
-    )
-    return BiotMomentCoupling.from_polygons(polygons)
-
-
-def row_function(coupling, arm):
-    def rows(target):
-        arguments = (
-            jnp.broadcast_to(target[0], coupling.norm.shape),
-            jnp.broadcast_to(target[1], coupling.norm.shape),
-            coupling.edge,
-            coupling.weight,
-            coupling.norm,
-            coupling.centre.T,
-            coupling.centre.T,
-            coupling.reflection_axis,
-            coupling.reflection_partner,
-        )
-        if arm == "shipped":
-            return packed_analytic_moments(jnp, *arguments)
-        if arm == "stable_poles":
-            return _packed_analytic_moments_primal(jnp, *arguments, stable_poles=True)
-        return _packed_analytic_moments_primal(jnp, *arguments)
-
-    return rows
+    return BiotMomentCoupling.from_polygons(geometry.cells())
 
 
 def jets(coupling, arm, target):
-    rows = row_function(coupling, arm)
-
-    def value_gradient(point):
-        stacked = rows(point)
-        value = jnp.stack(stacked[:3], axis=-1)
-        gradient = (
-            2
-            * jnp.pi
-            * point[0]
-            * jnp.stack(
-                (
-                    jnp.stack(stacked[6:9], axis=-1),
-                    -jnp.stack(stacked[3:6], axis=-1),
-                ),
-                axis=-1,
-            )
-        )
-        return value, gradient
-
-    def gradient_with_value(point):
-        value, gradient = value_gradient(point)
-        return gradient, (value, gradient)
-
-    hessian, (value, gradient) = jax.jacfwd(gradient_with_value, has_aux=True)(
-        jnp.asarray(target)
-    )
-    coefficients = jnp.concatenate(
-        (
-            value[..., None],
-            gradient,
-            hessian[..., 0, 0, None],
-            hessian[..., 0, 1, None],
-            hessian[..., 1, 1, None],
-        ),
-        axis=-1,
-    )
-    inverse = coupling.inverse_second_moment
-    count = len(value)
-    transform = jnp.stack(
-        (
-            jnp.stack((jnp.ones(count), jnp.zeros(count), jnp.zeros(count)), axis=-1),
-            jnp.stack((jnp.zeros(count), inverse[:, 0, 0], inverse[:, 0, 1]), axis=-1),
-            jnp.stack((jnp.zeros(count), inverse[:, 1, 0], inverse[:, 1, 1]), axis=-1),
-        ),
-        axis=1,
-    )
-    return jnp.einsum("cbq,cbm->cmq", coefficients, transform)
+    """The booked rows of every cell at ``target``, under one arm."""
+    with row_program(arm):
+        return _source_jets(jnp.asarray(target), coupling)
 
 
 def main():

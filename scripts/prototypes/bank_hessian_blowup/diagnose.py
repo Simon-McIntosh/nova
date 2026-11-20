@@ -22,6 +22,8 @@ from pathlib import Path
 
 import numpy as np
 
+from scripts.prototypes.bank_hessian_blowup import geometry
+
 ROOT = "/home/ITER/mcintos/.cache/nova-iter-bank/dina-rerun/bank/store/sha256"
 
 BANKS = {
@@ -40,8 +42,6 @@ BANKS = {
     "b00f714ac1d4de4d92ae0d4974482aaafc83d346dd797024eed6f67c3d0d04b3/bank.npz",
 }
 
-GEOMETRY = Path("/home/ITER/mcintos/.cache/nova-iter-bank/dina-rerun/bank/geometry.npz")
-
 HESSIAN = slice(3, 6)
 COMPONENTS = ("psi_RR", "psi_RZ", "psi_ZZ")
 HEIGHT_TOLERANCE = 1e-7
@@ -57,34 +57,12 @@ def load(path):
         )
 
 
-def cells():
-    with np.load(GEOMETRY, allow_pickle=False) as archive:
-        vertices = np.asarray(archive["vertices"])
-        counts = np.asarray(archive["vertex_count"])
-    return tuple(vertices[index, : int(count)] for index, count in enumerate(counts))
-
-
-def point_segment_distance(point, starts, ends):
-    along = ends - starts
-    offset = point[None, :] - starts
-    square = np.sum(along * along, axis=-1)
-    fraction = np.where(
-        square > 0.0,
-        np.sum(offset * along, axis=-1) / np.where(square > 0.0, square, 1.0),
-        0.0,
-    )
-    fraction = np.clip(fraction, 0.0, 1.0)
-    projection = starts + fraction[:, None] * along
-    return np.linalg.norm(point[None, :] - projection, axis=-1)
-
-
 def pair_geometry(node, polygon):
     vertex = np.linalg.norm(polygon - node[None, :], axis=-1)
-    edge = point_segment_distance(node, polygon, np.roll(polygon, -1, axis=0))
     return dict(
         distance_vertex=float(vertex.min()),
         vertex_index=int(np.argmin(vertex)),
-        distance_edge=float(edge.min()) if edge.size else 0.0,
+        distance_edge=geometry.segment_distance(node, polygon),
         cell_height_gap=float(np.abs(polygon[:, 1] - node[1]).min()),
     )
 
@@ -95,7 +73,7 @@ def main():
     parser.add_argument("--top", type=int, default=12)
     arguments = parser.parse_args()
 
-    polygons = cells()
+    polygons = geometry.cells()
     heights = np.concatenate([polygon[:, 1] for polygon in polygons])
 
     loaded = {}

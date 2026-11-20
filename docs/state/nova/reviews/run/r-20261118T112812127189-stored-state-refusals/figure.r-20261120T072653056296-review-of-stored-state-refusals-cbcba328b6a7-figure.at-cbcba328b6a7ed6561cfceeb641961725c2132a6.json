@@ -69,7 +69,13 @@
       "table_form": "pass: poloidal flux map."
     }
   },
-  "finding_dispositions": {},
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-stored-state-refusals-cbcba328b6a7",
+      "recorded_at": "2026-11-20T08:08:35.700123+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals/iter-iter-stored-default-preview.png",

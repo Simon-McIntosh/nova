@@ -57,7 +57,8 @@ def negative_control(tree, revision, output, scratch, after):
     source.write_text(
         original.replace(
             marker,
-            "delta = pair.unknown.flux_delta("
+            marker + "\n"
+            "                delta = delta + pair.unknown.flux_delta("
             "profile, context, pair.functional, pair.binding.payload, value)",
         )
     )
@@ -66,8 +67,9 @@ def negative_control(tree, revision, output, scratch, after):
     )
     failures = set(record["failure_ids"]) - set(after["failure_ids"])
     assert record["completed"] and record["exit_status"] != 0 and failures
+    assert failures, "the restored image must redden the route test"
     assert all(
-        "test_compensator_image_and_tangent_on_every_proposal_route" in failure
+        "test_compensator_image_and_tangent_on_every_proposal_route[False-" in failure
         for failure in failures
     ), failures
     source.write_text(original)

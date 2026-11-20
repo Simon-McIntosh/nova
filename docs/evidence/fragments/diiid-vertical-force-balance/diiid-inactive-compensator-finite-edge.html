@@ -1,0 +1,73 @@
+<section id="diiid-inactive-compensator-finite-edge">
+<h2>An inactive vertical-position compensator contributes no flux and no tangent on any proposal route</h2>
+<p id="diiid-inactive-compensator-finite-edge-landing-outcome"><strong>landing:</strong> a constraint pair whose payload reports its compensator inactive now applies a flux image of exactly zero, and a proposal route that differentiates that image obtains a tangent of exactly zero, on Newton, the rebuilt-model promotion, continuation and descent recovery alike. The rule lives at the one site that applies a pair's image, so no route can gate it separately, and the authored centroid row stays present and drives its unknown to zero. The committed contract is <code>tests/equilibrium/test_solve_vertical_pin.py</code>; a control that deletes the mask reddens every inactive case and no active one.</p>
+
+<h3>The rule and its single owner</h3>
+<p>A vertical-position pin is a <code>CurrentCentroidConstraint</code> whose binding carries an <code>active</code> flag. That flag is the only activity declaration a constraint payload carries: every other functional's payload is row data — sampled points, a level set — that says nothing about presence. Before this node the flag was read in the residual and nowhere else, so an inactive compensator's flux image entered the augmented map while its row was still scored, and the two disagreed off the root.</p>
+<p><code>nova/equilibrium/constraint.py</code> now declares that rule once, as <code>active_payload_mask(functional, payload)</code>: it returns the reshaped flag for a current-centroid payload and <code>None</code> otherwise. The residual reads it, and <code>ConstraintPair.flux_delta</code> reads it and applies the image through <code>jnp.where(mask, delta, 0)</code>. <code>assemble_augmented_system</code> and <code>reduced_newton._RowAugmentation</code> both call that owner, so every proposal route inherits one mask rather than each gating the image its own way. Because the predicate is shared, the residual and the image cannot drift apart: a future functional that publishes an activity flag changes one function.</p>
+
+<h3>The contract: exact zero at the owner, and the image observed from the route</h3>
+<p>Each scored candidate is read twice, and the two readings answer different questions. The owner reading is the value <code>ConstraintPair.flux_delta</code> returns: rounding cannot enter it, so an inactive binding must slice exactly zero and the assertion is an exact array equality. The route reading takes the same quantity from outside, as the difference between the route's own map at the candidate and that map with the compensator unknown held at zero; a difference of two map evaluations carries roundoff, so it is held to the double-precision floor of <code>1e-15</code>. The unknown-direction tangent is the route map's JVP and is compared exactly.</p>
+<p>Every case carries its own positive control. The same test builds an active binding and requires a nonzero image, a nonzero tangent, and a route reading above <code>1e-12</code>, so a mask that suppressed everything would redden the case rather than pass it. The shadowed cases freeze one flux coordinate and require both a zero tangent on it and no movement of the map there. The reduced contract goes further and drives both bindings through one compiled program: it traces <code>evaluate(runtime_pair, unknown)</code> once, calls it with the inactive pair and again with the same pair rebound to an active payload, and requires the active call to show an image while the inactive call slices zero at a nonzero unknown of <code>0.25</code>. The zero is therefore the binding's and not a second trace's.</p>
+<p>The sixteen route cases are the cross product of the four routes (<code>newton</code>, <code>rebuilt</code>, <code>continuation</code>, <code>descent</code>), two sources (a radial basis and a circuit-current direction), a shadowed and an unshadowed map, and an inactive and an active binding. The whole file runs 41 tests in one process:</p>
+<pre><code>arm after (45d4e1bd2): 41 passed in 71.18s</code></pre>
+<p>A second contract, <code>test_reduced_compensator_image_and_tangent</code>, reads the same image through the reduced-Newton row augmentation, so the reduced path is covered by the same rule rather than by a parallel implementation.</p>
+
+<h3>The refusal control</h3>
+<p>The control deletes the mask at the pair's image owner and leaves everything else in place, so every route that consumes the site applies the inactive compensator's image again while an active binding is bit-identical. The commit that runs it is <code>45d4e1bd2</code>; the measured tree is an extracted archive of that revision with the three mask lines replaced by <code>return delta</code>:</p>
+<table id="diiid-inactive-compensator-finite-edge-gate">
+<caption>The pin contract at the landed head and with the mask deleted. The refusal arm's new failures are every inactive route case plus the inactive reduced case; no active case fails.</caption>
+<thead><tr><th>arm</th><th>rule</th><th>exit</th><th>failed</th><th>passed</th><th>log</th></tr></thead>
+<tbody>
+<tr><td>base (<code>789479f7d</code>)</td><td>masked</td><td>0</td><td>0</td><td>41</td><td><code>gate/baseline.log</code></td></tr>
+<tr><td>after (<code>45d4e1bd2</code>)</td><td>masked</td><td>0</td><td>0</td><td>41</td><td><code>gate/after.log</code></td></tr>
+<tr><td>refusal (<code>45d4e1bd2</code>, mask deleted)</td><td>unmasked</td><td>1</td><td>17</td><td>18</td><td><code>gate/negative-radial.log</code></td></tr>
+</tbody>
+</table>
+<p>The seventeen failures are <code>test_compensator_image_and_tangent_on_every_proposal_route</code> for both sources, both shadow-level shapes and all four routes, plus <code>test_reduced_compensator_image_and_tangent[False]</code>. Every active parametrisation passes in the same run, which is what distinguishes a mask doing its job from a test that cannot see an image at all.</p>
+
+<h3>Four rows with the image suppressed and restored</h3>
+<p>The same four DIII-D rows the cohort books — 137 diverted, 146 diverted, 146 limited and 179 limited — are solved twice each from identical seeds and identical source inputs. The masked arm is the landed tree. The unmasked arm is the withdrawn rule restored inside the measurement process only: <code>measure.py</code> rebinds <code>ConstraintPair.flux_delta</code> to the unmasked form before any program is built, so the two arms are one tree, one seed set and one source reader with the single rule toggled. Both arms are booked on the finite-edge <code>base</code> arm, whose interior knots end inside ψ<sub>N</sub> = 1 and whose boundary value is EFIT's own read at the boundary.</p>
+<p>The measurement is one allocation that shards its rows across the job's cards, never one job per row. The first attempt ran four rows on four P100s and lost three limited rows to <code>RESOURCE_EXHAUSTED</code>: the batch caps each row at nine tenths of a card divided by the rows sharing it, so three limited rows were each held to 3.6 GB of a 16 GB device and died instantiating a <code>jit_scan</code> command buffer. The rerun gave each row a whole card; one row then failed to create a stream because its card was still held by the row that had just exited, and the final submission ran that row alone. The H200 rung was tried first and refused before the payload could start — <code>bwrap cannot run on 98dci4-gpu-0003</code> — so the rows are P100 measurements.</p>
+<p>Each row's <code>trips.json</code> reads the vertical pin's field and image at every inner endpoint, and its terminal state at the last of them. The masked and unmasked arms are compared on the lower saddle's distance to EFIT's own lower null; the shift limit is one millimetre.</p>
+<table id="diiid-inactive-compensator-finite-edge-rows">
+<caption>Four rows, both arms, from one allocation's cards. The lower X-point offset is the distance from the achieved lower null to EFIT's own lower null; the shift is masked minus unmasked on that distance. The terminal pin field is the inactive compensator's field at the row's terminal state, and the control's is the same field when the withdrawn unmasked rule is restored in the measurement process.</caption>
+<thead><tr><th>row</th><th>support</th><th>masked residual</th><th>unmasked residual</th><th>lower X offset [mm]</th><th>shift [mm]</th><th>terminal pin field, masked / control [mT]</th></tr></thead>
+<tbody>
+<tr><td>137 diverted</td><td>339</td><td>9.06e-09</td><td>9.06e-09</td><td>12.50</td><td>0</td><td>0.0 / 0.0</td></tr>
+<tr><td>146 diverted</td><td>338</td><td>2.28e-14</td><td>2.31e-14</td><td>17.91</td><td>6.2e-13</td><td>0.0 / 0.0</td></tr>
+<tr><td>146 limited</td><td>275</td><td>2.76e-09</td><td>2.76e-09</td><td>48.50</td><td>0</td><td>0.0 / 0.0</td></tr>
+<tr><td>179 limited</td><td>294</td><td>4.21e-11</td><td>4.21e-11</td><td>14.99</td><td>0</td><td>0.0 / 0.0</td></tr>
+</tbody>
+</table>
+<p>Every row converges in both arms, every shift is at or below <code>6.2e-13</code> mm, and the inactive compensator's terminal field and image are exactly zero in the control arm as well as the masked one. The two arms agree in the last digits of the residual because the row's authored centroid constraint drives the unknown to zero: with the image restored, the image is still the unknown's image, and that unknown is zero at the fixed point. What the mask changes is the path there, and the terminal state is the same point on it.</p>
+<p>Each panel draws the masked arm's solved flux as solid line contours and EFIT's as dashed ones on one shared level array, with the landed solver's nulls as solid markers (triangle for the axis, cross for the admitted saddle) and EFIT's as hollow markers, over the first wall.</p>
+<div class="figure-row">
+<figure><img src="/nova/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-137-diverted.svg" alt="137 diverted, masked arm: solved flux contours beside EFIT's, both null sets, the first wall."><figcaption>137 diverted, masked arm. Line contours on shared levels, solved flux solid, EFIT's dashed; solid markers are the solved axis and admitted saddle, hollow markers EFIT's, and the first wall is drawn. Terminal residual 9.06e-09, converged.</figcaption></figure>
+<figure><img src="/nova/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-146-diverted.svg" alt="146 diverted, masked arm: solved flux contours beside EFIT's, both null sets, the first wall."><figcaption>146 diverted, masked arm. Terminal residual 2.28e-14, converged.</figcaption></figure>
+<figure><img src="/nova/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-146-limited.svg" alt="146 limited, masked arm: solved flux contours beside EFIT's, both null sets, the first wall."><figcaption>146 limited, masked arm. The lower saddle level is added to the shared level array so the saddle cannot hide between contours. Terminal residual 2.76e-09, converged.</figcaption></figure>
+<figure><img src="/nova/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/frame-179-limited.svg" alt="179 limited, masked arm: solved flux contours beside EFIT's, both null sets, the first wall."><figcaption>179 limited, masked arm. Terminal residual 4.21e-11, converged.</figcaption></figure>
+</div>
+<p>The raw rows are the eight <code>masked/</code> and <code>unmasked/</code> directories under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T094314644058-diiid-inactive-compensator-finite-edge/titan</code>: <code>receipt.json</code> carries the terminal topology and residual, <code>trips.json</code> the per-endpoint pin reads, and <code>comparison.json</code> the table above.</p>
+
+<h3>No added failures in the focused equilibrium group and the suite</h3>
+<p>The wider consumer group ran as two arms over their own extracted trees in fresh processes on <code>all_debug</code>. Both arms report the same twenty-two failure ids, so the head adds none; the head arm also exits on an interpreter abort at <code>tests/test_reduced_newton_constraints.py::unattributed_process_abort</code>, which the base arm reaches at the same ids with a normal exit.</p>
+<table id="diiid-inactive-compensator-finite-edge-focused">
+<caption>Focused equilibrium group: <code>test_equilibrium_constraint_protocol</code>, <code>test_constraint_residual_algebra</code>, <code>test_fixed_point</code>, <code>test_fixed_point_stationary_mask</code>, <code>test_reduced_newton_constraints</code>.</caption>
+<thead><tr><th>arm</th><th>revision</th><th>exit</th><th>failure ids</th><th>log</th></tr></thead>
+<tbody>
+<tr><td>base</td><td><code>789479f7d</code></td><td>1</td><td>22</td><td><code>gate/baseline-focused.log</code></td></tr>
+<tr><td>after</td><td><code>45d4e1bd2</code></td><td>-6</td><td>22 (identical set)</td><td><code>gate/after-focused.log</code></td></tr>
+</tbody>
+</table>
+<p>The run's own marked suite (<code>tests/equilibrium/test_solve_vertical_pin.py</code>) is green at both arms and at the scoped gate, each measured on <code>all_debug</code> in its own job at the landed revision:</p>
+<table id="diiid-inactive-compensator-finite-edge-receipts">
+<caption>Receipts at <code>45d4e1bd2a3727d07e21f3f71abe0a022c729b7c</code>.</caption>
+<thead><tr><th>receipt</th><th>exit</th><th>failed</th><th>log</th></tr></thead>
+<tbody>
+<tr><td>scoped gate</td><td>0</td><td>0</td><td><code>scoped-gate-1795173167916295026.log</code></td></tr>
+<tr><td>baseline suite</td><td>0</td><td>0</td><td><code>baseline_suite-1795173302231217161.log</code></td></tr>
+<tr><td>after suite</td><td>0</td><td>0</td><td><code>after_suite-1795173377062451277.log</code></td></tr>
+</tbody>
+</table>
+</section>

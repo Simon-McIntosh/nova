@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-11-20T22:22:54.096Z",
   "dispatched_at": "2026-11-20T22:01:10Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-hessian-blowup-82591fd99022",
+      "recorded_at": "2026-11-20T23:51:17.485378+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_hessian_blowup/fragment.py",

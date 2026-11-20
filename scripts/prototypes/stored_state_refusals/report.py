@@ -8,9 +8,8 @@ import shutil
 import sys
 from pathlib import Path
 
-import numpy as np
+from records import failure_receipts, measurements, residual_fields
 
-RUN = Path(sys.argv[1]).resolve()
 ROOT = Path(__file__).resolve().parents[3]
 FRAGMENT = (
     ROOT
@@ -35,32 +34,13 @@ CASES = {
 }
 
 
-def records():
-    merged = {}
-    # Runs are read oldest first so the newest measurement of a key wins: an
-    # arm re-measured by a repair job replaces the arm it supersedes, and every
-    # case an older run measured still survives.
-    paths = sorted(
-        RUN.glob("*/measurement.json"),
-        key=lambda path: (path.stat().st_mtime, str(path)),
-    )
-    for path in paths:
-        for key, value in json.loads(path.read_text()).items():
-            if isinstance(value, dict):
-                merged.setdefault(key, {})
-                merged[key].update(value)
-            else:
-                merged[key] = value
+def records(run):
+    merged = measurements(run)
     for label in LABELS:
         arm = merged.get(label)
         if not arm:
             continue
-        failures = sorted(
-            RUN.glob(f"*/comparison/*{label}-generating-failure.json"),
-            key=lambda path: (path.stat().st_mtime, str(path)),
-        )
-        for path in failures:
-            failure = json.loads(path.read_text())
+        for failure in failure_receipts(run, label):
             for name, value in (
                 ("exception", failure.get("exception")),
                 ("axis_admitted", failure.get("axis_admitted")),
@@ -71,7 +51,7 @@ def records():
             ):
                 if value is not None:
                     arm[name] = value
-            for name, value in history_fields(failure.get("history_path")).items():
+            for name, value in residual_fields(failure.get("history_path")).items():
                 if arm.get(name) is None:
                     arm[name] = value
     return merged
@@ -81,33 +61,6 @@ def number(value, digits=6):
     if value is None:
         return "unavailable"
     return f"{float(value):.{digits}g}"
-
-
-def history_fields(path):
-    """Return the residuals a refused solve kept when it wrote no receipt."""
-    if not path:
-        return {}
-    history_path = Path(str(path))
-    if not history_path.is_file():
-        return {}
-    import pickle
-
-    import nova.equilibrium.fixed_point  # noqa: F401 - resolves the pickle type
-
-    try:
-        with history_path.open("rb") as stream:
-            history = pickle.load(stream)
-        values = np.asarray(history.active_set_residuals, dtype=float)
-    except OSError, AttributeError, ValueError, pickle.UnpicklingError:
-        return {}
-    finite = values[np.isfinite(values)]
-    if finite.size == 0:
-        return {}
-    return dict(
-        last_finite_residual=float(finite[-1]),
-        lowest_recorded_residual=float(finite.min()),
-        finite_residual_entries=int(finite.size),
-    )
 
 
 def arm_row(label, record):
@@ -286,8 +239,8 @@ def assemble(records_map):
     return "\n".join(parts)
 
 
-def main():
-    records_map = records()
+def main(run):
+    records_map = records(run)
     copy_figures(records_map)
     parts = [assemble(records_map)]
     parts.append(
@@ -343,4 +296,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(Path(sys.argv[1]).resolve())

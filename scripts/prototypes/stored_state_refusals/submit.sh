@@ -13,6 +13,12 @@ set -euo pipefail
 readonly SHARED_PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
 WORKTREE=$(git -C "$(dirname -- "$0")/../../.." rev-parse --show-toplevel)
 
+# slurmstepd creates the INHERITED TMPDIR before the payload's own export runs,
+# so a login-node /run/user/<uid> value cancels the job in zero seconds with an
+# empty log. Set it here as well as inside the payload, and keep --output under
+# the run directory rather than the node-local tmpfs.
+export TMPDIR=/tmp
+
 log=''
 rung='h200'
 wall='02:30:00'

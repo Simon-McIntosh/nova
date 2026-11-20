@@ -48,6 +48,7 @@ from nova.equilibrium.source import (  # noqa: E402
     PolynomialFluxFunction,
 )
 from nova.equilibrium.solve_request import ExplicitSolveSeed  # noqa: E402
+from records import next_sequence, residual_fields  # noqa: E402
 from tests.test_magnetics_fit_efit_comparison import (  # noqa: E402
     _attempt,
     _panel,
@@ -93,31 +94,6 @@ def _mesh_record(data):
     )
 
 
-def _history_fields(label):
-    """Return the residuals the refused solve kept when it wrote no receipt."""
-    path = OUTPUT / "comparison" / f"{label}-rejected-history.pkl"
-    if not path.is_file():
-        return {}
-    import pickle
-
-    import nova.equilibrium.fixed_point  # noqa: F401 - resolves the pickle type
-
-    try:
-        with path.open("rb") as stream:
-            history = pickle.load(stream)
-        values = np.asarray(history.active_set_residuals, dtype=float)
-    except OSError, AttributeError:
-        return {}
-    finite = values[np.isfinite(values)]
-    if finite.size == 0:
-        return dict(finite_residual_entries=0)
-    return dict(
-        last_finite_residual=float(finite[-1]),
-        lowest_recorded_residual=float(finite.min()),
-        finite_residual_entries=int(finite.size),
-    )
-
-
 def _record(data, label, request, receipt, record, started):
     flux = data.get("terminal_flux")
     residual = data.get("terminal_residual")
@@ -134,7 +110,9 @@ def _record(data, label, request, receipt, record, started):
         **_residual_fields(residual),
     )
     if receipt is None:
-        record.update(_history_fields(label))
+        record.update(
+            residual_fields(OUTPUT / "comparison" / f"{label}-rejected-history.pkl")
+        )
     if receipt is not None:
         record["resolved_policy"] = receipt.resolved_defaults.policy.to_dict()
     if flux is not None:
@@ -310,6 +288,7 @@ def main():
     monkeypatch = pytest.MonkeyPatch()
     records = dict(
         qualification_tolerance=1.0e-10,
+        sequence=next_sequence(OUTPUT),
         device=str(jax.devices()[0]),
         source_revision=os.environ.get("SOURCE_REVISION"),
         measurement_module="/".join(

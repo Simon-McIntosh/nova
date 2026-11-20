@@ -121,6 +121,34 @@ add a hundred packages the environment never carried.
   not exist on a compute node. Export it before `sbatch`/`srun` and again inside
   the payload; one of the two is not enough.
 
+### Nothing is removed or moved under /work (binding, lead 2026-11-19)
+
+**No worker, job script or brief runs `rm`, `mv`, `find -delete`,
+`rsync --delete`, `shutil.rmtree` or any other removal or move on a path under
+`/work`.** That holds for a directory the worker created itself and for
+"cleanup at the end". A removal on shared project storage has no undo and no
+snapshot.
+
+- A private cache, a scratch tree or any directory that must be removed lives
+  on the compute node's local disk, inside the job:
+  `D=$(mktemp -d /tmp/$USER-${SLURM_JOB_ID:-$$}-XXXX); trap 'rm -rf "$D"' EXIT`.
+  That trap, on the path `mktemp` just returned, is the only removal a job
+  writes. Steps that must share the directory run in one job.
+- Logs and receipts a later reader needs go under `~/.cache/<repo>-<topic>/`
+  and are left in place.
+- A worker does not write the pinned pre-warm cache and does not publish a
+  pin. It measures from a job-local cache; the coordinator pre-warms from main
+  after the landing.
+- A coordinator who needs something removed under `/work` lists the one
+  absolute path, shows the listing, and asks the lead first.
+
+Measured 2026-11-19: a worker removing its own private cache directory ran
+`rm -rf <private dir> /work/projects/imas_gpu`, with the second argument a typo
+and the output discarded. It deleted the project's whole `sophelio` directory
+(pinned pre-warm cache, operand cache, labeller sessions, evidence receipts)
+and about 24 other top-level entries before it was stopped. The brief had asked
+it to create a directory on shared storage and remove it at the end.
+
 ### One measurement, one SLURM job (binding, lead 2026-09-09)
 
 A measurement over many rows, shots, rungs or frames is ONE scheduler job that

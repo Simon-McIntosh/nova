@@ -49,7 +49,30 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 157,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "145486128bd51b2da846dec10955f3cc4ad76709",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Comment c-s13-frame102-moved on \u00a713 records that the frame-102 boundary extraction moved to \u00a711, which commits it; one owner, no duplicate",
+      "reason": "",
+      "when": "2026-11-20T20:03:55.576275+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "145486128bd51b2da846dec10955f3cc4ad76709",
+      "commit_basis": "edit",
+      "note": "Comment c-s13-frame102-moved on \u00a713 records that the frame-102 boundary extraction moved to \u00a711, which commits it; one owner, no duplicate",
+      "reason": "",
+      "when": "2026-11-20T20:03:55.576275+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T194001327715-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261120T194001327715-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "ba1c5c28f3ef55ca9fa68df1e4dc042fd4254673",
   "rubric": "content",

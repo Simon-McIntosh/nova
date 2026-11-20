@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="157">
+<meta name="plan-version" content="158">
 <meta name="plan-modified" content="2026-11-20">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -267,6 +267,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s13" data-id="c-run-r-20261118T203342822348-diiid-finite-edge-flux" data-who="reckon-build" data-when="2026-11-18T20:54:53Z">
     <div class="r-comment-body"><p>Sampled flux functions gained a finite-edge form that returns a supplied boundary value at psi_N = 1, and the DIII-D builder prescribes EFIT's own p-prime and FF-prime on the boundary shell, reproduced from the committed extraction to 4e-16 relative; all four rows converge on it and each moves its lower X-point 38 to 50 percent closer to EFIT than the capped tables, taking 137D from 2.317 to 1.250 cm, 146D from 2.883 to 1.791 cm, 146L from 8.115 to 4.850 cm and 179L from 3.003 to 1.499 cm.</p></div>
+</div>
+<div class="r-comment" data-section="s13" data-id="c-s13-frame102-moved" data-who="35a66cc6-f4f1-4358-8dbb-99c9333c7249" data-when="2026-11-20T20:50:00+00:00">
+    <div class="r-comment-body"><p>The finite-edge record committed the ψ<sub>N</sub>=1 extraction for the four X-point rows but not for frame <code>d3d_shot_00000c4a7b.parquet:102</code>, which clause (2) also names. That one remaining piece of clause (2) moved to §11 on 2026-11-20: §11's done-when (1) commits frame 102's boundary p′ and FF′ as the builder prescribes them, because §11 is the section that consumes them. §13 stays declared done for the capability and the four rows.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260903T190539914922-dvf-external-field-tare-scout" data-who="c-inv-diiid-tare" data-when="2026-09-03T19:10:45.016Z">
     <div class="r-comment-body"><p>reuse map of six tare and circuit drivers; banked residual: exterior current 99.6 percent explained by the label's own GS inconsistency (vessel structure not supported), dipole mode carries mean 54.8 percent of the gauge-free residual energy, three of five ohmic channels not recoverable from ECOILA, inclusion ladder closes frame 89 (2.54 m to 0.004 m) but is non-monotonic on frame 102; the ohmic currents in the corpus are cross-pulse scaled ECOILA proxies</p></div>

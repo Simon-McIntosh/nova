@@ -15,7 +15,7 @@ from pathlib import Path
 import numpy as np
 
 DEFAULT_FIELD = Path(
-    "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
+    "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/"
     "field-source/west-62751-uniform-0.08-field.npz"
 )
 

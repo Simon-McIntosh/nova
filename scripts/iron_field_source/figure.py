@@ -24,7 +24,7 @@ import numpy as np  # noqa: E402
 from nova.media.ink import DEFAULT_INK, trace_axes  # noqa: E402
 
 DEFAULT_FIELD = Path(
-    "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
+    "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/"
     "field-source/west-62751-uniform-0.08-field.npz"
 )
 COLORS = ("#3366cc", "#cc7722", "#009988")

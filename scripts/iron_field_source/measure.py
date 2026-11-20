@@ -51,10 +51,10 @@ EQUILIBRIUM = f"{ROOT}/62751/validation/nice"
 INDEX = 14
 CACHE = Path("/home/ITER/mcintos/.cache/nova-west-stray/hex/cache")
 EVIDENCE = Path(
-    "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/field-source"
+    "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/field-source"
 )
 LINEAR = Path(
-    "/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/"
+    "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/"
     "linear-magnetisation/west-h200"
 )
 DEFAULT_MESH = "uniform-0.08"

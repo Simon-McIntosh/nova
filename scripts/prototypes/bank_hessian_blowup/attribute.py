@@ -36,6 +36,8 @@ PRE_REPAIR = (
 )
 HESSIAN = slice(3, 6)
 HEIGHT_TOLERANCE = 1e-7
+CORNER_TOLERANCE = 1e-9
+CHANGED_TOLERANCE = 1e-2
 SECOND_ENTRIES = {
     3: (0, "psi_RR"),
     4: (0, "psi_RZ"),
@@ -124,10 +126,12 @@ def selector_census(certified, pre_repair, cells):
             certified["rows"][..., 3:6].astype(np.float64)
             - pre_repair["rows"][..., 3:6].astype(np.float64)
         ).max(axis=(2, 3))
-        > 1e-2
+        > CHANGED_TOLERANCE
     )
     return dict(
         tolerance=HEIGHT_TOLERANCE,
+        changed_tolerance=CHANGED_TOLERANCE,
+        corner_tolerance=CORNER_TOLERANCE,
         nodes=int(len(nodes)),
         selected_nodes=int(selected.sum()),
         selected_max_gap=float(gap[selected].max()) if selected.any() else None,
@@ -153,7 +157,7 @@ def main():
         record["nodes"] = record["nodes"][:active]
 
     cells = geometry.cells()
-    record = dict(active_nodes=active, cells=len(cells))
+    record = dict(active_nodes=active, cells=len(cells), bound=arguments.bound)
     record["pairs"] = pair_census(certified, pre_repair, cells, arguments.bound)
     selected = {pair["cell"] for pair in record["pairs"]}
     selected.add(arguments.reference_cell)

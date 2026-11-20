@@ -25,8 +25,8 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="136">
-<meta name="plan-modified" content="2026-11-19">
+<meta name="plan-version" content="137">
+<meta name="plan-modified" content="2026-11-20">
 </head>
 <body>
   <main class="plan-doc">
@@ -668,7 +668,10 @@ number is reported for either ratio.</p></div>
     <div class="r-comment-body"><p>On 2026-11-19 at 00:08Z an unrelated worker's <code>rm -rf</code> deleted <code>/work/projects/imas_gpu/sophelio</code>, and it is not being restored. Every GPFS receipt this plan's landed fragments cite under <code>…/evidence/iron-core-magnetisation/</code> is gone: <code>linear-magnetisation/</code>, <code>west-62751/</code>, <code>graded-refinement/</code>, <code>imas-efit/closed-shell/</code> and <code>field-source/</code>. The persisted WEST operators went with them: uniform 80 and 40 mm, graded 16/80, and graded 8/40 (39.5 GB, 6.5 h of H200 assembly). The fragments and figures in git still carry every reported number, but their receipt links no longer resolve. No iron-core worker ran the deletion. Nodes now rebuild what they need, and briefs forbid any rm, mv or cleanup under <code>/work/projects</code>.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-lead-ruling-targeted-volume-rule" data-who="lead" data-when="">
-    <div class="r-comment-body"><p>Lead ruling, 2026-11-19. Node <code>icm-graded-operator-bound</code> localised the bound violation to the volume potential's target rule: 6 nodes per triangle on a logarithmic self-term. It is a quadrature error in a nearly degenerate mode, not a grading or affine-basis defect, and uniform 160 and 40&nbsp;mm shells cross the bound too, by about 7e-6. A global 12-node rule restores the bound (quotient 0.999999996) but triples the assembly wall (325 to 1005&nbsp;s on the 115-cell shell). The ruling is a targeted rule instead: 12 nodes only for self, adjacent and close pairs and thin cells, matching the global 12-node operator to 1e-10, with the shell operator pin re-baselined to the repaired operator, an approximately 1.4e-6 change.</p></div>
+    <div class="r-comment-body"><p>Lead ruling, 2026-11-19. Node <code>icm-graded-operator-bound</code> localised the bound violation to the volume potential's target rule: 6 nodes per triangle on a logarithmic self-term. It is a quadrature error in a nearly degenerate mode, not a grading or affine-basis defect, and uniform 160 and 40 mm shells cross the bound too, by about 7e-6. A global 12-node rule restores the bound (quotient 0.999999996) but triples the assembly wall (325 to 1005 s on the 115-cell shell). The ruling is a targeted rule instead: 12 nodes only for self, adjacent and close pairs and thin cells, matching the global 12-node operator to 1e-10, with the shell operator pin re-baselined to the repaired operator, an approximately 1.4e-6 change.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261120T080641764792-review-of-icm-graded-operator-bound-9d4075126d2d" data-who="reckon-build" data-when="2026-11-20T08:08:28.796Z">
+    <div class="r-comment-body"><p>Independent review of e429aef8de8becbfbf77eccff24ede82ca33fa5a..9d4075126d2dc1997c97a8219e94d06953a825d1 recorded at both declared paths; blocking finding on the reviewed run&#x27;s unreadable after_suite, plus five non-blocking findings.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T222130291065-review-of-icm-strip-error-sweep-43dc514d920c-figure" data-who="reckon-build" data-when="2026-11-06T22:32:39.513Z">
     <div class="r-comment-body"><p>Figure review of run r-20261106T212311176377-icm-strip-error-sweep at head 43dc514d9 is parsed with no blocking finding: the strip-error curve figure renders clean (zero ink in the outer 8 px frame, ink bbox x 35..1365 y 86..690, one frameless legend row, the 1e-10 direct label in clear space), and one non-blocking finding records that the two lightest curve stops measure 2.61:1 and 1.93:1 against white, below the 3:1 a plotted line is required to hold, so the coincident right-hand branch is drawn in the palest trace.</p></div>

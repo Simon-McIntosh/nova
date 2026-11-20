@@ -87,9 +87,28 @@
       "note": "\u00a711 now waits on \u00a78 and \u00a713 in plan-section-depends-on",
       "reason": "",
       "when": "2026-11-20T08:33:26.571476+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "\u00a712 now opens by stating it was closed without diagnosis and that its named record and figure paths were never written",
+      "reason": "",
+      "when": "2026-11-20T08:34:17.441681+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "note": "\u00a712 now opens by stating it was closed without diagnosis and that its named record and figure paths were never written",
+      "reason": "",
+      "when": "2026-11-20T08:34:17.441681+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

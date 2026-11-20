@@ -2249,6 +2249,57 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "5212f19e10d324f266aade0c731f53c38fd6b5a1",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 12876011,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261119T065220776269-drifting-sensor-probe-rows",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 12876011,
+        "path": "/tmp/reckon-crew-scratch/r-20261119T065220776269-drifting-sensor-probe-rows"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 1
+      },
+      "worktrees": [
+        {
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "unintegrated",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "5212f19e10d324f266aade0c731f53c38fd6b5a1",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/drifting-sensor-probe-rows",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "its HEAD is not reachable from the integration revision, so removing it would destroy the only copy of that commit; merge it or discard it deliberately"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "uncommitted changes in the worktree; commit or discard them, and nothing reclaims a worktree holding work that exists nowhere else"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

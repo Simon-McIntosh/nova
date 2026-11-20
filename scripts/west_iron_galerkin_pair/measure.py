@@ -274,16 +274,20 @@ def measure_size(region, external, table_b, table_mu, size, air, probes, out):
     return row
 
 
-def code_provenance():
+def code_provenance(script: Path | None = None):
     """Return the revision and the blob hash of the code this run executes.
 
     A receipt that names only the tree HEAD can describe code that never ran:
     the measured script is a working-tree file, and an edit between the last
     commit and the launch is invisible in HEAD. So the tree must be clean, and
-    the blob of this file must be the blob that HEAD commits.
+    the blob of the measured script must be the blob that HEAD commits.
+
+    ``script`` defaults to this file, so a caller stamps its own code while the
+    refusal stays in one place. A script outside this repository has no
+    repository-relative name and is refused.
     """
-    root = Path(__file__).resolve().parents[2]
-    script = Path(__file__).resolve()
+    script = Path(script or __file__).resolve()
+    root = script.parents[2]
 
     def git(*arguments):
         return subprocess.check_output(

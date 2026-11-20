@@ -53,9 +53,22 @@
       "note": "The 1 mm band against the unmasked solve is replaced by: each masked lower null no farther from EFIT than the unmasked one, within 1 mm, with the shift reported",
       "reason": "",
       "when": "2026-11-20T07:59:21.503961+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "\u00a712 was closed by lead decision without running; its closing comment c-closed-s12-finite-edge records that no refusal mechanism was measured and the run was discarded, so the named record never existing is the documented outcome",
+      "when": "2026-11-20T08:00:21.778199+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a712 was closed by lead decision without running; its closing comment c-closed-s12-finite-edge records that no refusal mechanism was measured and the run was discarded, so the named record never existing is the documented outcome",
+      "when": "2026-11-20T08:00:21.778199+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

@@ -85,6 +85,16 @@
       "note": "The commit body now names the finite-edge flux-function form by mechanism, not by section",
       "reason": "",
       "when": "2026-11-20T14:10:22.141182+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7751443e8b89328a9d908102f5dadda75ec69243",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a79 now names docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html and a receipts directory, and forbids writing into the existing coil-correction record",
+      "reason": "",
+      "when": "2026-11-20T14:11:35.375360+00:00"
     }
   ],
   "responses": {
@@ -96,6 +106,15 @@
       "note": "The control now runs through the benchmark entry point, whose pre-finite-edge reading is 1119833.584 A, and names the probe's 160.6 A difference",
       "reason": "",
       "when": "2026-11-20T14:09:09.842270+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7751443e8b89328a9d908102f5dadda75ec69243",
+      "commit_basis": "edit",
+      "note": "\u00a79 now names docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html and a receipts directory, and forbids writing into the existing coil-correction record",
+      "reason": "",
+      "when": "2026-11-20T14:11:35.375360+00:00"
     },
     "naming-1": {
       "action": "acted",

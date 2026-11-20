@@ -34,6 +34,11 @@
       "kind": "exempted",
       "reason": "a redundant assertion in a test whose other checks (record values, digest) carry the guard; noted for removal with the fallback above",
       "recorded_at": "2026-11-20T11:08:14.700170+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "the missing-pin control is what the brief asked for; the record-misread control is a manifest overstatement, not a missing guard on a delivered claim",
+      "recorded_at": "2026-11-20T11:08:22.847187+00:00"
     }
   },
   "findings": [

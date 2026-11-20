@@ -17,7 +17,30 @@
   "plan_slug": "diiid-vertical-force-balance",
   "plan_version": 149,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1e267f37575342c56b510712a49cf1bcf2b685a0",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The lede now records that \u00a72 closed the external-field hypothesis negative and names the solve-side causes found near the X-point (zero-edge cap, mixed kernels, replaced conductor currents)",
+      "reason": "",
+      "when": "2026-11-20T09:13:10.691428+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1e267f37575342c56b510712a49cf1bcf2b685a0",
+      "commit_basis": "edit",
+      "note": "The lede now records that \u00a72 closed the external-field hypothesis negative and names the solve-side causes found near the X-point (zero-edge cap, mixed kernels, replaced conductor currents)",
+      "reason": "",
+      "when": "2026-11-20T09:13:10.691428+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T083633028233-plan-review-of-diiid-vertical-force-balance.json",
   "review_run_id": "r-20261120T083633028233-plan-review-of-diiid-vertical-force-balance",
   "reviewed_blob_sha": "3c26d026e01e7a7f643fb2eb6e4042c19e7dce12",
   "rubric": "content",

@@ -424,6 +424,41 @@ def test_graded_linear_interaction_holds_the_demagnetisation_bound(
   0d4ad57d6dbc72331ceeec2dea452dae8ce1a0c9:nova/biot/tiledassembly.py</code> the
   test runs resolves, which it did not in the first pair of arms (eight failures
   there, this one among them with exit status 128).</p>
+  <h3 id="icm-graded-operator-bound-suites-targeted">Both suite arms, re-run on the targeted rule</h3>
+  <p>The same file was run once on each side of this node's fence, each as its
+  own 16-core scheduler job under the same prepared tree and the same command
+  (<code>suites-final/*-suite.log</code>, receipt logs
+  <code>suite-baseline2-1332489.log</code> and <code>suite-after6-1332501.log</code>):</p>
+  <ul>
+    <li><strong>Baseline</strong> <code>e429aef8de8becbfbf77eccff24ede82ca33fa5a</code>
+      (job 1332489): <code>7 failed, 91 passed in 7084.04 s (1:58:04)</code>,
+      exit status 1, pytest wall 7092&nbsp;s.</li>
+    <li><strong>After</strong> <code>37ac500887e2bfdd9deda7c4c8768afe738ae95d</code>
+      (job 1332501): <code>7 failed, 92 passed in 9246.00 s (2:34:06)</code>,
+      exit status 1, pytest wall 9255&nbsp;s.</li>
+  </ul>
+  <p>The failure sets are identical &mdash; the five
+  <code>test_control_receipt_*</code> rows and both
+  <code>test_in_vessel_fill_matches_six_limb_reference</code> rows, each a
+  <code>FileNotFoundError</code> on
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/{case.json,
+  production/material-refinement-20261114/summary.json}</code>. The after arm
+  collects one test more than the baseline, because
+  <code>test_linear_volume_rule_holds_the_demagnetisation_bound</code> is
+  present only at the head (60 test functions in
+  <code>tests/test_magnetisation.py</code> against the base's 59), and it is the
+  ninety-second pass.</p>
+  <p>The suite is 2162&nbsp;s longer at the head, and the bound test alone is
+  3509&nbsp;s of it, so everything else ran 1347&nbsp;s faster on the after
+  job's node; the volume block's refinement on that file's meshes is 1.56&nbsp;%
+  of 179&nbsp;828&nbsp;100 ordered pairs on the 13410-cell graded mesh and
+  3.59&nbsp;% of 16&nbsp;136&nbsp;289 on the 4017-cell one (job 1332699), a few
+  per cent of each assembly's volume block, so the delta is contention and the
+  bound test rather than the rule.</p>
+  <p>The failure set, the collection count, and the exit statuses are what make
+  the arms a fence; the walls are not comparable across two nodes and are not
+  used as one.</p>
+
   <h3 id="icm-graded-operator-bound-receipts">Receipts</h3>
   <p><code>shells-repaired-confounded.jsonl</code> holds two superseded rows:
   the first repaired arm switched the rule by patching

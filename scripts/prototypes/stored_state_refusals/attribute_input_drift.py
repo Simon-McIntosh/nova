@@ -161,9 +161,44 @@ def _history(receipt, error=None):
     )
 
 
-def _arm(data, request, label, case):
+def _failure_trajectory(label):
+    """Read the trajectory an arm's generating failure stored beside its receipt.
+
+    A refused arm never returns a receipt, so its residual trace survives only in
+    the trajectory the solver dumped when it raised; that trace is what says
+    whether the arm started where the record's arm started.
+    """
+    path = OUTPUT / f"{label}-generating-failure.json"
+    if not path.is_file():
+        return None
+    failure = json.loads(path.read_text())
+    history_path = failure.get("history_path")
+    if not history_path:
+        return None
+    import pickle
+
+    with open(history_path, "rb") as handle:
+        result = pickle.load(handle)
+
+    def array(name):
+        value = getattr(result, name, None)
+        return None if value is None else np.asarray(value).ravel().tolist()
+
+    return dict(
+        exception=failure.get("exception"),
+        trips=failure.get("trips"),
+        termination_reason=failure.get("termination_reason"),
+        active_set_residuals=array("active_set_residuals"),
+        inner_iteration_residuals_before=array("inner_iteration_residuals_before"),
+        inner_iteration_residuals_after=array("inner_iteration_residuals_after"),
+    )
+
+
+def _arm(data, request, label, case, applied):
     started = perf_counter()
-    record = dict(label=label, case=case, recorded=RECORDED[case])
+    record = dict(
+        label=label, case=case, recorded=RECORDED[case], applied_current=applied
+    )
     error = None
     receipt = None
     try:
@@ -172,6 +207,8 @@ def _arm(data, request, label, case):
         error = raised
         print("ARM_EXC", label, type(raised).__name__, flush=True)
     flux = data.get("terminal_flux")
+    history = _history(receipt, error)
+    trajectory = None if history is not None else _failure_trajectory(label)
     record.update(
         policy=request.policy.to_dict(),
         route=request.policy.route,
@@ -185,7 +222,8 @@ def _arm(data, request, label, case):
         wall_seconds=perf_counter() - started,
         **_residual_fields(_finite(data.get("terminal_residual"))),
         axis=_axis_admission(data, flux),
-        residual_history=_history(receipt, error),
+        residual_history=history,
+        failure_trajectory=trajectory,
     )
     recorded = RECORDED[case]
     if recorded.get("residual") and record.get("residual") is not None:
@@ -211,8 +249,18 @@ def _prepare(case, monkeypatch, fitted):
     return data
 
 
-def _solve(data, columns, label, case):
+def _solve(data, columns, label, case, applied):
+    """Solve one arm with the given conductor currents applied to operator and request.
+
+    ``columns`` of ``None`` means "the currents this branch already bound", which
+    is the stored arm; an arm that applies no fitted currents at all reaches here
+    with no binding in ``data`` and leaves the request as the case reader built
+    it. Both the operator's external current and the request's current are set,
+    because the operator carries the field and the request carries the receipt.
+    """
     request, profile = data["request"], data["profile"]
+    if columns is None:
+        columns = data.get("fitted_conductor_current")
     if columns is not None:
         columns = np.asarray(columns, dtype=float)
         _bind_columns(data, columns)
@@ -221,7 +269,8 @@ def _solve(data, columns, label, case):
         profile = replace(
             profile, operator=replace(profile.operator, external_current=current)
         )
-    return _arm(data, request, label, case)
+        data["profile"] = profile
+    return _arm(data, request, label, case, applied)
 
 
 def main():
@@ -251,12 +300,20 @@ def main():
         entry["comparison_input"] = provenance
         if comparison is not None:
             entry["stored_vs_comparison"] = _current_drift(stored, comparison)
-        entry["stored"] = _solve(data, None, f"{case}-input-stored", case)
+        entry["stored"] = _solve(
+            data, None, f"{case}-input-stored", case, "stored fitted currents"
+        )
         _write(OUTPUT / "measurement.json", summary)
         del data
 
         data = _prepare(case, monkeypatch, fitted=comparison is not None)
-        entry["comparison"] = _solve(data, comparison, f"{case}-input-comparison", case)
+        entry["comparison"] = _solve(
+            data,
+            comparison,
+            f"{case}-input-comparison",
+            case,
+            provenance,
+        )
         del data
         summary["cases"][case] = entry
         _write(OUTPUT / "measurement.json", summary)

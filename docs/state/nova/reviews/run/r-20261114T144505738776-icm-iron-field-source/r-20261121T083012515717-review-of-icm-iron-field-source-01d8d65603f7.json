@@ -20,6 +20,13 @@
   },
   "dispatched_at": "2026-11-21T09:01:23Z",
   "failure_derivation": "The reviewed run's head arm /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/logs/icm-rafter2-1334452.log (job 1334452 at 01d8d65603f7c6926bc9d87f72fab8e28b320e51) records '7 failed, 112 passed in 8455.80s' and the after arm log /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/after_arm.log carries the seven FAILED ids, all in tests/test_magnetisation.py and all FileNotFoundError on /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/{case.json,production/material-refinement-20261114/summary.json}. The baseline arm /work/projects/imas_gpu/nova/evidence/iron-limb-fill log cited at manifest.md:26 (arms/baseline_arm.log for job 1334053) was overwritten at 08:40:53 by the cancelled rerun 1334447 and now ends at 64 per cent with no summary; job 1334053's count survives in arms/summary.tsv ('baseline 1 8157 7 failed, 104 passed in 8150.07s') and in logs/icm-fbase-1334053.log, and all five failing test functions (seven parametrised ids) exist unchanged at base revision 9b016126111a5acaebca064c07432042b5a2628c, so the seven head failures are failures the base arm also carried: added_failure_count 0, added_failure_ids [].",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-iron-field-source",
+      "recorded_at": "2026-11-21T12:04:15.497783+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/iron_field_source/figure.py",

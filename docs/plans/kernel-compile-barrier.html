@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="129">
+<meta name="plan-version" content="130">
 <meta name="plan-modified" content="2026-11-21">
 </head>
 <body>
@@ -301,6 +301,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261121T152204046382-review-of-pinned-point-program-4b2054acf8a2" data-who="reckon-build" data-when="2026-11-21T15:29:57.681Z">
     <div class="r-comment-body"><p>Reviewed run r-20261121T013213071208-pinned-point-program at base fe05f648d4fb181edc102d6904ecc3ed7fa2fbeb and head 4b2054acf8a2b7c1c57480179ab36898ec77a24c; stored a parsed review record scoring all six dimensions (goal_fidelity 18, evidence 16, scope_discipline 15, durability 11, fit 17, reuse 20, total 97) with 2 non-blocking findings and 0 added failures, at review-records/r-20261121T013213071208-pinned-point-program.json and its .at-4b2054acf8a2b7c1c57480179ab36898ec77a24c.json copy.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261121T013213071208-pinned-point-program" data-who="reckon-build" data-when="2026-11-21T11:09:49Z">
+    <div class="r-comment-body"><p>Added the pinned-cache measurement entry point and recorded, from coordinator job 1334715, that each of the four point-program arms loads from the pinned cache with one hit and no miss in 26.16-27.49 s at 2.53-2.60 GiB peak host memory, that the 500-cell coarse-tie census read passes against those entries with an empty operand store in 308.35 s (step wall 318 s) while recording 131 fixture-compile misses at the driver&#x27;s 1,000,000 budget, and that the same loads against an empty cache record a miss at a zero budget and make the receipt check fail. An earlier set of runs with the fence environment removed is not cited.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261027T105213580367-review-of-compile-pass-profile-56097c60b0a9-figure" data-who="reckon-build" data-when="2026-10-27T11:08:08.882Z">
     <div class="r-comment-body"><p>Figure review of the point-jet time-per-pass figure is parsed with all six rubric items: legibility, data_ink, decoration, contrast and label_collision pass, table_form carries the one non-blocking defect; four non-blocking findings are recorded and none blocks — the right panel's three bars sum to 99.235 s against the 96.116 s compile wall its axis names, aggregate passes are drawn identically to single passes, control figures sit in prose, and the blue/grey key lives only in the caption.</p></div>

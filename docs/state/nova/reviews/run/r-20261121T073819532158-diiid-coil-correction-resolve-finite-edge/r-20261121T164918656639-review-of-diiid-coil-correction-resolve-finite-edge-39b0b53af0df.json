@@ -19,6 +19,11 @@
       "kind": "exempted",
       "reason": "The build-seam control that counts ran as its own allocation (job 1335481) and the record quotes the adapter's own refusal naming F1A; only the in-cohort repeat of that control was satisfied by an unrelated missing receipt",
       "recorded_at": "2026-11-21T20:19:44.249522+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Prototype receipt hook; every call site passes the argument by keyword and the run's records were written",
+      "recorded_at": "2026-11-21T20:19:52.679700+00:00"
     }
   },
   "findings": [

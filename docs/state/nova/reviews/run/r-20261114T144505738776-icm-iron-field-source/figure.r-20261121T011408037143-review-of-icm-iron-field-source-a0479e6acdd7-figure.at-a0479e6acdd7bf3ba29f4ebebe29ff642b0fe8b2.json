@@ -19,6 +19,13 @@
     "blocking": 1,
     "non_blocking": 2
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-icm-iron-field-source-a0479e6acdd7",
+      "recorded_at": "2026-11-21T07:51:52.886386+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/west-stray-field/west-62751-iron-stray-field.png",

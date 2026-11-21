@@ -65,6 +65,13 @@
       "head_only_ids": []
     }
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-edge-term-tangent-rows-8978420fb1dd",
+      "recorded_at": "2026-11-21T22:09:32.669800+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/biot/test_edge_term_tangents.py",

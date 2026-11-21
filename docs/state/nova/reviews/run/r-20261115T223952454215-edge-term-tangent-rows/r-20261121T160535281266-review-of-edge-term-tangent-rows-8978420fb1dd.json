@@ -1,0 +1,146 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": [
+    {
+      "conditions_for_failure": "The edge_terms primal-bits assertion reddens if _edge_terms_tangent's returned value half departs from _Edge(vertex).terms + vertex.arsinh_terms() as the test builds it, and the tangent assertion at :328 reddens if the hand tangent departs from jax.jvp of the present primal by more than 1e-9 normwise on any of the 10,000 samples.",
+      "independence": "The primal side is rebuilt by the test from present-module constructors and the tangent side comes from _edge_terms_tangent, so the sides are distinct code paths; the frozen pin no longer participates in this row, so it cannot catch drift shared by both present paths.",
+      "limit": "No absolute reference remains for the edge_terms primal: _near_edge_reference_rows (tests/biot/test_edge_term_tangents.py:403) runs the 50-digit probe over second_residual only.",
+      "location": "tests/biot/test_edge_term_tangents.py:183-197"
+    },
+    {
+      "conditions_for_failure": "test_truncated_tangent_fails_identity[edge_terms] reddens when the truncated product rule stops moving the tangent, i.e. when the error falls to or below SCAN_TOLERANCE.",
+      "independence": "The expected side is jax.jvp of the primal and the mutated side is the hand tangent under a replaced _product_tangent, so it does not compare a value against what the test supplied.",
+      "limit": "It measures only that truncation moves the result by more than 1e-9; it says nothing about the untruncated value beyond the identity row.",
+      "location": "tests/biot/test_edge_term_tangents.py:335"
+    }
+  ],
+  "call_site_note": "No production runtime code can reach the landed change: the diff is confined to tests/biot, scripts/prototypes and docs/evidence, and no module under nova/ changed. The code the rows exercise is nova/biot/polygonanalytic.py:_edge_terms_tangent, which the node neither imports nor edits.",
+  "call_sites": [],
+  "completed_at": "2026-11-21T16:21:57.172Z",
+  "dispatched_at": "2026-11-21T16:21:46Z",
+  "failure_id_comparison": {
+    "cpu_suite_pair": {
+      "after": {
+        "completed": true,
+        "failure_count": 15,
+        "job": "1334311",
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T223952454215-edge-term-tangent-rows/omp-home/.cache/nova-kernel-compile-barrier/edge-term-tangent-rows/after-arm3-1334311.log",
+        "observed_summary": "15 failed, 33 passed in 9095.39s (2:31:35), AFTER_EXIT=1",
+        "revision": "a214f4698c27e99c629f78ec56a60f1fd9c62714"
+      },
+      "base_only_ids": [
+        "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[second_residual]"
+      ],
+      "baseline": {
+        "completed": true,
+        "failure_count": 16,
+        "job": "1334227",
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T223952454215-edge-term-tangent-rows/omp-home/.cache/nova-kernel-compile-barrier/edge-term-tangent-rows/base-arm2-1334227.log",
+        "observed_summary": "16 failed, 32 passed in 9911.97s (2:45:11), BASE_EXIT=1",
+        "revision": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c"
+      },
+      "head_only_ids": []
+    },
+    "h200_suite_pair": {
+      "after": {
+        "completed": true,
+        "failure_count": 9,
+        "job": "1334717",
+        "log_path": "/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/edge-term-tangent-rows/coordinator/job-1334717.log",
+        "observed_summary": "9 failed, 39 passed in 4240.39s (1:10:40), EXIT=1",
+        "revision": "d6cf0cd7db9ebbb7019efa7001a91756703d3fb2"
+      },
+      "base_only_ids": [
+        "tests/biot/test_edge_term_tangents.py::test_truncated_tangent_fails_identity[edge_terms]"
+      ],
+      "baseline": {
+        "completed": true,
+        "failure_count": 10,
+        "job": "1335151",
+        "log_path": "/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/edge-term-tangent-rows/coordinator/base-job-1335151.log",
+        "observed_summary": "10 failed, 38 passed in 4238.05s (1:10:38), EXIT=1",
+        "revision": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c"
+      },
+      "head_only_ids": []
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/biot/test_edge_term_tangents.py",
+      "line": "328",
+      "severity": "blocking",
+      "text": "blocking: test_tangent_matches_base_jvp[edge_terms] is landed red. H200 job 1334717 at d6cf0cd7d prints IDENTITY edge_terms tangent_max_relative=1.588e-09 bound=1e-09 covered_fraction=0.9999 and the P100 arm reproduces it, while the node goal and done_when clause (2) require all four rows to pass with every tolerance unchanged; the node's own fragment concedes it at docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:104."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html",
+      "line": "91",
+      "severity": "non-blocking",
+      "text": "non-blocking: the eight compile-bound rows failed on pytest's default 300 s ceiling (pyproject.toml:284 timeout = 300) at both arms, while done_when clause (1) names a per-test timeout of 1,800 s; those rows therefore carry no compile ratio at either arm and the node's report of them is an absence, not a measurement."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html",
+      "line": "162",
+      "severity": "non-blocking",
+      "text": "non-blocking: the claim that the file's 50-digit _EDGE_REFERENCE_PROBE still checks the edge_terms primal independently is unsupported: _near_edge_reference_rows (tests/biot/test_edge_term_tangents.py:403) calls _identity(\"second_residual\"), so after the re-pin the edge_terms primal bits have no absolute reference and a shared drift in terms and arsinh_terms would pass."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T223952454215-edge-term-tangent-rows/manifest.md",
+      "line": "78",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest's after_suite records revision d6cf0cd7db9ebbb7019efa7001a91756703d3fb2, but the cited log after-arm3-1334311.log opens with AFTER_REVISION=a214f4698c27e99c629f78ec56a60f1fd9c62714 and the fragment (line 227) states a214f4698; the field misreports the revision the arm ran at."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T223952454215-edge-term-tangent-rows/manifest.md",
+      "line": "28",
+      "severity": "non-blocking",
+      "text": "non-blocking: done_when clause (3) also requires that the lowered StableHLO size of production_point_batch at 132 does not rise, and neither the manifest's remaining section nor the evidence fragment records any measurement of it, so that clause is unaddressed rather than satisfied."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read the ten node commits against base 999c9d5fe: 14 new modules under scripts/prototypes/edge_term_tangent_rows, the edge_terms re-pin at tests/biot/test_edge_term_tangents.py:183-197, and a 264-line evidence fragment; no kernel change and no tolerance was touched.",
+    "done_when": "Read the s6 done_when; clause (1) is answered by the per-intermediate attribution in the fragment and clause (3)'s failure-id half is satisfied, but clause (2) is unmet at tests/biot/test_edge_term_tangents.py:328, the arms missed the named 1,800 s per-test timeout, and clause (3)'s lowered-size half is unmeasured.",
+    "goal": "The dispatch node record's goal is that the four failing rows of tests/biot/test_edge_term_tangents.py pass on the H200 with every tolerance unchanged; at head 8978420fb three pass and test_tangent_matches_base_jvp[edge_terms] remains red at 1.588e-09 against 1e-09 in coordinator/job-1334717.log.",
+    "manifest": "Read manifest.md: it reports head d6cf0cd7d at 9 failed/39 passed and base 999c9d5fe at 10 failed/38 passed with both log paths and concedes the remaining 1.588e-09 row, but misstates the after_suite revision.",
+    "write_paths": "Read dispatch-detail.json node.write_paths; every path in the ten node commits lies inside nova/biot/polygonanalytic.py, tests/biot, scripts/prototypes/edge_term_tangent_rows, the evidence fragment and the figures directory."
+  },
+  "justifications": {
+    "durability": "The truncation control at tests/biot/test_edge_term_tangents.py:335 genuinely reddens on a truncation-blind product rule, but the re-pin at :183-197 leaves edge_terms with no pinned or absolute reference for its primal bits.",
+    "evidence": "The identity rows are measured and their logs recorded (coordinator/job-1334717.log, base-job-1335151.log), but the arms ran at the 300 s default rather than the named 1,800 s, the lowered-size clause is measured nowhere, and the manifest's after_suite revision contradicts its own log header.",
+    "fit": "The re-pin comment and construction style at tests/biot/test_edge_term_tangents.py:183-197 follow the file, and the prototype directory follows the one-directory-per-investigation pattern of the 172 existing scripts/prototypes entries.",
+    "goal_fidelity": "tests/biot/test_edge_term_tangents.py:328 still fails at 1.588e-09 against the 1e-09 bound on H200 job 1334717 and on the P100 arm, so three of the four target rows pass and the goal's four-pass deliverable is not met.",
+    "reuse": "Searched scripts/prototypes (172 directories) and tests/biot for an owner of tangent-intermediate attribution and 10,000-sample identity comparison; the added modules import tests/biot/test_edge_term_tangents.py and tangent_identity.load_base_module rather than forking that harness.",
+    "scope_discipline": "Every path in the ten node commits (74da47c64 \u2026 8978420fb) is inside the declared write paths, and nova/biot/polygonanalytic.py is untouched because no kernel defect was found."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the dispatch node record's goal is that the four failing rows of tests/biot/test_edge_term_tangents.py pass on the H200 with every tolerance unchanged; at head 8978420fb three pass and test_tangent_matches_base_jvp[edge_terms] remains red at 1.588e-09 against 1e-09 on H200 job 1334717.\nVERDICT done_when: clause (1)'s per-intermediate attribution is answered in docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html, but clause (2) is unmet at tests/biot/test_edge_term_tangents.py:328, the arms used pytest's 300 s default instead of the named 1,800 s, and clause (3)'s lowered StableHLO size of production_point_batch at 132 is measured nowhere.\nVERDICT write_paths: read dispatch-detail.json node.write_paths; all ten node commits (74da47c64 \u2026 8978420fb) stay inside nova/biot/polygonanalytic.py, tests/biot, scripts/prototypes/edge_term_tangent_rows, the evidence fragment and the figures directory, while the 174-path delivered diff is the merge of main at ea9029961.\nVERDICT manifest: read manifest.md; it reports head d6cf0cd7d at 9 failed/39 passed and base 999c9d5fe at 10 failed/38 passed with both log paths and concedes the remaining row, but its after_suite revision contradicts the cited after-arm3-1334311.log header.\nVERDICT diff: read the ten node commits against base 999c9d5fe: 14 new modules under scripts/prototypes/edge_term_tangent_rows, the edge_terms re-pin at tests/biot/test_edge_term_tangents.py:183-197, and a 264-line evidence fragment; no kernel change and no tolerance change.\nCALL_SITES: none\nSCORE goal_fidelity: 8\nJUSTIFICATION goal_fidelity: tests/biot/test_edge_term_tangents.py:328 still fails at 1.588e-09 against the 1e-09 bound on H200 job 1334717 and the P100 arm, so the goal's four-pass deliverable is not met.\nSCORE evidence: 11\nJUSTIFICATION evidence: the identity rows are measured and logged, but the arms ran at the 300 s default rather than the named 1,800 s, the lowered-size clause is unmeasured, and the manifest's after_suite revision contradicts its own log header.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the ten node commits is inside the declared write paths, and nova/biot/polygonanalytic.py is untouched because no kernel defect was found.\nSCORE durability: 12\nJUSTIFICATION durability: the truncation control at tests/biot/test_edge_term_tangents.py:335 genuinely reddens on a truncation-blind product rule, but the re-pin at :183-197 leaves edge_terms with no independent absolute reference for its primal bits.\nSCORE fit: 17\nJUSTIFICATION fit: the re-pin comment and construction style at tests/biot/test_edge_term_tangents.py:183-197 follow the file, and the prototype directory follows the one-directory-per-investigation pattern of scripts/prototypes.\nSCORE reuse: 18\nJUSTIFICATION reuse: the added prototype modules import tests/biot/test_edge_term_tangents.py and tangent_identity.load_base_module instead of forking the identity harness, which the search over scripts/prototypes and tests/biot found no other owner for.\nFINDING tests/biot/test_edge_term_tangents.py:328 blocking: test_tangent_matches_base_jvp[edge_terms] is landed red at 1.588e-09 against the 1e-09 bound on H200 job 1334717 and on the P100 arm, so the node's four-pass goal is unmet.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:91 non-blocking: the eight compile-bound rows failed on pytest's default 300 s ceiling at both arms where done_when names 1,800 s, so they carry no compile ratio.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:162 non-blocking: the 50-digit probe is claimed to check the edge_terms primal but _near_edge_reference_rows runs over second_residual, leaving no absolute reference after the re-pin.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T223952454215-edge-term-tangent-rows/manifest.md:78 non-blocking: after_suite states revision d6cf0cd7d while its cited log header reads AFTER_REVISION=a214f4698.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T223952454215-edge-term-tangent-rows/manifest.md:28 non-blocking: the lowered StableHLO size of production_point_batch at 132 required by done_when clause (3) is measured nowhere.\n",
+  "review_method": "Read-only review of the node goal and done_when, the dispatch write paths, the run manifest, the ten node commits against base 999c9d5fe, and the recorded gate logs under the run's omp-home cache and the coordinator cache, plus the landed test/reference change. No suite rerun and no mutation experiment.",
+  "review_run_id": "r-20261121T160535281266-review-of-edge-term-tangent-rows-8978420fb1dd",
+  "reviewed_base_sha": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+  "reviewed_head_sha": "8978420fb1dd3c0902254b2bfe4a2e54b85f6f7d",
+  "reviewed_run_id": "r-20261115T223952454215-edge-term-tangent-rows",
+  "scores": {
+    "durability": 12,
+    "evidence": 11,
+    "fit": 17,
+    "goal_fidelity": 8,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "source_commits": [
+    "74da47c64",
+    "3675b6939",
+    "df0c53a10",
+    "a214f4698",
+    "204ea3185",
+    "f8015d60c",
+    "01b8237a0",
+    "d6cf0cd7d",
+    "71566f2aa",
+    "8978420fb"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T16:36:45.475459+00:00",
+  "total": 85
+}

@@ -1,0 +1,98 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T20:54:28.797Z",
+  "dispatched_at": "2026-11-20T20:28:44Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:66",
+      "id": "done_when-1",
+      "reason": "as written the section cannot be closed on clause (3) and a reviewer cannot tell whether the pinned-cache path was demonstrated or only the job-local one.",
+      "text": "node (d) says the program \"is added to the programs the pre-warm compiles into the pinned cache, and clauses (1) to (3) are then measured on the H200 against that cache\" and closes with \"Clauses (1) to (3) below are measured by node (d) on the cached program\", but the same node records that \"the run that produced it measured from a job-local cache\"; done-when (1) and (3) both require \"the pinned pre-warm cache\", and node (e) closes only clause (1)'s hit criterion, so clause (3)'s 500-cell census run on the pinned cache has no node that produces it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:67",
+      "id": "done_when-2",
+      "reason": "an obligation with no node is never executed, so the outcomes the plan promises to report are never produced and the section can close without them.",
+      "text": "\"The node runs them with that base's receipts and its own head receipts from its paired profile job\" names no node, and the only node that ever held a paired profile job, node (c), records that \"no paired cold profile was run\" and had its control waived, so the two receipt-driven budget tests have no owner and appear in no done-when",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "900ef402f2a7129ac33038e9f5536b9729feb7ce",
+  "plan_fingerprint": "e3830887fc7533379d1a5265448e2175528b879bd25cc12419e924dc04daa2fd",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 124,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "900ef402f2a7129ac33038e9f5536b9729feb7ce",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Node (e) now also runs the 500-cell coarse-tie census test against the pinned cache with an empty operand store, closing clause (3) on the pinned path; the text says node (d) measured from a job-local cache and that clause (2) stands on its record.",
+      "reason": "",
+      "when": "2026-11-21T01:02:12.478133+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "900ef402f2a7129ac33038e9f5536b9729feb7ce",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The receipt-driven budget tests are stated as owned by no node: no paired cold profile runs after the 2026-11-18 ruling, so they stay enabled, skip without receipts and are in no done-when.",
+      "reason": "",
+      "when": "2026-11-21T01:02:35.492875+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "900ef402f2a7129ac33038e9f5536b9729feb7ce",
+      "commit_basis": "edit",
+      "note": "Node (e) now also runs the 500-cell coarse-tie census test against the pinned cache with an empty operand store, closing clause (3) on the pinned path; the text says node (d) measured from a job-local cache and that clause (2) stands on its record.",
+      "reason": "",
+      "when": "2026-11-21T01:02:12.478133+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "900ef402f2a7129ac33038e9f5536b9729feb7ce",
+      "commit_basis": "edit",
+      "note": "The receipt-driven budget tests are stated as owned by no node: no paired cold profile runs after the 2026-11-18 ruling, so they stay enabled, skip without receipts and are in no done-when.",
+      "reason": "",
+      "when": "2026-11-21T01:02:35.492875+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261120T202734758677-plan-review-of-kernel-compile-barrier.json",
+  "review_run_id": "r-20261120T202734758677-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "a966745119650caf22e26da684b47b5d22872ba7",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `nova/equilibrium/fixed_points.py:323` (`_source_jets`), `:546` (`maintain_rows`, call at `:611`), `scripts/prototypes/read_route/jets.py:262`, `scripts/prototypes/fixed_points/solve.py:121`, `scripts/prototypes/kernel_compile_census/row.py:115`, and the cited test files all resolve in the tree.",
+    "done_when": "two findings \u2014 node (d) claims clauses (1) and (3) are measured against the pinned cache while its own run measured from a job-local cache, and the paragraph about `tests/biot/test_production_row_compile.py` assigns its run to an unnamed \"node\".",
+    "evidence_paths": "pass \u2014 the record fragments (`cached-point-program-remeasure.html`, `point-program-attribution.html`, `one-traced-body.html`, `pinned-point-program.html`) and receipt directories under `~/.cache/nova-kernel-compile-barrier/` are durable and exist where the node has run.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach symbols or comments in the section, and the ruled-out levers are described by mechanism.",
+    "reasoning": "pass \u2014 the stated root cause (the size of the one point program, not the node count) matches node (b)'s attribution, node (c)'s residual 32.2 s is reachable from the stub arms cited, and the section states no formula a node must implement.",
+    "single_goal": "pass \u2014 the remaining work in s3 is one deliverable, the one pre-warm and lane run in node (e); the shared-root migration was already moved out of this section.",
+    "wiring": "pass \u2014 s3's declared dependencies (`kernel-compile-barrier#s2`, `kernel-compile-barrier#s7`) are both satisfied, \u00a77 having landed, and node (e)'s wait on \u00a77 is stated and correct."
+  },
+  "section_digests": {
+    "_document": "4dd0bd0854bd8e84e354b6700ea2df0cf8c65cf370f4b05b8a7ed399ad4e1119",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "51f79c3c1f71bd1f19a88faa821c8c63dc187b9ed9f6bbbd75d3c61b68d190ee",
+    "s4": "4b8bf6686dd7741ef6ed148a144b3f512eff3f8ad043c934f568a9feb50f76f8",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea",
+    "s7": "6dfe0a01ad8470c02d38d7e3fa33263ff325b87943f260375c61e09e0cfe5db8"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T20:54:35.708109+00:00",
+  "total": null
+}

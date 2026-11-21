@@ -16,8 +16,8 @@ sys.path.insert(0, str(ROOT))
 from scripts.prototypes.diiid_xpoint_profile_extent import render  # noqa: E402
 
 render.ARMS = ("base", "corrected")
-render.NAMES = {"base": "measured currents", "corrected": "corrected currents"}
-ROWS = ((137, "diverted"), (146, "diverted"))
+render.NAMES = {"base": "measured currents", "corrected": "fitted currents"}
+ROWS = ((137, "diverted"), (179, "limited"), (146, "diverted"), (146, "limited"))
 
 
 def main():

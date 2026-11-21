@@ -1,0 +1,186 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "assertion": "float(finite(one)) == EDGE_VALUE",
+      "fails_if": "the exterior bridge reaches anything other than the supplied target at psi_N=1; reinstating the zero end cap reddens it, as logs/negative-control.log shows.",
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": 42,
+      "test": "test_finite_edge_returns_the_supplied_value_at_the_boundary"
+    },
+    {
+      "assertion": "float(zero(1.0)) == 0.0",
+      "fails_if": "the default form stops reaching zero one edge interval past the last knot, i.e. SampledFluxFunction(edge_value=None) begins bridging to a supplied value.",
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": 52,
+      "test": "test_zero_edge_form_still_returns_zero_at_the_boundary"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(finite(knots), INTERIOR_VALUES)",
+      "fails_if": "the finite-edge construction perturbs the sampled knots or the interior interpolation; INTERIOR_VALUES is an independent constant, not a value read back from the object.",
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": 62,
+      "test": "test_finite_edge_keeps_the_interior_samples"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(left, right, rtol=1e-5)",
+      "fails_if": "the exterior bridge does not carry the last sample's slope at the knot, so a C0-only bridge reddens it.",
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": 88,
+      "test": "test_finite_edge_is_continuous_across_the_last_knot"
+    },
+    {
+      "assertion": "np.testing.assert_array_equal(observed, [EDGE_VALUE, 0.0058420389744635714])",
+      "fails_if": "the vmap leaf layout drops or transposes per-member targets; the negative control reddens it with zeros.",
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": 97,
+      "test": "test_finite_edge_carries_one_value_per_batched_member"
+    },
+    {
+      "assertion": "pytest.raises(ValueError, match='inside psi_norm=1')",
+      "fails_if": "the construction guard at nova/equilibrium/solve_request.py:204-207 is removed or widened.",
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": 105,
+      "test": "test_finite_edge_refuses_a_table_that_reaches_the_boundary"
+    },
+    {
+      "assertion": "np.testing.assert_allclose(p_prime, record['p_prime'], rtol=1e-10)",
+      "fails_if": "_profile_edge_values selects a different shell or the extractor changes; the expectation is the committed extraction.json, independent of the call's return.",
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": 117,
+      "test": "test_builder_reads_the_boundary_shell_the_record_commits"
+    },
+    {
+      "assertion": "float(profile(1.0)) == p_prime",
+      "fails_if": "only the finite-edge evaluation is removed; p_prime is the same variable the test passed into SampledFluxFunction two lines above, so the assertion is not independent of its input and it does not exercise _build_profile's wiring.",
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": 121,
+      "test": "test_builder_reads_the_boundary_shell_the_record_commits"
+    }
+  ],
+  "assertion_independence": "One literal input-echo assertion identified at tests/equilibrium/test_finite_edge_flux_function.py:121, where the expected value is the p_prime the test constructed the profile with; the other six assertions compare against independent constants, the committed extraction.json, or the required refusal.",
+  "call_site_count": 3,
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:1532",
+    "benchmarks/strict_exit_incidence.py:432",
+    "benchmarks/mast_centroid_solve_panels.py:778"
+  ],
+  "completed_at": "2026-11-19T11:22:03.190Z",
+  "dispatched_at": "2026-11-19T11:21:46Z",
+  "evidence_limits": [
+    "Suite delta is read from the reviewed run's recorded arms: baseline 2 failures, after 0, so added_failure_count 0. The head arm's command differs from the base arm's, so the delta compares two commands, not one.",
+    "No suite or mutation was re-run during this bounded read-only review; the scoped gate log and the manifest's arms record are read as written.",
+    "The builder-vs-extraction 1e-10 agreement is computed by the same _profile_edge_values helper on both sides, so it shows reproducibility of the committed receipt, not agreement with an independent extraction."
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-finite-edge-flux",
+      "recorded_at": "2026-11-19T12:01:26.758398+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The coordinator corrects the record's negative-control count and the P102-only assertion wording against logs/negative-control.log after landing",
+      "recorded_at": "2026-11-19T12:01:34.447991+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The builder's edge prescription is checked against the committed psi_N=1 extraction to 4e-16 relative in the record and exercised by all four reruns; a builder-level regression test is added with the pinned re-registration that touches the same builder",
+      "recorded_at": "2026-11-19T12:01:42.066843+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_finite_edge_flux/summarize.py",
+      "line": "30",
+      "severity": "blocking",
+      "text": "blocking: the module carries `except TypeError, ValueError:`, Python 2 syntax that py_compile rejects at head, so the committed summariser cannot regenerate the table.json receipt the record cites, and commit 04c80ebaf's message claims this parse fix while its diff does not touch the line."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-flux.html",
+      "line": "21",
+      "severity": "non-blocking",
+      "text": "non-blocking: the record states \"three of the seven fail\" under the declared negative control and that the test asserts 1e-10 agreement \"for all four rows\", while logs/negative-control.log ends \"2 failed, 4 passed, 1 skipped\" and tests/equilibrium/test_finite_edge_flux_function.py:114 checks only P102."
+    },
+    {
+      "file": "tests/equilibrium/test_finite_edge_flux_function.py",
+      "line": "121",
+      "severity": "non-blocking",
+      "text": "non-blocking: the final assertion compares the profile's boundary against the same p_prime the test passed into its own constructor and never calls bench._build_profile, so reverting edge_value=edge_p_prime at benchmarks/diiid_forward_gs_match.py:1532 leaves every added test green."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "answered - three production call sites verified.",
+    "diff": "answered - ten commits read; summarize.py:30 does not compile at head.",
+    "done_when": "answered - tests/equilibrium/test_finite_edge_flux_function.py:33-121 plus suite-arms/after-arm-all_debug.log (7 passed) and logs/negative-control.log (2 failed).",
+    "goal": "answered - nova/equilibrium/solve_request.py:87-137 adds the finite-edge bridge and benchmarks/diiid_forward_gs_match.py:1532-1533 passes the extracted boundary value.",
+    "manifest": "answered - records the gate at 7 passed and both arms; its negative_control_note overstates the failing count.",
+    "write_paths": "answered - all 21 delivered paths lie inside the six declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal at prompt.txt:38 asks for a finite-edge sampled flux-function form returning a supplied boundary value at psi_N=1, used by the DIII-D builder; nova/equilibrium/solve_request.py:87-137 adds the finite-edge Hermite bridge and benchmarks/diiid_forward_gs_match.py:1532-1533 hands it _profile_edge_values, so the deliverable is present.\nVERDICT done_when: The plan's done-when (docs/plans/diiid-vertical-force-balance.html:121) requires a committed test, a negative control, and four-row boundary agreement; tests/equilibrium/test_finite_edge_flux_function.py:33-121 supplies the tests, the manifest records 7 passed in suite-arms/after-arm-all_debug.log, and logs/negative-control.log reddens two of them, though the record claims three.\nVERDICT write_paths: Read the six declared paths; every one of the 21 delivered paths (git diff --name-only d0947cef..2ffdb3b1f) lies inside them, no path outside the declaration is touched.\nVERDICT manifest: Read the run manifest; it records the scoped gate at 7 passed and both arms with baseline_suite 2 failures and after_suite 0, but its negative_control_note says three tests fail where logs/negative-control.log ends \"2 failed, 4 passed, 1 skipped\".\nVERDICT diff: Read the ten commits d46772974..2ffdb3b1f; the source change, benchmark wiring, tests and receipts are coherent, but scripts/prototypes/diiid_finite_edge_flux/summarize.py:30 carries Python 2 exception syntax and the module does not compile at head.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:1532, benchmarks/strict_exit_incidence.py:432, benchmarks/mast_centroid_solve_panels.py:778\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/diiid_forward_gs_match.py:1532-1533 prescribes edge_p_prime and edge_ff_prime from nova.equilibrium.map_extraction's boundary shell, so the builder's psi_N=1 value is EFIT's own rather than the last interior knot held outward.\nSCORE evidence: 14\nJUSTIFICATION evidence: The gate log suite-arms/after-arm-all_debug.log records \"7 passed\" and logs/negative-control.log records \"2 failed, 4 passed, 1 skipped\", but the four-row 1e-10 agreement rests on table.json's boundary_agreement computed by the same helper the extraction used, and the record's frame :102 cross-check against the review reading is absent.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in git diff d0947cef..2ffdb3b1f is inside the six declared write paths, and scripts/prototypes/diiid_finite_edge_flux/ and the figure directory carry only this node's drivers and receipts.\nSCORE durability: 13\nJUSTIFICATION durability: tests/equilibrium/test_finite_edge_flux_function.py:35-89 redden when the finite-edge bridge is removed (logs/negative-control.log fails the boundary and batched cases), but :120-121 constructs its own profile from the value it then asserts and no test exercises the builder's edge_value wiring at benchmarks/diiid_forward_gs_match.py:1532.\nSCORE fit: 16\nJUSTIFICATION fit: The new evaluator sits beside _evaluate_sampled_flux_function in nova/equilibrium/solve_request.py:47-90 with matching dataclass and pytree idioms, though summarize.py:30 is Python 2 syntax the surrounding code does not use.\nSCORE reuse: 18\nJUSTIFICATION reuse: The finite-edge evaluator extends SampledFluxFunction, the module's existing owner of the sampled-table representation; the nearest other mechanism, nova/equilibrium/flux_surface_extraction.py:112 _surface_interpolation, is a plain jnp.interp right-limit and does not carry a slope-continuous bridge.\nFINDING scripts/prototypes/diiid_finite_edge_flux/summarize.py:30 blocking: the module carries `except TypeError, ValueError:`, Python 2 syntax that py_compile rejects at head, so the committed summariser cannot regenerate the table.json receipt the record cites, and commit 04c80ebaf's message claims this parse fix while its diff does not touch the line.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-flux.html:21 non-blocking: the record states \"three of the seven fail\" under the declared negative control and that the test asserts 1e-10 agreement \"for all four rows\", while logs/negative-control.log ends \"2 failed, 4 passed, 1 skipped\" and tests/equilibrium/test_finite_edge_flux_function.py:114 checks only P102.\nFINDING tests/equilibrium/test_finite_edge_flux_function.py:121 non-blocking: the final assertion compares the profile's boundary against the same p_prime the test passed into its own constructor and never calls bench._build_profile, so reverting edge_value=edge_p_prime at benchmarks/diiid_forward_gs_match.py:1532 leaves every added test green.\n",
+  "reuse_note": "searched nova/equilibrium for sampled/flux-function boundary mechanisms by capability (edge_value, Hermite, quintic, boundary_value) and opened solve_request.py and flux_surface_extraction.py.",
+  "reuse_search": {
+    "capabilities": [
+      "sampled-table evaluation with a supplied boundary value",
+      "slope-continuous exterior bridge above the last knot"
+    ],
+    "judgement": "The addition extends the existing SampledFluxFunction owner in solve_request.py; flux_surface_extraction._surface_interpolation is a plain jnp.interp right-limit without a slope-preserving bridge, so no capability is forked.",
+    "owners_opened": [
+      "nova/equilibrium/solve_request.py:47-137",
+      "nova/equilibrium/flux_surface_extraction.py:112-119"
+    ]
+  },
+  "review_run_id": "r-20261119T104441722179-review-of-diiid-finite-edge-flux-2ffdb3b1fb99",
+  "reviewed_base_sha": "d0947cef28a8b539e0d4de9ed11eeebd29c84021",
+  "reviewed_head_sha": "2ffdb3b1fb9979aa098aa49b11629a4d2df14bb2",
+  "reviewed_run_id": "r-20261118T203342822348-diiid-finite-edge-flux",
+  "reviewed_worker_commits": [
+    "d46772974",
+    "a51d4d83e",
+    "4b617496a",
+    "4a8a2c233",
+    "3ce21f8e2",
+    "f3d138a28",
+    "04c80ebaf",
+    "c41f580c5",
+    "7823f636f",
+    "2ffdb3b1f"
+  ],
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_finite_edge_flux_function.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T203342822348-diiid-finite-edge-flux/suite-arms/after-arm-all_debug.log",
+      "revision": "2ffdb3b1fb9979aa098aa49b11629a4d2df14bb2"
+    },
+    "baseline_suite": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_finite_edge_booking.py tests/test_sampled_profile_core_hold.py tests/test_sampled_flux_batching.py tests/test_batched_operator_boundary.py",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 2,
+      "failure_ids": [
+        "tests/test_sampled_flux_batching.py::test_dynamic_edge_control_reproduces_batched_difference",
+        "tests/test_batched_operator_boundary.py::test_equivalent_diiid_bank_operators_stack_into_one_program"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T203342822348-diiid-finite-edge-flux/suite-arms/base-suite.log",
+      "revision": "d0947cef28a8b539e0d4de9ed11eeebd29c84021"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T11:32:45.933453+00:00",
+  "total": 100
+}

@@ -1,0 +1,110 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate arms, not from the worker's account: baseline_suite names revision 3a9238f0a626bec0783b4f0da32922dd0c390f4b and logs/suite-base2.log ends '7 passed, 6 errors in 318.84s' with EXIT=1, the six ids being tests/test_iter_bank.py::test_iter_nodal_jets_match_analytic_map[0..2] and tests/test_iter_bank.py::test_coil_jets_match_analytic_map[0..2], all setup timeouts at the 300 s default. after_suite names 06cb6262668b88719e53160f6addda4742fdb84e and logs/gate-final.log ends '21 passed in 625.12s' with EXIT=0. No id fails at head that does not fail at base, so the added-failure set is empty.",
+  "call_site_count": 0,
+  "call_site_note": "none - git grep at 06cb6262668b finds no runtime importer of scripts/prototypes/iter_bank/derive_rows.py: the only references are docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html and tests/test_iter_bank.py:347, so no code under nova/ revives the landed module; zero_entries and zero_entry_report are reached only from that module's own main().",
+  "call_sites": [],
+  "completed_at": "2026-11-19T08:09:01.264Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-iter-bank-recertify-06cb6262668b",
+      "recorded_at": "2026-11-19T09:42:15.586549+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-19T08:08:21Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "non-blocking: the plan-commits meta was edited by this increment (a4806db5e appends 882c815ac and a4806db5e) and still names 15 of the node's 24 commits, omitting 0f6bfa23c, the commit that adds zero_entries, zero_entry_report and both new tests this fragment now evidences at :53-54, and omitting 5bad4f38b, which records the zero-entry suite arm; the same omission was raised at 31d8dbc71 and debe7c9b3 and is still unanswered."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "line": "75",
+      "severity": "non-blocking",
+      "text": "non-blocking: 'an explicitly named path collects all nineteen: the fourteen accuracy cases and five fast cases' is refuted by the row this diff adds at :81 (21 passed at 0f6bfa23c) and by the two derivation cases this increment adds to tests/test_iter_bank.py:422,437, so the file now carries seven fast cases; :83 repeats 'runs all nineteen'."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "line": "81",
+      "severity": "non-blocking",
+      "text": "non-blocking: the added row quotes '21 passed, 0 skipped in 603.71 s' while the log it cites, logs/suite-repair5.log, ends '21 passed in 603.61s (0:10:03)', so the recorded wall differs from its cited receipt by a transposition."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "line": "54",
+      "severity": "non-blocking",
+      "text": "non-blocking: 'the nearest-vertex distance is identical at every entry' is contradicted by receipts/zero-entries.json, where 8 of the 1,612 entries differ by up to 1.9669305956759864e-06 between distance_to_cell_boundary and distance_to_nearest_vertex (1,604 agree exactly); the same sentence says '1,607 of the 1,612 nodes', but 1,612 is an entry count and those entries sit on 1,020 of the receipt's 1,023 distinct nodes, so the word nodes is wrong in a sentence whose point is which node is evaluated against which cell."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/derive_rows.py",
+      "line": "234",
+      "severity": "non-blocking",
+      "text": "non-blocking: kernel_rows rebuilds the program the repository already owns at nova/equilibrium/fixed_points.py:524 (_row_program = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))), and _ZERO_KERNEL_RUNNER at :277 repeats the same program and the same batch-and-pad loop a second time in this file, so a change to the batching has three places to land."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/derive_rows.py",
+      "line": "333",
+      "severity": "non-blocking",
+      "text": "non-blocking: segment_distance re-implements the point-to-segment projection and clamp that nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances already owns, rather than wrapping it (the added function takes the minimum over the polygon's segments itself), so the repository now has two implementations of one geometric primitive."
+    },
+    {
+      "file": "tests/test_iter_bank.py",
+      "line": "437",
+      "severity": "non-blocking",
+      "text": "non-blocking: the case named 'ignore rows past the active count' cannot fail on any clamp it names, and zero_entries has no active-count parameter at all (derive_rows.py:202), so the clamp that actually keeps the 356 zero padding rows of the 2,048-row archive out of the 1,612 count, at derive_rows.py:355-357, is untested; dropping the [:active] slicing would inflate the count and no added assertion reddens."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/derive_rows.py",
+      "line": "376",
+      "severity": "non-blocking",
+      "text": "non-blocking: own_cell and node_belongs_to_this_cell are taken from the nearest cell centre, which is not the cell a node belongs to, and the geometry archive carries no node-to-cell map (vertices, vertex_count, sample_points, centre, wall, turns, owners, coil_* only), so the fragment's 'node 1321 (which owns cell 434)' and '1,607 ... evaluated against a cell that is not their own' rest on an approximation presented as ownership."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit over debe7c9b33a34bc814d476847e3d7fd64af29ed2..06cb6262668b88719e53160f6addda4742fdb84e: five commits touching exactly three paths, adding zero_entries/zero_entry_report/kernel runners to derive_rows.py (277 lines), two tests, and eight fragment lines.",
+    "done_when": "the done_when's three clauses are the bank accuracy, the live suite and the paired arms plus figure; the increment's gate is the live suite, recorded as after_suite at 06cb6262668b with 21 passed and EXIT=0 in logs/gate-final.log, against the base arm's 7 passed, 6 errors, EXIT=1 in logs/suite-base2.log.",
+    "goal": "the source node's goal (brief.md) is to rebuild the ITER bank on the repaired polygon kernel and re-certify its plasma-row second derivatives, and the increment this review covers (0f6bfa23c, 882c815ac, 5bad4f38b, a4806db5e, 06cb62626) answers the lead's zero-entry question that the goal's evidence paragraph raised; derive_rows.py:202-420 and :455-480 implement the attribution and the fragment at :53-54 reports it from receipts/zero-entries.json.",
+    "manifest": "the reviewed run's manifest reads status complete and records the head at 06cb6262668b, the suite arms (baseline_suite 3a9238f0a with 6 failure ids, after_suite 06cb62626 with 21 passed and EXIT=0), the controls log logs/controls3.log as its negative control, and the two accepted exceptions; its zero-entry claims are reproduced by receipts/zero-entries.json.",
+    "write_paths": "the declared paths are scripts/prototypes/iter_bank, tests/test_iter_bank.py, docs/figures/sub-millisecond-forward-path/iter-bank, docs/figures/sub-millisecond-forward-path/iter-bank-recertify and the fragment; the increment's three changed paths (scripts/prototypes/iter_bank/derive_rows.py, tests/test_iter_bank.py, docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html) are all inside them."
+  },
+  "justifications": {
+    "durability": "logs/controls2.log shows the DERIVATIVE-slice mutation reddening tests/test_iter_bank.py:422 ('assert 0 == 1'), so one added test is pinned by a reinstated regression, but tests/test_iter_bank.py:437 cannot fail on the unnamed-target count it names and the clamp at derive_rows.py:355-357 has no test.",
+    "evidence": "the gate result is recorded, not claimed: logs/gate-final.log ends '21 passed in 625.12s' with EXIT=0 at revision 06cb62626, and receipts/zero-entries.json drives the zero-entry claims are recomputed and match, with the fragment's :81 wall clock and :54 node count the two exceptions.",
+    "fit": "derive_rows.py:234-290 follows the module's argparse and plain-function style, but the runner is an embedded Python module in a string constant (_ZERO_KERNEL_RUNNER at :255) that duplicates :337-349, a shape no other function in the file uses.",
+    "goal_fidelity": "derive_rows.py:420 emits ZERO_SUMMARY with count 1612 and the receipt at receipts/zero-entries.json reproduces every number the fragment's new paragraphs at :53-54 quote, including base 3.079120140989685e-16, repaired 8.457795039488852e-06 and head-vs-repaired 2.5667713804607487e-15.",
+    "reuse": "derive_rows.py:234 and :277 rebuild nova/equilibrium/fixed_points.py:524 _row_program and derive_rows.py:333 re-implements nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances instead of extending or importing either owner.",
+    "scope_discipline": "every path in the increment (scripts/prototypes/iter_bank/derive_rows.py, tests/test_iter_bank.py, docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html) lies inside the declared write paths and no dependency, product source or unrelated module was touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal (brief.md) is to rebuild the ITER bank on the repaired polygon kernel and re-certify its plasma-row second derivatives; the increment reviewed (0f6bfa23c, 882c815ac, 5bad4f38b, a4806db5e, 06cb62626) answers the zero-entry question raised by the goal's own evidence, implemented at scripts/prototypes/iter_bank/derive_rows.py:202-420 and reported at docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:53-54.\nVERDICT done_when: the done_when's three clauses measure the bank, the live suite and the paired arms; the increment's gate is the live suite, recorded as after_suite at 06cb6262668b with 21 passed and EXIT=0 in logs/gate-final.log against the base arm's 7 passed, 6 errors, EXIT=1 in logs/suite-base2.log.\nVERDICT write_paths: the declared paths are scripts/prototypes/iter_bank, tests/test_iter_bank.py, docs/figures/sub-millisecond-forward-path/iter-bank, docs/figures/sub-millisecond-forward-path/iter-bank-recertify and the fragment; all three paths the increment changes lie inside them.\nVERDICT manifest: read; it records status complete, head 06cb6262668b, the two suite arms with their failure ids, logs/controls3.log as the negative control and the two accepted exceptions, and its zero-entry figures reproduce from receipts/zero-entries.json.\nVERDICT diff: read commit by commit over debe7c9b33a34bc814d476847e3d7fd64af29ed2..06cb6262668b88719e53160f6addda4742fdb84e; five commits touch three paths, adding zero_entries, zero_entry_report and two kernel runners at scripts/prototypes/iter_bank/derive_rows.py:202-420, two tests at tests/test_iter_bank.py:422-447, and eight lines of the fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: derive_rows.py:420 emits ZERO_SUMMARY with count 1612 and receipts/zero-entries.json reproduces every number the fragment quotes at :53-54, including 8.457795039488852e-06 and 2.5667713804607487e-15.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/gate-final.log ends '21 passed in 625.12s' with EXIT=0 at revision 06cb62626 and the zero-entry receipt reproduces, with the fragment's :81 wall clock and :54 node count the two exceptions.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the increment's three paths (scripts/prototypes/iter_bank/derive_rows.py, tests/test_iter_bank.py, docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html) are all inside the declared write paths and nothing outside them changed.\nSCORE durability: 14\nJUSTIFICATION durability: logs/controls2.log shows the DERIVATIVE-slice mutation reddening tests/test_iter_bank.py:422 ('assert 0 == 1'), but tests/test_iter_bank.py:437 cannot fail on the count it names and the clamp at derive_rows.py:355-357 is untested.\nSCORE fit: 15\nJUSTIFICATION fit: derive_rows.py:255 embeds a second Python module in a string constant that repeats :234-252, a shape the rest of the file's argparse and plain-function style does not use.\nSCORE reuse: 5\nJUSTIFICATION reuse: derive_rows.py:234 and :277 rebuild nova/equilibrium/fixed_points.py:524 _row_program, and derive_rows.py:333 duplicates nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:12 non-blocking: the plan-commits meta omits 0f6bfa23c, the commit that adds zero_entries and both new tests this fragment evidences at :53-54, and omits 5bad4f38b.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:75 non-blocking: 'collects all nineteen: the fourteen accuracy cases and five fast cases' is refuted by the row added at :81 (21 passed) and by the two cases added at tests/test_iter_bank.py:422,437; :83 repeats the stale count at :83.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:81 non-blocking: the row quotes 603.71 s while the log it cites, logs/suite-repair5.log, ends '21 passed in 603.61s'.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:54 non-blocking: 'the nearest-vertex distance is identical at every entry' is contradicted by receipts/zero-entries.json (8 entries differ by up to 1.9669305956759864e-06) and '1,607 of the 1,612 nodes' conflates 1,612 entries over 1,023 nodes.\nFINDING scripts/prototypes/iter_bank/derive_rows.py:234 non-blocking: kernel_rows rebuilds nova/equilibrium/fixed_points.py:524 _row_program, and _ZERO_KERNEL_RUNNER at :277 repeats the same program and batch loop a third time.\nFINDING scripts/prototypes/iter_bank/derive_rows.py:333 non-blocking: segment_distance re-implements nova/equilibrium/boundary_comparison.py:81 _point_to_segment_distances instead of wrapping it.\nFINDING tests/test_iter_bank.py:437 non-blocking: the case named 'ignore rows past the active count' cannot fail on the clamp at derive_rows.py:355-357, which is the only thing keeping the 356 zero padding rows out of the 1,612 count.\nFINDING scripts/prototypes/iter_bank/derive_rows.py:376 non-blocking: own_cell is the nearest cell centre rather than the cell a node belongs to, and the geometry archive carries no node-to-cell map, so the fragment's 'owns cell 434' claim rests on an approximation.",
+  "review_node": "review-of-iter-bank-recertify-06cb6262668b",
+  "review_run_id": "r-20261119T074815259066-review-of-iter-bank-recertify-06cb6262668b",
+  "reviewed_base_sha": "debe7c9b33a34bc814d476847e3d7fd64af29ed2",
+  "reviewed_head_sha": "06cb6262668b88719e53160f6addda4742fdb84e",
+  "reviewed_run_id": "r-20261117T110237355670-iter-bank-recertify",
+  "reviewer": {
+    "backend": "omp-local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261119T074815259066-review-of-iter-bank-recertify-06cb6262668b"
+  },
+  "reviewer_note": "independent review of r-20261117T110237355670-iter-bank-recertify read as debe7c9b33a34bc814d476847e3d7fd64af29ed2..06cb6262668b88719e53160f6addda4742fdb84e, the five commits gained since the record at review-records/...at-debe7c9b33a34bc814d476847e3d7fd64af29ed2.json, whose reviewed_head_sha is that base; the dispatch's 3a9238f0..06cb6262 block is the whole run's diff and was read for context only. Every quoted number in the new fragment paragraphs was recomputed from receipts/zero-entries.json, and the two kernel revisions it names were checked in git (681a6ecd2 and 02997905193b both exist; git diff --quiet 681a6ecd2 0f6bfa23c -- nova/biot/polygonanalytic.py reports identical).",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T09:20:00+00:00",
+  "total": 88
+}

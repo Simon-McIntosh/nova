@@ -212,6 +212,31 @@ class Profile:
     operator: Operator
 
 
+def _shipped_vector() -> np.ndarray:
+    """The build seam's vector: the shipped currents in response-column order."""
+
+    shipped = _shipped()
+    return np.asarray([shipped[name] for name in POLOIDAL_CONDUCTORS])
+
+
+@pytest.mark.parametrize("changed", [False, True])
+def test_shipped_comparison_is_exact_and_matches_conductor_names(changed) -> None:
+    shipped = _shipped()
+    names = tuple(reversed(POLOIDAL_CONDUCTORS)) + CIRCUIT_DRIVEN_CONDUCTORS
+    installed = np.asarray([shipped.get(name, -1.0) for name in names])
+    built = _shipped_vector()
+    if changed:
+        built[0] = np.nextafter(built[0], np.inf)
+        with pytest.raises(ValueError, match="disagrees.*F1A"):
+            diiid_current._refuse_silent_shipped_current_replacement(
+                built, installed, names, POLOIDAL_CONDUCTORS
+            )
+    else:
+        diiid_current._refuse_silent_shipped_current_replacement(
+            built, installed, names, POLOIDAL_CONDUCTORS
+        )
+
+
 def test_complete_adapter_preserves_response_order(monkeypatch) -> None:
     shipped_count = len(POLOIDAL_CONDUCTORS)
     profile = Profile(
@@ -224,7 +249,7 @@ def test_complete_adapter_preserves_response_order(monkeypatch) -> None:
                 np.arange(3 * shipped_count).reshape(3, shipped_count),
                 np.asarray([[1.0, -1.0], [2.0, 0.0], [1.0, 1.0]]),
             ),
-            external_current=np.arange(shipped_count),
+            external_current=_shipped_vector(),
         )
     )
 
@@ -259,6 +284,152 @@ def test_complete_adapter_preserves_response_order(monkeypatch) -> None:
     assert adapter.response_receipt["current_authority"] == "pf_active circuit"
     assert adapter.resolution.unknown_names == ()
     assert len(adapter.response_receipt["pf_active"]["circuit"]["drives"]) == 5
+
+
+FRAME = 137
+BUILD_SEAM_CONDUCTOR = "F1A"
+BUILD_SEAM_SHIFT_A_TURN = 54_058.0
+
+
+def _corpus_137d():
+    """Return the benchmark module and frame 137D's corpus row."""
+
+    from benchmarks import diiid_forward_gs_match as bench
+
+    paths = sorted(bench.DEFAULT_DATA.glob("*.parquet"))
+    if not paths:
+        pytest.skip(f"no DIII-D corpus rows under {bench.DEFAULT_DATA}")
+    selected = bench.select_frames(
+        paths, bench.EXECUTION_FRAME_COUNT, bench.polarity_population()
+    )
+    match = [item for item in selected if item.frame == FRAME]
+    if len(match) != 1:
+        pytest.skip(f"frame {FRAME} did not select exactly one corpus row")
+    columns = (
+        bench._LABEL_COLUMNS
+        + bench._GEOMETRY_COLUMNS
+        + bench._CURRENT_COLUMNS
+        + bench._PLASMA_CURRENT_COLUMNS
+    )
+    return bench, bench._read(match[0].path, columns)
+
+
+def _bench_shipped(bench, row):
+    description = bench.dataset_machine_description(
+        row, source_row=str(row.get("_source_path", "corpus row"))
+    ).physical
+    time_ms = float(row["efit_times"][FRAME])
+    return (
+        bench.shipped_current_at(row, description, POLOIDAL_CONDUCTORS, time_ms),
+        time_ms,
+    )
+
+
+@pytest.mark.timeout(1800)
+def test_complete_adapter_refuses_a_build_time_current_it_would_replace(
+    monkeypatch,
+) -> None:
+    """Build frame 137D, patch its build-time conductor current, require a refusal.
+
+    The benchmark stores the conductor current on the operator at the build seam
+    and the adapter re-reads the corpus columns before the solve, so a current
+    patched at the seam would be discarded without a word unless the adapter
+    compares the two. The unpatched build is the control: it must still pass.
+    """
+
+    bench, row = _corpus_137d()
+    shipped, _time_ms = _bench_shipped(bench, row)
+    expansion = 0.02
+
+    profile, _seed, _label, _wall, _reliable, _statement = bench.build_profile(
+        row, FRAME, expansion
+    )
+    adapter = diiid_current.complete_profile_current_adapter(
+        profile,
+        shipped_names=POLOIDAL_CONDUCTORS,
+        shipped_current_a=shipped,
+    )
+    np.testing.assert_array_equal(
+        np.asarray(profile.operator.external_current, dtype=float),
+        np.asarray([shipped[name] for name in POLOIDAL_CONDUCTORS], dtype=float),
+        err_msg="the unpatched build did not carry the shipped conductor current",
+    )
+    installed = np.asarray(adapter.resolution.current(()), dtype=float)
+    np.testing.assert_array_equal(
+        installed[: len(POLOIDAL_CONDUCTORS)],
+        np.asarray([shipped[name] for name in POLOIDAL_CONDUCTORS], dtype=float),
+    )
+    assert len(installed) == len(POLOIDAL_CONDUCTORS) + len(CIRCUIT_DRIVEN_CONDUCTORS)
+
+    names = tuple(POLOIDAL_CONDUCTORS)
+    index = names.index(BUILD_SEAM_CONDUCTOR)
+    original = bench._source_current
+
+    def patched(source):
+        def seam(seam_row, description, seam_names, time_ms):
+            vector = np.asarray(
+                source(seam_row, description, seam_names, time_ms), dtype=float
+            )
+            if tuple(seam_names) == names:
+                vector = vector.copy()
+                vector[index] += BUILD_SEAM_SHIFT_A_TURN
+            return vector
+
+        return seam
+
+    monkeypatch.setattr(bench, "_source_current", patched(original))
+    patched_profile, *_rest = bench.build_profile(row, FRAME, expansion)
+    assert (
+        float(np.asarray(patched_profile.operator.external_current)[index])
+        == shipped[BUILD_SEAM_CONDUCTOR] + BUILD_SEAM_SHIFT_A_TURN
+    )
+
+    with pytest.raises(ValueError, match="disagrees.*" + BUILD_SEAM_CONDUCTOR) as error:
+        diiid_current.complete_profile_current_adapter(
+            patched_profile,
+            shipped_names=POLOIDAL_CONDUCTORS,
+            shipped_current_a=shipped,
+        )
+    assert (
+        f"build {shipped[BUILD_SEAM_CONDUCTOR] + BUILD_SEAM_SHIFT_A_TURN:.6f} A"
+        in str(error.value)
+    )
+    assert f"resolved {shipped[BUILD_SEAM_CONDUCTOR]:.6f} A" in str(error.value)
+
+
+def test_complete_adapter_refuses_a_build_current_of_the_wrong_width(
+    monkeypatch,
+) -> None:
+    """A build vector that is not the shipped population cannot be compared."""
+
+    shipped_count = len(POLOIDAL_CONDUCTORS)
+    profile = Profile(
+        Operator(
+            grid=Target(
+                np.zeros((2, shipped_count)), np.asarray([[0.0, 0.0], [1.0, 1.0]])
+            ),
+            wall=Target(
+                np.zeros((2, shipped_count)), np.asarray([[0.0, 0.0], [1.0, -1.0]])
+            ),
+            external_current=np.zeros(shipped_count + 5),
+        )
+    )
+    monkeypatch.setattr(
+        diiid_current,
+        "active_coil_response_from_imas",
+        lambda entry, version, names, radius, height: (
+            tuple(names),
+            np.zeros((len(names), len(radius))),
+            {"stub": True},
+        ),
+    )
+
+    with pytest.raises(ValueError, match="build-time conductor current carries"):
+        diiid_current.complete_profile_current_adapter(
+            profile,
+            shipped_names=POLOIDAL_CONDUCTORS,
+            shipped_current_a=_shipped(),
+        )
 
 
 class RecordingProfile:

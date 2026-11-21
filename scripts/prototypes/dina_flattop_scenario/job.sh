@@ -18,7 +18,7 @@ export TMPDIR=$scratch
 export PYTHONPATH=$scratch
 export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
-export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 printf '# revision: %s tree: %s command: ' "$revision" "$scratch"
 printf '%q ' /home/ITER/mcintos/Code/nova/.venv/bin/python -m "$module" "$@"

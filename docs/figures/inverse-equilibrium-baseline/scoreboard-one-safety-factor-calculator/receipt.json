@@ -1,0 +1,238 @@
+{
+ "bands": {
+  "axis_flux_fraction": {
+   "bound": 0.02,
+   "direction": "at-most",
+   "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json",
+   "unit": "fraction of the reference flux span"
+  },
+  "boundary_flux_fraction": {
+   "bound": 0.02,
+   "direction": "at-most",
+   "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json",
+   "unit": "fraction of the reference flux span, after gauge alignment"
+  },
+  "magnetic_axis_distance_m": {
+   "bound": 0.02,
+   "direction": "at-most",
+   "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json",
+   "unit": "m"
+  },
+  "plasma_current_fraction": {
+   "bound": 0.015,
+   "direction": "at-most",
+   "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json",
+   "unit": "fraction of the reference current"
+  },
+  "q95_difference": {
+   "bound": 0.1,
+   "direction": "at-most",
+   "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json",
+   "unit": "magnitude"
+  }
+ },
+ "cases": [
+  {
+   "case": "iter-row-exchange-nominal",
+   "estimators": [
+    {
+     "gauge_wb": 0.31671172612655596,
+     "lcfs_distance_m": 0.04236352945503373,
+     "metrics": {
+      "axis_flux_fraction": 0.0041473049781818585,
+      "boundary_flux_fraction": 0.0050102967905711745,
+      "magnetic_axis_distance_m": 0.015171676182269448,
+      "plasma_current_fraction": 8.66935929319592e-07,
+      "q95_difference": 0.06473746302523731
+     },
+     "name": "imas-efit",
+     "note": "imas-efit's reconstruction of the nominal nova-written pulse, read back through IMAS at the version it was written at: its own rectangular 65 by 65 flux map, its own diamagnetic gradient and its own reference radius, so one calculator reads its safety factor from the state it stored",
+     "q95_flux_map": 2.9188694160639885,
+     "q95_stored": 2.906980587231803,
+     "reference_free": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": 0.7355363786497701
+     },
+     "reference_free_verdicts": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": true
+     },
+     "state": {
+      "boundary_points": 212,
+      "dd_version": "4.1.0",
+      "digest": "sha256:69cd6d9ba07eb1001e74fd2b8d62deb4d43e9da69a532d180f75a3af0c0f50c2",
+      "flux_axis": -73.52817897700832,
+      "flux_boundary": 3.2201063663674483,
+      "flux_map_nodes": [
+       65,
+       65
+      ],
+      "flux_span": 76.74828534337577,
+      "magnetic_axis_m": [
+       6.304585611400429,
+       0.49440519486374757
+      ],
+      "plasma_current_a": -13633999.738707324,
+      "q95": 2.906980587231803,
+      "reference_radius": 6.15,
+      "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/efit-on-nova-rows-case/efit-out-10",
+      "time_s": 338.9275978120551,
+      "wall_rings": 1
+     },
+     "status": "scored",
+     "verdicts": {
+      "axis_flux_fraction": true,
+      "boundary_flux_fraction": true,
+      "magnetic_axis_distance_m": true,
+      "plasma_current_fraction": true,
+      "q95_difference": true
+     }
+    },
+    {
+     "gauge_wb": 1.2789769243681803e-13,
+     "lcfs_distance_m": 3.767600078857637e-15,
+     "metrics": {
+      "axis_flux_fraction": 1.6748061179434542e-15,
+      "boundary_flux_fraction": 1.0641997207765697e-15,
+      "magnetic_axis_distance_m": 1.2042849684860158e-14,
+      "plasma_current_fraction": 1.3661754218381376e-16,
+      "q95_difference": 9.325873406851315e-15
+     },
+     "name": "nova-inverse-class",
+     "note": "the nova inverse class's result on the same rows: its axis, fluxes, current and safety factor from nova-fit-10.json; its bounding surface traced on the stored flux map the fit recovered at the same edge fraction, and that map written with the state (its coefficients are 1.0 and its terminal residual 8.2e-16)",
+     "q95_flux_map": 2.9836068790892165,
+     "q95_stored": -3.0550243513325945,
+     "reference_free": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": 0.7482308247632418
+     },
+     "reference_free_verdicts": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": true
+     },
+     "state": {
+      "boundary_points": 227,
+      "dd_version": "4.1.0",
+      "digest": "sha256:66f5429093a4dca06591b431102881c14ad25073888b87711ec37be58f5d803e",
+      "flux_axis": -73.2114672508819,
+      "flux_boundary": 3.154203417832682,
+      "flux_map_nodes": [
+       65,
+       129
+      ],
+      "flux_span": 76.36567066871457,
+      "magnetic_axis_m": [
+       6.289868237209092,
+       0.4980901175347843
+      ],
+      "plasma_current_a": -13634011.558521807,
+      "q95": -3.0550243513325945,
+      "reference_radius": 6.2,
+      "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T044759953920-scoreboard-one-safety-factor-calculator/states/nova-inverse-class",
+      "time_s": 0.0,
+      "wall_rings": 1
+     },
+     "status": "scored",
+     "verdicts": {
+      "axis_flux_fraction": true,
+      "boundary_flux_fraction": true,
+      "magnetic_axis_distance_m": true,
+      "plasma_current_fraction": true,
+      "q95_difference": true
+     }
+    },
+    {
+     "gauge_wb": 1.527313413374415,
+     "lcfs_distance_m": 0.029014791187919383,
+     "metrics": {
+      "axis_flux_fraction": 0.020000000000001638,
+      "boundary_flux_fraction": 0.04000000000000105,
+      "magnetic_axis_distance_m": 0.030000000000010907,
+      "plasma_current_fraction": 0.06000000000000019,
+      "q95_difference": 0.2441419006977843
+     },
+     "name": "perturbed-copy",
+     "note": "a deliberately defective copy of the nova inverse-class state: current scaled by 1.06, boundary and axis shifted 0.03 m radially, flux span grown 2% at each end, and the stored flux map's minor radius about the axis scaled by 1.1, so the defect reaches the map the safety-factor calculator reads rather than only the scalar q profile",
+     "q95_flux_map": 3.22774877978701,
+     "q95_stored": -3.2077755688992244,
+     "reference_free": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": 0.7482308247632342
+     },
+     "reference_free_verdicts": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": true
+     },
+     "state": {
+      "boundary_points": 227,
+      "dd_version": "4.1.0",
+      "digest": "sha256:43f9f364d8a32d500b373b018b8c54afa5bbee859b455ccd008955eecc47751c",
+      "flux_axis": -74.73878066425618,
+      "flux_boundary": 4.681516831206974,
+      "flux_map_nodes": [
+       65,
+       129
+      ],
+      "flux_span": 79.42029749546316,
+      "magnetic_axis_m": [
+       6.319868237209092,
+       0.4980901175347843
+      ],
+      "plasma_current_a": -14452052.252033116,
+      "q95": -3.2077755688992244,
+      "reference_radius": 6.2,
+      "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T044759953920-scoreboard-one-safety-factor-calculator/states/perturbed-copy",
+      "time_s": 0.0,
+      "wall_rings": 1
+     },
+     "status": "scored",
+     "verdicts": {
+      "axis_flux_fraction": false,
+      "boundary_flux_fraction": false,
+      "magnetic_axis_distance_m": false,
+      "plasma_current_fraction": false,
+      "q95_difference": false
+     }
+    }
+   ],
+   "machine": "ITER",
+   "reference": {
+    "boundary_points": 227,
+    "dd_version": "4.1.0",
+    "digest": "sha256:4c32f0598b30868c01ec088b5a09e3281418b44edd37c88692a2759195349f6b",
+    "flux_axis": -73.21146725088177,
+    "flux_boundary": 3.1542034178327287,
+    "flux_map_nodes": [
+     65,
+     129
+    ],
+    "flux_span": 76.3656706687145,
+    "magnetic_axis_m": [
+     6.289868237209081,
+     0.4980901175347787
+    ],
+    "note": "the generating state of the row-exchange case: its axis, fluxes, current and safety factor from record-10.json, its bounding surface traced on the stored 65 by 129 flux map half a percent of the span inside the recorded boundary flux, and that map written with the state so the safety factor is read from it rather than from a scalar record",
+    "plasma_current_a": -13634011.558521805,
+    "q95": -3.0550243513325954,
+    "reference_radius": 6.2,
+    "source": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T044759953920-scoreboard-one-safety-factor-calculator/states/reference",
+    "time_s": 338.9275978120551,
+    "wall_rings": 1
+   },
+   "reference_q95_flux_map": 2.983606879089226
+  }
+ ],
+ "fields": [
+  "magnetic_axis_distance_m",
+  "plasma_current_fraction",
+  "axis_flux_fraction",
+  "boundary_flux_fraction",
+  "q95_difference"
+ ]
+}

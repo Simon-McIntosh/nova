@@ -1,0 +1,151 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T09:29:17.203Z",
+  "dispatched_at": "2026-11-20T09:16:11Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:109",
+      "id": "done_when-1",
+      "reason": "a done-when that re-registers the expectation to whatever the code emits dissolves the guard the section exists to hold.",
+      "text": "\u00a711's three done-when clauses cannot distinguish a correct result from any result: clause (1) only records three numbers, clause (2) restates a fact its own comment records as already landed (\"the three-change causal account ... accepted by the lead\", comment c-partial-r-20261116T235243862922), and clause (3) defines the new expected value as \"the value the benchmark entry point measures there\", so any implementation of the head satisfies it \u2014 and no clause names a negative control",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:107",
+      "id": "reasoning-1",
+      "reason": "a dispatched node reading the body would re-measure a fifteen-revision causal investigation the plan already records as complete, instead of doing the one remaining step.",
+      "text": "\u00a711's body says \"Nothing re-registers the value until the change is known\" and lists \"the corpus input, the frame's time slice, the conductor currents\" as live candidates, while done-when (2) and the plan's own comment record the cause as settled and the cited record states \"The physical input did not change\" and that the full historical replay restores the registration to 1.321e-7",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:108",
+      "id": "evidence_paths-1",
+      "reason": "the coordinator composing the brief must invent the durable location, and a record written anywhere else is what the review's evidence-path check exists to catch.",
+      "text": "\u00a711 sends the benchmark's output to \"this node's evidence directory\" and never names the fragment or receipt path, where \u00a77 names its fragment and figures directory, \u00a79 names its fragment, \u00a712 its record and figures, and \u00a713 its record and figures",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:101",
+      "id": "reasoning-2",
+      "reason": "the section is landed and no node will implement it, so the stale tense costs a reader's comprehension but changes no work.",
+      "text": "\u00a710 is marked done yet its body states in the present tense that the builder \"takes its plasma coupling rows from two kernels\" and that \"the `_moment_couplings` docstring claims all three rows are moments of one kernel; they are not\", while at this revision the builder takes every plasma row from `build_flux_blocks` alone and the docstring states the single-kernel fact correctly",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "1e267f37575342c56b510712a49cf1bcf2b685a0",
+  "plan_fingerprint": "88a571e39e71b0c65319573628a46320b2d9273e9e36c392eaa2336935fcd870",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 150,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ac6b4cf623ad384a5ecb5a12c2116a7eb8c1766a",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a711 now carries a negative control: at the same head with only the finite-edge form replaced by the zero-edge cap, the entry point reproduces the pre-\u00a713 reading 1119833.584 A within 2e-6",
+      "reason": "",
+      "when": "2026-11-20T09:37:47.633339+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ac6b4cf623ad384a5ecb5a12c2116a7eb8c1766a",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a711's body now states the cause is settled and that one step remains, replacing the open candidate list",
+      "reason": "",
+      "when": "2026-11-20T09:38:42.763282+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ac6b4cf623ad384a5ecb5a12c2116a7eb8c1766a",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a711 names docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-reregistration.html for the record and ~/.cache/nova-diiid-pinned-reregistration/ for the entry-point output",
+      "reason": "",
+      "when": "2026-11-20T09:39:41.558361+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-2",
+      "reason": "The review itself judges it changes no work: \u00a710 is landed and done, so no node implements it",
+      "when": "2026-11-20T09:40:36.276930+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ac6b4cf623ad384a5ecb5a12c2116a7eb8c1766a",
+      "commit_basis": "edit",
+      "note": "\u00a711 now carries a negative control: at the same head with only the finite-edge form replaced by the zero-edge cap, the entry point reproduces the pre-\u00a713 reading 1119833.584 A within 2e-6",
+      "reason": "",
+      "when": "2026-11-20T09:37:47.633339+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ac6b4cf623ad384a5ecb5a12c2116a7eb8c1766a",
+      "commit_basis": "edit",
+      "note": "\u00a711 names docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-reregistration.html for the record and ~/.cache/nova-diiid-pinned-reregistration/ for the entry-point output",
+      "reason": "",
+      "when": "2026-11-20T09:39:41.558361+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ac6b4cf623ad384a5ecb5a12c2116a7eb8c1766a",
+      "commit_basis": "edit",
+      "note": "\u00a711's body now states the cause is settled and that one step remains, replacing the open candidate list",
+      "reason": "",
+      "when": "2026-11-20T09:38:42.763282+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The review itself judges it changes no work: \u00a710 is landed and done, so no node implements it",
+      "when": "2026-11-20T09:40:36.276930+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T091452223457-plan-review-of-diiid-vertical-force-balance.json",
+  "review_run_id": "r-20261120T091452223457-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "8780d003a815c7121133477a2227bc3e77688f65",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited repository path exists (benchmarks/, nova/, tests/, docs/evidence/fragments, docs/figures receipts), every named commit resolves in git (508124520 is the merge and 37d974e55 the revert that \u00a77 claims), and each extensionless href resolves once \".html\" is appended; the two unresolved `/_shared/*.css` hrefs are docs-server assets, not repository paths.",
+    "done_when": "a finding \u2014 \u00a711 is the only implementable section whose done-when contains no clause that can fail and no negative control.",
+    "evidence_paths": "a finding \u2014 \u00a711 names no durable path for the receipt it must produce, where every other implementable section names its fragment file and figures directory.",
+    "naming": "pass \u2014 the records and directories the sections name are named by mechanism (diiid-inactive-compensator-finite-edge, diiid-137d-refusal, diiid-finite-edge-flux), with no plan label, ticket number or version tag reaching a symbol, and the one symbol a done-when names (book_tangent) exists.",
+    "reasoning": "a finding \u2014 \u00a711's body still argues the pinned-seed cause is unknown and lists candidates its own cited record refutes, while its done-when declares the cause settled.",
+    "single_goal": "pass \u2014 each implementable node carries one deliverable (s7 the inactive-image rule, s9 the fitted-current solve, s11 the pinned-seed registration), and each done-when stays within three clauses.",
+    "wiring": "pass \u2014 every declared depends-on resolves to a section that exists (s7\u2190s6,s10,s13; s8\u2190s6; s9\u2190s7,s8; s10\u2190s6; s11\u2190s8,s13; s12\u2190s10,s13; s13\u2190s10) and each matches the text: \u00a77 \"measured on the head that carries both\" plus \u00a713's finite edge, \u00a79 \"the head carrying \u00a76, \u00a77 and \u00a78\", \u00a711 \"owed after \u00a713 gives the flux functions a finite edge\", \u00a712 the single-kernel plus finite edge; the informs targets gs-absolute-accuracy-gates, diiid-forward-onboarding and constraint-augmented-newton-krylov all resolve as plan files and the cross-repo commit 82660f0 cited by \u00a75 resolves in imas-ambix."
+  },
+  "section_digests": {
+    "_document": "642eed59c1a3a539a2002d237f3345e1e11ec13304d06032dac3c8c1ede64780",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "c28bab71a5b8a98921088e45a4f4e31dfcc1affe12d46bd488a9fa2dac89933f",
+    "s12": "9f0b7de609dddf9cec0eead4c27fef615d5275f0957928c862d35cecbbb23ffe",
+    "s13": "e14df5cf0cb26cb414397b74fb90f493b050e0a424f5b4402cd3a7a7de859cac",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "67010ceabd250e895da0e2866c55016f6d94a692436e98f386fbf5a9a62a3df2",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T09:29:53.845167+00:00",
+  "total": null
+}

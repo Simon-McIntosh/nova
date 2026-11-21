@@ -1,0 +1,205 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T08:23:09Z",
+  "dispatched_at": "2026-11-20T08:02:36Z",
+  "findings": [
+    {
+      "anchor": "plan.html:10",
+      "id": "reasoning-1",
+      "reason": "the summary is the first thing a coordinator or queue reads, and it points effort at a mechanism the plan's own evidence has eliminated instead of the solver-side and label-inconsistency line the plan actually pursued.",
+      "text": "the plan summary (echoed by the lede at :37) states the displacement is to be attributed to \"external-field force imbalance\", while \u00a72 at :42-44 landed a measured negative for that hypothesis (\"the D-III-D displacement is not a missing external field\", residual 98.8-99.3 percent inside the label's own Grad-Shafranov inconsistency)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:109",
+      "id": "done_when-1",
+      "reason": "a dispatched \u00a711 node must either fail this clause or manufacture a single-change demonstration the plan's own record says does not exist.",
+      "text": "\u00a711 done-when (2) demands \"a run at the head with only that change undone that restores the registered value within 2e-6\", but the section's own record at :241 states \"no single-change undo meets the causal clause\", and the account the lead accepted at :243 is a three-change one (edge cap, stationary normalisation and domain, integration route)",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:32",
+      "id": "wiring-1",
+      "reason": "the declaration is what orders the queue, and it would release a re-registration node ahead of the flux-function change that moves the quantity being registered the moment \u00a713 is reopened.",
+      "text": "`plan-section-depends-on` gives \u00a711 only `#s8`, while \u00a711's own partial record at :243 says \"the re-registration remains, owed after \u00a713 gives the flux functions a finite edge, because that moves the value again\", so the dependency the section asserts in prose is missing from the declaration",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:114",
+      "id": "anchors_resolve-1",
+      "reason": "the section's declared deliverable is absent while its status says done, so a later reader cannot open the record and a node may re-run a diagnosis that was deliberately abandoned.",
+      "text": "\u00a712 names `docs/evidence/fragments/diiid-vertical-force-balance/diiid-137d-refusal.html` and `docs/figures/diiid-vertical-force-balance/diiid-137d-refusal/` as this section's record and panels, and neither path exists anywhere in the tree; the section is nonetheless declared `done` (:31) after the comment at :427 records it was \"Closed without diagnosis\" and its run \"discarded\"",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:113",
+      "id": "reasoning-2",
+      "reason": "leaving a refuted root cause standing in a `done` section invites a node to chase a mechanism the plan's own \u00a713 evidence has already eliminated.",
+      "text": "\u00a712's body still asserts that \"137D's convergence does not survive small, physically justified changes\" on \u00a710's single polygon kernel (3.3e-4, ACTIVE_SET_STEP_REFUSED) and instructs \"Find the mechanism of the refusals on the single-kernel head\", while \u00a713's landed result (:265) has 137D converging at 9.06e-9 on that same kernel with a finite edge, which explains the refusal as the zeroed edge rather than a persisting solver mechanism",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:96",
+      "id": "reasoning-3",
+      "reason": "a stated method in plan text is a guess the node must test against the code, and the review contract puts the module-to-extend and call sequence in the brief composed from this review, not in the plan.",
+      "text": "\u00a79 prescribes the implementation rather than the endpoint: it names the code path to run and a step sequence (\"Re-derive the fitted vector by running the committed fit (scripts/prototypes/diiid_xpoint_coil_correction/fit.py) at the head ... Then re-solve the four rows\"), which is the node brief's reuse map",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "f8e7459be0393615d31b3ca56bbbe51ecd8e2694",
+  "plan_fingerprint": "15e4713790f05df89d406aaf2174a5b3228932b3e87eb0ceb628407fed635593",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 146,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The plan summary now names the X-point geometry work: finite-edge profiles, one coupling kernel, honest conductor currents",
+      "reason": "",
+      "when": "2026-11-20T08:31:52.361658+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a711 done-when now records the accepted three-change account and re-registers on the finite-edge head",
+      "reason": "",
+      "when": "2026-11-20T08:32:39.436589+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a711 now waits on \u00a78 and \u00a713 in plan-section-depends-on",
+      "reason": "",
+      "when": "2026-11-20T08:33:26.571476+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "\u00a712 now opens by stating it was closed without diagnosis and that its named record and figure paths were never written",
+      "reason": "",
+      "when": "2026-11-20T08:34:17.441681+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a712's opening closure paragraph states the refusal came from the zeroed edge, per \u00a713's landed result",
+      "reason": "",
+      "when": "2026-11-20T08:35:01.367240+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-3",
+      "reason": "The committed fit is the only instrument that produces the vector \u00a79's endpoint compares against, so naming it is the endpoint's definition rather than a guessed method; raised and declined in an earlier round",
+      "when": "2026-11-20T08:35:50.248762+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "note": "\u00a712 now opens by stating it was closed without diagnosis and that its named record and figure paths were never written",
+      "reason": "",
+      "when": "2026-11-20T08:34:17.441681+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "note": "\u00a711 done-when now records the accepted three-change account and re-registers on the finite-edge head",
+      "reason": "",
+      "when": "2026-11-20T08:32:39.436589+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "note": "The plan summary now names the X-point geometry work: finite-edge profiles, one coupling kernel, honest conductor currents",
+      "reason": "",
+      "when": "2026-11-20T08:31:52.361658+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "note": "\u00a712's opening closure paragraph states the refusal came from the zeroed edge, per \u00a713's landed result",
+      "reason": "",
+      "when": "2026-11-20T08:35:01.367240+00:00"
+    },
+    "reasoning-3": {
+      "action": "declined",
+      "by": "",
+      "reason": "The committed fit is the only instrument that produces the vector \u00a79's endpoint compares against, so naming it is the endpoint's definition rather than a guessed method; raised and declined in an earlier round",
+      "when": "2026-11-20T08:35:50.248762+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "474770e085bee061c43773bb8cc196a8a3df6047",
+      "commit_basis": "edit",
+      "note": "\u00a711 now waits on \u00a78 and \u00a713 in plan-section-depends-on",
+      "reason": "",
+      "when": "2026-11-20T08:33:26.571476+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T080110432350-plan-review-of-diiid-vertical-force-balance.json",
+  "review_run_id": "r-20261120T080110432350-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "a5fdb9c2fec23c03c9e2ea9d195b51ebe851428c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a712's record and figure paths do not exist in the tree while the section is declared done (plan.html:114, :31).",
+    "done_when": "a finding \u2014 \u00a711 done-when (2) requires a single-change undo that the section's own record states cannot be produced, so the clause is unsatisfiable by the cause the lead accepted (plan.html:109).",
+    "evidence_paths": "pass \u2014 records and panels sit under docs/evidence/fragments/ and docs/figures/, and \u00a711 explicitly forbids the committed receipt directory its entry point truncates (plan.html:108).",
+    "naming": "pass \u2014 the section and artifact names describe the mechanism (finite edge, inactive compensator, seed drift) and carry no plan labels, ticket numbers or version tags.",
+    "reasoning": "a finding \u2014 the plan summary and lede name external-field force imbalance as the mechanism to attribute while \u00a72 landed a measured negative for that exact hypothesis (plan.html:10, :37, :42).",
+    "single_goal": "pass \u2014 each implementable section (\u00a77, \u00a79, \u00a711) names one deliverable, and the extra clauses are its gates and controls rather than a second goal.",
+    "wiring": "a finding \u2014 \u00a711 declares `depends-on` only `#s8` while the section's own record says the re-registration it owes must follow \u00a713's finite edge, which is absent from the dependency set (plan.html:32, :243)."
+  },
+  "section_digests": {
+    "_document": "1521260222faccb369b644ad24c59d32b09a89ffded99da40ab36806830d9b99",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8221264aa226d15c859f15d29e63bdc333dd055f1fa3f0ad1683edb6aba86e66",
+    "s12": "95c2ca272095b9a7723109be1e1906771bb259110daaf42b9ab5a27c90ee76f2",
+    "s13": "e14df5cf0cb26cb414397b74fb90f493b050e0a424f5b4402cd3a7a7de859cac",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "67010ceabd250e895da0e2866c55016f6d94a692436e98f386fbf5a9a62a3df2",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T08:23:16.431050+00:00",
+  "total": null
+}

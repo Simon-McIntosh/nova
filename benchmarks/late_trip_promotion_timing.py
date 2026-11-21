@@ -57,7 +57,7 @@ DEFAULT_TRIP_TABLE = OUTPUT_ROOT / "per-trip.csv"
 DEFAULT_FIGURE = OUTPUT_ROOT / "promotion-wall-by-trip.png"
 DEFAULT_EVENT_LOG = OUTPUT_ROOT / "promotion-events.jsonl"
 DEFAULT_REPORT = crew_reports("nova/millisecond/late-trip-promotion-timing.md")
-DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
+DEFAULT_CACHE = Path("/work/projects/imas_gpu/nova/jax-cache/trip-quantum-profile")
 FROZEN_PROFILE = (
     ROOT / "docs/figures/millisecond-converged-solve/trip-quantum/"
     "recovery-frozen/outer-loop.json"

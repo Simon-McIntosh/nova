@@ -1,0 +1,89 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/prototypes/diiid_xpoint_coil_correction/batch.py:measure_command",
+    "scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh",
+    "scripts/prototypes/diiid_xpoint_coil_correction/summarize.py:coil_rows",
+    "benchmarks/diiid_forward_gs_match.py:_read",
+    "benchmarks/diiid_forward_gs_match.py:complete_profile_current_adapter",
+    "nova/imas/diiid_current.py:shipped_current_at"
+  ],
+  "completed_at": "2026-11-21T16:57:55.528Z",
+  "dispatched_at": "2026-11-21T16:50:04Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The build-seam control that counts ran as its own allocation (job 1335481) and the record quotes the adapter's own refusal naming F1A; only the in-cohort repeat of that control was satisfied by an unrelated missing receipt",
+      "recorded_at": "2026-11-21T20:19:44.249522+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Prototype receipt hook; every call site passes the argument by keyword and the run's records were written",
+      "recorded_at": "2026-11-21T20:19:52.679700+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The column write is measured end to end: every fitted arm's solved vector equals measured minus correction on all nineteen conductors, and pairing a measured arm with itself reddens that check",
+      "recorded_at": "2026-11-21T20:20:00.234178+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "non-blocking: the build-seam control's pass condition is `SEAM` being non-zero (resolve.sh:50-51 and the SEAM==0 refusal at :70), which any crash satisfies, and in the actual cohort run it was satisfied by a FileNotFoundError in benchmarks/diiid_forward_gs_match.py:675 reading docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_audit_receipt.json (resolve-977fce96.log tail), not by the adapter's refusal; the refusal evidence is the separate job 1335481 in control-977fce96.log, so the in-cohort arm does not itself demonstrate the control and a future crash would read as a pass."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/measure.py",
+      "line": "188",
+      "severity": "non-blocking",
+      "text": "non-blocking: record_solved_currents reads kwargs[\"shipped_current_a\"], so a caller that passes the adapter's fifth argument positionally raises KeyError inside the receipt hook and loses the solve record; the benchmark's current call sites pass it by keyword, so the run succeeded, but the hook is coupled to a calling convention it does not check."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/measure.py",
+      "line": "116",
+      "severity": "non-blocking",
+      "text": "non-blocking: no test exercises install_corpus_correction's shift loop, carries_currents or column_shifts aggregation, so deleting or mis-scaling the column write at :116 would leave the whole 12-test suite green and be caught only by re-running the four-arm cohort."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read the gained commits f24e472ec..39b0b53af against 9ce2fe445 and the full 22-path diff against bd3c232f: the repair removes the duplicate interpolation, re-keys the mode-based install, rewrites resolve.sh, tightens the test, and corrects the zoom caption.",
+    "done_when": "the done-when's per-conductor equality is asserted at verify.py:52-70 and recorded in verify/fitted.json (19 conductors, 0 mismatched, 0 unchanged on all four rows); the reddening control is verify/base-base.json (19/19 mismatched per row) and the build-seam refusal is quoted in control-977fce96.log, while suite-base.log and suite-head.log record 8 passed at bd3c232f and 12 passed at 39b0b53af, both EXIT=0.",
+    "goal": "the node goal is the done_when: solve the four DIII-D X-point rows on measured and fitted arms, commit the fitted receipt, tabulate both arms in a new record with an implausibility verdict and paired panels, and pass the prototype test; measure.py:116 applies the fit to the corpus columns, receipts/correction-137.json plus its two siblings are committed, and suite-head.log records 12 passed at the head.",
+    "manifest": "read; it records status complete, the six commits, the two-arm suite result (8 then 12 passed), the run directory and both controls, but it carries no structured baseline_suite and after_suite blocks, so a coordinator must read suite-base.log and suite-head.log to confirm the 0 added failures.",
+    "write_paths": "the gained commits f24e472ec and 39b0b53af write only docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html and four files under scripts/prototypes/diiid_xpoint_coil_correction, all inside the declared paths; the wider 22-path diff is likewise inside them."
+  },
+  "justifications": {
+    "durability": "test_conductor_correction.py:110-174 pins the shift and both solve-check directions with constants read from the receipts, and negative-control.log shows each reddening when the guard is loosened, but no test exercises measure.py:116's shift loop or column_shifts aggregation, so the delivery path is covered only by the cohort.",
+    "evidence": "verify/fitted.json and verify/base-base.json record the check and its redden (19/19 mismatched per row) from the solve's own solve-currents.json, and control-977fce96.log records the adapter refusal, but the cohort log resolve-977fce96.log was produced at 977fce96e (pre-repair) and its in-cohort build-seam arm died on a missing polarity census rather than the refusal.",
+    "fit": "the repair follows the prototype's argparse-and-json-receipt idiom and imports shipped_current_at at module level, but measure.py:58 and measure.py:172 still key off private benchmark state (bench._GEOMETRY_COLUMNS, bench._read, bench._source_current), which is the same coupling the prototype's pre-existing install path already carried.",
+    "goal_fidelity": "measure.py:116 writes the fitted shift into the corpus magnetics columns the adapter reads, and verify/fitted.json records 19 conductors with 0 mismatches on all four rows, with corrected/frame-137-diverted/solve-currents.json carrying F1A at -231293.186 A against the measured -177235.036, matching the done-when's -231.293 kA.turn.",
+    "reuse": "f24e472ec removed the prototype's private current_at interpolation and imports nova.imas.diiid_current.shipped_current_at instead, per negative-control.log; a search over nova/, benchmarks/ and scripts/ for an existing ampere-turn-to-corpus-column inverse found only forward 1000*applied_multiplier conversions, so column_shift is the first owner of that direction.",
+    "scope_discipline": "the two gained commits f24e472ec and 39b0b53af touch only the five declared paths, and the full 22-path diff bd3c232f..39b0b53af lies entirely under the prototype directory, the new record fragment and its figure directory."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the done_when - solve the four DIII-D X-point rows on measured and fitted arms, commit the fitted receipt, tabulate both arms with an implausibility verdict and paired panels, and pass the prototype test; measure.py:116 applies the fit to the corpus columns, receipts/correction-137.json plus its two siblings are committed, and suite-head.log records 12 passed at the head.\nVERDICT done_when: the per-conductor equality is asserted at verify.py:52-70 and recorded in verify/fitted.json (19 conductors, 0 mismatched, 0 unchanged on all four rows); verify/base-base.json reddens 19/19 per row and control-977fce96.log records the build-seam refusal, while suite-base.log and suite-head.log record 8 passed at bd3c232f and 12 passed at 39b0b53af, both EXIT=0.\nVERDICT write_paths: the gained commits f24e472ec and 39b0b53af write only docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html and four files under scripts/prototypes/diiid_xpoint_coil_correction, all inside the declared paths; the wider 22-path diff is likewise inside them.\nVERDICT manifest: read; it records status complete, the six commits, the two-arm suite result (8 then 12 passed) and both controls, but carries no structured baseline_suite and after_suite blocks, so the 0 added failures must be read from suite-base.log and suite-head.log.\nVERDICT diff: read the gained commits f24e472ec..39b0b53af against 9ce2fe445 and the full 22-path diff against bd3c232f; the repair removes the duplicate interpolation, re-keys the mode-based install, rewrites resolve.sh, tightens the test, and corrects the zoom caption.\nCALL_SITES: scripts/prototypes/diiid_xpoint_coil_correction/batch.py:measure_command, scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh, scripts/prototypes/diiid_xpoint_coil_correction/summarize.py:coil_rows, benchmarks/diiid_forward_gs_match.py:_read, benchmarks/diiid_forward_gs_match.py:complete_profile_current_adapter, nova/imas/diiid_current.py:shipped_current_at\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: measure.py:116 writes the fitted shift into the corpus columns, verify/fitted.json records 19 conductors and 0 mismatches on all four rows, and corrected/frame-137-diverted/solve-currents.json carries F1A at -231293.186 A against the measured -177235.036.\nSCORE evidence: 16\nJUSTIFICATION evidence: verify/fitted.json and verify/base-base.json record the check and its redden from the solve's own record, and control-977fce96.log records the refusal, but resolve-977fce96.log was produced at 977fce96e and its in-cohort build-seam arm died on a missing polarity census rather than the refusal.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the gained commits touch only the five declared paths and every path in the 22-path diff lies under the prototype directory, the new record fragment or its figure directory.\nSCORE durability: 14\nJUSTIFICATION durability: test_conductor_correction.py:110-174 pins the shift and both solve-check directions with receipt constants and negative-control.log shows each reddening, but no test exercises measure.py:116's shift loop, so the delivery path is covered only by the cohort.\nSCORE fit: 17\nJUSTIFICATION fit: the repair follows the prototype's argparse-and-json idiom and imports shipped_current_at at module level, but measure.py:58 and :172 still key off private benchmark state.\nSCORE reuse: 19\nJUSTIFICATION reuse: f24e472ec removed the prototype's current_at and imports nova/imas/diiid_current.py:160 shipped_current_at, and a search for an existing ampere-turn-to-column inverse found only forward conversions, so column_shift has no prior owner.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh:50 non-blocking: the build-seam control accepts any non-zero exit, and in the cohort it was satisfied by a FileNotFoundError in benchmarks/diiid_forward_gs_match.py:675, so only job 1335481's control-977fce96.log demonstrates the refusal.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/measure.py:188 non-blocking: record_solved_currents reads kwargs[\"shipped_current_a\"], so a positional adapter call raises KeyError inside the receipt hook.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/measure.py:116 non-blocking: no test exercises install_corpus_correction's shift loop, so removing or mis-scaling the column write would leave the suite green.",
+  "review_run_id": "r-20261121T164918656639-review-of-diiid-coil-correction-resolve-finite-edge-39b0b53af0df",
+  "reviewed_base_sha": "9ce2fe445956537acb0855305238582d6e3d709e",
+  "reviewed_head_sha": "39b0b53af0dfddd20a1984738dd13d7ed9f5fc9e",
+  "reviewed_run_id": "r-20261121T073819532158-diiid-coil-correction-resolve-finite-edge",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T16:58:28.143151+00:00",
+  "total": 104
+}

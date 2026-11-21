@@ -1,0 +1,42 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-18T18:09:48.474Z",
+  "dispatched_at": "2026-11-18T17:45:15Z",
+  "figures": {
+    "docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh-preview.png": {
+      "contrast": "pass for text \u2014 label and legend text is #333333 on white at 12.6:1, the cell mesh at 5.24:1 and the coil outline at 3.03:1. One data mark sits below that: the first wall, #9aa2ab, measures 2.58:1 against white and is the faintest mark in the figure; recorded as a non-blocking finding because it is a data mark rather than text and remains visible.",
+      "data_ink": "pass \u2014 the hexagonal cell mesh, the hollow coil rectangles and the wall contour carry all the ink on a plain white field: 40,188 mesh pixels, 6,764 coil-outline pixels and 4,377 wall pixels measured with tight colour masks, no filled region, no raster imagery. The run's scene report reads an ink fraction of 0.067544 over 73,748 mesh pixels, consistent with what the raster shows.",
+      "decoration": "pass \u2014 no gradient, background fill, grid, frame, drop shadow or styled theme; the axes are switched off and the machine is drawn on white, with the legend frameless.",
+      "label_collision": "pass \u2014 with tight colour masks on both attachments, zero text pixels fall on any mark pixel (0 on mesh, 0 on coil, 0 on wall), and no text sits within 8 pixels of any canvas edge, so nothing is clipped; each two-line CS1 and VS3 label clears its nearest mark by at least one pixel with no intersection, and VS3 upper, VS3 lower, PF3, PF4 and PF5 all sit in clear space.",
+      "legibility": "pass \u2014 two poloidal mesh panels with all fourteen coil sections labelled once each (CS3U, CS2U, CS1 upper, CS1 lower, CS2L, CS3L, PF1, PF2, PF3, PF4, PF5, PF6, VS3 upper, VS3 lower) and a three-entry legend; the duplicate sections in the brief are distinguished by name, the two CS1 sections as 'CS1 upper' and 'CS1 lower' and the two VS3 sections as 'VS3 upper' and 'VS3 lower'. Measured on the delivered 1400x1072 raster: 4,046 text pixels in #333333 at 14 pt, all legible at delivered size. The run's second attachment (image-1.png, 1400x1074) is the same render two pixels taller and was measured the same way. The identities of the two panels are unstated, recorded as a non-blocking finding.",
+      "table_form": "pass \u2014 the image shows machine geometry and a plasma cell mesh, spatial information that no table carries."
+    }
+  },
+  "findings": [
+    {
+      "disposition": "exempted \u2014 non-blocking: both panels are individually legible, and the identity of the shape makes the zoom inferable; recorded so a later caption or panel-title edit can act on it",
+      "file": "docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh-preview.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The figure carries two panels of the same plasma at two extents and neither panel is named: the left panel draws the whole machine with the CS stack and PF coils, the right one is a tight zoom on the wall region drawn over the same cell mesh. Nothing in the raster and nothing in the evidence fragment's caption (alt text: 'ITER poloidal mesh with labelled coil sections and the first wall') says which panel is which, and the script builds both from the same geometry without a title (scripts/prototypes/iter_bank/render.py:303 loops over the overview and detail bounds and sets no title). A reader has to infer that the right panel is the wall detail of the left rather than a second or different machine state; naming each panel, or saying in the caption that the right panel is the wall detail, removes the inference."
+    },
+    {
+      "disposition": "exempted \u2014 non-blocking: the wall is visible above the cell outlines, its dash is measurable in the raster and its legend entry carries the same mark, so the mapping the brief asks for is present even though the contrast is the faintest in the figure",
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": 27,
+      "severity": "non-blocking",
+      "summary": "The first wall's separation from the coil mark is carried almost entirely by a fine dash between two closely related greys: WALL_COLOR #9aa2ab over coil #929292, dashed 5.0 pt on and 2.5 pt off at linewidth 1.7 (render.py:27-28). The wall measures 2.58:1 against white while the coil outline measures 3.03:1, so the wall is the fainter of the two, and the fragment's own readability figure (median contrast 4.7044) is measured over the mesh rather than the wall. The dash renders (9-14 pixel on-runs and 8-12 pixel off-runs measured along the panel's top edge, and the legend repeats the same dash), so a reader can map the entry to the curve, but at a page column of roughly 900 pixels a dash is 4-5 pixels and the wall reads as a near-continuous hairline where it hugs the plasma edge. A stronger lightness step from the coil grey, or a longer dash period, would make the first wall read as its own component at page scale; it does not hold the node."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261118T174430682688-review-of-iter-bank-recertify-31d8dbc71dff-figure",
+  "reviewed_base_sha": "3a9238f0a626bec0783b4f0da32922dd0c390f4b",
+  "reviewed_head_sha": "31d8dbc71dff28df2664364ab5939a39814dd0b0",
+  "reviewed_run_id": "r-20261117T110237355670-iter-bank-recertify",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T18:10:24.776160+00:00",
+  "total": null
+}

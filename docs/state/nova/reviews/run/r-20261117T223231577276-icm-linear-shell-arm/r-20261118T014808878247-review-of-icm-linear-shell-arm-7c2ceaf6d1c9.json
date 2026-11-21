@@ -1,0 +1,100 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own suite arms: gate-repair/baseline-suite.log ends '82 passed, 11 deselected ... EXIT=0' at c97c56ee and gate-repair/after-suite.log ends '83 passed, 11 deselected ... EXIT=0' at 7c2ceaf6, and the gate pair gate-repair/gate-base.log and gate-repair/gate-head.log each ends with 'EXIT=0' at 101 and 102 passed, so no test id fails at the head that does not fail at the base.",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/iron_linear_magnetisation/measure.py:131",
+    "scripts/iron_linear_magnetisation/figure.py:55"
+  ],
+  "completed_at": "2026-11-18T01:49:23.430Z",
+  "dispatched_at": "2026-11-18T01:48:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "a consistency check beside the independent checks at reference.py lines 66, 86, 103 and 109, which do catch a wrong per-degree transmission",
+      "recorded_at": "2026-11-18T02:13:09.615189+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the stale lane sentence describes a superseded CPU attempt; the measured numbers come from the completed titan receipt, which the fragment cites correctly",
+      "recorded_at": "2026-11-18T02:13:40.527356+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the logs' header names the single-file command they actually ran, and both arms pass at base and head; the recorded three-file command is the brief's gate, and its separate gate log passes at the head",
+      "recorded_at": "2026-11-18T02:14:31.404175+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "the coordinator accepts tests/test_magnetisation.py at landing: the test guards the reference.py restoration the previous review found unguarded",
+      "recorded_at": "2026-11-18T02:14:57.008930+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/iron_linear_magnetisation/reference.py",
+      "line": "112",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert_allclose(shielded, exterior_reference(6)[1]) compares the module against itself at fewer terms, so any wrong per-degree transmission moves both sides together and this line still passes; the independent checks are at lines 66, 86, 103 and 109."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html",
+      "line": "75",
+      "severity": "non-blocking",
+      "text": "non-blocking: the lane paragraph cites shell-arm/coarse/linear-0.08.json as recording completed: false, but that file now reads completed: true at revision 1ad97626d from the Titan run, and the only surviving CPU-lane artefact is logs/measure-1324235.log, whose single line is the TIME LIMIT cancellation and carries neither a mesh nor a completed flag; the 480 mm 300 s probe claim has no receipt at all, so the lane choice cannot be reopened from evidence."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223231577276-icm-linear-shell-arm/manifest.md",
+      "line": "14",
+      "severity": "non-blocking",
+      "text": "non-blocking: baseline_suite and after_suite record the three-file gate command, but the logs they cite (gate-repair/baseline-suite.log and gate-repair/after-suite.log) carry a '# command:' line naming tests/test_magnetisation.py alone and report 82/83 passed, so the recorded command and its log disagree and promotion reads the log header as the fallback."
+    },
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": "1484",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only test the node added sits outside its three declared write paths; it is defensible (it guards the reference.py restoration a prior review found unguarded) but the scope claim 'documented paths' is now false for the delivered diff."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit c97c56ee..7c2ceaf6: 1ad97626d restores reference.py to bytes identical to 5ac6f3380 (git diff between the two blobs is empty), 2bb9e0e7 adds the fragment, 85a17b24b adds the one-test guard, 423549bd adds mesh_limit.py, 7c2ceaf6 cites the mesh-limit log; 370 insertions and 1 deletion over four paths.",
+    "done_when": "plan \u00a75b clause (3) asks for 80 mm against the dipole reference and the next coarser spacing until one misses, with each spacing, unknowns and error recorded; docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html:35-42 carries six such rows and every value reproduces shell-arm/coarse/linear-*.json exactly (verified worst_error, cells, unknowns word-for-word), while the gate pair measures only that the artefact tree and tests are green.",
+    "goal": "the goal is to show a coarse piecewise-linear shell arm missing the 0.5 % mu_r = 1000 shell criterion; shell-arm/coarse/linear-0.12.json reads worst_error 0.005572741 (0.557274 %) at 38 cells / 228 unknowns against dipole 61.101838 while linear-0.08.json reads 0.001366301 (0.136630 %) at 76 cells / 456 unknowns, so the goal is met at the second rung and four coarser spacings miss by more.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223231577276-icm-linear-shell-arm/manifest.md: status complete, five commits named, six coarse receipts plus mesh-limit.json and four gate logs cited, both suite arms 0 failures, and its six spacing/unknowns/error triples reconcile with the receipts; its suite-arm command fields disagree with the logs they cite.",
+    "write_paths": "declared paths are scripts/iron_linear_magnetisation, the fragment docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html and the unused figure directory docs/figures/iron-core-magnetisation/icm-linear-shell-arm; the diff touches the first two and also tests/test_magnetisation.py, outside the fence."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:1509 pins the recorded vector and reference.py:109 checks degree one against controls.exact_shielding, and gate-repair/negative-control-stub-reference.log shows the test reddening with 'FAILED ... AttributeError' when reference.py holds only its a2bb320a1 docstring, but nothing tests the mesh_limit refusals or the six measured errors.",
+    "evidence": "docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html:33-42 reproduces every receipt value and gate-repair/gate-head.log ends '102 passed ... EXIT=0', but icm-linear-shell-arm.html:75 cites coarse/linear-0.08.json for a completed:false state that file no longer holds.",
+    "fit": "scripts/iron_linear_magnetisation/mesh_limit.py:1-28 follows the sibling idiom of scripts/iron_linear_magnetisation/measure.py:1-26 (module docstring, configure_dtypes before jax with noqa E402, argparse, JSON receipt, bare EXIT line) and introduces no forbidden name.",
+    "goal_fidelity": "shell-arm/coarse/linear-0.12.json records worst_error 0.005572741 against dipole 61.101838 at 228 unknowns while linear-0.08.json records 0.001366301, so the criterion is shown to pass at 80 mm and fail at 120 mm on the same script and reference.",
+    "reuse": "scripts/iron_linear_magnetisation/reference.py at 1ad97626d is byte-identical to the pre-truncation owner at 5ac6f3380 and is imported by measure.py:131 and figure.py:55, while mesh_limit.py:42 calls iron._mesh (the meshing owner) over controls.shell() and UNIFORM_SIZES rather than re-implementing a mesher, duplicating only the size-sweep loop shape of scripts/iron_linear_magnetisation/assembly_cost.py:101-113.",
+    "scope_discipline": "tests/test_magnetisation.py:1484 is a fourth path outside the three declared write paths, added for a durability repair the node's own review asked for."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to show a coarse piecewise-linear shell arm missing the 0.5 % criterion; shell-arm/coarse/linear-0.12.json reads worst_error 0.005572741 at 38 cells / 228 unknowns while linear-0.08.json reads 0.001366301 at 456 unknowns, so the goal is met at the second rung.\nVERDICT done_when: plan \u00a75b clause (3) is answered by six spacing/unknowns/error rows at docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html:35-42, every value of which reproduces shell-arm/coarse/linear-*.json exactly.\nVERDICT write_paths: the declared paths are scripts/iron_linear_magnetisation, the fragment and the figure directory; the diff touches the first two plus tests/test_magnetisation.py outside them.\nVERDICT manifest: read; it reports status complete, five commits, six receipts and four gate logs with 0 failures in both suite arms, and its suite-arm command fields disagree with the logs they cite.\nVERDICT diff: read all five commits against base c97c56ee (370 insertions, 1 deletion, four paths); 1ad97626d restores reference.py byte-identically to 5ac6f3380 and 423549bd adds mesh_limit.py.\nCALL_SITES: scripts/iron_linear_magnetisation/measure.py:131, scripts/iron_linear_magnetisation/figure.py:55\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: shell-arm/coarse/linear-0.12.json records 0.557274 % at 228 unknowns against dipole 61.101838 while linear-0.08.json records 0.136630 % at 456 unknowns, so the criterion is shown able to fail.\nSCORE evidence: 16\nJUSTIFICATION evidence: icm-linear-shell-arm.html:33-42 reproduces every receipt value and gate-repair/gate-head.log ends '102 passed ... EXIT=0', but icm-linear-shell-arm.html:75 cites a completed:false receipt that now reads completed:true.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: tests/test_magnetisation.py:1484 is a fourth path outside the three declared write paths.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_magnetisation.py:1509 reddens under the a2bb320a1 stub (gate-repair/negative-control-stub-reference.log EXIT=1), but no test covers the mesh_limit refusals or the six measured errors.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/iron_linear_magnetisation/mesh_limit.py:1-28 follows the sibling idiom of scripts/iron_linear_magnetisation/measure.py:1-26 and adds no forbidden name.\nSCORE reuse: 17\nJUSTIFICATION reuse: reference.py at head is byte-identical to its pre-truncation owner at 5ac6f3380 and mesh_limit.py:42 calls iron._mesh over controls.shell() rather than re-implementing a mesher.\nFINDING scripts/iron_linear_magnetisation/reference.py:112 non-blocking: assert_allclose(shielded, exterior_reference(6)[1]) compares the module with itself at fewer terms, so a wrong transmission moves both sides together and the line still passes.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html:75 non-blocking: the CPU-lane claim cites coarse/linear-0.08.json for completed:false, but that receipt now reads completed:true from the Titan run and logs/measure-1324235.log holds only the TIME LIMIT line, so the lane decision cannot be reopened.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223231577276-icm-linear-shell-arm/manifest.md:14 non-blocking: baseline_suite and after_suite record the three-file gate command while their logs' '# command:' lines name tests/test_magnetisation.py alone and report 82/83 passed.\nFINDING tests/test_magnetisation.py:1484 non-blocking: the added guard test lies outside the node's three declared write paths.",
+  "review_node": "review-of-icm-linear-shell-arm-7c2ceaf6d1c9",
+  "review_run_id": "r-20261118T014808878247-review-of-icm-linear-shell-arm-7c2ceaf6d1c9",
+  "reviewed_base_sha": "c97c56ee268b8535ba58cd42b458a35d4718544b",
+  "reviewed_head_sha": "7c2ceaf6d1c900612fb8ea2872d8f5dc1ec27541",
+  "reviewed_run_id": "r-20261117T223231577276-icm-linear-shell-arm",
+  "reviewer": {
+    "backend": "omp-local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T014808878247-review-of-icm-linear-shell-arm-7c2ceaf6d1c9"
+  },
+  "reviewer_note": "independent review of the landed node at head 7c2ceaf6d1c900612fb8ea2872d8f5dc1ec27541 against base c97c56ee268b8535ba58cd42b458a35d4718544b; every measurement claim was checked against the receipts under /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/shell-arm/ rather than the worker's account, and the gate, suite-arm and negative-control logs were read at their tails.",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 17,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T01:52:58+00:00",
+  "total": 101
+}

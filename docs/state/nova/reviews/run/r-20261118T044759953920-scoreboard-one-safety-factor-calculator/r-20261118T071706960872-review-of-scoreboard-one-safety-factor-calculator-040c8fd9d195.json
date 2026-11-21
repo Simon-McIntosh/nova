@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run suite-arms.log referenced by baseline_suite and after_suite: completed base 11 passed BASE_EXIT=0, head 16 passed HEAD_EXIT=0, no FAILED ids; the same parser finds the scalar-fallback test in negative-control.log as its positive control. Manifest revision/command fields are stale; the log header supplies the requested full pair.",
+  "assertion_audit": [
+    "tests/test_estimator_scoreboard.py:394-400: restoring scalar fallback makes both nan checks and the false q95 verdict fail; changing other metric calculations breaks the remaining-band all assertion.",
+    "tests/test_estimator_scoreboard.py:415-428: dropping the IMAS map breaks is-not-None; returning nan breaks finite; ignoring or reversing the gradient breaks stronger > value > 0. These are directional checks, not an absolute numerical oracle.",
+    "tests/test_estimator_scoreboard.py:434-436: is-None and finite stored q establish the no-map positive fixture; returning that scalar from the calculator breaks the nan assertion, demonstrated in negative-control.log.",
+    "tests/test_estimator_scoreboard.py:454-481: CLI status fails on scoring failure; persisted nan value/metric and false verdict fail if scalar fallback or omitted q95_values is restored; stored-q comparison is now independently calculated from fixture profile nodes and breaks reader interpolation/value corruption; removing absence rendering breaks the HTML text checks.",
+    "tests/test_estimator_scoreboard.py:502-506: finite checks reject invalid geometry; resetting flux_map_scale to 1 breaks the registered-bound comparison; ignoring q95_values breaks the false verdict because the stored profiles are equal. The measured q values do not constitute the expected threshold, so this is not a same-input tautology.",
+    "tests/test_estimator_scoreboard.py:532-548: map presence, descending levels and descending stored nodes validate the fixture orientation; finite/positive rejects invalid output; sorting physical nodes before normalisation breaks equality against the independently negated map, as negative-control-round2.log shows; discarding the inward tail breaks gradient growth.",
+    "tests/test_estimator_scoreboard.py:563-572: dropping maps breaks presence; applying a zero perturbation incorrectly to scalar levels breaks approximate equality; restoring division by abs(span) breaks map and gradient-node allclose, as negative-control-round2.log shows; changing q_scale default breaks stored-q identity.",
+    "No remaining added assertion compares a scorer readback with the same reader as its expected scalar: the earlier stored-q assertion now constructs its expectation directly from the fixture q-profile values."
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "benchmarks/estimator_scoreboard.py:main",
+    "benchmarks/estimator_scoreboard.py:emit_declared_states",
+    "benchmarks/estimator_scoreboard.py:score_case",
+    "benchmarks/estimator_scoreboard.py:render_table",
+    "nova/imas/mast_efit_referee.py:read_equilibrium_state",
+    "nova/imas/mast_efit_referee.py:q95_from_flux_map"
+  ],
+  "completed_at": "2026-11-18T07:23:16Z",
+  "dispatched_at": "2026-11-18T07:17:47Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "non-blocking: The reviewed run's after_suite revision and command still describe the preceding head and scratch directory, while suite-arms.log explicitly measures base 794d6ea6a5726be907fe0e38f516699bc68bfdf0 and head 040c8fd9d195c2f5e56ee6aa29a000becc87fd9e with 11/16 passes; refresh the manifest fields so machine readers receive the same evidence as a log reader."
+    },
+    {
+      "file": "tests/test_estimator_scoreboard.py",
+      "line": "415",
+      "severity": "non-blocking",
+      "text": "non-blocking: The finite, positive, monotonic, perturbation-threshold and mirror checks constrain behaviour but allow a common multiplicative error in all calculated q95 values to survive; add an independent numerical oracle for the common surface definition to protect the matched-definition value itself."
+    },
+    {
+      "file": "benchmarks/estimator_scoreboard.py",
+      "line": "529",
+      "severity": "non-blocking",
+      "text": "non-blocking: abs(float(stored)) prints the nova state's stored -3.055 as 3.055 and the perturbed state's -3.208 as 3.208, obscuring their signed stored definitions even though the receipt and companion fragment retain the signs; preserve the stored sign while continuing to judge the band on magnitudes."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "Read the implementation in e57345642789db2f4bea3d22dfdc798fa1e15a93, republication in 32e5252432b6779ca1a2cb742a3e23c1fdd12f27, evidence in 7437b9862399e8e5fd51ebfe85112ffd5d2b9299 and orientation/reuse repair in 040c8fd9d195c2f5e56ee6aa29a000becc87fd9e against base 794d6ea6a5726be907fe0e38f516699bc68bfdf0; the signed-span and descending-gradient defects are repaired at estimator_scoreboard.py:144 and mast_efit_referee.py:769.",
+    "done_when": "The reviewed prompt.txt:140 requires a gap near 0.065 inside 0.1, stored values beside it, no-map absence and a failing map perturbation; the committed receipt records 0.064737463 passing and 0.244141901 failing, suite-arms.log records 11 base and 16 head passes, and negative-control.log demonstrates scalar-fallback rejection.",
+    "goal": "The reviewed run's prompt.txt:38 requires one calculator on every column's own flux map; benchmarks/estimator_scoreboard.py:402 and :432 now call q95_from_flux_map for the reference and each supplied candidate.",
+    "manifest": "The source manifest.md names all seven paths and four commits, but its after_suite revision still names 7437b9862399 and its summary says 14 head passes while suite-arms.log actually records 040c8fd9d195 and 16 head passes.",
+    "write_paths": "The seven-path diff stays within the four scope roots supplied to this review except tests/test_estimator_scoreboard.py and docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html, both necessary mergeable extensions for regression coverage and republication."
+  },
+  "justifications": {
+    "durability": "tests/test_estimator_scoreboard.py:436 rejects scalar fallback, :504 rejects an ineffective map perturbation, :542 rejects descending-tail corruption and :566 rejects signed-span reflection, but no assertion pins an independently known numerical q95.",
+    "evidence": "The committed receipt.json:54 and :160 supply passing and failing q95 gaps and suite-arms.log records complete 11/16 passing arms at the requested revisions, but source manifest.md:after_suite misidentifies the measured head.",
+    "fit": "nova/imas/mast_efit_referee.py:521 follows the surrounding frozen immutable record style and benchmarks/estimator_scoreboard.py:515 extends its existing rendering owner without a forbidden source identifier.",
+    "goal_fidelity": "benchmarks/estimator_scoreboard.py:402 and :432 apply the same calculator to each stored map and preserve absence, although :529 drops the stored q95 sign in the published comparison.",
+    "reuse": "nova/imas/mast_efit_referee.py:819 and :821 wrap the existing observation.gradient_tail and convention.flux_function_toroidal_field owners, :824 wraps FluxSurfaceGeometry.from_flux_map, and capability searches found no existing IMAS map-plus-gradient adapter or q95 cell renderer to extend elsewhere.",
+    "scope_discipline": "tests/test_estimator_scoreboard.py and docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html extend the declared scope solely to test and publish the requested correction."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed run's prompt.txt:38 requires one calculator on every column's own flux map; benchmarks/estimator_scoreboard.py:402 and :432 now call q95_from_flux_map for the reference and each supplied candidate.\nVERDICT done_when: The reviewed prompt.txt:140 requires a gap near 0.065 inside 0.1, stored values beside it, no-map absence and a failing map perturbation; the committed receipt records 0.064737463 passing and 0.244141901 failing, suite-arms.log records 11 base and 16 head passes, and negative-control.log demonstrates scalar-fallback rejection.\nVERDICT write_paths: The seven-path diff stays within the four scope roots supplied to this review except tests/test_estimator_scoreboard.py and docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html, both necessary mergeable extensions for regression coverage and republication.\nVERDICT manifest: The source manifest.md names all seven paths and four commits, but its after_suite revision still names 7437b9862399 and its summary says 14 head passes while suite-arms.log actually records 040c8fd9d195 and 16 head passes.\nVERDICT diff: Read the implementation in e57345642789db2f4bea3d22dfdc798fa1e15a93, republication in 32e5252432b6779ca1a2cb742a3e23c1fdd12f27, evidence in 7437b9862399e8e5fd51ebfe85112ffd5d2b9299 and orientation/reuse repair in 040c8fd9d195c2f5e56ee6aa29a000becc87fd9e against base 794d6ea6a5726be907fe0e38f516699bc68bfdf0; the signed-span and descending-gradient defects are repaired at estimator_scoreboard.py:144 and mast_efit_referee.py:769.\nCALL_SITES: benchmarks/estimator_scoreboard.py:main, benchmarks/estimator_scoreboard.py:emit_declared_states, benchmarks/estimator_scoreboard.py:score_case, benchmarks/estimator_scoreboard.py:render_table, nova/imas/mast_efit_referee.py:read_equilibrium_state, nova/imas/mast_efit_referee.py:q95_from_flux_map\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/estimator_scoreboard.py:402 and :432 apply the same calculator to each stored map and preserve absence, although :529 drops the stored q95 sign in the published comparison.\nSCORE evidence: 18\nJUSTIFICATION evidence: The committed receipt.json:54 and :160 supply passing and failing q95 gaps and suite-arms.log records complete 11/16 passing arms at the requested revisions, but source manifest.md:after_suite misidentifies the measured head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: tests/test_estimator_scoreboard.py and docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html extend the declared scope solely to test and publish the requested correction.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_estimator_scoreboard.py:436 rejects scalar fallback, :504 rejects an ineffective map perturbation, :542 rejects descending-tail corruption and :566 rejects signed-span reflection, but no assertion pins an independently known numerical q95.\nSCORE fit: 18\nJUSTIFICATION fit: nova/imas/mast_efit_referee.py:521 follows the surrounding frozen immutable record style and benchmarks/estimator_scoreboard.py:515 extends its existing rendering owner without a forbidden source identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/imas/mast_efit_referee.py:819 and :821 wrap the existing observation.gradient_tail and convention.flux_function_toroidal_field owners, :824 wraps FluxSurfaceGeometry.from_flux_map, and capability searches found no existing IMAS map-plus-gradient adapter or q95 cell renderer to extend elsewhere.\nFINDING manifest.md:25 non-blocking: The reviewed run's after_suite revision and command still describe the preceding head and scratch directory, while suite-arms.log explicitly measures base 794d6ea6a5726be907fe0e38f516699bc68bfdf0 and head 040c8fd9d195c2f5e56ee6aa29a000becc87fd9e with 11/16 passes; refresh the manifest fields so machine readers receive the same evidence as a log reader.\nFINDING tests/test_estimator_scoreboard.py:415 non-blocking: The finite, positive, monotonic, perturbation-threshold and mirror checks constrain behaviour but allow a common multiplicative error in all calculated q95 values to survive; add an independent numerical oracle for the common surface definition to protect the matched-definition value itself.\nFINDING benchmarks/estimator_scoreboard.py:529 non-blocking: abs(float(stored)) prints the nova state's stored -3.055 as 3.055 and the perturbed state's -3.208 as 3.208, obscuring their signed stored definitions even though the receipt and companion fragment retain the signs; preserve the stored sign while continuing to judge the band on magnitudes.\n",
+  "reuse_search": "At reviewed head, searched nova, benchmarks and scripts by flux-map representation, stored IMAS reading, safety-factor evaluation, inward gradient integration and field composition. Opened observation.py:425, convention.py:115, flux_surface_geometry.py:381, display_flux.py:91 and bank_efit_overlay.py:46. DisplayFluxMap and EfitFluxMap describe display/catalogue maps, not IMAS field-gradient transfer; FluxMap extends EquilibriumState, _equilibrium_flux_map extends its IMAS reader, _stored_gradient adapts stored nodes to the existing integral, q95_from_flux_map wraps geometry/field owners, nested stored/field closures are adapters, and _q95_cell extends the existing table renderer. Test write_mapped_state extends the local fixture mechanism and corpus_wall wraps write_wall.",
+  "review_method": "Read-only git show/diff at explicit revisions; assigned tree HEAD 37fda573af072394c1217fa6607d197f09d4c8f7 was not treated as reviewed head. No implementation mutation or suite rerun.",
+  "review_run_id": "r-20261118T071706960872-review-of-scoreboard-one-safety-factor-calculator-040c8fd9d195",
+  "reviewed_base_sha": "794d6ea6a5726be907fe0e38f516699bc68bfdf0",
+  "reviewed_head_sha": "040c8fd9d195c2f5e56ee6aa29a000becc87fd9e",
+  "reviewed_run_id": "r-20261118T044759953920-scoreboard-one-safety-factor-calculator",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T07:21:01.137435+00:00",
+  "total": 112
+}

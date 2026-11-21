@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/diiid_xpoint_coil_correction/batch.py:measure_command",
+    "benchmarks/diiid_forward_gs_match.py:_read",
+    "benchmarks/diiid_forward_gs_match.py:complete_profile_current_adapter",
+    "scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh"
+  ],
+  "completed_at": "2026-11-21T16:34:07.402Z",
+  "dispatched_at": "2026-11-21T16:18:46Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "non-blocking: set -e is in force at the fitted verify and at the base-base control, so the control's expected non-zero exit terminates the script before CONTROL=$? at line 48, the VERIFY summary at line 50 and exit $FITTED at line 55; resolve-977fce96.log ends at NOT_CONFIRMED and sacct reports job 1334841 FAILED, so a fully successful run exits 1 and the exit status cannot distinguish a landed correction from a missing one."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh",
+      "line": "17",
+      "severity": "non-blocking",
+      "text": "non-blocking: unset SLURM_JOB_ID SLURM_JOBID runs before the header printf at line 22, so resolve-977fce96.log line 1 reads JOB=none while the run executed inside titan job 1334841, and the log cannot be tied to its allocation without the manifest's separate account."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/test_conductor_correction.py",
+      "line": "136",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_the_solved_current_check_passes_when_the_correction_landed builds fitted from the same measured-minus-correction expression verify.compare computes internally, so the assertion holds whatever compare's expectation is and can only catch over-strictness, not a wrong expectation."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_coil_correction/conductor_correction.py",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: current_at re-implements the corpus-column interpolation nova/imas/diiid_current.py:160 (shipped_current_at) already owns, with the same finite mask, two-sample refusal, np.interp and 1000 * applied_multiplier scale, and measure.measured_current repeats that capability's per-conductor loop."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "non-blocking: the 146D caption claims the wall, both axial null markers and the EFIT axis marker are drawn on every panel, but the rendered 10 cm zoom panels draw only the crossing contours and the nulls; the same vocabulary is claimed for 146L at line 47."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read all six commits against bd3c232f; the change is a corpus-column install in measure.py, the shift arithmetic in conductor_correction.py, the check in verify.py, a driver in resolve.sh, receipt and figure artefacts, and four added assertions in test_conductor_correction.py.",
+    "done_when": "the done-when's measure is verify.py's per-conductor comparison at scripts/prototypes/diiid_xpoint_coil_correction/verify.py:38, recorded in verify/fitted.json with 19 conductors and 0 mismatches on all four rows; its negative control is recorded in verify/base-base.json with 19/19 mismatched on all four rows, and the build-seam refusal is recorded in control-977fce96.log:163.",
+    "goal": "the node goal is to solve the four DIII-D X-point rows with the fitted coil-correction currents and bank them beside the measured-current offsets; measure.py:install_corpus_correction shifts the corpus magnetics columns the adapter reads, and corrected/frame-137-diverted/solve-currents.json records F1A at -231293.186 A against the measured -177235.036.",
+    "manifest": "read; it states the coil-correction prototype test passed (12 passed, proto-test.log, EXIT=0 at head 9ce2fe445) and names the run directory, the receipt paths and the two controls, but its changed_paths names batch.py, which the diff does not touch.",
+    "write_paths": "every one of the 22 delivered paths lies under scripts/prototypes/diiid_xpoint_coil_correction, docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html, or docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge; nothing outside them was touched."
+  },
+  "justifications": {
+    "durability": "test_conductor_correction.py:127 reddens when compare cannot see a missing correction, but the tautological pass test at :136 and the absence of any unit test over measure.py:install_corpus_correction leave the delivery path covered only by an expensive cohort rerun.",
+    "evidence": "verify/fitted.json records 19 conductors and zero mismatches on all four rows and verify/base-base.json records 19/19 red, but resolve-977fce96.log ends at NOT_CONFIRMED with no VERIFY or EXIT line because resolve.sh:43 aborts under set -e, and sacct reports the cohort job 1334841 FAILED.",
+    "fit": "verify.py and resolve.sh follow the surrounding prototype idiom (argparse and json records), and no added name carries a plan label or ticket reference, though conductor_correction.py:15 imports numpy inside the function against the module's no-top-level-import style.",
+    "goal_fidelity": "measure.py:124 shifts the corpus magnetics columns the adapter reads, and solve-currents.json at corrected/frame-137-diverted records F1A at -231293.186 A against the measured -177235.036, matching the done-when's -231.293 kA.turn.",
+    "reuse": "conductor_correction.py:15 re-implements the column interpolation nova/imas/diiid_current.py:160 already owns, without extending it.",
+    "scope_discipline": "all 22 delivered paths in git diff bd3c232f..9ce2fe445 lie inside the declared prototype directory, the new evidence fragment, or its figure directory, and no shared file outside them changed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to solve the four DIII-D X-point rows with the fitted coil-correction currents and bank them beside the measured-current offsets; measure.py:install_corpus_correction shifts the corpus magnetics columns the adapter reads, and corrected/frame-137-diverted/solve-currents.json records F1A at -231293.186 A against the measured -177235.036.\nVERDICT done_when: the done-when's measure is verify.py's per-conductor comparison at scripts/prototypes/diiid_xpoint_coil_correction/verify.py:38, recorded in verify/fitted.json with 19 conductors and 0 mismatches on all four rows; its negative control is recorded in verify/base-base.json with 19/19 mismatched on all four rows, and the build-seam refusal is recorded in control-977fce96.log:163.\nVERDICT write_paths: every one of the 22 delivered paths lies under scripts/prototypes/diiid_xpoint_coil_correction, docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html, or docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge; nothing outside them was touched.\nVERDICT manifest: read; it states the coil-correction prototype test passed (12 passed, proto-test.log, EXIT=0 at head 9ce2fe445) and names the run directory, the receipt paths and the two controls, but its changed_paths names batch.py, which the diff does not touch.\nVERDICT diff: read all six commits against bd3c232f; the change is a corpus-column install in measure.py, the shift arithmetic in conductor_correction.py, the check in verify.py, a driver in resolve.sh, receipt and figure artefacts, and four added assertions in test_conductor_correction.py.\nCALL_SITES: scripts/prototypes/diiid_xpoint_coil_correction/batch.py:measure_command, benchmarks/diiid_forward_gs_match.py:_read, benchmarks/diiid_forward_gs_match.py:complete_profile_current_adapter, scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: measure.py:124 shifts the corpus magnetics columns the adapter reads, and solve-currents.json at corrected/frame-137-diverted records F1A at -231293.186 A against the measured -177235.036, matching the done-when's -231.293 kA.turn.\nSCORE evidence: 16\nJUSTIFICATION evidence: verify/fitted.json records 19 conductors and zero mismatches on all four rows and verify/base-base.json records 19/19 red, but resolve-977fce96.log ends at NOT_CONFIRMED with no VERIFY or EXIT line because resolve.sh:43 aborts under set -e, and sacct reports the cohort job 1334841 FAILED.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all 22 delivered paths in git diff bd3c232f..9ce2fe445 lie inside the declared prototype directory, the new evidence fragment, or its figure directory, and no shared file outside them changed.\nSCORE durability: 12\nJUSTIFICATION durability: test_conductor_correction.py:127 reddens when compare cannot see a missing correction, but the tautological pass test at :136 and the absence of any unit test over measure.py:install_corpus_correction leave the delivery path covered only by an expensive cohort rerun.\nSCORE fit: 17\nJUSTIFICATION fit: verify.py and resolve.sh follow the surrounding prototype idiom (argparse and json records), and no added name carries a plan label or ticket reference, though conductor_correction.py:15 imports numpy inside the function against the module's no-top-level-import style.\nSCORE reuse: 5\nJUSTIFICATION reuse: conductor_correction.py:15 re-implements the column interpolation nova/imas/diiid_current.py:160 already owns, without extending it.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh:43 non-blocking: set -e is in force at the fitted verify and at the base-base control, so the control's expected non-zero exit terminates the script before CONTROL=$? at line 48, the VERIFY summary at line 50 and exit $FITTED at line 55; resolve-977fce96.log ends at NOT_CONFIRMED and sacct reports job 1334841 FAILED, so a fully successful run exits 1 and the exit status cannot distinguish a landed correction from a missing one.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh:17 non-blocking: unset SLURM_JOB_ID SLURM_JOBID runs before the header printf at line 22, so resolve-977fce96.log line 1 reads JOB=none while the run executed inside titan job 1334841, and the log cannot be tied to its allocation without the manifest's separate account.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/test_conductor_correction.py:136 non-blocking: test_the_solved_current_check_passes_when_the_correction_landed builds fitted from the same measured-minus-correction expression verify.compare computes internally, so the assertion holds whatever compare's expectation is and can only catch over-strictness, not a wrong expectation.\nFINDING scripts/prototypes/diiid_xpoint_coil_correction/conductor_correction.py:15 non-blocking: current_at re-implements the corpus-column interpolation nova/imas/diiid_current.py:160 (shipped_current_at) already owns, with the same finite mask, two-sample refusal, np.interp and 1000 * applied_multiplier scale, and measure.measured_current repeats that capability's per-conductor loop.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html:43 non-blocking: the 146D caption claims the wall, both axial null markers and the EFIT axis marker are drawn on every panel, but the rendered 10 cm zoom panels draw only the crossing contours and the nulls; the same vocabulary is claimed for 146L at line 47.",
+  "review_run_id": "r-20261121T161800187546-review-of-diiid-coil-correction-resolve-finite-edge-9ce2fe445956",
+  "reviewed_base_sha": "bd3c232f1128253a34e358219f429e2165a59e6c",
+  "reviewed_head_sha": "9ce2fe445956537acb0855305238582d6e3d709e",
+  "reviewed_run_id": "r-20261121T073819532158-diiid-coil-correction-resolve-finite-edge",
+  "scores": {
+    "durability": 12,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T16:34:19.517164+00:00",
+  "total": 88
+}

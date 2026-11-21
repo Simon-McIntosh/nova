@@ -1,0 +1,106 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-20T21:00:39.105Z",
+  "dispatched_at": "2026-11-20T20:24:24Z",
+  "figures": {
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/iter-iter-stored-default-preview.png": {
+      "contrast": "pass: legend text renders near-black on white (measured darkest text pixels 0,0,0 to 3,3,3); the data grey #929292 measures 3.11:1 against white and the blue #3366cc measures 5.37:1, both clearing the 3:1 non-text threshold.",
+      "data_ink": "the data carry the visual weight and no decoration competes with them, but the panel is drawn on a fixed 14x7.2 in canvas while the machine occupies 20 of the 100 percent of the canvas width (measured content box x 560-841 of 1399 px, y 90-677) and 95.8 percent of pixels are pure white. Recorded as a non-blocking framing finding.",
+      "decoration": "pass: no gradient, no background fill, no shading, no grid; contours, wall and null markers only.",
+      "label_collision": "pass: the legend sits in clear space above the panel at full text size; no axis labels, ticks or direct labels exist to clip, and nothing is cut at the canvas edge.",
+      "legibility": "pass: both series are present and separable at a glance - nested grey stored-state contours with the grey axis triangle and the grey X-point cross, crossed by near-vertical blue terminal-iterate contours. Measured on this 1400x720 PNG: 6829 blue pixels below the legend row (y>=60) against 20462 grey, and 6911 blue in total, so the blue series the legend advertises is drawn across the field of view, which answers the prior head's blocking finding of zero blue pixels below y=60. The panel is small on the page, which is recorded under data_ink rather than here.",
+      "table_form": "pass: a poloidal flux-contour comparison, which is naturally spatial and not tabular."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-displaced-continuation.svg": {
+      "contrast": "pass: grey and blue clear 3:1 on white; text near-black.",
+      "data_ink": "data carry the weight, no decorative fill; 15 percent canvas-width occupancy recorded as a non-blocking framing finding.",
+      "decoration": "pass: no gradient, fill or shading.",
+      "label_collision": "pass: no clipped or overlapping text.",
+      "legibility": "verdict taken from the rendered PNG attachment (review-run image-6.png): pass as a single panel, identical in every measured respect to image-3.png. Pixel-identical to the other three MAST-U renders; recorded as a non-blocking finding.",
+      "table_form": "pass: a flux-contour comparison."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-displaced-default.svg": {
+      "contrast": "pass: grey and blue clear 3:1 on white; text near-black.",
+      "data_ink": "data carry the weight, no decorative fill; 15 percent canvas-width occupancy recorded as a non-blocking framing finding.",
+      "decoration": "pass: no gradient, fill or shading.",
+      "label_collision": "pass: no clipped or overlapping text.",
+      "legibility": "verdict taken from the rendered PNG attachment (review-run image-5.png): pass as a single panel, identical in every measured respect to image-3.png. Pixel-identical to the other three MAST-U renders, so the displaced arm is visually indistinguishable from the stored arm; recorded as a non-blocking finding.",
+      "table_form": "pass: a flux-contour comparison."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-continuation.svg": {
+      "contrast": "pass: grey and blue clear 3:1 on white; text near-black.",
+      "data_ink": "data carry the weight, no decorative fill; 15 percent canvas-width occupancy recorded as a non-blocking framing finding.",
+      "decoration": "pass: no gradient, fill or shading.",
+      "label_collision": "pass: no clipped or overlapping text.",
+      "legibility": "verdict taken from the rendered PNG attachment (review-run image-4.png): pass as a single panel, identical in every measured respect to image-3.png (7524 blue below y=60, 17429 grey, 96.3 percent white). Pixel-identical to the other three MAST-U renders; recorded as a non-blocking finding, since a reader cannot tell this arm from the stored default by looking.",
+      "table_form": "pass: a flux-contour comparison."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-default.svg": {
+      "contrast": "pass: grey 3.11:1, blue 5.37:1, legend text near-black on white.",
+      "data_ink": "the data carry the weight with no decorative fill, but the machine occupies 15 percent of the canvas width (measured content box x 593-796 of 1399, y 104-672) and 96.3 percent of pixels are pure white; recorded as a non-blocking framing finding.",
+      "decoration": "pass: no gradient, background fill, shading or grid.",
+      "label_collision": "pass: nothing clipped; legend in clear space above the panel.",
+      "legibility": "verdict taken from the rendered PNG attachment (review-run image-3.png, 1399x720): grey stored-state contours with the grey axis triangle and X-point cross, crossed by blue terminal-iterate contours. Pass as a single panel - measured 7524 blue pixels below y=60 and 17429 grey. All four MAST-U renders are byte-identical to this one, which is recorded as a non-blocking finding.",
+      "table_form": "pass: a poloidal flux-contour comparison."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals/tcv-tcv-stored-default-preview.png": {
+      "contrast": "pass: near-black text on white; grey 3.11:1 and blue 5.37:1 on white at or above the 3:1 non-text threshold.",
+      "data_ink": "the data carry the weight without gradients or decorative fills, but the machine fills 14 percent of the canvas width (measured content box x 602-798 of 1399, y 104-672) and 95.4 percent of pixels are pure white; recorded as a non-blocking framing finding.",
+      "decoration": "pass: white ground, thin black wall polyline, no fills, no shading, no grid.",
+      "label_collision": "pass: legend in clear space above, no overlapping or clipped text.",
+      "legibility": "pass: the grey stored field (nested closed contours, grey axis triangle) and the blue terminal iterate are both drawn and clearly distinguishable. Measured on this 1400x720 PNG: 8198 blue pixels below y=60, 8280 in total, 21752 grey. The blue contours are open near-straight lines, which the fragment explains as the refused iterate leaving the stored band on unrestyled shared levels.",
+      "table_form": "pass: a flux-contour comparison, not a table."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals/mastu-mastu-stored-default.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The four MAST-U panels render to byte-identical PNGs (md5 f7d3f1f632040a8c879dd3bcd8a8f47d for all four of the review-run attachments image-3.png through image-6.png, with identical pixel census: 7645 blue, 17429 grey, 96.3 percent white). Published as four figures, the set shows a reader one picture four times: the stored-default, stored-continuation, displaced-default and displaced-continuation arms cannot be told apart in the rendering, so the displaced arm the section exists to show contributes no distinct visual evidence. Whether this is one shared terminal state across the four arms or one picture assigned to all four cannot be decided from the raster, but either way the figure set carries no comparison a reader can act on."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/panels.py",
+      "line": 104,
+      "severity": "non-blocking",
+      "summary": "The subject of these panels - the nova terminal iterate, the series the review exists to see - is drawn at linewidth=1.0 while the stored imas-efit reference above it is drawn at 2.6 pt (line 93), so the reference carries about three times the ink: measured 20462 grey against 6863 blue pixels on the ITER render and 21752 against 8280 on the TCV render. The project's own plot-style rule separates a comparison series by colour or dash, never by thinning it; here the blue contour also renders as the fainter of the two at page width, where the panel shrinks far below its 1400 px preview."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/panels.py",
+      "line": 82,
+      "severity": "non-blocking",
+      "summary": "Every panel is drawn on a fixed 14x7.2 in canvas with a device-sized poloidal cross-section inside it, so the machine occupies 20 percent of the canvas width on ITER (content box x 560-841 of 1399 px) and 14-15 percent on the others, and 95.4-96.3 percent of all pixels are pure white. Roughly four fifths of each canvas is empty margin while the drawing that carries all the information is confined to a narrow column; on the page the contours and the legend become small relative to the surrounding prose, and a reader who wants the contour topology has the least legible object on the page."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/panels.py",
+      "line": 96,
+      "severity": "non-blocking",
+      "summary": "The vessel is not clipped identically for the two series. The blue terminal-iterate contours are masked by whole triangulation cells, so along the ITER inner-wall edge a few blue strokes run a few pixels outside the drawn wall polyline, and a stray grey contour fragment sits between the wall and the blue there. On a panel whose whole purpose is to show where the solved field sits relative to the vessel, marks outside the vessel read as data the solve could not have produced."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/panels.py",
+      "line": 87,
+      "severity": "non-blocking",
+      "summary": "The grey stored-state contours are bounded by the source grid rather than by the plasma, so they stop with blunt flat caps in open plasma - clearest across the MAST-U divertor notch and at the top of the TCV panel, where several grey strokes end mid-field, their outlines cut square. A reader cannot tell whether the field ends there or the plotting domain was cut, so those contour ends read as truncation rather than as data. Blue contours stop at the same vertical cut where the node mesh ends."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261120T202326050164-review-of-stored-state-refusals-3abe68a77fb0-figure",
+  "reviewed_base_sha": "a148a0a9d176713a90cd24ffa7de2966b0c55654",
+  "reviewed_head_sha": "3abe68a77fb0184ff30104038c66348a6a27ffbe",
+  "reviewed_run_id": "r-20261118T112812127189-stored-state-refusals",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass on every figure: legend text near-black on white; data grey #929292 measures 3.11:1 and blue #3366cc 5.37:1, both at or above the 3:1 non-text threshold.",
+    "data_ink": "all six rendered panels put the data first with no decorative ink, but each leaves 95.4-96.3 percent of the canvas pure white because a narrow poloidal cross-section is drawn on a fixed 14x7.2 in canvas; recorded as one non-blocking framing finding anchored to scripts/prototypes/stored_state_refusals/panels.py:82.",
+    "decoration": "pass on every figure: white ground, no gradient, no background fill, no shading, no gridlines, no frames.",
+    "label_collision": "pass on every figure: the only text is the two-entry legend, placed in clear space above the panel, at full size, with no clipping at the canvas edge and no overlap with data. The captions live in the fragment's figcaptions, not in the raster, so nothing inside the panel can collide.",
+    "legibility": "pass on all six rendered panels: each shows both the grey stored imas-efit field (nested closed contours, grey axis triangle, grey X-point cross where one is admitted) and the blue nova terminal iterate, clearly distinguishable; the two preview PNGs now carry 6829 and 8198 blue pixels below the legend row, answering the prior head's blocking finding of zero.",
+    "table_form": "pass on every figure: each is a poloidal flux-contour comparison, which is naturally spatial; none depicts tabular information."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T21:01:00.047816+00:00",
+  "total": null
+}

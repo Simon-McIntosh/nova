@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-20T23:59:26.277Z",
+  "dispatched_at": "2026-11-20T23:52:48Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-21T00:04:36.896770+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261120T201203285388-bank-hessian-blowup"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-21T00:04:36.896770+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261120T201203285388-bank-hessian-blowup"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-21T00:04:36.896770+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261120T201203285388-bank-hessian-blowup"
+    },
+    "3": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-21T00:04:36.896770+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261120T201203285388-bank-hessian-blowup"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_hessian_blowup/attribute.py",
+      "line": 38,
+      "severity": "non-blocking",
+      "text": "the stable-height selector tolerance 1e-7 is restated here and at diagnose.py:47 instead of being derived from its owner at nova/biot/polygonanalytic.py:3530, so the page's \"1666 of 1772 selected\" claim silently misclassifies if the kernel threshold changes"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_blowup/test_fragment.py",
+      "line": 183,
+      "severity": "non-blocking",
+      "text": "test_the_renderer_types_no_scientific_literals rejects only scientific-notation constants, so a typed decimal such as 320.0 would survive, making the guard narrower than the module docstring's claim that any typed number is a failure"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_blowup/test_fragment.py",
+      "line": 34,
+      "severity": "non-blocking",
+      "text": "every claim test is gated on the measurement records existing under /home/ITER/mcintos/.cache/nova-bank-hessian-blowup, so on a checkout without that cache the durability guard reports skip rather than failing"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_blowup/fragment.py",
+      "line": 175,
+      "severity": "non-blocking",
+      "text": "the deliverable answers the brief's fourth question only by asserting the number is \"not from the moment rows\"; no sentence names the moment-row Z-gradient fix and states that it would not remove the blow-up"
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read the 8-file diff from 900ef402f and the ten gained commits ebc8f05bc..a10d832f8 commit by commit; they add geometry.py and test_fragment.py, route kernel.py and jump.py through the shared _source_jets, read every page number from the records, and replace the typed figure and verdict with record-derived ones",
+    "done_when": "the done_when is that the diff from the base names no path under nova/; the 8-file diff 900ef402f..a10d832f8 lists none, and suite-head-arm.log records 12 passed with EXIT=0",
+    "goal": "the node's goal is a fragment naming the node-cell pairs that carry the ITER bank's 3.77e15 second derivative, comparing the certified bank with the rerun rebuilds and attributing the construction; docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html answers pairs, banks and construction, though the moment-row-fix question is implicit",
+    "manifest": "read; it records status complete, 15 commits, the three repair answers, the suite and three control logs, and an artifacts block quoting the record maxima",
+    "write_paths": "the declared paths are the fragment and scripts/prototypes/bank_hessian_blowup; every changed path lies inside them"
+  },
+  "justifications": {
+    "durability": "control-durability.log shows the typed 3e5 reddens test_fragment.py:183 and control-reuse.log shows the restored helpers redden test_fragment.py:192, though the typed-literal guard catches only scientific notation and the module skips without the external records",
+    "evidence": "test_fragment.py recomputes every page claim from census.json, attribute.json, kernel.json and jump.json, and control-page.log, control-reuse.log and control-durability.log each end EXIT=1",
+    "fit": "the scripts follow the prototype idiom with configure_dtypes before the jax import and a COMPLETE marker, and the names carry no plan or ticket label",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html answers pairs, banks and construction, but the fourth brief question is asserted only as \"not from the moment rows\" (fragment.py:175)",
+    "reuse": "geometry.py:33 wraps nova.equilibrium.boundary_comparison._point_to_segment_distances and kernel.py:86 wraps nova.equilibrium.fixed_points._source_jets, with test_fragment.py:192 enforcing that neither is reimplemented",
+    "scope_discipline": "git diff --name-only 900ef402f..a10d832f8 lists only the 8 declared prototype and evidence paths, with zero paths under nova/"
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is a fragment naming the node-cell pairs that carry the ITER bank's 3.77e15 second derivative, comparing the certified bank with the rerun rebuilds and attributing the construction; docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html answers pairs (38 pairs, 37 moment-1 psi_RR and one moment-2 psi_RR), banks (the banks table, rebuilds identical to 1.0583e-5) and construction (the arms table plus the offset probe), though it answers the moment-row-fix question only implicitly\nVERDICT done_when: the done_when is that the diff from the base names no path under nova/; the 8-file diff 900ef402f..a10d832f8 lists none, and suite-head-arm.log records 12 passed with EXIT=0\nVERDICT write_paths: the declared paths are the fragment and scripts/prototypes/bank_hessian_blowup; every changed path lies inside them\nVERDICT manifest: read; it records status complete, 15 commits, the three repair answers, the suite and three control logs, and an artifacts block quoting the record maxima\nVERDICT diff: read the 8-file diff from 900ef402f and the ten gained commits ebc8f05bc..a10d832f8 commit by commit; they add geometry.py and test_fragment.py, route kernel.py and jump.py through the shared _source_jets, read every page number from the four records, and replace the typed figure and verdict with record-derived ones\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html answers pairs, banks and construction, but the fourth brief question is asserted only as \"not from the moment rows\" (fragment.py:175)\nSCORE evidence: 18\nJUSTIFICATION evidence: test_fragment.py recomputes every page claim from census.json, attribute.json, kernel.json and jump.json, and control-page.log, control-reuse.log and control-durability.log each end EXIT=1\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 900ef402f..a10d832f8 lists only the 8 declared prototype and evidence paths, with zero paths under nova/\nSCORE durability: 17\nJUSTIFICATION durability: control-durability.log shows the typed 3e5 reddens test_fragment.py:183 and control-reuse.log shows the restored helpers redden test_fragment.py:192, though the typed-literal guard catches only scientific notation and the module skips without the external records\nSCORE fit: 18\nJUSTIFICATION fit: the scripts follow the prototype idiom with configure_dtypes before the jax import and a COMPLETE marker, and the names carry no plan or ticket label\nSCORE reuse: 18\nJUSTIFICATION reuse: geometry.py:33 wraps nova.equilibrium.boundary_comparison._point_to_segment_distances and kernel.py:86 wraps nova.equilibrium.fixed_points._source_jets, with test_fragment.py:192 enforcing that neither is reimplemented\nFINDING scripts/prototypes/bank_hessian_blowup/attribute.py:38 non-blocking: the stable-height selector tolerance 1e-7 is restated here and at diagnose.py:47 instead of being derived from its owner at nova/biot/polygonanalytic.py:3530, so the page's \"1666 of 1772 selected\" claim silently misclassifies if the kernel threshold changes\nFINDING scripts/prototypes/bank_hessian_blowup/test_fragment.py:183 non-blocking: test_the_renderer_types_no_scientific_literals rejects only scientific-notation constants, so a typed decimal such as 320.0 would survive, making the guard narrower than the module docstring's claim that any typed number is a failure\nFINDING scripts/prototypes/bank_hessian_blowup/test_fragment.py:34 non-blocking: every claim test is gated on the measurement records existing under /home/ITER/mcintos/.cache/nova-bank-hessian-blowup, so on a checkout without that cache the durability guard reports skip rather than failing\nFINDING scripts/prototypes/bank_hessian_blowup/fragment.py:175 non-blocking: the deliverable answers the brief's fourth question only by asserting the number is \"not from the moment rows\"; no sentence names the moment-row Z-gradient fix and states that it would not remove the blow-up\n",
+  "review_run_id": "r-20261120T235210192020-review-of-bank-hessian-blowup-a10d832f81f7",
+  "reviewed_base_sha": "900ef402f2a7129ac33038e9f5536b9729feb7ce",
+  "reviewed_head_sha": "a10d832f81f7ceeca264b7b5863d158457425af2",
+  "reviewed_run_id": "r-20261120T201203285388-bank-hessian-blowup",
+  "reviewer_run_id": "r-20261120T235210192020-review-of-bank-hessian-blowup-a10d832f81f7",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T23:59:41.450559+00:00",
+  "total": 108
+}

@@ -1,0 +1,108 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-20T22:22:54.096Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-bank-hessian-blowup-82591fd99022",
+      "recorded_at": "2026-11-20T23:51:22.724513+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-bank-hessian-blowup-82591fd99022",
+      "recorded_at": "2026-11-20T23:51:28.374619+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-20T22:01:10Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bank-hessian-blowup-82591fd99022",
+      "recorded_at": "2026-11-20T23:51:17.485378+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/bank_hessian_blowup/fragment.py",
+      "line": 239,
+      "severity": "blocking",
+      "text": "the pairs section and the bold headline (fragment.py:166) assert that every one of the 38 pairs above 1e9 is a moment-1 psi_RR entry within 5.5e-13 m of a vertex; attribute.json holds 37 such pairs and one, node 637 cell 221, whose largest entry is moment-2 psi_RR at 3.7044e9 with a vertex distance of 5.7334e-13 m"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_blowup/fragment.py",
+      "line": 430,
+      "severity": "non-blocking",
+      "text": "the jump section hardcodes about 3e5 as the row-value change a genuine 3.77e15 second derivative would require across a 2e-9 m stencil; no record carries either figure and 3.77e15 x 2e-9 is 7.5e6, so the claim is unsourced and off by roughly a factor of 25"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_blowup/fragment.py",
+      "line": 249,
+      "severity": "non-blocking",
+      "text": "the inverse-second-moment singular values (4.63e7 and 5.14e6 m^-2 against 320 and 201 for cell 38) are typed into the renderer rather than read from any of the four records, so the module docstring's claim that every number is read from the records does not hold and these cannot be re-derived from the cited artifacts"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_blowup/fragment.py",
+      "line": 433,
+      "severity": "non-blocking",
+      "text": "the page concludes the booked psi_RR is a property of the derivative rule and not of the value graph, yet its stable-pole arm reads the primal row through _packed_analytic_moments_primal(stable_poles=True) (kernel.py:76-82) and the page's own jump table records that arm's row value stepping from -1.0386e-6 at +1e-9 m to -1.4716e-7 at +1e-12 m, a discontinuity in that formulation's value path rather than a tangent-only effect"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_blowup/diagnose.py",
+      "line": 67,
+      "severity": "non-blocking",
+      "text": "point_segment_distance re-implements the point-to-segment distance the repository already owns at nova/equilibrium/boundary_comparison.py:81, and attribute.py:55 duplicates it again, so one geometry measure now has three implementations instead of one"
+    },
+    {
+      "file": "scripts/prototypes/bank_hessian_blowup/kernel.py",
+      "line": 85,
+      "severity": "non-blocking",
+      "text": "jets reproduces nova/equilibrium/fixed_points.py:323 _source_jets line for line with only the row function swapped and jump.py repeats the same arm plumbing again, while the brief named derive_rows.py's subprocess-plus-PYTHONPATH pattern as the reuse route for this row-program swap"
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html",
+      "line": 28,
+      "severity": "non-blocking",
+      "text": "the evidence record carries four tables and no figure, where nova/AGENTS.md's plotting rules require a GS forward-solve evidence record of a bank row to show its poloidal flux contour panels with both null sets and the wall, and the subject here is geometry a reader can only see as a panel of the offending nodes against their source cells"
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from 900ef402f: a census, an attribution pass, a three-arm kernel evaluation, a jump probe, then the fragment and its renderer, 1284 insertions across six new files, every one a prototype script or the evidence page",
+    "done_when": "the done_when is that the diff from the base names no path under nova/; the six-file diff 900ef402f..82591fd99 touches none, and the manifest's checkpoint records the same check beside four EXIT=0 gate logs",
+    "goal": "the node's goal is a fragment naming the node-cell pairs that carry the ITER bank's second-derivative blowup, comparing the certified bank with the rerun rebuilds and attributing the construction; docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html answers all four brief questions with tables rendered from measured records",
+    "manifest": "read; it records status complete, five commits, the four measurement jobs with their logs, and a checkpoint naming the no-nova-path check, and its artifacts block quotes census.log's maxima",
+    "write_paths": "the declared paths are the fragment and scripts/prototypes/bank_hessian_blowup; all six changed paths lie inside them"
+  },
+  "justifications": {
+    "durability": "the diff adds no test and no assertion, and fragment.py:4 claims every number is read from the records while fragment.py:430 hardcodes one, so nothing reddens if the rendered prose drifts",
+    "evidence": "census.log, attribute.log, kernel.log and jump.log each end EXIT=0 and carry the numbers the page quotes, but fragment.py:239 states a universal the attribute record contradicts",
+    "fit": "the scripts follow the surrounding prototype idiom (configure_dtypes before the jax import, argparse, a COMPLETE marker and an EXIT log line), but fragment.py:239 and fragment.py:430 carry prose numbers that contradict the module's own docstring",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html answers pairs, banks, construction and the moment-row question, though its bold headline overstates the moment-1 shape by one pair",
+    "reuse": "diagnose.py:67 and attribute.py:55 both re-implement nova/equilibrium/boundary_comparison.py:81, and kernel.py:85 reproduces nova/equilibrium/fixed_points.py:323, without extending either owner",
+    "scope_discipline": "every path in the diff is inside the declared write paths and no file under nova/ is touched, matching the diagnosis-only fence"
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is a fragment naming the node-cell pairs that carry the ITER bank's second-derivative blowup, comparing the certified bank with the rerun rebuilds and attributing the construction; docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html answers all four brief questions with tables rendered from measured records\nVERDICT done_when: the done_when is that the diff from the base names no path under nova/; the six-file diff 900ef402f..82591fd99 touches none, and the manifest's checkpoint records the same check beside four EXIT=0 gate logs\nVERDICT write_paths: the declared paths are the fragment and scripts/prototypes/bank_hessian_blowup; all six changed paths lie inside them\nVERDICT manifest: read; it records status complete, five commits, the four measurement jobs with their logs, and a checkpoint naming the no-nova-path check, and its artifacts block quotes census.log's maxima\nVERDICT diff: read commit by commit from 900ef402f: a census, an attribution pass, a three-arm kernel evaluation, a jump probe, then the fragment and its renderer, 1284 insertions across six new files, every one a prototype script or the evidence page\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html answers pairs, banks, construction and the moment-row question, though its bold headline overstates the moment-1 shape by one pair\nSCORE evidence: 13\nJUSTIFICATION evidence: census.log, attribute.log, kernel.log and jump.log each end EXIT=0 and carry the numbers the page quotes, but fragment.py:239 states a universal the attribute record contradicts\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the diff is inside the declared write paths and no file under nova/ is touched, matching the diagnosis-only fence\nSCORE durability: 4\nJUSTIFICATION durability: the diff adds no test and no assertion, and fragment.py:4 claims every number is read from the records while fragment.py:430 hardcodes one, so nothing reddens if the rendered prose drifts\nSCORE fit: 12\nJUSTIFICATION fit: the scripts follow the surrounding prototype idiom (configure_dtypes before the jax import, argparse, a COMPLETE marker and an EXIT log line), but fragment.py:239 and fragment.py:430 carry prose numbers that contradict the module's own docstring\nSCORE reuse: 5\nJUSTIFICATION reuse: diagnose.py:67 and attribute.py:55 both re-implement nova/equilibrium/boundary_comparison.py:81, and kernel.py:85 reproduces nova/equilibrium/fixed_points.py:323, without extending either owner\nFINDING scripts/prototypes/bank_hessian_blowup/fragment.py:239 blocking: the pairs section and the bold headline (fragment.py:166) assert that every one of the 38 pairs above 1e9 is a moment-1 psi_RR entry within 5.5e-13 m of a vertex; attribute.json holds 37 such pairs and one, node 637 cell 221, whose largest entry is moment-2 psi_RR at 3.7044e9 with a vertex distance of 5.7334e-13 m\nFINDING scripts/prototypes/bank_hessian_blowup/fragment.py:430 non-blocking: the jump section hardcodes about 3e5 as the row-value change a genuine 3.77e15 second derivative would require across a 2e-9 m stencil; no record carries either figure and 3.77e15 x 2e-9 is 7.5e6, so the claim is unsourced and off by roughly a factor of 25\nFINDING scripts/prototypes/bank_hessian_blowup/fragment.py:249 non-blocking: the inverse-second-moment singular values (4.63e7 and 5.14e6 m^-2 against 320 and 201 for cell 38) are typed into the renderer rather than read from any of the four records, so the module docstring's claim that every number is read from the records does not hold and these cannot be re-derived from the cited artifacts\nFINDING scripts/prototypes/bank_hessian_blowup/fragment.py:433 non-blocking: the page concludes the booked psi_RR is a property of the derivative rule and not of the value graph, yet its stable-pole arm reads the primal row through _packed_analytic_moments_primal(stable_poles=True) (kernel.py:76-82) and the page's own jump table records that arm's row value stepping from -1.0386e-6 at +1e-9 m to -1.4716e-7 at +1e-12 m, a discontinuity in that formulation's value path rather than a tangent-only effect\nFINDING scripts/prototypes/bank_hessian_blowup/diagnose.py:67 non-blocking: point_segment_distance re-implements the point-to-segment distance the repository already owns at nova/equilibrium/boundary_comparison.py:81, and attribute.py:55 duplicates it again, so one geometry measure now has three implementations instead of one\nFINDING scripts/prototypes/bank_hessian_blowup/kernel.py:85 non-blocking: jets reproduces nova/equilibrium/fixed_points.py:323 _source_jets line for line with only the row function swapped and jump.py repeats the same arm plumbing again, while the brief named derive_rows.py's subprocess-plus-PYTHONPATH pattern as the reuse route for this row-program swap\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html:28 non-blocking: the evidence record carries four tables and no figure, where nova/AGENTS.md's plotting rules require a GS forward-solve evidence record of a bank row to show its poloidal flux contour panels with both null sets and the wall, and the subject here is geometry a reader can only see as a panel of the offending nodes against their source cells\n",
+  "review_run_id": "r-20261120T220033043753-review-of-bank-hessian-blowup-82591fd99022",
+  "reviewed_base_sha": "900ef402f2a7129ac33038e9f5536b9729feb7ce",
+  "reviewed_head_sha": "82591fd99022152c93313efb79c0527d19eadb40",
+  "reviewed_run_id": "r-20261120T201203285388-bank-hessian-blowup",
+  "reviewer_run_id": "r-20261120T220033043753-review-of-bank-hessian-blowup-82591fd99022",
+  "scores": {
+    "durability": 4,
+    "evidence": 13,
+    "fit": 12,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T22:23:19.217277+00:00",
+  "total": 68
+}

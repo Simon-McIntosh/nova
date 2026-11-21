@@ -9,6 +9,28 @@
   ],
   "completed_at": "",
   "dispatched_at": "2026-11-16T22:49:58Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "diiid-single-kernel-coupling",
+      "recorded_at": "2026-11-17T20:49:20.416351+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "diiid-single-kernel-coupling",
+      "recorded_at": "2026-11-17T20:49:27.695603+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "diiid-single-kernel-coupling",
+      "recorded_at": "2026-11-17T20:49:34.530041+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "The legend is shared across panels; each caption gives its panel maximum (0.071 %, 0.146 %, 0.064 %), and only the wall panel reaches and draws 0.12 %",
+      "recorded_at": "2026-11-17T20:49:46.309906+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html",

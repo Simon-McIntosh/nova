@@ -23,7 +23,7 @@ readonly PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
 # Inside the batch job the shell runs a spooled copy of this file, so the
 # script path there is not the lane directory; the submitter passes it.
 readonly LANE_DIRECTORY="${NOVA_PREWARM_LANE_DIRECTORY:-$(dirname "$(realpath -e -- "${BASH_SOURCE[0]}")")}"
-readonly DEFAULT_PINNED_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+readonly DEFAULT_PINNED_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 
 usage() {
   printf '%s\n' \
@@ -127,6 +127,38 @@ run_payload() {
   compile_row forward-solve-lane --allow-pytest-failures pytest \
     "${repository_root}/tests/test_equilibrium_forward_solve.py" \
     -p no:cacheprovider -p cache_guard
+
+  # The production point program at the row window's 132-cell shape, the
+  # 282-cell census build and the 2,132-node certified build. One process per
+  # arm, because an interpreter retains every executable it compiles; the driver
+  # resolves each arm's coupling through the caller's own fixture and records
+  # its receipt.
+  readonly point_program="${repository_root}/scripts/prototypes/cached_point_remeasure/measure.py"
+  # The rows above point NOVA_ANALYTIC_ORACLE_CACHE at a local directory so a
+  # fixture build writes beside them. The point program's census arms read the
+  # certified machine store instead, so it is named explicitly here.
+  point_machine_cache="$(
+    HOME=/home/ITER/mcintos env -u NOVA_ANALYTIC_ORACLE_CACHE "${PYTHON}" -c \
+      "import sys; sys.path.insert(0, '${repository_root}'); from tests.equilibrium.test_topology_read import _census_cache; print(_census_cache())"
+  )" || point_machine_cache=''
+  printf 'PREWARM_POINT_MACHINE_CACHE=%s\n' "${point_machine_cache}"
+  export NOVA_CACHED_POINT_MACHINE_CACHE="${point_machine_cache}"
+  compile_row cached-point-row-132 \
+    "${point_program}" measure --arm row-132 \
+    --receipt "${output_directory}/cached-point-row-132.json"
+  compile_row cached-point-census-250 \
+    "${point_program}" measure --arm census-250 \
+    --receipt "${output_directory}/cached-point-census-250.json"
+  compile_row cached-point-census-500 \
+    "${point_program}" measure --arm census-500 \
+    --receipt "${output_directory}/cached-point-census-500.json"
+  # The 500-cell request has more than one certified census build in the store
+  # and the resolver above takes the first, which holds 550 polygons. The
+  # plan's 2,132-node arm is the neighbouring certified build (551 polygons) and
+  # is a different program, so it is warmed by name rather than left cold.
+  compile_row cached-point-census-2132 \
+    "${point_program}" measure --arm census-2132 \
+    --receipt "${output_directory}/cached-point-census-2132.json"
 
   # A pre-warm that exits 0 while persisting nothing is the failure this job
   # cannot report from its own rows alone: the receipts record compile cost

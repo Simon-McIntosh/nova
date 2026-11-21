@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-21T16:56:32.203Z",
+  "dispatched_at": "2026-11-21T16:51:11Z",
+  "figures_reviewed": [
+    "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-137-diverted-lower-xpoint.png",
+    "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-146-diverted-lower-xpoint.png",
+    "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-146-limited-lower-xpoint.png",
+    "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-179-limited-lower-xpoint.png"
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the lower-X comparison the figure exists for is readable and the record table carries the numbers",
+      "recorded_at": "2026-11-21T20:20:11.567391+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the lower-X comparison the figure exists for is readable and the record table carries the numbers",
+      "recorded_at": "2026-11-21T20:20:26.017237+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the lower-X comparison the figure exists for is readable and the record table carries the numbers",
+      "recorded_at": "2026-11-21T20:20:38.566260+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the lower-X comparison the figure exists for is readable and the record table carries the numbers",
+      "recorded_at": "2026-11-21T20:20:56.522802+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-137-diverted-lower-xpoint.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The fitted-currents field draws solved-null marks outside the vessel at the top left, top right and bottom (the census's other qualified nulls, drawn hollow), while the legend carries only one filled X entry for 'solved null'. At rendered size the hollow marks read as the same glyph as the legend key, so a reader counting marks cannot tell the anchor null from the out-of-vessel ones, and three or four apparent solved nulls are shown with no key for the distinction. The figure's own rule is that every coloured mark is identified."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-179-limited-lower-xpoint.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "As on 137D, the fitted-currents field draws two solved-null marks outside the vessel (top right and bottom) in the same glyph the legend uses for the single filled 'solved null', with no legend entry for the hollow variant. The marks sit against the empty space outside the wall where a reader has no other cue to discount them, so they read as additional solved nulls rather than as other qualified nulls of an unconverged set."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-179-limited-lower-xpoint.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In the measured-currents field a tight clump of hollow blue shadow-node circles is drawn outside the vessel at the top left, overlapping one another and crossing the wall outline. Individual nodes in the clump cannot be counted or placed, and the cluster competes visually with the EFIT null mark just inside the vessel top. The markers are plotted straight from the imaging receipt with a fixed 9 pt size, so a group of near-coincident nodes collapses into a blob."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-146-diverted-lower-xpoint.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "None of the four rendered figures states the extent of its lower-X zoom: the captions carry only the step and arm name plus 'residual ...; converged ...', and no panel carries a scale bar or a width annotation. The window is 10 cm across, so the null separations the zoom exists to show (centimetres on 146D and 146L, tens of centimetres on the fitted 137D and 179L rows) cannot be read quantitatively from the figure, only from the record's table. This applies to all four figures; it is anchored here as one of them."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261121T165024152677-review-of-diiid-coil-correction-resolve-finite-edge-39b0b53af0df-figure",
+  "reviewed_base_sha": "bd3c232f1128253a34e358219f429e2165a59e6c",
+  "reviewed_head_sha": "39b0b53af0dfddd20a1984738dd13d7ed9f5fc9e",
+  "reviewed_run_id": "r-20261121T073819532158-diiid-coil-correction-resolve-finite-edge",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Pass. Legend text, arm captions and the printed residual lines are near-black on white. The blue solved series and the mid grey wall both clear the white background and neither is used for text.",
+    "data_ink": "Pass. Every panel is unfilled line contours: the flux surfaces carry the ink, the zero (separatrix) level is drawn thick over the thinner levels, and the wall, null and axis marks stay thin. The dense contour bundle along the inboard edge of the 137D fitted field is data, not ornament.",
+    "decoration": "Pass. No gradient, background fill, gridline, frame or styled theme appears on any panel or in the legend; the poloidal axes are off and the only furniture is the single legend row above the panels.",
+    "label_collision": "Pass on text: no rendered text is clipped or overlapping, and every caption sits in clear space below its panel pair. One marker collision is recorded against the 179L measured-currents field, where a clump of hollow blue shadow-node circles overlaps itself and the wall outline at the top left; markers are not text, so this is recorded as a legibility finding rather than holding the node.",
+    "legibility": "Pass with recorded limitations. All four rendered panels read at a glance as two arms side by side (measured currents left, fitted currents right), each arm a full poloidal field beside a lower-X zoom; one frameless figure-level legend carries the vocabulary; the arm name and the printed residual/converged line sit under each arm. The 137D and 179L fitted rows are visibly unconverged states and their printed lines say so. Two limitations are recorded as findings: the fitted zooms on 137D and 179L contain no solved null (that arm's null lies far outside the 10 cm window), and the zoom's physical extent is stated nowhere on the rendered figure, so the centimetre null displacements the figure is about cannot be read from it.",
+    "table_form": "Pass. The content is irreducibly spatial (poloidal flux surfaces and lower-X zooms); the per-row numbers the panels depend on belong in the record's table and are correctly not drawn as an image of a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T16:56:52.588398+00:00",
+  "total": null
+}

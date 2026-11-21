@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T23:16:02.938Z",
+  "dispatched_at": "2026-11-17T23:15:50Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:88",
+      "id": "done_when-1",
+      "reason": "\u00a73's repair scope is set by \u00a72's verdict, so the plan must say which solve produces Reached before a node can report one.",
+      "text": "\u00a72(1) states the fractions to run in the order \"1, 1/2, 1/4, 1/8, 1/16, 1/32 and 1/64\" and then requires \"each solve started from the last state that qualified, beginning at \u00a71's positive control\", while \u00a72(3) defines Reached as the full recorded displacement qualifying \"at the end of the sequence\": read in the written order the full-displacement solve is tried first and directly from the positive control (the same shape as \u00a71's refused lower response perturbation, only under the loosened policy), and read in the order the chaining rule forces it is tried last from an already-displaced qualified state; those are different solves, so the record's largest-qualifying fraction, smallest-failing fraction and Reached verdict all differ by the reading",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b9aa6ddb69ba8a15285225c7cf1e40d5d1f1bda3",
+  "plan_fingerprint": "8d98ecf236fe3b687468f902985dffc3d973db64a1683227bb61225ea7edfc8c",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 4,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b9aa6ddb69ba8a15285225c7cf1e40d5d1f1bda3",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The sequence is now stated in the order it is run, smallest fraction first and doubling to the full displacement, each solve started from the last state that qualified; Reached is the final solve of that sequence qualifying.",
+      "reason": "",
+      "when": "2026-11-18T04:50:32.377938+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b9aa6ddb69ba8a15285225c7cf1e40d5d1f1bda3",
+      "commit_basis": "edit",
+      "note": "The sequence is now stated in the order it is run, smallest fraction first and doubling to the full displacement, each solve started from the last state that qualified; Reached is the final solve of that sequence qualifying.",
+      "reason": "",
+      "when": "2026-11-18T04:50:32.377938+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-near-stored-states/r-20261117T231521365193-plan-review-of-forward-solve-near-stored-states.json",
+  "review_run_id": "r-20261117T231521365193-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "64c09438fe0a55f66d31afdebdecc81fee2f0e86",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html` resolves at HEAD (git cat-file on HEAD exits 0), `docs/plans/inverse-equilibrium-baseline.html#s2` resolves, and the plan's own `docs/evidence/archive/forward-solve-near-stored-states-landed.html` is the record it is to produce, not a cited existing artifact.",
+    "done_when": "a finding \u2014 \u00a72(1) lists the fractions 1, 1/2, 1/4, 1/8, 1/16, 1/32 and 1/64 in descending order while its own chaining rule and \u00a72(3)'s \"at the end of the sequence\" require the ascending chain that ends at the full displacement.",
+    "evidence_paths": "pass \u2014 the plan's record is `docs/evidence/archive/forward-solve-near-stored-states-landed.html` under the tracked evidence tree, and no clause routes a record, panel or gate log to a scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 no section names a file, function or symbol, and no plan label, section number, ticket number or version tag is carried into a code name or comment.",
+    "reasoning": "pass \u2014 the four cited outcomes match their source: stored-field MAST-U 4.864113698736961e-10 with qualified=false, the displaced lower response perturbation 1.237999574577207e-4 with reason 12 ACTIVE_SET_STEP_REFUSED, TCV stored field 0.030364200526436996 with reason 12, ITER with no axis and a non-finite residual; the positive control's tighter policy is on record (internal stopping tolerance 1e-12 against 1e-8, Newton budget 40 against 10, outer active-set budget 64 against 16) with the 1e-10 admission limit unchanged, and \u00a72/\u00a73's controls are states that must fail.",
+    "single_goal": "pass \u2014 s1 makes the refusals standing cases, s2 measures where each solve stops qualifying, s3 repairs the reached cases; each node has one deliverable and the panels and controls are records of that deliverable.",
+    "wiring": "pass \u2014 `plan-section-depends-on` gives s1\u2192inverse-equilibrium-baseline#s2, s2\u2192#s1, s3\u2192#s2; that plan's \u00a72 carries `data-status=\"done\"` and its outcome paragraph hands the refusals to this plan, and the section contract table repeats the same three waits."
+  },
+  "section_digests": {
+    "_document": "9895bb348f263c92b2f814901edac43c580b128c76511f07830d01b8657777ff",
+    "s0": "66c1d333dde62b6fc022136f37cc6884c840cb88f5daacc984d0009d39c7ea47",
+    "s1": "ad38a639ccff273d1e55e7b6f13b0c54dbeab542646bea92d52811c964773a64",
+    "s2": "a17c6162b39cf853da5f110179b1b3dc7decdc7951e971c8af54949b5960f7aa",
+    "s3": "c1164314d236e8fd566ce929a4f43e519d3b76ca3978d08d77b3c0ba13e6055c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T23:26:28.525288+00:00",
+  "total": null
+}

@@ -1,0 +1,214 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T09:54:11.921Z",
+  "dispatched_at": "2026-11-20T09:42:32Z",
+  "findings": [
+    {
+      "anchor": "plans/diiid-vertical-force-balance.html:47",
+      "id": "wiring-1",
+      "reason": "a `done` declaration retires a deliverable the plan still owes, so no node will ever refresh the eleven-row gate and its ordering constraint is invisible to admission.",
+      "text": "\u00a73 is declared `done` in `plan-section-declarations` and carries no `depends-on`, yet its own landed summary says \"One measurement remains owed rather than designed: the eleven-row receipt is refreshed after `millisecond-converged-solve` \u00a72 makes the prescribed current a traced argument\", and that section is still `implementable`; the dependency map has no `s3` key and `plan-informs` does not name the plan this section waits on",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plans/diiid-vertical-force-balance.html:94",
+      "id": "wiring-2",
+      "reason": "\u00a76 and \u00a713 have already landed, so nothing queues differently, but the declaration is not a faithful record of what the section consumes.",
+      "text": "\u00a79's declared `depends-on` is `[s7, s8],` while its own prose requires the re-solve to run \"at the head carrying \u00a76, \u00a77 and \u00a78\" (\u00a76 is the booked finite-edge source the rows are solved on) and it reports convergence on \u00a713's finite-edge profiles",
+      "type": "wiring",
+      "would_change": false
+    },
+    {
+      "anchor": "plans/diiid-vertical-force-balance.html:109",
+      "id": "done_when-1",
+      "reason": "a node running the control through the probe route it is shown in clause (1) reproduces 1119994.165 and records a failed control on faithful code, while a node choosing the benchmark route passes; the target is only measurable once the route and the 160.6 A discrepancy are settled.",
+      "text": "clause (2) requires the zero-edge-cap control to reproduce \"the pre-\u00a713 reading of 1119833.584 A within 2e-6\" while clause (1) sets the record beside \"the probe's 1119994.165 A\", and both are readings of the same pre-\u00a713 frame: they differ by 160.6 A (1.43e-4), 71 times the stated tolerance, and the section records the probe route and the benchmark route as sharing \"conductor count and adapter path\" without explaining the gap or saying which route the control must use",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plans/diiid-vertical-force-balance.html:96",
+      "id": "evidence_paths-1",
+      "reason": "unlike \u00a77, \u00a711 and \u00a713, \u00a79 leaves a writing node to choose its record path, and the natural reading points at a peer record the section itself forbids replacing (\"never in their place\"); naming the new fragment removes both the overwrite risk and a done-when no later reader can open by path.",
+      "text": "\u00a79 names no durable path for the refitted vector's receipt or for the record that tabulates both arms; it says only \"commit it as a receipt beside the evidence fragment\", and clause (3)'s \"The evidence fragment tabulates both arms per row\" resolves to the existing `docs/evidence/fragments/diiid-vertical-force-balance/diiid-xpoint-coil-correction.html`, which already carries the earlier measured-current arm",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "plans/diiid-vertical-force-balance.html:37",
+      "id": "anchors_resolve-1",
+      "reason": "the triage directory exists but holds no such file, so the pointer is dead; the three facts it is cited for (seed correct, total current correct, external field the leading suspect and later closed negative) are restated in full in the same paragraph and in \u00a72, so nothing a node needs is lost.",
+      "text": "the lede cites `~/.config/reckon/crew/reports/nova/triage/diiid-vertical.md",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "plans/diiid-vertical-force-balance.html:109",
+      "id": "naming-1",
+      "reason": "the repository's commit rules forbid plan, sprint and section identifiers in commit messages, so a node that follows the clause exactly breaks a binding rule; the mechanism (\"the finite-edge flux-function form\") can be named instead of the section number.",
+      "text": "\u00a711 clause (3) requires the node to re-register \"naming the three accepted changes and \u00a713 in the commit body\", putting a plan-section identifier into a commit message",
+      "type": "naming",
+      "would_change": true
+    },
+    {
+      "anchor": "plans/diiid-vertical-force-balance.html:96",
+      "id": "reasoning-1",
+      "reason": "these name committed measurement instruments the receipt must be reproducible from, not code a node is told to write or extend; dropping them would make the numbers unreproducible, so the plan's authority is better served keeping them while the router-override note stays in the brief.",
+      "text": "\u00a79 prescribes \"running the committed fit (`scripts/prototypes/diiid_xpoint_coil_correction/fit.py`) at the head\" and a receipt format, and \u00a711:108 fixes the \"benchmark's own entry point with `--output`\" route, which are a code path, a step sequence and a flag rather than only the record and its tolerance",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "ac6b4cf623ad384a5ecb5a12c2116a7eb8c1766a",
+  "plan_fingerprint": "bf00a06f17d9965745014965ba106e96f43b6a6d82ef236a5296a5769af8882b",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 152,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7751443e8b89328a9d908102f5dadda75ec69243",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The control now runs through the benchmark entry point, whose pre-finite-edge reading is 1119833.584 A, and names the probe's 160.6 A difference",
+      "reason": "",
+      "when": "2026-11-20T14:09:09.842270+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7751443e8b89328a9d908102f5dadda75ec69243",
+      "commit_basis": "edit",
+      "finding": "naming-1",
+      "note": "The commit body now names the finite-edge flux-function form by mechanism, not by section",
+      "reason": "",
+      "when": "2026-11-20T14:10:22.141182+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7751443e8b89328a9d908102f5dadda75ec69243",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a79 now names docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html and a receipts directory, and forbids writing into the existing coil-correction record",
+      "reason": "",
+      "when": "2026-11-20T14:11:35.375360+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "The eleven-row refresh is owned by millisecond-converged-solve \u00a72, not a section of this plan; a plan-level wait would report this plan blocked, which is false",
+      "when": "2026-11-20T14:13:00.530356+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-2",
+      "reason": "The review judges it changes nothing: \u00a76 and \u00a713 have landed, so \u00a79's queue order is unaffected",
+      "when": "2026-11-20T14:14:17.549325+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "The triage pointer is historical; the three facts it was cited for are restated in the same paragraph and in \u00a72, as the review notes",
+      "when": "2026-11-20T14:16:36.461051+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The review judges it changes nothing: fit.py and the entry point are the committed instruments the receipts must be reproducible from",
+      "when": "2026-11-20T14:19:00.271315+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The triage pointer is historical; the three facts it was cited for are restated in the same paragraph and in \u00a72, as the review notes",
+      "when": "2026-11-20T14:16:36.461051+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7751443e8b89328a9d908102f5dadda75ec69243",
+      "commit_basis": "edit",
+      "note": "The control now runs through the benchmark entry point, whose pre-finite-edge reading is 1119833.584 A, and names the probe's 160.6 A difference",
+      "reason": "",
+      "when": "2026-11-20T14:09:09.842270+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7751443e8b89328a9d908102f5dadda75ec69243",
+      "commit_basis": "edit",
+      "note": "\u00a79 now names docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html and a receipts directory, and forbids writing into the existing coil-correction record",
+      "reason": "",
+      "when": "2026-11-20T14:11:35.375360+00:00"
+    },
+    "naming-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7751443e8b89328a9d908102f5dadda75ec69243",
+      "commit_basis": "edit",
+      "note": "The commit body now names the finite-edge flux-function form by mechanism, not by section",
+      "reason": "",
+      "when": "2026-11-20T14:10:22.141182+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The review judges it changes nothing: fit.py and the entry point are the committed instruments the receipts must be reproducible from",
+      "when": "2026-11-20T14:19:00.271315+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The eleven-row refresh is owned by millisecond-converged-solve \u00a72, not a section of this plan; a plan-level wait would report this plan blocked, which is false",
+      "when": "2026-11-20T14:13:00.530356+00:00"
+    },
+    "wiring-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The review judges it changes nothing: \u00a76 and \u00a713 have landed, so \u00a79's queue order is unaffected",
+      "when": "2026-11-20T14:14:17.549325+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T094131620051-plan-review-of-diiid-vertical-force-balance.json",
+  "review_run_id": "r-20261120T094131620051-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "dd9f6d8915c1efd2268b05905c4b363bbf5de7bf",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the header's triage pointer names a file that no longer exists; every other cited file, fragment, figure directory, plan and receipt that the plan relies on resolves.",
+    "done_when": "a finding \u2014 \u00a711's negative control targets a pre-\u00a713 value that its own evidence records twice, 160.6 A apart, under a 2e-6 tolerance.",
+    "evidence_paths": "a finding \u2014 \u00a79 names no durable path for its fitted-arms receipt or record.",
+    "naming": "a finding \u2014 \u00a711 instructs the node to write a plan-section label into a commit body.",
+    "reasoning": "a finding \u2014 \u00a79 and \u00a711 name the committed instrument and command-line route rather than only the record; the three substantive checks (root cause against cited evidence, reachability of the endpoint, no formula or function to implement) otherwise hold for every section.",
+    "single_goal": "pass \u2014 each open section (\u00a77, \u00a79, \u00a711) names one deliverable: the compensator mask measured on all four rows, the corrected-current arms, and the pinned-frame re-registration.",
+    "wiring": "a finding \u2014 \u00a73 is declared `done` while its own text owes an eleven-row gate that waits on a section of another plan, and no dependency records that wait."
+  },
+  "section_digests": {
+    "_document": "642eed59c1a3a539a2002d237f3345e1e11ec13304d06032dac3c8c1ede64780",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "cb4fe17aae7340d39a98f7b595b34d26c81954c80583715e4963e86d8e66e94f",
+    "s12": "9f0b7de609dddf9cec0eead4c27fef615d5275f0957928c862d35cecbbb23ffe",
+    "s13": "e14df5cf0cb26cb414397b74fb90f493b050e0a424f5b4402cd3a7a7de859cac",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "67010ceabd250e895da0e2866c55016f6d94a692436e98f386fbf5a9a62a3df2",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T09:54:27.591373+00:00",
+  "total": null
+}

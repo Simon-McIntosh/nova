@@ -1,0 +1,125 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-21T01:25:50.104Z",
+  "dispatched_at": "2026-11-21T01:07:13Z",
+  "findings": [
+    {
+      "anchor": "plan.html:66",
+      "id": "done_when-1",
+      "reason": "without naming a warm `measure --arm` run per \u00a70 arm, node (e) can complete and close clause (1) with no evidence of the 60 s or 64 GB bound, and a violation of the plan's whole point would go unreported.",
+      "text": "node (e) closes clause (1) on \"one H200 lane run then shows the four point-program rows served as hits with NOVA_CACHE_MISS_BUDGET at zero\", but clause (1) at plan.html:68 bounds the first call at \"at most 60 s, with at most 64 GB peak host memory\"; those two numbers are recorded only by the per-arm `measure` receipt (`scripts/prototypes/cached_point_remeasure/measure.py` writes `first_call_seconds` and `first_call_peak_rss_bytes`), and the pre-warm's own `measure --arm` rows run cold because filling the cache is what the pre-warm is for, while `scripts/h200_test_lane/run.sh` is `--mode pytest` over tests and records hit/miss counts, not per-arm first-call seconds or peak memory \u2014 so the section's binding bound passes with nothing measuring it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:66",
+      "id": "reasoning-1",
+      "reason": "a worker measuring against the cited 1e-9 would accept a form that moves derivative bits by 1e-10, which clause (2) forbids, and node (c)'s own negative result (2.0e-4) is recorded against the wrong standard, so the identity gate the section rests on is stated at the wrong strictness.",
+      "text": "the node (c) text and the section paragraph at plan.html:65 both say clause (2) is \"bit-identical ... and derivative entries within 1e-9 relative\" / \"outside the 1e-9 of clause (2)\", while clause (2) at plan.html:68 requires the cached program's rows to be \"bit-identical, values and every derivative entry\" to the cold-compile rows in the same job; the cited tolerance is looser than the clause and belongs to no current clause at all",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:64",
+      "id": "reasoning-2",
+      "reason": "a coordinator composing a brief from the stated aim would commission compile-shrinking work that the lead's 2026-11-18 ruling ends, which is exactly what node (e) is not to do.",
+      "text": "the opening paragraph still sets the section's aim as \"Bound that program with the lever \u00a75's compile attribution names\" and calls it \"The section's aim is unchanged\", while the same section at plan.html:65 records \"no node of this section shrinks the cold compile any further, and no cold-compile bound remains to be met\" and \u00a73 still carries status `implementable`; two of the levers it names are recorded as retired or not pursued",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "91de28fdd157a76967cea142da097ab0cfededb9",
+  "plan_fingerprint": "3525afdcc34ec941cd2d0325c6f0f8e8c723876e47deb6e3cb4926b5ccc49580",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 125,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "91de28fdd157a76967cea142da097ab0cfededb9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Node (e) now runs a warm measure --arm per section-0 arm against the pinned cache and records first-call seconds and peak host memory, which is what closes the 60 s and 64 GB bound of clause (1).",
+      "reason": "",
+      "when": "2026-11-21T02:02:43.547840+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "91de28fdd157a76967cea142da097ab0cfededb9",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The 1e-9 mentions are marked as the tangent tolerance the earlier nodes were held to; clause (2) as written, bit identity for the cached program, is named as the stricter current standard.",
+      "reason": "",
+      "when": "2026-11-21T02:03:06.838215+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "91de28fdd157a76967cea142da097ab0cfededb9",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The opening no longer states compile-bounding as the live aim: it says the section first set out to bound the program and that the 2026-11-18 ruling replaced that with the cached compile; the single-owner part is stated as landed.",
+      "reason": "",
+      "when": "2026-11-21T02:03:30.462179+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "91de28fdd157a76967cea142da097ab0cfededb9",
+      "commit_basis": "edit",
+      "note": "Node (e) now runs a warm measure --arm per section-0 arm against the pinned cache and records first-call seconds and peak host memory, which is what closes the 60 s and 64 GB bound of clause (1).",
+      "reason": "",
+      "when": "2026-11-21T02:02:43.547840+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "91de28fdd157a76967cea142da097ab0cfededb9",
+      "commit_basis": "edit",
+      "note": "The 1e-9 mentions are marked as the tangent tolerance the earlier nodes were held to; clause (2) as written, bit identity for the cached program, is named as the stricter current standard.",
+      "reason": "",
+      "when": "2026-11-21T02:03:06.838215+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "91de28fdd157a76967cea142da097ab0cfededb9",
+      "commit_basis": "edit",
+      "note": "The opening no longer states compile-bounding as the live aim: it says the section first set out to bound the program and that the 2026-11-18 ruling replaced that with the cached compile; the single-owner part is stated as landed.",
+      "reason": "",
+      "when": "2026-11-21T02:03:30.462179+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261121T010523548374-plan-review-of-kernel-compile-barrier.json",
+  "review_run_id": "r-20261121T010523548374-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "5e09b21ee7e3a8674906a278d5a56878efd51822",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited `ordered-sharing.html`, `polygon-stable-evaluator.html`, `one-traced-body.html` and `cached-point-program-remeasure.html` all exist, as do `tests/biot/test_moment_program_identity.py`, `tests/biot/test_kernel_compile_cost.py`, `tests/equilibrium/test_bounded_point_program.py`, `tests/test_fixed_points.py`, `nova/equilibrium/fixed_points.py`, and the census coarse-tie test id resolves to `tests/equilibrium/test_topology_read.py:3010`.",
+    "done_when": "a finding \u2014 node (e) (plan.html:66) says a lane run \"is what closes clause (1) on the pinned cache\", but clause (1) (plan.html:68) bounds each arm's first call at 60 s and 64 GB peak host memory, numbers only the point program's own `measure --arm` receipt records.",
+    "evidence_paths": "pass \u2014 node (e) names its record `docs/evidence/fragments/kernel-compile-barrier/pinned-point-program.html` and its logs under `~/.cache/nova-kernel-compile-barrier/pinned-point-program/`, both durable shared paths; nodes (b) and (c) likewise.",
+    "naming": "pass \u2014 \u00a73 introduces no new symbol, file or comment whose name carries a plan label, ticket number or version tag; the dates it cites are decision records, not code names.",
+    "reasoning": "a finding \u2014 node (c) and the section paragraph both state clause (2)'s identity tolerance as 1e-9 relative for derivative entries, while clause (2) as written at plan.html:68 requires bit-identical derivative entries.",
+    "single_goal": "pass \u2014 node (e) carries one deliverable (the pinned pre-warm plus the runs that read it), and each of nodes (a)\u2013(d) names one.",
+    "wiring": "pass \u2014 plan.html:23 declares `s3` depends-on `kernel-compile-barrier#s2` and `kernel-compile-barrier#s7`, and node (e) at plan.html:66 states the pre-warm waits on the shared-root section (\u00a77); no declared relationship points at a wrong node."
+  },
+  "section_digests": {
+    "_document": "4dd0bd0854bd8e84e354b6700ea2df0cf8c65cf370f4b05b8a7ed399ad4e1119",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "c4ce76a04d2cb13e8a7a602900973bc932ca94be7144049a0c3236e9ede9bd90",
+    "s4": "4b8bf6686dd7741ef6ed148a144b3f512eff3f8ad043c934f568a9feb50f76f8",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea",
+    "s7": "6dfe0a01ad8470c02d38d7e3fa33263ff325b87943f260375c61e09e0cfe5db8"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T01:26:03.028254+00:00",
+  "total": null
+}

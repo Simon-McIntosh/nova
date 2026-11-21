@@ -1,0 +1,115 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so no added-failure measurement exists; 0 and [] are the declared empty values, not an observed green run.",
+  "caption_note": "The section's caption is not a repeat of the figure title: the paragraph after the image names each panel's content, states that the middle panel is symmetric-log and why, and quotes the same -96 % plateau the panel and the prose table carry. The claim that the plateau sits about fifty pixels below zero matches the render (row 548 against a zero rule at row 495, 53 px).",
+  "completed_at": "2026-11-21T08:55:24.899Z",
+  "dispatched_at": "2026-11-21T08:32:59Z",
+  "figure_evidence": {
+    "canvas": "768x864 px, three stacked panels from plt.subplots(3, 1, figsize=(6.4, 7.2), height_ratios=(2.0, 1.0, 1.2), constrained_layout=True).",
+    "edge_scan": "Zero non-white pixels in the outer 2 px band on all four sides (top 0, bottom 0, left 0, right 0), so no artist is clipped at the canvas edge; the top legend's longest entry ends 5 px inside the right edge.",
+    "identity": "Both attached PNGs are one figure: identical sha256 d0907646c0e69e3f24756f406ce52b9cef4e438420366cd789029b215c6e45e9, both 768x864 RGBA at 120 dpi, and that digest equals the blob committed at reviewed head 01d8d65603f7 for both paths (verified with git cat-file, sibling worktree clean at 01d8d65603f7). The duplication is documented in the evidence fragment and is not a defect; every verdict below applies to both paths.",
+    "legend_rows": "middle-panel legend at lower right: handle rows 503-504 (blue, midplane), 524-525 (orange, Fb plane), 545-548 (teal, Fh plane); text rows 498-511, 519-532, 540-553 at columns 684-762.",
+    "magnified_crops": "Regions inspected at 2x to 4x from the named PNG: the near-edge peak, the post-edge plateau, both legends, the left y-label, the title, and both halves of the lower panel. The only collision found is the middle-panel legend against the plateau line.",
+    "middle_panel_rows": "zero rule (grey #888888) at row 495, 597 px wide; iron-share plateau (teal) at row 548, 637 px spanning columns 108 to 762; that plateau is 53 px below the zero rule, consistent with the caption's 'about fifty pixels' and with the -96 % share in the prose table.",
+    "repair_verified": "The prior review at head a0479e6acdd7 reported the middle panel unreadable on a linear axis. At this head the section's repair landed: the panel is symlog (linthresh=1.0), the peak is annotated +6787 %, and the -96 % plateau renders near -10^2 on the negative side, no longer reading as about 0 %.",
+    "upper_panel_ink": "blue 133 px and orange 139 px over the whole upper panel, against teal 1389 px; beyond column 200 the split is 56 blue, 56 orange, 832 teal, so past the near-edge peak a reader sees essentially the teal curve only."
+  },
+  "finding_counts": {
+    "blocking": 1,
+    "non-blocking": 3
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-icm-iron-field-source-01d8d65603f7",
+      "recorded_at": "2026-11-21T12:03:29.104491+00:00"
+    }
+  },
+  "finding_dispositions_suggested": {
+    "0": {
+      "kind": "folded",
+      "note": "repair in the figure script: move the middle-panel legend to upper right or a clear row, and draw it where no curve reaches."
+    },
+    "1": {
+      "kind": "folded",
+      "note": "same repair: one figure-level legend for the three planes."
+    },
+    "2": {
+      "kind": "exempted",
+      "note": "the near-coincidence is the physics the section reports (the share is flat in radius across planes); state it in the caption or panel note rather than separating the curves at the cost of fidelity."
+    },
+    "3": {
+      "kind": "folded",
+      "note": "same repair: make the y-label name the marks as drawn; the comparison the section reports is between planes, not between mark shapes."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/west-stray-field/west-62751-iron-stray-field.png",
+      "id": "fd058faa62c",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The middle panel's legend is drawn over its own data. The iron-share plateau is a teal line at row 548 spanning columns 108 to 762, and the legend placed at lower right (scripts/iron_field_source/figure.py:109, loc=lower right) puts its third entry at exactly that row: the handle occupies rows 545-548 and the words Fh plane occupy rows 540-553 at columns 684-762, with the teal line visible through the letter gaps and across the lower half of the glyphs. The same defect is in the byte-identical twin at docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png. A reader cannot read the entry that names the third plane, and the legend ceases to say which colour is which exactly where all three series coincide."
+    },
+    {
+      "file": "scripts/iron_field_source/figure.py",
+      "id": "f00802b676b",
+      "line": 62,
+      "severity": "non-blocking",
+      "summary": "The same three-entry plane legend is drawn twice on one figure, here in the upper panel (line 62) and again in the middle panel (line 109), and never in the lower panel, although the colours mean the same plane in every panel. One figure-level legend would carry the information once; the second copy is also what places a legend in the lower-right region the plateau occupies, which is the cause of the blocking collision above."
+    },
+    {
+      "file": "scripts/iron_field_source/figure.py",
+      "id": "f191bf6e80f",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "After the near-edge peak the three with-iron curves coincide to within about a pixel, so the upper panel's three-colour legend promises a comparison a reader cannot see: the panel carries 133 blue and 139 orange pixels against 1389 teal, and beyond column 200 only 56 blue and 56 orange pixels remain, where the lines are drawn underneath the teal one. The coincidence is the data rather than a plotting error, but the picture gives the impression that two series are missing; a note stating that the three planes coincide in the far field, or plotting the two hidden series dashed and offset-free, would let a reader tell agreement from absence."
+    },
+    {
+      "file": "scripts/iron_field_source/figure.py",
+      "id": "fbfd11607a1",
+      "line": 133,
+      "severity": "non-blocking",
+      "summary": "The lower panel's y-axis label says (bars) for |B_air|, but the air-core marks are drawn with the horizontal-dash marker '_' (line 127) and render as short grey dashes and small squares, not as bars. A reader who wants the air-core value looks for the wrong mark and may take the dashes for a third series; the label should name the marks as drawn, or the marks should become bars."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261121T083116270237-review-of-icm-iron-field-source-01d8d65603f7-figure",
+  "review_scope_note": "Read-only review: no file was edited, created, moved or redrawn. Only the two named PNGs were opened; no SVG and no other image was read, rendered or shown.",
+  "reviewed_base_sha": "9b016126111a5acaebca064c07432042b5a2628c",
+  "reviewed_figures": [
+    "docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png",
+    "docs/figures/west-stray-field/west-62751-iron-stray-field.png"
+  ],
+  "reviewed_head_sha": "01d8d65603f7c6926bc9d87f72fab8e28b320e51",
+  "reviewed_run_id": "r-20261114T144505738776-icm-iron-field-source",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: defect (blocking) - docs/figures/west-stray-field/west-62751-iron-stray-field.png: the upper and lower panels read at a glance, but in the middle panel the legend placed at lower right lands on the iron-share plateau, so a third of the legend cannot be read.",
+    "RUBRIC data_ink: pass - docs/figures/west-stray-field/west-62751-iron-stray-field.png: no gradients, fills or shading, and the curves, markers and reference rule carry the ink.",
+    "RUBRIC decoration: pass - docs/figures/west-stray-field/west-62751-iron-stray-field.png: no background fill, frame, gridline or themed styling; the only added marks are the air-core annotation in panel one, the +6787 % peak annotation and the grey zero rule.",
+    "RUBRIC contrast: pass - docs/figures/west-stray-field/west-62751-iron-stray-field.png: axis and tick text is near-black on white, the annotation is #444444, and the grey air-core curves and zero rule are data and reference marks rather than text.",
+    "RUBRIC table_form: pass - docs/figures/west-stray-field/west-62751-iron-stray-field.png: the image plots continuous field against radius and discrete probe positions; the numeric summary beside the figure is a separate table in the prose, not depicted here.",
+    "RUBRIC label_collision: defect (blocking) - docs/figures/west-stray-field/west-62751-iron-stray-field.png: in the middle panel the teal plateau line at row 548 crosses the legend's third entry, whose text occupies rows 540-553 at columns 684-762 and whose handle sits at rows 545-548, so the data line runs through the middle of the words Fh plane.",
+    "RUBRIC legibility: defect (blocking) - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: byte-identical to the west-stray-field copy and carries the same middle-panel legend defect.",
+    "RUBRIC data_ink: pass - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: curves, markers and the reference rule carry the ink, with no decorative fill.",
+    "RUBRIC decoration: pass - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: no gradient, background fill or themed styling.",
+    "RUBRIC contrast: pass - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: near-black text on white, #444444 annotations, grey used only for data and reference marks.",
+    "RUBRIC table_form: pass - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: the image depicts plotted relationships; the per-distance and per-probe numbers are a prose table, not this image.",
+    "RUBRIC label_collision: defect (blocking) - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: the same plateau-through-legend collision as the west-stray-field copy, at the same rows and columns."
+  ],
+  "rubric_verdicts": {
+    "caption_not_title_repeat": "pass",
+    "contrast": "pass",
+    "data_ink": "pass",
+    "decoration": "pass",
+    "label_collision": "defect",
+    "legibility": "defect",
+    "table_form": "pass"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T09:55:00Z",
+  "total": null
+}

@@ -1,0 +1,109 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms and confirmed against their logs: logs/suite-base2.log names revision 3a9238f0a and ends '7 passed, 6 errors' with EXIT=1, the six ids being test_iter_nodal_jets_match_analytic_map[0..2] and test_iter_coil_jets_match_analytic_map[0..2] timing out at the 300 s setup bound. The reviewed run's recorded head arm is logs/after-final2.log, revision c064f837c, ending '14 passed in 611.28s' with EXIT=0; head 31d8dbc71 differs from it only in the fragment. No id fails at head that does not fail at base, so the added-failure set is empty.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-18T18:17:59.804Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-iter-bank-recertify-31d8dbc71dff",
+      "recorded_at": "2026-11-18T19:32:39.186765+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-iter-bank-recertify-31d8dbc71dff",
+      "recorded_at": "2026-11-18T19:32:46.195200+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-18T18:17:25Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/iter_bank/derive_rows.py",
+      "id": "f325669b4f7",
+      "line": "46",
+      "severity": "non-blocking",
+      "text": "non-blocking: relative() is a third copy of the node-aggregated relative norm, its own docstring calling it \"the certification script's\" while duplicating scripts/prototypes/iter_bank/recertify.py:35 and scripts/prototypes/bank_hessian_diagnosis/report.py:22 rather than extending or importing either owner, so a change to the normalisation now has three edits to land."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "id": "f6c4e60fec7",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: the first-derivative table row still quotes 2.00e-08 for psi_Z and a median of 3e-12, neither of which exists in receipts/derive-rows.json or logs/derive-rows-instrumented.log (the per-component block prints the unfiltered dpsi_dZ maximum 7.49e7, and the filtered median is 4.170781034099556e-12), so the prior review's reproducibility finding is answered for the worst entry only."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "id": "f25d4df784d",
+      "line": "52",
+      "severity": "non-blocking",
+      "text": "non-blocking: the added sentence reports the node 101 / cell 7 / moment 1 entry's relative departure as 3.887e-8, while the receipt and log it cites record 3.923273659969061e-08 for that exact entry and 3.887e-8 appears in no run artefact."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "id": "f4fa8f4817c",
+      "line": "53",
+      "severity": "non-blocking",
+      "text": "non-blocking: the unchanged sentence \"a worst case of 7.20e-8 at a cell whose psi_R reaches 62.6\" is refuted by the receipt the new paragraph cites, which places the 7.204033878373014e-08 maximum at cell 502, node 1538 on an entry of magnitude 0.0415, and the added paragraphs leave the sentence standing."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/derive_rows.py",
+      "id": "fd5e0c2ad6a",
+      "line": "204",
+      "severity": "non-blocking",
+      "text": "non-blocking: exit status 2 is documented at :12-14 as a MATERIAL verdict on the lead's 1e-7 absolute boundary, and job 1325117 recorded EXIT=2 with material.present true and 48 entries, so the receipt that supports the accepted exception also records the instrument's failure verdict on a boundary the ruling at 31d8dbc71 withdrew, and no sentence in the fragment reconciles the two."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "id": "fcc9dd44893",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "non-blocking: the plan-commits meta stops at 0a73119c5 and omits 39eaf5ef5, the commit that adds the derive_rows.py the fragment now cites at :53, so the record does not attribute the change carrying its own reproduction instrument."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the four commits 669eed1df..31d8dbc7 commit by commit (39eaf5ef5 adds derive_rows.py; c064f837c rewrites the fragment's first-derivative paragraphs, the table row's context and the receipts list; 31d8dbc71 records the final ruling; 669eed1df records the earlier ruling) against the full delivered range 3a9238f0..31d8dbc7 for context; no product source and no test file changes.",
+    "done_when": "the gained commits speak to clause 1's first-derivative sentence; docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:51-52 cites receipts/derive-rows.json, which records filtered max_relative 7.204033878373014e-08, median 4.170781034099556e-12, max_absolute 1.8871317450930292e-06 and material count 48, every one of them matching logs/derive-rows-instrumented.log, but the same table row at :49 still carries 2.00e-08 for psi_Z and a median of 3e-12 that no receipt or log in the run contains.",
+    "goal": "the source node's goal (its brief) is to rebuild the ITER bank on the repaired polygon kernel and re-certify its plasma-row second derivatives against the independent reference; the commits gained since the prior review at 669eed1df address the one part of it that was carried as a lead-accepted exception, and scripts/prototypes/iter_bank/derive_rows.py now makes the first-derivative departure reproducible from the two published archives.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T110237355670-iter-bank-recertify/manifest.md; it records status complete, sixteen commits to 31d8dbc71, baseline 7 passed / 6 errors EXIT=1 at 3a9238f0a with the six setup timeouts, head 14 passed EXIT=0 at c064f837c in logs/after-final2.log, the two lead-accepted exceptions, and first-derivative figures that reconcile with receipts/derive-rows.json.",
+    "write_paths": "the declared paths are scripts/prototypes/iter_bank, tests/test_iter_bank.py, docs/figures/sub-millisecond-forward-path/iter-bank, docs/figures/sub-millisecond-forward-path/iter-bank-recertify and docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html; the gained commits 669eed1df..31d8dbc7 change exactly scripts/prototypes/iter_bank/derive_rows.py (new, 208 lines) and that fragment, both inside them."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion in tests/test_iter_bank.py or anywhere else, so changing derive_rows.py:31 DERIVATIVE from slice(1, 3) or its --window default would change every number the fragment now relies on and no test would redden.",
+    "evidence": "receipts/derive-rows.json reconciles line for line with logs/derive-rows-instrumented.log:4-9 and :3284212-3284216, but the fragment's table row at docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:49, its ratio at :52 and its location at :53 are not in either.",
+    "fit": "scripts/prototypes/iter_bank/derive_rows.py passes ruff and follows recertify.py's untyped-argument and print-a-JSON-receipt idiom, introducing no name the naming rules forbid.",
+    "goal_fidelity": "scripts/prototypes/iter_bank/derive_rows.py:53-204 does produce the statistic the fragment quotes from the two archives, and receipts/derive-rows.json's active-node aggregate 0.17260566886876466 equals receipts/recertify-head-bank.json's independently produced first_derivative_rows_active, so the increment delivers on the exception it was added to document.",
+    "reuse": "scripts/prototypes/iter_bank/derive_rows.py:46 re-implements relative(delta, scale, axis=0), a third copy of the helper owned by scripts/prototypes/bank_hessian_diagnosis/report.py:22 and already present in recertify.py:35, instead of importing either.",
+    "scope_discipline": "git diff --stat 669eed1df..31d8dbc7 lists only scripts/prototypes/iter_bank/derive_rows.py and docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html, both inside the declared write paths, with nothing under nova/."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal (its brief) is to rebuild the ITER bank on the repaired polygon kernel and re-certify its plasma-row second derivatives against the independent reference; the commits gained since the prior review at 669eed1df address the one part of it that was carried as a lead-accepted exception, and scripts/prototypes/iter_bank/derive_rows.py now makes the first-derivative departure reproducible from the two published archives.\nVERDICT done_when: the gained commits speak to clause 1's first-derivative sentence; docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:51-52 cites receipts/derive-rows.json, which records filtered max_relative 7.204033878373014e-08, median 4.170781034099556e-12, max_absolute 1.8871317450930292e-06 and material count 48, every one of them matching logs/derive-rows-instrumented.log, but the same table row at :49 still carries 2.00e-08 for psi_Z and a median of 3e-12 that no receipt or log in the run contains.\nVERDICT write_paths: the declared paths are scripts/prototypes/iter_bank, tests/test_iter_bank.py, docs/figures/sub-millisecond-forward-path/iter-bank, docs/figures/sub-millisecond-forward-path/iter-bank-recertify and docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html; the gained commits 669eed1df..31d8dbc7 change exactly scripts/prototypes/iter_bank/derive_rows.py (new, 208 lines) and that fragment, both inside them.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T110237355670-iter-bank-recertify/manifest.md; it records status complete, sixteen commits to 31d8dbc71, baseline 7 passed / 6 errors EXIT=1 at 3a9238f0a with the six setup timeouts, head 14 passed EXIT=0 at c064f837c in logs/after-final2.log, the two lead-accepted exceptions, and first-derivative figures that reconcile with receipts/derive-rows.json.\nVERDICT diff: read the four commits 669eed1df..31d8dbc7 commit by commit (39eaf5ef5 adds derive_rows.py; c064f837c rewrites the fragment's first-derivative paragraphs, the table row's context and the receipts list; 31d8dbc71 records the final ruling; 669eed1df records the earlier ruling) against the full delivered range 3a9238f0..31d8dbc7 for context; no product source and no test file changes.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: scripts/prototypes/iter_bank/derive_rows.py:53-204 does produce the statistic the fragment quotes from the two archives, and receipts/derive-rows.json's active-node aggregate 0.17260566886876466 equals receipts/recertify-head-bank.json's independently produced first_derivative_rows_active, so the increment delivers on the exception it was added to document.\nSCORE evidence: 13\nJUSTIFICATION evidence: receipts/derive-rows.json reconciles line for line with logs/derive-rows-instrumented.log:4-9 and :3284212-3284216, but the fragment's table row at docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:49, its ratio at :52 and its location at :53 are not in either.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 669eed1df..31d8dbc7 lists only scripts/prototypes/iter_bank/derive_rows.py and docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html, both inside the declared write paths, with nothing under nova/.\nSCORE durability: 6\nJUSTIFICATION durability: the diff adds no assertion in tests/test_iter_bank.py or anywhere else, so changing derive_rows.py:31 DERIVATIVE from slice(1, 3) or its --window default would change every number the fragment now relies on and no test would redden.\nSCORE fit: 17\nJUSTIFICATION fit: scripts/prototypes/iter_bank/derive_rows.py passes ruff and follows recertify.py's untyped-argument and print-a-JSON-receipt idiom, introducing no name the naming rules forbid.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/iter_bank/derive_rows.py:46 re-implements relative(delta, scale, axis=0), a third copy of the helper owned by scripts/prototypes/bank_hessian_diagnosis/report.py:22 and already present in recertify.py:35, instead of importing either.\nFINDING scripts/prototypes/iter_bank/derive_rows.py:46 non-blocking: relative() is a third copy of the node-aggregated relative norm, its own docstring calling it \"the certification script's\" while duplicating scripts/prototypes/iter_bank/recertify.py:35 and scripts/prototypes/bank_hessian_diagnosis/report.py:22 rather than extending or importing either owner, so a change to the normalisation now has three edits to land.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:49 non-blocking: the first-derivative table row still quotes 2.00e-08 for psi_Z and a median of 3e-12, neither of which exists in receipts/derive-rows.json or logs/derive-rows-instrumented.log (the per-component block prints the unfiltered dpsi_dZ maximum 7.49e7, and the filtered median is 4.170781034099556e-12), so the prior review's reproducibility finding is answered for the worst entry only.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:52 non-blocking: the added sentence reports the node 101 / cell 7 / moment 1 entry's relative departure as 3.887e-8, while the receipt and log it cites record 3.923273659969061e-08 for that exact entry and 3.887e-8 appears in no run artefact.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:53 non-blocking: the unchanged sentence \"a worst case of 7.20e-8 at a cell whose psi_R reaches 62.6\" is refuted by the receipt the new paragraph cites, which places the 7.204033878373014e-08 maximum at cell 502, node 1538 on an entry of magnitude 0.0415, and the added paragraphs leave the sentence standing.\nFINDING scripts/prototypes/iter_bank/derive_rows.py:204 non-blocking: exit status 2 is documented at :12-14 as a MATERIAL verdict on the lead's 1e-7 absolute boundary, and job 1325117 recorded EXIT=2 with material.present true and 48 entries, so the receipt that supports the accepted exception also records the instrument's failure verdict on a boundary the ruling at 31d8dbc71 withdrew, and no sentence in the fragment reconciles the two.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:12 non-blocking: the plan-commits meta stops at 0a73119c5 and omits 39eaf5ef5, the commit that adds the derive_rows.py the fragment now cites at :53, so the record does not attribute the change carrying its own reproduction instrument.",
+  "review_node": "review-of-iter-bank-recertify-31d8dbc71dff",
+  "review_run_id": "r-20261118T174359748571-review-of-iter-bank-recertify-31d8dbc71dff",
+  "reviewed_base_sha": "669eed1df4a24126e90131f1d6ee0b39d14926fb",
+  "reviewed_head_sha": "31d8dbc71dff28df2664364ab5939a39814dd0b0",
+  "reviewed_run_id": "r-20261117T110237355670-iter-bank-recertify",
+  "reviewer": {
+    "backend": "omp-local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T174359748571-review-of-iter-bank-recertify-31d8dbc71dff"
+  },
+  "reviewer_note": "independent review of the commits run r-20261117T110237355670-iter-bank-recertify gained after its earlier review at 669eed1df, read as 669eed1df4a24126e90131f1d6ee0b39d14926fb..31d8dbc71dff28df2664364ab5939a39814dd0b0; the full delivered range 3a9238f0a..31d8dbc71 was read for context and its 3a9238f0a..669eed1df half was covered by the prior record. Every number was checked against the run's receipts and logs rather than the worker's account.",
+  "scores": {
+    "durability": 6,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T18:32:18.915984+00:00",
+  "total": 77
+}

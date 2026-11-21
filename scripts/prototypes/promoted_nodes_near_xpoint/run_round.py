@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 
 PYTHON = sys.executable
-EVIDENCE = Path("/work/projects/imas_gpu/sophelio/evidence/promoted-nodes-near-xpoint")
+EVIDENCE = Path("/work/projects/imas_gpu/nova/evidence/promoted-nodes-near-xpoint")
 RECEIPT = EVIDENCE / "measure-5.json"
 FIELDS = EVIDENCE / "measure-5-fields.npz"
 FIGURE = Path(

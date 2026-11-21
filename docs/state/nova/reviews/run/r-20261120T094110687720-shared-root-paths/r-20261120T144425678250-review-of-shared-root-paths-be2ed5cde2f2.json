@@ -1,0 +1,46 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "789479f7dbaa97933495e8c0f82b9dfa1dc0fc75",
+  "completed_at": "2026-11-20T14:49:02.379Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-20T14:45:19Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/shared-root.html",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the paragraph says both runs 'and the tool's listing over the worktree itself, are recorded by the script that produces them', but logs/negative_control.sh emits only the two scratch-copy listings, while logs/inventory-current.log comes from a separate invocation and neither the script alone nor a re-run reproduces the log's '# command:' header or trailing EXIT line, so the log is not byte-for-byte regenerable from the script as stated."
+    }
+  ],
+  "head_log_revision": "0d6b98b3a458b97870d9433724b2f3b045e014e4",
+  "justifications": {
+    "durability": "the gained commit adds no test and rests on tests/test_operand_cache.py:126, whose assertion compares the code's default against the independent literals '/work/projects/imas_gpu/nova/' and 'sophelio', so restoring OPERAND_CACHE_ROOT reddens it, and logs/standalone-assertion.log now records its 1 passed at 0d6b98b3a.",
+    "evidence": "I reproduced the fragment's claims at be2ed5cde \u2014 29 corpus / 0 default against 88 base defaults, 29 corpus lines unchanged, the six-id arm sets identical, and logs/negative_control.sh re-run over TMPDIR copies yielding the same 'default=1 line 30' and 'default=0, EXIT=0' listings \u2014 with a small deduction for the fragment attributing logs/inventory-current.log to that script.",
+    "fit": "the edited paragraphs follow the surrounding evidence-fragment style in docs/evidence/fragments/kernel-compile-barrier/shared-root.html:19, and the commit carries no plan label, ticket id, worktree path or version suffix in the changed file.",
+    "goal_fidelity": "docs/evidence/fragments/kernel-compile-barrier/shared-root.html:41 now says the assertion was added after both arms and verified in a standalone run with its log, and line 29 now describes the default row at line 30 the negative-control log actually carries.",
+    "reuse": "the gained commit adds no function, class or module, so nothing is duplicated; the node's one added tool, scripts/prototypes/shared_root/inventory.py, was scored at the prior review against a search that found no existing classification owner.",
+    "scope_discipline": "the gained diff is docs/evidence/fragments/kernel-compile-barrier/shared-root.html alone, two paragraphs, entirely inside the declared write paths and carrying nothing the goal does not imply."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the gained commit be2ed5cde answers the two findings left by the review at 0d6b98b3a, and its whole change is docs/evidence/fragments/kernel-compile-barrier/shared-root.html lines 29 and 41, which now say where the added assertion was measured and what the negative-control log actually contains.\nVERDICT done_when: clause (1) reproduces independently at be2ed5cde (git grep over the tracked tree outside docs lists 29 rows, all under sophelio/raw, and 0 default rows against 88 at base 789479f7d, with all 29 corpus lines byte-identical); clause (2) rests on logs/base-arm.log and logs/head-arm-at-0d6b98b3a.log, whose FAILED id sets I diffed and found identical at six each; clause (3) holds against the worker's command stream, whose only /work-adjacent write-like commands write to TMPDIR scratch and the run log directory.\nVERDICT write_paths: the declared scope covers nova, scripts, benchmarks, apps/playable/machines.py, tests, AGENTS.md and the shared-root fragment; the gained commit touches only docs/evidence/fragments/kernel-compile-barrier/shared-root.html (+2 -2), inside it.\nVERDICT manifest: read; it records the standalone assertion run, a reproducible negative control, and after_suite at 0d6b98b3a with the same six ids as base, and note that the on-disk manifest is complete at 23fa51437, one commit past the reviewed head be2ed5cde, whose fragment table at the reviewed head still names da2abb6c3 and is corrected by that later commit.\nVERDICT diff: 0d6b98b3a..be2ed5cde is one commit and one file, docs/evidence/fragments/kernel-compile-barrier/shared-root.html, rewriting the negative-control paragraph and the operand-cut-short paragraph so neither overstates what the recorded runs measured.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:1735, benchmarks/mast_centroid_solve_panels.py:266, scripts/prototypes/read_route/jets.py:58, scripts/prototypes/support/certificate_fixtures.py, scripts/h200_test_lane/cache_guard.py:70\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/kernel-compile-barrier/shared-root.html:41 now says the assertion was added after both arms and verified in a standalone run with its log, and line 29 now describes the default row at line 30 the negative-control log actually carries.\nSCORE evidence: 18\nJUSTIFICATION evidence: I reproduced the fragment's claims at be2ed5cde \u2014 29 corpus / 0 default against 88 base defaults, 29 corpus lines unchanged, the six-id arm sets identical, and logs/negative_control.sh re-run over TMPDIR copies yielding the same 'default=1 line 30' and 'default=0, EXIT=0' listings \u2014 with a small deduction for the fragment attributing logs/inventory-current.log to that script.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the gained diff is docs/evidence/fragments/kernel-compile-barrier/shared-root.html alone, two paragraphs, entirely inside the declared write paths and carrying nothing the goal does not imply.\nSCORE durability: 18\nJUSTIFICATION durability: the gained commit adds no test and rests on tests/test_operand_cache.py:126, whose assertion compares the code's default against the independent literals '/work/projects/imas_gpu/nova/' and 'sophelio', so restoring OPERAND_CACHE_ROOT reddens it, and logs/standalone-assertion.log now records its 1 passed at 0d6b98b3a.\nSCORE fit: 19\nJUSTIFICATION fit: the edited paragraphs follow the surrounding evidence-fragment style in docs/evidence/fragments/kernel-compile-barrier/shared-root.html:19, and the commit carries no plan label, ticket id, worktree path or version suffix in the changed file.\nSCORE reuse: 20\nJUSTIFICATION reuse: the gained commit adds no function, class or module, so nothing is duplicated; the node's one added tool, scripts/prototypes/shared_root/inventory.py, was scored at the prior review against a search that found no existing classification owner.\nFINDING docs/evidence/fragments/kernel-compile-barrier/shared-root.html:29 non-blocking: the paragraph says both runs 'and the tool's listing over the worktree itself, are recorded by the script that produces them', but logs/negative_control.sh emits only the two scratch-copy listings, while logs/inventory-current.log comes from a separate invocation and neither the script alone nor a re-run reproduces the log's '# command:' header or trailing EXIT line, so the log is not byte-for-byte regenerable from the script as stated.\n",
+  "review_run_id": "r-20261120T144425678250-review-of-shared-root-paths-be2ed5cde2f2",
+  "reviewed_base_sha": "0d6b98b3a458b97870d9433724b2f3b045e014e4",
+  "reviewed_head_sha": "be2ed5cde2f25a57cd38df94166ae49ef8b2a44e",
+  "reviewed_run_id": "r-20261120T094110687720-shared-root-paths",
+  "reviewer_run_id": "r-20261120T144425678250-review-of-shared-root-paths-be2ed5cde2f2",
+  "scope_note": "re-review of the commits gained since the review recorded at 0d6b98b3a; the diff read is 0d6b98b3a..be2ed5cde (one commit, one file). The run's worktree and manifest have since advanced to 23fa51437, which corrects the fragment's suite table to the arm at 0d6b98b3a; that commit is outside this review's head and is not scored.",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T14:49:18.708402+00:00",
+  "total": 114
+}

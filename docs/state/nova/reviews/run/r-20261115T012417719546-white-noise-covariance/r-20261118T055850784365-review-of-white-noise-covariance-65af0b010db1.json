@@ -1,0 +1,140 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_evidence": "Both source-run gate logs name their respective reviewed revisions, contain a complete one-passed summary and end in EXIT=0; failure_ids(head) minus failure_ids(base) is empty. This is the artifact-path gate only.",
+  "after_suite": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_artifacts_carry_no_worktree_paths.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/logs/head-gate-65af0b010db137b05137b6fd8fc9dd183cb273d9.log",
+    "revision": "65af0b010db137b05137b6fd8fc9dd183cb273d9"
+  },
+  "assertion_analysis": {
+    "added_assertions": [],
+    "existing_gate": "The positive-control candidate assertion fails if the tracked owner module is not found; the offender assertion fails when a non-exempt tracked artifact names a worktree. Neither fails for a wrong covariance, variance ratio, noise factor, bias or flux-error scaling.",
+    "regression_reading": "Replacing the fragment's full nonlinear verdict with linearised-only evidence or changing the covariance calculation would not change the recorded gate's path assertions. The doubled-noise study independently falsifies the covariance-acceptance criterion on measured states, but it is not an installed regression test.",
+    "self_coupled_added_assertions": []
+  },
+  "baseline_suite": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_artifacts_carry_no_worktree_paths.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T012417719546-white-noise-covariance/logs/base-gate-d7676e478fc8701b036ec717f80d403c3ead86f5.log",
+    "revision": "d7676e478fc8701b036ec717f80d403c3ead86f5"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-18T06:07:06Z",
+  "dispatched_at": "2026-11-18T05:59:28Z",
+  "figures_reviewed": [
+    {
+      "path": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/solovev.svg",
+      "render": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T055850784365-review-of-white-noise-covariance-65af0b010db1/solovev.png",
+      "verdict": "Rendered the exact reviewed SVG to 1400px PNG and inspected it; text and data are legible, without clipped or overlapping labels."
+    },
+    {
+      "path": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/mast.svg",
+      "render": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T055850784365-review-of-white-noise-covariance-65af0b010db1/mast.png",
+      "verdict": "Rendered the exact reviewed SVG to 1400px PNG and inspected it; text and data are legible, without clipped or overlapping labels."
+    },
+    {
+      "path": "docs/figures/inverse-equilibrium-baseline/white-noise-covariance/iter.svg",
+      "render": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T055850784365-review-of-white-noise-covariance-65af0b010db1/iter.png",
+      "verdict": "Rendered the exact reviewed SVG to 1400px PNG and inspected it; text and data are legible, without clipped or overlapping labels."
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "line": "45",
+      "severity": "blocking",
+      "text": "blocking: The live plan's clause (2) asks for reconstructed flux-map RMS error at 0.5, 1 and 2 times the stated noise, proportional within 20%, but the delivered table explicitly measures only the linearised operator and says nothing about nonlinear recovery; the small earlier full-fit table at :50 has unequal counts and no usable MAST result at 2 sigma, so the required nonlinear scaling measure remains unestablished."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "line": "59",
+      "severity": "non-blocking",
+      "text": "non-blocking: The study generators and numerical acceptance checks exist only in the run directory, with no added repository assertion consuming the study; changing a covariance formula, a variance verdict or a figure's data can leave the recorded artifact-path test green, so the measurement has no automated regression protection and needs a separately scoped generator/test node or an explicit exemption."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "non-blocking: The fragment says a literal reading of the clause still requires 256 nonlinear fits, whereas the live plan now explicitly requires 32 attempts with intervals recomputed for returned fits; this stale statement misidentifies an already amended requirement as outstanding work."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "non-blocking: The sentence says the reported covariance must be four times the realised variance under doubled true noise, reversing the relationship; the measured control is realised/stated near four, so the realised variance is four times the stated variance."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: The closing explanation says the standard error sigma/sqrt(n) is larger than the per-fit sigma; it is smaller, while the bias expressed in standard-error units is larger, and confusing those quantities obscures how the three-standard-error criterion is evaluated."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read all six commits from b15155f8d0361efce262ded60fd0b54a95133cf4 through 65af0b010db137b05137b6fd8fc9dd183cb273d9 and rendered all three final SVGs; the final diff adds one 61-line fragment and three legible figures, without source definitions or test assertions.",
+    "done_when": "Read prompt.txt:118-122 against the live plan amendment to 32 attempts and titan execution; saved full-analysis records support the variance, mean-bias and residual measures, while white-noise-covariance.html:45 expressly excludes nonlinear recovery from the flux-scaling measure and the recorded pytest gate checks artifact paths only.",
+    "goal": "Read the source goal in prompt.txt:43 and live nova/docs/plans/inverse-equilibrium-baseline.html#s6; the delivered fragment measures repeated nonlinear-fit covariance on all three states and explicitly labels the P100 execution, but its flux-error scaling remains a linearised measurement.",
+    "manifest": "Read the source manifest.md, both revision-bound gate logs and the six full/full-control analysis JSON files; the reported 82/96 main fits and 16/16, 4/16, 15/16 control returns agree with those artifacts, and the base/head logs each finish with one passed test and EXIT=0.",
+    "write_paths": "Read the source prompt.txt:79-81 and git diff --numstat for d7676e478fc8701b036ec717f80d403c3ead86f5..65af0b010db137b05137b6fd8fc9dd183cb273d9; all four delivered paths are the declared evidence fragment or files beneath its declared figure directory."
+  },
+  "justifications": {
+    "durability": "No assertion is added anywhere in the diff, and tests/test_artifacts_carry_no_worktree_paths.py:27-44 would remain green if the numerical tables in docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:13-21 or MagneticsFit's covariance regressed.",
+    "evidence": "study/results/*-full-analysis.json and *-full-control-analysis.json substantiate docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:13-21, while logs/base-gate-d7676e478fc8701b036ec717f80d403c3ead86f5.log and logs/head-gate-65af0b010db137b05137b6fd8fc9dd183cb273d9.log prove zero added artifact-path failures rather than the numerical study's acceptance criteria.",
+    "fit": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:53-55 uses scoped anchors, project-absolute image sources and readable rendered figures, but :4, :8 and :18 retain contradictory statistical or requirement wording.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4-21 supplies the nonlinear covariance and control measurements, but :45-46 supplies only linearised flux-error scaling for the remaining live-plan measure.",
+    "reuse": "The diff adds no function, class or module; a capability search across nova, scripts, benchmarks and tests at 65af0b010db137b05137b6fd8fc9dd183cb273d9 found the existing covariance owner nova/equilibrium/magnetics_fit.py and no added implementation that duplicates it.",
+    "scope_discipline": "The complete diff changes only docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html and the three SVGs in docs/figures/inverse-equilibrium-baseline/white-noise-covariance, exactly the source prompt's declared paths."
+  },
+  "live_plan_path": "/home/ITER/mcintos/Code/nova/docs/plans/inverse-equilibrium-baseline.html",
+  "live_plan_version": 59,
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read the source goal in prompt.txt:43 and live nova/docs/plans/inverse-equilibrium-baseline.html#s6; the delivered fragment measures repeated nonlinear-fit covariance on all three states and explicitly labels the P100 execution, but its flux-error scaling remains a linearised measurement.\nVERDICT done_when: Read prompt.txt:118-122 against the live plan amendment to 32 attempts and titan execution; saved full-analysis records support the variance, mean-bias and residual measures, while white-noise-covariance.html:45 expressly excludes nonlinear recovery from the flux-scaling measure and the recorded pytest gate checks artifact paths only.\nVERDICT write_paths: Read the source prompt.txt:79-81 and git diff --numstat for d7676e478fc8701b036ec717f80d403c3ead86f5..65af0b010db137b05137b6fd8fc9dd183cb273d9; all four delivered paths are the declared evidence fragment or files beneath its declared figure directory.\nVERDICT manifest: Read the source manifest.md, both revision-bound gate logs and the six full/full-control analysis JSON files; the reported 82/96 main fits and 16/16, 4/16, 15/16 control returns agree with those artifacts, and the base/head logs each finish with one passed test and EXIT=0.\nVERDICT diff: Read all six commits from b15155f8d0361efce262ded60fd0b54a95133cf4 through 65af0b010db137b05137b6fd8fc9dd183cb273d9 and rendered all three final SVGs; the final diff adds one 61-line fragment and three legible figures, without source definitions or test assertions.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4-21 supplies the nonlinear covariance and control measurements, but :45-46 supplies only linearised flux-error scaling for the remaining live-plan measure.\nSCORE evidence: 16\nJUSTIFICATION evidence: study/results/*-full-analysis.json and *-full-control-analysis.json substantiate docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:13-21, while logs/base-gate-d7676e478fc8701b036ec717f80d403c3ead86f5.log and logs/head-gate-65af0b010db137b05137b6fd8fc9dd183cb273d9.log prove zero added artifact-path failures rather than the numerical study's acceptance criteria.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The complete diff changes only docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html and the three SVGs in docs/figures/inverse-equilibrium-baseline/white-noise-covariance, exactly the source prompt's declared paths.\nSCORE durability: 0\nJUSTIFICATION durability: No assertion is added anywhere in the diff, and tests/test_artifacts_carry_no_worktree_paths.py:27-44 would remain green if the numerical tables in docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:13-21 or MagneticsFit's covariance regressed.\nSCORE fit: 17\nJUSTIFICATION fit: docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:53-55 uses scoped anchors, project-absolute image sources and readable rendered figures, but :4, :8 and :18 retain contradictory statistical or requirement wording.\nSCORE reuse: 20\nJUSTIFICATION reuse: The diff adds no function, class or module; a capability search across nova, scripts, benchmarks and tests at 65af0b010db137b05137b6fd8fc9dd183cb273d9 found the existing covariance owner nova/equilibrium/magnetics_fit.py and no added implementation that duplicates it.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:45 blocking: The live plan's clause (2) asks for reconstructed flux-map RMS error at 0.5, 1 and 2 times the stated noise, proportional within 20%, but the delivered table explicitly measures only the linearised operator and says nothing about nonlinear recovery; the small earlier full-fit table at :50 has unequal counts and no usable MAST result at 2 sigma, so the required nonlinear scaling measure remains unestablished.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:59 non-blocking: The study generators and numerical acceptance checks exist only in the run directory, with no added repository assertion consuming the study; changing a covariance formula, a variance verdict or a figure's data can leave the recorded artifact-path test green, so the measurement has no automated regression protection and needs a separately scoped generator/test node or an explicit exemption.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:8 non-blocking: The fragment says a literal reading of the clause still requires 256 nonlinear fits, whereas the live plan now explicitly requires 32 attempts with intervals recomputed for returned fits; this stale statement misidentifies an already amended requirement as outstanding work.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:18 non-blocking: The sentence says the reported covariance must be four times the realised variance under doubled true noise, reversing the relationship; the measured control is realised/stated near four, so the realised variance is four times the stated variance.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html:4 non-blocking: The closing explanation says the standard error sigma/sqrt(n) is larger than the per-fit sigma; it is smaller, while the bias expressed in standard-error units is larger, and confusing those quantities obscures how the three-standard-error criterion is evaluated.\n",
+  "reuse_search": {
+    "added_definitions": [],
+    "capabilities": [
+      "white-noise covariance scatter",
+      "MagneticsFit coefficient covariance"
+    ],
+    "owner": "nova/equilibrium/magnetics_fit.py",
+    "scope": "nova scripts benchmarks tests at reviewed head"
+  },
+  "review_run_id": "r-20261118T055850784365-review-of-white-noise-covariance-65af0b010db1",
+  "reviewed_base_sha": "d7676e478fc8701b036ec717f80d403c3ead86f5",
+  "reviewed_head_sha": "65af0b010db137b05137b6fd8fc9dd183cb273d9",
+  "reviewed_run_id": "r-20261115T012417719546-white-noise-covariance",
+  "reviewed_worktree_head": "89b76c92954a1d7db41ec18df568c4964d36549b",
+  "revision_read_method": "git show and git diff at the explicit reviewed object IDs; no checkout mutation",
+  "scores": {
+    "durability": 0,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "source_commits": [
+    "b15155f8d0361efce262ded60fd0b54a95133cf4",
+    "f0cd75cbf01ac4af6f497d543edc033df1309dd1",
+    "e6595693dbcf27b048cd1e4f2c3ea46bdde63392",
+    "7ef7424513cb16aab82e15908db6207ced873d22",
+    "ffce4cd56a91258155d61c9ada6a5d1ddfb16d81",
+    "65af0b010db137b05137b6fd8fc9dd183cb273d9"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:05:02.275236+00:00",
+  "total": 89
+}

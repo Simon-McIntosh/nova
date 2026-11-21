@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-21T00:52:05.133Z",
+  "dispatched_at": "2026-11-21T00:45:16Z",
+  "figures": {
+    "docs/figures/inverse-equilibrium-baseline/fit-iteration-converges-known-states/known-states/iter.svg": {
+      "contrast": "pass - the black legend text is unambiguous on white, and both the blue recovered series and the grey generating set read cleanly against the white page.",
+      "data_ink": "pass - 4.65 per cent of the 1399x720 canvas carries ink and all of it is data or the two-entry legend; no fills, no gradients, no gridlines.",
+      "decoration": "pass - despined with no axes at all, per the poloidal painter; no background tint, no frame, no styled theme.",
+      "label_collision": "pass - the only text is 'generating' and 'recovered' in one frameless legend above the panel; neither is clipped nor overlaps the data.",
+      "legibility": "pass - the ITER elongated plasma reads at a glance: twelve blue recovered contours drawn narrow over the wide grey generating set, the two coincident axis triangles and the one X-point cross are all visible, and the grey underlay shows as a halo on both sides of each blue line; the undrawn separatrix and the crowded outer levels are recorded as non-blocking findings rather than passed over.",
+      "table_form": "pass - the image carries a spatial relationship, the coincidence of two flux-surface families and their nulls; no table could carry it."
+    },
+    "docs/figures/inverse-equilibrium-baseline/fit-iteration-converges-known-states/known-states/solovev.svg": {
+      "contrast": "pass - black legend text on white; the blue and grey series both stand clear of the white background.",
+      "data_ink": "pass - 6.66 per cent of the canvas is inked, all of it the contour geometry, the wall and the legend; nothing decorative is drawn.",
+      "decoration": "pass - no axes, no gridlines, no background fill or styling.",
+      "label_collision": "pass - the legend sits above the panel in clear space and is the figure's only text; nothing is clipped.",
+      "legibility": "pass - the Solov'ev elliptical state is readable at a glance: twelve blue recovered contours centred on the wide grey generating set, the axis markers coincident, and the black elliptical wall enclosing both; the white gap to the wall and the visibly faceted contour segments are recorded as non-blocking findings.",
+      "table_form": "pass - the figure shows contour coincidence in the poloidal plane, a spatial comparison a table cannot express."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-iteration-converges-known-states/known-states/iter.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The separatrix is not drawn: the shared level array takes the interior of a 14-point linspace between the axis flux and the boundary flux, so neither endpoint is painted, so on a diverted case the boundary-level contour - the surface the admitted X-point lies on - is absent. The X marker therefore floats about 45 px clear of the nearest drawn contour with white page between them, and a reader cannot see which surface the null belongs to."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-iteration-converges-known-states/known-states/iter.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Framing: the poloidal panel spans only 274 px of the 1399 px canvas width (20 per cent) while filling 83 per cent of its height, so roughly three quarters of the image is blank and the contours are drawn small; counting the twelve levels needs magnification even though the 14x7.2 canvas is the house style. The Solov'ev figure has the same framing at 317 px (23 per cent)."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-iteration-converges-known-states/known-states/iter.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The wide grey generating contours sit at a 6-8 px pitch against a roughly 5 px stroke in the crowded inboard and outboard regions, so adjacent generating levels leave almost no white between them and read as a continuous grey wash; the narrow blue recovered lines stay individually distinguishable, so the comparison is still legible, but the generating set's individual levels are hard to count where the pitch is tightest."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-iteration-converges-known-states/known-states/iter.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two null sets are nearly coincident and are drawn at very different sizes (grey 15 pt axis and 16 pt cross under blue 7 pt and 8 pt markers), so each pair renders as a single silhouette with a blue core: the reader sees one marker and cannot tell from the picture that two coincident marker sets are drawn. The caption states it; the image does not. The same holds on the Solov'ev panel."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-iteration-converges-known-states/known-states/solovev.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The boundary level is omitted from the shared level array, so no contour is drawn at the generating boundary flux; a visible white gap separates the outermost recovered contour from the black elliptical wall, which reads as a plasma that stops short of its vessel rather than one whose last surface coincides with it."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-iteration-converges-known-states/known-states/solovev.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The contours are visibly faceted: each loop is drawn as straight segments meeting at corners (roughly twelve to sixteen vertices), so a corner in a flux surface cannot be told from the coarse rendering grid; the two sets are still distinguishable, but the faceting gives the figure a low-resolution reading that a smoothed or denser sampling would remove."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261121T004429778267-review-of-fit-iteration-converges-known-states-56d5c3f0ca02-figure",
+  "reviewed_base": "364a99271fe3d1a4d18f9fbd093785145504571f",
+  "reviewed_base_sha": "364a99271fe3d1a4d18f9fbd093785145504571f",
+  "reviewed_head": "56d5c3f0ca0280c99a4a5642a4c7835b007a2b95",
+  "reviewed_head_sha": "56d5c3f0ca0280c99a4a5642a4c7835b007a2b95",
+  "reviewed_run_id": "r-20261120T080021687060-fit-iteration-converges-known-states",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T00:52:19.473500+00:00",
+  "total": null
+}

@@ -1,0 +1,124 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T18:36:19.014Z",
+  "dispatched_at": "2026-11-18T18:35:54Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:74",
+      "id": "done_when-1",
+      "reason": "the node would be dispatched against a cache service nothing measures, and the marker removal it authorises would rest on a ledger that structurally cannot see the compile being tested.",
+      "text": "\u00a74 node (a) says the pre-warm rows are required because \"without that the zero-miss clauses cannot be met\", but the seven fixture ids' compile runs in a subprocess (`subprocess.Popen([sys.executable, \"-u\", \"-c\", script, module])`, tests/equilibrium/test_topology_read.py:105) that never imports the cache guard, whose ledger is installed only by `pytest_sessionstart`/`install()` in the pytest process (scripts/h200_test_lane/cache_guard.py:365-367); the fixture asserts only the completion marker (tests/equilibrium/test_topology_read.py:132) and its child currently disables the cache outright (`jax.config.update('jax_enable_compilation_cache', False)`, :76), so a cold compile of 218 s \u2014 under the fixture's 600 s bound \u2014 passes all seven ids, records no miss in the parent ledger, and satisfies clause (1) and clause (3)'s \"no miss recorded\" on an empty cache; the clause's declared measure therefore cannot fail for the arm it is about, and node (a)'s premise is false",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:73",
+      "id": "reasoning-1",
+      "reason": "the acceptance clause a node must meet is stated twice with opposite meanings, so the gate chosen depends on which section the worker reads first.",
+      "text": "\u00a74 clause (1) bounds the cache-served first call at 60 s and 64 GB and clause (2) states \"the cold compile ... which this plan no longer bounds\", while \u00a70 (line 48) still records as the bounds \"this plan owns ... compile wall at most 60 s on the H200 with the warm cache excluded, executable at most 50 MB, and at most 64 GB resident on the host during a cold compile\"; a node reading \u00a70 is held to the cold compile and a node reading \u00a74 to the warm load, and no text reconciles them",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/kernel-compile-barrier.html:74",
+      "id": "evidence_paths-1",
+      "reason": "without a declared path the compile-clause evidence has no durable home for the later reader, and the node's own record cannot be reconciled with the pre-warm rows it creates.",
+      "text": "\u00a74 node (a) adds the read at 132, 300 and 550 cells to the pre-warm and owns the three compile arms, executable size and memory row, but names no record fragment, figure directory or receipt directory for them, while every s3 node (b), (c) and (d) names all three",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "404db535e42b794c01af70c32ff28f3ffbe329dc",
+  "plan_fingerprint": "4da31be67c96b4ba838ac85f6afa5345df36caa1614b3dc219856c5d0d534b99",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 103,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "fc636c51cfbb7709a0abf7d5a8a8a3864a763a9c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "s4 clause (3) requires the fixture compile child to enable the pinned cache and report its own hits and misses, and the fixture to fail unless the child reports zero misses",
+      "reason": "",
+      "when": "2026-11-18T18:53:04.342649+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "fc636c51cfbb7709a0abf7d5a8a8a3864a763a9c",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "the opening section now says the inherited cold-compile bounds are superseded for this plan by the warm-load ruling of 2026-11-18",
+      "reason": "",
+      "when": "2026-11-18T18:53:14.717571+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "fc636c51cfbb7709a0abf7d5a8a8a3864a763a9c",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "s4 node (a) names its fragment, figure directory and receipt directory",
+      "reason": "",
+      "when": "2026-11-18T18:53:24.047189+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "fc636c51cfbb7709a0abf7d5a8a8a3864a763a9c",
+      "commit_basis": "edit",
+      "note": "s4 clause (3) requires the fixture compile child to enable the pinned cache and report its own hits and misses, and the fixture to fail unless the child reports zero misses",
+      "reason": "",
+      "when": "2026-11-18T18:53:04.342649+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "fc636c51cfbb7709a0abf7d5a8a8a3864a763a9c",
+      "commit_basis": "edit",
+      "note": "s4 node (a) names its fragment, figure directory and receipt directory",
+      "reason": "",
+      "when": "2026-11-18T18:53:24.047189+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "fc636c51cfbb7709a0abf7d5a8a8a3864a763a9c",
+      "commit_basis": "edit",
+      "note": "the opening section now says the inherited cold-compile bounds are superseded for this plan by the warm-load ruling of 2026-11-18",
+      "reason": "",
+      "when": "2026-11-18T18:53:14.717571+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261118T182214864781-plan-review-of-kernel-compile-barrier.json",
+  "review_run_id": "r-20261118T182214864781-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "41c8d94d973bc6e0644064ac3643dc0304987051",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `scripts/h200_test_lane/prewarm.sh`, `tests/equilibrium/test_topology_read.py` (marker at :39), `tests/biot/test_production_row_compile.py`, `tests/equilibrium/test_bounded_point_program.py`, the plan hrefs `/nova/sub-millisecond-forward-path.html` and `/nova/evidence/fragments/sub-millisecond-forward-path/polygon-stable-evaluator.html` all resolve; commit anchors b0a2cde51, 681a6ecd2, 35fad5250 and 00ec05512 resolve in the repository.",
+    "done_when": "a finding \u2014 \u00a74 clause (3) and node (a) rest the seven fixture ids' cache service on \"no miss recorded\", a guard that cannot observe the compile child.",
+    "evidence_paths": "a finding \u2014 \u00a74 node (a) gains pre-warm rows and the compile-clause evidence but still names no record fragment, figure directory or receipt directory, unlike every s3 node.",
+    "naming": "pass \u2014 the changed units name no plan labels or ticket numbers; the marker and fixture names they cite already exist in the tree.",
+    "reasoning": "a finding \u2014 \u00a74 clause (1) measures the cache-served first call against 60 s and 64 GB while \u00a70 states those bounds as the cold-compile clause this plan owns, and clause (2) declares the cold compile unbounded; the two statements cannot both hold.",
+    "single_goal": "pass \u2014 s3 carries one deliverable per node (attribution, bounded form, cached program), s4 splits node (a) the compile clause from node (b) and gives each its own done-when.",
+    "wiring": "pass \u2014 s3 declares kernel-compile-barrier#s2 and #s5, s4 the same, both exist; node (d) of s3 feeds \u00a74's kernel-bounded precondition and \u00a74 node (a)'s pre-warm rows name the program s3 node (d) adds."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "4e75bf46143b90cd845e066af2c90aec4c2f201644111067b0791f5e1bcfe044",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "0526d8117195742636996dd744986469f3b4e1bc78f8fb4328ffa7c0aaf2c7f7",
+    "s4": "595de4331bc5c0d6cf15b68666ce34c6189168bf1059ac6588512d0ff4ede8c8",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T18:45:46.792764+00:00",
+  "total": null
+}

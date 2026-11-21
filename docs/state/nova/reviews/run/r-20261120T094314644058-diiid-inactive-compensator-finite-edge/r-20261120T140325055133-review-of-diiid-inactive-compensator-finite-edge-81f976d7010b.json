@@ -1,0 +1,151 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": [
+    {
+      "conditions_for_failure": "images and tangents are exact array equalities against zeros for every inactive parametrisation, and route_images is the map difference against the same map with the unknown held at zero; deleting the mask at ConstraintPair.flux_delta makes all three nonzero and reddens all 32 inactive route cases, which gate/negative-radial.log records as 17 failing ids (16 route cases plus the reduced case).",
+      "independence": "The active half of the same cross product requires a nonzero image, tangent and route reading above 1e-12, so the instrument is shown seeing a source in the same run that it reports absent.",
+      "limit": "The assertion depends on the pair's flux_delta being reached at all; the len(images) > 1 guard covers only that a candidate ran, not that the route's own map consumed the owner value.",
+      "location": "tests/equilibrium/test_solve_vertical_pin.py:511-518"
+    },
+    {
+      "conditions_for_failure": "For active=False the image, tangent and row assertions redden if the payload stops masking (image nonzero, row becomes observed-minus-target rather than the unknown); for active=True the image and tangent equalities compare two calls with the identical payload and cannot fail.",
+      "independence": "The control call rebinds payload to True and is compared against an inactive pair, so the inactive half is independent; the active half is not.",
+      "limit": "The active branch is a self-comparison and is reported as a finding.",
+      "location": "tests/equilibrium/test_solve_vertical_pin.py:552-561"
+    },
+    {
+      "conditions_for_failure": "assert gates.core_gate is shared_gate fails if the prototype gate stops importing the shared arm runner, and the RunnerReached round trip fails if gates.arm re-implements execution instead of calling it; a local fork reddens both.",
+      "independence": "The behavioural half drives arm() and observes the call tuple, so it is independent of the alias assertion beside it.",
+      "limit": "Both halves test delegation wiring, not the measured behaviour of an arm.",
+      "location": "tests/equilibrium/test_solve_vertical_pin.py:564-583"
+    }
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/forward.py:2266",
+    "nova/equilibrium/constraint.py:2141",
+    "nova/equilibrium/reduced_newton.py:2396",
+    "nova/equilibrium/reduced_newton.py:594"
+  ],
+  "completed_at": "2026-11-20T14:04:44.385Z",
+  "dispatched_at": "2026-11-20T14:04:24Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The reviewer names the inactive-branch assertion as the guard that catches the regression; the active-branch comparison is redundant but harmless",
+      "recorded_at": "2026-11-20T14:19:34.004473+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "constraint_records only reports which constraints are present and does not drive the image or tangent; the residual and the pair image share active_payload_mask, which is the masking that matters",
+      "recorded_at": "2026-11-20T14:19:49.955177+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "On the finite-edge profiles the unmasked solves already hold the pin at zero, so the rows cannot show a masked difference; the exact-zero contract test with its reddening control is the measurement of the mask",
+      "recorded_at": "2026-11-20T14:20:04.383625+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "A 16 GB P100 ran out of memory; each row's receipt persisted and the fragment discloses the three allocations, which the one-job rule allows for an expiry",
+      "recorded_at": "2026-11-20T14:20:16.240045+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_solve_vertical_pin.py",
+      "line": "556",
+      "severity": "non-blocking",
+      "text": "in the active branch the control is replace(pair, binding=replace(pair.binding, payload=jnp.asarray(True))) applied to a pair whose payload is already True, so assert_array_equal(image, control_image) and the tangent twin compare two calls of the same function on equal inputs and hold whatever the code does; the inactive branch at :559-561 is the assertion that actually guards the regression."
+    },
+    {
+      "file": "nova/equilibrium/constraint.py",
+      "line": "2235",
+      "severity": "non-blocking",
+      "text": "constraint_records re-derives the activity predicate inline (isinstance(pair.functional, CurrentCentroidConstraint) and binding.payload is not None) instead of calling active_payload_mask, so the docstring claim at :166 that a future functional publishing an activity flag changes one function is wrong and the record path can drift from the residual and image owners."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge.html",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "the report that the inactive compensator's field is zero 'in the control arm as well as the masked one' rests on a column that is 0.0 in all eight arm receipts with pin_unknown 0.0 at every recorded endpoint, so no reading shows the cohort instrument can observe a nonzero pin field; the only demonstrated arm difference is 146D's residual at 2.307e-14 against 2.281e-14, and the attribution of any movement therefore rests on the unit contract rather than on the row experiment."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge.html",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "done_when item (2) asks for one job, while the receipt spans three titan allocations (1333254, 1333385, 1333434) after a 16 GB P100 ran out of memory; the fragment discloses the retries and each row's receipt persisted, but the run is not the single job the measure names."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read the eleven commits 789479f7d..81f976d70 file by file: a9185453f adds the mask and its tests, d6658fd5f..45d4e1bd2 rewrite the prototype measurement and one refusal control, aa5313256 and 57bb0984b and 81f976d70 add the fragment and four SVG panels.",
+    "done_when": "Item (1) is asserted by tests/equilibrium/test_solve_vertical_pin.py:496-518 and gate/negative-radial.log reddens 17 inactive cases and no active one; item (2) is recorded in titan/comparison.json (all four rows converged, shifts 0, 6.2e-13, 0, 0 mm), but the 'one job' wording was served by three titan allocations as the fragment states at line 31.",
+    "goal": "The source goal (prompt.txt:38) is that an inactive compensator contribute no flux and no tangent on any proposal route while every DIII-D row stays converged on the finite-edge profiles; nova/equilibrium/constraint.py:318-331 masks the image at the one site the route owners call, and all four booked rows converge in titan/comparison.json.",
+    "manifest": "Read manifest.md; it states the scoped gate at 57bb0984b (41 passed, exit 0), baseline_suite (6 passed, EXIT=0) and after_suite (41 passed, EXIT=0), the focused arms with 22 identical failure ids, and the negative control at 17 failed / 18 passed, and the logs on disk carry those numbers and their EXIT lines.",
+    "write_paths": "The seven declared paths cover all fourteen delivered files; nova/equilibrium/fixed_point.py was declared and not needed."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_solve_vertical_pin.py:516-518 reddens on every inactive route when the mask is deleted, which gate/negative-radial.log demonstrates, but :556-557 compare two evaluations handed the same payload and cannot fail.",
+    "evidence": "gate/negative-radial.log ends '17 failed, 18 passed' with every failing id an inactive [False] case and gate/after.log records 41 passed, but the eight arm receipts carry a terminal pin field of 0.0 everywhere (titan/unmasked/frame-146-limited/trips.json), so the unmasked control shows no known-present nonzero reading.",
+    "fit": "nova/equilibrium/constraint.py:159-171 follows the module's helper and docstring idiom, yet its claim to be the one declaration of the activity rule is falsified by constraint.py:2235 re-deriving the same predicate inline.",
+    "goal_fidelity": "nova/equilibrium/constraint.py:318-331 applies active_payload_mask at the single image site that assemble_augmented_system (constraint.py:2141) and _RowAugmentation (reduced_newton.py:2396) both call, and titan/comparison.json records all four rows converged.",
+    "reuse": "scripts/prototypes/diiid_inactive_compensator/gate.py:12 delegates to the existing scripts/prototypes/diiid_core_hold/regressions.py:gate owner, and a search of nova/equilibrium found no prior activity-mask owner for active_payload_mask.",
+    "scope_discipline": "every one of the fourteen delivered paths sits inside the seven declared write paths, though scripts/prototypes/diiid_inactive_compensator/gate.py:60-96 deletes the prior radial, circuit, shadow and reverse-commit controls instead of extending them."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source goal (prompt.txt:38) is that an inactive compensator contribute no flux and no tangent on any proposal route while every DIII-D row stays converged on the finite-edge profiles; nova/equilibrium/constraint.py:318-331 masks the image at the one site the route owners call, and all four booked rows converge in titan/comparison.json.\nVERDICT done_when: Item (1) is asserted by tests/equilibrium/test_solve_vertical_pin.py:496-518 and gate/negative-radial.log reddens 17 inactive cases and no active one; item (2) is recorded in titan/comparison.json (all four rows converged, shifts 0, 6.2e-13, 0, 0 mm), but the 'one job' wording was served by three titan allocations as the fragment states at line 31.\nVERDICT write_paths: The seven declared paths cover all fourteen delivered files (four SVG panels, one evidence fragment, three nova/equilibrium or scripts paths, one test file); nova/equilibrium/fixed_point.py was declared and not needed.\nVERDICT manifest: Read manifest.md; it states the scoped gate at 57bb0984b (41 passed, exit 0), baseline_suite (6 passed, EXIT=0) and after_suite (41 passed, EXIT=0), the focused arms with 22 identical failure ids, and the negative control at 17 failed / 18 passed, and the logs on disk carry those numbers and their EXIT lines.\nVERDICT diff: Read the eleven commits 789479f7d..81f976d70 file by file: a9185453f adds the mask and its tests, d6658fd5f..45d4e1bd2 rewrite the prototype measurement and one refusal control, aa5313256 and 57bb0984b and 81f976d70 add the fragment and four SVG panels.\nCALL_SITES: nova/equilibrium/forward.py:2266, nova/equilibrium/constraint.py:2141, nova/equilibrium/reduced_newton.py:2396, nova/equilibrium/reduced_newton.py:594\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/constraint.py:318-331 applies active_payload_mask at the single image site that assemble_augmented_system (constraint.py:2141) and _RowAugmentation (reduced_newton.py:2396) both call, and titan/comparison.json records all four rows converged.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate/negative-radial.log ends '17 failed, 18 passed' with every failing id an inactive [False] case and gate/after.log records 41 passed, but the eight arm receipts carry a terminal pin field of 0.0 everywhere (titan/unmasked/frame-146-limited/trips.json), so the unmasked control shows no known-present nonzero reading.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every one of the fourteen delivered paths sits inside the seven declared write paths, though scripts/prototypes/diiid_inactive_compensator/gate.py:60-96 deletes the prior radial, circuit, shadow and reverse-commit controls instead of extending them.\nSCORE durability: 17\nJUSTIFICATION durability: tests/equilibrium/test_solve_vertical_pin.py:516-518 reddens on every inactive route when the mask is deleted, which gate/negative-radial.log demonstrates, but :556-557 compare two evaluations handed the same payload and cannot fail.\nSCORE fit: 15\nJUSTIFICATION fit: nova/equilibrium/constraint.py:159-171 follows the module's helper and docstring idiom, yet its claim to be the one declaration of the activity rule is falsified by constraint.py:2235 re-deriving the same predicate inline.\nSCORE reuse: 18\nJUSTIFICATION reuse: scripts/prototypes/diiid_inactive_compensator/gate.py:12 delegates to the existing scripts/prototypes/diiid_core_hold/regressions.py:gate owner, and a search of nova/equilibrium found no prior activity-mask owner for active_payload_mask.\nFINDING tests/equilibrium/test_solve_vertical_pin.py:556 non-blocking: in the active branch the control is replace(pair, binding=replace(pair.binding, payload=jnp.asarray(True))) applied to a pair whose payload is already True, so assert_array_equal(image, control_image) and the tangent twin compare two calls of the same function on equal inputs and hold whatever the code does; the inactive branch at :559-561 is the assertion that actually guards the regression.\nFINDING nova/equilibrium/constraint.py:2235 non-blocking: constraint_records re-derives the activity predicate inline (isinstance(pair.functional, CurrentCentroidConstraint) and binding.payload is not None) instead of calling active_payload_mask, so the docstring claim at :166 that a future functional publishing an activity flag changes one function is wrong and the record path can drift from the residual and image owners.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge.html:43 non-blocking: the report that the inactive compensator's field is zero 'in the control arm as well as the masked one' rests on a column that is 0.0 in all eight arm receipts with pin_unknown 0.0 at every recorded endpoint, so no reading shows the cohort instrument can observe a nonzero pin field; the only demonstrated arm difference is 146D's residual at 2.307e-14 against 2.281e-14, and the attribution of any movement therefore rests on the unit contract rather than on the row experiment.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge.html:31 non-blocking: done_when item (2) asks for one job, while the receipt spans three titan allocations (1333254, 1333385, 1333434) after a 16 GB P100 ran out of memory; the fragment discloses the retries and each row's receipt persisted, but the run is not the single job the measure names.\n",
+  "review_method": "Read-only source, receipt and recorded-log review; no suite rerun and no mutation experiment.",
+  "review_run_id": "r-20261120T140325055133-review-of-diiid-inactive-compensator-finite-edge-81f976d7010b",
+  "reviewed_base_sha": "789479f7dbaa97933495e8c0f82b9dfa1dc0fc75",
+  "reviewed_head_sha": "81f976d7010bddac6478e73426f9114b40297f32",
+  "reviewed_run_id": "r-20261120T094314644058-diiid-inactive-compensator-finite-edge",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "source_commits": [
+    "a9185453f",
+    "d6658fd5f",
+    "62b321f69",
+    "666cadfe9",
+    "f9ae140bd",
+    "582076d3e",
+    "4ce0d3e44",
+    "45d4e1bd2",
+    "aa5313256",
+    "57bb0984b",
+    "81f976d70"
+  ],
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_solve_vertical_pin.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T094314644058-diiid-inactive-compensator-finite-edge/after_suite-1795182486566760376.log",
+      "observed_summary": "41 passed in 61.25s (0:01:01)",
+      "revision": "57bb0984b200033668d6f68a34ae2981d1cb9ab6"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/equilibrium/test_solve_vertical_pin.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T094314644058-diiid-inactive-compensator-finite-edge/baseline_suite-1795182379935964350.log",
+      "observed_summary": "6 passed in 54.34s",
+      "revision": "789479f7dbaa97933495e8c0f82b9dfa1dc0fc75"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T14:12:13.761416+00:00",
+  "total": 102
+}

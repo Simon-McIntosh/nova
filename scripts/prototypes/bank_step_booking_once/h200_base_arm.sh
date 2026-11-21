@@ -11,7 +11,7 @@ PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 MIRROR=${TMPDIR:?TMPDIR must name the run scratch}/base-tree
 export TMPDIR=/tmp PYTHONPATH="$MIRROR:$ROOT" JAX_PLATFORMS=cuda
 export BANK_STEP_TRACE_DIR="$TRACE"
-export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 mkdir -p "$TRACE"
 rm -rf "$MIRROR"
 mkdir -p "$MIRROR/nova"

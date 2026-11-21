@@ -1,0 +1,85 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own suite arms recorded in its manifest and confirmed against the logs: gate/baseline-suite.log ends '82 passed, 11 deselected ... EXIT=0' at c97c56ee and gate/after-suite.log ends '82 passed, 11 deselected ... EXIT=0' at 2bb9e0e7, and the full gate arms gate-base.log and gate-head.log each end '101 passed, 11 deselected ... EXIT=0', so no failure id exists at the head that does not exist at the base and the added-failure set is empty.",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/iron_linear_magnetisation/measure.py:131",
+    "scripts/iron_linear_magnetisation/figure.py:55"
+  ],
+  "completed_at": "2026-11-18T00:56:05.262Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-icm-linear-shell-arm-2bb9e0e7f546",
+      "recorded_at": "2026-11-18T01:48:53.402778+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-18T00:55:54Z",
+  "findings": [
+    {
+      "file": "scripts/iron_linear_magnetisation/reference.py",
+      "line": "104",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion compares exterior_reference(10) against exterior_reference(6), i.e. the module against itself at fewer terms, so a wrong shell transmission inside the same function moves both sides together and this line still passes; only lines 66, 86 and 103 are independent checks."
+    },
+    {
+      "file": "scripts/iron_linear_magnetisation/reference.py",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the landed file is the whole guard for a defect that has already happened once (a2bb320a1 reduced it to a one-line docstring), and nothing in tests/ imports it, so a repeat truncation is invisible to the gate and surfaces only when measure.py is next run."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html",
+      "line": "55",
+      "severity": "non-blocking",
+      "text": "non-blocking: the mesher-limit claim that 640 and 960 mm were refused is quoted from a 7-second in-allocation probe that left no log under shell-arm/logs/, which holds only gate- and measure- job logs, so the evidence fixing 480 mm as the coarsest admitted spacing cannot be reopened."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223231577276-icm-linear-shell-arm/manifest.md",
+      "line": "14",
+      "severity": "non-blocking",
+      "text": "non-blocking: baseline_suite and after_suite record tests/test_magnetisation.py alone (82 passed) while the gate command on its own tests: line and in gate-base/gate-head ran three files (101 passed), so the recorded suite pair understates the gate it stands beside."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read both commits against base c97c56ee; 1ad97626d restores reference.py to a revision byte-identical to 5ac6f3380 (git diff between the two blobs is empty) and 2bb9e0e7 adds the 96-line fragment, 246 insertions and 1 deletion, all inside the declared paths.",
+    "done_when": "clause (1) is recorded as six spacing/unknowns/error rows in docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html:35-42 and every number there reproduces its receipt in shell-arm/coarse/ exactly; clause (2) is met by 120 mm at 0.557274 %; clause (3) is the gate pair gate/gate-base.log and gate/gate-head.log, each ending \"101 passed, 11 deselected\" and EXIT=0 at revisions c97c56ee and 2bb9e0e7.",
+    "goal": "the goal is \"Show a coarse piecewise-linear shell arm missing the 0.5 percent shell criterion\"; scripts/iron_linear_magnetisation/measure.py records the mu_r=1000 shell rows in /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/shell-arm/coarse/, and linear-0.12.json reads worst_error 0.00557274 (0.557274 %) at 38 cells / 228 unknowns against dipole 61.101838 while 80 mm reads 0.136630 %, so the goal is met at the second rung.",
+    "manifest": "read; status complete, commits 1ad97626d and 2bb9e0e7 named, six receipts and four gate logs cited, baseline_suite and after_suite both 0 failures, and the six spacing/unknowns/error triples on its artifacts line reconcile with the receipts, though those two suite arms name tests/test_magnetisation.py alone while the gate command it records names three files.",
+    "write_paths": "the declared paths are scripts/iron_linear_magnetisation, docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html and docs/figures/iron-core-magnetisation/icm-linear-shell-arm; the delivered diff c97c56ee..2bb9e0e7 touches only scripts/iron_linear_magnetisation/reference.py inside the first and the fragment itself, and creates no figure directory."
+  },
+  "justifications": {
+    "durability": "no test imports scripts/iron_linear_magnetisation/reference.py (tests/test_magnetisation.py:1489 writes its own one-line stub in tmp_path), so the a2bb320a1 truncation that broke measure.py leaves the 101-test gate green.",
+    "evidence": "gate/gate-base.log and gate/gate-head.log each show \"101 passed, 11 deselected\" with EXIT=0 at the two named revisions, and the fragment's twenty-four probe percentages, six unknown counts and residual range all reproduce the receipts exactly.",
+    "fit": "reference.py:1-24 follows the sibling idiom of scripts/iron_linear_magnetisation/measure.py:9-12 (module-level configure_dtypes, then noqa E402 imports) and introduces no name the repository rules forbid.",
+    "goal_fidelity": "scripts/iron_linear_magnetisation/reference.py is the only production path that changes, and the measurement it enables is already landed at measure.py:35 with the recorded linear-0.12.json missing 0.5 % by 0.057274 points.",
+    "reuse": "scripts/iron_linear_magnetisation/reference.py:27 is the only owner of exterior_reference and is imported by measure.py:131 and figure.py:55; a search of nova/ for a shielding owner found none, and the restoration extends the existing owner rather than forking it.",
+    "scope_discipline": "git diff --stat c97c56ee 2bb9e0e7 lists two paths, both inside the declared write paths, and scripts/iron_linear_magnetisation/reference.py changes no operator, default or tolerance."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is \"Show a coarse piecewise-linear shell arm missing the 0.5 percent shell criterion\"; scripts/iron_linear_magnetisation/measure.py records the mu_r=1000 shell rows in /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/shell-arm/coarse/, and linear-0.12.json reads worst_error 0.00557274 (0.557274 %) at 38 cells / 228 unknowns against dipole 61.101838 while 80 mm reads 0.136630 %, so the goal is met at the second rung.\nVERDICT done_when: clause (1) is recorded as six spacing/unknowns/error rows in docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html:35-42 and every number there reproduces its receipt in shell-arm/coarse/ exactly; clause (2) is met by 120 mm at 0.557274 %; clause (3) is the gate pair gate/gate-base.log and gate/gate-head.log, each ending \"101 passed, 11 deselected\" and EXIT=0 at revisions c97c56ee and 2bb9e0e7.\nVERDICT write_paths: the declared paths are scripts/iron_linear_magnetisation, docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html and docs/figures/iron-core-magnetisation/icm-linear-shell-arm; the delivered diff c97c56ee..2bb9e0e7 touches only scripts/iron_linear_magnetisation/reference.py inside the first and the fragment itself, and creates no figure directory.\nVERDICT manifest: read; status complete, commits 1ad97626d and 2bb9e0e7 named, six receipts and four gate logs cited, baseline_suite and after_suite both 0 failures, and the six spacing/unknowns/error triples on its artifacts line reconcile with the receipts, though those two suite arms name tests/test_magnetisation.py alone while the gate command it records names three files.\nVERDICT diff: read both commits against base c97c56ee; 1ad97626d restores reference.py to a revision byte-identical to 5ac6f3380 (git diff between the two blobs is empty) and 2bb9e0e7 adds the 96-line fragment, 246 insertions and 1 deletion, all inside the declared paths.\nCALL_SITES: scripts/iron_linear_magnetisation/measure.py:131, scripts/iron_linear_magnetisation/figure.py:55\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: scripts/iron_linear_magnetisation/reference.py is the only production path that changes, and the measurement it enables is already landed at measure.py:35 with the recorded linear-0.12.json missing 0.5 % by 0.057274 points.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate/gate-base.log and gate/gate-head.log each show \"101 passed, 11 deselected\" with EXIT=0 at the two named revisions, and the fragment's twenty-four probe percentages, six unknown counts and residual range all reproduce the receipts exactly.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat c97c56ee 2bb9e0e7 lists two paths, both inside the declared write paths, and scripts/iron_linear_magnetisation/reference.py changes no operator, default or tolerance.\nSCORE durability: 7\nJUSTIFICATION durability: no test imports scripts/iron_linear_magnetisation/reference.py (tests/test_magnetisation.py:1489 writes its own one-line stub in tmp_path), so the a2bb320a1 truncation that broke measure.py leaves the 101-test gate green.\nSCORE fit: 18\nJUSTIFICATION fit: reference.py:1-24 follows the sibling idiom of scripts/iron_linear_magnetisation/measure.py:9-12 (module-level configure_dtypes, then noqa E402 imports) and introduces no name the repository rules forbid.\nSCORE reuse: 20\nJUSTIFICATION reuse: scripts/iron_linear_magnetisation/reference.py:27 is the only owner of exterior_reference and is imported by measure.py:131 and figure.py:55; a search of nova/ for a shielding owner found none, and the restoration extends the existing owner rather than forking it.\nFINDING scripts/iron_linear_magnetisation/reference.py:104 non-blocking: the assertion compares exterior_reference(10) against exterior_reference(6), i.e. the module against itself at fewer terms, so a wrong shell transmission inside the same function moves both sides together and this line still passes; only lines 66, 86 and 103 are independent checks.\nFINDING scripts/iron_linear_magnetisation/reference.py:1 non-blocking: the landed file is the whole guard for a defect that has already happened once (a2bb320a1 reduced it to a one-line docstring), and nothing in tests/ imports it, so a repeat truncation is invisible to the gate and surfaces only when measure.py is next run.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-linear-shell-arm.html:55 non-blocking: the mesher-limit claim that 640 and 960 mm were refused is quoted from a 7-second in-allocation probe that left no log under shell-arm/logs/, which holds only gate- and measure- job logs, so the evidence fixing 480 mm as the coarsest admitted spacing cannot be reopened.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223231577276-icm-linear-shell-arm/manifest.md:14 non-blocking: baseline_suite and after_suite record tests/test_magnetisation.py alone (82 passed) while the gate command on its own tests: line and in gate-base/gate-head ran three files (101 passed), so the recorded suite pair understates the gate it stands beside.",
+  "review_node": "review-of-icm-linear-shell-arm-2bb9e0e7f546",
+  "review_run_id": "r-20261118T005532530803-review-of-icm-linear-shell-arm-2bb9e0e7f546",
+  "reviewed_base_sha": "c97c56ee268b8535ba58cd42b458a35d4718544b",
+  "reviewed_head_sha": "2bb9e0e7f5467413d0458b57c510e362b9f204e7",
+  "reviewed_run_id": "r-20261117T223231577276-icm-linear-shell-arm",
+  "reviewer": {
+    "backend": "omp-local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T005532530803-review-of-icm-linear-shell-arm-2bb9e0e7f546"
+  },
+  "reviewer_note": "independent review of the landed node at head 2bb9e0e7f5467413d0458b57c510e362b9f204e7 against base c97c56ee268b8535ba58cd42b458a35d4718544b; every measurement claim was checked against the receipts in /work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/shell-arm/coarse/ rather than the worker's account.",
+  "scores": {
+    "durability": 7,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T01:02:39.693413+00:00",
+  "total": 101
+}

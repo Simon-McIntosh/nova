@@ -1,0 +1,120 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:190",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1036",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/panel.py:105"
+  ],
+  "completed_at": "2026-11-20T04:42:57.341Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "repair-of-drifting-sensor-probe-rows-06f50708c5a6",
+      "recorded_at": "2026-11-20T05:03:55.944433+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-20T04:42:30Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-drifting-sensor-probe-rows-06f50708c5a6",
+      "recorded_at": "2026-11-20T05:03:37.468115+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "repair-of-drifting-sensor-probe-rows-06f50708c5a6",
+      "recorded_at": "2026-11-20T05:03:42.976000+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "repair-of-drifting-sensor-probe-rows-06f50708c5a6",
+      "recorded_at": "2026-11-20T05:03:48.844687+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html",
+      "id": "f2836af2319",
+      "line": "46",
+      "severity": "blocking",
+      "text": "blocking: the prior-head boundary-flux lag-one cells are 0.0852 on white and 0.4537 on drift (per-slice-span fraction), while the corrected rows at :40-:41 carry 0.099 and 0.549 (fraction of the generating state's fixed span, which is what analyse.py:65 computes and what the r-20261119 summary.json records), and the r-20261115 arm's own summary.json records 0.1186 and 0.1866 for those same rows, so one column mixes two conventions and the corrected-versus-prior comparison the table exists for compares unlike statistics."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html",
+      "id": "f3804ab4acb",
+      "line": "44",
+      "severity": "blocking",
+      "text": "blocking: the prior-head white boundary-flux cell carries 0.0852 under the same mixed convention as :46, where the arm's own summary.json records 0.1186, so a reader comparing the white arms reads a 0.099-versus-0.0852 difference that the arms' own summaries do not support."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html",
+      "id": "f16219344f5",
+      "line": "49",
+      "severity": "blocking",
+      "text": "blocking: the added method sentence says the table \"keeps the fraction form the arm's own summary records\" and that the raw-Wb alternative reads 0.1186 and 0.1866 \"because the span varies slice to slice\", but a constant divisor leaves a correlation unchanged so raw Wb and the fixed-span fraction are the same 0.1186/0.1866, and the cells at :44 and :46 are the per-slice-span variant the sentence says the table does not use; the sentence therefore cannot be used to reproduce the cells it was added to source."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html",
+      "id": "f4b20174771",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence runs on from \"and the drift is\" into \"Every lag-one figure ...\", dropping the clause about where the drift is carried that the replaced text ended with, so the published record carries a visibly broken sentence."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html",
+      "id": "f5a36fe543b",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence describes the axis lag-one as \"the mean over the two coordinates\", but analyse.py:30-37 computes lag_one by averaging the table's two per-coordinate correlations, and correlating the mean-coordinate series gives -0.0682 on white and 0.4659 on drift rather than the -0.018 and 0.441 the table states."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/test_probe_rows.py",
+      "id": "ff91d60fc2a",
+      "line": "76",
+      "severity": "non-blocking",
+      "text": "non-blocking: the wall assertion compares the file against an expected array built by calling wall_units_from_ids, the same function wall_npz calls, and the bespoke walker it replaced produced the same first limiter ring, so reverting wall_npz to a second reader leaves the test green and only the manual grep in negative-control-durability's sibling negative-control-reuse.log guards the reuse."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read the four commits against cb373e23: 83c611597 replaces the prior-head lag-one triple with values recomputed from the r-20261115T202148674467 arm, 6cbca9571 replaces the whole-arm versus nova-RMSE comparison with a slice-matched one, 478f5740f adds probe_row_angle and the six tests, and 06f50708c removes the bespoke limiter walk from wall_npz.",
+    "done_when": "the arm measurements the done_when names are unchanged by these commits; the gate they gained is scripts/prototypes/drifting_sensor_sequences/probe_rows/test_probe_rows.py, whose after_suite.log records 6 passed with EXIT=0 at 06f50708c and whose negative-control-durability.log records 4 failed with EXIT=1 when the sign of probe_row_angle is reverted.",
+    "goal": "the node's goal is the probe-row deliverable, and the four commits gained since cb373e23 (83c611597, 6cbca9571, 478f5740f, 06f50708c) repair the two blocking evidence findings, name the probe projection in scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:95 and route the wall read through the shared limiter reader at study.py:1004.",
+    "manifest": "read; it records the after_suite as 6 passed at 06f50708c, the baseline arm as a scratch tree at eda6cfd6e where the test file does not exist (exit 4) and added_failure_count 0, and its evidence_inputs name imas.cpp:723 as the convention the six tests pin.",
+    "write_paths": "the declared paths are docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html, docs/figures/inverse-equilibrium-baseline/drifting-sensor-sequences and scripts/prototypes/drifting_sensor_sequences, and every path in the four commits is one of the first and the last."
+  },
+  "justifications": {
+    "durability": "test_probe_rows.py:46 reddens on a sign flip (negative-control-durability.log records 4 failed, EXIT=1), while test_probe_rows.py:76 derives its expected value from the same wall_units_from_ids call the implementation makes and so stays green under the regression it claims to guard.",
+    "evidence": "after_suite.log records 6 passed and EXIT=0 at 06f50708c and the slice-matched numbers at drifting-sensor-probe-rows.html:65 reproduce exactly (0.00935 and 0.00790 against nova 0.0177 and 0.0236), but the prior-head boundary-flux lag-one cells at :44 and :46 read 0.0852 and 0.4537 where the arm's own summary.json and the fragment's stated recipe both give 0.1186 and 0.1866.",
+    "fit": "the added code passes ruff check and format and follows the module idiom, but study.py:95 leaves its parameter unannotated while the file's other helpers are typed.",
+    "goal_fidelity": "study.py:190 now reads the IMAS probe angle through probe_row_angle and study.py:1005 reads the wall through nova/equilibrium/wall_mask.py:209 as the reuse finding asked, but drifting-sensor-probe-rows.html:46 now carries boundary-flux cells on a different span convention from the rows above it and :49 carries a sentence broken mid-clause.",
+    "reuse": "wall_npz now extends nova/equilibrium/wall_mask.py:209, and a search for an owner of the dictionary-angle conversion over nova/, scripts/ and tests/ found only the inlined negation at nova/imas/mast_geometry.py:289, so probe_row_angle restates a machine-local convention rather than forking a shared owner.",
+    "scope_discipline": "the four commits touch only docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html and the two probe_rows modules, both inside the declared paths, though study.py:72-93 carries an unrelated EFIT_CONFIG string reflow."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is the probe-row deliverable, and the four commits gained since cb373e23 (83c611597, 6cbca9571, 478f5740f, 06f50708c) repair the two blocking evidence findings, name the probe projection in scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:95 and route the wall read through the shared limiter reader at study.py:1004.\nVERDICT done_when: the arm measurements the done_when names are unchanged by these commits; the gate they gained is scripts/prototypes/drifting_sensor_sequences/probe_rows/test_probe_rows.py, whose after_suite.log records 6 passed with EXIT=0 at 06f50708c and whose negative-control-durability.log records 4 failed with EXIT=1 when the sign of probe_row_angle is reverted.\nVERDICT write_paths: the declared paths are docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html, docs/figures/inverse-equilibrium-baseline/drifting-sensor-sequences and scripts/prototypes/drifting_sensor_sequences, and every path in the four commits is one of the first and the last.\nVERDICT manifest: read; it records the after_suite as 6 passed at 06f50708c, the baseline arm as a scratch tree at eda6cfd6e where the test file does not exist (exit 4) and added_failure_count 0, and its evidence_inputs name imas.cpp:723 as the convention the six tests pin.\nVERDICT diff: read the four commits against cb373e23: 83c611597 replaces the prior-head lag-one triple with values recomputed from the r-20261115T202148674467 arm, 6cbca9571 replaces the whole-arm versus nova-RMSE comparison with a slice-matched one, 478f5740f adds probe_row_angle and the six tests, and 06f50708c removes the bespoke limiter walk from wall_npz.\nCALL_SITES: scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:190, scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1036, scripts/prototypes/drifting_sensor_sequences/probe_rows/panel.py:105\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: study.py:190 now reads the IMAS probe angle through probe_row_angle and study.py:1005 reads the wall through nova/equilibrium/wall_mask.py:209 as the reuse finding asked, but drifting-sensor-probe-rows.html:46 now carries boundary-flux cells on a different span convention from the rows above it and :49 carries a sentence broken mid-clause.\nSCORE evidence: 9\nJUSTIFICATION evidence: after_suite.log records 6 passed and EXIT=0 at 06f50708c and the slice-matched numbers at drifting-sensor-probe-rows.html:65 reproduce exactly (0.00935 and 0.00790 against nova 0.0177 and 0.0236), but the prior-head boundary-flux lag-one cells at :44 and :46 read 0.0852 and 0.4537 where the arm's own summary.json and the fragment's stated recipe both give 0.1186 and 0.1866.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the four commits touch only docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html and the two probe_rows modules, both inside the declared paths, though study.py:72-93 carries an unrelated EFIT_CONFIG string reflow.\nSCORE durability: 12\nJUSTIFICATION durability: test_probe_rows.py:46 reddens on a sign flip (negative-control-durability.log records 4 failed, EXIT=1), while test_probe_rows.py:76 derives its expected value from the same wall_units_from_ids call the implementation makes and so stays green under the regression it claims to guard.\nSCORE fit: 17\nJUSTIFICATION fit: the added code passes ruff check and format and follows the module idiom, but study.py:95 leaves its parameter unannotated while the file's other helpers are typed.\nSCORE reuse: 18\nJUSTIFICATION reuse: wall_npz now extends nova/equilibrium/wall_mask.py:209, and a search for an owner of the dictionary-angle conversion over nova/, scripts/ and tests/ found only the inlined negation at nova/imas/mast_geometry.py:289, so probe_row_angle restates a machine-local convention rather than forking a shared owner.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:46 blocking: the prior-head boundary-flux lag-one cells are 0.0852 on white and 0.4537 on drift (per-slice-span fraction), while the corrected rows at :40-:41 carry 0.099 and 0.549 (fraction of the generating state's fixed span, which is what analyse.py:65 computes and what the r-20261119 summary.json records), and the r-20261115 arm's own summary.json records 0.1186 and 0.1866 for those same rows, so one column mixes two conventions and the corrected-versus-prior comparison the table exists for compares unlike statistics.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:44 blocking: the prior-head white boundary-flux cell carries 0.0852 under the same mixed convention as :46, where the arm's own summary.json records 0.1186, so a reader comparing the white arms reads a 0.099-versus-0.0852 difference that the arms' own summaries do not support.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:49 blocking: the added method sentence says the table \"keeps the fraction form the arm's own summary records\" and that the raw-Wb alternative reads 0.1186 and 0.1866 \"because the span varies slice to slice\", but a constant divisor leaves a correlation unchanged so raw Wb and the fixed-span fraction are the same 0.1186/0.1866, and the cells at :44 and :46 are the per-slice-span variant the sentence says the table does not use; the sentence therefore cannot be used to reproduce the cells it was added to source.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:49 non-blocking: the sentence runs on from \"and the drift is\" into \"Every lag-one figure ...\", dropping the clause about where the drift is carried that the replaced text ended with, so the published record carries a visibly broken sentence.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:49 non-blocking: the sentence describes the axis lag-one as \"the mean over the two coordinates\", but analyse.py:30-37 computes lag_one by averaging the table's two per-coordinate correlations, and correlating the mean-coordinate series gives -0.0682 on white and 0.4659 on drift rather than the -0.018 and 0.441 the table states.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/test_probe_rows.py:76 non-blocking: the wall assertion compares the file against an expected array built by calling wall_units_from_ids, the same function wall_npz calls, and the bespoke walker it replaced produced the same first limiter ring, so reverting wall_npz to a second reader leaves the test green and only the manual grep in negative-control-durability's sibling negative-control-reuse.log guards the reuse.\n",
+  "review_run_id": "r-20261120T044118086376-review-of-drifting-sensor-probe-rows-06f50708c5a6",
+  "reviewed_base_sha": "cb373e2333883294ebf488d1f11ad957f7c0d2a6",
+  "reviewed_head_sha": "06f50708c5a6ff2d533ae2ff7ca56e62b64e146d",
+  "reviewed_run_id": "r-20261119T065220776269-drifting-sensor-probe-rows",
+  "reviewer": "omp",
+  "reviewer_run_id": "r-20261120T044118086376-review-of-drifting-sensor-probe-rows-06f50708c5a6",
+  "rubric": "review",
+  "scores": {
+    "durability": 12,
+    "evidence": 9,
+    "fit": 17,
+    "goal_fidelity": 13,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T04:52:51.025871+00:00",
+  "total": 87
+}

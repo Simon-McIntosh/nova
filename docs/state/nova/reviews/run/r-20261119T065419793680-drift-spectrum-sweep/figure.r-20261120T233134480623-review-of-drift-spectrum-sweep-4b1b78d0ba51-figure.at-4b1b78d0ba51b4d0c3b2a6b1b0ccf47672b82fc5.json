@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-20T23:32:18Z",
+  "figures_reviewed": [
+    {
+      "caption": "passes: the caption states what is plotted, names the arm ordering the figure shows and cites the drawing script; it is a description, not a restatement of the figure title.",
+      "path": "docs/figures/inverse-equilibrium-baseline/drift-spectrum-sweep/drift-spectrum-sweep-axis-vs-slice.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T233134480623-review-of-drift-spectrum-sweep-4b1b78d0ba51-figure/image-0.png",
+      "rubric": {
+        "contrast": "passes: black tick and axis text on white; the white-arm trace in #333333 at alpha 0.7 reads clearly against white; the blue, orange and red traces all read at a glance.",
+        "data_ink": "passes: five thin traces plus two marker sets on an empty field; the data occupy the panel and nothing else is drawn inside the axes.",
+        "decoration": "passes: no gridlines, no background fill, no gradient, no shading, top and right spines absent.",
+        "label_collision": "no text label is clipped or overlapping: the 7-entry legend sits in clear space at upper left and no label touches a trace. Data marks do collide: the slice-0 nova markers are cut in half by the left spine, and the ring and square coincide at slices 0 and 2 (see findings).",
+        "legibility": "passes for the four size arms and the white arm: the arms separate into three readable bands (0.01-0.02 near 0.01 m, 0.05 near 0.06-0.13 m, 0.10 near 0.12-0.30 m with a 0.55 m spike at slice 40) and the axes carry their units. It does not fully pass on the nova overlay: the two nova marks at slices 0 and 2 are not separately distinguishable as two sequences (see finding).",
+        "table_form": "passes: a 100-slice per-arm time series is not information that is naturally a table; the surrounding record carries the reduction tables for the numbers."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py",
+      "id": "f1624dc4261",
+      "line": 113,
+      "severity": "non-blocking",
+      "summary": "The slice-0 nova markers are clipped in half by the left spine. axes.set_xlim(0, 99) puts the slice-0 point exactly on the y-axis, and the 5 pt open markers at x=0 lose their left half to the axes boundary, so the reader sees half a ring and half a square where the figure's one cross-code column begins. The centre and its height are still readable, so the figure's message survives; offsetting the limit below 0 or nudging the marks off the spine would show them whole."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py",
+      "id": "f89a29f032a",
+      "line": 83,
+      "severity": "non-blocking",
+      "summary": "The drift (ring) and white (square) nova markers coincide at slices 0 and 2, because both sequences were measured on the same slices and the two values are about a pixel apart at this scale. The square, drawn second, sits over the ring and the pair renders as one composite mark, so a reader cannot tell the two nova sequences apart at either slice without the legend and the table. A small horizontal offset per sequence, or one marker carrying a distinguishing fill, would let both be seen."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py",
+      "id": "f8d27ae6a14",
+      "line": 134,
+      "severity": "non-blocking",
+      "summary": "The panel is drawn on a 6.4 x 3.6 in canvas with a 7 pt legend and 0.9 pt lines, and saved through figure.savefig rather than the repository's style save function. It therefore misses the declared 14 in canvas, 14 pt legend and 2.4-3.0 pt line weights, and the mechanical text-overlap check that the style module's save runs on every figure never sees this one \u2014 which is why the marker collisions above reached the record. The rendered PNG is still legible at its own size; the cost is that the figure reads as smaller and lighter than every other nova figure beside it."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261120T233134480623-review-of-drift-spectrum-sweep-4b1b78d0ba51-figure",
+  "reviewed_base_sha": "54cc8f94f3ff8fafc359291fb5e18e88ae7bf7a8",
+  "reviewed_head_sha": "4b1b78d0ba51b4d0c3b2a6b1b0ccf47672b82fc5",
+  "reviewed_run_id": "r-20261119T065419793680-drift-spectrum-sweep",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T23:35:47.606981+00:00",
+  "total": null
+}

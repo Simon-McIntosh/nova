@@ -1,0 +1,182 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "assertion": "assert records.next_sequence(job) == 2",
+      "failing_condition": "Fails when measurement_receipts stops including directory.glob('measurement.json'): the pre-fix glob sees only */measurement.json, finds nothing under the job directory and returns 1.",
+      "file": "scripts/prototypes/stored_state_refusals/test_receipt_durability.py",
+      "independent": true,
+      "line": 60
+    },
+    {
+      "assertion": "assert records.next_sequence(run) == 8",
+      "failing_condition": "Fails only if the child receipt at sequence 7 is removed; the run directory's own sequence-1 receipt is never the maximum, so this line passes on the pre-fix glob and does not guard the change.",
+      "file": "scripts/prototypes/stored_state_refusals/test_receipt_durability.py",
+      "independent": true,
+      "line": 56
+    },
+    {
+      "assertion": "assert written[\"sequence\"] == 5",
+      "failing_condition": "Fails when _report reverts to writing the dict it was handed without a sequence (KeyError) or counts OUTPUT instead of OUTPUT.parent (the empty job directory yields 1), which is the recorded defect.",
+      "file": "scripts/prototypes/stored_state_refusals/test_receipt_durability.py",
+      "independent": true,
+      "line": 70
+    },
+    {
+      "assertion": "assert written[\"sequence\"] == 6",
+      "failing_condition": "Fails when the second write does not count the receipt the first write left in the same directory, which is the re-measurement tie the commit repairs.",
+      "file": "scripts/prototypes/stored_state_refusals/test_receipt_durability.py",
+      "independent": true,
+      "line": 73
+    },
+    {
+      "assertion": "assert records.measurements(run)[\"arm\"][\"value\"] == 6",
+      "failing_condition": "A read-back of a literal the test supplied: it fails only if measurements drops the newer receipt (yielding 5), and it passes under an ordering regression because the two receipts are both children of the one directory and the newer one still wins by filename order.",
+      "file": "scripts/prototypes/stored_state_refusals/test_receipt_durability.py",
+      "independent": false,
+      "line": 74
+    },
+    {
+      "assertion": "if counts[\"nova\"] < 100: empty[name] = counts / assert empty == {}",
+      "failing_condition": "Fails on the pre-fix published previews, measured at nova=0 below the legend band against the committed 4876 and 5961.",
+      "file": "scripts/prototypes/stored_state_refusals/test_panel_visibility.py",
+      "independent": true,
+      "line": 88
+    }
+  ],
+  "assertion_independence": "No assertion compares a call against the same variable it handed the code under test except test_receipt_durability.py:74, whose two sides are the literal 6 written through _report and read back through measurements; it is a round trip that still fails when the newer receipt is dropped, but it does not guard the ordering regression that line :70 does. Reinstated defects: the sequence lines fail on the pre-fix glob and on a _write without a sequence; the preview line fails on the cbcba328 blobs, measured rather than claimed.",
+  "call_site_count": 4,
+  "call_site_notes": "panels.preview_series has no production call site: only test_panel_visibility.py:87 calls it.",
+  "call_sites": [
+    "scripts/prototypes/stored_state_refusals/run_cases.py:165 -> records.next_sequence",
+    "scripts/prototypes/stored_state_refusals/report.py:331 -> copy_figures",
+    "scripts/prototypes/stored_state_refusals/report.py:359 -> harness_rows",
+    "scripts/prototypes/stored_state_refusals/report.py:12 -> records.measurements/owner via measurement_receipts"
+  ],
+  "completed_at": "2026-11-20T20:27:48.189Z",
+  "dispatched_at": "2026-11-20T20:27:30Z",
+  "evidence_limits": [
+    "No suite pair was re-run; the two arm logs were read and the single preview assertion was re-executed at the source worktree's head.",
+    "The published-preview caveat: the gain commit refreshed two PNGs; their pixel counts were measured with panels.preview_series (4876 and 5961 nova below the legend band) and the cbcba328 blobs measured 0, matching the commit's stated negative control.",
+    "The source worktree used for the single-test re-run is /home/ITER/mcintos/Code/.reckon-worktrees/.../stored-state-refusals at 3abe68a; this review's own worktree sits at db7cca0 and does not carry the run's commits as ancestors."
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-20T21:08:10.309069+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261118T112812127189-stored-state-refusals"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "non-blocking: The added harness-difference section states that 'the machine cache receipt here names the store, key, hit and build seconds', but no section of the fragment carries store, key, hit or build_seconds: run_cases.py:175 writes records['machine_cache'] into the measurement receipt and report.py never emits it, so a reader following the pointer finds nothing; emit the machine-cache fields into the fragment or drop the claim."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/panels.py",
+      "line": "332",
+      "severity": "non-blocking",
+      "text": "non-blocking: PREVIEW_INK restates the two series colours as RGB literals while the same module already binds them from the style owner at panels.py:79 (nova/media/ink.py:45 owns the #3366cc flux colour) and repeats the hex map at panels.py:311, so a palette change must be made in three places and preview_series would then measure a colour the panel no longer strokes; derive the tuple from the same DEFAULT_INK source and reuse the one series-colour map."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: The record's arm table reports last-finite residuals of 4.70674 (mastu-stored-default) and 5.03224 (mastu-displaced-default) against the section done-when's 4.9e-10 and 1.2e-4 targets, and the continuation positive control refused with 0 finite residual entries, so done-when clauses (1) and (2) are still unmet at the reviewed head; the new harness-difference section explains why the comparison's residuals are not reachable on this mesh, which makes re-targeting the clause a coordinator decision rather than a worker repair."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read the three gained commits (9 paths, +220 -12): records.measurement_receipts and the write-time sequence in run_cases._report, panels.preview_series with the copy_figures preview refresh, and report.harness_rows emitted as a section; the committed previews measure 4876 and 5961 nova pixels below the legend band where the cbcba328 blobs measure 0.",
+    "done_when": "The section done_when (docs/plans/forward-solve-near-stored-states.html:76-80) is three clauses - residuals within a factor of three, positive control below 1e-10, and per-solve record with panels; the gate the run records (armed-round3c.log) runs two prototype test files plus tests/test_unqualified_axis_eager_routes.py and asserts pass counts, not the residual clauses, which rest on the fragment's own table.",
+    "goal": "docs/plans/forward-solve-near-stored-states.html:71 sets the goal as the three refusals made rerunnable standing cases; the three gained commits repair the receipt sequence, refresh the two published previews and add the harness-difference section at the fragment, and none of them changes that the record's MAST-U positive control still refuses.",
+    "manifest": "The run manifest's suite line names the head command and both arms' logs; armed-baseline.log reads 4 passed, EXIT=0 at a148a0a and armed-round3c.log reads 14 passed, EXIT=0 at 3abe68a, with failure_count 0 on both.",
+    "write_paths": "The declared paths are the fragment, the figure directory (with the two preview PNGs named individually) and scripts/prototypes/stored_state_refusals; all nine gained paths - the fragment, the two previews, panels.py, records.py, report.py, run_cases.py and the two test files - lie inside them."
+  },
+  "justifications": {
+    "durability": "test_receipt_durability.py:60 reddens when measurement_receipts drops the directory's own receipt and :70 reddens when _report stops writing a counted sequence, and test_panel_visibility.py:88 reddens on the pre-fix previews (measured nova=0 vs 4876/5961), while the copy_figures refresh and the harness-difference section carry no asserting test and :56 is non-discriminating.",
+    "evidence": "armed-round3c.log records '14 passed in 90.40s' with EXIT=0 at 3abe68a and armed-baseline.log records '4 passed' with EXIT=0 at a148a0a, but neither arm measures the done-when's residual or qualification clauses.",
+    "fit": "The added code follows the prototype's docstring and helper style in records.py:26-68, but panels.py:332 duplicates the series palette the module already binds at panels.py:79, and no forbidden name ('new', 'refactored', 'enhanced') appears.",
+    "goal_fidelity": "scripts/prototypes/stored_state_refusals/records.py:42 and run_cases.py:165 fix the receipt sequence and report.py:120 refreshes the previews, but docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html:4 still reports last-finite residuals 4.70674 and 5.03224 against the done-when's 4.9e-10 and 1.2e-4 and a refused positive control.",
+    "reuse": "measurement_receipts, preview_series and harness_rows extend owners local to scripts/prototypes/stored_state_refusals (records.py, panels.py, report.py) and the capability search over scripts/ and nova/ found no other receipt-sequence or preview-ink owner, though panels.py:332 restates the colour constants nova/media/ink.py:45 owns.",
+    "scope_discipline": "Every path in git diff cbcba328b6a7ed6561cfceeb641961725c2132a6..3abe68a77fb0184ff30104038c66348a6a27ffbe is inside the declared write paths, and no path outside the run's delivery is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: docs/plans/forward-solve-near-stored-states.html:71 sets the section goal as the three refusals made rerunnable standing cases, and the three gained commits repair the receipt sequence (records.py:42), refresh the published previews (report.py:120) and add the harness-difference section (docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html:25) without changing that the record's MAST-U positive control still refuses.\nVERDICT done_when: The section done-when (docs/plans/forward-solve-near-stored-states.html:76-80) requires residuals within a factor of three, a continuation positive control below 1e-10, and a per-solve record with panels, while the gate recorded in armed-round3c.log runs two prototype test files plus tests/test_unqualified_axis_eager_routes.py, so it asserts test pass counts rather than the residual clauses the fragment's table at stored-state-refusals.html:4 carries.\nVERDICT write_paths: The declared paths name the fragment, the stored-state-refusals figure directory with the two preview PNGs, and scripts/prototypes/stored_state_refusals (as declared), and all nine paths gained between cbcba328 and 3abe68a lie inside them.\nVERDICT manifest: The run manifest's suite line names armed-round3c.log, which reads '14 passed in 90.40s' with EXIT=0 at 3abe68a, beside armed-baseline.log reading '4 passed' with EXIT=0 at a148a0a, both with failure_count 0.\nVERDICT diff: Read the three gained commits commit by commit (9 paths, +220 -12): measurement_receipts and the write-time sequence, preview_series with copy_figures refreshing the preview it publishes, and harness_rows emitted as the fragment's harness-difference section; the committed previews carry 4876 and 5961 nova pixels below the legend band where the cbcba328 blobs carry 0.\nCALL_SITES: scripts/prototypes/stored_state_refusals/run_cases.py:165 -> records.next_sequence, scripts/prototypes/stored_state_refusals/report.py:331 -> copy_figures, scripts/prototypes/stored_state_refusals/report.py:359 -> harness_rows, scripts/prototypes/stored_state_refusals/report.py:12 -> records.measurements via measurement_receipts\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: The gained commits fix the receipt sequence at run_cases.py:165 and the preview freshness at report.py:120, but docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html:4 still reports last-finite residuals of 4.70674 and 5.03224 against the done-when's 4.9e-10 and 1.2e-4 with a refused positive control.\nSCORE evidence: 12\nJUSTIFICATION evidence: armed-round3c.log records '14 passed in 90.40s' with EXIT=0 at 3abe68a and armed-baseline.log '4 passed' with EXIT=0 at a148a0a, but neither arm measures the done-when's residual or qualification clauses.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in git diff cbcba328b6a7ed6561cfceeb641961725c2132a6..3abe68a77fb0184ff30104038c66348a6a27ffbe sits inside the declared write paths and the diff touches nothing outside the run's delivery.\nSCORE durability: 16\nJUSTIFICATION durability: test_receipt_durability.py:60 reddens when the directory's own receipt is dropped and :70 when the written sequence is not counted from the run directory, and test_panel_visibility.py:88 reddens on the pre-fix previews measured at nova=0, while the copy_figures refresh at report.py:120 and the harness section carry no asserting test and :56 is non-discriminating.\nSCORE fit: 17\nJUSTIFICATION fit: records.py:42-68 and panels.py:336 follow the prototype's docstring and helper idiom with no forbidden name, but panels.py:332 restates series-colour literals the module already binds at panels.py:79.\nSCORE reuse: 16\nJUSTIFICATION reuse: measurement_receipts, preview_series and harness_rows extend their own prototype owners and the capability search over scripts/ and nova/ found no other receipt-sequence or preview-ink owner, though panels.py:332 duplicates the palette that nova/media/ink.py:45 owns.\nFINDING docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html:25 non-blocking: the harness-difference section says 'the machine cache receipt here names the store, key, hit and build seconds', but run_cases.py:175 writes records['machine_cache'] and report.py never emits it, so no section carries store, key, hit or build_seconds and the pointer names evidence absent from the record.\nFINDING scripts/prototypes/stored_state_refusals/panels.py:332 non-blocking: PREVIEW_INK restates the two series colours as RGB literals while the same module binds them at panels.py:79 from nova/media/ink.py:45 and repeats the hex map at panels.py:311, so a palette change must be made in three places and preview_series would then count a colour the panel no longer strokes.\nFINDING docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html:4 non-blocking: the arm table reports last-finite residuals of 4.70674 and 5.03224 against the done-when's 4.9e-10 and 1.2e-4 and a continuation control with 0 finite residual entries, so done-when clauses (1) and (2) remain unmet at the reviewed head; the new harness-difference section explains why those residuals are unreachable on this mesh, which makes re-targeting a coordinator decision.\n",
+  "reuse_search": {
+    "capabilities": [
+      "written-order receipt sequencing over a run directory",
+      "published preview freshness beside a copied panel",
+      "series ink measurement from a rasterised panel",
+      "divergence table emission against a cited comparison record"
+    ],
+    "judgement": "The capability search over scripts/ and nova/ found no other receipt-sequence owner (grep next_sequence|measurement_receipts matched only this prototype), no pixel-ink counting owner in nova/media (no Image.open or colour-count helper in nova/media/*.py), and no preview-copy mechanism outside report.copy_figures; the only shared owner touched is the series palette, nova/media/ink.py:45, which panels.py:332 restates as literals.",
+    "owners_opened": [
+      "scripts/prototypes/stored_state_refusals/records.py:26-100",
+      "nova/media/ink.py:45",
+      "nova/media/gif.py (PIL use)",
+      "scripts/prototypes/stored_state_refusals/report.py:97-127"
+    ]
+  },
+  "review_run_id": "r-20261120T202250586394-review-of-stored-state-refusals-3abe68a77fb0",
+  "reviewed_base_sha": "a148a0a9d176713a90cd24ffa7de2966b0c55654",
+  "reviewed_head_sha": "3abe68a77fb0184ff30104038c66348a6a27ffbe",
+  "reviewed_run_id": "r-20261118T112812127189-stored-state-refusals",
+  "reviewed_scope_base_sha": "cbcba328b6a7ed6561cfceeb641961725c2132a6",
+  "reviewed_worker_commits": [
+    "9db661e9f306e3b458265c6ac3d728445e48f4cc",
+    "c71a46c902a93e0a02b34a48c9953c7e0651f05e",
+    "3abe68a77fb0184ff30104038c66348a6a27ffbe"
+  ],
+  "scope_provenance": "The supplied cumulative diff a148a0a9d176713a90cd24ffa7de2966b0c55654..3abe68a77fb0184ff30104038c66348a6a27ffbe is the run's whole delivery; the prior review record in this run's review-records directory read it through cbcba328b6a7ed6561cfceeb641961725c2132a6, so the nine paths gained after that head (three commits) are the reviewed scope; the other ten paths of the cumulative diff were landed before cbcba328 and are out of this verdict.",
+  "scores": {
+    "durability": 16,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/stored_state_refusals/test_receipt_durability.py scripts/prototypes/stored_state_refusals/test_panel_visibility.py tests/test_unqualified_axis_eager_routes.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/armed-round3c.log",
+      "revision": "3abe68a77fb0184ff30104038c66348a6a27ffbe",
+      "sha256": "15c90b0d1e8118efa87f016c5be1cd585b879238c5d62fe768d0c8d5fe976c2f",
+      "summary": "14 passed in 90.40s (0:01:30)"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_unqualified_axis_eager_routes.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/armed-baseline.log",
+      "revision": "a148a0a9d176713a90cd24ffa7de2966b0c55654",
+      "sha256": "4baa679648b8373469ce110bf4f3a7556d0d12800bed95b7992881e1315e114f",
+      "summary": "4 passed in 97.62s (0:01:37)"
+    },
+    "review_check": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/stored_state_refusals/test_panel_visibility.py::test_published_previews_draw_the_blue_series",
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T202250586394-review-of-stored-state-refusals-3abe68a77fb0/logs/panel-preview-check.log",
+      "note": "The single test the gate names that guards the gained preview commit, re-run in the source worktree at 3abe68a. The command line above records the shell text including the trailing probes; the appended commit's assertion passed.",
+      "revision": "3abe68a77fb0184ff30104038c66348a6a27ffbe",
+      "summary": "1 passed in 2.48s"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T21:02:16.903524+00:00",
+  "total": 95
+}

@@ -39,6 +39,43 @@ not comparable with any production receipt.
   kernel) and `tests/test_default_wiring.py` (every production entry point
   resolves the defaults on and its launcher leaves them to the public seam).
 
+## Fit coefficients inside the iteration
+
+`FluxIterationFit` in `flux_iteration.py` solves the least-squares fit on every
+pass of the map iteration: each pass steps one coefficient at a time at the
+held map, solves the whitened system, and applies one Grad-Shafranov
+read-write cycle at the coefficients and fitted currents that solve just chose.
+No forward solve is converged for a proposal the data did not choose, which is
+the cheaper form beside the nested class. Three properties are load-bearing.
+
+- **The map belongs to the coefficients that pass just fitted.** The operator
+  applying the update is rebuilt from the corrected coefficient vector; reusing
+  the loop head's operator lays down the pre-fit map, and the pass then reports
+  an update of 2e-16 where the map sits 5e-3 of the fix's own map away.
+  `tests/test_flux_iteration.py` builds the expected map independently and
+  asserts the reviewer's probe, [1.0, -0.4] from [1.05, -0.42].
+- **The fitted conductor currents reach the map as the operator's `current`.**
+  The response columns use `conductor_response`; the update passes the solved
+  fitted currents as `current`, so the rows and the laid-down map carry one
+  conductor state. An operator left to its stored `current` measures one state
+  and lays down another.
+- **The pass is a fixed-point step, and its stability is a property of the
+  state.** Measured on the three known states: MAST 22086 and ITER 135013 reach both
+  known-answer bands in one pass (1.3e-15 and 1.5e-15 of the span); Solov'ev,
+  started from the largest perturbation the recovery record uses, diverges at
+  full step and is not recovered by damping at 0.5, 0.25 or 0.1: each arm
+  improves to a residual near 0.14 and then leaves the basin, the half-step at
+  pass 12, the quarter-step at pass 23, the tenth-step at pass 56, reading 0.98,
+  1.01 and 0.41 at the ends of their budgets. Read `relaxation` before reading a
+  failure as a fit defect.
+- **A pass can be refused, and the receipt says so.** An update beyond
+  `max_update` spans after the first pass keeps the previous map and records
+  `rejected_pass` with its message. Read `flux_map_error_over_span` and
+  `whitened_residual_sup` beside `converged`: the flag means the update reached
+  `flux_tolerance` of the axis-to-boundary span, so a state inside a band
+  while the flag reads false is a correct state whose final update was refused,
+  not a recovered one. A case that misses its band is reported as failing.
+
 ## Keep the two reference lanes separate
 
 ### Closed-form analytic oracle

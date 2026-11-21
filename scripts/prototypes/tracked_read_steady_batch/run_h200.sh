@@ -12,7 +12,7 @@ PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 set +e
 "$PY" -m scripts.prototypes.tracked_read_steady_batch.measure \
   --cells 550 --repeats 20 \
-  --store /work/projects/imas_gpu/sophelio/nova-assembled-step-bank \
+  --store /work/projects/imas_gpu/nova/nova-assembled-step-bank \
   --output "$L/batched-steady.json" > "$L/measure.log" 2>&1
 code=$?
 echo "EXIT=$code" >> "$L/measure.log"

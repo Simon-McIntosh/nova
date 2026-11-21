@@ -1,0 +1,70 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-20T07:27:28.560Z",
+  "dispatched_at": "2026-11-20T07:27:10Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-stored-state-refusals-cbcba328b6a7",
+      "recorded_at": "2026-11-20T08:08:29.849982+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/stored_state_refusals/records.py",
+      "line": 42,
+      "severity": "blocking",
+      "text": "next_sequence globs '*/measurement.json' relative to the directory run_cases.py:301 passes, which is the job's own output directory whose receipt sits at its top level, so a fresh job always returns 1 (probe: a job directory holding measurement.json with sequence 1 yields next_sequence 1), and a re-measured arm ties the first run instead of superseding it; the run directory's 1..10 sequences were backfilled by hand in one batch (eight receipts share mtime 06:19:20, mastu-displaced3 and mastu-titan2 are 06:31:41, tcv-iter-long is 08:21:22), so the ordering the record relies on is not produced by this code."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/test_receipt_durability.py",
+      "line": 29,
+      "severity": "non-blocking",
+      "text": "the ordering test constructs the nested run/arm layout the reader expects and never calls next_sequence through run_cases' job-directory layout, so it stays green while the writer emits sequence 1 and guards the read half of the capability only."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/manifest.md",
+      "line": 11,
+      "severity": "non-blocking",
+      "text": "baseline_suite cites armed-baseline.log, whose second line is '# tree /tmp/ssr-base-arm', so records.suite_arm_log:135 raises ValueError on the very log the manifest names and the base arm's revision and command cannot be read back through the reader the same commit added."
+    },
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals/iter-iter-stored-default-preview.png",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "a preview PNG is committed although report.py:98-103 states previews are not published and the fragment cites neither preview, and panels.py:190-191 writes one beside every panel so the uncited raster enters docs/figures."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html",
+      "line": 4,
+      "severity": "non-blocking",
+      "text": "the recorded last finite residuals (mastu-stored-default 4.70674, mastu-displaced-default 5.03224, tcv-stored-default 0.905546) sit orders of magnitude from \u00a71's 4.9e-10, 1.2e-4 and 0.030, and mastu-stored-continuation refused with 0 finite entries instead of qualifying below 1e-10, so \u00a71's done_when (1) and (2) remain unmet and belong to \u00a72/\u00a73."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read c64f0350651c085b89242c266a2fd413b1b27feb and cbcba328b6a7ed6561cfceeb641961725c2132a6 commit by commit, the two commits gained since bddfb05ef, plus the accumulating 19-path diff; c64f03506 adds records.py, run_suite_arm.sh and test_receipt_durability.py and exports TMPDIR before sbatch, and cbcba328b adds panels.py, redraw_panels.py, redraw_panels.sh and test_panel_visibility.py and redraws all six SVGs on one shared band.",
+    "done_when": "the done_when demands one batch job per case family with residuals within a factor of three of 4.9e-10, 1.2e-4 and 0.030 plus a MAST-U continuation below 1e-10; the gate recorded at manifest.md:10 runs test_receipt_durability.py, test_panel_visibility.py and tests/test_unqualified_axis_eager_routes.py, which assert none of those numbers, while part (3)'s mesh, route, coefficient and displacement lines are present at stored-state-refusals.html:11-36.",
+    "goal": "read \u00a71's deliverable at docs/plans/forward-solve-near-stored-states.html:66-86 beside the commits gained since the bddfb05ef review; the repairs answer the durability and panel findings, but docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html:4 still reports mastu-stored-default at 4.70674 and tcv-stored-default at 0.905546 against the done_when's 4.9e-10 and 0.030, and line 6 records the continuation control refusing with 0 finite entries.",
+    "manifest": "read r-20261118T112812127189-stored-state-refusals/manifest.md; status complete, ten commits named, baseline_suite and after_suite recorded at exit 0 with 0 failures, the landing line gives each arm's terminal state, and armed-round2.log carries '# revision cbcba328b6a7ed6561cfceeb641961725c2132a6', a '# command: ' line and a closing 'EXIT=0'.",
+    "write_paths": "read the declared paths against git diff --stat a148a0a9d176713a90cd24ffa7de2966b0c55654..cbcba328b6a7ed6561cfceeb641961725c2132a6; all 19 changed paths lie inside docs/evidence/fragments/forward-solve-near-stored-states, docs/figures/forward-solve-near-stored-states/stored-state-refusals and scripts/prototypes/stored_state_refusals."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read \u00a71's deliverable at docs/plans/forward-solve-near-stored-states.html:66-86 beside the commits gained since the bddfb05ef review; the repairs answer the durability and panel findings, but docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html:4 still reports mastu-stored-default at 4.70674 and tcv-stored-default at 0.905546 against the done_when's 4.9e-10 and 0.030, and line 6 records the continuation control refusing with 0 finite entries.\nVERDICT done_when: the done_when demands one batch job per case family with residuals within a factor of three of 4.9e-10, 1.2e-4 and 0.030 plus a MAST-U continuation below 1e-10; the gate recorded at manifest.md:10 runs test_receipt_durability.py, test_panel_visibility.py and tests/test_unqualified_axis_eager_routes.py, which assert none of those numbers, while part (3)'s mesh, route, coefficient and displacement lines are present at stored-state-refusals.html:11-36.\nVERDICT write_paths: read the declared paths against git diff --stat a148a0a9d176713a90cd24ffa7de2966b0c55654..cbcba328b6a7ed6561cfceeb641961725c2132a6; all 19 changed paths lie inside docs/evidence/fragments/forward-solve-near-stored-states, docs/figures/forward-solve-near-stored-states/stored-state-refusals and scripts/prototypes/stored_state_refusals.\nVERDICT manifest: read r-20261118T112812127189-stored-state-refusals/manifest.md; status complete, ten commits named, baseline_suite and after_suite recorded at exit 0 with 0 failures, the landing line gives each arm's terminal state, and armed-round2.log carries '# revision cbcba328b6a7ed6561cfceeb641961725c2132a6', a '# command: ' line and a closing 'EXIT=0'.\nVERDICT diff: read c64f0350651c085b89242c266a2fd413b1b27feb and cbcba328b6a7ed6561cfceeb641961725c2132a6 commit by commit, the two commits gained since bddfb05ef, plus the accumulating 19-path diff; c64f03506 adds records.py, run_suite_arm.sh and test_receipt_durability.py and exports TMPDIR before sbatch, and cbcba328b adds panels.py, redraw_panels.py, redraw_panels.sh and test_panel_visibility.py and redraws all six SVGs on one shared band.\nCALL_SITES: scripts/prototypes/stored_state_refusals/submit.sh:85, scripts/prototypes/stored_state_refusals/redraw_panels.sh:52, scripts/prototypes/stored_state_refusals/run_suite_arm.sh:43, scripts/prototypes/stored_state_refusals/report.py:11, scripts/prototypes/stored_state_refusals/run_cases.py:51, scripts/prototypes/stored_state_refusals/run_cases.py:60\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: stored-state-refusals.html:39-44 now carries six panels whose committed SVGs carry 8-15 imas-efit and 13-17 nova contoured levels, answering the panel defect, but line 4 beside line 5 records residuals orders of magnitude off the done_when factors and a refused positive control.\nSCORE evidence: 11\nJUSTIFICATION evidence: manifest.md:12 cites armed-round2.log, which ends '11 passed' with 'EXIT=0' and can be read by records.suite_arm_log:122, but manifest.md:10's gate asserts none of the done_when's residual measures and armed-baseline.log's second line is '# tree /tmp/ssr-base-arm', which records.suite_arm_log:135 rejects.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --stat a148a0a9d176713a90cd24ffa7de2966b0c55654..cbcba328b6a7ed6561cfceeb641961725c2132a6 lists only the declared evidence, figure and prototype paths, though two preview PNGs are committed although report.py:98-103 says previews are not published.\nSCORE durability: 12\nJUSTIFICATION durability: test_receipt_durability.py:29 and test_panel_visibility.py:55 would redden on the read-side ordering and the missing nova contours, but the write side of the sequence is untested and broken, with records.py:42 globbing '*/measurement.json' under the leaf directory run_cases.py:301 passes so every new job writes sequence 1.\nSCORE fit: 15\nJUSTIFICATION fit: records.py:1-13 and panels.py:1-14 follow the sibling prototype modules' module-docstring and plain-function idiom with no forbidden names, though panels.py:30 leaves a bare string where its comment belongs.\nSCORE reuse: 10\nJUSTIFICATION reuse: records.residual_fields consolidates the two divergent readers and run_cases.py:52-58 imports the comparison module's _write, but records.suite_arm_log:122 re-reads arm logs that scripts/prototypes/bank_solve_cycle/receipts.py:11-31 already parses, and panels.shared_levels:33 builds its own band rather than calling nova/media/poloidal.py:748 contour_levels.\nFINDING scripts/prototypes/stored_state_refusals/records.py:42 blocking: next_sequence globs '*/measurement.json' relative to the directory run_cases.py:301 passes, which is the job's own output directory whose receipt sits at its top level, so a fresh job always returns 1 (probe: a job directory holding measurement.json with sequence 1 yields next_sequence 1), and a re-measured arm ties the first run instead of superseding it; the run directory's 1..10 sequences were backfilled by hand in one batch (eight receipts share mtime 06:19:20, mastu-displaced3 and mastu-titan2 are 06:31:41, tcv-iter-long is 08:21:22), so the ordering the record relies on is not produced by this code.\nFINDING scripts/prototypes/stored_state_refusals/test_receipt_durability.py:29 non-blocking: the ordering test constructs the nested run/arm layout the reader expects and never calls next_sequence through run_cases' job-directory layout, so it stays green while the writer emits sequence 1 and guards the read half of the capability only.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/manifest.md:11 non-blocking: baseline_suite cites armed-baseline.log, whose second line is '# tree /tmp/ssr-base-arm', so records.suite_arm_log:135 raises ValueError on the very log the manifest names and the base arm's revision and command cannot be read back through the reader the same commit added.\nFINDING docs/figures/forward-solve-near-stored-states/stored-state-refusals/iter-iter-stored-default-preview.png:1 non-blocking: a preview PNG is committed although report.py:98-103 states previews are not published and the fragment cites neither preview, and panels.py:190-191 writes one beside every panel so the uncited raster enters docs/figures.\nFINDING docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html:4 non-blocking: the recorded last finite residuals (mastu-stored-default 4.70674, mastu-displaced-default 5.03224, tcv-stored-default 0.905546) sit orders of magnitude from \u00a71's 4.9e-10, 1.2e-4 and 0.030, and mastu-stored-continuation refused with 0 finite entries instead of qualifying below 1e-10, so \u00a71's done_when (1) and (2) remain unmet and belong to \u00a72/\u00a73.\n",
+  "review_run_id": "r-20261120T072617915276-review-of-stored-state-refusals-cbcba328b6a7",
+  "reviewed_base_sha": "a148a0a9d176713a90cd24ffa7de2966b0c55654",
+  "reviewed_head_sha": "cbcba328b6a7ed6561cfceeb641961725c2132a6",
+  "reviewed_run_id": "r-20261118T112812127189-stored-state-refusals",
+  "scores": {
+    "durability": 12,
+    "evidence": 11,
+    "fit": 15,
+    "goal_fidelity": 13,
+    "reuse": 10,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T07:35:25.723841+00:00",
+  "total": 79
+}

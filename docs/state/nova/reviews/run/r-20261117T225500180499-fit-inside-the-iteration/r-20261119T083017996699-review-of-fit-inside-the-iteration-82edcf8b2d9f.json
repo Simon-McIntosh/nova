@@ -1,0 +1,100 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/fit_inside_iteration/run.py:_run_known",
+    "scripts/prototypes/fit_inside_iteration/run.py:_run_stored"
+  ],
+  "completed_at": "2026-11-19T09:02:04.744Z",
+  "dispatched_at": "2026-11-19T09:01:17Z",
+  "evidence_paths": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T083017996699-review-of-fit-inside-the-iteration-82edcf8b2d9f/gate-rerun.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225500180499-fit-inside-the-iteration/evidence/gate-16/result-table.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225500180499-fit-inside-the-iteration/fit-iter-16-1327572.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225500180499-fit-inside-the-iteration/logs/baseline-suite.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225500180499-fit-inside-the-iteration/logs/after-suite-final.log"
+  ],
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html",
+      "line": "6",
+      "severity": "blocking",
+      "text": "blocking: The Solov'ev known state never converges or recovers: 24 passes, flux error 2.889 of the span against the 1e-6 band, terminal residual 0.9347 against 1e-8, last update 0.2849 of the span, and the record itself reads 'bands not met'. Done-when clause (1) requires all three Section 1 known states to converge and recover inside the bands, and the four relaxation arms (html:41-48, at 0.5, 0.25 and 0.10) each end without a contraction. Either land an estimator that recovers this state or obtain a plan decision that holds the section open."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-inside-the-iteration/known-states/solovev.svg",
+      "line": "40",
+      "severity": "blocking",
+      "text": "blocking: The terminal-state contour group (TriContourSet_2, stroke #3366cc) holds 12 paths whose d attribute is empty, so the panel draws the grey reference map only, while the caption at html:19 claims 'narrow blue contours of the terminal state the fit laid down'. The binding plotting rule says a panel that shows a solved field draws both sets and that a figure breaking the rule is regenerated rather than captioned around; the stored-case painter already handles the disjoint-level case by drawing nova on its own levels and labelling them (tests/test_magnetics_fit_efit_comparison.py:1479-1505), and the known-state painter has no such branch (tests/test_equilibrium_magnetics_fit.py:1750-1797)."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html",
+      "line": "48",
+      "severity": "non-blocking",
+      "text": "non-blocking: The published record was produced by six separate scheduler jobs (1327572 for the six rows, 1327685/1327710/1327819/1327990 for the relaxation arms, 1327987 for the re-rendered Solov'ev panel), and the text states so: 'The runs are separate jobs, not one measurement.' Done-when clause (3) and the repository's one-measurement-one-job rule require one batch job that runs the cases in sequence inside its allocation; the numbers agree where compared, so this is a provenance defect in the evidence rather than a wrong measurement, but the receipt does not have the shape the section names."
+    },
+    {
+      "file": "nova/equilibrium/flux_iteration.py",
+      "line": "164",
+      "severity": "non-blocking",
+      "text": "non-blocking: The conductor-response validation, per-column naming, uniqueness check and read-only freeze at nova/equilibrium/flux_iteration.py:164-183 duplicate the block at nova/equilibrium/magnetics_fit.py:227-243, differing only in where the current vector comes from. The node already extracted the coefficient basis into that module as the shared owner (magnetics_fit.py:78-159), so that idiom is established and this residual block could share it; duplicating it lets the two fitters drift in what they accept."
+    },
+    {
+      "file": "nova/equilibrium/flux_iteration.py",
+      "line": "406",
+      "severity": "non-blocking",
+      "text": "non-blocking: update is computed from the full delta at line 406, before line 415 lays down flux + relaxation * delta, so IterationPass.flux_update is unrelaxed although the docstring at :65-66 calls it 'the largest flux change of the update that pass applies'. Every damping arm in the record therefore overstates its 'last update / span' by 1/relaxation (the 0.10 arm reports 0.07204 for an applied 0.0072), and that is the quantity done-when (2) asks a reader to lay the failure beside the misfit with."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Read all 33 commits of b14c343547132859c56dc052f78550611eadac57..82edcf8b2d9f029b32f930c24cab452135d71049; the implementation commits a1e7065fd through 0fdbf583e, with the map rebuild at nova/equilibrium/flux_iteration.py:379-399, repair the stale-operator defect the 98dc1aa8 review found, and the rest record measurements and figures.",
+    "done_when": "Read all three clauses in the source dispatch; clause (2) holds (each stored case records terminal misfit, stopped-improving pass, last update and a panel, and the ITER row keeps its label), clause (3) holds on the two cases that converged (0.1244 and 0.0637 against the 0.015 band), but clause (1) is unmet: the Solov'ev known state ends at 24 passes with flux error 2.889 and residual 0.9347, recorded 'bands not met' at docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:6.",
+    "goal": "Read dispatch-detail.json admit_request.node.goal and live docs/plans/inverse-equilibrium-baseline.html section s9; FluxIterationFit solves the least-squares problem at the held map on every pass and applies one Grad-Shafranov cycle at the coefficients and currents the solve just chose (nova/equilibrium/flux_iteration.py:326-431), measured on the three known states and the three stored cases, but the Solov'ev known state does not recover.",
+    "manifest": "Read the source manifest.md and both gate logs; it states 9 of 9 at 82edcf8b, which I re-ran and confirmed, and its per-case claims agree with evidence/gate-16/result-table.json, but its tests field is prose rather than the literal command and logs/after-suite-final.log names the worktree and command with no revision header.",
+    "write_paths": "Read the nine declared paths and the b14c3435..82edcf8b diff; all 14 changed files sit inside them (nova/equilibrium/flux_iteration.py, nova/equilibrium/magnetics_fit.py, nova/equilibrium/AGENTS.md, the three declared tests, scripts/prototypes/fit_inside_iteration/run.py, the evidence fragment and the six SVGs under the declared figure directory)."
+  },
+  "justifications": {
+    "durability": "tests/test_flux_iteration.py:295-299 builds the expected terminal map independently from TRUTH and asserts it differs from the pre-fit map, so reinstating the stale operator reddens it, as do tests/test_flux_iteration.py:338 and :352 for axis loss and branch exit.",
+    "evidence": "scripts/prototypes/fit_inside_iteration/run.py:470-478 derives bands_met and exits 1 when a known state misses its band, and fit-iter-16-1327572.log ends EXIT=1 with a per-case table; the recorded head suite log carries no revision and the published rows come from six separate jobs.",
+    "fit": "nova/equilibrium/flux_iteration.py follows the module idiom (frozen dataclasses, a NamedTuple terminal state, CoefficientBasis reuse and ForwardProfile._with_source as used at nova/equilibrium/forward.py:720) and introduces no forbidden name.",
+    "goal_fidelity": "nova/equilibrium/flux_iteration.py:326-431 implements the per-pass fit and one flux cycle, but docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:6 records the Solov'ev known state outside both bands, so one of the three mandatory recoveries is absent.",
+    "reuse": "nova/equilibrium/magnetics_fit.py:78-159 now owns coefficient-basis validation and source rebuilding for both fitters, but nova/equilibrium/flux_iteration.py:164-184 repeats the conductor-response validation and naming that nova/equilibrium/magnetics_fit.py:227-243 already holds.",
+    "scope_discipline": "Every one of the 14 paths in the diff is inside the nine declared write paths, and no file outside them changed."
+  },
+  "plan": "inverse-equilibrium-baseline",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read dispatch-detail.json admit_request.node.goal and live docs/plans/inverse-equilibrium-baseline.html section s9; FluxIterationFit solves the least-squares problem at the held map on every pass and applies one Grad-Shafranov cycle at the coefficients and currents the solve just chose (nova/equilibrium/flux_iteration.py:326-431), measured on the three known states and the three stored cases, but the Solov'ev known state does not recover.\nVERDICT done_when: Read all three clauses in the source dispatch; clause (2) holds, clause (3) holds on the two cases that converged, but clause (1) is unmet: the Solov'ev known state ends at 24 passes with flux error 2.889 and residual 0.9347, recorded 'bands not met' at docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:6.\nVERDICT write_paths: Read the nine declared paths and the b14c3435..82edcf8b diff; all 14 changed files sit inside them.\nVERDICT manifest: Read the source manifest.md and both gate logs; it states 9 of 9 at 82edcf8b, which I re-ran and confirmed, but its tests field is prose and logs/after-suite-final.log names no revision.\nVERDICT diff: Read all 33 commits of b14c343547132859c56dc052f78550611eadac57..82edcf8b2d9f029b32f930c24cab452135d71049; the implementation commits a1e7065fd through 0fdbf583e repair the stale-operator defect the 98dc1aa8 review found at nova/equilibrium/flux_iteration.py:379-399, and the rest record measurements and figures.\nCALL_SITES: scripts/prototypes/fit_inside_iteration/run.py:_run_known, scripts/prototypes/fit_inside_iteration/run.py:_run_stored\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: nova/equilibrium/flux_iteration.py:326-431 implements the per-pass fit and one flux cycle, but docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:6 records the Solov'ev known state outside both bands, so one of the three mandatory recoveries is absent.\nSCORE evidence: 14\nJUSTIFICATION evidence: scripts/prototypes/fit_inside_iteration/run.py:470-478 derives bands_met and exits 1 when a known state misses its band, and fit-iter-16-1327572.log ends EXIT=1 with a per-case table; the recorded head suite log carries no revision and the published rows come from six separate jobs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every one of the 14 paths in the diff is inside the nine declared write paths, and no file outside them changed.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_flux_iteration.py:295-299 builds the expected terminal map independently from TRUTH and asserts it differs from the pre-fit map, so reinstating the stale operator reddens it.\nSCORE fit: 17\nJUSTIFICATION fit: nova/equilibrium/flux_iteration.py follows the module idiom (frozen dataclasses, a NamedTuple terminal state, CoefficientBasis reuse and ForwardProfile._with_source as used at nova/equilibrium/forward.py:720) and introduces no forbidden name.\nSCORE reuse: 15\nJUSTIFICATION reuse: nova/equilibrium/magnetics_fit.py:78-159 now owns coefficient-basis validation and source rebuilding for both fitters, but nova/equilibrium/flux_iteration.py:164-184 repeats the conductor-response validation and naming that nova/equilibrium/magnetics_fit.py:227-243 already holds.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:6 blocking: The Solov'ev known state never converges or recovers (flux error 2.889, residual 0.9347, last update 0.2849 after 24 passes), so done-when clause (1) is unmet.\nFINDING docs/figures/inverse-equilibrium-baseline/fit-inside-the-iteration/known-states/solovev.svg:40 blocking: the terminal-state contour paths are empty while the caption claims them.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:48 non-blocking: the record was produced by six separate jobs, contrary to done-when clause (3).\nFINDING nova/equilibrium/flux_iteration.py:164 non-blocking: conductor-response validation duplicates nova/equilibrium/magnetics_fit.py:227-243.\nFINDING nova/equilibrium/flux_iteration.py:406 non-blocking: flux_update records the unrelaxed delta, overstating the damping arms' applied update.",
+  "recommendation": "repair-before-landing",
+  "review_run_id": "r-20261119T083017996699-review-of-fit-inside-the-iteration-82edcf8b2d9f",
+  "review_worktree_sha": "86a22e21bb53cc2399d00437fd430019b0b280aa",
+  "reviewed_at": "2026-11-19T10:20:00+00:00",
+  "reviewed_base_sha": "b14c343547132859c56dc052f78550611eadac57",
+  "reviewed_head_sha": "82edcf8b2d9f029b32f930c24cab452135d71049",
+  "reviewed_run_id": "r-20261117T225500180499-fit-inside-the-iteration",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 13,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "section": "s9",
+  "status": "parsed",
+  "suite_evidence": {
+    "base_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225500180499-fit-inside-the-iteration/logs/baseline-suite.log",
+    "comparative_suite_measured": false,
+    "head_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225500180499-fit-inside-the-iteration/logs/after-suite-final.log",
+    "note": "The source pointer declares suite_gate=unarmed because its expected paths are artifacts, so zero added failures is a non-applicable gate value rather than an asserted suite pair. The reviewed run's own arms were read: logs/baseline-suite.log exits 4 with 'ERROR: file or directory not found: tests/test_flux_iteration.py' because that file does not exist at b14c3435, and logs/after-suite-final.log records '9 passed in 3.67s' with EXIT=0. The gate test was re-run at the reviewed head 82edcf8b2 and returned '9 passed in 6.43s' with EXIT=0 (gate-rerun.log in this run directory), so the head arm is confirmed at the head rather than merely claimed.",
+    "rerun_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T083017996699-review-of-fit-inside-the-iteration-82edcf8b2d9f/gate-rerun.log",
+    "source_suite_gate": "unarmed"
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T09:33:44.939123+00:00",
+  "total": 95
+}

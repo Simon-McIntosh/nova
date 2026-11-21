@@ -232,6 +232,12 @@ GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE
 REPRESENTATIVE_CURRENT_FLOOR_A = 200_000.0
 REGISTERED_SOLVER_ROUTE = "newton_krylov"
 REGISTERED_PROFILE_EVALUATIONS = 180
+# The surfaces the prescribed p' and FF' read EFIT's profiles on: the interior
+# shell centres the tables carry, continued to the boundary so the profile has
+# a value at psi_norm = 1 of its own rather than the last interior knot held
+# outward. The tables prescribe the interior rows; the boundary row is supplied
+# to the finite-edge flux function.
+PROFILE_SURFACES = tuple(round(0.05 + 0.05 * index, 10) for index in range(20))
 REGISTERED_ACCELERATED_NEWTON_STEPS = 24
 REGISTERED_ACCELERATED_GMRES_ITERATIONS = 24
 REGISTERED_ACCELERATED_WARMUP = 8
@@ -1104,10 +1110,10 @@ def _plasma_mask(
     )
 
 
-def _label_state(
+def _normalised_label_state(
     row: dict[str, Any], frame: int
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Cross the corpus flux boundary once and extract native Nova profiles."""
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Cross the corpus flux boundary once and return the normalised map."""
 
     radius, height = canonical_axes(row)
     label = corpus_flux_to_nova_total(
@@ -1127,12 +1133,27 @@ def _label_state(
         )
     )
     normalised = (label - axis_flux) / (boundary_flux - axis_flux)
+    return (
+        radius,
+        height,
+        label,
+        normalised,
+        _plasma_mask(row, frame, radius, height),
+    )
+
+
+def _label_state(
+    row: dict[str, Any], frame: int
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Cross the corpus flux boundary once and extract native Nova profiles."""
+
+    radius, height, label, normalised, mask = _normalised_label_state(row, frame)
     extraction = extract_flux_functions(
         radius,
         height,
         label,
         normalised,
-        plasma_mask=_plasma_mask(row, frame, radius, height),
+        plasma_mask=mask,
         min_samples=6,
     )
     reliable = extraction.reliable & np.isfinite(
@@ -1145,6 +1166,44 @@ def _label_state(
         extraction.psi_norm[reliable],
         extraction.p_prime[reliable],
         extraction.ff_prime[reliable],
+    )
+
+
+def _profile_edge_values(row: dict[str, Any], frame: int) -> tuple[float, float, float]:
+    """Read EFIT's own p' and FF' on the boundary shell at psi_norm = 1.
+
+    The extraction carries the interior shell centres the prescribed tables use
+    and one more at the boundary, so the boundary shell is the same spacing as
+    the interior read.  A profile then carries EFIT's value at psi_norm = 1
+    through the finite-edge flux function rather than the last interior sample
+    held outward.
+    """
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError(
+            "the prescribed profile edge needs double precision: configure_dtypes() "
+            "must run before the extraction, or the boundary value moves in the "
+            "fifth digit"
+        )
+    radius, height, label, normalised, mask = _normalised_label_state(row, frame)
+    extraction = extract_flux_functions(
+        radius,
+        height,
+        label,
+        normalised,
+        surfaces=np.asarray(PROFILE_SURFACES, dtype=np.float64),
+        plasma_mask=mask,
+        min_samples=6,
+    )
+    boundary = int(np.argmin(np.abs(np.asarray(extraction.psi_norm) - 1.0)))
+    if not bool(extraction.reliable[boundary]):
+        raise RuntimeError(
+            "the extractor does not resolve EFIT's boundary shell at psi_norm=1 "
+            "on this frame"
+        )
+    return (
+        float(extraction.psi_norm[boundary]),
+        float(extraction.p_prime[boundary]),
+        float(extraction.ff_prime[boundary]),
     )
 
 
@@ -1279,21 +1338,17 @@ def _couplings(
     names, response = vacuum_response(machine.physical, radius, height)
     source_to_grid = np.stack([plane.T.ravel() for plane in response], axis=1)
     source_to_wall = _wall_source_response(machine.physical, names, wall)
-    width = float(np.diff(radius).mean())
-    vertical_extent = float(np.diff(height).mean())
-    plasma_to_grid = _green_block(coordinate, coordinate, width, vertical_extent)
-    plasma_to_wall = _green_block(wall, coordinate, width, vertical_extent)
     grid_moments, wall_moments, sample_coordinate, sample_moments = _moment_couplings(
         lattice, wall
     )
+    plasma_to_grid = grid_moments[0]
+    plasma_to_wall = wall_moments[0]
+    plasma_to_sample = sample_moments[0]
     # The sampling nodes are solved rows too, so they carry the same conductor
     # population the grid carries, evaluated at the vertices with the polygon
     # kernel the wall target uses. A target built from zeros would hold a flux
     # of zero at the nodes the boundary is clipped on.
     source_to_sample = _wall_source_response(machine.physical, names, sample_coordinate)
-    plasma_to_sample = _green_block(
-        sample_coordinate, coordinate, width, vertical_extent
-    )
     grid_rows = lattice.node_count
     wall_rows = len(wall)
     same_grid_seam = (
@@ -1437,6 +1492,7 @@ def _build_profile(
     """Build one prescribed-source solve with a coherent topology surface."""
 
     label_full, surfaces, p_prime, ff_prime = _label_state(row, frame)
+    edge_psi_norm, edge_p_prime, edge_ff_prime = _profile_edge_values(row, frame)
     radius_full, height_full = canonical_axes(row)
     radius = radius_full[::REGISTERED_GRID_STRIDE]
     height = height_full[::REGISTERED_GRID_STRIDE]
@@ -1473,8 +1529,8 @@ def _build_profile(
     )
     source = ForwardSource(
         core=DomainProfile(
-            p_prime=SampledFluxFunction(surfaces, p_prime),
-            ff_prime=SampledFluxFunction(surfaces, ff_prime),
+            p_prime=SampledFluxFunction(surfaces, p_prime, edge_value=edge_p_prime),
+            ff_prime=SampledFluxFunction(surfaces, ff_prime, edge_value=edge_ff_prime),
         ),
         boundary_pressure=0.0,
         boundary_field_function=_boundary_field_function(
@@ -1523,6 +1579,15 @@ def _build_profile(
         wall_statement=statement,
         surface_receipt={
             **surface_receipt,
+            "prescribed_profile_edge": {
+                "form": "finite_edge",
+                "surfaces": [float(value) for value in PROFILE_SURFACES],
+                "psi_norm": edge_psi_norm,
+                "p_prime": edge_p_prime,
+                "ff_prime": edge_ff_prime,
+                "interior_knots": int(np.size(surfaces)),
+                "interior_last_psi_norm": float(np.max(surfaces)),
+            },
             "labelled_frame_grid": {
                 "label_shape": list(label.shape),
                 "label_node_count": int(label.size),
@@ -1869,15 +1934,13 @@ def _publish_accumulated_response(targets: _ConductorTargets) -> dict[str, Any]:
 def _display_coupling(
     profile: ForwardProfile, machine
 ) -> tuple[DisplayCoupling, _ConductorTargets]:
-    """Return the target-point coupling the frame's own solve was built from.
+    """Return the display's target-point plasma and conductor coupling.
 
-    The plasma columns are the same uniform ``hybrid_greens`` block the solve
-    lattice consumes, evaluated at whatever points the panel asks for; the
-    operator carries no radial or vertical plasma moment matrices here, so
-    those columns are zero exactly as the solve's own raster image is.  The
-    conductor flux is the response matrix contracted with the operator's own
-    current vector, and its targets are the points the display map evaluates
-    on, so the map's grid is the grid the response is built for.
+    The display evaluates uniform ``hybrid_greens`` plasma columns at the
+    requested panel points and supplies zero radial and vertical columns.
+    This display approximation differs from the solve's exact polygon
+    uniform, radial and vertical blocks. The conductor flux contracts the
+    target-point response matrix with the operator's external-current vector.
     """
 
     lattice = profile.lattice

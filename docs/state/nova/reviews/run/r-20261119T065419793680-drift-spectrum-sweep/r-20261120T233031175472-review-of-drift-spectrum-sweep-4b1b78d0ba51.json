@@ -1,0 +1,104 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed baseline_suite.log at 54cc8f9 records 9 passed, 0 failed; its after_suite.log holds only EXIT=143 with no test output, so the added count is read from the head arm re-run at 4b1b78d0b (logs/after_suite_review.log: 14 passed, 1 skipped, EXIT=0), which fails nothing the baseline does not.",
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh:35-48",
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:202",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1050",
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:298",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/analyse.py:131-135"
+  ],
+  "completed_at": "2026-11-20T23:31:41.582Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-drift-spectrum-sweep-4b1b78d0ba51",
+      "recorded_at": "2026-11-20T23:50:05.832650+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-20T23:31:21Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py",
+      "line": "28",
+      "severity": "non-blocking",
+      "text": "non-blocking: load() is a byte-identical copy of analyse.load at analyse.py:22, which the same package already imports through sweep.import_study, so a reader change is made twice or not at all."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py",
+      "line": "53",
+      "severity": "non-blocking",
+      "text": "non-blocking: the arm file is rebuilt from the literal template \"efit-drift-100-%.4f-index1.0-corner2.0000.jsonl\" while sweep.label at sweep.py:125 owns the study's stem, so a label or slice-count change silently empties the trace instead of failing."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py",
+      "line": "33",
+      "severity": "non-blocking",
+      "text": "non-blocking: axis_error recomputes the per-slice distance from truth that analyse.summarise already forms at analyse.py:125, so the figure and the table that cite the same arms can disagree without either failing."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py",
+      "line": "25",
+      "severity": "non-blocking",
+      "text": "non-blocking: INK hardcodes five hexes, two of them absent from InkStyle, and series.py:56 plots with axes.plot instead of nova/media/traces.py:194 draw_trace, bypassing the module that states every visual constant Nova's figures use."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/test_spectrum_sweep.py",
+      "line": "122",
+      "severity": "non-blocking",
+      "text": "non-blocking: both sides of the assertion are derived from analyse.LAG_ONE_LIMIT, so restoring sweep.validate's pre-repair literal 0.15 leaves the test green; it guards future drift of the constant, not the deduplication its docstring claims."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: the record says the reduction and controls were re-run at db2b46079, but the only analyse gate log names revision 19a48a98, a rewritten twin of 4b1b78d0b that is not in the delivered history, and no run at db2b46079 survives in logs/."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T065419793680-drift-spectrum-sweep/manifest.md",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest records the head arm as 15 passed with EXIT=0 while logs/after_suite.log holds four header lines and EXIT=143 with no test output, so the head-arm result is unreadable in the reviewed run; re-running that command at 4b1b78d0b gives 14 passed, 1 skipped, EXIT=0."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read e58ff0e5a and 4b1b78d0b against db2b46079: e58ff0e5a adds test_spectrum_sweep.py, LAG_ONE_LIMIT/DRIFT_LAG_ONE_FLOOR and the wall cleanup, and 4b1b78d0b adds series.py, the SVG and the receipt wording; a re-render of the committed SVG from series.py on the study arm files reproduces all 1674 lines apart from matplotlib's random marker ids.",
+    "done_when": "the three clauses are measured by the gate.sh run plus analyse pair, whose sweep-analyse.log ends CHECKS-PASSED 49 and EXIT=0 with the axis crossing at 0.05 (0.0850 m), the q95 crossing at 0.10 (0.2193) and the index-0 control at 0.00150; the record names the second contour panel as deferred rather than dropping it silently.",
+    "goal": "the goal is to sweep the noise size, the spectral index and the corner frequency for imas-efit on the held ITER state; sweep.py:46-54 still fixes the three grids, study/spectrum-summary.json carries one reduced row per arm, and 4b1b78d0b adds the plan's axis-against-slice figure without moving any measured value (payload md5 bff12f86 unchanged).",
+    "manifest": "read; it records the 12 arms, both gate commands, the payload md5 bff12f86 and six new tests, but its checkpoint line 5 claims the head arm passed 15 at EXIT=0 while logs/after_suite.log holds only EXIT=143 with no test output.",
+    "write_paths": "the declared roots are docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html, docs/figures/inverse-equilibrium-baseline/drift-spectrum-sweep and scripts/prototypes/drifting_sensor_sequences; every path in db2b46079..4b1b78d0b lies inside them."
+  },
+  "justifications": {
+    "durability": "test_spectrum_sweep.py:77-102 reddens when validate() is bypassed or the wall write returns to unlink-plus-savez, but test_spectrum_sweep.py:122 cannot fail when sweep.validate's literal 0.15 is restored.",
+    "evidence": "logs/sweep-analyse.log ends CHECKS-PASSED 49 and EXIT=0 and spectrum-summary.json is md5 bff12f86, but both cited gate logs name revision 19a48a98, a rewritten twin of the landed head, and logs/after_suite.log is a bare EXIT=143.",
+    "fit": "series.py:25 invents a five-colour palette and series.py:53 a literal arm-file stem, both against the surrounding prototype idiom that reads sweep.label and the study's files.",
+    "goal_fidelity": "sweep.py:46-54 fixes the size, index and corner grids the goal names and spectrum-summary.json carries the reduced row per arm, while the delta only adds the tests, the figure and the receipt wording around that measurement.",
+    "reuse": "series.py:28 repeats analyse.py:22 load, series.py:53 repeats sweep.py:125 label, series.py:33 repeats the axis distance analyse.py:125 owns, and series.py:56 calls axes.plot where nova/media/traces.py:194 draw_trace exists.",
+    "scope_discipline": "every path in git diff db2b46079..4b1b78d0b is under the three declared roots, and the only deletion is an intermediate PNG in the declared figures directory."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to sweep the noise size, the spectral index and the corner frequency for imas-efit on the held ITER state; sweep.py:46-54 still fixes the three grids, study/spectrum-summary.json carries one reduced row per arm, and 4b1b78d0b adds the plan's axis-against-slice figure without moving any measured value (payload md5 bff12f86 unchanged).\nVERDICT done_when: the three clauses are measured by the gate.sh run plus analyse pair, whose sweep-analyse.log ends CHECKS-PASSED 49 and EXIT=0 with the axis crossing at 0.05 (0.0850 m), the q95 crossing at 0.10 (0.2193) and the index-0 control at 0.00150; the record names the second contour panel as deferred rather than dropping it silently.\nVERDICT write_paths: the declared roots are docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html, docs/figures/inverse-equilibrium-baseline/drift-spectrum-sweep and scripts/prototypes/drifting_sensor_sequences; every path in db2b46079..4b1b78d0b lies inside them.\nVERDICT manifest: read; it records the 12 arms, both gate commands, the payload md5 bff12f86 and six new tests, but its checkpoint line 5 claims the head arm passed 15 at EXIT=0 while logs/after_suite.log holds only EXIT=143 with no test output.\nVERDICT diff: read e58ff0e5a and 4b1b78d0b against db2b46079: e58ff0e5a adds test_spectrum_sweep.py, LAG_ONE_LIMIT/DRIFT_LAG_ONE_FLOOR and the wall cleanup, and 4b1b78d0b adds series.py, the SVG and the receipt wording; a re-render of the committed SVG from series.py on the study arm files reproduces all 1674 lines apart from matplotlib's random marker ids.\nCALL_SITES: scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh:35-48, scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:202, scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1050, scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:298, scripts/prototypes/drifting_sensor_sequences/probe_rows/analyse.py:131-135\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: sweep.py:46-54 fixes the size, index and corner grids the goal names and spectrum-summary.json carries the reduced row per arm, while the delta only adds the tests, the figure and the receipt wording around that measurement.\nSCORE evidence: 14\nJUSTIFICATION evidence: logs/sweep-analyse.log ends CHECKS-PASSED 49 and EXIT=0 and spectrum-summary.json is md5 bff12f86, but both cited gate logs name revision 19a48a98, a rewritten twin of the landed head, and logs/after_suite.log is a bare EXIT=143.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff db2b46079..4b1b78d0b is under the three declared roots, and the only deletion is an intermediate PNG in the declared figures directory.\nSCORE durability: 15\nJUSTIFICATION durability: test_spectrum_sweep.py:77-102 reddens when validate() is bypassed or the wall write returns to unlink-plus-savez, but test_spectrum_sweep.py:122 cannot fail when sweep.validate's literal 0.15 is restored.\nSCORE fit: 15\nJUSTIFICATION fit: series.py:25 invents a five-colour palette and series.py:53 a literal arm-file stem, both against the surrounding prototype idiom that reads sweep.label and the study's files.\nSCORE reuse: 5\nJUSTIFICATION reuse: series.py:28 repeats analyse.py:22 load, series.py:53 repeats sweep.py:125 label, series.py:33 repeats the axis distance analyse.py:125 owns, and series.py:56 calls axes.plot where nova/media/traces.py:194 draw_trace exists.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py:28 non-blocking: load() is a byte-identical copy of analyse.load at analyse.py:22, which the same package already imports through sweep.import_study, so a reader change is made twice or not at all.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py:53 non-blocking: the arm file is rebuilt from the literal template \"efit-drift-100-%.4f-index1.0-corner2.0000.jsonl\" while sweep.label at sweep.py:125 owns the study's stem, so a label or slice-count change silently empties the trace instead of failing.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py:33 non-blocking: axis_error recomputes the per-slice distance from truth that analyse.summarise already forms at analyse.py:125, so the figure and the table that cite the same arms can disagree without either failing.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py:25 non-blocking: INK hardcodes five hexes, two of them absent from InkStyle, and series.py:56 plots with axes.plot instead of nova/media/traces.py:194 draw_trace, bypassing the module that states every visual constant Nova's figures use.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/test_spectrum_sweep.py:122 non-blocking: both sides of the assertion are derived from analyse.LAG_ONE_LIMIT, so restoring sweep.validate's pre-repair literal 0.15 leaves the test green; it guards future drift of the constant, not the deduplication its docstring claims.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html:4 non-blocking: the record says the reduction and controls were re-run at db2b46079, but the only analyse gate log names revision 19a48a98, a rewritten twin of 4b1b78d0b that is not in the delivered history, and no run at db2b46079 survives in logs/.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T065419793680-drift-spectrum-sweep/manifest.md:5 non-blocking: the manifest records the head arm as 15 passed with EXIT=0 while logs/after_suite.log holds four header lines and EXIT=143 with no test output, so the head-arm result is unreadable in the reviewed run; re-running that command at 4b1b78d0b gives 14 passed, 1 skipped, EXIT=0.",
+  "review_run_id": "r-20261120T233031175472-review-of-drift-spectrum-sweep-4b1b78d0ba51",
+  "reviewed_base_sha": "54cc8f94f3ff8fafc359291fb5e18e88ae7bf7a8",
+  "reviewed_head_sha": "4b1b78d0ba51b4d0c3b2a6b1b0ccf47672b82fc5",
+  "reviewed_run_id": "r-20261119T065419793680-drift-spectrum-sweep",
+  "reviewer_run_id": "r-20261120T233031175472-review-of-drift-spectrum-sweep-4b1b78d0ba51",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T23:40:04.161789+00:00",
+  "total": 86
+}

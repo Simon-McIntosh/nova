@@ -1,0 +1,97 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T06:27:52.022Z",
+  "dispatched_at": "2026-11-18T06:27:34Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261118T061343956195-plan-review-of-kernel-compile-barrier/plan.html:66",
+      "id": "done_when-1",
+      "reason": "the node's acceptance set is incomplete against a gate it inherits, so a deliverable passing the named rows can still fail review on an unnamed 1e-13 assertion.",
+      "text": "node (c) allows \"derivative entries within 1e-9 relative\" and requires only `tests/biot/test_moment_program_identity.py`'s two rows to pass against `681a6ecd2`, but the same pinned revision is read by `tests/biot/test_kernel_compile_cost.py::test_point_jet_identity`, which asserts a 1e-13 maximum on the polygon jet from `nova/biot/polygonanalytic.py` \u2014 the module the repair changed and the program the node bounds \u2014 so a form inside the plan's declared tolerance leaves that unnamed gate red, and \"no tolerance is relaxed\" gives the worker no basis to widen it either way",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261118T061343956195-plan-review-of-kernel-compile-barrier/plan.html:66",
+      "id": "reasoning-1",
+      "reason": "the node could fold both instantiations exactly as ordered and still land above the 60 s bound, so the section needs a post-repair residual measured on the base arm rather than a reach argument carried over from the smaller kernel.",
+      "text": "the section concludes \"both the Hessian and the gradient instantiations must fold for 60 s\" from pre-repair arms (223.7 s control, 104.5 s Hessian stubbed, 34.1 s every derivative stubbed) and then sets the same 60 s bound on the repaired kernel, which its own paragraph prices at 1.872x the pre-repair cold compile; applying that factor to the 34.1 s non-foldable residual gives about 64 s, so the plan's own evidence leaves the endpoint unproven by the named lever and the plan does not say what reduces that residual",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5dc60d8a6112a13c52786e6203595b0e714ffc95",
+  "plan_fingerprint": "63a5d68bfd597f56fac96891228eef15704b70d88591334238afa4f16bceae92",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 96,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "5dc60d8a6112a13c52786e6203595b0e714ffc95",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "s3 names test_point_jet_identity as a gate the node inherits at its own 1e-13, which stands where it is tighter than the 1e-9 allowance",
+      "reason": "",
+      "when": "2026-11-18T06:53:13.451186+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "5dc60d8a6112a13c52786e6203595b0e714ffc95",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "s3 says the 60 s reach is unproven on the repaired kernel and makes the node measure the derivative-free residual there first, delivering a partial result if it exceeds the bound",
+      "reason": "",
+      "when": "2026-11-18T06:53:22.593976+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "5dc60d8a6112a13c52786e6203595b0e714ffc95",
+      "commit_basis": "edit",
+      "note": "s3 names test_point_jet_identity as a gate the node inherits at its own 1e-13, which stands where it is tighter than the 1e-9 allowance",
+      "reason": "",
+      "when": "2026-11-18T06:53:13.451186+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "5dc60d8a6112a13c52786e6203595b0e714ffc95",
+      "commit_basis": "edit",
+      "note": "s3 says the 60 s reach is unproven on the repaired kernel and makes the node measure the derivative-free residual there first, delivering a partial result if it exceeds the bound",
+      "reason": "",
+      "when": "2026-11-18T06:53:22.593976+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261118T061343956195-plan-review-of-kernel-compile-barrier.json",
+  "review_run_id": "r-20261118T061343956195-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "6409b39fbc90ffc90576451e03ed4d12f405830f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `35fad5250`, `b0a2cde51`, `681a6ecd2` all resolve, and `35fad5250`'s `nova/` tree is byte-identical to the ordered-sharing measured head `e6b9ea32a`; `fixed_points.py:323` is `def _source_jets`, `:546` is `def maintain_rows`, `:611` is the `_row_program(...)` call, `read_route/jets.py:262`, `fixed_points/solve.py:121` and `kernel_compile_census/row.py:115` each hold the cited `jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))`, and every test path cited exists with its cited row and the 10,000,000-byte ceiling.",
+    "done_when": "a finding \u2014 node (c) admits derivative entries \"within 1e-9 relative\" and names two identity rows, while `tests/biot/test_kernel_compile_cost.py:393` asserts a 1e-13 maximum on the same polygon module against the same pinned base.",
+    "evidence_paths": "pass \u2014 node (c) writes `docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html`, `docs/figures/kernel-compile-barrier/one-traced-body/` and receipts under `~/.cache/nova-kernel-compile-barrier/one-traced-body/`, all under the repository evidence convention, not a scratchpad.",
+    "naming": "pass \u2014 the three short hashes in the changed paragraphs are revision citations in prose, not symbols or comments carrying plan labels.",
+    "reasoning": "a finding \u2014 node (c) keeps the 60 s endpoint on the repaired kernel while its only reach argument is the pre-repair stub set, whose residual 34.1 s is not established to stay under 60 s after the repair's own 1.872x compile growth.",
+    "single_goal": "pass \u2014 node (c) has one deliverable, the bounded form; the ceiling return, the re-based identity reference and the record paths are what closing that one deliverable requires.",
+    "wiring": "pass \u2014 s3 declares `data-links=\"kernel-compile-barrier#s2,kernel-compile-barrier#s5\"`, both sections exist and are `done`, and the polygon tangent repair it builds on has landed on main at merge `681a6ecd2`, so no dependency is missing and no link points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "6af29e9c0d4ae386d870df6baa70b910da2c50485eef97ddf1c3d2ebc9f12a27",
+    "s1": "aa5aa8c58e97b36f2cd4f105d3cfb0b24bd5697ec1f0ec570392a44b85ce3e6e",
+    "s2": "b465cef1e2cc13170ec112ecc51774aeedecf0105d30a3902a7c0ecc0a762197",
+    "s3": "add9acab0c4a52fd7f63636b5b2d17e9cbf9e76f585218e2873746d538bd6568",
+    "s4": "b4c3eef27a064692dbf419c8ce536674acaafb04413c9c58789ff1b0a6338bcc",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:48:27.435329+00:00",
+  "total": null
+}

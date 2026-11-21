@@ -1,0 +1,75 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T20:49:48.098Z",
+  "dispatched_at": "2026-11-17T20:49:29Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/iron-core-magnetisation/r-20261117T204829882247-plan-review-of-iron-core-magnetisation/plan.html:549-550",
+      "id": "reasoning-1",
+      "reason": "either the superlative is corrected to name the graded restriction or the equivalence check moves to the larger uniform 40 mm mesh the record shows executed, and as written a brief writer is told the stronger comparison is impossible on the card.",
+      "text": "clause (2) caps the value-preservation check at the graded 16/80 mm mesh on a superlative that its own evidence refutes: icm-west-linear-h200.html:95 reads \"The largest completed operator is uniform 40 mm, 6632 cells and 39 792 unknowns\", that mesh was fully executed on the H200 (assembly 6502.489 s, factor peak 50.697 GB, replay solve 202.311 s), so a mesh 4 608 unknowns larger than the one clause (2) validates on is available and already persisted; the parenthetical is true only if read as \"largest graded\"",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0ff239ac9d89370d536a06f093b565b2d908c958",
+  "plan_fingerprint": "37e94f0d5a7b261a89edcd63033c9f37bda646777e358564bf0bfbcb1fa7b0dd",
+  "plan_slug": "iron-core-magnetisation",
+  "plan_version": 122,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b9b32a34170e0900921c7965b53ddd9441036158",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "the superlative is corrected in a section-11 comment: uniform 40 mm (39 792 unknowns) is the largest completed operator; graded 16/80 stays the clause's mesh because it carries the grading boundary, and the node brief also asks for the uniform 40 mm comparison",
+      "reason": "",
+      "when": "2026-11-17T22:28:55.143999+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b9b32a34170e0900921c7965b53ddd9441036158",
+      "commit_basis": "edit",
+      "note": "the superlative is corrected in a section-11 comment: uniform 40 mm (39 792 unknowns) is the largest completed operator; graded 16/80 stays the clause's mesh because it carries the grading boundary, and the node brief also asks for the uniform 40 mm comparison",
+      "reason": "",
+      "when": "2026-11-17T22:28:55.143999+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/iron-core-magnetisation/r-20261117T204829882247-plan-review-of-iron-core-magnetisation.json",
+  "review_run_id": "r-20261117T204829882247-plan-review-of-iron-core-magnetisation",
+  "reviewed_blob_sha": "1eeb9258432b6edb48356a6766a22aca1c7bcca1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the `#s11` heading exists at plan.html:530, `<code>icm-west-linear-h200` names a fragment that exists on disk, and \u00a75's pointer to \u00a75b at plan.html:381 resolves to this section.",
+    "done_when": "pass \u2014 clauses (1)\u2013(3) each carry a numeric acceptance with a stated failure outcome: a per-probe 1 % change against graded 16/80 mm (line 546-547), a 1e-12 relative reproduction of the existing route's interaction and probe fields on a named mesh (549-551), and a shell arm that must reach a spacing which misses 0.5 % (551-553).",
+    "evidence_paths": "pass \u2014 the input record the section cites resolves at docs/evidence/fragments/iron-core-magnetisation/icm-west-linear-h200.html, and the new measurements land in the node fragment under docs/evidence/fragments/iron-core-magnetisation/ by the build contract, the disposition already recorded for \u00a75/\u00a77/\u00a78/\u00a79.",
+    "naming": "pass \u2014 s11 introduces no symbol, file or function name into code; \"\u00a75b\" and \"icm-west-linear-h200\" are document and record names, not code identifiers.",
+    "reasoning": "a finding \u2014 the clause (2) parenthetical calls graded 16/80 mm (35 184 unknowns) \"the largest the existing route solves on the card\", while the fragment the section cites states that the largest completed operator is uniform 40 mm at 39 792 unknowns, executed on the same card.",
+    "single_goal": "pass \u2014 line 541-542 declares the section as two dispatch nodes (clauses 1\u20132 the WEST refinement, clause 3 the shell negative arm), each landing on its own review, which is the disposition the earlier single_goal finding asked for.",
+    "wiring": "pass \u2014 s11 declares no depends-on entry (previously raised and declined at plan-review r-20261117T161650105021; both parents \u00a74 and \u00a75 are declared done), and its clause (2) comparator is the landed \u00a74 route, so no dispatch order or relationship is left unstated or mis-pointed."
+  },
+  "section_digests": {
+    "_document": "1141c1abfa62daa5fedd0175f738e2d823584a4d08b639e480205c525f99ca95",
+    "s0": "0d42a042a9779276a9b36cb00b49d764c7d74be520e7ba612e18d8158ccdb7bc",
+    "s1": "b9d1b847df72b6f23aea04fe6f138e00a7663bcdb675d4b247aaba2bcd0e4cd3",
+    "s10": "17259ea3554b3882c54fad80b5d94c5142433ed6ee465ebe63c28b6d0520a690",
+    "s11": "c01dcd9aa87a529bce68c100c1882d8204854e7d26f12b67c3c995eb49b42033",
+    "s2": "5adcd40523cd5e26276eb096bde1c5ab8f3bb8ab1e30ad4b525998dcdc7712d2",
+    "s3": "0a2c60a9672045f1b7b4c08f3437bc639658c29bc1d0c59bb25b9efa4177c85c",
+    "s4": "9d9575a3a830059f2eefb6ac953213be0aa858329aaeec3fae422fb48313a0d3",
+    "s5": "36bad4819e31bb149a73ded355cde8eca817e860913fbdafdc22dbf119126f1e",
+    "s6": "2532f33b84d4401c4f99a4c5d4c48b277171f9e129307bc0ce0c66545cc0e73d",
+    "s7": "1555dc4a428fc5ed84d96b31b0da13217072c683c765f3ad1d7e897ba1bfbdbf",
+    "s8": "6f09879ace82774a03c887b980857ea52573826045f08365978f3645df7df635",
+    "s9": "6285fbc7d628867dde2a33c77aa4e3ee72d67adfc05e6a6078a9d46e7c2b4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T20:56:47.999483+00:00",
+  "total": null
+}

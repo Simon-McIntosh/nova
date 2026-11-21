@@ -12,7 +12,7 @@
 set -u
 WT=${WT:?WT must name the worktree the job measures}
 RUN=${RUN:?RUN must name the run directory}
-STORE=/work/projects/imas_gpu/sophelio/nova-assembled-step-bank
+STORE=/work/projects/imas_gpu/nova/nova-assembled-step-bank
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cuda
 D=$(mktemp -d /tmp/tracked-read-h200-XXXX)

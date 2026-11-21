@@ -1,0 +1,426 @@
+<section id="point-program-attribution">
+<h3>Where the consolidated production row program's compile goes</h3>
+<p id="point-program-attribution-scope">Measurement only: no product source and no test changed. The program is <code>production_point_batch</code> at 132 cells, the consolidated form §3 (a) landed. Clause (1) is one H200 job, <code>1322209</code> on node <code>98dci4-gpu-0003</code>, submitted to <code>betelgeuse</code> in reservation <code>gpu_0003_grpA</code> with one card, four cores, 64 GB and a two-hour limit. It ran the three arms <em>control</em>, <em>regular Hessian at corner heights stubbed</em> and <em>gradient and Hessian stubbed</em>, each in a fresh process with the compilation cache disabled, and took 10 m 40 s; its own last line is <code>EXIT=0</code>. Clause (2) lowers the program on <code>all_debug</code>, one fresh process per stub. The card receipts record revision <code>76e7f19d</code> and the CPU receipts record <code>c80456f0</code>; the two revisions differ only in <code>scripts/prototypes/point_program_attribution</code>, and <code>git diff c80456f0 76e7f19d -- nova/</code> is empty, so both measure the same product source. Receipts are under <code>~/.cache/nova-kernel-compile-barrier/point-program-attribution/</code>: <code>h200/&lt;arm&gt;/profile.json</code> and <code>h200/&lt;arm&gt;/attribution.json</code> for the card arms, <code>cpu/&lt;block&gt;.json</code> for the lowering arms, <code>attribution.json</code> for the assembled receipt.</p>
+
+<p id="point-program-attribution-device">Each card receipt is read only if its recorded device names the H200; the code enforces that before it traces anything, so a host fallback cannot be measured as a card arm. All three name <code>NVIDIA H200 NVL</code>, all three sit at <code>phase = done</code>, and each records <code>0</code> cache hits and <code>1</code> miss. The first card submission, <code>1321015</code>, is excluded for exactly that reason: it inherited <code>JAX_PLATFORMS=cpu</code> from the submitting shell, compiled the program on the host inside the allocation, and its receipts say <code>device = cpu:0</code> — the control and corner-height arms were killed at 62.4 GB and the gradient arm's "18.27 s compile" is a CPU wall, not a card one. The payload now sets its own platform and <code>profile_arm.py</code> exits in 6.4 s on cpu with <code>device 'cpu' does not name 'H200'</code>.</p>
+
+<p id="point-program-attribution-control">The unstubbed control compiles cold in <code>223.718 s</code> against the 218.9 s this program is named at, <code>2.21%</code> above it and inside the 5% clause (1) allows, with <code>7.3 GiB</code> peak host RSS and a <code>10,192,599</code>-byte executable. Its instruction count after <code>variadic-op-splitter</code> is <code>267,438</code>, exactly the count the plan names for the consolidated program, and the module enters that pass at <code>720</code> instructions. <code>212.504 s</code> of the wall is attributed across <code>107</code> passes (<code>94.99%</code>), with <code>1.68 s</code> before the first dump and <code>9.54 s</code> after the last.</p>
+
+<table id="point-program-attribution-two-passes">
+<thead><tr><th>arm</th><th>cold compile</th><th><code>variadic-op-splitter</code></th><th><code>multi_output_fusion</code></th><th>the two passes</th></tr></thead>
+<tbody>
+<tr><td>control</td><td>223.718 s</td><td>88.744 s</td><td>42.934 s</td><td>131.678 s (61.9% of attributed)</td></tr>
+<tr><td>corner-height Hessian stubbed</td><td>104.549 s</td><td>41.443 s</td><td>22.450 s</td><td>63.893 s (63.9%)</td></tr>
+<tr><td>gradient and Hessian stubbed</td><td>34.090 s</td><td>15.857 s</td><td>4.741 s</td><td>20.598 s (63.4%)</td></tr>
+</tbody>
+</table>
+
+<p id="point-program-attribution-two-passes-text">The two passes that §5 named as the lever still carry three fifths of every arm's compile, and their seconds follow the program rather than the cell count: 131.7 s on the control, 63.9 s with the corner-height Hessian stubbed, 20.6 s with the derivative tower stubbed. That is the same statement the sibling <a href="/nova/evidence/fragments/kernel-compile-barrier/production-point-batch-pass-profile.html">pass profile</a> makes at 351.44 s, and <strong>controls</strong> — the splitter and fusion are not the program's only cost, but they are never a fixed overhead either.</p>
+
+<p id="point-program-attribution-stubs">Both stubbed arms are visible to the compiler on the card, which is clause (3)'s test: the corner-height stub lowers to <code>4,176,042</code> StableHLO bytes instead of <code>6,088,067</code> and leaves <code>128,250</code> instructions after the splitter instead of <code>267,438</code>; the derivative stub lowers to <code>1,980,103</code> bytes and leaves <code>45,471</code>. Neither equals the unstubbed count, so neither is erased and both carry seconds.</p>
+
+<table id="point-program-attribution-arm-table">
+<thead><tr><th>H200 arm</th><th>cold compile</th><th>instructions after the splitter</th><th>StableHLO bytes</th><th>peak host RSS</th><th>passes attributed</th><th>distinct passes</th></tr></thead>
+<tbody>
+<tr><td>unchanged program</td><td>223.718 s</td><td>267,438</td><td>6,088,067</td><td>7.3 GiB</td><td>94.99%</td><td>107</td></tr>
+<tr><td>corner-height Hessian stubbed</td><td>104.549 s</td><td>128,250</td><td>4,176,042</td><td>4.0 GiB</td><td>95.64%</td><td>101</td></tr>
+<tr><td>gradient and Hessian stubbed</td><td>34.090 s</td><td>45,471</td><td>1,980,103</td><td>2.2 GiB</td><td>95.26%</td><td>104</td></tr>
+</tbody>
+</table>
+
+<p id="point-program-attribution-hessian-seconds"><strong>The regular Hessian at corner heights holds <code>119.169 s</code>.</strong> Stubbing it — replacing <code>_packed_moments_with_stable_height</code> with the plain primal so JAX differentiates it instead of the custom jvp rule — takes the cold compile from 223.718 s to 104.549 s and takes the post-splitter instruction count from 267,438 to 128,250, so it holds <code>53.3%</code> of the compile while holding <code>31.41%</code> of the lowered graph. Removing those <code>139,188</code> instructions is worth <code>52.04%</code> of the control's instruction count and it costs <code>53.3%</code> of the wall, while its <code>31.41%</code> byte share understates the cost by <code>21.9</code> points: here the instruction count after the splitter predicts the seconds and the byte count does not.</p>
+
+<p id="point-program-attribution-gradient-seconds"><strong>The derivative instantiations of the moment rows hold <code>189.628 s</code>.</strong> That is the larger block the plan asked to compile twice — <code>67.48%</code> of the lowered graph, the largest share of any block, and <code>83.00%</code> of the post-splitter instructions — so its arm is the second cold compile. Holding the moment rows' jvp rule at a constant tangent takes the compile from 223.718 s to 34.090 s — <code>84.8%</code> of the wall — with <code>221,967</code> instructions removed — <code>83.00%</code> of the control's count against <code>84.8%</code> of its seconds — and the executable falls from 10.2 MB to 1.7 MB. The two stubbed arms cost the same seconds per instruction removed, <code>8.56 s</code> per 10,000 for the corner-height block against <code>8.54 s</code> for this one, so the wall tracks the post-splitter instruction count and not the lowered byte count: this arm's <code>2.11</code>-times-smaller module compiles <code>3.07</code> times faster.</p>
+
+<p id="point-program-attribution-what-remains">After both blocks are stubbed the program still compiles in 34.1 s and still holds <code>45,471</code> instructions after the splitter, so neither block is the whole of the 60 s bound §3 must meet; the elliptic terms, at <code>17.20%</code> of the graph and not compiled on the card here, are the next block the lowering sizes without a seconds measurement.</p>
+
+<p id="point-program-attribution-graph">Clause (2)'s control: the unstubbed program lowers on CPU at 132 cells to <code>6,088,067</code> StableHLO bytes, three bytes from the <code>6,088,070</code> the plan names (<code>0.00005%</code>, inside the 0.01% the clause allows). Each block is stubbed by replacing the callable that implements it before the program is traced; a stub that leaves the lowered size at the control's is reported as erased and credited with nothing.</p>
+
+
+
+<table id="point-program-attribution-graph-table">
+<thead><tr><th>source block stubbed</th><th>lowered bytes</th><th>bytes removed</th><th>share of 6,088,067 bytes</th><th>verdict</th></tr></thead>
+<tbody>
+<tr><td>value path</td><td>51,778</td><td>6,036,289</td><td>99.15%</td><td>removed</td></tr>
+<tr><td>gradient</td><td>1,980,103</td><td>4,107,964</td><td>67.48%</td><td>removed</td></tr>
+<tr><td>regular Hessian at corner heights</td><td>4,176,042</td><td>1,912,025</td><td>31.41%</td><td>removed</td></tr>
+<tr><td>near-corner weighted residual tangents</td><td>6,088,067</td><td>0</td><td>0.00%</td><td>erased, no share</td></tr>
+<tr><td>elliptic terms</td><td>5,040,870</td><td>1,047,197</td><td>17.20%</td><td>removed</td></tr>
+<tr><td>identity stub (control)</td><td>6,088,067</td><td>0</td><td>0.00%</td><td>erased (control)</td></tr>
+</tbody>
+</table>
+
+<p id="point-program-attribution-erased">Two rows are erased and are credited with nothing. The identity stub wraps the primal moment program without changing what it computes, and the near-corner weighted residual tangents are <em>never reached</em>: substituting stubs that raise when called lowers the program to the same <code>6,088,067</code> bytes, while the same probe on the corner-height block refuses with <code>REACHED nova.biot.polygonanalytic._packed_moments_with_stable_height</code>. The probe fires where a block is reached and stays silent where it is not, so this is reachability rather than folding. The gradient arm is deterministic across processes: two runs against the committed stub give <code>1,980,103</code> bytes and byte-identical StableHLO text (sha256 <code>520de555f77273c2c6318079ce39dea2480993c02cdac4f7e3bc230076015f65</code>).</p>
+
+<p id="point-program-attribution-repeated"><strong>Repeated per-term bodies.</strong> The lowered module carries <code>53,007</code> operations in <code>662</code> outlined functions. Those functions are inlined the same way at every call site, so the repeated-body count is the call-site count: <code>4,744</code> call sites, <code>380</code> of the 662 bodies called more than once, and <code>246</code> call sites of one body — <code>_pole_backward_step</code>, with <code>240</code> of <code>_pole_forward_step</code> beside it. Erasing operand identities (the same body re-emitted with different broadcast names) leaves <code>419</code> distinct bodies of which <code>111</code> are emitted more than once, one of them <code>23</code> times; <code>6,512</code> of <code>24,550</code> exact expression classes repeat. <strong>The term order is therefore unrolled inside one point's evaluation</strong>, not already folded: the per-cell axis carries one body, and the pole and harmonic recursions are re-expanded per term within it. §5's measurement says what that means for the scan lever: inlining the top-ranked repeated term, <code>_harmonic_pair_step</code>, cut the expanded equation count by 4.04% and moved the point jet's cold compile from 82.43 s to 82.36 s, so a fixed-capacity scan over these bodies is not a compile lever on this program.</p>
+
+<table id="point-program-attribution-bodies">
+<thead><tr><th>count in the unstubbed lowered program</th><th>value</th></tr></thead>
+<tbody>
+<tr><td>operations</td><td><code>53,007</code></td></tr>
+<tr><td>outlined functions</td><td><code>662</code></td></tr>
+<tr><td>distinct bodies after erasing operand identities</td><td><code>419</code></td></tr>
+<tr><td>bodies emitted more than once</td><td><code>111</code>, most emitted <code>23</code> times</td></tr>
+<tr><td>call sites</td><td><code>4,744</code></td></tr>
+<tr><td>bodies called once / more than once</td><td><code>281</code> / <code>380</code></td></tr>
+<tr><td>most call sites of one body</td><td><code>246</code> (<code>_pole_backward_step</code>)</td></tr>
+<tr><td>exact expression classes, repeated</td><td><code>24,550</code>, <code>6,512</code> repeated</td></tr>
+<tr><td>call sites by family, largest five</td><td><code>_where</code> <code>895</code>, <code>_harmonic_pair_step</code> <code>614</code>, <code>_pole_forward_step</code> <code>492</code>, <code>_pole_backward_step</code> <code>492</code>, <code>_harmonic_ratio_step</code> <code>278</code></td></tr>
+</tbody>
+</table>
+
+<figure id="point-program-attribution-figure">
+<img src="/nova/figures/kernel-compile-barrier/point-program-attribution/block-attribution.svg" alt="Left: share of the lowered graph each source-block stub removes, in per cent of 6,088,067 bytes. Right: cold H200 compile seconds for the control, the corner-height Hessian stub and the derivative stub, with the seconds the corner-height block holds marked.">
+<figcaption id="point-program-attribution-caption">Left: the share of the lowered graph each source-block stub removes, against the <code>6,088,067</code>-byte control; the row marked <em>erased</em> is the near-corner residual tangents, whose stub removes nothing because a raising stub never reaches it. Right: cold H200 compile seconds for the three arms of job <code>1322209</code>. The two grey spans in the gaps beside the bars carry the block's seconds: <code>119.2 s</code> held by the corner-height Hessian and <code>189.6 s</code> held by all derivative instantiations, and <code>34.1 s</code> is what the program still costs with both stubbed.</figcaption>
+</figure>
+
+<p id="point-program-attribution-what-reads-off">Read together, the two measures answer §3's three questions. Where the 218.9 s goes: <code>84.8%</code> of it to the moment rows' derivative instantiations and <code>53.3%</code> to the regular Hessian at corner heights, with the two XLA passes that walk the expanded graph taking <code>61.9%</code> of the whole wall. Which block is worth attacking first: the derivative tower, by both graph and seconds, and a form of it that keeps the emitted tangent is the lever §3 (c) should be written around. Whether the term order is unrolled: yes — <code>246</code> call sites of one outlined body inside a single lowered point program — but §5 already measured that inlining such bodies does not move the compile, so the unrolling is a symptom of the derivative expansion and not a lever of its own.</p>
+
+<p id="point-program-attribution-receipts">Reproduce: <code>scripts/prototypes/point_program_attribution/cpu_arms.sh &lt;repo&gt; &lt;out&gt;</code> for the lowering arms, <code>scripts/prototypes/point_program_attribution/attribution_job.sh &lt;repo&gt; &lt;out&gt;</code> in one card allocation for the three compiled arms, and <code>scripts/prototypes/point_program_attribution/summarise.py</code> to assemble <code>attribution.json</code> from both, with <code>figure.py</code> to draw the figure.</p>
+
+<h4>Per-pass tables</h4>
+<p id="point-program-attribution-pass-tables-text">Each table is <code>attribution.json</code>'s per-pass grouping for that arm: seconds between consecutive dumps, the share of the arm's attributed seconds, the number of dumps under the pass, and the HLO instruction count at the pass's last dump. The passes whose dumps are written at pipeline start report the module as the pipeline handed them in, which is why <code>variadic-op-splitter</code> reads <code>720</code> instructions for the control: its output is the next HLO dump, <code>after_priority-fusion/cse</code>, at <code>267,438</code> for the control, <code>128,250</code> for the corner-height arm and <code>45,471</code> for the derivative arm. The <code>priority_fusion_dump.txt</code> between them is a codegen artifact and reports no count.</p>
+
+<div id="point-program-attribution-pass-tables">
+<details id="point-program-attribution-passes-control">
+<summary>unchanged program: 107 distinct passes, 1.68 s before the first dump, 9.54 s after the last</summary>
+<table>
+<thead><tr><th>pass</th><th>seconds</th><th>share of attributed</th><th>dumps</th><th>instructions at exit</th></tr></thead>
+<tbody>
+<tr><td><code>after_pipeline-start/variadic-op-splitter</code></td><td>88.744 s</td><td>41.8%</td><td>1</td><td>720</td></tr>
+<tr><td><code>after_dce/multi_output_fusion</code></td><td>42.934 s</td><td>20.2%</td><td>1</td><td>36,884</td></tr>
+<tr><td><code>jit__source_jets.ir-no-opt.ll</code></td><td>5.932 s</td><td>2.8%</td><td>293</td><td>2,095</td></tr>
+<tr><td><code>after_pipeline-start/zero_sized_hlo_elimination</code></td><td>5.887 s</td><td>2.8%</td><td>25</td><td>414</td></tr>
+<tr><td><code>after_flatten-call-graph/call-inliner</code></td><td>4.813 s</td><td>2.3%</td><td>1</td><td>178,111</td></tr>
+<tr><td><code>jit__source_jets.ir-with-opt.ll</code></td><td>4.798 s</td><td>2.3%</td><td>293</td><td>2,136</td></tr>
+<tr><td><code>after_fusion-wrapper/autotuner</code></td><td>3.967 s</td><td>1.9%</td><td>1</td><td>17,409</td></tr>
+<tr><td><code>after_reshape-mover/constant_folding</code></td><td>3.962 s</td><td>1.9%</td><td>25</td><td>414</td></tr>
+<tr><td><code>after_cse/dce</code></td><td>3.282 s</td><td>1.5%</td><td>14</td><td>17,398</td></tr>
+<tr><td><code>jit__source_jets.priority_fusion_dump.txt</code></td><td>2.777 s</td><td>1.3%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/pipeline-end</code></td><td>2.015 s</td><td>0.9%</td><td>4</td><td>262</td></tr>
+<tr><td><code>after_algsimp/simplify-sorts</code></td><td>1.898 s</td><td>0.9%</td><td>12</td><td>414</td></tr>
+<tr><td><code>after_dynamic-slice-copy-fusion-async-wrapper/pipeline-end</code></td><td>1.823 s</td><td>0.9%</td><td>1</td><td>17,423</td></tr>
+<tr><td><code>after_pipeline-start/float-normalization-bf16</code></td><td>1.583 s</td><td>0.7%</td><td>3</td><td>736</td></tr>
+<tr><td><code>after_dot_decomposer/result_caster</code></td><td>1.572 s</td><td>0.7%</td><td>1</td><td>7</td></tr>
+<tr><td><code>after_constant_folding/simplify-conditional</code></td><td>1.516 s</td><td>0.7%</td><td>7</td><td>414</td></tr>
+<tr><td><code>after_pdl-launch-annotation/pipeline-end</code></td><td>1.315 s</td><td>0.6%</td><td>2</td><td>264</td></tr>
+<tr><td><code>after_flatten-call-graph/layout-assignment</code></td><td>1.297 s</td><td>0.6%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_priority-fusion/cse</code></td><td>1.176 s</td><td>0.5%</td><td>1</td><td>267,438</td></tr>
+<tr><td><code>after_hoist-fused-bitcasts/gemm-fusion-swap-operands</code></td><td>1.149 s</td><td>0.5%</td><td>1</td><td>17,672</td></tr>
+<tr><td><code>after_pipeline-start/cudnn-custom-call-converter</code></td><td>1.136 s</td><td>0.5%</td><td>1</td><td>9,756</td></tr>
+<tr><td><code>after_batched_gather_scatter_normalizer/windowed-einsum-handler</code></td><td>0.988 s</td><td>0.5%</td><td>1</td><td>7</td></tr>
+<tr><td><code>after_pipeline-start/dce</code></td><td>0.977 s</td><td>0.5%</td><td>2</td><td>264</td></tr>
+<tr><td><code>after_dot-strength-reduction/algsimp</code></td><td>0.937 s</td><td>0.4%</td><td>1</td><td>1,887</td></tr>
+<tr><td><code>after_dynamic-dimension-simplifier/associative-scan-rewriter</code></td><td>0.929 s</td><td>0.4%</td><td>1</td><td>7</td></tr>
+<tr><td><code>after_dce/pipeline-end</code></td><td>0.876 s</td><td>0.4%</td><td>8</td><td>414</td></tr>
+<tr><td><code>after_layout_normalization/algsimp</code></td><td>0.829 s</td><td>0.4%</td><td>2</td><td>17,952</td></tr>
+<tr><td><code>after_pipeline-start/algsimp</code></td><td>0.828 s</td><td>0.4%</td><td>3</td><td>17,398</td></tr>
+<tr><td><code>after_simplify-while-loops/slice-sinker</code></td><td>0.789 s</td><td>0.4%</td><td>4</td><td>524</td></tr>
+<tr><td><code>jit__source_jets.after_spmd_partitioner.txt</code></td><td>0.785 s</td><td>0.4%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/rematerialization</code></td><td>0.773 s</td><td>0.4%</td><td>1</td><td>264</td></tr>
+<tr><td><code>after_pipeline-start/fusion-wrapper</code></td><td>0.746 s</td><td>0.4%</td><td>3</td><td>264</td></tr>
+<tr><td><code>jit__source_jets.copy-insertion.after_adding_copies_to_resolve_interference.txt</code></td><td>0.725 s</td><td>0.3%</td><td>1</td><td>17,443</td></tr>
+<tr><td><code>after_pipeline-start/convert-mover</code></td><td>0.713 s</td><td>0.3%</td><td>4</td><td>78</td></tr>
+<tr><td><code>after_loop-schedule-linearizer/copy-insertion</code></td><td>0.699 s</td><td>0.3%</td><td>1</td><td>17,399</td></tr>
+<tr><td><code>after_scheduling-instruction-annotator/pipeline-end</code></td><td>0.680 s</td><td>0.3%</td><td>1</td><td>262</td></tr>
+<tr><td><code>jit__source_jets.copy-insertion.after_removing_unnecessary_copies.txt</code></td><td>0.673 s</td><td>0.3%</td><td>1</td><td>17,443</td></tr>
+<tr><td><code>after_pipeline-start/legalize-scheduling-annotations</code></td><td>0.589 s</td><td>0.3%</td><td>1</td><td>17,423</td></tr>
+<tr><td><code>after_move_copy_to_users/layout_normalization</code></td><td>0.578 s</td><td>0.3%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_sanitize-constant-names/pipeline-end</code></td><td>0.539 s</td><td>0.2%</td><td>2</td><td>264</td></tr>
+<tr><td><code>after_call-inliner/zero_sized_hlo_elimination</code></td><td>0.498 s</td><td>0.2%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_while-loop-constant-sinking/simplify-while-loops</code></td><td>0.492 s</td><td>0.2%</td><td>2</td><td>522</td></tr>
+<tr><td><code>after_gather_expander/scatter_simplifier</code></td><td>0.474 s</td><td>0.2%</td><td>1</td><td>1,187</td></tr>
+<tr><td><code>after_dce/collective-pipelining-analyzer</code></td><td>0.446 s</td><td>0.2%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_layout_normalization/scatter_simplifier</code></td><td>0.436 s</td><td>0.2%</td><td>1</td><td>736</td></tr>
+<tr><td><code>after_pipeline-start/ragged_dot_rewriter</code></td><td>0.419 s</td><td>0.2%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_multi_output_fusion/cse</code></td><td>0.419 s</td><td>0.2%</td><td>1</td><td>18,170</td></tr>
+<tr><td><code>after_pipeline-start/sharding-remover</code></td><td>0.383 s</td><td>0.2%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_gather_simplifier/gather_expander</code></td><td>0.379 s</td><td>0.2%</td><td>1</td><td>7</td></tr>
+<tr><td><code>after_pipeline-start/sanitize-constant-names</code></td><td>0.360 s</td><td>0.2%</td><td>1</td><td>264</td></tr>
+<tr><td><code>after_pipeline-start/host_compute_asyncifier</code></td><td>0.341 s</td><td>0.2%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/ragged-all-to-all-canonicalizer</code></td><td>0.333 s</td><td>0.2%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_copy_fusion/sanitize-constant-names</code></td><td>0.332 s</td><td>0.2%</td><td>1</td><td>17,411</td></tr>
+<tr><td><code>after_latency-hiding-scheduler/scheduling-instruction-annotator</code></td><td>0.295 s</td><td>0.1%</td><td>1</td><td>17,423</td></tr>
+<tr><td><code>after_pipeline-start/rename_fusions</code></td><td>0.283 s</td><td>0.1%</td><td>1</td><td>17,398</td></tr>
+<tr><td><code>jit__source_jets.thunk_sequence.txt</code></td><td>0.266 s</td><td>0.1%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/apply-xla-transforms</code></td><td>0.260 s</td><td>0.1%</td><td>1</td><td>264</td></tr>
+<tr><td><code>after_pipeline-start/pdl-launch-annotation</code></td><td>0.259 s</td><td>0.1%</td><td>1</td><td>264</td></tr>
+<tr><td><code>after_sanitize-constant-names/pdl-launch-annotation</code></td><td>0.259 s</td><td>0.1%</td><td>1</td><td>264</td></tr>
+<tr><td><code>after_pipeline-start/async-to-sync-converter</code></td><td>0.257 s</td><td>0.1%</td><td>1</td><td>264</td></tr>
+<tr><td><code>after_pipeline-start/gpu-convert-async-collectives-to-sync</code></td><td>0.256 s</td><td>0.1%</td><td>1</td><td>264</td></tr>
+<tr><td><code>after_computation-deduplicator/stream-attribute-annotator</code></td><td>0.256 s</td><td>0.1%</td><td>1</td><td>17,398</td></tr>
+<tr><td><code>after_rename_fusions/dus-accumulator-zero-init-elimination</code></td><td>0.254 s</td><td>0.1%</td><td>1</td><td>17,398</td></tr>
+<tr><td><code>jit__source_jets.copy-insertion.after_adding_special-case_copies.txt</code></td><td>0.250 s</td><td>0.1%</td><td>1</td><td>17,443</td></tr>
+<tr><td><code>jit__source_jets/config_assignment</code></td><td>0.244 s</td><td>0.1%</td><td>1</td><td>17,398</td></tr>
+<tr><td><code>after_convert_triton_gemm_config/pipeline-end</code></td><td>0.243 s</td><td>0.1%</td><td>1</td><td>17,399</td></tr>
+<tr><td><code>after_layout-assignment/sub-byte-size-setter</code></td><td>0.242 s</td><td>0.1%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_pipeline-start/propagate-call-metadata</code></td><td>0.238 s</td><td>0.1%</td><td>1</td><td>17,399</td></tr>
+<tr><td><code>after_autotuner/convert_triton_gemm_config</code></td><td>0.237 s</td><td>0.1%</td><td>1</td><td>17,399</td></tr>
+<tr><td><code>after_pipeline-start/collectives-schedule-linearizer</code></td><td>0.235 s</td><td>0.1%</td><td>1</td><td>17,398</td></tr>
+<tr><td><code>after_pipeline-start/async-collective-creator</code></td><td>0.234 s</td><td>0.1%</td><td>1</td><td>17,398</td></tr>
+<tr><td><code>after_copy-insertion/copy_fusion</code></td><td>0.233 s</td><td>0.1%</td><td>1</td><td>17,410</td></tr>
+<tr><td><code>after_reduction-layout-normalizer/algsimp</code></td><td>0.232 s</td><td>0.1%</td><td>1</td><td>17,873</td></tr>
+<tr><td><code>after_algsimp/pipeline-end</code></td><td>0.225 s</td><td>0.1%</td><td>2</td><td>414</td></tr>
+<tr><td><code>after_cse/constant_folding</code></td><td>0.208 s</td><td>0.1%</td><td>1</td><td>720</td></tr>
+<tr><td><code>after_simplification-2/computation-deduplicator</code></td><td>0.193 s</td><td>0.1%</td><td>1</td><td>414</td></tr>
+<tr><td><code>after_computation-deduplicator/apply-xla-transforms</code></td><td>0.182 s</td><td>0.1%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_transpose-folding/simplification-2</code></td><td>0.181 s</td><td>0.1%</td><td>1</td><td>414</td></tr>
+<tr><td><code>after_algsimp/cse</code></td><td>0.168 s</td><td>0.1%</td><td>1</td><td>17,671</td></tr>
+<tr><td><code>after_pipeline-start/rename-instructions</code></td><td>0.165 s</td><td>0.1%</td><td>1</td><td>720</td></tr>
+<tr><td><code>after_pipeline-start/reshape-mover</code></td><td>0.159 s</td><td>0.1%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_algsimp/scatter_simplifier</code></td><td>0.156 s</td><td>0.1%</td><td>1</td><td>17,740</td></tr>
+<tr><td><code>after_reduction-dimension-grouper/reduction-splitter</code></td><td>0.150 s</td><td>0.1%</td><td>1</td><td>720</td></tr>
+<tr><td><code>after_algsimp/broadcast_canonicalizer</code></td><td>0.148 s</td><td>0.1%</td><td>1</td><td>17,670</td></tr>
+<tr><td><code>after_triton-gemm-rewriter/hoist-fused-bitcasts</code></td><td>0.147 s</td><td>0.1%</td><td>1</td><td>17,672</td></tr>
+<tr><td><code>after_pipeline-start/block-scaling-rewriter</code></td><td>0.146 s</td><td>0.1%</td><td>1</td><td>17,670</td></tr>
+<tr><td><code>after_reduction-degenerate-dim-remover/reduction-layout-normalizer</code></td><td>0.136 s</td><td>0.1%</td><td>1</td><td>17,741</td></tr>
+<tr><td><code>jit__source_jets/optimizations</code></td><td>0.131 s</td><td>0.1%</td><td>1</td><td>9,756</td></tr>
+<tr><td><code>after_slice-sinker/reshape-mover</code></td><td>0.129 s</td><td>0.1%</td><td>1</td><td>594</td></tr>
+<tr><td><code>after_pipeline-start/sub-byte-collective-normalization</code></td><td>0.129 s</td><td>0.1%</td><td>1</td><td>720</td></tr>
+<tr><td><code>after_reshape-decomposer/move_copy_to_users</code></td><td>0.129 s</td><td>0.1%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_pipeline-start/reshape-decomposer</code></td><td>0.125 s</td><td>0.1%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_pipeline-start/triangular-solve-rewriter</code></td><td>0.120 s</td><td>0.1%</td><td>1</td><td>720</td></tr>
+<tr><td><code>after_algsimp/simplify-fp-conversions</code></td><td>0.117 s</td><td>0.1%</td><td>1</td><td>720</td></tr>
+<tr><td><code>after_rename-instructions/pipeline-end</code></td><td>0.116 s</td><td>0.1%</td><td>1</td><td>720</td></tr>
+<tr><td><code>after_while-loop-trip-count-annotator/pipeline-end</code></td><td>0.115 s</td><td>0.1%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_dynamic-slice-annotator/pipeline-end</code></td><td>0.114 s</td><td>0.1%</td><td>1</td><td>720</td></tr>
+<tr><td><code>after_pipeline-start/dynamic-slice-annotator</code></td><td>0.113 s</td><td>0.1%</td><td>1</td><td>720</td></tr>
+<tr><td><code>after_pipeline-start/flatten-call-graph</code></td><td>0.101 s</td><td>0.1%</td><td>1</td><td>78</td></tr>
+<tr><td><code>after_pipeline-start/hlo_host_device_type_call_wrapper</code></td><td>0.051 s</td><td>0.0%</td><td>1</td><td>9,756</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-buffer-assignment.txt</code></td><td>0.042 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-memory-usage-report.txt</code></td><td>0.016 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-buffer-assignment-values.txt</code></td><td>0.008 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-live-range.txt</code></td><td>0.007 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations.txt</code></td><td>0.005 s</td><td>0.0%</td><td>1</td><td>264</td></tr>
+<tr><td><code>jit__source_jets.thunk_sequence_after_thunk_passes.txt</code></td><td>0.002 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.thunk_metadata.txt</code></td><td>0.000 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+</tbody>
+</table>
+</details>
+<details id="point-program-attribution-passes-corner-height">
+<summary>corner-height Hessian stubbed: 101 distinct passes, 1.29 s before the first dump, 3.27 s after the last</summary>
+<table>
+<thead><tr><th>pass</th><th>seconds</th><th>share of attributed</th><th>dumps</th><th>instructions at exit</th></tr></thead>
+<tbody>
+<tr><td><code>after_pipeline-start/variadic-op-splitter</code></td><td>41.443 s</td><td>41.4%</td><td>1</td><td>464</td></tr>
+<tr><td><code>after_dce/multi_output_fusion</code></td><td>22.450 s</td><td>22.4%</td><td>1</td><td>21,108</td></tr>
+<tr><td><code>jit__source_jets.ir-no-opt.ll</code></td><td>3.358 s</td><td>3.4%</td><td>179</td><td>1,752</td></tr>
+<tr><td><code>after_pipeline-start/zero_sized_hlo_elimination</code></td><td>2.918 s</td><td>2.9%</td><td>25</td><td>218</td></tr>
+<tr><td><code>jit__source_jets.ir-with-opt.ll</code></td><td>2.789 s</td><td>2.8%</td><td>179</td><td>1,842</td></tr>
+<tr><td><code>after_fusion-wrapper/autotuner</code></td><td>2.094 s</td><td>2.1%</td><td>1</td><td>8,627</td></tr>
+<tr><td><code>after_reshape-mover/constant_folding</code></td><td>1.764 s</td><td>1.8%</td><td>24</td><td>218</td></tr>
+<tr><td><code>after_cse/dce</code></td><td>1.472 s</td><td>1.5%</td><td>10</td><td>8,618</td></tr>
+<tr><td><code>after_flatten-call-graph/call-inliner</code></td><td>1.468 s</td><td>1.5%</td><td>1</td><td>68,935</td></tr>
+<tr><td><code>jit__source_jets.priority_fusion_dump.txt</code></td><td>1.386 s</td><td>1.4%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/fusion-wrapper</code></td><td>1.052 s</td><td>1.1%</td><td>3</td><td>93</td></tr>
+<tr><td><code>after_pipeline-start/pipeline-end</code></td><td>0.830 s</td><td>0.8%</td><td>4</td><td>91</td></tr>
+<tr><td><code>after_pipeline-start/float-normalization-bf16</code></td><td>0.785 s</td><td>0.8%</td><td>3</td><td>476</td></tr>
+<tr><td><code>after_algsimp/simplify-sorts</code></td><td>0.765 s</td><td>0.8%</td><td>10</td><td>218</td></tr>
+<tr><td><code>after_constant_folding/simplify-conditional</code></td><td>0.631 s</td><td>0.6%</td><td>7</td><td>218</td></tr>
+<tr><td><code>after_flatten-call-graph/layout-assignment</code></td><td>0.603 s</td><td>0.6%</td><td>1</td><td>50</td></tr>
+<tr><td><code>after_pdl-launch-annotation/pipeline-end</code></td><td>0.593 s</td><td>0.6%</td><td>2</td><td>93</td></tr>
+<tr><td><code>after_hoist-fused-bitcasts/gemm-fusion-swap-operands</code></td><td>0.574 s</td><td>0.6%</td><td>1</td><td>6,082</td></tr>
+<tr><td><code>after_dot_decomposer/result_caster</code></td><td>0.566 s</td><td>0.6%</td><td>1</td><td>3</td></tr>
+<tr><td><code>after_priority-fusion/cse</code></td><td>0.550 s</td><td>0.5%</td><td>1</td><td>128,250</td></tr>
+<tr><td><code>after_pipeline-start/dce</code></td><td>0.444 s</td><td>0.4%</td><td>2</td><td>93</td></tr>
+<tr><td><code>after_dce/pipeline-end</code></td><td>0.422 s</td><td>0.4%</td><td>8</td><td>218</td></tr>
+<tr><td><code>after_pipeline-start/cudnn-custom-call-converter</code></td><td>0.416 s</td><td>0.4%</td><td>1</td><td>6,293</td></tr>
+<tr><td><code>after_layout_normalization/algsimp</code></td><td>0.382 s</td><td>0.4%</td><td>2</td><td>6,232</td></tr>
+<tr><td><code>after_pipeline-start/algsimp</code></td><td>0.380 s</td><td>0.4%</td><td>3</td><td>8,618</td></tr>
+<tr><td><code>after_dot-strength-reduction/algsimp</code></td><td>0.368 s</td><td>0.4%</td><td>1</td><td>873</td></tr>
+<tr><td><code>after_batched_gather_scatter_normalizer/windowed-einsum-handler</code></td><td>0.347 s</td><td>0.4%</td><td>1</td><td>3</td></tr>
+<tr><td><code>jit__source_jets.copy-insertion.after_adding_copies_to_resolve_interference.txt</code></td><td>0.334 s</td><td>0.3%</td><td>1</td><td>8,637</td></tr>
+<tr><td><code>after_pipeline-start/rematerialization</code></td><td>0.328 s</td><td>0.3%</td><td>1</td><td>93</td></tr>
+<tr><td><code>after_dynamic-dimension-simplifier/associative-scan-rewriter</code></td><td>0.323 s</td><td>0.3%</td><td>1</td><td>3</td></tr>
+<tr><td><code>jit__source_jets.copy-insertion.after_removing_unnecessary_copies.txt</code></td><td>0.317 s</td><td>0.3%</td><td>1</td><td>8,637</td></tr>
+<tr><td><code>after_loop-schedule-linearizer/copy-insertion</code></td><td>0.313 s</td><td>0.3%</td><td>1</td><td>8,620</td></tr>
+<tr><td><code>after_pipeline-start/ragged-all-to-all-canonicalizer</code></td><td>0.307 s</td><td>0.3%</td><td>1</td><td>50</td></tr>
+<tr><td><code>after_sanitize-constant-names/pipeline-end</code></td><td>0.278 s</td><td>0.3%</td><td>2</td><td>93</td></tr>
+<tr><td><code>jit__source_jets.after_spmd_partitioner.txt</code></td><td>0.277 s</td><td>0.3%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_move_copy_to_users/layout_normalization</code></td><td>0.248 s</td><td>0.2%</td><td>1</td><td>50</td></tr>
+<tr><td><code>after_scheduling-instruction-annotator/pipeline-end</code></td><td>0.226 s</td><td>0.2%</td><td>1</td><td>91</td></tr>
+<tr><td><code>after_multi_output_fusion/cse</code></td><td>0.223 s</td><td>0.2%</td><td>1</td><td>9,048</td></tr>
+<tr><td><code>after_simplify-while-loops/slice-sinker</code></td><td>0.215 s</td><td>0.2%</td><td>2</td><td>313</td></tr>
+<tr><td><code>after_layout_normalization/scatter_simplifier</code></td><td>0.197 s</td><td>0.2%</td><td>1</td><td>476</td></tr>
+<tr><td><code>after_gather_expander/scatter_simplifier</code></td><td>0.193 s</td><td>0.2%</td><td>1</td><td>593</td></tr>
+<tr><td><code>after_call-inliner/zero_sized_hlo_elimination</code></td><td>0.186 s</td><td>0.2%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/convert-mover</code></td><td>0.174 s</td><td>0.2%</td><td>2</td><td>50</td></tr>
+<tr><td><code>after_pipeline-start/sanitize-constant-names</code></td><td>0.173 s</td><td>0.2%</td><td>1</td><td>93</td></tr>
+<tr><td><code>after_copy-insertion/copy_fusion</code></td><td>0.161 s</td><td>0.2%</td><td>1</td><td>8,625</td></tr>
+<tr><td><code>after_sanitize-constant-names/pdl-launch-annotation</code></td><td>0.156 s</td><td>0.2%</td><td>1</td><td>93</td></tr>
+<tr><td><code>after_pipeline-start/ragged_dot_rewriter</code></td><td>0.152 s</td><td>0.1%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/rename_fusions</code></td><td>0.148 s</td><td>0.1%</td><td>1</td><td>8,618</td></tr>
+<tr><td><code>after_gather_simplifier/gather_expander</code></td><td>0.146 s</td><td>0.1%</td><td>1</td><td>3</td></tr>
+<tr><td><code>after_pipeline-start/sharding-remover</code></td><td>0.144 s</td><td>0.1%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/legalize-scheduling-annotations</code></td><td>0.138 s</td><td>0.1%</td><td>1</td><td>8,625</td></tr>
+<tr><td><code>jit__source_jets.thunk_sequence.txt</code></td><td>0.134 s</td><td>0.1%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/pdl-launch-annotation</code></td><td>0.127 s</td><td>0.1%</td><td>1</td><td>93</td></tr>
+<tr><td><code>after_pipeline-start/host_compute_asyncifier</code></td><td>0.126 s</td><td>0.1%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_computation-deduplicator/stream-attribute-annotator</code></td><td>0.125 s</td><td>0.1%</td><td>1</td><td>8,618</td></tr>
+<tr><td><code>after_rename_fusions/dus-accumulator-zero-init-elimination</code></td><td>0.123 s</td><td>0.1%</td><td>1</td><td>8,618</td></tr>
+<tr><td><code>jit__source_jets/optimizations</code></td><td>0.123 s</td><td>0.1%</td><td>1</td><td>6,293</td></tr>
+<tr><td><code>jit__source_jets.copy-insertion.after_adding_special-case_copies.txt</code></td><td>0.122 s</td><td>0.1%</td><td>1</td><td>8,638</td></tr>
+<tr><td><code>after_pipeline-start/async-to-sync-converter</code></td><td>0.122 s</td><td>0.1%</td><td>1</td><td>93</td></tr>
+<tr><td><code>after_pipeline-start/apply-xla-transforms</code></td><td>0.122 s</td><td>0.1%</td><td>1</td><td>93</td></tr>
+<tr><td><code>after_pipeline-start/gpu-convert-async-collectives-to-sync</code></td><td>0.121 s</td><td>0.1%</td><td>1</td><td>93</td></tr>
+<tr><td><code>after_convert_triton_gemm_config/pipeline-end</code></td><td>0.115 s</td><td>0.1%</td><td>1</td><td>8,620</td></tr>
+<tr><td><code>after_pipeline-start/propagate-call-metadata</code></td><td>0.115 s</td><td>0.1%</td><td>1</td><td>8,620</td></tr>
+<tr><td><code>after_reduction-layout-normalizer/algsimp</code></td><td>0.114 s</td><td>0.1%</td><td>1</td><td>6,188</td></tr>
+<tr><td><code>jit__source_jets/config_assignment</code></td><td>0.113 s</td><td>0.1%</td><td>1</td><td>8,618</td></tr>
+<tr><td><code>after_autotuner/convert_triton_gemm_config</code></td><td>0.112 s</td><td>0.1%</td><td>1</td><td>8,620</td></tr>
+<tr><td><code>after_pipeline-start/async-collective-creator</code></td><td>0.111 s</td><td>0.1%</td><td>1</td><td>8,618</td></tr>
+<tr><td><code>after_pipeline-start/collectives-schedule-linearizer</code></td><td>0.111 s</td><td>0.1%</td><td>1</td><td>8,618</td></tr>
+<tr><td><code>after_layout-assignment/sub-byte-size-setter</code></td><td>0.108 s</td><td>0.1%</td><td>1</td><td>50</td></tr>
+<tr><td><code>after_computation-deduplicator/apply-xla-transforms</code></td><td>0.104 s</td><td>0.1%</td><td>1</td><td>50</td></tr>
+<tr><td><code>after_transpose-folding/simplification-2</code></td><td>0.097 s</td><td>0.1%</td><td>1</td><td>218</td></tr>
+<tr><td><code>after_cse/constant_folding</code></td><td>0.091 s</td><td>0.1%</td><td>1</td><td>464</td></tr>
+<tr><td><code>after_reduction-dimension-grouper/reduction-splitter</code></td><td>0.073 s</td><td>0.1%</td><td>1</td><td>464</td></tr>
+<tr><td><code>after_algsimp/broadcast_canonicalizer</code></td><td>0.070 s</td><td>0.1%</td><td>1</td><td>6,080</td></tr>
+<tr><td><code>after_pipeline-start/reshape-mover</code></td><td>0.069 s</td><td>0.1%</td><td>1</td><td>50</td></tr>
+<tr><td><code>after_algsimp/scatter_simplifier</code></td><td>0.068 s</td><td>0.1%</td><td>1</td><td>6,118</td></tr>
+<tr><td><code>after_algsimp/cse</code></td><td>0.067 s</td><td>0.1%</td><td>1</td><td>6,081</td></tr>
+<tr><td><code>after_reduction-degenerate-dim-remover/reduction-layout-normalizer</code></td><td>0.066 s</td><td>0.1%</td><td>1</td><td>6,119</td></tr>
+<tr><td><code>after_triton-gemm-rewriter/hoist-fused-bitcasts</code></td><td>0.064 s</td><td>0.1%</td><td>1</td><td>6,082</td></tr>
+<tr><td><code>after_while-loop-constant-sinking/simplify-while-loops</code></td><td>0.063 s</td><td>0.1%</td><td>1</td><td>315</td></tr>
+<tr><td><code>after_pipeline-start/block-scaling-rewriter</code></td><td>0.062 s</td><td>0.1%</td><td>1</td><td>6,080</td></tr>
+<tr><td><code>after_pipeline-start/triangular-solve-rewriter</code></td><td>0.062 s</td><td>0.1%</td><td>1</td><td>464</td></tr>
+<tr><td><code>after_pipeline-start/rename-instructions</code></td><td>0.060 s</td><td>0.1%</td><td>1</td><td>464</td></tr>
+<tr><td><code>after_slice-sinker/reshape-mover</code></td><td>0.058 s</td><td>0.1%</td><td>1</td><td>313</td></tr>
+<tr><td><code>after_pipeline-start/sub-byte-collective-normalization</code></td><td>0.057 s</td><td>0.1%</td><td>1</td><td>464</td></tr>
+<tr><td><code>after_reshape-decomposer/move_copy_to_users</code></td><td>0.056 s</td><td>0.1%</td><td>1</td><td>50</td></tr>
+<tr><td><code>after_pipeline-start/reshape-decomposer</code></td><td>0.056 s</td><td>0.1%</td><td>1</td><td>50</td></tr>
+<tr><td><code>after_pipeline-start/dynamic-slice-annotator</code></td><td>0.053 s</td><td>0.1%</td><td>1</td><td>464</td></tr>
+<tr><td><code>after_algsimp/simplify-fp-conversions</code></td><td>0.052 s</td><td>0.1%</td><td>1</td><td>464</td></tr>
+<tr><td><code>after_while-loop-trip-count-annotator/pipeline-end</code></td><td>0.052 s</td><td>0.1%</td><td>1</td><td>50</td></tr>
+<tr><td><code>after_pipeline-start/flatten-call-graph</code></td><td>0.049 s</td><td>0.1%</td><td>1</td><td>50</td></tr>
+<tr><td><code>after_dynamic-slice-annotator/pipeline-end</code></td><td>0.047 s</td><td>0.1%</td><td>1</td><td>464</td></tr>
+<tr><td><code>after_rename-instructions/pipeline-end</code></td><td>0.045 s</td><td>0.1%</td><td>1</td><td>464</td></tr>
+<tr><td><code>after_pipeline-start/hlo_host_device_type_call_wrapper</code></td><td>0.035 s</td><td>0.0%</td><td>1</td><td>6,293</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-buffer-assignment.txt</code></td><td>0.025 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-buffer-assignment-values.txt</code></td><td>0.012 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-memory-usage-report.txt</code></td><td>0.011 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations.txt</code></td><td>0.006 s</td><td>0.0%</td><td>1</td><td>93</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-live-range.txt</code></td><td>0.004 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.thunk_sequence_after_thunk_passes.txt</code></td><td>0.001 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.thunk_metadata.txt</code></td><td>0.000 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+</tbody>
+</table>
+</details>
+<details id="point-program-attribution-passes-derivative">
+<summary>gradient and Hessian stubbed: 104 distinct passes, 0.58 s before the first dump, 1.03 s after the last</summary>
+<table>
+<thead><tr><th>pass</th><th>seconds</th><th>share of attributed</th><th>dumps</th><th>instructions at exit</th></tr></thead>
+<tbody>
+<tr><td><code>after_pipeline-start/variadic-op-splitter</code></td><td>15.857 s</td><td>48.8%</td><td>1</td><td>55</td></tr>
+<tr><td><code>after_dce/multi_output_fusion</code></td><td>4.741 s</td><td>14.6%</td><td>1</td><td>4,110</td></tr>
+<tr><td><code>jit__source_jets.ir-no-opt.ll</code></td><td>1.459 s</td><td>4.5%</td><td>75</td><td>858</td></tr>
+<tr><td><code>after_fusion-wrapper/autotuner</code></td><td>1.208 s</td><td>3.7%</td><td>1</td><td>1,460</td></tr>
+<tr><td><code>jit__source_jets.ir-with-opt.ll</code></td><td>0.993 s</td><td>3.1%</td><td>75</td><td>1,129</td></tr>
+<tr><td><code>after_pipeline-start/zero_sized_hlo_elimination</code></td><td>0.903 s</td><td>2.8%</td><td>24</td><td>120</td></tr>
+<tr><td><code>after_flatten-call-graph/call-inliner</code></td><td>0.533 s</td><td>1.6%</td><td>1</td><td>40,036</td></tr>
+<tr><td><code>after_reshape-mover/constant_folding</code></td><td>0.520 s</td><td>1.6%</td><td>22</td><td>120</td></tr>
+<tr><td><code>after_cse/dce</code></td><td>0.425 s</td><td>1.3%</td><td>9</td><td>1,438</td></tr>
+<tr><td><code>jit__source_jets.priority_fusion_dump.txt</code></td><td>0.410 s</td><td>1.3%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/float-normalization-bf16</code></td><td>0.292 s</td><td>0.9%</td><td>3</td><td>65</td></tr>
+<tr><td><code>after_pipeline-start/fusion-wrapper</code></td><td>0.212 s</td><td>0.7%</td><td>3</td><td>17</td></tr>
+<tr><td><code>after_algsimp/simplify-sorts</code></td><td>0.211 s</td><td>0.7%</td><td>8</td><td>120</td></tr>
+<tr><td><code>after_hoist-fused-bitcasts/gemm-fusion-swap-operands</code></td><td>0.200 s</td><td>0.6%</td><td>1</td><td>118</td></tr>
+<tr><td><code>after_constant_folding/simplify-conditional</code></td><td>0.190 s</td><td>0.6%</td><td>7</td><td>120</td></tr>
+<tr><td><code>after_pipeline-start/cudnn-custom-call-converter</code></td><td>0.187 s</td><td>0.6%</td><td>1</td><td>3,963</td></tr>
+<tr><td><code>after_pipeline-start/pipeline-end</code></td><td>0.180 s</td><td>0.6%</td><td>4</td><td>15</td></tr>
+<tr><td><code>after_flatten-call-graph/layout-assignment</code></td><td>0.177 s</td><td>0.5%</td><td>1</td><td>38</td></tr>
+<tr><td><code>after_priority-fusion/cse</code></td><td>0.175 s</td><td>0.5%</td><td>1</td><td>45,471</td></tr>
+<tr><td><code>after_dot_decomposer/result_caster</code></td><td>0.169 s</td><td>0.5%</td><td>1</td><td>2</td></tr>
+<tr><td><code>after_dce/pipeline-end</code></td><td>0.122 s</td><td>0.4%</td><td>7</td><td>120</td></tr>
+<tr><td><code>after_pdl-launch-annotation/pipeline-end</code></td><td>0.110 s</td><td>0.3%</td><td>2</td><td>17</td></tr>
+<tr><td><code>after_pipeline-start/ragged-all-to-all-canonicalizer</code></td><td>0.104 s</td><td>0.3%</td><td>1</td><td>38</td></tr>
+<tr><td><code>after_pipeline-start/algsimp</code></td><td>0.104 s</td><td>0.3%</td><td>3</td><td>1,438</td></tr>
+<tr><td><code>after_batched_gather_scatter_normalizer/windowed-einsum-handler</code></td><td>0.099 s</td><td>0.3%</td><td>1</td><td>2</td></tr>
+<tr><td><code>after_pipeline-start/convert-mover</code></td><td>0.098 s</td><td>0.3%</td><td>3</td><td>38</td></tr>
+<tr><td><code>after_pipeline-start/dce</code></td><td>0.095 s</td><td>0.3%</td><td>2</td><td>17</td></tr>
+<tr><td><code>after_dynamic-dimension-simplifier/associative-scan-rewriter</code></td><td>0.089 s</td><td>0.3%</td><td>1</td><td>2</td></tr>
+<tr><td><code>jit__source_jets.after_spmd_partitioner.txt</code></td><td>0.088 s</td><td>0.3%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_dot-strength-reduction/algsimp</code></td><td>0.087 s</td><td>0.3%</td><td>1</td><td>732</td></tr>
+<tr><td><code>after_call-inliner/zero_sized_hlo_elimination</code></td><td>0.072 s</td><td>0.2%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_pipeline-start/rematerialization</code></td><td>0.071 s</td><td>0.2%</td><td>1</td><td>17</td></tr>
+<tr><td><code>after_layout_normalization/algsimp</code></td><td>0.070 s</td><td>0.2%</td><td>2</td><td>142</td></tr>
+<tr><td><code>jit__source_jets.copy-insertion.after_adding_copies_to_resolve_interference.txt</code></td><td>0.066 s</td><td>0.2%</td><td>1</td><td>1,477</td></tr>
+<tr><td><code>after_simplify-while-loops/slice-sinker</code></td><td>0.064 s</td><td>0.2%</td><td>2</td><td>187</td></tr>
+<tr><td><code>after_loop-schedule-linearizer/copy-insertion</code></td><td>0.063 s</td><td>0.2%</td><td>1</td><td>1,460</td></tr>
+<tr><td><code>after_layout_normalization/scatter_simplifier</code></td><td>0.061 s</td><td>0.2%</td><td>1</td><td>65</td></tr>
+<tr><td><code>jit__source_jets.copy-insertion.after_removing_unnecessary_copies.txt</code></td><td>0.061 s</td><td>0.2%</td><td>1</td><td>1,477</td></tr>
+<tr><td><code>after_cse/constant_folding</code></td><td>0.059 s</td><td>0.2%</td><td>1</td><td>55</td></tr>
+<tr><td><code>after_pipeline-start/rename_fusions</code></td><td>0.059 s</td><td>0.2%</td><td>1</td><td>1,438</td></tr>
+<tr><td><code>after_sanitize-constant-names/pipeline-end</code></td><td>0.056 s</td><td>0.2%</td><td>2</td><td>17</td></tr>
+<tr><td><code>after_pipeline-start/host_compute_asyncifier</code></td><td>0.055 s</td><td>0.2%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_gather_expander/scatter_simplifier</code></td><td>0.054 s</td><td>0.2%</td><td>1</td><td>592</td></tr>
+<tr><td><code>after_pipeline-start/sharding-remover</code></td><td>0.051 s</td><td>0.2%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_multi_output_fusion/cse</code></td><td>0.051 s</td><td>0.2%</td><td>1</td><td>1,455</td></tr>
+<tr><td><code>after_pipeline-start/ragged_dot_rewriter</code></td><td>0.049 s</td><td>0.1%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_scheduling-instruction-annotator/pipeline-end</code></td><td>0.046 s</td><td>0.1%</td><td>1</td><td>15</td></tr>
+<tr><td><code>after_gather_simplifier/gather_expander</code></td><td>0.042 s</td><td>0.1%</td><td>1</td><td>2</td></tr>
+<tr><td><code>jit__source_jets/optimizations</code></td><td>0.040 s</td><td>0.1%</td><td>1</td><td>3,963</td></tr>
+<tr><td><code>after_pipeline-start/legalize-scheduling-annotations</code></td><td>0.039 s</td><td>0.1%</td><td>1</td><td>1,465</td></tr>
+<tr><td><code>after_pipeline-start/gpu-convert-async-collectives-to-sync</code></td><td>0.037 s</td><td>0.1%</td><td>1</td><td>17</td></tr>
+<tr><td><code>after_pipeline-start/sanitize-constant-names</code></td><td>0.036 s</td><td>0.1%</td><td>1</td><td>17</td></tr>
+<tr><td><code>after_pipeline-start/flatten-call-graph</code></td><td>0.036 s</td><td>0.1%</td><td>1</td><td>38</td></tr>
+<tr><td><code>after_reduction-layout-normalizer/algsimp</code></td><td>0.035 s</td><td>0.1%</td><td>1</td><td>131</td></tr>
+<tr><td><code>after_convert_triton_gemm_config/pipeline-end</code></td><td>0.035 s</td><td>0.1%</td><td>1</td><td>1,460</td></tr>
+<tr><td><code>after_convert-mover/algsimp</code></td><td>0.034 s</td><td>0.1%</td><td>1</td><td>120</td></tr>
+<tr><td><code>after_algsimp/scatter_simplifier</code></td><td>0.033 s</td><td>0.1%</td><td>1</td><td>123</td></tr>
+<tr><td><code>after_layout-assignment/sub-byte-size-setter</code></td><td>0.032 s</td><td>0.1%</td><td>1</td><td>38</td></tr>
+<tr><td><code>after_reduction-dimension-grouper/reduction-splitter</code></td><td>0.030 s</td><td>0.1%</td><td>1</td><td>55</td></tr>
+<tr><td><code>after_simplification/dot-merger</code></td><td>0.030 s</td><td>0.1%</td><td>1</td><td>120</td></tr>
+<tr><td><code>after_transpose-folding/simplification-2</code></td><td>0.030 s</td><td>0.1%</td><td>1</td><td>120</td></tr>
+<tr><td><code>jit__source_jets.thunk_sequence.txt</code></td><td>0.029 s</td><td>0.1%</td><td>1</td><td>0</td></tr>
+<tr><td><code>after_copy-insertion/copy_fusion</code></td><td>0.029 s</td><td>0.1%</td><td>1</td><td>1,465</td></tr>
+<tr><td><code>after_autotuner/convert_triton_gemm_config</code></td><td>0.029 s</td><td>0.1%</td><td>1</td><td>1,460</td></tr>
+<tr><td><code>after_pipeline-start/dynamic-slice-annotator</code></td><td>0.029 s</td><td>0.1%</td><td>1</td><td>55</td></tr>
+<tr><td><code>after_rename_fusions/dus-accumulator-zero-init-elimination</code></td><td>0.029 s</td><td>0.1%</td><td>1</td><td>1,438</td></tr>
+<tr><td><code>after_rename-instructions/pipeline-end</code></td><td>0.029 s</td><td>0.1%</td><td>1</td><td>55</td></tr>
+<tr><td><code>after_reduction-degenerate-dim-remover/reduction-layout-normalizer</code></td><td>0.029 s</td><td>0.1%</td><td>1</td><td>124</td></tr>
+<tr><td><code>after_pipeline-start/reshape-decomposer</code></td><td>0.029 s</td><td>0.1%</td><td>1</td><td>38</td></tr>
+<tr><td><code>after_algsimp/simplify-fp-conversions</code></td><td>0.029 s</td><td>0.1%</td><td>1</td><td>55</td></tr>
+<tr><td><code>after_algsimp/broadcast_canonicalizer</code></td><td>0.028 s</td><td>0.1%</td><td>1</td><td>116</td></tr>
+<tr><td><code>after_pipeline-start/sub-byte-collective-normalization</code></td><td>0.028 s</td><td>0.1%</td><td>1</td><td>55</td></tr>
+<tr><td><code>after_pipeline-start/propagate-call-metadata</code></td><td>0.028 s</td><td>0.1%</td><td>1</td><td>1,460</td></tr>
+<tr><td><code>after_pipeline-start/triangular-solve-rewriter</code></td><td>0.028 s</td><td>0.1%</td><td>1</td><td>55</td></tr>
+<tr><td><code>after_triton-gemm-rewriter/hoist-fused-bitcasts</code></td><td>0.028 s</td><td>0.1%</td><td>1</td><td>118</td></tr>
+<tr><td><code>after_pipeline-start/block-scaling-rewriter</code></td><td>0.028 s</td><td>0.1%</td><td>1</td><td>116</td></tr>
+<tr><td><code>jit__source_jets/config_assignment</code></td><td>0.027 s</td><td>0.1%</td><td>1</td><td>1,438</td></tr>
+<tr><td><code>after_computation-deduplicator/apply-xla-transforms</code></td><td>0.026 s</td><td>0.1%</td><td>1</td><td>38</td></tr>
+<tr><td><code>after_dynamic-slice-annotator/pipeline-end</code></td><td>0.026 s</td><td>0.1%</td><td>1</td><td>55</td></tr>
+<tr><td><code>after_simplification-2/computation-deduplicator</code></td><td>0.026 s</td><td>0.1%</td><td>1</td><td>122</td></tr>
+<tr><td><code>after_pipeline-start/reshape-mover</code></td><td>0.025 s</td><td>0.1%</td><td>1</td><td>38</td></tr>
+<tr><td><code>after_pipeline-start/apply-xla-transforms</code></td><td>0.025 s</td><td>0.1%</td><td>1</td><td>17</td></tr>
+<tr><td><code>after_pipeline-start/async-collective-creator</code></td><td>0.025 s</td><td>0.1%</td><td>1</td><td>1,438</td></tr>
+<tr><td><code>jit__source_jets.copy-insertion.after_adding_special-case_copies.txt</code></td><td>0.025 s</td><td>0.1%</td><td>1</td><td>1,478</td></tr>
+<tr><td><code>after_pipeline-start/async-to-sync-converter</code></td><td>0.024 s</td><td>0.1%</td><td>1</td><td>17</td></tr>
+<tr><td><code>after_pipeline-start/pdl-launch-annotation</code></td><td>0.024 s</td><td>0.1%</td><td>1</td><td>17</td></tr>
+<tr><td><code>after_sanitize-constant-names/pdl-launch-annotation</code></td><td>0.023 s</td><td>0.1%</td><td>1</td><td>17</td></tr>
+<tr><td><code>after_reshape-decomposer/move_copy_to_users</code></td><td>0.023 s</td><td>0.1%</td><td>1</td><td>38</td></tr>
+<tr><td><code>after_computation-deduplicator/stream-attribute-annotator</code></td><td>0.023 s</td><td>0.1%</td><td>1</td><td>1,438</td></tr>
+<tr><td><code>after_pipeline-start/collectives-schedule-linearizer</code></td><td>0.021 s</td><td>0.1%</td><td>1</td><td>1,438</td></tr>
+<tr><td><code>after_algsimp/pipeline-end</code></td><td>0.020 s</td><td>0.1%</td><td>1</td><td>122</td></tr>
+<tr><td><code>after_while-loop-constant-sinking/simplify-while-loops</code></td><td>0.020 s</td><td>0.1%</td><td>1</td><td>184</td></tr>
+<tr><td><code>after_pipeline-start/rename-instructions</code></td><td>0.019 s</td><td>0.1%</td><td>1</td><td>55</td></tr>
+<tr><td><code>after_algsimp/cse</code></td><td>0.019 s</td><td>0.1%</td><td>1</td><td>117</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations.txt</code></td><td>0.018 s</td><td>0.1%</td><td>1</td><td>17</td></tr>
+<tr><td><code>after_slice-sinker/reshape-mover</code></td><td>0.016 s</td><td>0.1%</td><td>1</td><td>187</td></tr>
+<tr><td><code>after_while-loop-trip-count-annotator/pipeline-end</code></td><td>0.015 s</td><td>0.1%</td><td>1</td><td>38</td></tr>
+<tr><td><code>after_pipeline-start/hlo_host_device_type_call_wrapper</code></td><td>0.013 s</td><td>0.0%</td><td>1</td><td>3,963</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-memory-usage-report.txt</code></td><td>0.007 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-buffer-assignment.txt</code></td><td>0.007 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-live-range.txt</code></td><td>0.005 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.sm_9.0a_gpu_after_optimizations-buffer-assignment-values.txt</code></td><td>0.003 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.thunk_sequence_after_thunk_passes.txt</code></td><td>0.001 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+<tr><td><code>jit__source_jets.thunk_metadata.txt</code></td><td>0.000 s</td><td>0.0%</td><td>1</td><td>0</td></tr>
+</tbody>
+</table>
+</details>
+</div>
+
+<p id="point-program-attribution-durability">The card receipts sit under <code>~/.cache</code>, which a later reader may not have, so the numbers this record carries are also committed beside the figure as <code>docs/figures/kernel-compile-barrier/point-program-attribution/attribution-receipt.json</code> — six blocks, three arms, all 312 per-pass rows and the repeated-body counts, 60 kB — and <code>scripts/prototypes/point_program_attribution/check.py</code> compares the record and the figure against that copy. It reads no cache and compiles nothing, and it refuses when a number in the record or the figure has moved away from the receipt, when an arm's device stops naming the H200, when a stubbed arm stops changing the instruction count after the splitter, when an erased block's raising probe changes the lowering, when the figure paints red, or when the receipt is absent; it prints <code>attribution check passed: 6 blocks, 3 arms and 312 pass rows agree with attribution-receipt.json</code>. A record that cannot be checked without the cache is not evidence, so this one is checked without it.</p>
+
+<p id="point-program-attribution-closing">No product source, no test and no tolerance changed. The figure and this record are the node's whole output.</p>
+</section>

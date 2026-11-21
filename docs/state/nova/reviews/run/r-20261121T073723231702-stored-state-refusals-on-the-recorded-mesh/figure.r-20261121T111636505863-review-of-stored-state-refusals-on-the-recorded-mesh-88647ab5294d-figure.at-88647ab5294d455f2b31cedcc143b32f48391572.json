@@ -1,0 +1,116 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachments_judged": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/stored-state-refusals-on-the-recorded-mesh/docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/iter-stored-default-preview.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/stored-state-refusals-on-the-recorded-mesh/docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/iter-stored-tightened-preview.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/stored-state-refusals-on-the-recorded-mesh/docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/tcv-stored-default-preview.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/stored-state-refusals-on-the-recorded-mesh/docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/tcv-stored-tightened-preview.png"
+  ],
+  "completed_at": "2026-11-21T11:36:55.857Z",
+  "dispatched_at": "2026-11-21T11:17:10Z",
+  "figures": {
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/iter-stored-default-preview.png": {
+      "contrast": "pass \u2014 the legend and caption text is black on white (about 21:1). The data strokes clear 3:1 against the ground: grey 146,146,146 is about 3.1:1 and blue 51,102,204 about 5.3:1.",
+      "data_ink": "pass \u2014 every mark carries data: grey and blue contour families (linewidths 2.6 and 1.0 pt), the black wall, and the null glyphs. Pixel census of the plot region below the legend band finds 3.99 percent ink on a pure white ground, with four colours present (white 255,255,255; grey 146,146,146; blue 51,102,204; black for the wall) and no fill, gradient or shading.",
+      "decoration": "pass \u2014 no background fill, no gradient, no gridline, no frame: the axes are off and the machine outline alone gives scale. The only non-data furniture is the frameless two-entry legend above the panel.",
+      "label_collision": "pass \u2014 no text is the panel's, so nothing is clipped: the legend sits at the top with clear space on both sides and no label overlaps another or the field.",
+      "legibility": "fail (blocking) \u2014 the field comparison itself reads at the rendered 1400x720: the wall outline, eight grey stored-state contours and thirteen blue nova contours are all distinguishable, and the stored null set is clear. The defect is an absent mark the caption promises: a full-image scan of the blue series finds exactly two glyphs, the axis triangle (9x9 px at rows 233-241, columns 660-668) and a small closed contour loop (15x11 px at rows 238-251, columns 635-645), and no nova X-point cross anywhere, while the caption states 'the nova axis and X-point are drawn'. The stored-state cross is drawn at rows 601-616, columns 626-641, so a reader looks for a blue saddle there and finds none. Recorded as the blocking finding below.",
+      "table_form": "pass \u2014 this is a spatial comparison of two poloidal flux fields on one shared level array, which is what a contour panel is for; the numbers a reader needs are in the caption and the arm tables, not drawn into the image."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/iter-stored-tightened-preview.png": {
+      "contrast": "pass \u2014 black legend text on white; grey data at about 3.1:1 and blue at about 5.3:1.",
+      "data_ink": "pass \u2014 4.02 percent of the plot region is ink; the four colours of the palette carry contours, wall and glyphs, nothing else.",
+      "decoration": "pass \u2014 no fill, gradient, gridline or frame; axes off.",
+      "label_collision": "pass \u2014 no label is clipped or overlapping. The legend's nova entry carries no triangle marker here, which is consistent rather than a defect: the panel draws no blue null, and the caption says so.",
+      "legibility": "pass \u2014 the panel reads at native size: the wall, eight grey and thirteen blue contour families, the grey stored-state axis and X-point, and the blue field with no blue null marker, which is exactly what the caption states (the solved-null read refused with NoQualifiedAxisError). The blue series being contours only is visible rather than inferred.",
+      "table_form": "pass \u2014 a two-field poloidal comparison, not a table drawn as an image."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/tcv-stored-default-preview.png": {
+      "contrast": "pass \u2014 black text on white; grey 146,146,146 at about 3.1:1 and blue 51,102,204 at about 5.3:1 against the ground.",
+      "data_ink": "pass \u2014 4.67 percent of the plot region is ink on white, all of it data: fifteen grey and fourteen blue contours, the black wall, and four null glyphs.",
+      "decoration": "pass \u2014 no fill, gradient, gridline or frame; the only furniture is the frameless legend.",
+      "label_collision": "defect (non-blocking) \u2014 no text collides, but the two null-marker pairs overlap: the blue axis triangle (8x9 px at rows 391-398, columns 699-707) sits inside the grey axis triangle (rows 387-401, columns 693-707), and the blue X-point (10x10 at rows 552-561, columns 643-652) sits on the grey cross (rows 547-562, columns 640-647), which renders the grey cross at 60 ink pixels against 184 where it is uncovered in the tightened panel. The stored-state null positions are therefore hard to read, but the coincidence they encode is legible and the panel is not held.",
+      "legibility": "pass \u2014 both fields, the wall and both null sets read at native size, and the near-coincidence of the two axes and the two X-points is visible at a glance. The stored-state null positions are partly hidden by the blue glyphs drawn over them, which the marker-overlap finding records, but the panel's message survives by colour.",
+      "table_form": "pass \u2014 a spatial field comparison; the residual and reason live in the caption and the arm table."
+    },
+    "docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/tcv-stored-tightened-preview.png": {
+      "contrast": "pass \u2014 black text on white; grey and blue data strokes clear 3:1.",
+      "data_ink": "pass \u2014 4.26 percent of the plot region is ink; four colours, all data.",
+      "decoration": "pass \u2014 no fill, gradient, gridline or frame.",
+      "label_collision": "pass \u2014 no label is clipped or overlapping; the null glyphs of the two series are separated and both legible.",
+      "legibility": "pass \u2014 the panel reads at native size: the wall, fifteen grey and fifteen blue contours, both null sets drawn separately (grey axis at rows 387-401, columns 693-707; blue axis at rows 401-409, columns 660-668).",
+      "table_form": "pass \u2014 a two-field poloidal comparison, not a table."
+    }
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Repaired at the reviewed head 16399ead2, after this figure review of 88647ab52: the iter-stored-default panel now draws the nova axis triangle and the nova saddle cross beside the stored state's, and its caption reads 'both null sets drawn, one axis and one saddle each'. Checked by the coordinator on a 1400 px raster of the committed SVG on 2026-11-21; the code review at 16399ead2 raises no finding against it",
+      "recorded_at": "2026-11-21T20:29:29.338071+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/iter-stored-default-preview.png",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The caption states 'the nova axis and X-point are drawn', but the rendered panel: none is drawn. A full-image scan of the blue series (51,102,204) finds exactly two compact glyphs in the whole 1400x720 render: the axis triangle, 9x9 px at rows 233-241 and columns 660-668, and a small closed contour loop, 15x11 px at rows 238-251 and columns 635-645. No blue X-point cross of the kind the same style draws in the two TCV panels (10x10 px, 80 ink pixels) appears anywhere, including at the stored-state cross (rows 601-616, columns 626-641), where a reader who has read the caption will look. The panel therefore reads as a solve with no saddle at all, or as one whose saddle coincides with the stored one, when the receiver says neither: the arm's admission record marks it diverted. The mechanism is visible in the drawing path: draw_nulls drops an X-point that falls outside the wall and reports the drop only in a tally return that panels.py discards, while panels.py marks the nova nulls 'drawn' from the field read alone (panels.py:149); a point drawn beyond the axes limits would be invisible for the same reason. Either way, the marker the caption asserts is data the figure does not let a reader see, which holds the node. The fix is to record and surface the null tally and let the caption state what was actually drawn."
+    },
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/tcv-stored-default-preview.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two null-marker pairs of the compared fields are drawn almost on top of each other, so the stored-state glyphs are largely hidden under the nova ones. Measured on the render: the grey axis triangle occupies rows 387-401, columns 693-707 and the blue axis triangle rows 391-398, columns 699-707, inside it; the grey X-point cross occupies rows 547-562, columns 640-647 and the blue cross rows 552-561, columns 643-652, over it. The grey cross carries 60 ink pixels here against 184 in the tightened panel, where it is uncovered, and the grey axis 90 against 127. The coincidence is legible and is itself the panel's message, so the node is not held, but a reader cannot read the stored-state null positions off this panel; a small offset, a hollow inner glyph for the smaller series, or a different shape per series would keep both readable."
+    },
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/tcv-stored-default-preview.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "All four panels draw a tall, narrow cross-section on the full 1400x720 slide canvas, leaving most of the canvas white: on this panel the plot ink spans columns 603-798 (196 px, 14.0 percent of the canvas width) and rows 104-672 (79.0 percent of the height), and the ITER panels span 282 px (20.1 percent). This is a consequence of equal aspect on a mandated wide canvas rather than decorative ink, so it is recorded rather than held; the reader-facing cost is that at page-column width the 15 grey and 14 blue contours crowd into a few pixels of spacing."
+    }
+  ],
+  "notes": "Read-only figure review of the four rendered PNGs named in this review: iter-stored-default-preview.png, iter-stored-tightened-preview.png, tcv-stored-default-preview.png and tcv-stored-tightened-preview.png, each attached both from the reviewed worktree's figures directory and as an image-N.png copy; the pairs were compared and are identical renders. No SVG and no other image was opened, read, listed, searched, rendered or shown, and no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. Crops used to inspect glyphs and wall clipping were written only to this run's scratch directory. Every verdict is anchored in pixels measured from the PNGs (ink bounding boxes, colour census, connected-component glyph inventory) and in the caption, alt text and arm receipts read as text. No caption merely repeats a figure title: each carries both fields' flux ranges, the shared level band, the per-series level counts and the terminal residual and reason, so no caption finding is recorded. The legend's nova entry losing its triangle marker in iter-stored-tightened-preview is consistent with the caption's statement that no blue null is drawn there, and is not recorded as a defect. No suite ran for this figure review; added_failure_count is 0 by construction.",
+  "project": "nova",
+  "review_run_id": "r-20261121T111636505863-review-of-stored-state-refusals-on-the-recorded-mesh-88647ab5294d-figure",
+  "reviewed_base_sha": "6816484212613ba4657e3083620bb32b0bd75277",
+  "reviewed_head_sha": "88647ab5294d455f2b31cedcc143b32f48391572",
+  "reviewed_run_id": "r-20261121T073723231702-stored-state-refusals-on-the-recorded-mesh",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash",
+    "reviewed_at": "2026-11-21T11:34:58Z",
+    "reviewer_run_id": "r-20261121T111636505863-review-of-stored-state-refusals-on-the-recorded-mesh-88647ab5294d-figure"
+  },
+  "reviewer_run_id": "r-20261121T111636505863-review-of-stored-state-refusals-on-the-recorded-mesh-88647ab5294d-figure",
+  "rubric": "figure",
+  "rubric_lines": [
+    "iter-stored-default-preview.png RUBRIC legibility: fail (blocking) \u2014 the field comparison itself reads at the rendered 1400x720: the wall outline, eight grey stored-state contours and thirteen blue nova contours are all distinguishable, and the stored null set is clear. The defect is an absent mark the caption promises: a full-image scan of the blue series finds exactly two glyphs, the axis triangle (9x9 px at rows 233-241, columns 660-668) and a small closed contour loop (15x11 px at rows 238-251, columns 635-645), and no nova X-point cross anywhere, while the caption states 'the nova axis and X-point are drawn'. The stored-state cross is drawn at rows 601-616, columns 626-641, so a reader looks for a blue saddle there and finds none. Recorded as the blocking finding below.",
+    "iter-stored-default-preview.png RUBRIC data_ink: pass \u2014 every mark carries data: grey and blue contour families (linewidths 2.6 and 1.0 pt), the black wall, and the null glyphs. Pixel census of the plot region below the legend band finds 3.99 percent ink on a pure white ground, with four colours present (white 255,255,255; grey 146,146,146; blue 51,102,204; black for the wall) and no fill, gradient or shading.",
+    "iter-stored-default-preview.png RUBRIC decoration: pass \u2014 no background fill, no gradient, no gridline, no frame: the axes are off and the machine outline alone gives scale. The only non-data furniture is the frameless two-entry legend above the panel.",
+    "iter-stored-default-preview.png RUBRIC contrast: pass \u2014 the legend and caption text is black on white (about 21:1). The data strokes clear 3:1 against the ground: grey 146,146,146 is about 3.1:1 and blue 51,102,204 about 5.3:1.",
+    "iter-stored-default-preview.png RUBRIC table_form: pass \u2014 this is a spatial comparison of two poloidal flux fields on one shared level array, which is what a contour panel is for; the numbers a reader needs are in the caption and the arm tables, not drawn into the image.",
+    "iter-stored-default-preview.png RUBRIC label_collision: pass \u2014 no text is the panel's, so nothing is clipped: the legend sits at the top with clear space on both sides and no label overlaps another or the field.",
+    "iter-stored-tightened-preview.png RUBRIC legibility: pass \u2014 the panel reads at native size: the wall, eight grey and thirteen blue contour families, the grey stored-state axis and X-point, and the blue field with no blue null marker, which is exactly what the caption states (the solved-null read refused with NoQualifiedAxisError). The blue series being contours only is visible rather than inferred.",
+    "iter-stored-tightened-preview.png RUBRIC data_ink: pass \u2014 4.02 percent of the plot region is ink; the four colours of the palette carry contours, wall and glyphs, nothing else.",
+    "iter-stored-tightened-preview.png RUBRIC decoration: pass \u2014 no fill, gradient, gridline or frame; axes off.",
+    "iter-stored-tightened-preview.png RUBRIC contrast: pass \u2014 black legend text on white; grey data at about 3.1:1 and blue at about 5.3:1.",
+    "iter-stored-tightened-preview.png RUBRIC table_form: pass \u2014 a two-field poloidal comparison, not a table drawn as an image.",
+    "iter-stored-tightened-preview.png RUBRIC label_collision: pass \u2014 no label is clipped or overlapping. The legend's nova entry carries no triangle marker here, which is consistent rather than a defect: the panel draws no blue null, and the caption says so.",
+    "tcv-stored-default-preview.png RUBRIC legibility: pass \u2014 both fields, the wall and both null sets read at native size, and the near-coincidence of the two axes and the two X-points is visible at a glance. The stored-state null positions are partly hidden by the blue glyphs drawn over them, which the marker-overlap finding records, but the panel's message survives by colour.",
+    "tcv-stored-default-preview.png RUBRIC data_ink: pass \u2014 4.67 percent of the plot region is ink on white, all of it data: fifteen grey and fourteen blue contours, the black wall, and four null glyphs.",
+    "tcv-stored-default-preview.png RUBRIC decoration: pass \u2014 no fill, gradient, gridline or frame; the only furniture is the frameless legend.",
+    "tcv-stored-default-preview.png RUBRIC contrast: pass \u2014 black text on white; grey 146,146,146 at about 3.1:1 and blue 51,102,204 at about 5.3:1 against the ground.",
+    "tcv-stored-default-preview.png RUBRIC table_form: pass \u2014 a spatial field comparison; the residual and reason live in the caption and the arm table.",
+    "tcv-stored-default-preview.png RUBRIC label_collision: defect (non-blocking) \u2014 no text collides, but the two null-marker pairs overlap: the blue axis triangle (8x9 px at rows 391-398, columns 699-707) sits inside the grey axis triangle (rows 387-401, columns 693-707), and the blue X-point (10x10 at rows 552-561, columns 643-652) sits on the grey cross (rows 547-562, columns 640-647), which renders the grey cross at 60 ink pixels against 184 where it is uncovered in the tightened panel. The stored-state null positions are therefore hard to read, but the coincidence they encode is legible and the panel is not held.",
+    "tcv-stored-tightened-preview.png RUBRIC legibility: pass \u2014 the panel reads at native size: the wall, fifteen grey and fifteen blue contours, both null sets drawn separately (grey axis at rows 387-401, columns 693-707; blue axis at rows 401-409, columns 660-668).",
+    "tcv-stored-tightened-preview.png RUBRIC data_ink: pass \u2014 4.26 percent of the plot region is ink; four colours, all data.",
+    "tcv-stored-tightened-preview.png RUBRIC decoration: pass \u2014 no fill, gradient, gridline or frame.",
+    "tcv-stored-tightened-preview.png RUBRIC contrast: pass \u2014 black text on white; grey and blue data strokes clear 3:1.",
+    "tcv-stored-tightened-preview.png RUBRIC table_form: pass \u2014 a two-field poloidal comparison, not a table.",
+    "tcv-stored-tightened-preview.png RUBRIC label_collision: pass \u2014 no label is clipped or overlapping; the null glyphs of the two series are separated and both legible."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T11:37:29.412497+00:00",
+  "total": null
+}

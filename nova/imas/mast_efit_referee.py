@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 import numpy as np
 
@@ -26,7 +26,7 @@ from nova.imas.mast_parity_chain import (
     run_parity_chain,
 )
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
-from nova.imas.parity_tolerances import ScorecardField
+from nova.imas.parity_tolerances import IMAS_COMPARISON_BANDS, ScorecardField
 
 FROZEN_SHOTS = (21978, 21983, 21985, 21986, 21989, 22086)
 EFIT_GROUP = "efm"
@@ -370,12 +370,24 @@ def compare_reference_geometry(
 
 
 def score_with_efit_referee(
-    result: ParityChainResult,
-    referee: EfitReferee,
+    result: Any,
+    referee: Any,
     *,
     time_tolerance_s: float | None = None,
-) -> RefereedParityResult:
-    """Resolve reference metrics on an already-completed reconstruction result."""
+    slice_index: int = 0,
+    reference_slice_index: int = 0,
+    current_centroid_z_m: float | None = None,
+    reference_current_centroid_z_m: float | None = None,
+) -> RefereedParityResult | dict[str, Any]:
+    """Score completed parity results or supplied IMAS equilibrium slices."""
+
+    if hasattr(result, "time_slice") and hasattr(referee, "time_slice"):
+        return _score_imas_equilibrium(
+            result.time_slice[slice_index],
+            referee.time_slice[reference_slice_index],
+            current_centroid_z_m=current_centroid_z_m,
+            reference_current_centroid_z_m=reference_current_centroid_z_m,
+        )
 
     if int(result.scorecard.shot) != int(referee.shot):
         raise EfitRefereeError(
@@ -393,6 +405,85 @@ def score_with_efit_referee(
     scorecard = replace(result.scorecard, registered_metrics=metrics)
     chain = replace(result, scorecard=scorecard)
     return RefereedParityResult(chain, referee, geometry_scores)
+
+
+def _score_imas_equilibrium(
+    solved,
+    reference,
+    *,
+    current_centroid_z_m,
+    reference_current_centroid_z_m,
+):
+    """Score supplied IMAS slices without opening a store or changing a state."""
+
+    def axis(item):
+        point = item.global_quantities.magnetic_axis
+        return np.array([float(point.r), float(point.z)])
+
+    def boundary(item):
+        return np.column_stack((item.boundary.outline.r, item.boundary.outline.z))
+
+    def q95(item):
+        profile = item.profiles_1d
+        flux = np.asarray(profile.psi, dtype=float)
+        q = np.asarray(profile.q, dtype=float)
+        axis_flux = float(item.global_quantities.psi_axis)
+        flux_span = float(item.global_quantities.psi_boundary) - axis_flux
+        if (
+            flux.size < 2
+            or q.shape != flux.shape
+            or flux[-1] == flux[0]
+            or not np.isfinite(flux_span)
+            or flux_span == 0
+        ):
+            return float("nan")
+        coordinate = (flux - axis_flux) / flux_span
+        return float(np.interp(0.95, coordinate, q))
+
+    actual, expected = solved.global_quantities, reference.global_quantities
+    span = abs(float(expected.psi_boundary) - float(expected.psi_axis))
+    reference_current = float(expected.ip)
+    if span == 0 or reference_current == 0:
+        raise EfitRefereeError("reference flux span and plasma current must be nonzero")
+    solved_axis, reference_axis = axis(solved), axis(reference)
+    solved_boundary, reference_boundary = boundary(solved), boundary(reference)
+    actual_q, expected_q = q95(solved), q95(reference)
+    metrics = {
+        "magnetic_axis_distance_m": float(np.linalg.norm(solved_axis - reference_axis)),
+        "plasma_current_a": float(actual.ip),
+        "reference_plasma_current_a": reference_current,
+        "plasma_current_relative_error": abs(float(actual.ip) - reference_current)
+        / abs(reference_current),
+        "axis_flux_wb": float(actual.psi_axis),
+        "boundary_flux_wb": float(actual.psi_boundary),
+        "axis_flux_span_error": abs(float(actual.psi_axis) - float(expected.psi_axis))
+        / span,
+        "boundary_flux_span_error": abs(
+            float(actual.psi_boundary) - float(expected.psi_boundary)
+        )
+        / span,
+        "boundary_distance_mm": 1000
+        * _boundary_distance(solved_boundary, reference_boundary),
+        "q95": actual_q,
+        "reference_q95": expected_q,
+        "q95_magnitude_error": abs(abs(actual_q) - abs(expected_q)),
+    }
+    if current_centroid_z_m is not None and reference_current_centroid_z_m is not None:
+        offset = float(current_centroid_z_m - reference_current_centroid_z_m)
+        shift = np.array([0.0, offset])
+        metrics.update(
+            vertical_centroid_offset_m=offset,
+            aligned_magnetic_axis_distance_m=float(
+                np.linalg.norm(solved_axis - shift - reference_axis)
+            ),
+            aligned_boundary_distance_mm=1000
+            * _boundary_distance(solved_boundary - shift, reference_boundary),
+        )
+    metrics["bands"] = {
+        field: bool(np.isfinite(metrics[field]) and metrics[field] <= bound)
+        for field, bound in IMAS_COMPARISON_BANDS.items()
+    }
+    return metrics
 
 
 def run_refereed_parity_chain(
@@ -414,15 +505,649 @@ def run_refereed_parity_chain(
     )
 
 
+EMPTY_SENTINEL = 1.0e35
+
+
+def _imas_uri(source: Path | str) -> str:
+    """Return an IMAS-python URI for a filesystem path or an existing URI."""
+
+    text = str(source)
+    if text.startswith("imas:"):
+        return text
+    return f"imas:hdf5?path={Path(text).expanduser().resolve()}"
+
+
+@dataclass(frozen=True)
+class FluxMap:
+    """One state's own stored poloidal flux map and the field data it carries.
+
+    ``flux`` is the total poloidal flux on the rectangular lattice.
+    ``gradient_psi`` and ``gradient`` are the stored diamagnetic gradient
+    ``F dF/dpsi`` on its own flux nodes, from which the toroidal-field function
+    the geometry read consumes is integrated inward.  ``reference_radius`` is
+    the state's own toroidal-field reference radius; the machine's vacuum field
+    on the state's axis is supplied with the case, because a stored ``b0`` is
+    the code's own reading of it rather than the case's.
+    """
+
+    radius: np.ndarray
+    height: np.ndarray
+    flux: np.ndarray
+    reference_radius: float
+    gradient_psi: np.ndarray
+    gradient: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Reject a map whose arrays do not index one another."""
+
+        radius = np.ascontiguousarray(self.radius, dtype=float)
+        height = np.ascontiguousarray(self.height, dtype=float)
+        flux = np.ascontiguousarray(self.flux, dtype=float)
+        if flux.shape != (radius.size, height.size):
+            raise EfitRefereeError(
+                f"the stored flux map carries shape {flux.shape}; its axes index "
+                f"{(radius.size, height.size)}"
+            )
+        if radius.size < 2 or height.size < 2:
+            raise EfitRefereeError("a flux map needs at least two nodes on each axis")
+        gradient_psi = np.ascontiguousarray(self.gradient_psi, dtype=float)
+        gradient = np.ascontiguousarray(self.gradient, dtype=float)
+        if gradient_psi.shape != gradient.shape:
+            raise EfitRefereeError(
+                f"the stored gradient carries {gradient.shape} on "
+                f"{gradient_psi.shape} flux nodes"
+            )
+        for name, values in (
+            ("radius", radius),
+            ("height", height),
+            ("flux", flux),
+            ("gradient_psi", gradient_psi),
+            ("gradient", gradient),
+        ):
+            if not np.all(np.isfinite(values)):
+                raise EfitRefereeError(f"the stored flux map's {name} is not finite")
+            values.setflags(write=False)
+            object.__setattr__(self, name, values)
+
+
+@dataclass(frozen=True)
+class EquilibriumState:
+    """One reconstructed state read from an IMAS equilibrium, with its digest."""
+
+    source: str
+    dd_version: str
+    time_s: float
+    magnetic_axis_m: np.ndarray
+    boundary_m: np.ndarray
+    flux_axis: float
+    flux_boundary: float
+    plasma_current_a: float
+    q95: float
+    wall_loops: tuple[np.ndarray, ...]
+    flux_map: FluxMap | None = None
+
+    def __post_init__(self) -> None:
+        """Reject a state that cannot be scored as a closed plasma boundary."""
+
+        boundary = np.asarray(self.boundary_m, dtype=float)
+        if boundary.ndim != 2 or boundary.shape[0] < 3 or boundary.shape[1] != 2:
+            raise EfitRefereeError(
+                "an equilibrium state must carry a boundary outline of at least "
+                f"three (R, Z) points, observed shape {boundary.shape}"
+            )
+        axis = np.asarray(self.magnetic_axis_m, dtype=float)
+        if axis.shape != (2,) or not np.all(np.isfinite(axis)):
+            raise EfitRefereeError(
+                f"an equilibrium state must carry one finite magnetic axis, "
+                f"observed {axis}"
+            )
+        for name in ("flux_axis", "flux_boundary", "plasma_current_a"):
+            value = float(getattr(self, name))
+            if np.isfinite(value) and abs(value) >= EMPTY_SENTINEL:
+                raise EfitRefereeError(
+                    f"equilibrium state carries sentinel fill as {name}: {value}"
+                )
+
+    @property
+    def flux_span(self) -> float:
+        """Return the axis-to-boundary flux span, in the state's own units."""
+
+        span = float(self.flux_boundary) - float(self.flux_axis)
+        return abs(span) if np.isfinite(span) else float("nan")
+
+    @property
+    def magnetic_axis(self) -> np.ndarray:
+        """Return the read-only axis position."""
+
+        return _readonly(self.magnetic_axis_m)
+
+    @property
+    def boundary(self) -> np.ndarray:
+        """Return the read-only closed outline."""
+
+        return _readonly(self.boundary_m)
+
+    def digest(self) -> str:
+        """Return a sha256 over every quantity this state is scored by."""
+
+        import hashlib
+
+        digest = hashlib.sha256()
+        digest.update(f"dd_version={self.dd_version}\n".encode())
+        digest.update(np.float64(self.time_s).tobytes())
+        digest.update(np.asarray(self.magnetic_axis_m, dtype=float).tobytes())
+        digest.update(np.asarray(self.boundary_m, dtype=float).tobytes())
+        for value in (
+            self.flux_axis,
+            self.flux_boundary,
+            self.plasma_current_a,
+            self.q95,
+        ):
+            digest.update(np.float64(value).tobytes())
+        for loop in self.wall_loops:
+            digest.update(np.asarray(loop, dtype=float).tobytes())
+        if self.flux_map is not None:
+            digest.update(np.float64(self.flux_map.reference_radius).tobytes())
+            for values in (
+                self.flux_map.radius,
+                self.flux_map.height,
+                self.flux_map.flux,
+                self.flux_map.gradient_psi,
+                self.flux_map.gradient,
+            ):
+                digest.update(np.asarray(values, dtype=float).dtype.str.encode())
+                digest.update(np.asarray(values, dtype=float).tobytes())
+        return "sha256:" + digest.hexdigest()
+
+
+def _equilibrium_q95(equilibrium, index: int) -> float:
+    """Read the state's own safety factor at normalised flux 0.95, or nan."""
+
+    frame = equilibrium.time_slice[index]
+    try:
+        profiles = frame.profiles_1d
+        q = np.asarray(profiles.q, dtype=float)
+        psi_norm = np.asarray(profiles.psi_norm, dtype=float)
+    except AttributeError, TypeError:
+        return float("nan")
+    if psi_norm.size != q.size:
+        psi = np.asarray(profiles.psi, dtype=float)
+        if psi.size != q.size:
+            return float("nan")
+        span = float(psi[-1]) - float(psi[0])
+        if not np.isfinite(span) or span == 0.0:
+            return float("nan")
+        psi_norm = (psi - float(psi[0])) / span
+    if psi_norm.size < 2:
+        return float("nan")
+    usable = (
+        np.isfinite(psi_norm)
+        & np.isfinite(q)
+        & (np.abs(q) < EMPTY_SENTINEL)
+        & (np.abs(psi_norm) < EMPTY_SENTINEL)
+    )
+    if np.count_nonzero(usable) < 2:
+        return float("nan")
+    order = np.argsort(psi_norm[usable])
+    q95 = float(np.interp(0.95, psi_norm[usable][order], q[usable][order]))
+    return q95 if np.isfinite(q95) else float("nan")
+
+
+def _equilibrium_flux_map(equilibrium, index: int) -> FluxMap | None:
+    """Read one state's own stored poloidal flux map, or None when it carries none.
+
+    The rectangular lattice is the ``profiles_2d`` grid the state wrote its
+    flux on, and the field data is the diamagnetic gradient the same state
+    stores on its own flux nodes.  A state that stores neither is one this
+    calculator cannot read, and it reports no measure rather than borrowing one
+    from a scalar record.
+    """
+
+    frame = equilibrium.time_slice[index]
+    try:
+        count = len(frame.profiles_2d)
+    except AttributeError, TypeError:
+        return None
+    if count == 0:
+        return None
+    profile = frame.profiles_2d[0]
+    radius = np.asarray(profile.grid.dim1, dtype=float)
+    height = np.asarray(profile.grid.dim2, dtype=float)
+    flux = np.asarray(profile.psi, dtype=float)
+    if flux.size == 0 or radius.size < 2 or height.size < 2:
+        return None
+    if flux.shape != (radius.size, height.size):
+        raise EfitRefereeError(
+            f"the stored flux map carries shape {flux.shape} "
+            f"on axes {(radius.size, height.size)}"
+        )
+    profiles = frame.profiles_1d
+    try:
+        gradient_psi = np.asarray(profiles.psi, dtype=float)
+        gradient = np.asarray(profiles.f_df_dpsi, dtype=float)
+    except AttributeError, TypeError:
+        return None
+    if gradient.size < 2 or gradient_psi.size != gradient.size:
+        return None
+    usable = np.isfinite(gradient_psi) & np.isfinite(gradient)
+    if np.count_nonzero(usable) < 2:
+        return None
+    try:
+        reference_psi = float(equilibrium.vacuum_toroidal_field.r0)
+    except AttributeError, TypeError:
+        return None
+    if not np.isfinite(reference_psi) or abs(reference_psi) >= EMPTY_SENTINEL:
+        return None
+    return FluxMap(
+        radius=radius,
+        height=height,
+        flux=flux,
+        reference_radius=reference_psi,
+        gradient_psi=gradient_psi[usable],
+        gradient=gradient[usable],
+    )
+
+
+def _stored_gradient(flux_map: FluxMap):
+    """Return the state's stored ``F dF/dpsi`` as a function of normalised flux.
+
+    The stored nodes are normalised *before* they are ordered: a map whose flux
+    falls from the axis outward carries descending physical nodes, and dividing
+    that sequence by its signed axis-to-edge span is what maps it onto an
+    increasing ``psi_N``.  Ordering the physical nodes first would leave the
+    interpolation coordinates descending, which ``numpy.interp`` reads as
+    unordered input and returns its endpoint value; that would report a zero
+    inward integral at ``psi_N = 0.95`` for a state whose flux runs the other way.
+    """
+
+    nodes = np.asarray(flux_map.gradient_psi, dtype=float)
+    values = np.asarray(flux_map.gradient, dtype=float)
+    start = float(nodes[0])
+    span = float(nodes[-1]) - start
+    if not np.isfinite(span) or span == 0.0:
+        raise EfitRefereeError("the stored gradient has no flux span")
+    position = (nodes - start) / span
+    order = np.argsort(position)
+    ordered = np.ascontiguousarray(position[order])
+    gradient = np.ascontiguousarray(values[order])
+
+    def stored(psi_norm):
+        """Return the stored gradient at one normalised flux."""
+
+        return np.interp(psi_norm, ordered, gradient)
+
+    return stored
+
+
+def q95_from_flux_map(state: EquilibriumState, *, vacuum_b0: float) -> float:
+    """Return one state's safety factor at ``psi_N = 0.95`` read from its own map.
+
+    One calculator serves every column: the state's own stored flux map is
+    handed to :class:`nova.equilibrium.flux_surface_geometry.FluxSurfaceGeometry`
+    with the state's own magnetic axis and boundary flux, its own reference
+    radius and its own diamagnetic gradient integrated inward from the vacuum
+    boundary field the case declares.  The inward integral is
+    :func:`nova.equilibrium.observation.gradient_tail` and the field primitive is
+    :func:`nova.equilibrium.convention.flux_function_toroidal_field`, so a
+    stored map's gradient is read through the same two owners a solved state's
+    is.  ``nan`` reports a state that carries no flux map or no field data, which
+    no scalar record may stand in for.
+    """
+
+    flux_map = state.flux_map
+    if flux_map is None:
+        return float("nan")
+    span = float(state.flux_boundary) - float(state.flux_axis)
+    if not np.isfinite(span) or span == 0.0:
+        return float("nan")
+    if not np.isfinite(vacuum_b0) or vacuum_b0 == 0.0:
+        raise EfitRefereeError("the case supplies no vacuum toroidal field")
+    boundary_field = abs(float(vacuum_b0)) * float(flux_map.reference_radius)
+
+    from types import SimpleNamespace
+
+    from nova.equilibrium.convention import flux_function_toroidal_field
+    from nova.equilibrium.flux_surface_geometry import FluxSurfaceGeometry
+    from nova.equilibrium.observation import gradient_tail
+
+    stored = _stored_gradient(flux_map)
+
+    def field(psi_norm):
+        """Return the toroidal-field function at one normalised flux."""
+
+        tail = np.asarray(
+            gradient_tail(stored, np.asarray(psi_norm, dtype=float)), dtype=float
+        )
+        squared = flux_function_toroidal_field(boundary_field, span, tail)
+        return np.sign(boundary_field) * np.sqrt(np.maximum(squared, 0.0))
+
+    geometry = FluxSurfaceGeometry.from_flux_map(
+        SimpleNamespace(radius=flux_map.radius, height=flux_map.height),
+        flux_map.flux.reshape(-1),
+        field,
+        axis=tuple(float(value) for value in state.magnetic_axis_m),
+        boundary_flux=float(state.flux_boundary),
+        reference_radius=float(flux_map.reference_radius),
+    )
+    value = float(np.interp(0.95, geometry.psi_norm, geometry.safety_factor))
+    return value if np.isfinite(value) else float("nan")
+
+
+def read_equilibrium_wall(source: Path | str) -> tuple[np.ndarray, ...]:
+    """Read the vessel or limiter rings a machine description carries.
+
+    A ``.npz`` source is read as one ring stored under the key ``wall``, which
+    is how a machine description written beside a flux map carries its first
+    wall when no wall IDS was written.
+    """
+
+    import imas
+
+    if str(source).endswith(".npz"):
+        with np.load(Path(source).expanduser(), allow_pickle=False) as stored:
+            if "wall" not in stored.files:
+                raise EfitRefereeError(f"the wall array at {source} carries no 'wall'")
+            points = np.asarray(stored["wall"], dtype=float)
+        points = points[_valid_points(points)]
+        if points.shape[0] < 3:
+            raise EfitRefereeError(f"the wall array at {source} carries no ring")
+        return (_readonly(points),)
+
+    entry = imas.DBEntry(_imas_uri(source), "r")
+    try:
+        wall = entry.get("wall")
+    except Exception as error:  # noqa: BLE001 - imas raises a backend-specific type
+        raise EfitRefereeError(
+            f"no wall IDS is readable at {source}: {error}"
+        ) from error
+    rings: list[np.ndarray] = []
+    for description in wall.description_2d:
+        try:
+            units = description.limiter.unit
+        except AttributeError:
+            continue
+        for unit in units:
+            radius = np.asarray(unit.outline.r, dtype=float)
+            height = np.asarray(unit.outline.z, dtype=float)
+            if radius.size < 3:
+                continue
+            points = np.column_stack([radius, height])
+            points = points[_valid_points(points)]
+            if points.shape[0] >= 3:
+                rings.append(_readonly(points))
+    if not rings:
+        raise EfitRefereeError(f"the wall IDS at {source} carries no limiter ring")
+    return tuple(rings)
+
+
+def read_equilibrium_state(
+    source: Path | str,
+    *,
+    occurrence: int = 0,
+    time_index: int | None = None,
+    time_s: float | None = None,
+    wall_source: Path | str | None = None,
+    q95: float | None = None,
+) -> EquilibriumState:
+    """Read one reconstructed state from any IMAS equilibrium.
+
+    The entry is opened without a data dictionary version so that imas-python
+    selects the version the dataset was written at; that version is recorded on
+    the returned state and named by its digest.  A frame carrying sentinel fill
+    is refused rather than scored.  ``q95`` supplies the safety factor from the
+    state's own record where the stored equilibrium carries no q profile, which
+    is the case for a state written from a scalar topology record; the digest
+    then names the supplied value.
+    """
+
+    import imas
+
+    uri = _imas_uri(source)
+    entry = imas.DBEntry(uri, "r")
+    equilibrium = entry.get("equilibrium", occurrence)
+    count = len(equilibrium.time_slice)
+    if count == 0:
+        raise EfitRefereeError(f"the equilibrium at {source} carries no slice")
+    times = np.asarray(equilibrium.time, dtype=float)
+    if time_index is None:
+        if time_s is not None:
+            finite = np.isfinite(times) & (np.abs(times) < EMPTY_SENTINEL)
+            if not np.any(finite):
+                raise EfitRefereeError(
+                    f"the equilibrium at {source} carries no time base"
+                )
+            candidates = np.flatnonzero(finite)
+            time_index = int(candidates[np.argmin(np.abs(times[candidates] - time_s))])
+        else:
+            time_index = count - 1
+    index = int(time_index)
+    if not 0 <= index < count:
+        raise EfitRefereeError(
+            f"time index {index} lies outside the {count} slices at {source}"
+        )
+
+    frame = equilibrium.time_slice[index]
+    radius = np.asarray(frame.boundary.outline.r, dtype=float)
+    height = np.asarray(frame.boundary.outline.z, dtype=float)
+    outline = np.column_stack([radius, height])[
+        _valid_points(np.column_stack([radius, height]))
+    ]
+    quantities = frame.global_quantities
+    axis = np.array(
+        [float(quantities.magnetic_axis.r), float(quantities.magnetic_axis.z)],
+        dtype=float,
+    )
+    wall_loops = read_equilibrium_wall(
+        wall_source if wall_source is not None else source
+    )
+
+    def _scalar(value: Any) -> float:
+        """Return a stored scalar, mapping sentinel fill onto an absent measure."""
+
+        number = float(value)
+        return number if abs(number) < EMPTY_SENTINEL else float("nan")
+
+    state = EquilibriumState(
+        source=str(source),
+        dd_version=str(equilibrium.ids_properties.version_put.data_dictionary.value),
+        time_s=float(times[index]),
+        magnetic_axis_m=_readonly(axis),
+        boundary_m=_readonly(outline),
+        flux_axis=_scalar(quantities.psi_axis),
+        flux_boundary=_scalar(quantities.psi_boundary),
+        plasma_current_a=_scalar(quantities.ip),
+        q95=_equilibrium_q95(equilibrium, index) if q95 is None else float(q95),
+        wall_loops=wall_loops,
+        flux_map=_equilibrium_flux_map(equilibrium, index),
+    )
+    return state
+
+
+@dataclass(frozen=True)
+class StateComparison:
+    """One candidate state scored against one reference state."""
+
+    reference: EquilibriumState
+    candidate: EquilibriumState
+    gauge_wb: float
+    magnetic_axis_distance_m: float
+    lcfs_distance_m: float
+    plasma_current_fraction: float
+    axis_flux_fraction: float
+    boundary_flux_fraction: float
+    q95_difference: float
+
+    @property
+    def metrics(self) -> dict[str, float]:
+        """Return the registered metrics keyed by their registry names."""
+
+        return {
+            ScorecardField.MAGNETIC_AXIS_DISTANCE_M.value: (
+                self.magnetic_axis_distance_m
+            ),
+            "plasma_current_fraction": self.plasma_current_fraction,
+            "axis_flux_fraction": self.axis_flux_fraction,
+            "boundary_flux_fraction": self.boundary_flux_fraction,
+            "q95_difference": self.q95_difference,
+        }
+
+    def verdicts(self) -> Mapping[str, bool]:
+        """Return the registered verdicts; a metric absent from the state fails."""
+
+        from nova.imas.parity_tolerances import state_scoreboard_verdicts
+
+        return state_scoreboard_verdicts(self.metrics)
+
+
+def compare_states(
+    reference: EquilibriumState,
+    candidate: EquilibriumState,
+    *,
+    q95_values: tuple[float, float] | None = None,
+) -> StateComparison:
+    """Score a candidate state against a reference with the registered bands.
+
+    Each state's stored flux sign is read as it stands, and the boundary flux is
+    compared after the one additive constant that aligns the candidate's axis
+    flux onto the reference's.  Every flux measure is a fraction of the
+    reference's axis-to-boundary span, so the bands are on the span rather than
+    on absolute flux.  ``q95_values`` carries the two safety factors one
+    calculated value per state where the caller read them from the states' own
+    flux maps; without it the states' stored values are compared, which is a
+    comparison of two definitions rather than of two reconstructions.
+    """
+
+    span = reference.flux_span
+    gauge = float("nan")
+    current = float(reference.plasma_current_a)
+    flux_span_usable = np.isfinite(span) and span > 0.0
+    if flux_span_usable:
+        gauge = float(reference.flux_axis) - float(candidate.flux_axis)
+    q95_difference = float("nan")
+    reference_q95, candidate_q95 = (
+        (float(reference.q95), float(candidate.q95))
+        if q95_values is None
+        else (float(q95_values[0]), float(q95_values[1]))
+    )
+    if np.isfinite(reference_q95) and np.isfinite(candidate_q95):
+        q95_difference = abs(abs(candidate_q95) - abs(reference_q95))
+    return StateComparison(
+        reference=reference,
+        candidate=candidate,
+        gauge_wb=gauge,
+        magnetic_axis_distance_m=float(
+            np.linalg.norm(
+                np.asarray(candidate.magnetic_axis_m)
+                - np.asarray(reference.magnetic_axis_m)
+            )
+        ),
+        lcfs_distance_m=_boundary_distance(candidate.boundary_m, reference.boundary_m),
+        plasma_current_fraction=(
+            abs(candidate.plasma_current_a - current) / abs(current)
+            if np.isfinite(current) and current != 0.0
+            else float("nan")
+        ),
+        axis_flux_fraction=(
+            abs(candidate.flux_axis - reference.flux_axis) / span
+            if flux_span_usable
+            else float("nan")
+        ),
+        boundary_flux_fraction=(
+            abs(candidate.flux_boundary + gauge - reference.flux_boundary) / span
+            if flux_span_usable
+            else float("nan")
+        ),
+        q95_difference=q95_difference,
+    )
+
+
+def _polygon_area(outline: np.ndarray) -> float:
+    """Return the unsigned shoelace area of one closed outline."""
+
+    points = np.asarray(outline, dtype=float)
+    radius = points[:, 0]
+    height = points[:, 1]
+    return float(
+        abs(np.dot(radius, np.roll(height, -1)) - np.dot(height, np.roll(radius, -1)))
+        * 0.5
+    )
+
+
+def _point_in_loops(point: np.ndarray, loops: tuple[np.ndarray, ...]) -> bool:
+    """Return whether a point lies inside any of the supplied closed rings."""
+
+    from nova.equilibrium.wall_mask import inside_polygon
+
+    px = np.array([float(point[0])])
+    py = np.array([float(point[1])])
+    return any(
+        bool(np.asarray(inside_polygon(px, py, loop[:, 0], loop[:, 1])).ravel()[0])
+        for loop in loops
+    )
+
+
+@dataclass(frozen=True)
+class ReferenceFreeChecks:
+    """The three checks a state must pass without any reference state."""
+
+    axis_inside_wall: bool
+    axis_inside_boundary: bool
+    boundary_area_fraction: float
+
+    @property
+    def values(self) -> dict[str, float | bool]:
+        """Return the checks keyed by the reference-free registry names."""
+
+        return {
+            "axis_inside_wall": self.axis_inside_wall,
+            "axis_inside_boundary": self.axis_inside_boundary,
+            "boundary_area_fraction": self.boundary_area_fraction,
+        }
+
+    def verdicts(self) -> Mapping[str, bool]:
+        """Return the registered verdicts, refusing a missing measure."""
+
+        from nova.imas.parity_tolerances import reference_free_verdicts
+
+        return reference_free_verdicts(self.values)
+
+
+def reference_free_checks(state: EquilibriumState) -> ReferenceFreeChecks:
+    """Run the reference-free geometry checks on one state."""
+
+    outline = np.asarray(state.boundary_m, dtype=float)
+    bounding_box = float((np.ptp(outline[:, 0])) * (np.ptp(outline[:, 1])))
+    if not np.isfinite(bounding_box) or bounding_box <= 0.0:
+        raise EfitRefereeError(
+            f"the boundary at {state.source} has no positive bounding box"
+        )
+    axis = np.asarray(state.magnetic_axis_m, dtype=float)
+    return ReferenceFreeChecks(
+        axis_inside_wall=_point_in_loops(axis, state.wall_loops),
+        axis_inside_boundary=bool(_point_in_loops(axis, (_readonly(outline),))),
+        boundary_area_fraction=_polygon_area(outline) / bounding_box,
+    )
+
+
 __all__ = [
     "EFIT_GROUP",
+    "EMPTY_SENTINEL",
+    "EquilibriumState",
     "FROZEN_SHOTS",
     "EfitReferee",
     "EfitRefereeError",
+    "FluxMap",
     "ReferenceGeometryScores",
+    "ReferenceFreeChecks",
     "RefereedParityResult",
+    "StateComparison",
     "compare_reference_geometry",
+    "compare_states",
+    "q95_from_flux_map",
     "read_efit_referee",
+    "read_equilibrium_state",
+    "reference_free_checks",
+    "read_equilibrium_wall",
     "run_refereed_parity_chain",
     "score_with_efit_referee",
 ]

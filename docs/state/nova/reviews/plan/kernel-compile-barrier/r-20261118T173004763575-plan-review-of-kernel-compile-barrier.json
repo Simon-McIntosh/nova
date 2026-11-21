@@ -1,0 +1,124 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T17:31:30.083Z",
+  "dispatched_at": "2026-11-18T17:31:11Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:68",
+      "id": "reasoning-1",
+      "reason": "a worker reads the 64 GB release as safe because the peak belongs to a loop it will not pay, while the cited run shows the peak is compile memory retained afterwards, which is exactly what clause (2)'s 64 GB cold arm at the 2,132-node arm and clause (3)'s `--mem=64G` census run must survive.",
+      "text": "\u00a73 clause (1) says \"\u00a70 records 381 GB held through the loop at the 2,132-node arm, which is the loop's operand store and not the program\", but the cited row reads \"7,044 s and 381 GB peak host memory, from one compile\" and the run comment records the peak reproduced by the cold compile and then held for ~11,000 s in the loop; the plan's own evidence places the peak in the compile, not in loop turnover",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:73",
+      "id": "wiring-1",
+      "reason": "without a node adding the topology read to the pre-warm, the \"no miss recorded\" clauses are unreachable and node (a) fails on a miss budget it has no instruction to satisfy.",
+      "text": "\u00a74 clause (3) requires the `kernel_compile_budget` compile child to read the pinned pre-warm and the seven fixture ids to pass with \"no miss recorded\", and clause (1) the same for the read's first call at 132, 300 and 550 cells, but `scripts/h200_test_lane/prewarm.sh` runs exactly three rows (solve-fixture-floor, forward-compile-identity, forward-solve-lane) and none compiles the kernel-backed topology read, while \u00a74's nodes (a) and (b) contain no step that adds it \u2014 unlike \u00a73(d), which explicitly adds the point program to the pre-warm",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/kernel-compile-barrier.html:73",
+      "id": "evidence_paths-1",
+      "reason": "the clause's whole purpose is a record a later reader can open, and as written the job it describes leaves that record in a temporary path that dies with the run.",
+      "text": "\u00a74 clause (2) keeps `test_kernel_compile_growth` as \"the standing record of that cold compile\", but the test and its measurement child write their receipt to `NOVA_TOPOLOGY_EVIDENCE_DIR` when set and otherwise to pytest's `tmp_path` (tests/equilibrium/test_topology_read.py:2551), so the standing record is a per-run scratch directory unless the job names the variable, and the section names neither the variable nor a directory",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "f067f8a14f5c5d4ec90b3ac73a2c6c929d28f035",
+  "plan_fingerprint": "5ed053299bf52b5fd61da0978c6d0452ddc7b2551705bf80246384704f57c381",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 102,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "f067f8a14f5c5d4ec90b3ac73a2c6c929d28f035",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "s3 says the 381 GB is CPU compile memory retained through the loop, and that the card loop peak is unmeasured and recorded without a bound",
+      "reason": "",
+      "when": "2026-11-18T18:21:05.856155+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "f067f8a14f5c5d4ec90b3ac73a2c6c929d28f035",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "s4 node (a) adds the kernel-backed topology read at 132, 300 and 550 cells to the pre-warm",
+      "reason": "",
+      "when": "2026-11-18T18:21:17.631564+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "f067f8a14f5c5d4ec90b3ac73a2c6c929d28f035",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "s4 names NOVA_TOPOLOGY_EVIDENCE_DIR and the directory the cold-compile receipts are kept in",
+      "reason": "",
+      "when": "2026-11-18T18:21:26.407489+00:00"
+    }
+  ],
+  "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "f067f8a14f5c5d4ec90b3ac73a2c6c929d28f035",
+      "commit_basis": "edit",
+      "note": "s4 names NOVA_TOPOLOGY_EVIDENCE_DIR and the directory the cold-compile receipts are kept in",
+      "reason": "",
+      "when": "2026-11-18T18:21:26.407489+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "f067f8a14f5c5d4ec90b3ac73a2c6c929d28f035",
+      "commit_basis": "edit",
+      "note": "s3 says the 381 GB is CPU compile memory retained through the loop, and that the card loop peak is unmeasured and recorded without a bound",
+      "reason": "",
+      "when": "2026-11-18T18:21:05.856155+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "f067f8a14f5c5d4ec90b3ac73a2c6c929d28f035",
+      "commit_basis": "edit",
+      "note": "s4 node (a) adds the kernel-backed topology read at 132, 300 and 550 cells to the pre-warm",
+      "reason": "",
+      "when": "2026-11-18T18:21:17.631564+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261118T173004763575-plan-review-of-kernel-compile-barrier.json",
+  "review_run_id": "r-20261118T173004763575-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "cf618ea5c4795b8087e3625419dcb1cd847a3101",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the changed text's anchors resolve: `tests/equilibrium/test_topology_read.py:39` is the marker definition, `scripts/h200_test_lane/prewarm.sh` and `default_persistent_compilation_cache_root()` (nova/jax/config.py:103) exist, and `/nova/sub-millisecond-forward-path.html` and `/nova/evidence/fragments/sub-millisecond-forward-path/polygon-stable-evaluator.html` both resolve on disk.",
+    "done_when": "pass \u2014 the changed text of \u00a74 clause (1) names its empty-cache arm that must exceed the miss budget and exit nonzero, \u00a74 clause (2) keeps a strict xfail that can only XPASS on a real substrate change (tests/equilibrium/test_topology_read.py:2519-2535), and \u00a73 clause (1) bounds the first call where it can now be measured; the earlier unanswered node (c) lowered-graph ceiling finding is unchanged by this edit and is not re-raised.",
+    "evidence_paths": "a finding \u2014 \u00a74 clause (2) makes `test_kernel_compile_growth` the standing record of the cold compile, but that test's receipt lands in `NOVA_TOPOLOGY_EVIDENCE_DIR` or pytest's `tmp_path` (tests/equilibrium/test_topology_read.py:2551) and the section names no durable record path.",
+    "naming": "pass \u2014 the changed clauses carry no plan label, stage name, ticket number or version tag into code.",
+    "reasoning": "a finding \u2014 the sentence new to \u00a73 clause (1) attributes the 381 GB peak at the 2,132-node arm to \"the loop's operand store and not the program\", while \u00a70's table (plan.html:44) records \"7,044 s and 381 GB peak host memory, from one compile\" and the coarse-tie run comment on s3 records the second job reproducing \"the cold compile at 7,013 s and about 378 GB, then held that memory\".",
+    "single_goal": "pass \u2014 \u00a74's nodes (a) compile clause and (b) read-path arm each state one deliverable and (b) waits on (a); \u00a73's nodes (a)-(d) each name one record.",
+    "wiring": "a finding \u2014 \u00a74 clause (3) (plan.html:73) requires the `kernel_compile_budget` compile child to be served from the pinned pre-warm with no miss, and no node in \u00a74 adds the topology read to the pre-warm rows that `scripts/h200_test_lane/prewarm.sh` runs."
+  },
+  "section_digests": {
+    "_document": "25d77badeed98593fc4e9873b7ec4a7572c9b269fc6c0ad7d14ec21b596552d1",
+    "s0": "4e75bf46143b90cd845e066af2c90aec4c2f201644111067b0791f5e1bcfe044",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "60f2b87246b7d5b909676c52fe054b712d81ccb8c17b38c089cf72a9981b8610",
+    "s4": "6816bb27e05d8901be17eb84e01c3a4fd368e2b18791213c60a001b18bfc7292",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T17:38:56.566952+00:00",
+  "total": null
+}

@@ -1,0 +1,69 @@
+<article>
+<h2>Negative result: folding the tangent program does not preserve identity</h2>
+<p><strong>No folded form is accepted.</strong> Both candidates fail the unchanged H200 identity gates against the repaired kernel at <code>681a6ecd20d6a3473b02e340b6dc66dd288981c5</code>. The accepted kernel is restored byte for byte in forward commit <code>5c35fb4f6474e1ac96c777afd0bc806291fe1afc</code>. The reference pin and diagnostic scripts are retained; <code>STABLEHLO_CEILING</code> remains 10,000,000. Further implementation follows the compilation-cache route.</p>
+
+<section>
+<h3>The derivative-free residual compiles in 32.2 seconds</h3>
+<p>Job <code>1325215</code> on <code>98dci4-gpu-0003</code> profiles the repaired 132-cell production row with every moment-row derivative instantiation stubbed, using the existing <code>point_program_attribution.profile_arm</code> driver and its <code>gradient</code> block. The fresh H200 process has caching disabled, one observed miss and zero hits. Its completed receipt records <strong>32.232170674949884 s cold compile</strong>, <strong>45,471 peak instructions</strong>, 1,980,103 StableHLO bytes and a 1,717,563-byte executable. Peak host RSS is 2,344,752 KiB. The pass attribution covers 30.8426 s, or 95.69% of the compile; the splitter and multi-output fusion take 15.9223 s and 4.7091 s. The captured log ends <code>EXIT=0</code>.</p>
+<p>The instruction measures are distinct. The attribution sequence records <strong>55 instructions at splitter entry</strong> in <code>after_pipeline-start/variadic-op-splitter</code> and <strong>45,471 in the first subsequent non-diagnostic dump</strong>, <code>after_priority-fusion/cse</code>; the latter is also the recorded peak. No immediate splitter-exit dump was recorded. The existing <code>splitter_instructions</code> helper in <code>scripts/prototypes/point_program_attribution/summarise.py</code> selects that subsequent dump, skipping <code>jit__source_jets.priority_fusion_dump.txt</code>. Its convention therefore yields 45,471 for the post-splitter column, but the receipt does not isolate the splitter's output from the intervening priority fusion. The 267,438 control figure from the earlier attribution uses that convention too; these are not asserted to be immediate splitter-exit counts. The extracted entry, selected dump, source digest and selection rule are preserved in <code>bounded-fixture/residual-instructions.json</code> beneath the receipt root.</p>
+<p>This residual is below 60 s, but does not establish that a numerically valid fold reaches that bound. Its receipts are <code>residual-h200/profile.json</code>, <code>residual-h200/attribution.json</code> and <code>residual-h200/profile.log</code> beneath <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/one-traced-body/</code>.</p>
+</section>
+
+<section>
+<h3>The height samples already have one body at the base</h3>
+<p>CPU lowering job <code>1325815</code> preserves the unchanged repaired production module at 132 cells: <strong>10,251,812 StableHLO bytes</strong>, 100,091 parsed operations and 837 outlined functions. The six corner-height samples already use one <code>lax.map</code> body, with one call site inside a loop bounded at six. That body's lowered definition, <code>closed_call_656</code>, has 10,892 parsed operations.</p>
+<p>The ordinary and height-held directions share one outlined definition, <code>closed_call</code>, containing 27,061 parsed operations, but the point function calls it <strong>twice</strong> because <code>scan(unroll=2)</code> statically expands both visits. One definition therefore still creates two instances for XLA to inline. The body counter observes both known-present bodies and records their callers separately. The raw module and counts are <code>base-lowering/module.mlir</code> and <code>base-lowering/structure.json</code> beneath the receipt root above. The module SHA256 is <code>487ee64642ef682f16cdc6a540d9a33e114a8725ae70dad9e45254e8f9603f78</code>. These parsed operation counts are distinct from optimized HLO instruction counts.</p>
+</section>
+
+<section>
+<h3>The repaired-reference control passes every native gate</h3>
+<p>H200 job <code>1325816</code> tests unchanged product source at helper commit <code>3c4e66d772b77e46ebf1613f9e307da9c913775a</code> against <code>681a6ecd20d6a3473b02e340b6dc66dd288981c5</code>. All three native checks cover 10,000 points, each in a fresh process with caching disabled. Packed values have zero bit differences and their tangent maximum is zero. Production value/gradient rows have zero bit differences and their Hessian maximum is zero. The polygon jet has zero error in all seven components, passing its unchanged 1e-13 bound. The checks pass in 707.01, 664.72 and 685.63 s, respectively, each with <code>EXIT=0</code>.</p>
+<p>This control supports the retained reference revision in <code>tests/biot/test_kernel_compile_cost.py</code>, which is shared by <code>tests/biot/test_moment_program_identity.py</code>. It also demonstrates that the comparison instrument reports exact agreement for the repaired kernel before evaluating either candidate.</p>
+</section>
+
+<section>
+<h3>The restored graph-budget fixture exceeds six million bytes</h3>
+<p>The exact eight-cell hexagon and three-point fixture in <code>tests/equilibrium/test_bounded_point_program.py</code>, measured on CPU at <code>098010058c0ebc6d3a1c00d144728cea4096a933</code>, lowers to <strong>9,351,535 StableHLO bytes</strong> in 22.751 s. This is lowering only: no executable is compiled, x64 is enabled before array construction, and compilation caching is disabled. The restored kernel is byte-identical to the repaired reference. The fixture fits its unchanged 10,000,000-byte ceiling but exceeds 6,000,000 by 3,351,535 bytes; a 6,000,000-byte ceiling is not reachable by the restored form. No folded form passed identity to replace it. The receipt <code>bounded-fixture/lowered-size.json</code> records the revision, fixture and kernel digests, cell count, point coordinates, runtime versions, lowering duration and text digest beneath the receipt root. This fixture is distinct from the 132-cell production row whose base lowers to 10,251,812 bytes.</p>
+</section>
+
+<section>
+<h3>Hoisted linearisation fails all three native gates</h3>
+<p>Candidate <code>5bef7ae10079617d40da0744d2acd31db7aa1e2a</code> evaluates stable primal residuals before a rolled direction scan and maps the linearized pushforward. CPU job <code>1325827</code> lowers it to <strong>17,247,951 bytes</strong>, with one direction call site for a 14,752-operation body. Total parsed operations grow to 102,890. H200 job <code>1325863</code> completes all three native checks on <code>98dci4-gpu-0003</code>, against the repaired reference, with fresh processes and caching disabled.</p>
+<table>
+<thead><tr><th>Measured quantity</th><th>Candidate result</th><th>Unchanged acceptance</th></tr></thead>
+<tbody>
+<tr><td>Packed primal bit differences</td><td>0</td><td>0</td></tr>
+<tr><td>Packed tangent maximum relative error</td><td>0.0019508062790069287</td><td>At most 1e-9</td></tr>
+<tr><td>Production value/gradient bit differences</td><td>56,825</td><td>0</td></tr>
+<tr><td>Production Hessian maximum relative error</td><td>0.0032245325244316461</td><td>At most 1e-9</td></tr>
+<tr><td>Polygon jet maximum relative error</td><td>4.0347646949990685e-6</td><td>At most 1e-13</td></tr>
+</tbody>
+</table>
+<p>The packed, production and polygon checks fail in 606.62, 615.15 and 682.39 s, respectively, each ending <code>EXIT=1</code>. Polygon component maxima in emitted order are <code>[0, 0, 0, 4.0347646949990685e-6, 4.4773440921038875e-7, 4.477969236072228e-8, 1.5163091332383061e-7]</code>. The production point-scaled Hessian departure is 2.7352924312941973e-8; this informational scale does not replace the entrywise acceptance bound.</p>
+<p>At production point <code>[6.191426454923443, -5.7103163437081985]</code>, byte offset 8 changes from <code>0x1.9eb9852774078p-22</code> to <code>0x1.9eb985277f80dp-22</code>, a 46,997-ULP departure. A lossless closure-packing trial at <code>2192c4d376bf1bf16b2206a3131136e7a91b8104</code> enlarges the lowered module further to 20,315,833 bytes and is rejected on CPU without a card measurement. It is removed before the next numerical candidate.</p>
+</section>
+
+<section>
+<h3>One-call-site rematerialisation also fails tangent identity</h3>
+<p>Candidate <code>69bb47314caf550709874d4af8447e607fa04033</code> uses <code>jax.linearize(jax.checkpoint(tangent_expression, prevent_cse=True), *primals)</code> with a rolled two-direction scan. CPU job <code>1326096</code> observes <strong>10,227,680 bytes against the base's 10,251,812</strong>, one direction call site for the 27,061-operation body, one height call site for the 10,892-operation body, and one optimization barrier. Total parsed operations are 100,100.</p>
+<table>
+<thead><tr><th>Measured quantity</th><th>Candidate result</th><th>Unchanged acceptance</th></tr></thead>
+<tbody>
+<tr><td>Packed primal bit differences, 10,000 points</td><td>0</td><td>0</td></tr>
+<tr><td>Packed tangent maximum relative error</td><td>0.00020071875474093513, approximately 2.0e-4</td><td>At most 1e-9</td></tr>
+<tr><td>Production identity</td><td>Not run after packed refusal</td><td>No verdict</td></tr>
+<tr><td>Polygon identity</td><td>Not run after packed refusal</td><td>No verdict</td></tr>
+</tbody>
+</table>
+<p>H200 job <code>1326101</code> on <code>98dci4-gpu-0003</code> completes the packed check in 600.36 s and ends <code>EXIT=1</code>, with scheduler state <code>FAILED 1:0</code> after 10 min 29 s. This is the second counted failure of <code>tests/biot/test_moment_program_identity.py::test_packed_moment_primal_and_tangent_identity</code> after a different repair. The runner stops there. The result is a completed numerical refusal; no result is inferred for the two checks that did not start.</p>
+</section>
+
+<section>
+<h3>Clean negative-result delivery</h3>
+<p><strong>The repaired base was not cold-profiled in this run.</strong> The approximately 405 s is inherited context from the repaired kernel's earlier measurement, not a receipt produced here. Native reference identity job <code>1325816</code> establishes numerical identity only; its test walls are not production cold-profile timings. Thus the paired 60 s control was not exercised: there is no job with an unstubbed repaired-base arm and an accepted head arm, and the requested base refusal is unmeasured. The lead retired cold-compile shrinking in favour of the compilation cache, explicitly accepted this negative result and instructed that no further job be submitted. The paired profile and its compile-bound negative control are waived for this accepted negative result; they are not claimed complete.</p>
+<p><strong>No folded form is accepted, and no candidate or paired cold profile was run.</strong> The derivative-free residual is the sole production cold-profile measurement in this investigation. No figure is required for this negative result because there is no paired profile. The 282-cell, 2,132-node and 500-cell acceptance arms are not pursued after the numerical refusals. No tolerance, test or graph ceiling is relaxed.</p>
+<p>The restored kernel contains no rejected product change. The diagnostic scripts remain under <code>scripts/prototypes/one_traced_body/</code>, and the shared test reference remains pinned to the repaired kernel, supported by H200 control job <code>1325816</code>. The baseline scoped suite at <code>c9a2cb2d270dfb529272bb0a3c4f38fd553d53e1</code> passes all 20 tests in 54.55 s, <code>EXIT=0</code>. The final-head suite receipt and complete commit list accompany the delivery manifest.</p>
+<p>Raw card logs remain in <code>reference-identity/</code>, <code>linearized-identity/</code> and <code>rematerialized-identity/</code> beneath the receipt root above. Parsed per-check receipts, <code>identity-comparison.json</code>, the restored-source verification and the scoped-suite records are retained with the delivery manifest. The earlier 64G CPU reference preflight was OOM-killed before a numerical verdict; its original log and incomplete receipt are retained, and no acceptance claim uses them.</p>
+<p>The small replay receipt is committed at <code>docs/figures/kernel-compile-barrier/one-traced-body/evidence-receipt.json</code>. It contains the residual profile, the splitter-entry and selected subsequent dump, the bounded-fixture measurement and SHA256 digests of their original receipts. <code>PYTHONPATH=. python scripts/prototypes/one_traced_body/check_record.py</code> checks this record from that copy with no cache access or compilation. It supplies its receipt-derived prose claims to the shared <code>check_record</code> owner in <code>scripts/prototypes/point_program_attribution/check.py</code>; the same owner continues to check the earlier attribution tables.</p>
+</section>
+</article>

@@ -1,0 +1,103 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/diiid_forward_gs_match.py:1461 _build_profile -> _couplings",
+    "benchmarks/forward_solve_memory_ledger.py:340 producer._couplings",
+    "benchmarks/diiid_circuit_driven_forward_validation.py:204 build_profile",
+    "benchmarks/diiid_circuit_driven_vacuum.py:344 build_profile",
+    "benchmarks/diiid_constrained_cold_start.py:128 build_profile",
+    "benchmarks/diiid_current_pinned_forward.py:746 build_profile",
+    "scripts/prototypes/diiid_single_kernel_coupling/measure.py:37 wraps bench._couplings"
+  ],
+  "completed_at": "2026-11-17T22:33:06.402Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "The low reuse score comes only from the measurement scaffolding under scripts/prototypes, which re-implements a sibling prototype's gate and extract helpers; the product change reuses the existing polygon evaluation and adds no duplicate machinery",
+      "recorded_at": "2026-11-17T22:52:49.337634+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T22:32:37Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Prototype measurement scaffolding, not product code; it does not ship and its receipts are recorded",
+      "recorded_at": "2026-11-17T22:52:59.449820+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The display map is a drawing aid; its docstring now states it uses the hybrid kernel, and the solve targets use the polygon kernel",
+      "recorded_at": "2026-11-17T22:53:09.576417+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The fragment's later paragraph names both the measurement head 4ec23b91 and the gated head 843063ef1, and the all_debug rerun at 843063ef1 is the landing gate",
+      "recorded_at": "2026-11-17T22:53:20.055179+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "The base-versus-head evidence is the five-file focused pair on all_debug job 1323964, 97 passed at each arm with zero added; the scoped test does not exist at base",
+      "recorded_at": "2026-11-17T22:53:31.305555+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/diiid_single_kernel_coupling/gates.py",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "run() re-implements the isolated-revision gate already owned by scripts/prototypes/diiid_warmup_admission/regression.py:20 (gate), including its '# revision/tree/command' header, imported-module probe and bare EXIT= line, and gates.py:80-113 and batch.py:35-41 re-implement extract() from scripts/prototypes/diiid_warmup_admission/measure.py:33, which the sibling prototype scripts/prototypes/diiid_diverted_branch/gates.py:16-18 imports directly with sys.path.insert; two copies of the sibling's harness will drift from the one whose log format the receipts already use."
+    },
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": "1886",
+      "severity": "non-blocking",
+      "text": "_display_coupling still builds its plasma columns with _green_block, so the field maps beside the evidence panels are drawn from the hybrid kernel the plan replaced, and the new docstring at :1859-1867 discloses the approximation rather than removing it; the solve targets are unaffected, but a reader of the panel should not read the display as the solve's coupling."
+    },
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html",
+      "line": "75",
+      "severity": "non-blocking",
+      "text": "The provenance paragraph names the base and head as 3b05ffb6 and 4ec23b9154 while the delivered head is 6ae8117f4, and the plan-commits meta tag lists only e252f00a5 and 4ec23b91, so a reader cannot map this fragment to the four commits after 843063ef1 from the fragment alone; the measurement head and the delivered head are distinguishable only from the later paragraph naming 4ec23b91 and 843063ef1."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T224846811324-diiid-single-kernel-coupling/manifest.md",
+      "line": "10",
+      "severity": "non-blocking",
+      "text": "The recorded baseline_suite is a git ls-tree presence inventory that ran no test (baseline-scoped-inventory.log: 'No pytest suite was run for this empty arm'), so the suite pair's zero added failures is not measured by that arm; the base-versus-head evidence is the five-file focused pair in partition-gate/focused-base.log and focused-head.log (97 passed each, EXIT=0)."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all 18 commits of 3b05ffb6..6ae8117f4 by stat, and in full the product change e252f00a5 (benchmarks/diiid_forward_gs_match.py +10/-16 including the _display_coupling docstring), the 99-line regression test, the four prototype scripts, the 79-line evidence fragment and the five SVGs; the four commits after 843063ef1 touch only the evidence fragment.",
+    "done_when": "Clause (1) is asserted at tests/equilibrium/test_diiid_single_kernel_coupling.py:72-88, reddens on the real base builder in reproduction-couplings.log (3 failed, 1 passed, EXIT=1) and reddens under the hybrid-restoring mutation in tests/negative-control.log (same three ids, EXIT=1); clause (2) is recorded in docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html as the per-cell difference table, uniform-response-difference.svg and the four paired terminal SVGs with the eight-row table; clause (3) is partition-gate/focused-base.log and focused-head.log at 97 passed each; the single-job wording of clause (2) was met by two H200 allocations (1320896 plus authorized recovery 1322107).",
+    "goal": "The node's goal is plan section 10's decision that every plasma row the DIII-D builder attaches comes from one polygon evaluation; it lands at benchmarks/diiid_forward_gs_match.py:1282-1287, where grid_moments[0], wall_moments[0] and sample_moments[0] from one _moment_couplings call replace the three _green_block calls.",
+    "manifest": "Read: manifest.md reads status complete with tests PYTHONPATH=. JAX_PLATFORMS=cpu .../python -m pytest -p no:cacheprovider -q tests/equilibrium/test_diiid_single_kernel_coupling.py, after_suite at 843063ef1 completed with 4 passed (partition-gate/scoped-head.log, EXIT=0) and baseline_suite as the 3b05ffb6 presence inventory, while the five-file focused pair records added_failure_count 0.",
+    "write_paths": "The declared fence is benchmarks/diiid_forward_gs_match.py, tests/equilibrium/test_diiid_single_kernel_coupling.py, scripts/prototypes/diiid_single_kernel_coupling, docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling and docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html; all 12 paths in 3b05ffb6..6ae8117f4 lie inside that fence."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_diiid_single_kernel_coupling.py:81-85 fails if any of the three uniform rows is attached from the hybrid kernel, shown both by the base arm in reproduction-couplings.log and by gates.py:118-131 restoring the old rows in tests/negative-control.log, but the display-path hybrid at :1886 is uncovered.",
+    "evidence": "tests/negative-control.log records EXIT=1 with the three builder test ids, reproduction-couplings.log records the same three ids at base 3b05ffb6 (EXIT=1), partition-gate/scoped-head.log records 4 passed EXIT=0, and partition-gate/focused-base.log and focused-head.log record 97 passed each; the done_when's single-job clause was met only by splitting the run into job 1320896 plus authorized recovery 1322107.",
+    "fit": "The product diff follows the module's numpy/_moment_couplings idiom at benchmarks/diiid_forward_gs_match.py:1282-1287, while scripts/prototypes/diiid_single_kernel_coupling/gates.py:24-58 re-grows a harness format the sibling prototype already centralises.",
+    "goal_fidelity": "benchmarks/diiid_forward_gs_match.py:1282-1287 attaches block 0 of the same build_flux_blocks evaluations that supply the radial and vertical rows for grid, wall and sampling targets, and conductor rows, guards and tolerances are untouched, but the display path at :1886 still derives plasma columns from _green_block.",
+    "reuse": "scripts/prototypes/diiid_single_kernel_coupling/gates.py:24 run() duplicates gate() from scripts/prototypes/diiid_warmup_admission/regression.py:20 and gates.py:80-113 plus batch.py:35-41 duplicate extract() from scripts/prototypes/diiid_warmup_admission/measure.py:33, which scripts/prototypes/diiid_diverted_branch/gates.py:16-18 imports directly, so the added harness re-implements an owned capability instead of extending it.",
+    "scope_discipline": "Every path in 3b05ffb6..6ae8117f4 is under one of the five declared paths, and the product delta is confined to _couplings at benchmarks/diiid_forward_gs_match.py:1282-1287 plus a docstring."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261117T223141893946-review-of-diiid-single-kernel-coupling-6ae8117f4121",
+  "reviewed_base_sha": "3b05ffb6a28c84da912bbea33035be558e714234",
+  "reviewed_head_sha": "6ae8117f41217b22a8cd88811d48829333dc568a",
+  "reviewed_run_id": "r-20261116T224846811324-diiid-single-kernel-coupling",
+  "reviewer_run_id": "r-20261117T223141893946-review-of-diiid-single-kernel-coupling-6ae8117f4121",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T22:49:31.247143+00:00",
+  "total": 97
+}

@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate arms: baseline_suite names revision 3a9238f0a626bec0783b4f0da32922dd0c390f4b and logs/suite-base2.log reaches '7 passed, 6 errors in 318.84s' with EXIT=1, the six ids being the setup timeouts of test_iter_nodal_jets_match_analytic_map[0..2] and test_iter_coil_jets_match_analytic_map[0..2]; after_suite names revision 67cef0ddde591348b5872f92298ad61cff3bb16d and logs/suite-repair10.log reaches '23 passed in 613.23s' with AFTER_SUITE_EXIT=0, so no failing id at the head is absent from the baseline and the added set is empty.",
+  "call_site_count": 0,
+  "call_site_note": "none - git grep at 67cef0ddd finds no runtime importer of scripts/prototypes/iter_bank/derive_rows.py under nova/ or apps/; the only importers are tests/test_iter_bank.py:347 and the fragment, so the change reaches no production path.",
+  "call_sites": [],
+  "completed_at": "2026-11-19T09:39:37.142Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-19T09:39:00Z",
+  "findings": [
+    {
+      "file": "tests/test_iter_bank.py",
+      "line": "469",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_derive_rows_evaluates_through_the_repository_row_program asserts on the source text of derive_rows._ZERO_KERNEL_RUNNER (the import line present, 'jax.jit(' and 'jax.vmap(' absent), so it reddens on a harmless rename of the runner's import and stays green if the subprocess wiring at derive_rows.py:307-318 breaks; the behaviour it claims to guard is never executed."
+    },
+    {
+      "file": "scripts/prototypes/iter_bank/derive_rows.py",
+      "line": "294",
+      "severity": "non-blocking",
+      "text": "non-blocking: the increment's behavioural change is that the head arm now runs in a subprocess whose PYTHONPATH names the manifest's tree and whose cwd is that tree (derive_rows.py:307-318), and no test calls kernel_rows, so dropping PYTHONPATH or the cwd leaves all 23 cases green; the head arm was also not re-run after the change - deriving receipts/zero-entries.json predates it - so no run demonstrates the rewired path."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "line": "54",
+      "severity": "non-blocking",
+      "text": "non-blocking: the paragraph says the foreign-cell field 'is named for the geometry it is measured from rather than for ownership', but the receipt it cites, receipts/zero-entries.json, still carries own_cell and node_belongs_to_this_cell on all 1,612 of its entries, because it was written before the rename in 99299eac6; a reader following the pointer finds the old names."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "line": "83",
+      "severity": "non-blocking",
+      "text": "non-blocking: the suite table's newest row is 99299eac6, while the manifest records the landing head's own arm (job 1330598 at 67cef0ddd, 23 passed in 613.23 s, logs/suite-repair10.log), so the fragment a reader opens shows no leaf arm at the head it is the evidence for."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "non-blocking: 792402886's body says plan-commits 'now names all twenty-five commits this run made beyond its base', the meta carries 26 shas, and 3a9238f0a..67cef0ddd holds 27, the omitted one being 67cef0ddd itself; the count in the sentence matches neither the list nor the history."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit over 06cb6262668b88719e53160f6addda4742fdb84e..67cef0ddde591348b5872f92298ad61cff3bb16d: 99299eac6 moves derive_rows.py's kernel evaluation onto fixed_points._row_program and boundary_comparison._point_to_segment_distances and parameterises the active count, 792402886 corrects six fragment claims from the receipts, 67cef0ddd appends the evidence commit to plan-commits.",
+    "done_when": "the done_when's clauses name the certification receipt, tests/test_iter_bank.py live at head with 0 skipped, and paired suite arms; the manifest's after_suite records job 1330598 over a git archive of 67cef0ddd running tests/test_iter_bank.py with 23 passed in 613.23 s, and logs/suite-repair10.log ends AFTER_SUITE_EXIT=0.",
+    "goal": "the source node's goal (brief.md) is the rebuilt, re-certified ITER bank; the increment reviewed is 99299eac6..67cef0ddd, the reuse repair that answers the prior record at review-records/r-20261117T110237355670-iter-bank-recertify.at-06cb6262668b88719e53160f6addda4742fdb84e.json (folded into repair-of-iter-bank-recertify-06cb6262668b), and scripts/prototypes/iter_bank/derive_rows.py:294 now takes both kernel programs and both geometric primitives from their owners.",
+    "manifest": "read; it states 23 passed at the landing head with its log path, records the reuse repair and its three added cases, and cites the negative control at logs/controls7.log (3 failed, NEGATIVE_CONTROL_EXIT=1).",
+    "write_paths": "read the declared set (scripts/prototypes/iter_bank, tests/test_iter_bank.py, docs/figures/sub-millisecond-forward-path/iter-bank, the fragment); git diff 06cb626..67cef0ddd touches exactly derive_rows.py, tests/test_iter_bank.py and the fragment, all inside it."
+  },
+  "justifications": {
+    "durability": "logs/controls7.log shows restoring the pre-repair derive_rows.py reddens exactly the three added cases (3 failed, NEGATIVE_CONTROL_EXIT=1), but tests/test_iter_bank.py:469 pins the runner by its source text rather than by executing it, and nothing calls kernel_rows at derive_rows.py:294, so the subprocess wiring itself is uncovered.",
+    "evidence": "logs/suite-repair10.log (job 1330598, revision 67cef0ddd, 23 passed in 613.23 s) and logs/suite-base2.log (3a9238f0a, 7 passed 6 errors, EXIT=1) both ran to their summary lines, but the fragment's suite table stops at line 83 on 99299eac6 and never records the landing head's own arm, and receipts/zero-entries.json still carries the pre-rename field names.",
+    "fit": "derive_rows.py keeps its embedded-runner idiom at :251 and adds names (nearest_cell_centre, nearest_centre_is_this_cell, head_tree) that follow the module's vocabulary and break no repository naming rule.",
+    "goal_fidelity": "scripts/prototypes/iter_bank/derive_rows.py:294 runs both kernel arms through the named tree's own _row_program (nova/equilibrium/fixed_points.py:524) and segment_distance at :324 delegates to nova/equilibrium/boundary_comparison._point_to_segment_distances, which is the ownership the prior review's folded finding asked for.",
+    "reuse": "derive_rows.py:294 imports the tree's _row_program instead of building jax.jit(jax.vmap(_source_jets)) and :324 wraps _point_to_segment_distances, so both capabilities come from their owners; the batch-and-pad loop survives only in the embedded runner at :280, and fixed_points.py:608 keeps its own loop inside maintenance rather than as a shared helper.",
+    "scope_discipline": "all three commits touch only scripts/prototypes/iter_bank/derive_rows.py, tests/test_iter_bank.py and docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html, a subset of the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal (brief.md) is the rebuilt, re-certified ITER bank; the increment reviewed is 99299eac6..67cef0ddd, the reuse repair that answers the prior record at review-records/r-20261117T110237355670-iter-bank-recertify.at-06cb6262668b88719e53160f6addda4742fdb84e.json (folded into repair-of-iter-bank-recertify-06cb6262668b), and scripts/prototypes/iter_bank/derive_rows.py:294 now takes both kernel programs and both geometric primitives from their owners.\nVERDICT done_when: the done_when's clauses name the certification receipt, tests/test_iter_bank.py live at head with 0 skipped, and paired suite arms; the manifest's after_suite records job 1330598 over a git archive of 67cef0ddd running tests/test_iter_bank.py with 23 passed in 613.23 s, and logs/suite-repair10.log ends AFTER_SUITE_EXIT=0.\nVERDICT write_paths: read the declared set (scripts/prototypes/iter_bank, tests/test_iter_bank.py, docs/figures/sub-millisecond-forward-path/iter-bank, the fragment); git diff 06cb626..67cef0ddd touches exactly derive_rows.py, tests/test_iter_bank.py and the fragment, all inside it.\nVERDICT manifest: read; it states 23 passed at the landing head with its log path, records the reuse repair and its three added cases, and cites the negative control at logs/controls7.log (3 failed, NEGATIVE_CONTROL_EXIT=1).\nVERDICT diff: read commit by commit over 06cb6262668b88719e53160f6addda4742fdb84e..67cef0ddde591348b5872f92298ad61cff3bb16d: 99299eac6 moves derive_rows.py's kernel evaluation onto fixed_points._row_program and boundary_comparison._point_to_segment_distances and parameterises the active count, 792402886 corrects six fragment claims from the receipts, 67cef0ddd appends the evidence commit to plan-commits.\nCALL_SITES: none - git grep at 67cef0ddd finds no runtime importer of scripts/prototypes/iter_bank/derive_rows.py under nova/ or apps/; the only importers are tests/test_iter_bank.py:347 and the fragment, so the change reaches no production path.\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/iter_bank/derive_rows.py:294 runs both kernel arms through the named tree's own _row_program (nova/equilibrium/fixed_points.py:524) and segment_distance at :324 delegates to nova/equilibrium/boundary_comparison._point_to_segment_distances, which is the ownership the prior review's folded finding asked for.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/suite-repair10.log (job 1330598, revision 67cef0ddd, 23 passed in 613.23 s) and logs/suite-base2.log (3a9238f0a, 7 passed 6 errors, EXIT=1) both ran to their summary lines, but the fragment's suite table stops at line 83 on 99299eac6 and never records the landing head's own arm, and receipts/zero-entries.json still carries the pre-rename field names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all three commits touch only scripts/prototypes/iter_bank/derive_rows.py, tests/test_iter_bank.py and docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html, a subset of the declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: logs/controls7.log shows restoring the pre-repair derive_rows.py reddens exactly the three added cases (3 failed, NEGATIVE_CONTROL_EXIT=1), but tests/test_iter_bank.py:469 pins the runner by its source text rather than by executing it, and nothing calls kernel_rows at derive_rows.py:294, so the subprocess wiring itself is uncovered.\nSCORE fit: 17\nJUSTIFICATION fit: derive_rows.py keeps its embedded-runner idiom at :251 and adds names (nearest_cell_centre, nearest_centre_is_this_cell, head_tree) that follow the module's vocabulary and break no repository naming rule.\nSCORE reuse: 19\nJUSTIFICATION reuse: derive_rows.py:294 imports the tree's _row_program instead of building jax.jit(jax.vmap(_source_jets)) and :324 wraps _point_to_segment_distances, so both capabilities come from their owners; the batch-and-pad loop survives only in the embedded runner at :280, and fixed_points.py:608 keeps its own loop inside maintenance rather than as a shared helper.\nFINDING tests/test_iter_bank.py:469 non-blocking: test_derive_rows_evaluates_through_the_repository_row_program asserts on the source text of derive_rows._ZERO_KERNEL_RUNNER (the import line present, 'jax.jit(' and 'jax.vmap(' absent), so it reddens on a harmless rename of the runner's import and stays green if the subprocess wiring at derive_rows.py:307-318 breaks; the behaviour it claims to guard is never executed.\nFINDING scripts/prototypes/iter_bank/derive_rows.py:294 non-blocking: the increment's behavioural change is that the head arm now runs in a subprocess whose PYTHONPATH names the manifest's tree and whose cwd is that tree (derive_rows.py:307-318), and no test calls kernel_rows, so dropping PYTHONPATH or the cwd leaves all 23 cases green; the head arm was also not re-run after the change - deriving receipts/zero-entries.json predates it - so no run demonstrates the rewired path.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:54 non-blocking: the paragraph says the foreign-cell field 'is named for the geometry it is measured from rather than for ownership', but the receipt it cites, receipts/zero-entries.json, still carries own_cell and node_belongs_to_this_cell on all 1,612 of its entries, because it was written before the rename in 99299eac6; a reader following the pointer finds the old names.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:83 non-blocking: the suite table's newest row is 99299eac6, while the manifest records the landing head's own arm (job 1330598 at 67cef0ddd, 23 passed in 613.23 s, logs/suite-repair10.log), so the fragment a reader opens shows no leaf arm at the head it is the evidence for.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html:12 non-blocking: 792402886's body says plan-commits 'now names all twenty-five commits this run made beyond its base', the meta carries 26 shas, and 3a9238f0a..67cef0ddd holds 27, the omitted one being 67cef0ddd itself; the count in the sentence matches neither the list nor the history.",
+  "review_node": "review-of-iter-bank-recertify-67cef0ddde59",
+  "review_run_id": "r-20261119T093620832404-review-of-iter-bank-recertify-67cef0ddde59",
+  "reviewed_base_sha": "06cb6262668b88719e53160f6addda4742fdb84e",
+  "reviewed_head_sha": "67cef0ddde591348b5872f92298ad61cff3bb16d",
+  "reviewed_run_id": "r-20261117T110237355670-iter-bank-recertify",
+  "reviewer": {
+    "backend": "omp-local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261119T093620832404-review-of-iter-bank-recertify-67cef0ddde59"
+  },
+  "reviewer_note": "independent review of r-20261117T110237355670-iter-bank-recertify read as the three commits gained since review-records/r-20261117T110237355670-iter-bank-recertify.at-06cb6262668b88719e53160f6addda4742fdb84e.json, whose reviewed_head_sha is the base recorded here; the node's whole diff 3a9238f0a626bec0783b4f0da32922dd0c390f4b..67cef0ddde591348b5872f92298ad61cff3bb16d (8 paths) was read too, with the scores and findings about the increment. Five non-blocking findings, none blocking.",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T10:25:00+00:00",
+  "total": 105
+}

@@ -1,0 +1,213 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "assertion": "receipt[\"qualified\"] is qualified",
+      "fails_if": "the preflight stops writing seed_preflight.json before refusing, so the -3.0e-6 arm raises FileNotFoundError, or the qualification gate is bypassed so a drifted seed reports qualified true.",
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": 377,
+      "test": "test_entry_point_records_seed_qualification_before_scoring"
+    },
+    {
+      "assertion": "receipt[\"unscaled_seed_plasma_current_a\"] == seed_preflight[\"current_a\"]",
+      "fails_if": "only the receipt drops the measured moment sum or writes another field; the assertion moves with its own input, so a wrong current fed through the same path stays green (finding at this line).",
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": 378,
+      "test": "test_entry_point_records_seed_qualification_before_scoring"
+    },
+    {
+      "assertion": "receipt[\"relative_tolerance\"] == 2.0e-6",
+      "fails_if": "the frozen 2e-6 tolerance is widened or replaced in COHORT_PREFLIGHT_RELATIVE_TOLERANCE.",
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": 379,
+      "test": "test_entry_point_records_seed_qualification_before_scoring"
+    },
+    {
+      "assertion": "receipt[\"frame\"] == 102",
+      "fails_if": "the requested frame selects a different cohort row than the recorded one; the literal repeats the argv value, so a wrong cohort row selected consistently on both sides is not detected.",
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": 380,
+      "test": "test_entry_point_records_seed_qualification_before_scoring"
+    },
+    {
+      "assertion": "receipt[\"inference_current_authority\"][\"uses_circuit\"] is True",
+      "fails_if": "the preflight stops carrying the description_driven_currents receipt, or routes the measurement through the source-read-only arm.",
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": 381,
+      "test": "test_entry_point_records_seed_qualification_before_scoring"
+    },
+    {
+      "assertion": "refused.value.code == 2",
+      "fails_if": "the guard comparing --output against DEFAULT_OUTPUT is removed, so the run proceeds to truncate the committed cohort bank instead of exiting through parser.error.",
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": 388,
+      "test": "test_seed_entry_point_refuses_the_banked_output_directory"
+    }
+  ],
+  "assertion_independence": "Line 378 compares the receipt against the value the fixture supplied and is recorded as a finding; line 380 repeats the argv literal. The qualification cases shift the input independently of the code (1.0e-6 inside and -3.0e-6 outside a 2e-6 tolerance) and line 379 pins the frozen tolerance from the plan rather than a value returned by the code, so the added tests do fail on the regressions they were written for.",
+  "call_site_count": 3,
+  "call_sites": [
+    "benchmarks/diiid_current_pinned_forward.py:1098 run -> solve_frame",
+    "benchmarks/diiid_current_pinned_forward.py:1185 main --preflight-frame -> solve_frame",
+    "scripts/prototypes/diiid_pinned_seed_drift/measure.py:273 -> pinned.solve_frame"
+  ],
+  "completed_at": "2026-11-18T05:55:19.524Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "exempted",
+      "reason": "Lead decision 2026-11-18: accept the three-change causal account (edge cap, stationary normalization and domain, integration route; only the full historical functional restores registration) as this node's result, and re-register only after the finite-edge section lands, because that moves the value again. The section stays implementable in the plan with the re-registration owed.",
+      "recorded_at": "2026-11-18T06:28:49.932319+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-18T05:55:07Z",
+  "evidence_limits": [
+    "Bounded read-only review: no test was re-run and no mutation was applied; the two suite logs and the control receipts were read as recorded.",
+    "The added-failure count is read from the reviewed run's own baseline_suite and after_suite logs (11 and 14 passing, EXIT=0, zero failures) and was not measured independently.",
+    "The head entry-point measurement ran at 32edef46a; the benchmark blob is identical at the reviewed head, so its current stands while the receipt names no head revision.",
+    "The declared figure directory received no file; this node produced no terminal forward state, so the poloidal flux-panel rule is not engaged and its absence is not a defect."
+  ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Lead decision 2026-11-18: accept the three-change causal account (edge cap, stationary normalization and domain, integration route; only the full historical functional restores registration) as this node's result, and re-register only after the finite-edge section lands, because that moves the value again. The section stays implementable in the plan with the re-registration owed.",
+      "recorded_at": "2026-11-18T06:29:10.219519+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "The test guards that the preflight propagates the moment sum it computed; the qualification threshold itself is tested by the passing and refusing preflight cases",
+      "recorded_at": "2026-11-18T06:29:16.697758+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The reviewer confirms the benchmark blob is identical between 32edef46a and the reviewed head, so the recorded current stands",
+      "recorded_at": "2026-11-18T06:29:24.562455+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Three construction sites of the read column set; worth a module constant in the re-registration node, not a blocker for the preflight",
+      "recorded_at": "2026-11-18T06:29:44.394928+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html",
+      "line": "9",
+      "severity": "blocking",
+      "text": "blocking: the record's own terminal state is Unresolved - done_when (2)'s head run with only the named change undone and done_when (3)'s repair-or-re-register are both absent, registration stays at 1137702.226779481 A and the 2e-6 tolerance is untouched, so section 11's goal is not delivered and the manifest's status complete rests on an unmet terminal clause; the missing deliverable has to be produced or the section re-scoped before this node lands as complete."
+    },
+    {
+      "file": "tests/imas/test_diiid_current_pinned_forward.py",
+      "line": "378",
+      "severity": "non-blocking",
+      "text": "non-blocking: receipt['unscaled_seed_plasma_current_a'] == seed_preflight['current_a'] compares the receipt against the value the fixture itself supplied through cell_current, so both sides move together and it cannot fail if the recorded current is wrong; the 2e-6 qualification threshold leaves a defective value inside tolerance invisible to it. It guards propagation of the moment sum only."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T235243862922-diiid-pinned-seed-drift/entry-head.log",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: the entry-point measurement the record calls the head ran at SOURCE_REVISION=32edef46ac6ce837caf9255937fe517a5096e43f, not at the reviewed head bc9db1e3. The benchmark blob is identical between the two revisions (git diff 32edef46a..bc9db1e3 -- benchmarks/ is empty, so the recorded current stands), but no receipt exists in the reviewed revision's name and done_when (1)'s at-the-head wording rests on revision identity."
+    },
+    {
+      "file": "benchmarks/diiid_current_pinned_forward.py",
+      "line": "1184",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new --preflight-frame block re-copies run()'s cohort-row read preamble (the columns tuple, the shot path join, _read, _source_path) from :1068-1089, and scripts/prototypes/diiid_pinned_seed_drift/measure.py:60 copies it a third time, so the read column set has three construction sites where a module constant beside _LABEL_COLUMNS would leave one."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all nine commits b0adebdf..bc9db1e3 (+717/-6); 32edef46a adds the keyword-only preflight seam (benchmarks/diiid_current_pinned_forward.py:739-806, :1165-1204) and three test cases, the other eight add the four prototype scripts and the evidence record, every commit carries a body and none leaves the declared paths.",
+    "done_when": "Read plan section 11's three done-when clauses; evidence/head-entry/seed_preflight.json carries 1119833.5841760212 A beside 1137702.226779481 A and 1119994.1652867154 A for clause (1), the run's baseline and after suite logs carry 11 and 14 passing cases for clause (3)'s no-added-failure arm, and nothing delivers clause (2)'s head run with only the named change undone or clause (3)'s repair-or-re-register.",
+    "goal": "The source goal (plan docs/plans/diiid-vertical-force-balance.html section 11 and the dispatch admit_request.goal) is to find why frame d3d_shot_00000c4a7b.parquet:102 reads 1.56 % below its registration and to repair or re-register it; docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html:3 lands the reproduction and the cause measurement but records the frame as Unresolved with registration frozen.",
+    "manifest": "Read the source manifest.md; it records baseline_suite at b0adebdf with 0 failures and after_suite at bc9db1e3 with 0 failures beside the two named logs, and it files status complete while its blockers name the unmet causal clause and its own rubric line records goal_fidelity as missing.",
+    "write_paths": "The node declared benchmarks/diiid_current_pinned_forward.py, tests/imas/test_diiid_current_pinned_forward.py, scripts/prototypes/diiid_pinned_seed_drift, one evidence fragment and one figure directory; all seven delivered files lie inside the first four, and docs/figures/diiid-vertical-force-balance/diiid-pinned-seed-drift received no file because the node produced no terminal forward state to panel."
+  },
+  "justifications": {
+    "durability": "tests/imas/test_diiid_current_pinned_forward.py:377-381 reddens when the preflight receipt or its qualification refusal is removed and :384-388 reddens when the banked-output guard is removed, but nothing fails if the recorded measurement claims regress and :378 compares the receipt against the value the fixture itself fed in.",
+    "evidence": "The run's baseline_suite and after_suite logs record 11 and 14 passing cases with EXIT=0 each and evidence/head-entry/seed_preflight.json reconciles the three stated currents, but entry-head.log:5 measures 32edef46a rather than the head and no arm demonstrates the single-change undo clause.",
+    "fit": "benchmarks/diiid_current_pinned_forward.py:1165-1204 follows the file's argparse/JSON/raise idiom, while scripts/prototypes/diiid_pinned_seed_drift/history.py:12 uses os.sys.executable where the neighbouring scripts/prototypes/bank_newton_step/suite_arm.py:21 imports sys.",
+    "goal_fidelity": "docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html:3 declares the frame unresolved and leaves registration at 1137702.226779481, so the repair-or-re-register half of the goal is undelivered.",
+    "reuse": "scripts/prototypes/diiid_pinned_seed_drift/measure.py:72 and replay.py:43-56 call pinned.build_profile, nova.equilibrium.forward_operator.point_route_current and _cubic_cell_average_stencil rather than re-deriving them, while benchmarks/diiid_current_pinned_forward.py:1184 re-copies run()'s row-read preamble from :1068.",
+    "scope_discipline": "All seven delivered files sit under the five declared paths; nothing outside benchmarks/, tests/imas/test_diiid_current_pinned_forward.py, scripts/prototypes/diiid_pinned_seed_drift/ and the one evidence fragment is touched, and no registration or tolerance value changed."
+  },
+  "measurements_read": {
+    "entry_point_head_current_a": 1119833.5841760212,
+    "first_departure": {
+      "current_a": 1136049.5373650398,
+      "parent": "044adfdfc97d25d11562c1fd67b044ce1c52c419",
+      "revision": "862e712ae8c67db7955938da1cd1e4c785f2c386"
+    },
+    "full_historical_replay_current_a": 1137702.07648747,
+    "recorded_probe_current_a": 1119994.1652867154,
+    "registered_current_a": 1137702.226779481
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source goal (plan docs/plans/diiid-vertical-force-balance.html section 11 and the dispatch admit_request.goal) is to find why frame d3d_shot_00000c4a7b.parquet:102 reads 1.56 % below its registration and to repair or re-register it; docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html:3 lands the reproduction and the cause measurement but records the frame as Unresolved with registration frozen.\nVERDICT done_when: Read plan section 11's three done-when clauses; evidence/head-entry/seed_preflight.json carries 1119833.5841760212 A beside 1137702.226779481 A and 1119994.1652867154 A for clause (1), the run's baseline and after suite logs carry 11 and 14 passing cases for clause (3)'s no-added-failure arm, and nothing delivers clause (2)'s head run with only the named change undone or clause (3)'s repair-or-re-register.\nVERDICT write_paths: The node declared benchmarks/diiid_current_pinned_forward.py, tests/imas/test_diiid_current_pinned_forward.py, scripts/prototypes/diiid_pinned_seed_drift, one evidence fragment and one figure directory; all seven delivered files lie inside the first four, and docs/figures/diiid-vertical-force-balance/diiid-pinned-seed-drift received no file because the node produced no terminal forward state to panel.\nVERDICT manifest: Read the source manifest.md; it records baseline_suite at b0adebdf with 0 failures and after_suite at bc9db1e3 with 0 failures beside the two named logs, and it files status complete while its blockers name the unmet causal clause and its own rubric line records goal_fidelity as missing.\nVERDICT diff: Read all nine commits b0adebdf..bc9db1e3 (+717/-6); 32edef46a adds the keyword-only preflight seam (benchmarks/diiid_current_pinned_forward.py:739-806, :1165-1204) and three test cases, the other eight add the four prototype scripts and the evidence record, every commit carries a body and none leaves the declared paths.\nCALL_SITES: benchmarks/diiid_current_pinned_forward.py:1098 run -> solve_frame, benchmarks/diiid_current_pinned_forward.py:1185 main --preflight-frame -> solve_frame, scripts/prototypes/diiid_pinned_seed_drift/measure.py:273 -> pinned.solve_frame\nSCORE goal_fidelity: 9\nSCORE evidence: 12\nSCORE scope_discipline: 19\nSCORE durability: 14\nSCORE fit: 16\nSCORE reuse: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html:3 declares the frame unresolved and leaves registration at 1137702.226779481, so the repair-or-re-register half of the goal is undelivered.\nJUSTIFICATION evidence: The run's baseline_suite and after_suite logs record 11 and 14 passing cases with EXIT=0 each and evidence/head-entry/seed_preflight.json reconciles the three stated currents, but entry-head.log:5 measures 32edef46a rather than the head and no arm demonstrates the single-change undo clause.\nJUSTIFICATION scope_discipline: All seven delivered files sit under the five declared paths; nothing outside benchmarks/, tests/imas/test_diiid_current_pinned_forward.py, scripts/prototypes/diiid_pinned_seed_drift/ and the one evidence fragment is touched, and no registration or tolerance value changed.\nJUSTIFICATION durability: tests/imas/test_diiid_current_pinned_forward.py:377-381 reddens when the preflight receipt or its qualification refusal is removed and :384-388 reddens when the banked-output guard is removed, but nothing fails if the recorded measurement claims regress and :378 compares the receipt against the value the fixture itself fed in.\nJUSTIFICATION fit: benchmarks/diiid_current_pinned_forward.py:1165-1204 follows the file's argparse/JSON/raise idiom, while scripts/prototypes/diiid_pinned_seed_drift/history.py:12 uses os.sys.executable where the neighbouring scripts/prototypes/bank_newton_step/suite_arm.py:21 imports sys.\nJUSTIFICATION reuse: scripts/prototypes/diiid_pinned_seed_drift/measure.py:72 and replay.py:43-56 call pinned.build_profile, nova.equilibrium.forward_operator.point_route_current and _cubic_cell_average_stencil rather than re-deriving them, while benchmarks/diiid_current_pinned_forward.py:1184 re-copies run()'s row-read preamble from :1068.\nFINDING docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html:9 blocking: the record's own terminal state is Unresolved - done_when (2)'s head run with only the named change undone and done_when (3)'s repair-or-re-register are both absent, registration stays at 1137702.226779481 A and the 2e-6 tolerance is untouched, so section 11's goal is not delivered and the manifest's status complete rests on an unmet terminal clause; the missing deliverable has to be produced or the section re-scoped before this node lands as complete.\nFINDING tests/imas/test_diiid_current_pinned_forward.py:378 non-blocking: receipt['unscaled_seed_plasma_current_a'] == seed_preflight['current_a'] compares the receipt against the value the fixture itself supplied through cell_current, so both sides move together and it cannot fail if the recorded current is wrong; the 2e-6 qualification threshold leaves a defective value inside tolerance invisible to it. It guards propagation of the moment sum only.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T235243862922-diiid-pinned-seed-drift/entry-head.log:5 non-blocking: the entry-point measurement the record calls the head ran at SOURCE_REVISION=32edef46ac6ce837caf9255937fe517a5096e43f, not at the reviewed head bc9db1e3. The benchmark blob is identical between the two revisions (git diff 32edef46a..bc9db1e3 -- benchmarks/ is empty, so the recorded current stands), but no receipt exists in the reviewed revision's name and done_when (1)'s at-the-head wording rests on revision identity.\nFINDING benchmarks/diiid_current_pinned_forward.py:1184 non-blocking: the new --preflight-frame block re-copies run()'s cohort-row read preamble (the columns tuple, the shot path join, _read, _source_path) from :1068-1089, and scripts/prototypes/diiid_pinned_seed_drift/measure.py:60 copies it a third time, so the read column set has three construction sites where a module constant beside _LABEL_COLUMNS would leave one.\n",
+  "reuse_search": {
+    "capabilities": [
+      "named-revision source extraction and measurement",
+      "cohort row reading from the pinned parquet",
+      "seed-current integration and normalisation",
+      "point-route current integration",
+      "receipt readback against the registered current"
+    ],
+    "judgement": "Named-revision extraction has no shared owner: the only prior implementations are per-prototype local helpers (bank_newton_step/suite_arm.py:22 archive, bank_h200_slice_profile/run.py:46 archive_revision), so history.py follows the established per-prototype pattern rather than forking a shared module. measure.py and replay.py extend the benchmark and nova owners instead of re-deriving integration. The residual duplication is the cohort-row read preamble, copied inside the benchmark and the same column set again in measure.py.",
+    "owners_opened": [
+      "scripts/prototypes/bank_newton_step/suite_arm.py:22",
+      "scripts/prototypes/bank_h200_slice_profile/run.py:46",
+      "nova/equilibrium/forward_operator.py:2320",
+      "nova/equilibrium/forward.py:264",
+      "benchmarks/diiid_current_pinned_forward.py:1056"
+    ]
+  },
+  "review_run_id": "r-20261118T053226435594-review-of-diiid-pinned-seed-drift-bc9db1e3b9b0",
+  "reviewed_base_sha": "b0adebdf3153b0e6d99f6a717c344a7af5e6b01f",
+  "reviewed_head_sha": "bc9db1e3b9b0ba9f8f52dadf5bbfadb3d3dfc345",
+  "reviewed_run_id": "r-20261116T235243862922-diiid-pinned-seed-drift",
+  "reviewed_worker_commits": [
+    "48b21e2432c0eb9de10de044688062c46db680c7",
+    "634678b789cbfffd75e932999ff650bb67c77045",
+    "32edef46ac6ce837caf9255937fe517a5096e43f",
+    "7caa43c42cd6d6934a231beffd59fd6b3ad0b3dd",
+    "b4edd03110b0196f05b7889f6353b9fba277a489",
+    "dff422e5e7450d86e9a335cd1a0189ad6af9f2d5",
+    "db44a94b6883c2827d1d75b5155522a29d997c8f",
+    "415226ad0092b388b4e34af0f802e66cd4e02b9d",
+    "bc9db1e3b9b0ba9f8f52dadf5bbfadb3d3dfc345"
+  ],
+  "scope_provenance": "The first worker commit 48b21e243's parent is the reviewed base b0adebdf, so base-to-head is exactly the nine worker commits and carries no inherited landing.",
+  "scores": {
+    "durability": 14,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 9,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/imas/test_diiid_current_pinned_forward.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T235243862922-diiid-pinned-seed-drift/after_suite-1794960337904931686.log",
+      "revision": "bc9db1e3b9b0ba9f8f52dadf5bbfadb3d3dfc345",
+      "sha256": "9f177b4aa8f69979bf7127110646064857c39a0adf9ceb868965c04698215623",
+      "summary": "14 passed in 5.99s"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/imas/test_diiid_current_pinned_forward.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T235243862922-diiid-pinned-seed-drift/baseline_suite-1794960295769312281.log",
+      "revision": "b0adebdf3153b0e6d99f6a717c344a7af5e6b01f",
+      "sha256": "9fe169f1b026834abec092f735a3a65e30357f1b4a081dd07ecf343d29c97c9e",
+      "summary": "11 passed in 5.91s"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:27:05.398898+00:00",
+  "total": 87
+}

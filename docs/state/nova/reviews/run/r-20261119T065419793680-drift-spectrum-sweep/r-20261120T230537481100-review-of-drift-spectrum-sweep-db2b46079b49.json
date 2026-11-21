@@ -1,0 +1,114 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:70 import_study",
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:202 study.wall_npz",
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh:17-24",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1046 read_efit"
+  ],
+  "completed_at": "2026-11-20T23:06:39.676Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-drift-spectrum-sweep-db2b46079b49",
+      "recorded_at": "2026-11-20T23:32:34.719913+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-20T23:06:16Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py",
+      "line": "395",
+      "severity": "non-blocking",
+      "text": "non-blocking: validate() is the only guard that refuses a wrong table, but no test imports sweep.py and the probe_rows suite never calls it, so deleting validate() or its call at :507 leaves every recorded arm green while the analyse step would again write spectrum-summary.json and exit 0; the manifest's two negative controls (control forced to 0.40, arm withheld) are run-scoped and not committed."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py",
+      "line": "1035",
+      "severity": "non-blocking",
+      "text": "non-blocking: no assertion reddens if the atomic wall write is reverted to path.unlink() plus np.savez(path); test_probe_rows.py:73-78 reads the file back on a fresh tmp_path and passes under both the unlink and the rename pattern, so the concurrency repair is guarded only by the run-scoped five-writer experiment quoted in the fragment."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/test_probe_rows.py",
+      "line": "73",
+      "severity": "non-blocking",
+      "text": "non-blocking: the wall assertion's expected value is drawn.vertices from the same wall_units_from_ids call study.wall_npz makes at study.py:1019, so the two sides move together and a change in the reader's unit choice leaves np.array_equal true; the classification assertions at :80-81 read the reader, not wall_npz."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py",
+      "line": "448",
+      "severity": "non-blocking",
+      "text": "non-blocking: validate() restates the white-arm lag-one 0.15 rule that analyse.py:207-215 thresholds() already owns and that analyse.py main publishes pass booleans for, so the pass threshold now exists in two places that can drift apart."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py",
+      "line": "297",
+      "severity": "non-blocking",
+      "text": "non-blocking: generator_control's local lag(value) duplicates the one-dimensional branch of analyse.lag_one at analyse.py:45-63; the refactor removed the module-level copy but left this one, which is the same correlation computed one more time."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py",
+      "line": "507",
+      "severity": "non-blocking",
+      "text": "non-blocking: CHECKS-PASSED is printed as len(CHECKS) = 6 whatever the validation ran, so the receipt's count is the group count rather than the number of assertions that passed and would read 6 even for an empty table whose checks all passed vacuously."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment says every cited receipt is 'at the revision this fragment is committed with', but logs/sweep-run.log at db2b46079 records every arm as reused and the arm jsonl files predate the reviewed head, so the receipts carry no revision and the claim overstates what the head measured."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html",
+      "line": "56",
+      "severity": "non-blocking",
+      "text": "non-blocking: plan section 7 asks for two figures (axis against slice per code, and an overlaid contour panel at the slice of largest disagreement) and the node declared a docs/figures write path, but the landed record carries tables only and no figure was produced."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html",
+      "line": "58",
+      "severity": "non-blocking",
+      "text": "non-blocking: the record is measured at 100 slices per arm where plan section 7 asks at least 200 and the axis lag-one is 0.432 against the plan's 0.5 clause; both gaps are stated rather than hidden, so this is a plan decision the record names and leaves open."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified sweep.py:70 import_study, sweep.py:202 study.wall_npz, gate.sh:17-24 driver invocation and study.py:1046 read_efit.",
+    "diff": "read 33abbd2fa, 6ec93c438 and db2b46079 against 54cc8f94: 33abbd2fa moves the reduction into analyse.py:35-202, 6ec93c438 adds sweep.py:395-467 validate plus the atomic wall at study.py:1035-1039, and db2b46079 splits crossing_point from crossing at analyse.py:233-250.",
+    "done_when": "the done_when's three clauses are measured by the gate.sh run plus analyse pair, whose logs at db2b46079 end EXIT=0 and print CHECKS-PASSED 6 after checking the arm set, the crossings at 0.05/0.10, the index-0 control and both nova receipts.",
+    "goal": "the source node's goal is to sweep the noise size, spectral index and corner frequency for imas-efit on the held ITER state; sweep.py:48-54 fixes the three grids and study/spectrum-summary.json carries one reduced point per arm.",
+    "manifest": "the reviewed manifest records 12 arms of 100 slices, both gate commands, both suite arms at 8 passed and 1 skipped with EXIT=0, and the payload md5 bff12f86, which study/spectrum-summary.json actually has.",
+    "write_paths": "the declared paths are the evidence fragment, the figures directory and scripts/prototypes/drifting_sensor_sequences; the five changed paths all lie inside the fragment and scripts roots, with no figure delivered."
+  },
+  "justifications": {
+    "durability": "No test file is changed and no added assertion fails if validate() is deleted or study.py:1035 reverts to unlink plus np.savez, so the suite stays green under the exact regressions the commits repair.",
+    "evidence": "gate.sh run and analyse logs at db2b46079 end EXIT=0 with CHECKS-PASSED 6 at logs/sweep-analyse.log:484, and the crossing values in study/spectrum-summary.json reconcile with the fragment's 0.05 and 0.10 statements.",
+    "fit": "The new functions follow analyse.py's numpy, %-format and docstring idiom, but sweep.py:476 prints len(CHECKS) as a constant pass count rather than the checks that ran.",
+    "goal_fidelity": "The three post-review commits (33abbd2fa, 6ec93c438, db2b46079) leave the published payload byte-identical at md5 bff12f86 while the node's 12 arms and both crossings in scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:374-376 still carry the swept size, index and corner points.",
+    "reuse": "33abbd2fa moves the reduction into analyse.py:166 reduce_arm and the sweep calls it, yet sweep.py:448 restates the 0.15 white lag-one rule analyse.py:207 thresholds owns and sweep.py:297 keeps its own lag helper.",
+    "scope_discipline": "All five changed paths sit inside the declared scripts/prototypes/drifting_sensor_sequences and docs/evidence fragment roots, and no file outside them is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is to sweep the noise size, the spectral index and the corner frequency of the sensor noise for imas-efit on the held ITER state, and scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:48-54 fixes the three grids whose twelve arms study/spectrum-summary.json reduces; the three commits gained since ace04f820 leave that payload byte-identical at md5 bff12f86.\nVERDICT done_when: the done_when asks for five or more noise sizes with both crossings and the 50-slice-mean ratio, three or more index values from 0.5 to 2, three or more corner values over two decades, an index-0 control within 0.15 of zero and a reference-only nova column with its wall per slice; logs/sweep-analyse.log at db2b46079 ends CHECKS-PASSED 6 / EXIT=0 and the fragment states 6 sizes, index 0.5/1/2, corners 0.002/0.02/0.2, crossings at 0.05 and 0.10 and nova at 805-1014 s per slice.\nVERDICT write_paths: the declared paths are docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html, docs/figures/inverse-equilibrium-baseline/drift-spectrum-sweep and scripts/prototypes/drifting_sensor_sequences; the five changed paths all lie inside the fragment and scripts roots and no figure was delivered.\nVERDICT manifest: read the reviewed manifest; it records commits d537b5032 through db2b46079, both gate commands, both suite arms at 8 passed 1 skipped with EXIT=0, and the payload md5 bff12f86, which matches study/spectrum-summary.json on disk.\nVERDICT diff: read 33abbd2fa, 6ec93c438 and db2b46079 against 54cc8f94 together with the full five-path delta: 33abbd2fa moves series/rms_error/block_error/lag_one/reduce_arm/crossing into analyse.py:35-202 and has the sweep call them, 6ec93c438 adds sweep.py:395-467 validate and writes study.py:1035-1039 the wall beside its name, and db2b46079 splits crossing_point from crossing at analyse.py:233-250 so analyse.py's own table stays a bare factor.\nCALL_SITES: scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:70 import_study, scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:202 study.wall_npz, scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh:17-24, scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1046 read_efit\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the three post-review commits leave the published payload byte-identical at md5 bff12f86 while sweep.py:374-376 still reduces the swept size, index and corner points.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate.sh run and analyse logs at db2b46079 end EXIT=0 with CHECKS-PASSED 6 at logs/sweep-analyse.log:484, and study/spectrum-summary.json reconciles with the fragment's 0.05 and 0.10 crossings.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all five changed paths lie inside the declared scripts/prototypes/drifting_sensor_sequences and docs/evidence fragment roots.\nSCORE durability: 5\nJUSTIFICATION durability: no test file is changed and no added assertion reddens if validate() at sweep.py:395 is deleted or study.py:1035 reverts to unlink plus np.savez.\nSCORE fit: 17\nJUSTIFICATION fit: the new functions follow analyse.py's numpy and %-format idiom, though sweep.py:476 prints len(CHECKS) as a constant pass count.\nSCORE reuse: 12\nJUSTIFICATION reuse: 33abbd2fa moves the reduction into analyse.py:166 reduce_arm and the sweep calls it, but sweep.py:448 restates the 0.15 white lag-one rule analyse.py:207 thresholds owns and sweep.py:297 keeps its own lag helper.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:395 non-blocking: validate() is the only guard that refuses a wrong table, but no test imports sweep.py, so deleting it or its call leaves the suite green while the analyse step would write spectrum-summary.json and exit 0 again.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1035 non-blocking: no assertion reddens if the atomic wall write reverts to unlink plus np.savez, because test_probe_rows.py:73-78 reads the file back on a fresh tmp_path and passes under both patterns.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/test_probe_rows.py:73 non-blocking: the wall assertion's expected value comes from the same wall_units_from_ids call study.wall_npz makes, so both sides move together and a unit-choice change keeps it green.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:448 non-blocking: validate restates the white-arm lag-one 0.15 rule analyse.py:207-215 thresholds owns, so the pass threshold exists in two places.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:297 non-blocking: generator_control's local lag(value) duplicates the one-dimensional branch of analyse.lag_one at analyse.py:45-63.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:507 non-blocking: CHECKS-PASSED prints len(CHECKS) = 6 whatever ran, so the receipt's count is a constant rather than the checks passed.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html:4 non-blocking: the fragment says every receipt sits at the committed revision, but logs/sweep-run.log at db2b46079 records every arm as reused and the arm jsonl predate the head.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html:56 non-blocking: plan section 7 asks for two figures and the node declared a docs/figures path, but the record carries tables only.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html:58 non-blocking: the record measures 100 slices against plan section 7's 200 and the axis lag-one is 0.432 against the plan's 0.5 clause; both are stated rather than hidden.\n",
+  "review_run_id": "r-20261120T230537481100-review-of-drift-spectrum-sweep-db2b46079b49",
+  "reviewed_base_sha": "54cc8f94f3ff8fafc359291fb5e18e88ae7bf7a8",
+  "reviewed_head_sha": "db2b46079b4952a68b738bc6c917061d7c353dfd",
+  "reviewed_run_id": "r-20261119T065419793680-drift-spectrum-sweep",
+  "reviewer_run_id": "r-20261120T230537481100-review-of-drift-spectrum-sweep-db2b46079b49",
+  "scores": {
+    "durability": 5,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T23:16:48.001730+00:00",
+  "total": 87
+}

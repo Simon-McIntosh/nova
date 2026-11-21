@@ -1,0 +1,254 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T09:29:51.797Z",
+  "dispatched_at": "2026-11-20T09:17:57Z",
+  "findings": [
+    {
+      "anchor": "plan.html:66",
+      "id": "wiring-1",
+      "reason": "the plan cannot be sequenced as written; the author must either drop the s4\u2192s3 edge or move node (e) out of \u00a73 into a landing that follows \u00a74.",
+      "text": "node (e) is ordered \"after the shared-root section (\u00a77) lands and after every later landing that adds pre-warm rows\", and \u00a74 node (a) (plan.html:74) is exactly such a landing (\"adds that read at 132, 300 and 550 cells to the programs the pre-warm compiles\"), while plan.html:23 declares s4 depends on s3 \u2014 so a dispatch following the declared graph holds \u00a74 behind s3(e) and s3(e) behind \u00a74(a)",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:66",
+      "id": "done_when-1",
+      "reason": "without a red arm on this exact lane invocation, a cache guard that silently reports zero misses closes the plan's only remaining node, which is the failure mode \u00a74 clause (1) and node (d) exist to exclude.",
+      "text": "node (e)'s done-when is only \"one H200 lane run then shows the four point-program rows served as hits with NOVA_CACHE_MISS_BUDGET at zero\" and names no arm that must fail, where node (d) declares the empty-cache arm that records a miss and exits nonzero",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:66",
+      "id": "evidence_paths-1",
+      "reason": "a later reader cannot open the pinned-cache closure from the plan, and the node is the one whose evidence the plan's completion rests on.",
+      "text": "node (e) names no evidence fragment, figure directory or receipt directory, while nodes (b), (c) and (d) each name all three; the lane run that closes clause (1) has no durable artifact named in the plan",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:66",
+      "id": "anchors_resolve-1",
+      "reason": "the section points a reader at a missing file and leaves the actual record unnamed, which is the stale-pointer defect the rubric treats as worse than no pointer.",
+      "text": "\u00a73 assigns node (d)'s record to docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html, which does not exist in the tree; node (d) landed its fragment at docs/evidence/fragments/kernel-compile-barrier/cached-point-program-remeasure.html, as the section's own landed comment records",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:65",
+      "id": "reasoning-1",
+      "reason": "a coordinator reading the section's own summary would re-dispatch a measurement that already landed, and the live record contradicts itself two paragraphs apart.",
+      "text": "the paragraph says the cheaper regular-Hessian form \"is not yet measured as compile time ... Node (b) measures that wall\", while node (b) has landed and measured it (223.7 s control, 104.5 s with that block stubbed, 119.2 s attributed), and node (c) on plan.html:66 restates those figures as measured",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:64",
+      "id": "reasoning-2",
+      "reason": "the section already names the bank build and the measurement as its consumers, so the overstatement changes no node's work; it only misstates the call graph.",
+      "text": "the paragraph says _row_program is \"evaluated only by fixed_points.maintain_rows (:546, the call at :611)\", but it is evaluated or bound outside maintain_rows: scripts/prototypes/iter_bank/derive_rows.py:275 calls it, scripts/prototypes/kernel_compile_census/row.py:111 returns it as the program the census compiles, and scripts/prototypes/cached_point_remeasure/arms.py:143 takes it as the row arm's program object",
+      "type": "reasoning",
+      "would_change": false
+    },
+    {
+      "anchor": "plan.html:86",
+      "id": "reasoning-3",
+      "reason": "clause (1)'s git grep forces the node to edit all 46, so the section's declared scope and its 2.0-hour estimate understate the work and the node brief would omit write paths the gate requires.",
+      "text": "\u00a77 enumerates five families (scripts/h200_test_lane's three files, nova/database/filepath.py, the benchmarks' defaults, the iron-limb evidence roots under scripts/, and three AGENTS.md mentions) covering 35 of the 81 tracked files outside docs/ that carry a non-raw reference to the old root; 46 files fall outside every named family, chiefly the prototypes' hardcoded NOVA_COMPILATION_CACHE_ROOT pre-warm root (e.g. scripts/prototypes/bank_step_batch/*.sh, bank_step_booking_once/*.sh, moment_hessian/*.sh, bank_width_probe/*), the hardcoded nova-assembled-step-bank roots (scripts/prototypes/bank_newton_step/*.py, tracked_read_h200/*.sh), the evidence roots in scripts/prototypes/{membership,promoted_nodes_near_xpoint,diiid_forward_convergence} and scripts/west_*, and the defaults in tests/test_filepath_data_roots.py, tests/test_steering_frames.py, tests/test_media.py, tests/test_sheet_tile.py, tests/test_batched_operator_boundary.py, scripts/media/limited_class_census.py, scripts/playable_server/run.sh and nova/biot/AGENTS.md",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:86",
+      "id": "reasoning-4",
+      "reason": "it changes the size of the set the section promises to leave untouched, and a node reading \"seven\" would believe ten fewer benchmark modules need checking against the unchanged-from-base requirement of clause (1).",
+      "text": "\u00a77 says \"Seven DIII-D benchmarks read it as their default\", but 17 benchmark modules carry the raw corpus as their data default (DEFAULT_DATA / COMPETITION_DATA / DIIID_DATA = /work/projects/imas_gpu/sophelio/raw/data/diii_d_train)",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+  "plan_fingerprint": "6b714fb40fb49b133edc71642f4175dac077a8c1841361028111244574f6383c",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 115,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "s3 node (e) is one pre-warm after s7 lands; the pre-warm after s4 node (a) is s4's own closing step, so nothing in s3 waits on s4",
+      "reason": "",
+      "when": "2026-11-20T09:36:19.333559+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "node (e) names a red arm: the same lane invocation against an empty job-local cache root must print the unreliable-wall marker and exit nonzero",
+      "reason": "",
+      "when": "2026-11-20T09:36:29.801636+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "node (e) names its fragment and receipt directory",
+      "reason": "",
+      "when": "2026-11-20T09:36:38.704012+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "node (d) record path corrected to cached-point-program-remeasure.html",
+      "reason": "",
+      "when": "2026-11-20T09:36:48.652118+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "the regular-Hessian lever is stated as measured by node (b): 119.2 s of 223.7 s",
+      "reason": "",
+      "when": "2026-11-20T09:36:58.267271+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "finding": "reasoning-2",
+      "reason": "the sentence describes the production caller; the prototype call sites it omits change no node's work, as the finding itself says",
+      "when": "2026-11-20T09:37:06.518473+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "s7 states the full scope (81 tracked files outside docs with a non-raw reference), names the prototype families and raises the estimate",
+      "reason": "",
+      "when": "2026-11-20T09:37:15.462180+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "finding": "reasoning-4",
+      "note": "s7 says seventeen benchmark modules read the raw corpus",
+      "reason": "",
+      "when": "2026-11-20T09:37:26.667490+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "note": "node (d) record path corrected to cached-point-program-remeasure.html",
+      "reason": "",
+      "when": "2026-11-20T09:36:48.652118+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "note": "node (e) names a red arm: the same lane invocation against an empty job-local cache root must print the unreliable-wall marker and exit nonzero",
+      "reason": "",
+      "when": "2026-11-20T09:36:29.801636+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "note": "node (e) names its fragment and receipt directory",
+      "reason": "",
+      "when": "2026-11-20T09:36:38.704012+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "note": "the regular-Hessian lever is stated as measured by node (b): 119.2 s of 223.7 s",
+      "reason": "",
+      "when": "2026-11-20T09:36:58.267271+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "reason": "the sentence describes the production caller; the prototype call sites it omits change no node's work, as the finding itself says",
+      "when": "2026-11-20T09:37:06.518473+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "note": "s7 states the full scope (81 tracked files outside docs with a non-raw reference), names the prototype families and raises the estimate",
+      "reason": "",
+      "when": "2026-11-20T09:37:15.462180+00:00"
+    },
+    "reasoning-4": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "note": "s7 says seventeen benchmark modules read the raw corpus",
+      "reason": "",
+      "when": "2026-11-20T09:37:26.667490+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "37c577a5cc2cb4df710fa2fab9008e17f4474b6d",
+      "commit_basis": "edit",
+      "note": "s3 node (e) is one pre-warm after s7 lands; the pre-warm after s4 node (a) is s4's own closing step, so nothing in s3 waits on s4",
+      "reason": "",
+      "when": "2026-11-20T09:36:19.333559+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261120T091623243587-plan-review-of-kernel-compile-barrier.json",
+  "review_run_id": "r-20261120T091623243587-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "c66fad85b825c9f84b34e0b22e175a29b2c5074c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a73 assigns node (d)'s record to docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html, which does not exist; the landed fragment is cached-point-program-remeasure.html. Every href in the changed units resolves (/nova/evidence/fragments/kernel-compile-barrier/ordered-sharing.html, /nova/evidence/fragments/sub-millisecond-forward-path/polygon-stable-evaluator.html, /nova/sub-millisecond-forward-path.html), as do the cited code anchors in fixed_points.py (:323, :524, :546, :611) and the three prototype wrappers.",
+    "done_when": "a finding \u2014 node (e) (plan.html:66), the only node of \u00a73 still open, names no arm that must fail, while nodes (b), (c) and (d) each declare one.",
+    "evidence_paths": "a finding \u2014 node (e) names no fragment, figure directory or receipt directory, so the pinned-cache closure of clause (1) has no durable record, unlike nodes (b), (c) and (d).",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach code in the changed units, and \u00a77's path names are mechanism-named.",
+    "reasoning": "a finding \u2014 four defects: \u00a73 states a measurement is still owed that node (b) has already landed (plan.html:65); \u00a73's \"evaluated only by maintain_rows\" is contradicted by two direct callers (plan.html:64); \u00a77's family list covers 46 fewer files than its own done-when requires (plan.html:86); and \u00a77's benchmark count is wrong (plan.html:86).",
+    "single_goal": "pass \u2014 \u00a73's five nodes all serve one deliverable (the point program served from the pinned cache inside 60 s) and \u00a77 one (nova's shared-root defaults), and each section's done-when carries one verdict.",
+    "wiring": "a finding \u2014 s3's dependency on s7 (plan.html:23) is correct for node (e), but node (e) also waits on \"every later landing that adds pre-warm rows\", which is s4 node (a), while s4 is declared to depend on s3: the declared graph is cyclic."
+  },
+  "section_digests": {
+    "_document": "4dd0bd0854bd8e84e354b6700ea2df0cf8c65cf370f4b05b8a7ed399ad4e1119",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "01553d09df39e0a0cc04388601262b463b97aa115d8b5f044033cb1d152e484f",
+    "s4": "2d41b958c1a801e917c3b1945758dd89abb0d4e9421b3e5a498f6dd10e5deddb",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea",
+    "s7": "1d0375cba1fc4c226b5a8f4749b4f45a555c38e4104c6586545deadd01025c5d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T09:30:02.696562+00:00",
+  "total": null
+}

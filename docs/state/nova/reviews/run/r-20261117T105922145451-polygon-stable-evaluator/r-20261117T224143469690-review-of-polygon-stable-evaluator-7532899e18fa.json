@@ -1,0 +1,94 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "02997905193b245dcc099a238fea6c22d8817671",
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/biot/tiledassembly.py:1383 packed_analytic_moments",
+    "nova/equilibrium/fixed_points.py:327 packed_analytic_moments",
+    "nova/equilibrium/topology.py:2514 packed_analytic_moments"
+  ],
+  "completed_at": "2026-11-17T22:43:24.058Z",
+  "dispatched_at": "2026-11-17T22:43:03Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "kernel-compile-barrier-s3-one-traced-body",
+      "recorded_at": "2026-11-17T23:27:56.675091+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "the integrated 64-node accuracy run takes about 4.5 h on rigel and cannot run in the default lane; the receipt-gated cases are the designed contract, and the live accuracy is re-checked by iter-bank-recertify, which holds psi_RZ and psi_ZZ to 1e-8 at the same nodes",
+      "recorded_at": "2026-11-17T23:28:07.310096+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "provenance of the negative-control array is recorded by measurement_array_sha256 in base-summary/receipt.json beside the log; a header wording change alone does not change the evidence",
+      "recorded_at": "2026-11-17T23:28:18.971856+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "tests/biot/test_moment_program_identity.py",
+      "line": "164",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert maximum <= 1e-9 now fails at head, because program-identity/program-identity.log records EXIT=1 with packed tangent departures up to 0.345 and both test ids failed, and the node's per-file suite arms did not cover this file, so a promoted tree carries two red tests the added-failure count does not see; the brief predicts the gradient and Hessian rows move and the fragment discloses it, so the follow-up that owns the derivative pins must rebase this assertion on the value rows or delete the derivative clause."
+    },
+    {
+      "file": "tests/biot/test_polygon_stable_evaluator.py",
+      "line": "73",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fixture skips seven of the nine cases without NOVA_POLYGON_INTEGRATED_RECEIPT, so the after_suite arm records 16 passed and 7 skipped and the accuracy the goal names is guarded only by head-summary/integrated.log, which nothing regenerates; a regression after the receipt was taken leaves the default lane green."
+    },
+    {
+      "file": "base-summary/integrated.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the negative-control log's header names revision 1d7d1d056 of the test helper rather than the main kernel it measured, so the red log alone cannot be told apart from a head failure and its provenance lives only in the sibling base-summary/receipt.json measurement_array_sha256; the control's header should name the measured array."
+    }
+  ],
+  "head_log_revision": "1b208ee751a71417f5808588f6ef6b76ea35323a",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Verified three production call sites of packed_analytic_moments that reach the changed custom JVP: nova/biot/tiledassembly.py:1383, nova/equilibrium/fixed_points.py:327 and nova/equilibrium/topology.py:2514.",
+    "diff": "Read commit by commit: 888c7966a to 30b5ab332 add the instrument scripts, tests and evidence, 27b4418b7 is the kernel change (+443/-35 in polygonanalytic.py), 764da60c2 the authorized graph ceiling, fff973f5e the per-file suite isolation and 7532899e1 the finalization commits touch only evidence.",
+    "done_when": "The done_when asks the fragment to record the integrated result beside the tangent-only 1.32x/1.56x, the bounded-point byte count and both suite arms; polygon-stable-evaluator.html carries all four and the base arm log base-per-file/suite.log (0299790519) reads SUITE_SUMMARY 10 passed EXIT=0 against head-per-file/suite.log (1b208ee75) 16 passed 7 skipped EXIT=0.",
+    "goal": "The goal is to route every polygon kernel derivative through one stable evaluator with a sixth-order height stencil so the 64-node trace and interior Hessians meet 1e-8 with values bit-identical to main; nova/biot/polygonanalytic.py:3511-3523 does that and head-summary/receipt.json reports 7.424e-10, 9.150e-10 and 6.982e-10 with a 6.919e-9 worst component against 1e-8.",
+    "manifest": "Read; status complete, commits listed, changed_paths the 12 landed files, baseline_suite and after_suite complete with failure_count 0, negative_control_log base-summary/integrated.log, and the checkpoint says the final commit changes only evidence.",
+    "write_paths": "The declared paths were nova/biot/polygonanalytic.py, tests/biot, scripts/prototypes/polygon_stable_evaluator, the evidence fragment, its figures directory and tests/equilibrium/test_bounded_point_program.py; git diff 0299790519..7532899e1 touches all but the figures directory and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_polygon_stable_evaluator.py:76-91 uses a fifth-degree height term so the four-sample stencil returns -249 against the expected 1.0 and the fourth-order assertion of the old routing returns 1.18 against -0.07, but tests/biot/test_polygon_stable_evaluator.py:70-73 skips all seven accuracy cases without NOVA_POLYGON_INTEGRATED_RECEIPT, which is exactly what the after_suite arm reports as seven skips.",
+    "evidence": "The fragment docs/evidence/fragments/sub-millisecond-forward-path/polygon-stable-evaluator.html records the integrated per-state trace, the 1.565208/1.871670 production ratios, the 9,351,538-byte graph and both suite arms, and each number reconciles with head-summary/receipt.json and production/production-budget.json on disk.",
+    "fit": "The added helpers follow the module's existing idiom (paired_* wrappers, _-prefixed module-private names, dense mechanism comments as at nova/biot/polygonanalytic.py:975-981) and introduce no forbidden name.",
+    "goal_fidelity": "nova/biot/polygonanalytic.py:3509-3523 routes every derivative through _packed_analytic_moments_primal(..., stable_poles=True) while nova/biot/polygonanalytic.py:3554 keeps the primal on the unchanged stable_poles=False path, giving the head-summary trace 7.424e-10/9.150e-10/6.982e-10.",
+    "reuse": "The landed module is byte-for-byte ff92ac8f's stable-pole machinery plus only the tangent routing and stencil change, measure.py imports trace/jet/density from scripts/prototypes/bank_hessian_diagnosis/report.py, and production_pair.py at scripts/prototypes/polygon_stable_evaluator/production_pair.py:13-17 imports compile_pass_profile.analyse; production_pair.py itself adapts a branch-only file (bf9964e is not an ancestor of the base) and duplicates no main-owned capability.",
+    "scope_discipline": "git diff --stat 0299790519..7532899e1 lists 12 paths, each inside the declared write paths; the only sensitive one is tests/equilibrium/test_bounded_point_program.py:30 where the ceiling rises 6,000,000 to 10,000,000, which the coordinator's ruling in resume-4-advice.txt line 1 grants and commit 764da60c2 carries alone."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is to route every polygon kernel derivative through one stable evaluator with a sixth-order height stencil so the 64-node trace and interior Hessians meet 1e-8 with values bit-identical to main; nova/biot/polygonanalytic.py:3511-3523 does exactly that.\nVERDICT done_when: the done_when asks the fragment to record the integrated result beside the tangent-only 1.32x/1.56x, the bounded-point byte count and both suite arms; docs/evidence/fragments/sub-millisecond-forward-path/polygon-stable-evaluator.html carries all four and the arms are on disk.\nVERDICT write_paths: the fence was polygonanalytic.py, tests/biot, scripts/prototypes/polygon_stable_evaluator, the fragment, its figures directory and tests/equilibrium/test_bounded_point_program.py; every diff line is inside them.\nVERDICT manifest: read; complete, zero added failures, both suite arms complete at EXIT=0 with the negative control red at base-summary/integrated.log.\nVERDICT diff: read all 16 commits against base 0299790519; 12 files, one product file (+443/-35), instruments, two new test files and one ceiling line.\nCALL_SITES: nova/biot/tiledassembly.py:1383, nova/equilibrium/fixed_points.py:327, nova/equilibrium/topology.py:2514\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:3554 keeps the primal on stable_poles=False while every tangent uses stable_poles=True, so the goal's two halves hold together.\nSCORE evidence: 19\nJUSTIFICATION evidence: head-summary/receipt.json reports 7.424e-10, 9.150e-10, 6.982e-10 and 6.919e-9 worst component, exactly the fragment's numbers.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: all 12 paths are declared; tests/equilibrium/test_bounded_point_program.py:30 raises the ceiling only under the coordinator's written ruling.\nSCORE durability: 15\nJUSTIFICATION durability: tests/biot/test_polygon_stable_evaluator.py:76-91 reddens on both regressions it names, but the accuracy cases skip without an env receipt.\nSCORE fit: 18\nJUSTIFICATION fit: nova/biot/polygonanalytic.py:972-1240 follows the module's paired_* and _-prefixed idiom with mechanism comments and no forbidden names.\nSCORE reuse: 18\nJUSTIFICATION reuse: the module is ff92ac8f's stable machinery plus the tangent routing, and measure.py imports trace/jet/density from scripts/prototypes/bank_hessian_diagnosis/report.py rather than copying them.\nFINDING tests/biot/test_moment_program_identity.py:164 non-blocking: the derivative-identity assertion is red at head and outside the per-file arms.\nFINDING tests/biot/test_polygon_stable_evaluator.py:73 non-blocking: seven accuracy cases skip without an environment receipt.\nFINDING base-summary/integrated.log:1 non-blocking: the negative-control header names the helper revision, not the main kernel it measured.",
+  "review_run_id": "r-20261117T224143469690-review-of-polygon-stable-evaluator-7532899e18fa",
+  "reviewed_base_sha": "02997905193b245dcc099a238fea6c22d8817671",
+  "reviewed_head_sha": "7532899e18fa8e56b465215727b6706813c90502",
+  "reviewed_run_id": "r-20261117T105922145451-polygon-stable-evaluator",
+  "reviewer": {
+    "backend": "omp",
+    "model": "local/deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T224143469690-review-of-polygon-stable-evaluator-7532899e18fa"
+  },
+  "reviewer_run_id": "r-20261117T224143469690-review-of-polygon-stable-evaluator-7532899e18fa",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T22:55:54.517924+00:00",
+  "total": 106
+}

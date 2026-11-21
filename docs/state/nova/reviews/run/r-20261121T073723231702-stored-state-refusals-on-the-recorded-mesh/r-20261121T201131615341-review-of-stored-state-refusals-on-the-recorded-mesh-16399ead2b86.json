@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "answered": "The prior review's ten findings are answered: the two _profile_coefficients/_mesh_record duplicates now live once in records.py and are imported by both runners; submit_recorded.sh is deleted and submit.sh takes --runner/--tree/--revision; the self-comparing band assertions are removed; the panel check reads the published SVG rather than an archived run path; submit.sh now verifies the runner is in the tree and marks a dirty revision.",
+  "call_sites": [],
+  "completed_at": "2026-11-21T20:23:51.432Z",
+  "dispatched_at": "2026-11-21T20:12:25Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/stored_state_refusals/panels.py",
+      "line": 202,
+      "severity": "non-blocking",
+      "text": "panels.py:202 still writes a <stem>-preview.png beside every SVG it saves, so the 'one SVG per figure' rule the commit says it honours is enforced only by where the redraw was pointed: a runner run with STORED_STATE_REFUSALS_FIGURES at the committed figures directory leaves an untracked preview that then fails tests/test_stored_state_refusals.py:151."
+    },
+    {
+      "file": "tests/test_stored_state_refusals.py",
+      "line": 114,
+      "severity": "non-blocking",
+      "text": "tests/test_stored_state_refusals.py:114 asserts only that the runner's source contains the import line and :116 that four helper names appear as substrings, which stays true for a runner that imports the comparison's helpers and then restates the fixtures, so it does not enforce what its docstring claims."
+    },
+    {
+      "file": "tests/test_stored_state_refusals.py",
+      "line": 157,
+      "severity": "non-blocking",
+      "text": "tests/test_stored_state_refusals.py:157 re-implements the coloured-path count that scripts/prototypes/stored_state_refusals/panels.py:417 already owns as drawn_series, so the two definitions of 'a series drew ink' can diverge and the published-figure check would not follow the drawing code."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh.html",
+      "line": 144,
+      "severity": "non-blocking",
+      "text": "docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh.html:144 states that each receipt names source_revision 6816484212613ba4657e3083620bb32b0bd75277, but the per-arm receipts carry no source_revision key at all; only measurement.json in ~/.cache/nova-stored-state-refusals/recorded-cases does, so a reader checking the receipt the sentence names finds nothing."
+    },
+    {
+      "file": "manifest.md",
+      "line": 10,
+      "severity": "non-blocking",
+      "text": "manifest.md:10 records landing as the bare sha 16399ead2b8652a38a97470b77f5594e2f94f4ae rather than a landing record, so the plan section promotion lands carries no statement of what changed or of the measure's figure."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_stored_state_refusals.py:64 and :86 now compare the receipts to constants the runner does not write, so a receipt that drifts reddens them, but the receipts are static files under ~/.cache so no solver regression is caught without a manual GPU re-run.",
+    "evidence": "tests/test_stored_state_refusals.py:64 and :86 assert the tightened TCV band and ITER no-axis refusal against constants the test writes, and the committed SVGs were verified byte-identical to the redraw jobs, but the baseline arm exited 4 with no test file present so the comparison proves nothing about added failures.",
+    "fit": "The added code follows the sibling prototype's conventions and the figure rules at scripts/prototypes/stored_state_refusals/panels.py:200, declaring the 31.1 x 16 cm canvas the repository's imas-ink style specifies.",
+    "goal_fidelity": "scripts/prototypes/stored_state_refusals/run_recorded_cases.py:292 reproduces both recorded refusals only from the tightened continuation arm, so the stored-flux default arm the node goal names as the standing case does not itself assert the recorded values.",
+    "reuse": "The profile-coefficient, mesh-record and submission duplications are repaired into scripts/prototypes/stored_state_refusals/records.py:22 and submit.sh:20, leaving the arm loop still written twice at run_cases.py:145 and run_recorded_cases.py:196.",
+    "scope_discipline": "Every path in 6816484212613ba4657e3083620bb32b0bd75277..16399ead2b8652a38a97470b77f5594e2f94f4ae lies inside the four declared write paths and nothing outside them is touched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261121T201131615341-review-of-stored-state-refusals-on-the-recorded-mesh-16399ead2b86",
+  "reviewed_base_sha": "6816484212613ba4657e3083620bb32b0bd75277",
+  "reviewed_head_sha": "16399ead2b8652a38a97470b77f5594e2f94f4ae",
+  "reviewed_run_id": "r-20261121T073723231702-stored-state-refusals-on-the-recorded-mesh",
+  "scores": {
+    "durability": 14,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 13,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T20:26:29.034826+00:00",
+  "total": 90,
+  "verdicts": {
+    "call_sites": "none \u2014 the landed change is a prototype runner plus a receipt-reading test; its only runtime dependencies are the six helpers imported from tests/test_magnetics_fit_efit_comparison.py and the nova.media drawing API, none of which is called from production code.",
+    "diff": "Read all six commits against base 6816484212613ba4657e3083620bb32b0bd75277: two runner scripts, records.py and panels.py helpers, submit.sh parameterisation, one test module, one evidence fragment and four SVGs (eleven paths), each inside the declared write paths.",
+    "done_when": "The dispatched done_when asks for TCV unqualified within 3x of 0.030 with its recorded reason code, ITER refusing with no axis admitted, a tightened-policy control reported against the record, MAST-U left unmeasured with its wall and device memory, and a panel per arm; tests/test_stored_state_refusals.py:64 asserts the tightened TCV band and :86 the ITER no-axis refusal, the fragment states MAST-U's 3508.560784 s wall and 12801015808-byte card limit, and four panels are published.",
+    "goal": "The goal is to reproduce the recorded TCV and ITER forward-solve refusals as standing cases built from the comparison's own fixtures; scripts/prototypes/stored_state_refusals/run_recorded_cases.py:73 imports the comparison's reader, machine, mesh, seed, current binding and policy, and its tightened arm reaches the recorded TCV residual 0.023974836483438934 at reason 12 and the recorded ITER refusal, but the stored-flux default arm does not reach either refusal.",
+    "manifest": "Read the reviewed manifest: it records six commits, the literal gate command, baseline exit 4 (test file absent at base, 0 tests) and after exit 0 (6 passed), the negative-control log, and an outside_scope note on the untracked imas-efit data; its landing line is a bare sha rather than a landing record.",
+    "write_paths": "The declared paths are scripts/prototypes/stored_state_refusals, the forward-solve-near-stored-states fragment, its figures directory and tests/test_stored_state_refusals.py; all eleven paths in the diff lie inside them."
+  }
+}

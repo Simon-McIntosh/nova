@@ -1,0 +1,114 @@
+{
+  "added_failure_basis": "The reviewed run records no baseline_suite or after_suite JSON arm, and its only gate log (logs/arms-final-b26da1031.log) carries a head arm of 10 passed with EXIT=0 and a base arm that cannot collect the added test file (EXIT=4, file or directory not found, no failing test id). With no readable pair of arms there is no id a gained commit could have added, so the count of zero records the absence of a measurable delta, not a measured delta of zero.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "bb4e2d45f7a292970bdb8b381cf71dba9d8c0cd5",
+    "54f3bded7e264e67ead5e6cb6c91677f1598810c",
+    "b26da1031e578a1939d2046d50d4c2ddd94ff32c"
+  ],
+  "completed_at": "2026-11-19T22:03:28.740Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-polygon-symmetry-violation-2-b26da1031e57",
+      "recorded_at": "2026-11-19T22:25:25.224305+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-19T22:03:01Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-polygon-symmetry-violation-2-b26da1031e57",
+      "recorded_at": "2026-11-19T22:25:12.452123+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "repair-of-polygon-symmetry-violation-2-b26da1031e57",
+      "recorded_at": "2026-11-19T22:25:18.024399+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/mutation_control.py",
+      "line": "66",
+      "severity": "blocking",
+      "text": "The control's verdict is encoded backwards: the branch that reports CONTROL FAILED exits 0 (line 68) while the branch that reports the refusal exits 1 (line 73). A control whose two forms have not separated therefore returns success and one that did separate returns failure, so any promotion gate reading the status scores a silent failure as the pass."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/arms.py",
+      "line": "104",
+      "severity": "blocking",
+      "text": "main records base_status, head_status and control.returncode and then returns, so the driver exits 0 whatever the three arms did; logs/arms-final-b26da1031.log:17 ends EXIT=0 while carrying CONTROL_EXIT=1 and would also end EXIT=0 with a red head arm. The reviewed run's negative_control_log names this log, so the red it records cannot be read from the log's exit status and no admission rule can see the refusal."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/arms.py",
+      "line": "64",
+      "severity": "non-blocking",
+      "text": "extract() and run() re-implement the base-and-head arm runner already owned by scripts/prototypes/diiid_finite_edge_flux/suite_arms.py:36-66, which extracts a revision with git archive, runs pytest under PYTHONPATH and JAX_PLATFORMS, and writes a per-arm log headed with revision, tree and literal command and closed with EXIT=; the addition neither imports nor generalizes that owner, and the missing per-arm log is why the reviewed manifest carries no baseline_suite or after_suite arm."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/arms.py",
+      "line": "87",
+      "severity": "non-blocking",
+      "text": "--directory defaults to the relative name arms, so the run extracts a full repository tree into the working directory it runs in, which is the worktree; the parallel-safety rule puts a temporary extraction under $TMPDIR so it dies with the run's scratch."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/split.py",
+      "line": "56",
+      "severity": "non-blocking",
+      "text": "mirror_gap recomputes the same vertical residual that _horizontal_reflection already bounded at nova/biot/polygonanalytic.py:2471-2475, so its value is bounded by 32 eps scale for every paired cell and is infinity otherwise; the reported mirror_gap column is now binary rather than a departure, and a cell 1e-12 off symmetry moves from the A group to B although the recheck on this geometry still reads 867 A."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/test_prototypes.py",
+      "line": "159",
+      "severity": "non-blocking",
+      "text": "Both cells fed to symmetric_cells are symmetric about their own centre Z, so gaps.shape == (2,) and gaps == 0.0 hold under the owner-based mirror_gap and under the prior centre-based one alike; the assertion cannot fail on the reversion it appears to guard."
+    },
+    {
+      "file": "scripts/prototypes/polygon_symmetry_violation/test_prototypes.py",
+      "line": "123",
+      "severity": "non-blocking",
+      "text": "The WORST_B empty-section repair is tested only through print_rows, so restoring split.py:191 to a bare print of the WORST_B header leaves the suite green; the repaired call site is never exercised."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "The reviewed worktree at b26da1031 carries this file modified and unstaged, so the repairs' narrative and the job ids that re-measured the identity (psi-identity.json over 946 records, split-recheck.json) are not landed; the committed line still quotes psi_current_vs_base_max_abs = 0.0 without citing the receipt that now measures it."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read bb4e2d45f, 54f3bded7 and b26da1031 one by one: bb4e2d45f replaces the breaking psi loop with compare.psi_identity and a refusal, prints split.py's WORST_B rows, reads _horizontal_reflection for the mirror gap and collapses the three central() copies into compare.central_step; 54f3bded7 deletes the source-text search from the control; b26da1031 replaces the exact gap equality with a 1e-12 tolerance.",
+    "done_when": "The done_when is 'git diff --stat from the base names no path under nova/, and the fragment recommends one kernel change with an estimated compile-cost effect'; git diff --name-status 7ee4fa80433045b2d3482cdc48ae3dac6bb5ae47 b26da1031e578a1939d2046d50d4c2ddd94ff32c names only the seven scripts/prototypes/polygon_symmetry_violation paths, and docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html:68 carries the row-derivative recommendation with its instruction-count and compile-wall estimate.",
+    "goal": "The reviewed node's brief (/home/ITER/mcintos/.cache/nova-s21-briefs/nov19/polygon-symmetry-violation.md) asks for the split reproduction, the group-A mechanism, a group-B independent reference and the smallest kernel change with a cost estimate; the three gained commits repair the record's own instruments in scripts/prototypes/polygon_symmetry_violation/{compare,crosscheck,scrutiny,split,mutation_control,arms,test_prototypes}.py and leave the deliverable fragment untouched.",
+    "manifest": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T181844971547-polygon-symmetry-violation-2/manifest.md; it reports status complete, tests: scripts/prototypes/polygon_symmetry_violation/test_prototypes.py (10 tests, no JAX), test_logs and negative_control_log both at logs/arms-final-b26da1031.log, and its commits line names bb4e2d45f, 54f3bded7 and b26da1031 with no commit of the gained range omitted.",
+    "write_paths": "The declared paths are docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html and scripts/prototypes/polygon_symmetry_violation; all seven files gained in f39764085..b26da1031 lie under the second and no other path changed."
+  },
+  "justifications": {
+    "durability": "test_prototypes.py:70-77 fails (SystemExit from compare.py:350) if the break is restored at compare.py:337, but test_prototypes.py:159 passes under both the owner-based and the prior centre-based split.py:42 mirror gap, so it cannot catch that reversion.",
+    "evidence": "logs/arms-final-b26da1031.log records ARM head as 10 passed and the control separation (shipped gap 3.000e-06 against unfixed gap 0.000e+00), but its last line is EXIT=0 and the base arm's EXIT=4 is a collection error carrying no failing test id, so the declared negative control is not readable as red.",
+    "fit": "The added modules follow the scripts/prototypes house style and the private-symbol import at split.py:25 has precedent at scripts/device_kernel_port/measure_nine_blocks.py:19, though compare.py:354 exports the record count as a float.",
+    "goal_fidelity": "The gained commits re-measure the flux identity at compare.py:322 over 946 ladder records (psi-identity.json), yet docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html:57 was not updated by them and still cites psi_current_vs_base_max_abs without that receipt.",
+    "reuse": "split.py:42 now extends the kernel owner and compare.py:313 removes two duplicate central() copies, but arms.py:64 re-implements the base/head archive-and-run arm owned by scripts/prototypes/diiid_finite_edge_flux/suite_arms.py:36-66 without extending it.",
+    "scope_discipline": "Every path in git diff --name-status f39764085 b26da1031 lies under scripts/prototypes/polygon_symmetry_violation and no path under nova/ is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed node's brief (/home/ITER/mcintos/.cache/nova-s21-briefs/nov19/polygon-symmetry-violation.md) asks for the split reproduction, the group-A mechanism, a group-B independent reference and the smallest kernel change with a cost estimate; the three gained commits repair the record's own instruments in scripts/prototypes/polygon_symmetry_violation and leave the deliverable fragment untouched.\nVERDICT done_when: The done_when is 'git diff --stat from the base names no path under nova/, and the fragment recommends one kernel change with an estimated compile-cost effect'; git diff --name-status 7ee4fa80433045b2d3482cdc48ae3dac6bb5ae47 b26da1031e578a1939d2046d50d4c2ddd94ff32c names only the seven scripts/prototypes/polygon_symmetry_violation paths, and docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html:68 carries the row-derivative recommendation with its instruction-count and compile-wall estimate.\nVERDICT write_paths: The declared paths are docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html and scripts/prototypes/polygon_symmetry_violation; all seven files gained in f39764085..b26da1031 lie under the second and no other path changed.\nVERDICT manifest: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T181844971547-polygon-symmetry-violation-2/manifest.md; it reports status complete, tests: scripts/prototypes/polygon_symmetry_violation/test_prototypes.py (10 tests, no JAX), test_logs and negative_control_log both at logs/arms-final-b26da1031.log, and its commits line names bb4e2d45f, 54f3bded7 and b26da1031 with no commit of the gained range omitted.\nVERDICT diff: Read bb4e2d45f, 54f3bded7 and b26da1031 one by one: bb4e2d45f replaces the breaking psi loop with compare.psi_identity and a refusal, prints split.py's WORST_B rows, reads _horizontal_reflection for the mirror gap and collapses the three central() copies into compare.central_step; 54f3bded7 deletes the source-text search from the control; b26da1031 replaces the exact gap equality with a 1e-12 tolerance.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: The gained commits re-measure the flux identity at compare.py:322 over 946 ladder records (psi-identity.json), yet docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html:57 was not updated by them and still cites psi_current_vs_base_max_abs without that receipt.\nSCORE evidence: 13\nJUSTIFICATION evidence: logs/arms-final-b26da1031.log records ARM head as 10 passed and the control separation (shipped gap 3.000e-06 against unfixed gap 0.000e+00), but its last line is EXIT=0 and the base arm's EXIT=4 is a collection error carrying no failing test id, so the declared negative control is not readable as red.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Every path in git diff --name-status f39764085 b26da1031 lies under scripts/prototypes/polygon_symmetry_violation and no path under nova/ is touched.\nSCORE durability: 15\nJUSTIFICATION durability: test_prototypes.py:70-77 fails with SystemExit from compare.py:350 if the break is restored at compare.py:337, but test_prototypes.py:159 passes under both the owner-based and the prior centre-based split.py:42 mirror gap, so it cannot catch that reversion.\nSCORE fit: 15\nJUSTIFICATION fit: The added modules follow the scripts/prototypes house style and the private-symbol import at split.py:25 has precedent at scripts/device_kernel_port/measure_nine_blocks.py:19, though compare.py:354 exports the record count as a float.\nSCORE reuse: 5\nJUSTIFICATION reuse: split.py:42 now extends the kernel owner and compare.py:313 removes two duplicate central() copies, but arms.py:64 re-implements the base/head archive-and-run arm owned by scripts/prototypes/diiid_finite_edge_flux/suite_arms.py:36-66 without extending it.\nFINDING scripts/prototypes/polygon_symmetry_violation/mutation_control.py:66 blocking: The control's verdict is encoded backwards -- the branch that reports CONTROL FAILED exits 0 (line 68) while the branch that reports the refusal exits 1 (line 73), so a control whose two forms have not separated returns success and any promotion gate reading the status scores a silent failure as the pass.\nFINDING scripts/prototypes/polygon_symmetry_violation/arms.py:104 blocking: main records base_status, head_status and control.returncode and then returns, so the driver exits 0 whatever the three arms did; logs/arms-final-b26da1031.log ends EXIT=0 while carrying CONTROL_EXIT=1 and would also end EXIT=0 with a red head arm, so the manifest's negative_control_log cannot be read as red.\nFINDING scripts/prototypes/polygon_symmetry_violation/arms.py:64 non-blocking: extract() and run() re-implement the base-and-head arm runner owned by scripts/prototypes/diiid_finite_edge_flux/suite_arms.py:36-66, which already extracts a revision with git archive, runs pytest under PYTHONPATH and JAX_PLATFORMS, and writes a per-arm log headed with revision, tree and command and closed with EXIT=; the addition neither imports nor generalizes that owner, and the absent per-arm log is why the manifest carries no baseline_suite or after_suite arm.\nFINDING scripts/prototypes/polygon_symmetry_violation/arms.py:87 non-blocking: --directory defaults to the relative name arms, so the run extracts a full repository tree into the worktree it runs in; the parallel-safety rule puts a temporary extraction under $TMPDIR so it dies with the run's scratch.\nFINDING scripts/prototypes/polygon_symmetry_violation/split.py:56 non-blocking: mirror_gap recomputes the residual _horizontal_reflection already bounded at nova/biot/polygonanalytic.py:2471-2475, so its value is bounded by 32 eps scale for every paired cell and is infinity otherwise; the reported mirror_gap column is binary rather than a departure, and a cell 1e-12 off symmetry moves from A to B although the recheck on this geometry still reads 867 A.\nFINDING scripts/prototypes/polygon_symmetry_violation/test_prototypes.py:159 non-blocking: Both cells fed to symmetric_cells are symmetric about their own centre Z, so gaps.shape == (2,) and gaps == 0.0 hold under both the owner-based mirror_gap and the prior centre-based one; the assertion cannot fail on the reversion it appears to guard.\nFINDING scripts/prototypes/polygon_symmetry_violation/test_prototypes.py:123 non-blocking: The WORST_B empty-section repair is tested only through print_rows, so restoring split.py:191 to a bare print of the WORST_B header leaves the suite green; the repaired call site is never exercised.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html:57 non-blocking: The reviewed worktree at b26da1031 carries this file modified and unstaged, so the repairs' narrative and the job ids that re-measured the identity are not landed; the committed line still quotes psi_current_vs_base_max_abs = 0.0 without citing psi-identity.json.\n",
+  "review_run_id": "r-20261119T220206659148-review-of-polygon-symmetry-violation-2-b26da1031e57",
+  "reviewed_base_sha": "f3976408513be85108c9d5ee87ce40007f023fc5",
+  "reviewed_head_sha": "b26da1031e578a1939d2046d50d4c2ddd94ff32c",
+  "reviewed_run_id": "r-20261119T181844971547-polygon-symmetry-violation-2",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T22:13:03.554885+00:00",
+  "total": 83
+}

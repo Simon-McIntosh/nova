@@ -37,7 +37,7 @@ from nova.imas.diiid_description import (
 )
 
 DEFAULT_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
-DEFAULT_OUTPUT = Path("/work/projects/imas_gpu/sophelio/vacuum-gate")
+DEFAULT_OUTPUT = Path("/work/projects/imas_gpu/nova/vacuum-gate")
 DERIVATIVE_THRESHOLDS = (50.0, 100.0, 200.0)
 SELECTED_THRESHOLD = 100.0
 SMOOTHING_WINDOW_MS = 50.0

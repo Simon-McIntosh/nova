@@ -46,7 +46,7 @@ from nova.imas.diiid_description import (
 )
 
 DEFAULT_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
-DEFAULT_OUTPUT = Path("/work/projects/imas_gpu/sophelio/vacuum-gate")
+DEFAULT_OUTPUT = Path("/work/projects/imas_gpu/nova/vacuum-gate")
 DEFAULT_FIGURES = Path("docs/figures/diiid-forward-onboarding/differencing")
 PREREGISTRATION_NAME = "diiid_plasma_subtraction_preregistration.json"
 RESULT_NAME = "diiid_plasma_subtraction_gate.json"

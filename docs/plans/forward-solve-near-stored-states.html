@@ -8,9 +8,9 @@
   <meta name="plan-slug" content="forward-solve-near-stored-states">
   <meta name="plan-title" content="Forward Solve Near Stored States — qualify the solves a reconstruction asks for beside an imas-efit equilibrium">
   <meta name="plan-summary" content="Forward solves started at or beside a stored imas-efit state refuse on MAST-U, TCV and ITER; reproduce, attribute and repair them.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="in-progress">
   <meta name="plan-roi" content="high">
-  <meta name="plan-effort-hours" content="14.0">
+  <meta name="plan-effort-hours" content="20.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
@@ -20,13 +20,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,efit,grad-shafranov,convergence">
   <meta name="plan-after" content="converged-forward-solve">
-  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s1&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s2&quot;:[&quot;forward-solve-near-stored-states#s1&quot;],&quot;s3&quot;:[&quot;forward-solve-near-stored-states#s2&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s1&quot;:[&quot;inverse-equilibrium-baseline#s2&quot;],&quot;s2&quot;:[&quot;forward-solve-near-stored-states#s1&quot;],&quot;s3&quot;:[&quot;forward-solve-near-stored-states#s2&quot;],&quot;s4&quot;:[&quot;inverse-equilibrium-baseline#s8&quot;]}">
   <title>Forward Solve Near Stored States | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
-<meta name="plan-modified" content="2026-11-17">
+<meta name="plan-version" content="25">
+<meta name="plan-modified" content="2026-11-21">
 </head>
 <body>
   <main class="plan-doc">
@@ -48,7 +48,7 @@
     <p><strong>The boundary this plan keeps.</strong> The qualification threshold of 1e-10 does not move and
     no case is admitted by relaxing it. The plan sequences after <code>converged-forward-solve</code>, which
     owns the forward solve's convergence on its own case set, and takes only the cases that arise beside a
-    stored imas-efit state. It does not rerun the inverse fit: when §3 lands, the inverse baseline's own
+    stored imas-efit state, with one exception: §4 makes the public solve run under a batch, which the inverse baseline's cost section needs, and measures it on a state that baseline generated itself. It does not rerun the inverse fit: when §3 lands, the inverse baseline's own
     sections decide whether the nested class is run again on these machines.</p>
     <p>Its record is <code>docs/evidence/archive/forward-solve-near-stored-states-landed.html</code>.</p>
 
@@ -59,6 +59,7 @@
         <tr><td>§1 The three refusals as standing cases</td><td>3</td><td>standard</td><td>moderate</td><td>inverse-equilibrium-baseline §2</td></tr>
         <tr><td>§2 Where each solve stops qualifying</td><td>3</td><td>deep</td><td>moderate</td><td>§1</td></tr>
         <tr><td>§3 The solves qualify</td><td>8</td><td>deep</td><td>elevated</td><td>§2</td></tr>
+        <tr><td>§4 The public solve runs under a batch</td><td>6</td><td>deep</td><td>elevated</td><td>inverse-equilibrium-baseline §8 (landed)</td></tr>
       </tbody>
     </table>
 
@@ -69,12 +70,12 @@
     reproducible on their own, from stored inputs, without the inverse class: each machine's description,
     imas-efit's fitted conductor currents and profile coefficients, and the stored flux map used as the
     starting field.</p>
-    <p><strong>Done when.</strong> (1) One batch job on the H200, falling back to titan, runs the three cases
-    in sequence and reproduces each refusal: the MAST-U perturbed solve ends unqualified with the active-set
-    step refused and a residual within a factor of three of 1.2e-4; the TCV solve from the stored field ends
+    <p><strong>Done when.</strong> (1) One batch job on the H200, falling back to titan, runs the cases
+    in sequence and reproduces each refusal under the solver's default policy, started from the stored flux map: the MAST-U solve at the stored coefficients ends unqualified with a residual within a factor of three of 4.9e-10; the MAST-U solve at the displaced coefficients the comparison's fit asked for ends unqualified with the active-set
+    step refused and a residual within a factor of three of 1.2e-4; the TCV solve at the stored coefficients ends
     unqualified with the same refusal and a residual within a factor of three of 0.030; the ITER solve ends
-    with no magnetic axis admitted. (2) Positive control in the same job: the unperturbed MAST-U state
-    qualifies below 1e-10, as the comparison run measured. (3) The record carries, per case, the terminal
+    with no magnetic axis admitted. (2) Positive control in the same job: the MAST-U state at the stored coefficients
+    qualifies below 1e-10 when continued from the first solve's terminal state under the tighter stopping tolerance and larger budgets the comparison run recorded, and the record states that policy beside the default one. (3) The record states, per solve, the mesh, the solver route and the coefficient vector, and for the displaced solve the coordinate displaced, its size and its sign, with the terminal
     reason and residual and one line-contour panel of the terminal state on the stored imas-efit state, on
     shared levels, with both null sets and the wall.</p>
 
@@ -85,13 +86,7 @@
     section measures that distance for each case, and says which displaced states can be reached at all by
     the solve as it stands when it is led there in smaller steps. It makes no claim about whether an
     unreached state exists.</p>
-    <p><strong>Done when.</strong> (1) For MAST-U the record states, along the profile-coefficient direction
-    the inverse class perturbs, the largest relative perturbation from the stored coefficients at which the
-    solve still qualifies below 1e-10 and the smallest at which it does not, bracketed to within a factor of
-    two, beside the perturbation size the class's response step uses. (2) For TCV and ITER the record states
-    whether any state within 1 % of the stored coefficients qualifies when started from the stored flux map,
-    and for each the stage at which qualification is first lost. (3) Each case is given one of two verdicts
-    on a measurement that can fail. <em>Reached</em>: the state displaced by the inverse class's response step qualifies below 1e-10 when approached from the stored state through intermediate solves, and the record lists the sequence that got there. <em>Not reached</em>: no sequence tried qualifies, and the record lists each sequence and where it stopped. Negative control: the direct solve of the displaced MAST-U state, with no intermediate solves, reproduces the refusal §1 recorded.</p>
+    <p><strong>Done when.</strong> (1) For MAST-U the record states, along the coordinate and sign §1 recorded, the largest fraction of the recorded displacement at which the solve qualifies below 1e-10, and the smallest at which it does not where one exists, over the fractions 1/64, 1/32, 1/16, 1/8, 1/4, 1/2 and 1 run in that order, each solve started from the last state that qualified, beginning at §1's positive control and using its policy, all in one batch job on the H200, falling back to titan, at the mesh and solver route §1 recorded, with the device stated in the record. (2) For TCV and ITER, which refuse at the stored coefficients, the record states the terminal reason and residual from two starting routes: the stored flux map under the default policy, and the same start under the positive control's policy. (3) Each case is given one of two verdicts within those stated sets. <em>Reached</em>: for MAST-U the last solve of that sequence, at the full recorded displacement, qualifies, and the MAST-U solve at the stored coefficients counts as reached by §1's positive control; for TCV and ITER either route qualifies. <em>Not reached</em>: otherwise, with where each solve stopped. Negative control: the direct MAST-U solve at the full displacement under the default policy, started from the stored flux map, reproduces the refusal §1 recorded.</p>
 
     <h2 id="s3">§3 — The solves qualify</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
@@ -99,9 +94,7 @@
     <p>For every case §2 marks as reached, the forward solve is repaired until the solves a reconstruction
     asks for beside the stored state qualify directly, without being led there. A case §2 marks as not
     reached is not forced: its record stands, and it stays open against this plan.</p>
-    <p><strong>Done when.</strong> (1) On every case §2 marks as reached, forward solves at the stored
-    coefficients and at the stored coefficients displaced by plus and minus the inverse class's response
-    step, each started from the stored flux map, qualify below the unchanged 1e-10 threshold, measured in one
+    <p><strong>Done when.</strong> (1) On every case §2 marks as reached, each solve §1 showed refusing at the base revision, at its recorded coefficients and started from the stored flux map under the default policy, qualifies below the unchanged 1e-10 threshold, measured in one
     batch job on the H200, falling back to titan. (2) Nothing already converging is lost: the forward gate
     that passes at the base revision passes at the head with no added failure, both arms run in fresh
     processes on the same device. (3) Negative control: the same job run at the base revision reproduces the
@@ -109,6 +102,10 @@
     on the stored imas-efit state, on shared levels, with both null sets and the wall.</p>
 
     
+
+    <h2 id="s4">§4 — The public solve runs under a batch</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+<p>Waits on the inverse baseline's row-exchange section, which has landed and whose case, record and solver route it reads; the inverse baseline's cost section waits on it.</p><p>The inverse baseline could not measure what a reconstruction costs at batch widths above one. Its attempt ran a route inventory on a MAST carrier (shot 22086, slice 40) on a CPU node and on a P100. The Newton-Krylov route of the public solve refused the batched call with a traced-array conversion on the host; the Picard and Anderson routes ran batched but ended unconverged at a residual of 0.032, batched and unbatched alike; and the unbatched Newton-Krylov solve did not converge either (4.8e-5 on the P100). No route both converged and ran under a batch, so no cost was reported. The lead ruled on 2026-11-18 that batching be made a section here and the cost section wait on it. The receipts are <code>/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/route-inventory-cpu.json</code> and <code>/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/route-inventory-titan.json</code> (titan job 1324349).</p><p>A batched entry to the forward solve already exists and carries the accelerated routes over a leading batch axis, so the capability is not new. What the receipts show is one route breaking inside that entry and the others not converging on that carrier. This section therefore adds no second batched surface and no new public entry point: it repairs that route under the existing batched entry, and widens that entry to take the request and return, per state, the receipt fields of the unbatched public solve.</p><p>The case this section is measured on is a different one, chosen because its solve is known to qualify alone: the generating state of the nova-written ITER rows, solved at the reference mesh on a device in the inverse baseline's row-exchange section and recorded in <code>docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html</code>.</p><p><strong>Done when.</strong> (1) Positive control first: the generating state of the nova-written ITER rows qualifies below the unchanged 1e-10 threshold when solved alone by the public solve's default route, which is the route the inverse class calls and the one the receipts show refusing a batched call; the record names that route. The public forward solve on that route then runs under a batch of 16 and of 64 copies of that same state in one traced program on the H200, and that one call takes the unbatched solve's request and returns per-state converged flags and residuals as arrays of the batch width beside the unbatched receipt's fields for each state, with no host conversion inside the traced solve, with every copy qualifying below the threshold. The same batch with each copy displaced by an independent 1 % change in its profile amplitudes is run as well, and the record reports how many of those qualify; that count is reported, not gated. (2) Each batched state agrees with the same state solved alone with the flux difference at every mesh node within 1e-9 of the axis-to-boundary flux span, and the warm wall per state at width 16 is no greater than the warm wall of one unbatched solve, both measured in one job with compile excluded and the persistent compilation cache contract printed. (3) Negative control: at the base revision the same batched call on the same route raises the traced-array conversion the receipts recorded. Nothing already converging is lost: the forward gate that passes at base passes at head with no added failure. The record carries one line-contour panel of a batched state on the state solved alone, on shared levels, with both null sets and the wall.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -118,6 +115,44 @@
     <pre class="r-fu-prompt">/reckon-build forward-solve-near-stored-states §1</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261119T070256263324-review-of-stored-state-refusals-fbfeafd36316" data-who="reckon-build" data-when="2026-11-19T07:16:40.310Z">
+    <div class="r-comment-body"><p>Reviewed a148a0a9d176713a90cd24ffa7de2966b0c55654..fbfeafd36316f86b924745f2cf343733ee35cc63 (eight commits, twelve paths) against the six checklist items and stored a parsed record scoring goal_fidelity 11, evidence 9, scope_discipline 19, durability 5, fit 12, reuse 4. Two blocking findings: report.py:37 drops the TCV and ITER coefficient vectors from the landed fragment by first-writer-wins merge, and run_cases.py:219 invents the displaced step so the mastu-displaced arms do not stand up the comparison's displaced coefficients. Four non-blocking findings: report.py:56 carries no finite residual operand, run_cases.py:78 re-implements the _write the imported comparison module owns, submit.sh:80 submits a raw --wrap with no --job-name, and the reviewed manifest.md:10 records an unsubstituted {node_test_files} placeholder. added_failure_count 0 from 4 passed in both arms. The section's own positive control refused (mastu-stored-continuation qualified=no at 489.56 s), which is recorded in the goal_fidelity justification rather than as a defect.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261120T044804973844-review-of-stored-state-refusals-bddfb05efe1a-figure" data-who="reckon-build" data-when="2026-11-20T04:55:36.740Z">
+    <div class="r-comment-body"><p>figure review of r-20261118T112812127189-stored-state-refusals at head bddfb05efe1a reports one blocking defect — the blue nova series the legend advertises is drawn nowhere in any of the six panels — plus three non-blocking findings (byte-identical MAST-U raster pairs, an arm-only caption that names no series, and roughly three quarters of each canvas left blank).</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261120T044721594659-review-of-stored-state-refusals-bddfb05efe1a" data-who="reckon-build" data-when="2026-11-20T04:48:33.625Z">
+    <div class="r-comment-body"><p>Independent review of r-20261118T112812127189-stored-state-refusals at bddfb05efe1a3e06674394fbed4f262a9ae7f0f2, covering fbfeafd36316f86b924745f2cf343733ee35cc63..bddfb05efe1a (three repair commits, 6 paths); scores goal_fidelity 12, evidence 10, scope_discipline 19, durability 3, fit 15, reuse 12; five non-blocking findings, no blocking finding; the two prior blocking findings (report.py coefficient union, run_cases.py displaced coordinate) and all four prior non-blocking findings are answered by the repair commits.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261120T072653056296-review-of-stored-state-refusals-cbcba328b6a7-figure" data-who="reckon-build" data-when="2026-11-20T07:33:43.615Z">
+    <div class="r-comment-body"><p>figure review at cbcba328 — 6 SVG-rendered panels pass all six rubric items, 2 published previews fail legibility (blue nova series advertised in the legend, drawn nowhere), 3 non-blocking findings; parsed record at both write paths.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261120T072617915276-review-of-stored-state-refusals-cbcba328b6a7" data-who="reckon-build" data-when="2026-11-20T07:27:28.560Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261118T112812127189-stored-state-refusals at head cbcba328b6a7ed6561cfceeb641961725c2132a6 over base a148a0a9d176713a90cd24ffa7de2966b0c55654, focusing on the two commits gained since the bddfb05ef review: scores goal_fidelity 13, evidence 11, scope_discipline 18, durability 12, fit 15, reuse 10; one blocking finding (records.py:42 next_sequence globs the job leaf directory so every new receipt writes sequence 1) and four non-blocking findings, with the panel defect answered (all six committed SVGs carry 8-15 imas-efit and 13-17 nova contoured levels) and §1's residual and positive-control clauses recorded as unmet.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261120T202326050164-review-of-stored-state-refusals-3abe68a77fb0-figure" data-who="reckon-build" data-when="2026-11-20T21:00:39.105Z">
+    <div class="r-comment-body"><p>figure review of r-20261118T112812127189-stored-state-refusals at head 3abe68a77fb01 is parsed, read-only, with no blocking finding: the prior head's blocking defect (no blue nova series in either preview PNG) is answered — both previews now carry the blue series (6829 and 8198 blue pixels below the legend row) — and five non-blocking findings are recorded (four byte-identical MAST-U renders, the subject series drawn at 1.0 pt against a 2.6 pt reference, each panel filling 14-20 percent of a fixed 14x7.2 in canvas, contours that overshoot or stop short of the drawn wall, and blunt-capped contour ends where the source grid ends).</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261120T202250586394-review-of-stored-state-refusals-3abe68a77fb0" data-who="reckon-build" data-when="2026-11-20T20:27:48.189Z">
+    <div class="r-comment-body"><p>Independent review of r-20261118T112812127189-stored-state-refusals at head 3abe68a77fb0184ff30104038c66348a6a27ffbe over the run base a148a0a9d176713a90cd24ffa7de2966b0c55654, scoped to the nine paths gained after the cbcba328 review; scores goal_fidelity 14, evidence 12, scope_discipline 20, durability 16, fit 17, reuse 16, with three non-blocking findings (a harness-section pointer to a machine cache receipt the fragment does not carry, duplicated series-colour literals in panels.py, and §1 done-when residual and positive-control clauses still unmet).</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261118T112812127189-stored-state-refusals" data-who="reckon-build" data-when="2026-11-18T11:38:17Z">
+    <div class="r-comment-body"><p>Arm by arm against the section's targets. mastu-stored-default: NoQualifiedAxisError, axis_admitted false, termination reason 3 over 9 trips, 660.63 s, 8 finite residuals, 4.70674 last and 0.0796556 lowest, terminal residual nan. mastu-stored-continuation: NoQualifiedAxisError in 489.56 s over 1 trip with 0 finite residuals, because the seed itself admits no axis before the solve starts. mastu-displaced-default (titan job 1331905, corrected coordinate): the request's ff_prime_0 at index 2 moved from -0.16737319484313604 to -0.16747319484313603, 1e-4 of max(|c|, 1) and 5.97e-4 of that coefficient; NoQualifiedAxisError in 378.86 s, axis_admitted false, reason 3 over 9 trips, 8 finite residuals, 5.03224 last and 0.0992440 lowest. mastu-displaced-continuation: NoQualifiedAxisError in 0.52 s over 1 trip with 0 finite residuals. tcv-stored-default: NoQualifiedAxisError in 786.02 s, axis_admitted false, reason 3 over 7 trips, 6 finite residuals, 0.905546 last and 0.0302351 lowest. iter-stored-default: NoQualifiedAxisError in 680.70 s, axis_admitted false, reason 3 over 6 trips, 5 finite residuals, 0.796215 last and 0.137857 lowest. So the stored MAST-U, TCV and ITER cases all refuse with NO axis admitted, where the earlier comparison record reached a finite residual of 4.9e-10 unqualified on MAST-U, 0.030 on TCV, and qualified 5.3e-16 on MAST-U under the tightened policy. Read the two records against each other through the residual the refused solve does reach: the TCV arm's lowest recorded residual is 0.0302351, the record's own 0.030, so the solve arrives at that residual and still refuses because no qualified axis exists there; MAST-U stops at 0.0797, two orders above its 4.9e-10, and the tightened-policy 5.3e-16 is not reached at all. The positive control does not reproduce: the tightened policy IS the continuation policy this run used (newton_steps 40, active_set_steps 64, kernel_tolerance 1e-12), and its MAST-U continuation arm refuses in 0.52 s with no finite residual, so the difference is in the harness inputs, not the policy. The harness differs from the comparison record in every input that sets the solve: - Mesh: the request is built on the harness receipt_mesh of the cached fixture machine (StencilMesh, 367 nodes, 232 stencil rows) with the case projection applied to the source, wall and sample targets. - Seed flux: ExplicitSolveSeed taken from the stored imas-efit flux map at the stored time slice, not from a converged fit solution, so the iteration starts where the stored state is; each continuation arm takes the previous arm's terminal flux. - Policy: ForwardSolveRequest.from_defaults (newton_steps 10, gmres_iterations 30, active_set_steps 16, kernel_tolerance 1e-8, qualification_tolerance 1e-10) and the continuation policy above, whereas the record's 4.9e-10 and 5.3e-16 came from its own fit policy. - Revision: the four MAST-U and the TCV/ITER arms ran from source revision c0253f70, the displaced re-run from d1739fbcb and the fold from bddfb05ef; the record was measured at its own revision. - Machine build: the fixture machine was rebuilt here, not reused - this tree's cache identity is f93b899b01255233 while the store held 9bbd901844e53bbc, so job 1331905 paid the ~4h20m build before its two arms (and job 1330354's 2h wall expired inside that build). - Dtype setup: configure_dtypes() runs before any array is built and jax_enable_x64 is asserted True, on cuda:0 of a P100 whose fp64 is about a seventh of the H200's, so the walls are titan walls. - Coefficients: the stored coefficient vector itself differs between the two runs, [0.0, 0.0, -0.17007188340092272, 0.17007188340092272] at c0253f70 and [0.0, 0.0, -0.16737319484313604, 0.16737319484313604] at d1739fbcb, so the two runs did not start from the same stored profile either. The six poloidal panels are the six cited SVGs; each carries one QuadContourSet of unfilled flux contours, one TriContourSet of the first-wall units and five line2d null markers with no tick, grid or axis furniture, and the displaced pair differ from each other and from the stored pair (distinct sha1), so the corrected displacement moves the drawn field. Visual inspection was not available to this session - no vision-capable model is configured - so the panel evidence is that structural reading, stated as such, not a look at the rendered image.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261121T111618152173-review-of-stored-state-refusals-on-the-recorded-mesh-88647ab5294d" data-who="reckon-build" data-when="2026-11-21T11:30:25.874Z">
+    <div class="r-comment-body"><p>reviewed r-20261121T073723231702-stored-state-refusals-on-the-recorded-mesh over 6816484212613ba4657e3083620bb32b0bd75277..88647ab5294d455f2b31cedcc143b32f48391572; parsed record scores goal_fidelity 11, evidence 13, scope_discipline 19, durability 11, fit 16, reuse 3, with ten non-blocking findings and no blocking finding; added_failure_count 0 from 0 failures in both arms.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261121T111636505863-review-of-stored-state-refusals-on-the-recorded-mesh-88647ab5294d-figure" data-who="reckon-build" data-when="2026-11-21T11:36:55.857Z">
+    <div class="r-comment-body"><p>figure review of r-20261121T073723231702 at 88647ab5294d: 6 rubric items per figure across 4 panels, 1 blocking (iter-stored-default draws no nova X-point although its caption states one is drawn) and 2 non-blocking findings (tcv-stored-default null markers overlap; all panels use 14-20 percent of the canvas width).</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261121T201131615341-review-of-stored-state-refusals-on-the-recorded-mesh-16399ead2b86" data-who="reckon-build" data-when="2026-11-21T20:23:51.432Z">
+    <div class="r-comment-body"><p>reviewed r-20261121T073723231702-stored-state-refusals-on-the-recorded-mesh over 6816484212613ba4657e3083620bb32b0bd75277..16399ead2b8652a38a97470b77f5594e2f94f4ae (six commits, eleven paths); parsed record scores goal_fidelity 13, evidence 14, scope_discipline 19, durability 14, fit 17, reuse 13, with five non-blocking findings and no blocking finding; added_failure_count 0 from 0 failures in both arms, the base arm having exited 4 with the test file absent at the base revision.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261121T073723231702-stored-state-refusals-on-the-recorded-mesh" data-who="reckon-build" data-when="2026-11-21T16:05:43Z">
+    <div class="r-comment-body"><p>16399ead2b8652a38a97470b77f5594e2f94f4ae</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

@@ -1,0 +1,103 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T06:42:29.245Z",
+  "dispatched_at": "2026-11-18T06:42:04Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:121",
+      "id": "done_when-1",
+      "reason": "without a recorded \u03c8_N=1 extraction for frame :102 the acceptance test is circular and the node's successor cannot tell a correct edge value from a hard-coded one.",
+      "text": "done-when (2) demands the DIII-D builder's p\u2032 and FF\u2032 at \u03c8_N=1 equal \u22122319.18090032498 and +0.005842038974463571 to 1e-10 relative, but those two numbers appear nowhere except this plan and a review record (`grep -rl 2319.1809003` over the tree matches only `docs/plans/diiid-vertical-force-balance.html` and `docs/state/nova/reviews/plan/.../r-20261118T045109814107-...json`), so the worker has no recorded extraction to compare against and the only reachable test is an equality against a constant copied out of the plan \u2014 a check that cannot distinguish the correct finite edge from the plan's transcription of it, nor fail for the intended reason",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:119",
+      "id": "reasoning-1",
+      "reason": "the \u03c8_N=1 reference values must be backed by a named extraction for this frame (or restated from the extent record's edge arm), otherwise the section's evidence chain stops at the 0.95 hold and the reviewer cannot check the root-cause claim it is built on.",
+      "text": "the sentence \"EFIT's own profile extracted with a surface at \u03c8_N=1 is finite there: p\u2032=\u22122319.18090032498 and FF\u2032=+0.005842038974463571\" attributes those values to an extraction, but the only cited record (`diiid-pinned-seed-drift`) reports a different quantity: its endpoint-hold control on \"the same extracted source knots\" returns p\u2032=\u22123262.9392101572676 and ff\u2032=\u22120.013014528399534793, i.e. the last sampled knot at \u03c8_N=0.95, and it says only that the cap \"returns zero at normalized flux one\"; the record in the tree that does carry an extraction out to \u03c8_N=1.0 (`diiid-xpoint-profile-extent.html`) covers frames 137/146/179 and is not cited by s13",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "03d6212b45343c6044de69ef4d706d423aee2a8d",
+  "plan_fingerprint": "ab2dbbbc9d5562f928bcee84fee2612ac4cd7afdc890f009626b557fbea1276b",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 133,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "88c0e8119d02765d179f8fd30037437e7b4ddeaf",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Done-when (2) now has the node commit the psi_N=1 extraction for frame 102 and the four rows from the corpus and compares the builder against that record; the review reading is only a cross-check",
+      "reason": "",
+      "when": "2026-11-18T19:59:56.691892+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "88c0e8119d02765d179f8fd30037437e7b4ddeaf",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a713 now attributes -3262.94/-0.0130 to the last sample at 0.95, states that no committed record yet holds the psi_N=1 extraction for frame 102, and cites the extent record for frames 137, 146 and 179",
+      "reason": "",
+      "when": "2026-11-18T20:01:15.382965+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "88c0e8119d02765d179f8fd30037437e7b4ddeaf",
+      "commit_basis": "edit",
+      "note": "Done-when (2) now has the node commit the psi_N=1 extraction for frame 102 and the four rows from the corpus and compares the builder against that record; the review reading is only a cross-check",
+      "reason": "",
+      "when": "2026-11-18T19:59:56.691892+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "88c0e8119d02765d179f8fd30037437e7b4ddeaf",
+      "commit_basis": "edit",
+      "note": "\u00a713 now attributes -3262.94/-0.0130 to the last sample at 0.95, states that no committed record yet holds the psi_N=1 extraction for frame 102, and cites the extent record for frames 137, 146 and 179",
+      "reason": "",
+      "when": "2026-11-18T20:01:15.382965+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261118T063659668205-plan-review-of-diiid-vertical-force-balance.json",
+  "review_run_id": "r-20261118T063659668205-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "ce7e1c7b30850299953c70a30e011ed87bcaaebf",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited `diiid-pinned-seed-drift` record now exists (`docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html`, added by bc9db1e3b), and the code site it names (`nova/equilibrium/solve_request.py` `SampledFluxFunction`) and commit `62562397d` resolve.",
+    "done_when": "a finding \u2014 clause (2) of s13 requires the builder's \u03c8_N=1 values to equal two constants that no record in the repository produces.",
+    "evidence_paths": "pass \u2014 the change names `docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-flux.html` and `docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/`, closing the durable-path gap the prior review raised.",
+    "naming": "pass \u2014 the change introduces no plan label, stage name or ticket number; the constants are physical quantities.",
+    "reasoning": "a finding \u2014 s13 states EFIT's own profile extracted at \u03c8_N=1 is finite at p\u2032=\u22122319.18\u2026 and FF\u2032=+0.005842\u2026, but no record cited or present in the repository carries an extraction at \u03c8_N=1 for frame `d3d_shot_00000c4a7b.parquet:102`.",
+    "single_goal": "pass \u2014 s13 delivers one representation change plus its record, and clause (1) is its own guard.",
+    "wiring": "pass \u2014 s13 declares `plan-section-depends-on` = `#s10` and its declared record and figure paths sit under the standard evidence roots; the change added no relationship."
+  },
+  "section_digests": {
+    "_document": "1521260222faccb369b644ad24c59d32b09a89ffded99da40ab36806830d9b99",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8221264aa226d15c859f15d29e63bdc333dd055f1fa3f0ad1683edb6aba86e66",
+    "s12": "95c2ca272095b9a7723109be1e1906771bb259110daaf42b9ab5a27c90ee76f2",
+    "s13": "b313c5492654043896c9e97346b1f51669fce193189cc6d1f4f277e88c01b61d",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "3dc57bc53014ca0924803e72edad5a80c9db8d8548f1484de73c21e0193d0ae3",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:52:40.528157+00:00",
+  "total": null
+}

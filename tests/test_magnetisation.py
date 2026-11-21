@@ -1376,13 +1376,7 @@ def test_compatibility_comparison_resolves_reference_scale():
 @pytest.mark.parametrize("size", [0.20, 0.16])
 def test_linear_shell_spectrum_uses_its_volume_gram(size):
     """The affine B projection is reciprocal and bounded in its own metric."""
-    region = (
-        shapely.Point(0, 0)
-        .buffer(0.4, 2)
-        .difference(shapely.Point(0, 0).buffer(0.28, 2))
-        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
-    )
-    cells = iron._mesh(region, size)
+    cells = iron._mesh(iron.gate_shell(), size)
     operator = iron._galerkin_interaction(cells, basis="linear")
     spectrum = iron.galerkin_spectrum(cells, operator, basis="linear")
     print("linear shell spectrum", size, spectrum)
@@ -1481,6 +1475,39 @@ def test_linear_local_tangent_matches_differentiating_the_projected_law(fill):
     np.testing.assert_allclose(jacobian @ direction, np.ones(6), rtol=2e-14)
 
 
+def test_finite_loop_reference_module_transmits_the_shell():
+    """The shell measurement's reference module carries its own transmission.
+
+    The shell script imports ``exterior_reference`` from this module, so a
+    module that no longer defines it breaks every shell measurement while a
+    suite that only stamps committed bytes stays green. The transmitted field
+    is checked here against the closed-form shell shielding in ``controls``,
+    an independent owner, and against the recorded finite-loop vector, rather
+    than against a shorter truncation of the same series.
+    """
+    from scripts.iron_linear_magnetisation import reference
+    from scripts.iron_linear_magnetisation.controls import (
+        SHELL_PROBES,
+        exact_shielding,
+        loop,
+    )
+
+    assert callable(reference.exterior_reference)
+    vacuum, shielded = reference.exterior_reference(10)
+    owner = loop(SHELL_PROBES)
+    np.testing.assert_allclose(vacuum, owner, rtol=2e-13, atol=1e-25)
+    pure_vacuum, pure_shielded = reference.exterior_reference(1)
+    np.testing.assert_allclose(
+        pure_shielded * exact_shielding(), pure_vacuum, rtol=2e-15, atol=1e-25
+    )
+    shielding = np.linalg.norm(owner, axis=1) / np.linalg.norm(shielded, axis=1)
+    np.testing.assert_allclose(
+        shielding,
+        [61.12438346603941, 61.0718066323272, 61.109581606774945],
+        rtol=2e-12,
+    )
+
+
 def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
     import hashlib
     import subprocess
@@ -1521,6 +1548,39 @@ def test_reference_stamp_refuses_wrong_revision_and_dirty_tree(tmp_path):
     script.write_bytes(data + b"\n")
     with pytest.raises(SystemExit, match="dirty tree"):
         require_clean_script(script, blob, revision)
+
+
+@pytest.mark.parametrize(
+    "ratio, mu",
+    [(0.5, 1000.0), (0.7, 100.0), (0.25, 10.0), (0.9, 1000.0)],
+    ids=["half-radius", "seven-tenths", "quarter", "own-shell"],
+)
+def test_exact_shielding_follows_the_shell_it_is_given(ratio, mu):
+    """The shared factor answers for the shell in its arguments, not its own.
+
+    scripts/iron_linear_magnetisation/controls.py carries the repository's one
+    closed-shell factor. It became the imas-efit control's owner when that case
+    stopped restating the formula, so the parameters it took there are pinned
+    here: the returned ratio must track both the radius ratio and mu, which a
+    version that read its module constants could not do.
+    """
+    from scripts.iron_linear_magnetisation import controls
+
+    expected = ((2 * mu + 1) * (mu + 2) - 2 * (mu - 1) ** 2 * ratio**3) / (9 * mu)
+    factor = controls.exact_shielding(ratio, mu)
+    assert factor == pytest.approx(expected, rel=1e-12), (ratio, mu)
+    # The defaults are still this control's 0.9-1 m shell at mu_r = 1000, so a
+    # bare call must equal the closed form at those two constants and not at the
+    # parameters above.
+    default_ratio = controls.SHELL_INNER_RADIUS / controls.SHELL_OUTER_RADIUS
+    default_mu = controls.SHELL_MU
+    expected_default = (
+        (2 * default_mu + 1) * (default_mu + 2)
+        - 2 * (default_mu - 1) ** 2 * default_ratio**3
+    ) / (9 * default_mu)
+    assert controls.exact_shielding() == pytest.approx(expected_default, rel=1e-15)
+    if ratio != default_ratio or mu != default_mu:
+        assert factor != pytest.approx(controls.exact_shielding(), rel=1e-6)
 
 
 @pytest.mark.parametrize("batch_edges", [False, True], ids=["compact", "batch-edges"])
@@ -1931,3 +1991,86 @@ def test_reloaded_coilset_accepts_the_iron_frame(tmp_path):
     contribution = with_iron - air
     assert np.max(np.abs(contribution - direct)) <= 1e-12 * np.max(np.abs(direct))
     assert np.max(np.abs(contribution)) > 1e-6 * np.max(np.abs(air))
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(3600)
+def test_linear_volume_rule_holds_the_demagnetisation_bound(monkeypatch):
+    """The near-field volume rule holds the bound where the delivered rule does not.
+
+    The volume potential integrates a section quadrature of a logarithmic
+    self-term. Six nodes per triangle, the delivered rule, leaves the assembled
+    form non-dissipative on a 40 mm graded mesh. The shipped rule integrates
+    twelve nodes against the pairs inside eight least widths of each other and
+    six elsewhere. It must land inside the bound while the delivered six-node
+    rule everywhere fails it, and it must stay within 1e-8 of the global
+    twelve-node operator, the margin a measured 2.73e-9 leaves on this mesh.
+
+    The 1e-8 is the lead's ruling of 2026-11-20, accepted as the match to the
+    global twelve-node rule rather than as a coincidence. The mechanism sets
+    its size: the shipped rule and the global one take the same twelve-node
+    quadrature and differ only on the unflagged pairs, where the shipped rule
+    keeps the delivered six-node section. An exact match therefore needs every
+    pair flagged, which happens at 200 mm and 40 mm uniform shells, where the
+    bound test is not the one that runs; on a graded 40/80 mm mesh 33 per cent
+    of the pairs are flagged, the operator moves by the measured 2.73e-9, and
+    1e-8 is the tolerance that admits it while still failing a mask that fires
+    nowhere (the delivered operator, 7.2e-6 away by its bound) or everywhere
+    (0.0, a different rule under review rather than a tolerance).
+    """
+    from nova.biot import tiledassembly
+
+    region = iron.gate_shell()
+    field = iron.graded_cell_size(
+        [0.28, 0.4], [-0.4, 0.4], fine=0.04, coarse=0.08, cells_across=20
+    )
+    cells = iron._mesh(region, field)
+    assert len(cells.polygons) > 40
+
+    def assemble():
+        return np.asarray(iron._galerkin_interaction(cells, basis="linear"))
+
+    def bound(operator):
+        return float(iron.galerkin_spectrum(cells, operator, basis="linear")["maximum"])
+
+    def everywhere(flag):
+        return lambda polygons: np.full(
+            (len(polygons), len(polygons)), flag, dtype=bool
+        )
+
+    shipped = tiledassembly._volume_near_mask
+    targeted = assemble()
+    with monkeypatch.context() as patch:
+        patch.setattr(tiledassembly, "_volume_near_mask", everywhere(True))
+        twelve = assemble()
+    difference = targeted - twelve
+    relative = float(np.max(np.abs(difference)) / np.max(np.abs(twelve)))
+    delivered_bound = None
+    with monkeypatch.context() as patch:
+        patch.setattr(tiledassembly, "_volume_near_mask", everywhere(False))
+        delivered = assemble()
+        delivered_bound = bound(delivered)
+    assert tiledassembly._volume_near_mask is shipped
+    print(
+        "volume rule bound",
+        json.dumps(
+            dict(
+                cells=len(cells.polygons),
+                targeted=bound(targeted),
+                delivered=delivered_bound,
+                operator_relative=relative,
+            )
+        ),
+    )
+    assert bound(targeted) <= 1.0
+    assert delivered_bound > 1.0
+    # Lead ruling 2026-11-20: 1e-8 is the accepted operator match to the global
+    # twelve-node rule. Both rules take the same twelve-node quadrature and
+    # differ only on the unflagged pairs, where this one keeps the delivered
+    # six-node section, so the distance equals the six-node rule's error on
+    # those pairs and is zero only where every pair is flagged. Measured
+    # 2.73e-9 here, three decades under the 7.2e-6 the delivered rule misses by
+    # and three under the tolerance; a mask that fires nowhere lands at that
+    # 7.2e-6 and fails, and one that fires everywhere leaves the operator equal
+    # to the global rule rather than this one.
+    assert relative <= 1e-8

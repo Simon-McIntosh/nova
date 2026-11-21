@@ -1,0 +1,42 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-18T05:47:21.785Z",
+  "dispatched_at": "2026-11-18T05:23:26Z",
+  "figures": {
+    "docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh-preview.png": {
+      "contrast": "pass \u2014 direct labels and legend text render in #333333 on white (about 12:1); the first wall is a light grey data mark, not text",
+      "data_ink": "pass \u2014 outline-only hexagonal cell mesh, coil rectangles and the wall contour carry the ink; no filled regions, no shading, no raster imagery",
+      "decoration": "pass \u2014 no gradient, background fill, grid, frame or styled theme; the axes are switched off and the scene is drawn on white",
+      "label_collision": "pass \u2014 measured zero text pixels in a 4-pixel border band on every edge of the raster, so nothing is clipped, and no label overlaps another label or the cell mesh; VS3 upper, VS3 lower, PF3, PF4 and PF5 all sit in clear space",
+      "legibility": "pass \u2014 two poloidal mesh panels, all fourteen coil sections labelled once each (CS3U, CS2U, CS1 upper, CS1 lower, CS2L, CS3L, PF1-PF6, VS3 upper, VS3 lower) and a three-entry legend; every mark and label is legible at the delivered 1400x1072 size; the panel identities themselves are unstated, recorded as a non-blocking finding",
+      "table_form": "pass \u2014 the image shows machine geometry and a cell mesh, which is spatial information, not a table rendered as a picture"
+    }
+  },
+  "findings": [
+    {
+      "disposition": "exempted \u2014 non-blocking: the panels are individually legible and the shape identity makes the zoom inferable; recording it so a later caption or panel-title edit can act on it",
+      "file": "docs/figures/sub-millisecond-forward-path/iter-bank/iter-mesh-preview.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The scene carries two panels of the same plasma at two extents and neither panel is named: the left panel draws the whole machine with the CS stack and PF coils, the right one is a tight zoom on the wall region drawn over the same cell mesh. Nothing in the raster and nothing in the evidence fragment's caption (alt text: 'ITER poloidal mesh with labelled coil sections and the first wall') says which panel is which, and the script builds both from the same geometry without a title (scripts/prototypes/iter_bank/render.py:303 loops over the overview and detail bounds). A reader must infer that the right panel is the same mesh enlarged rather than a second or different machine state; naming each panel, or saying in the caption that the right panel is the wall detail, removes the inference."
+    },
+    {
+      "disposition": "exempted \u2014 non-blocking: the wall renders with a visible dash pattern (190 separated segments measured in the raster) and the legend matches the drawn mark, so a reader can map the entry to the curve",
+      "file": "scripts/prototypes/iter_bank/render.py",
+      "line": 26,
+      "severity": "non-blocking",
+      "summary": "The first wall's only separation from the coil mark is a fine dash between two closely related greys: #9aa2ab over coil #929292, dashed 5.0 pt on and 2.5 pt off at linewidth 1.7 (render.py:25-26). In the delivered 1400-pixel raster the wall segments into about 190 dash components of 20-43 pixels, so at a page column width of roughly 900 pixels a dash is 4-5 pixels and the wall reads as a near-continuous hairline where it hugs the plasma edge; the dash is only just perceptible. The mark is distinguishable and the legend carries the same dash, so this does not hold the node; a longer dash period or a stronger lightness step would make the first wall read as a separate component at page scale."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261118T052207647152-review-of-iter-bank-recertify-669eed1df4a2-figure",
+  "reviewed_base_sha": "3a9238f0a626bec0783b4f0da32922dd0c390f4b",
+  "reviewed_head_sha": "669eed1df4a24126e90131f1d6ee0b39d14926fb",
+  "reviewed_run_id": "r-20261117T110237355670-iter-bank-recertify",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T05:48:32.893664+00:00",
+  "total": null
+}

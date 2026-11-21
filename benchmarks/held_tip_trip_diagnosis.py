@@ -36,7 +36,7 @@ from nova.jax.config import configure_dtypes, configure_persistent_compilation_c
 
 
 ROOT = Path(os.environ.get("NOVA_DIAG_ROOT", Path(__file__).resolve().parents[1]))
-DEFAULT_CACHE = Path("/work/projects/imas_gpu/sophelio/jax-cache/trip-quantum-profile")
+DEFAULT_CACHE = Path("/work/projects/imas_gpu/nova/jax-cache/trip-quantum-profile")
 TRIP_BUDGET = 24
 REFERENCE_SHOT = 22086
 REFERENCE_SLICE = 43

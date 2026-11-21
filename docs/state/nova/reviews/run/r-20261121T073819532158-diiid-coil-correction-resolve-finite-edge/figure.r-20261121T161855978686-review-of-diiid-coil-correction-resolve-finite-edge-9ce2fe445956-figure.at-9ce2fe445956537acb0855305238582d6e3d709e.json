@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-21T16:37:16.022Z",
+  "dispatched_at": "2026-11-21T16:19:28Z",
+  "figures_reviewed": [
+    "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-137-diverted-lower-xpoint.svg",
+    "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-146-diverted-lower-xpoint.svg",
+    "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-146-limited-lower-xpoint.svg",
+    "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-179-limited-lower-xpoint.svg"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-137-diverted-lower-xpoint.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 10 cm zoom is anchored on EFIT's lower null so both arms are read at the same place, which on the fitted arm leaves the zoom with no solved structure at all: that arm's lower null sits 28.6 cm from EFIT's (the row's own table), far outside the window, so the right-hand zoom draws only dashed EFIT lines. The panel cannot show the fitted null's displacement, which is the row's headline, and a reader who reads the zoom alone could take the empty blue series for a missing field rather than a collapsed one. The displacement is visible only in the full-field panel."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-179-limited-lower-xpoint.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "As on 137D, the fitted arm's lower null is 64.9 cm from EFIT's (the row's table) while the zoom window spans 10 cm, so the fitted zoom panel contains no solved null and only the dashed EFIT reference. The zoom contributes nothing to the fitted arm's story and, read alone, its absent blue series understates the fact that the solved contours are still drawn in the full panel."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-146-diverted-lower-xpoint.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 146D caption states 'The wall, both axial null markers and the EFIT axis marker are drawn on every panel', but the two 10 cm zoom panels contain neither axis marker and no wall: both magnetic axes and the wall lie well outside a window centred on the lower X-point. The caption promises marks a reader will look for and not find in those panels."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-146-limited-lower-xpoint.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Only the 146D caption states the zoom extent ('a 10 cm zoom'); the 137D, 146L and 179L figures carry no scale cue in their zoom panels and do not state the window size in their captions, so the null separation cannot be read quantitatively from those figures. The measured-to-fitted change in separation (1.25 cm to 8.97 cm on 146D) is the comparison the zoom exists to show and is present in the record's table, not on the figure."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261121T161855978686-review-of-diiid-coil-correction-resolve-finite-edge-9ce2fe445956-figure",
+  "reviewed_base_sha": "bd3c232f1128253a34e358219f429e2165a59e6c",
+  "reviewed_head_sha": "9ce2fe445956537acb0855305238582d6e3d709e",
+  "reviewed_run_id": "r-20261121T073819532158-diiid-coil-correction-resolve-finite-edge",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Pass. All text (legend entries, the two notes and the printed residual lines) is near-black on white with a wide margin. The mid grey (#929292) is used only for the wall line, never for text, and reads as data behind the contours.",
+    "data_ink": "Pass. Every panel is unfilled line contours: the flux surfaces carry the ink, the zero (separatrix) level is drawn thick at 3.0 pt over the 1.2 pt levels, and the wall, null and axis marks stay thin. No fill, band or gradient competes with the contours.",
+    "decoration": "Pass. No gradient, background fill, gridline, frame, shading or styled theme appears on any panel or in the legend; poloidal axes are off and the only furniture is the single legend row at the top.",
+    "label_collision": "Pass on all four. Legend entries, both arm notes and the printed residual lines are inside the canvas with no overlap; the rendered PNGs show no clipped or overlapping text. The shared save() guard that wrote these figures printed text clipping=0, text overlaps=0, labels over data=0 for each of the four files, and the rendered panels are consistent with that receipt.",
+    "legibility": "Pass on all four rendered panels. Each figure reads as two arms side by side (measured currents left, fitted currents right), each arm a full poloidal field beside a 10 cm lower-X zoom; one frameless figure-level legend carries the eight-entry vocabulary; the residual and convergence flag are printed under each arm. Both null sets and both axis markers are discernible where they coincide because the EFIT marks are drawn larger and above the solved ones. One non-blocking limitation is recorded against the 137D and 179L zoom panels, which carry no solved structure because the fitted null lies outside the shared window.",
+    "table_form": "Pass. The information is irreducibly spatial (poloidal flux surfaces and lower-X zooms); the per-row numbers the panels depend on are carried by the record's tables, not drawn as an image of a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T16:37:30.190013+00:00",
+  "total": null
+}

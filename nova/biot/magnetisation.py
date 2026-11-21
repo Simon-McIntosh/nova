@@ -42,7 +42,9 @@ __all__ = [
     "MagnetisationInteraction",
     "load_magnetisation_interaction",
     "save_magnetisation_interaction",
+    "galerkin_block_spectrum",
     "galerkin_spectrum",
+    "gate_shell",
     "graded_cell_size",
     "BoundCurrents",
     "bound_currents",
@@ -349,7 +351,63 @@ def load_magnetisation_interaction(
     return response
 
 
-def galerkin_spectrum(cells, gram, *, basis="constant"):
+def gate_shell():
+    """Return the closed octagonal shell of the linear spectral gate.
+
+    A 0.4 m radius octagon with a 0.28 m bore, clipped to the upper half-plane.
+    The spectral gate, the near-field study and the suite's bound test all
+    measure this shape, so it is defined once here rather than rebuilt beside
+    each measurement; a change to the gate is a change to this function.
+    """
+    return (
+        shapely.Point(0, 0)
+        .buffer(0.4, 2)
+        .difference(shapely.Point(0, 0).buffer(0.28, 2))
+        .intersection(shapely.box(0, -0.4, 0.4, 0.4))
+    )
+
+
+def galerkin_block_spectrum(blocks, energy, *, witness=False, scale=True):
+    """Return the generalised spectrum of ``energy`` against its Gram blocks.
+
+    ``blocks`` is the per-cell Gram block list; the volume measure repeats it
+    for the two in-plane components, so the metric is that repetition.  This is
+    the owner of the normalisation: every caller that reports a quotient reads
+    the same ``1/mu0`` and the same symmetrisation here rather than solving the
+    generalised eigenproblem again beside its own measurement.
+
+    ``energy`` enters as the assembled interaction; the returned ``metric`` is
+    the block-diagonal form the solve used, so a caller decomposing a witness
+    weighs it with the same operator the quotient was read against.
+
+    ``scale`` premultiplies the energy by the metric, which is this module's
+    convention: the assembled interaction already carries the volume measure in
+    its energy form, so the eigenproblem reads ``M E x = lambda M x``.  A caller
+    whose blocks are already in the metric's scale passes ``scale=False``.
+    """
+    from scipy.linalg import block_diag, eigh, eigvalsh
+
+    metric = block_diag(*blocks, *blocks)
+    assembled = np.asarray(energy)
+    if scale:
+        assembled = metric @ assembled
+    normalised = assembled / _MU0
+    symmetric = (normalised + normalised.T) / 2
+    if witness:
+        values, vectors = eigh(symmetric, metric)
+        extremes = dict(witness=vectors[:, -1])
+    else:
+        values = eigvalsh(symmetric, metric)
+        extremes = {}
+    return dict(
+        minimum=float(values[0]),
+        maximum=float(values[-1]),
+        metric=metric,
+        **extremes,
+    )
+
+
+def galerkin_spectrum(cells, gram, *, basis="constant", witness=False):
     """Return the symmetric spectrum of the volume-weighted Galerkin operator.
 
     ``gram`` is the cell interaction returned by :func:`_galerkin_interaction`,
@@ -359,22 +417,23 @@ def galerkin_spectrum(cells, gram, *, basis="constant"):
     ``eigvalsh`` off ``G`` alone reads one triangle of an unsymmetric matrix and
     reports a range the projection does not have. For ``basis="linear"``,
     solve the generalised eigenproblem for the energy against the full local
-    polynomial Gram blocks, including their off-diagonal volume moments.
+    polynomial Gram blocks, including their off-diagonal volume moments.  With
+    ``witness`` the linear branch also returns the eigenvector of the maximum,
+    which is the state a bound statement is read from; the default returns the
+    eigenvalues alone, so a caller that reports only the extremes does not pay
+    for the vectors.
     """
     if basis == "linear":
-        from scipy.linalg import block_diag, eigvalsh
-
         blocks = linear_magnetisation_geometry(cells.polygons)["gram"]
-        metric = block_diag(*blocks, *blocks)
+        spectrum = galerkin_block_spectrum(blocks, gram, witness=witness)
+        metric = spectrum.pop("metric")
         energy = metric @ np.asarray(gram) / _MU0
-        eigenvalues = eigvalsh((energy + energy.T) / 2, metric)
         return dict(
             cells=int(len(cells.centroids)),
             volume_symmetry=float(
                 np.linalg.norm(energy - energy.T) / np.linalg.norm(energy)
             ),
-            minimum=float(eigenvalues[0]),
-            maximum=float(eigenvalues[-1]),
+            **spectrum,
         )
     if basis != "constant":
         raise ValueError("basis must be constant or linear")

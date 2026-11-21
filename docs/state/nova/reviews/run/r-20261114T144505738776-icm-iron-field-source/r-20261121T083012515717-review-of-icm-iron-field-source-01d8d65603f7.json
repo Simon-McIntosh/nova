@@ -1,0 +1,106 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/iron_field_source/run_cpu.sh:41 (figure stage execs scripts/iron_field_source/figure.py)",
+    "scripts/iron_field_source/run_cpu.sh:46 (the all stage runs figure.py after diagnostics)",
+    "scripts/iron_field_source/run_arms.sh:12-15 (no code caller: submitted directly to sbatch per its own header)"
+  ],
+  "completed_at": "2026-11-21T09:01:34.289Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-icm-iron-field-source-01d8d65603f7",
+      "recorded_at": "2026-11-21T12:03:17.693603+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-21T09:01:23Z",
+  "failure_derivation": "The reviewed run's head arm /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/logs/icm-rafter2-1334452.log (job 1334452 at 01d8d65603f7c6926bc9d87f72fab8e28b320e51) records '7 failed, 112 passed in 8455.80s' and the after arm log /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/after_arm.log carries the seven FAILED ids, all in tests/test_magnetisation.py and all FileNotFoundError on /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/{case.json,production/material-refinement-20261114/summary.json}. The baseline arm /work/projects/imas_gpu/nova/evidence/iron-limb-fill log cited at manifest.md:26 (arms/baseline_arm.log for job 1334053) was overwritten at 08:40:53 by the cancelled rerun 1334447 and now ends at 64 per cent with no summary; job 1334053's count survives in arms/summary.tsv ('baseline 1 8157 7 failed, 104 passed in 8150.07s') and in logs/icm-fbase-1334053.log, and all five failing test functions (seven parametrised ids) exist unchanged at base revision 9b016126111a5acaebca064c07432042b5a2628c, so the seven head failures are failures the base arm also carried: added_failure_count 0, added_failure_ids [].",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-iron-field-source",
+      "recorded_at": "2026-11-21T12:04:15.497783+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-iron-field-source",
+      "recorded_at": "2026-11-21T12:04:21.890834+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "icm-iron-field-source",
+      "recorded_at": "2026-11-21T12:04:27.583059+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "icm-iron-field-source",
+      "recorded_at": "2026-11-21T12:04:33.675863+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/iron_field_source/figure.py",
+      "line": "109",
+      "severity": "non-blocking",
+      "text": "non-blocking: the legend moved to loc=\"lower right\" lands on the iron-share plateau - the committed PNG draws the plateau at rows 547-549 across columns 108-762 while the teal legend entry's handle and text occupy rows 540-553 at columns 684-762, so the data line runs through the third legend entry; the figure review of this head recorded the same collision as blocking, and the panel would read cleanly with the legend above the plateau or outside the axes."
+    },
+    {
+      "file": "scripts/iron_field_source/run_arms.sh",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: mktemp reads ${TMPDIR:-/tmp} before the script exports TMPDIR=/tmp at line 31, so a submit environment that exports the login node's /run/user/<uid> makes mktemp fail on a compute node and set -e ends the job before either arm runs; the script's own export TMPDIR=/tmp belongs above the mktemp call, and the repair was not run as a job so the ordering is untested."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/manifest.md",
+      "line": "26",
+      "severity": "non-blocking",
+      "text": "non-blocking: the baseline suite line cites arms/baseline_arm.log for job 1334053, but that file was overwritten by the cancelled rerun 1334447 at 2026-11-21T08:40:53 and now ends at \".... [ 64%]\" with no summary line and zero FAILED lines, so the baseline's failing ids are no longer readable from the log the manifest names; the job's counts survive only in arms/summary.tsv and logs/icm-fbase-1334053.log."
+    },
+    {
+      "file": "scripts/iron_field_source/run_arms.sh",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the committed runner's target list is tests/test_magnetisation.py, whereas the recorded arms (jobs 1334053, 1334054 and 1334452) ran tests/test_imas_iron_read.py plus tests/test_iron_field_source.py plus tests/test_magnetisation.py through the uncommitted arms/run_fence_arms.sh, so re-running the committed script does not reproduce the gate the manifest cites and the arms commands.json still names head 6d1132bf4."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read both commits in a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2..01d8d65603f7c6926bc9d87f72fab8e28b320e51: a5b065741 changes scripts/iron_field_source/run_arms.sh lines 24-44 (mktemp clone on node-local disk, EXIT trap, prepare_base no longer removes) and scripts/iron_field_source/figure.py lines 80-109 (symlog middle panel, grey zero rule under the curves, peak annotation), adds a nine-line paragraph to the evidence fragment, and replaces the PNG; 01d8d6560 copies that same PNG blob (bb701ad95) to the section path, so both published paths now match as the fragment claims.",
+    "done_when": "read node.done_when (figure from the production path, probe/loop table from the same seam, and a zero-magnetisation control that reproduces air-core to round-off while the solved magnetisation changes it) against the arms the run recorded; the gate the worker ran is the rigel suite pair (icm-fbase-1334053.log and icm-rafter2-1334452.log: 7 failed, 104 passed at 9b0161261 against 7 failed, 112 passed at 01d8d6560), which asserts the seam contracts in tests/test_magnetisation.py and tests/test_iron_field_source.py and not the figure or the probe table.",
+    "goal": "read the source node's goal in dispatch-detail.json (\"Insert the solved iron magnetisation into the CoilSet as one passive frame so every grid and point solve carries the iron field\") and the two commits the run gained since its last review; a5b065741 and 01d8d6560 repair two review findings (scripts/iron_field_source/run_arms.sh scratch clone, and the middle panel of docs/figures/west-stray-field/west-62751-iron-stray-field.png) and leave the frame seam untouched.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/manifest.md lines 8-26; it records both blocking findings as acted with negative controls, the after arm at the head, a cancelled baseline rerun (1334447) replaced by job 1334053, and the arms directory as the log location.",
+    "write_paths": "read the declared write paths listed in this node's brief; every one of the four files and two PNG copies in the gained diff (docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html, docs/figures/west-stray-field/west-62751-iron-stray-field.png, docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png, scripts/iron_field_source/figure.py, scripts/iron_field_source/run_arms.sh) lies inside them."
+  },
+  "justifications": {
+    "durability": "neither gained commit adds a test or touches tests/, so the /work-removal guard (scripts/iron_field_source/run_arms.sh:28) and the symlog share panel (scripts/iron_field_source/figure.py:95-105) rest on one-off measurements (negctl-old-figure.png, panelcheck.py) kept outside git rather than on an assertion.",
+    "evidence": "the figure repair's claim was reproduced here: the pre-repair PNG (a0479e6a) has its teal plateau at rows 556-557 with the black zero rule at row 555, and the head PNG has the plateau at rows 547-549 with the only zero rule grey at row 495, 53 px above it, while the manifest's cited baseline log (arms/baseline_arm.log, manifest.md:26) no longer holds job 1334053's run.",
+    "fit": "the script change follows the file's own idiom and the figure change uses the surrounding trace_axes/style calls, but the legend placed at scripts/iron_field_source/figure.py:109 now sits on the plateau it must not obscure.",
+    "goal_fidelity": "the gained commits are the repair round the previous review's two blocking findings asked for, landing at scripts/iron_field_source/run_arms.sh:27-28 and scripts/iron_field_source/figure.py:80-105 without touching the frame seam the goal is about.",
+    "reuse": "the diff adds no function, class or module; a search of nova/media/ink.py and the sibling scripts/*/figure.py found no owned zero-rule or symlog helper, so nothing is duplicated.",
+    "scope_discipline": "git log --stat over a0479e6a..01d8d656 shows exactly the evidence fragment, scripts/iron_field_source/figure.py, scripts/iron_field_source/run_arms.sh and two copies of the one PNG, all inside the declared paths."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2\nreviewed_head_sha: 01d8d65603f7c6926bc9d87f72fab8e28b320e51\nVERDICT goal: read the source node's goal in dispatch-detail.json (\"Insert the solved iron magnetisation into the CoilSet as one passive frame so every grid and point solve carries the iron field\") and the two commits the run gained since its last review; a5b065741 and 01d8d6560 repair two review findings (scripts/iron_field_source/run_arms.sh scratch clone, and the middle panel of docs/figures/west-stray-field/west-62751-iron-stray-field.png) and leave the frame seam untouched.\nVERDICT done_when: read node.done_when (figure from the production path, probe/loop table from the same seam, and a zero-magnetisation control that reproduces air-core to round-off while the solved magnetisation changes it) against the arms the run recorded; the gate the worker ran is the rigel suite pair (icm-fbase-1334053.log and icm-rafter2-1334452.log: 7 failed, 104 passed at 9b0161261 against 7 failed, 112 passed at 01d8d6560), which asserts the seam contracts in tests/test_magnetisation.py and tests/test_iron_field_source.py and not the figure or the probe table.\nVERDICT write_paths: read the declared write paths listed in this node's brief; every one of the four files and two PNG copies in the gained diff (docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html, docs/figures/west-stray-field/west-62751-iron-stray-field.png, docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png, scripts/iron_field_source/figure.py, scripts/iron_field_source/run_arms.sh) lies inside them.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/manifest.md lines 8-26; it records both blocking findings as acted with negative controls, the after arm at the head, a cancelled baseline rerun (1334447) replaced by job 1334053, and the arms directory as the log location.\nVERDICT diff: read both commits in a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2..01d8d65603f7c6926bc9d87f72fab8e28b320e51: a5b065741 changes scripts/iron_field_source/run_arms.sh lines 24-44 (mktemp clone on node-local disk, EXIT trap, prepare_base no longer removes) and scripts/iron_field_source/figure.py lines 80-109 (symlog middle panel, grey zero rule under the curves, peak annotation), adds a nine-line paragraph to the evidence fragment, and replaces the PNG; 01d8d6560 copies that same PNG blob (bb701ad95) to the section path, so both published paths now match as the fragment claims.\nCALL_SITES: scripts/iron_field_source/run_cpu.sh:41 (figure stage execs scripts/iron_field_source/figure.py), scripts/iron_field_source/run_cpu.sh:46 (the all stage runs figure.py after diagnostics), scripts/iron_field_source/run_arms.sh:12-15 (no code caller: submitted directly to sbatch per its own header)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the gained commits are the repair round the previous review's two blocking findings asked for, landing at scripts/iron_field_source/run_arms.sh:27-28 and scripts/iron_field_source/figure.py:80-105 without touching the frame seam the goal is about.\nSCORE evidence: 13\nJUSTIFICATION evidence: the figure repair's claim was reproduced here: the pre-repair PNG (a0479e6a) has its teal plateau at rows 556-557 with the black zero rule at row 555, and the head PNG has the plateau at rows 547-549 with the only zero rule grey at row 495, 53 px above it, while the manifest's cited baseline log (arms/baseline_arm.log, manifest.md:26) no longer holds job 1334053's run.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git log --stat over a0479e6a..01d8d656 shows exactly the evidence fragment, scripts/iron_field_source/figure.py, scripts/iron_field_source/run_arms.sh and two copies of the one PNG, all inside the declared paths.\nSCORE durability: 8\nJUSTIFICATION durability: neither gained commit adds a test or touches tests/, so the /work-removal guard (scripts/iron_field_source/run_arms.sh:28) and the symlog share panel (scripts/iron_field_source/figure.py:95-105) rest on one-off measurements (negctl-old-figure.png, panelcheck.py) kept outside git rather than on an assertion.\nSCORE fit: 15\nJUSTIFICATION fit: the script change follows the file's own idiom and the figure change uses the surrounding trace_axes/style calls, but the legend placed at scripts/iron_field_source/figure.py:109 now sits on the plateau it must not obscure.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module; a search of nova/media/ink.py and the sibling scripts/*/figure.py found no owned zero-rule or symlog helper, so nothing is duplicated.\nFINDING scripts/iron_field_source/figure.py:109 non-blocking: the legend moved to loc=\"lower right\" lands on the iron-share plateau - the committed PNG draws the plateau at rows 547-549 across columns 108-762 while the teal legend entry's handle and text occupy rows 540-553 at columns 684-762, so the data line runs through the third legend entry; the figure review of this head recorded the same collision as blocking, and the panel would read cleanly with the legend above the plateau or outside the axes.\nFINDING scripts/iron_field_source/run_arms.sh:27 non-blocking: mktemp reads ${TMPDIR:-/tmp} before the script exports TMPDIR=/tmp at line 31, so a submit environment that exports the login node's /run/user/<uid> makes mktemp fail on a compute node and set -e ends the job before either arm runs; the script's own export TMPDIR=/tmp belongs above the mktemp call, and the repair was not run as a job so the ordering is untested.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/manifest.md:26 non-blocking: the baseline suite line cites arms/baseline_arm.log for job 1334053, but that file was overwritten by the cancelled rerun 1334447 at 2026-11-21T08:40:53 and now ends at \".... [ 64%]\" with no summary line and zero FAILED lines, so the baseline's failing ids are no longer readable from the log the manifest names; the job's counts survive only in arms/summary.tsv and logs/icm-fbase-1334053.log.\nFINDING scripts/iron_field_source/run_arms.sh:29 non-blocking: the committed runner's target list is tests/test_magnetisation.py, whereas the recorded arms (jobs 1334053, 1334054 and 1334452) ran tests/test_imas_iron_read.py plus tests/test_iron_field_source.py plus tests/test_magnetisation.py through the uncommitted arms/run_fence_arms.sh, so re-running the committed script does not reproduce the gate the manifest cites and the arms commands.json still names head 6d1132bf4.",
+  "review_run_id": "r-20261121T083012515717-review-of-icm-iron-field-source-01d8d65603f7",
+  "reviewed_base_sha": "a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2",
+  "reviewed_head_sha": "01d8d65603f7c6926bc9d87f72fab8e28b320e51",
+  "reviewed_run_id": "r-20261114T144505738776-icm-iron-field-source",
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T10:30:00Z",
+  "total": 92
+}

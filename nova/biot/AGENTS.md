@@ -62,13 +62,14 @@ conclusion from reading `nova/biot/polygon.py` alone is wrong.
   Measured 2026-09-07 with two probe jobs, after a node failed twice on what
   looked like an absent mount. `/work/projects/imas_gpu` IS mounted on titan
   and `/work/projects/imas_gpu/mast/level1/shots/<shot>.zarr` reads normally
-  there, but `ls /work/projects/imas_gpu/sophelio` returns only `jax-cache`
-  where the login node returns eight subdirectories, and `stat` reports
+  there, but a listing of the shared project tree can return only a subset of
+  what the login node reports, and `stat` on such a directory reports
   `links=3` against the login node's eight. `df` resolves both to the same
   `HPC_T2 /work/projects` device, so this is a stale metadata view on that node
   rather than a missing mount or a permissions mask. Consequences: a titan job
-  may read the level-1 store; a job needing anything under `sophelio` -- frozen
-  response carriers, labeller sessions, the challenge corpus -- belongs on
+  may read the level-1 store; a job needing anything else under
+  `/work/projects/imas_gpu` -- frozen response carriers, labeller sessions, the
+  challenge corpus -- belongs on
   `betelgeuse`, or must be handed its input by a path the node can see. A
   `FileNotFoundError` on a path the login node can `stat` is this, and probing
   it costs one two-minute job.

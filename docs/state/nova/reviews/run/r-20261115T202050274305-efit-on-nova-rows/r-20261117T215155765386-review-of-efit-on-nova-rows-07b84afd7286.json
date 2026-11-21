@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from completed BASE and HEAD sections in the reviewed source run case/suite-arms6b.log: 1 passed, BASE_EXIT=0; 17 passed, HEAD_EXIT=0; no FAILED ids in either arm.",
+  "artifact_review": "Rendered both exact-head SVGs with ImageMagick and inspected both PNGs: both contour sets, wall and null markers visible; legend readable and unclipped. ImageMagick printed temporary delegate read-only warnings but returned two readable drawings; SVG comments independently confirm only the two intended legend labels.",
+  "assertion_analysis": {
+    "test_both_panels_parse_and_name_both_states": "Fails for missing/small/malformed/unlabelled/uncited panel or a drawing edit that changes the existing owner digest.",
+    "test_every_container_closes": "Fails for unmatched section, paragraph, table, figure, pre, tbody, thead or tr counts.",
+    "test_every_element_identifier_is_unique": "Fails for repeated element ids.",
+    "test_every_paragraph_opens_and_closes_in_order": "Fails on nested, stray-closing or unclosed paragraph.",
+    "test_the_basis_log_line_is_quoted_verbatim": "Fails for absent or wrong Bernstein label, log count, first/final rank, path or quoted solver statement.",
+    "test_the_edge_constraint_is_shown_by_the_solver_not_the_config": "Fails when switch-off count remains one, design ranks change, constrained edge is nonzero, released edge is zero, or required output is not quoted.",
+    "test_the_imas_efit_wall_and_hardware_are_stated_and_pinned": "Fails for missing run metadata, bad node count/exit, nonpositive or implausibly long pulse wall or absent quoted duration.",
+    "test_the_q95_rows_are_pinned_and_the_band_read_on_one_calculator": "Fails if quoted calculator values disappear, gap arithmetic ceases to match the two rows, or pinned cross-code and definitional differences move.",
+    "test_the_record_cites_the_check_that_guards_it": "Fails if receipt or collected test path disappears from the fragment.",
+    "test_the_record_quotes_every_state_it_tabulated": "Fails when a required printed raw state value is removed or changed relative to the independently stored receipt.",
+    "test_the_record_quotes_the_amplitude_trade_it_attributed": "Fails if coefficient projections disagree with profile samples or the quoted recovered/generating amplitudes and percentages change.",
+    "test_the_record_quotes_the_bands_it_measured": "Fails for changed quoted deltas, contradicted verdict sentences, a calculator gap beyond its band or raw state deltas beyond bands; presently measures raw flux differences, not post-gauge ones.",
+    "test_the_record_quotes_the_control_ratios": "Fails if documented target-current mismatch, span ratio or control q95 disagrees with stored raw states.",
+    "test_the_record_quotes_the_nova_fit_it_measured": "Fails if coefficients, singular values, residuals or state are not quoted or the control is misreported as converged.",
+    "test_the_record_states_the_relations_it_names": "Fails on reintroduced current-ratio wording, missing gauge convention, opposite-flux explanation or missing successful rerun citation.",
+    "test_the_solver_lines_are_quoted_and_the_basis_is_labelled": "Fails when either stored solver line or the configuration-read qualification is omitted."
+  },
+  "assertion_independence": "No added assertion calls production code with an expected value then compares its echoed result to that same input; these are stored-evidence reconciliation tests. They protect the committed record, not future solver behaviour. The gauge finding is an incorrect measured quantity, not an input-echo tautology.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T21:58:00Z",
+  "dispatched_at": "2026-11-17T21:53:05Z",
+  "finding_disposition": "Coordinator must fold the non-blocking gauge-consistency finding into a named node or exempt it with a reason; this review does not invent a disposition.",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+      "line": "102",
+      "severity": "non-blocking",
+      "text": "non-blocking: The paragraph says 0.41% axis and 0.09% boundary flux errors are measured after the additive axis alignment, but receipt.json gives an exact shift of +0.3167117261 Wb, after which the errors are 0% and 0.5010296791%; tests/test_efit_on_nova_rows_receipt.py:108-113 recomputes the raw differences and therefore preserves this inconsistent claim; label the current values as raw or compute and quote the aligned values, which still pass the 2% band."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the ten-commit range 1f788362e8e1ca19bb5691fff8b31d25ed825f0e..07b84afd7286b2ac0d0b98334c211a3b0628a393; its final five paths contain one fragment, two rendered overlays, their receipt and the reconciliation tests, with no production source change.",
+    "done_when": "The live docs/plans/inverse-equilibrium-baseline.html section s8 is supported by the committed receipt and solver output, including the 17 s CPU run and matched-definition q95 gap 0.064734, with one non-blocking inconsistency in the stated post-alignment flux deltas.",
+    "goal": "The goal in the source prompt.txt:45 is satisfied by docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:5-106, which records disabled priors, the resolved two-function basis, nominal reconstructions and the scaled control.",
+    "manifest": "The source manifest.md names the ten commits and case/suite-arms6b.log, whose completed baseline and head arms record 1 passed and 17 passed with BASE_EXIT=0 and HEAD_EXIT=0, respectively.",
+    "write_paths": "The source prompt.txt declares the evidence fragment and figure directory; tests/test_efit_on_nova_rows_receipt.py is the only extra final path and the source manifest.md:4 records the coordinator's acceptance of that durability guard."
+  },
+  "justifications": {
+    "durability": "tests/test_efit_on_nova_rows_receipt.py:122-482 guards quoted states, basis logs, edge controls, q95 arithmetic, timing, markup and panel digests, with eight recorded failing mutations in case/negative-control-receipt.log, while lines 108-113 omit the gauge shift the prose says was applied.",
+    "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json carries the resolved-basis, edge-switch, q95 and timing records, and case/suite-arms6b.log records the zero-failure delta, but the fragment's line 102 calls raw flux differences post-alignment measurements.",
+    "fit": "tests/test_efit_on_nova_rows_receipt.py follows the repository's receipt-reconciliation idiom and both overlay SVGs render legibly, while docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:102 needs consistent naming of raw and aligned flux errors.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:45-106 records both converged nominal reconstructions against the generating state and an EFIT control current 9.9999% from nominal, beyond the 1.5% band.",
+    "reuse": "tests/test_efit_on_nova_rows_receipt.py:38 imports the existing tests/test_figure_panel_pin.py:_vector_content_digest owner, follows tests/test_outboard_census_receipt_consistency.py for case-specific receipt reconciliation, and capability searches in nova, benchmarks and receipt tests found no owner for this case's arithmetic or fragment validation.",
+    "scope_discipline": "The five-path diff stays within the source prompt's fragment and figure roots except tests/test_efit_on_nova_rows_receipt.py, whose inclusion the source manifest.md:4 explicitly records as accepted by the coordinator."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal in the source prompt.txt:45 is satisfied by docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:5-106, which records disabled priors, the resolved two-function basis, nominal reconstructions and the scaled control.\nVERDICT done_when: The live docs/plans/inverse-equilibrium-baseline.html section s8 is supported by the committed receipt and solver output, including the 17 s CPU run and matched-definition q95 gap 0.064734, with one non-blocking inconsistency in the stated post-alignment flux deltas.\nVERDICT write_paths: The source prompt.txt declares the evidence fragment and figure directory; tests/test_efit_on_nova_rows_receipt.py is the only extra final path and the source manifest.md:4 records the coordinator's acceptance of that durability guard.\nVERDICT manifest: The source manifest.md names the ten commits and case/suite-arms6b.log, whose completed baseline and head arms record 1 passed and 17 passed with BASE_EXIT=0 and HEAD_EXIT=0, respectively.\nVERDICT diff: Read the ten-commit range 1f788362e8e1ca19bb5691fff8b31d25ed825f0e..07b84afd7286b2ac0d0b98334c211a3b0628a393; its final five paths contain one fragment, two rendered overlays, their receipt and the reconciliation tests, with no production source change.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:45-106 records both converged nominal reconstructions against the generating state and an EFIT control current 9.9999% from nominal, beyond the 1.5% band.\nSCORE evidence: 17\nJUSTIFICATION evidence: docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json carries the resolved-basis, edge-switch, q95 and timing records, and case/suite-arms6b.log records the zero-failure delta, but the fragment's line 102 calls raw flux differences post-alignment measurements.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: The five-path diff stays within the source prompt's fragment and figure roots except tests/test_efit_on_nova_rows_receipt.py, whose inclusion the source manifest.md:4 explicitly records as accepted by the coordinator.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_efit_on_nova_rows_receipt.py:122-482 guards quoted states, basis logs, edge controls, q95 arithmetic, timing, markup and panel digests, with eight recorded failing mutations in case/negative-control-receipt.log, while lines 108-113 omit the gauge shift the prose says was applied.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_efit_on_nova_rows_receipt.py follows the repository's receipt-reconciliation idiom and both overlay SVGs render legibly, while docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:102 needs consistent naming of raw and aligned flux errors.\nSCORE reuse: 20\nJUSTIFICATION reuse: tests/test_efit_on_nova_rows_receipt.py:38 imports the existing tests/test_figure_panel_pin.py:_vector_content_digest owner, follows tests/test_outboard_census_receipt_consistency.py for case-specific receipt reconciliation, and capability searches in nova, benchmarks and receipt tests found no owner for this case's arithmetic or fragment validation.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html:102 non-blocking: The paragraph says 0.41% axis and 0.09% boundary flux errors are measured after the additive axis alignment, but receipt.json gives an exact shift of +0.3167117261 Wb, after which the errors are 0% and 0.5010296791%; tests/test_efit_on_nova_rows_receipt.py:108-113 recomputes the raw differences and therefore preserves this inconsistent claim; label the current values as raw or compute and quote the aligned values, which still pass the 2% band.\n",
+  "review_run_id": "r-20261117T215155765386-review-of-efit-on-nova-rows-07b84afd7286",
+  "reviewed_base_sha": "1f788362e8e1ca19bb5691fff8b31d25ed825f0e",
+  "reviewed_head_sha": "07b84afd7286b2ac0d0b98334c211a3b0628a393",
+  "reviewed_run_id": "r-20261115T202050274305-efit-on-nova-rows",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "source_gate_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T202050274305-efit-on-nova-rows/case/suite-arms6b.log",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T21:58:54.703075+00:00",
+  "total": 110
+}

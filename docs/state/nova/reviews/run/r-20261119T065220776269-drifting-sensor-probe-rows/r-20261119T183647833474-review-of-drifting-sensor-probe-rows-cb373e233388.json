@@ -1,0 +1,120 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-19T18:39:21.352Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-drifting-sensor-probe-rows-cb373e233388",
+      "recorded_at": "2026-11-19T19:32:56.072141+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-drifting-sensor-probe-rows-cb373e233388",
+      "recorded_at": "2026-11-19T19:33:02.561826+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-19T18:38:55Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-drifting-sensor-probe-rows-cb373e233388",
+      "recorded_at": "2026-11-19T19:32:33.427427+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "repair-of-drifting-sensor-probe-rows-cb373e233388",
+      "recorded_at": "2026-11-19T19:32:47.651373+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html",
+      "id": "11aaf7fecb3",
+      "line": 44,
+      "severity": "blocking",
+      "summary": "the prior-head rows carry lag-one 0.997/1.000/0.999, but the only arm that produced them gives 0.0348/0.1186/0.1131 on white and 0.3666/0.1866/0.399 on drift when recomputed from r-20261115T202148674467-drifting-sensor-sequences/study/efit-white-200-0.0100.jsonl and its summary.json; the same triplet is repeated at :46."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html",
+      "id": "fefab3f163a",
+      "line": 65,
+      "severity": "blocking",
+      "summary": "the sentence compares nova's axis RMSE (0.0177 m and 0.0236 m) against imas-efit's 0.0134 m and 0.0106 m, which are that arm's mean Euclidean axis error (verified 0.013397 and 0.010579 against an RMSE of 0.014564 and 0.011599), so two codes are compared on different statistics under one axis-RMSE label."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py",
+      "id": "f8ba6cda8a2",
+      "line": 991,
+      "severity": "non-blocking",
+      "summary": "wall_npz re-implements the limiter-unit read owned by nova/imas/mast_efit_referee.py:836 (read_equilibrium_wall) and nova/equilibrium/wall_mask.py:209 (wall_units_from_ids) and keeps rings[0] only, so a machine description with more than one limiter unit loses the rest."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py",
+      "id": "cb30e7bd474",
+      "line": 63,
+      "severity": "non-blocking",
+      "summary": "draw_nulls is called with neither contain= nor other_x_points=, although nova/media/poloidal.py:549 documents containment as strongly advised and draws a second qualified null hollow only through other_x_points, so no null on either panel is admitted against the wall."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py",
+      "id": "3c2f2da9bae",
+      "line": 637,
+      "severity": "non-blocking",
+      "summary": "the sweep branch names its flux map with the preceding sequence loop's variable sequence and args.factor rather than the sweep's own swept, so a run with an empty --sequences raises NameError at the first swept factor and successive factors overwrite one map file."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html",
+      "id": "3b2f4ab9d4d",
+      "line": 76,
+      "severity": "non-blocking",
+      "summary": "the record says paint.py writes the SVG and a 200 dpi raster beside it, but the committed directory holds only the three SVGs; the raster that done_when clause (3) asks be inspected exists only at the reviewed run's study/panels/white-0.png."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/resume_read.py",
+      "id": "c7e14a15931",
+      "line": 17,
+      "severity": "non-blocking",
+      "summary": "STUDY is hard-coded to one run's absolute study directory, unlike every other module here that takes DRIFT_STUDY from the environment, so the reader cannot be pointed at another arm."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "seven commits read against eda6cfd6e: 60ce87ef9 adds the five prototype modules, a03389f49 and 6b5e92d21 correct the panel (solver x-points, vessel clip, gauge sign), 6a3c47566 gates the covariance ratio, efdc125fa adds the boundary-tolerant re-read, 7dec70f4f writes the fragment and a PNG, and cb373e233 folds the returned nova slices into the record and moves the panels into the topic directory, deleting the PNG.",
+    "done_when": "clause (1) is measured by analyse.py over both arms with the loops-only comparison and a 0.670 m prior-convention control, clause (2) by the four per-slice nova receipts and the two failures with their 3923 s and 4336 s walls, clause (3) by the three panels; the gate asserts the quantities only through the fragment, and two of its numbers do not reconcile (findings at :44 and :65).",
+    "goal": "the node goal is to measure both 200-slice sequences with imas-efit on all 72 magnetics rows beside a nova column on the slices one titan job holds; docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:39-49 reports the imas-efit arms (200 white, 199 drift with slice 174 refused) and :57-66 the nova column of two converged slices per sequence.",
+    "manifest": "the manifest states the four measurement scripts ran at cb373e233 with EXIT=0 and names the four logs, records the suite pair as unarmed for an implement node with no test in scope, and reports the same numbers the study directory holds.",
+    "write_paths": "the declared paths are docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html, docs/figures/inverse-equilibrium-baseline/drifting-sensor-sequences, scripts/prototypes/drifting_sensor_sequences and four drifting-sensor-probe-rows figure paths; all ten paths in eda6cfd6e..cb373e233 are inside them."
+  },
+  "justifications": {
+    "durability": "the diff adds no test and no assertion, so reverting probe_angle = -np.asarray(geometry[\"angle\"]) at study.py:174 reddens nothing; the only guard is the control number recorded in the fragment.",
+    "evidence": "study/summary.json reproduces the corrected-arm statistics and study/efit-drift-200-0.0100.missing names slice 174, but drifting-sensor-probe-rows.html:44-46 states prior-head lag-one 0.997/1.000/0.999 where the only prior-head arm gives 0.0348/0.1186/0.1131, and :65 compares nova's RMSE with imas-efit's mean error.",
+    "fit": "the modules follow the neighbouring prototype idiom and the repository's modern typing, but resume_read.py:17-20 hard-codes this run's absolute study directory and analyse.py:40 defines error() that nothing calls.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:39-49 reports both imas-efit sequences on 24 loops plus 48 probes beside the loops-only reference, and :57-66 reports the nova column at two slices per sequence.",
+    "reuse": "study.py:991 wall_npz re-implemented the limiter-ring read that nova/imas/mast_efit_referee.py:836 and nova/equilibrium/wall_mask.py:209 already own instead of extending it; q95_from_flux_map, read_equilibrium_state and the nova.media painters are reused rather than forked.",
+    "scope_discipline": "every path in the diff is inside the declared write paths, but study.py:566-780 carries sweep, spectrum and jacobian machinery and the fragment's :44-46 rows quote the base record's prior-head arms rather than an arm this node ran."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the landed change measures both 200-slice sequences with imas-efit on all 72 magnetics rows and adds a nova column for the titan slices; docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html reports 200 white and 199 drift slices read and two converged nova slices per sequence.\nVERDICT done_when: the done_when's quantities are computed by scripts/prototypes/drifting_sensor_sequences/probe_rows/analyse.py and reconcile with study/summary.json of the reviewed run (axis RMSE 0.01456 and 0.01160, lag-one -0.018/0.099/0.041 and 0.441/0.549/0.598, 50-slice mean 0.01188 and 0.00672) beside the loops-only reference, with the prior-convention control at 0.670 m; two numbers in the fragment do not reconcile with any arm (see findings).\nVERDICT write_paths: the declared paths are docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html, docs/figures/inverse-equilibrium-baseline/drifting-sensor-sequences, scripts/prototypes/drifting_sensor_sequences and four drifting-sensor-probe-rows figure paths; every one of the ten paths in eda6cfd6e..cb373e233 lies inside them.\nVERDICT manifest: read; it records the four measurement scripts at cb373e233 each returning EXIT=0 with their log paths, an unarmed suite pair (\"role implement, no test file lies in this node's write scope\"), the four nova receipts and the two .failed traces, and its numbers match the study directory.\nVERDICT diff: read commit by commit against eda6cfd6e: seven commits touch five prototype modules, the fragment and three SVGs, and every commit stays inside the declared paths; 7dec70f4f adds a PNG that cb373e233 removes when the panels move into the topic directory.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:39-49 reports both imas-efit sequences on 24 loops plus 48 probes beside the loops-only reference, and :57-66 reports the nova column at two slices per sequence.\nSCORE evidence: 12\nJUSTIFICATION evidence: study/summary.json reproduces the corrected-arm statistics and study/efit-drift-200-0.0100.missing names slice 174, but drifting-sensor-probe-rows.html:44-46 states prior-head lag-one 0.997/1.000/0.999 where the only prior-head arm gives 0.0348/0.1186/0.1131, and :65 compares nova's RMSE with imas-efit's mean error.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: every path in the diff is inside the declared write paths, but study.py:566-780 carries sweep, spectrum and jacobian machinery and the fragment's :44-46 rows quote the base record's prior-head arms rather than an arm this node ran.\nSCORE durability: 4\nJUSTIFICATION durability: the diff adds no test and no assertion, so reverting probe_angle = -np.asarray(geometry[\"angle\"]) at study.py:174 reddens nothing; the only guard is the control number recorded in the fragment.\nSCORE fit: 14\nJUSTIFICATION fit: the modules follow the neighbouring prototype idiom and the repository's modern typing, but resume_read.py:17-20 hard-codes this run's absolute study directory and analyse.py:40 defines error() that nothing calls.\nSCORE reuse: 5\nJUSTIFICATION reuse: study.py:991 wall_npz re-implemented the limiter-ring read that nova/imas/mast_efit_referee.py:836 and nova/equilibrium/wall_mask.py:209 already own instead of extending it; q95_from_flux_map, read_equilibrium_state and the nova.media painters are reused rather than forked.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:44 blocking: the prior-head rows carry lag-one 0.997/1.000/0.999, but the only arm that produced them gives 0.0348/0.1186/0.1131 on white and 0.3666/0.1866/0.399 on drift when recomputed from r-20261115T202148674467-drifting-sensor-sequences/study/efit-white-200-0.0100.jsonl and its summary.json, so the record tells a reader the reflected rows reconstruct an almost perfectly autocorrelated series when they reconstruct a noisy one; the same triplet is repeated at :46.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:65 blocking: the sentence compares nova's axis RMSE (0.0177 m and 0.0236 m) against imas-efit's 0.0134 m and 0.0106 m, which are that arm's mean Euclidean axis error (verified 0.013397 and 0.010579 against an RMSE of 0.014564 and 0.011599), so two codes are compared on different statistics under one axis-RMSE label.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:991 non-blocking: wall_npz re-implements the limiter-unit read owned by nova/imas/mast_efit_referee.py:836 (read_equilibrium_wall) and nova/equilibrium/wall_mask.py:209 (wall_units_from_ids) and keeps rings[0] only, so a machine description with more than one limiter unit loses the rest; the ITER wall read here carries one unit of 56 points, so today's figure is faithful by coincidence.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py:63 non-blocking: draw_nulls is called with neither contain= nor other_x_points=, although nova/media/poloidal.py:549 documents containment as strongly advised and draws a second qualified null hollow only through other_x_points, so no null on either panel is admitted against the wall and a second qualified null would be drawn as if absent.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:637 non-blocking: the sweep branch names its flux map with the preceding sequence loop's variable sequence and args.factor rather than the sweep's own swept, so a run with an empty --sequences raises NameError at the first swept factor and successive factors overwrite one map file; the sweep, spectrum and jacobian paths are also outside this node's goal.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drifting-sensor-probe-rows.html:76 non-blocking: the record says paint.py writes the SVG and a 200 dpi raster beside it, but the committed directory holds only the three SVGs; the raster that done_when clause (3) asks be inspected exists only at the reviewed run's study/ `panels/white-0.png`.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/resume_read.py:17 non-blocking: STUDY is hard-coded to one run's absolute study directory, unlike every other module here that takes DRIFT_STUDY from the environment, so the reader cannot be pointed at another arm and breaks once that run directory is pruned.\n",
+  "review_run_id": "r-20261119T183647833474-review-of-drifting-sensor-probe-rows-cb373e233388",
+  "reviewed_base_sha": "eda6cfd6e7b90de3ab254bfbb1f267044ecf432d",
+  "reviewed_head_sha": "cb373e2333883294ebf488d1f11ad957f7c0d2a6",
+  "reviewed_run_id": "r-20261119T065220776269-drifting-sensor-probe-rows",
+  "reviewer": "omp",
+  "reviewer_run_id": "r-20261119T183647833474-review-of-drifting-sensor-probe-rows-cb373e233388",
+  "rubric": "review",
+  "scores": {
+    "durability": 4,
+    "evidence": 12,
+    "fit": 14,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T18:59:21.714019+00:00",
+  "total": 65
+}

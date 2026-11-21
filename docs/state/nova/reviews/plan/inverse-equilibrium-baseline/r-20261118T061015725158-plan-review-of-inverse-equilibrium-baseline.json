@@ -1,0 +1,91 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T06:28:22.046Z",
+  "dispatched_at": "2026-11-18T06:28:09Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:182",
+      "id": "done_when-1",
+      "reason": "without a rule that withholds a covariance verdict when any draw is censored (or states the MAST verdict as conditional on the qualifying draws), the section's per-state claim is unfalsifiable exactly where the evidence is weakest.",
+      "text": "clause (1) settles a state as measured whenever fewer than half its fits fail qualification, but the refusals are not missing at random: the cited record reports MAST at 18 of 32 returned (44 % refused, the lowest of the three) and states the 18 survivors are a selected subset whose ratios \"should be read with that selection in mind\", and its MAST ratios are the section's two smallest (0.352 and 0.773) with a mean bias at 2.96 standard errors against the limit of 3, so the variance ratio that passes MAST is computed on draws whose large perturbations were removed \u2014 the interval is calibrated for independent draws from the target distribution, not a truncated sample, so the clause can return a passed covariance verdict for a state it never tested",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:182",
+      "id": "done_when-2",
+      "reason": "the clause either fails a correct operator on sampling noise or must have its tolerance recomputed for the draw count and its statement narrowed to what the operator can show, so the delivered measure and band both change.",
+      "text": "clause (2)'s flux-map scaling is measured on the linearised operator, so the proportionality is arithmetic rather than a property the fit can violate, and the 20 % band is then a test of the 32-draw sampling of that operator itself: an RMS estimate from 32 draws carries a 1/sqrt(2*32) = 12.5 % relative standard deviation, so a band of +/-20 % is about 1.6 sigma and a correct operator fails it about 11 % of the time per ratio \u2014 roughly a coin flip over the six ratios the clause asks (three states x 0.5 sigma and 2 sigma), which the cited record already brushes with its 0.45 and 1.79 ratios against 0.5 and 2.0",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "1fd7632a1f1567a9e9e534749124828486237b86",
+  "plan_fingerprint": "de058b38ea96317977f791f708faacb2c20bb9b4078d729600b36a3b61c3237b",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 61,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The section has landed and no node will be dispatched from this clause again. The landed record already withholds the verdict the finding asks about: it reports MAST as marginal and not established, states that its 18 surviving fits are a selected subset, and gives its control as not measured.",
+      "when": "2026-11-18T06:44:52.337130+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "The section has landed. By lead decision the flux scaling is reported as a property of the linearised operator and the landed record labels it so; it is not presented as a test the fit could fail, and the three measured ratios are stated with their draw counts.",
+      "when": "2026-11-18T06:46:12.813473+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The section has landed and no node will be dispatched from this clause again. The landed record already withholds the verdict the finding asks about: it reports MAST as marginal and not established, states that its 18 surviving fits are a selected subset, and gives its control as not measured.",
+      "when": "2026-11-18T06:44:52.337130+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The section has landed. By lead decision the flux scaling is reported as a property of the linearised operator and the landed record labels it so; it is not presented as a test the fit could fail, and the three measured ratios are stated with their draw counts.",
+      "when": "2026-11-18T06:46:12.813473+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261118T061015725158-plan-review-of-inverse-equilibrium-baseline.json",
+  "review_run_id": "r-20261118T061015725158-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "041517ac5a31388055e3cfb286f47b84222b2325",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a76 cites no symbol or file; the plan-level hrefs /nova/figures/inverse-equilibrium-baseline/inverse-seam.svg and /nova/spine-efit-parity resolve (spine-efit-parity.html exists) and the extensionless rule leaves nothing unresolved.",
+    "done_when": "two findings \u2014 clause (1) admits a censored state as measured, and clause (2)'s proportionality band is a linearised identity whose tolerance is too tight for its own draw count (docs/plans/inverse-equilibrium-baseline.html:182).",
+    "evidence_paths": "pass \u2014 the section's evidence is a named titan job with its receipt directory under the crew runs tree and the fragment at docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html, all of which survive the run.",
+    "naming": "pass \u2014 \u00a76 names no symbol, no plan label and no ticket number; its clauses are stated as quantities and tolerances.",
+    "reasoning": "pass \u2014 the premise that \u00a71's noise-free recovery leaves the reported covariance untested matches the receipt's covariance field and the cited method, the endpoint is reachable on the three \u00a71 states, and \u00a76 prescribes no code path, step sequence or function to extend.",
+    "single_goal": "pass \u2014 all three clauses ask one question, whether the receipt covariance describes the scatter of the fit's own recoveries, and the control falsifies it.",
+    "wiring": "pass \u2014 `s6` declares no depends-on while its own opening states the \u00a71 fit has landed, matching the emptied wait (the active edge is `s7: [s6, s8, s3]`), and no relationship points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "fb98dbb43fc2642534ec98e1fda5075ba9f6672c5bcad11683c8bf49cd31255d",
+    "s0": "222214efd929830ab3769e033a76bb2b0b963eee1000f2f8d79d3f78da1ee921",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "1d7c7611f002d7765b98531126cc095d6d244b387578c5d44d7284ff93c9e59c",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "95b901a9be71a11db2f0b5f656f0952915a0c3838fafa8e46f0bf5675bd54527",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "38673123cc34cb5be04fbd26c1a149df7d18d2adc2937221123fbc79c8308d95",
+    "s7": "5c750c79d813b34b96a3b3b418cd41dd92a06de78455a410a3cfd366c1aeabee",
+    "s8": "5f1a44b0fc4688ef69242b46b85666aefaf1d27e32404e14f4874b566bc15a1f",
+    "s9": "6b59708e5b47c987c440323356fb9dd0f2ec4438ce599455f755a5cf0772d5bb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:41:39.377094+00:00",
+  "total": null,
+  "traced_units": [
+    "s6"
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T19:45:41.840Z",
+  "dispatched_at": "2026-11-20T19:40:39Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:119",
+      "id": "done_when-1",
+      "reason": "a coordinator reading s13=done never dispatches the :102 clause, while the identical deliverable sits inside \u00a711, so the work is either duplicated or lost depending on which section a node is composed from.",
+      "text": "\u00a713 is declared `done` (plan-section-declarations s13=done) while its done-when (2) still requires committing frame `:102`'s p\u2032 and FF\u2032 extracted at \u03c8_N=1; the landed record `docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-flux.html` carries no `:102` extraction (it reproduces the committed extraction for the four rows only), and \u00a711 done-when (1) names the same gap in its own words, \"which the finite-edge record did not\" \u2014 so the section's status contradicts its own done-when and two sections now claim the same deliverable",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:47",
+      "id": "wiring-1",
+      "reason": "the owed receipt has no recorded gate, so nothing sequences it and nothing releases it when the traced-current repair lands; the plan will read as fully closed with the refresh silently dropped.",
+      "text": "\u00a73 is declared `done` and badged \"landed 2026-09-08\", yet its landed-summary states that \"one measurement remains owed rather than designed: the eleven-row receipt is refreshed after `millisecond-converged-solve` \u00a72 makes the prescribed current a traced argument\"; that section is still `implementable` in `docs/plans/millisecond-converged-solve.html`, and this plan's `plan-informs`/`plan-section-depends-on` declare no edge to it",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:28",
+      "id": "anchors_resolve-1",
+      "reason": "the artifact list is machine-read and surfaced as the plan's evidence links, so the entry resolves to a 404 rather than the receipt \u00a74 banks as its proof.",
+      "text": "the `plan-artifacts` metadata names `docs/figures/diiid-forward-onboarding/ids-set/ddiid_pf_active_circuits.receipt.json`, which does not exist; the committed artifact is `diiid_pf_active_circuits.receipt.json` (single \"i\" after \"d\")",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:89",
+      "id": "anchors_resolve-2",
+      "reason": "the function is named correctly and the store is in that same function, so a worker reading `_build_profile` finds the seam within a screen; only the line number is stale, and repairing it changes no work.",
+      "text": "\u00a78's anchor `benchmarks/diiid_forward_gs_match.py:1487` is not the seam it claims: at the plan's own commit `5c822cbd9`, line 1487 sits inside `_build_profile`'s signature and the `external_current=_source_current(...)` store is at line 1543",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/diiid-vertical-force-balance.html:47",
+      "id": "reasoning-1",
+      "reason": "the plan's own evidence says the receipt cannot be produced at head, so any node dispatched from \u00a73 as written either rebuilds scheduling machinery around a compile defect or reports the same timeout; the missing piece is a declared successor, which is a plan edit rather than a node instruction.",
+      "text": "the section's substantive endpoint (a fresh eleven-row two-field gate) is known to be unobtainable in one allocation because every row pays a distinct compile, measured by the target-current digest probe (\u00a73 landed-record, `docs/figures/diiid-vertical-force-balance/two-field-gate/target-current-digest-probe.json`, verdict `target-current-baked`), yet \u00a73 is closed as landed and the plan names no owner for the rerun",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5c822cbd9fdca849dd7581d812eca9fc3b4280aa",
+  "plan_fingerprint": "ec6316bb2100470369bae7484fd3c6c3534857002d96a5b7dde641b40d186087",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 157,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "145486128bd51b2da846dec10955f3cc4ad76709",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Comment c-s13-frame102-moved on \u00a713 records that the frame-102 boundary extraction moved to \u00a711, which commits it; one owner, no duplicate",
+      "reason": "",
+      "when": "2026-11-20T20:03:55.576275+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "The eleven-row refresh is owned by millisecond-converged-solve \u00a72; declined in earlier rounds for the same reason",
+      "when": "2026-11-20T20:04:05.004592+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "Same \u00a73 refresh, owned by millisecond-converged-solve; this round builds \u00a79 and \u00a711",
+      "when": "2026-11-20T20:04:14.121389+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "Fixed after \u00a711 is dispatched: the artifact list is document metadata and editing it now would hold \u00a711 behind another review round",
+      "when": "2026-11-20T20:04:23.750358+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-2",
+      "reason": "The review judges it changes no work: the function is named and the store is in it",
+      "when": "2026-11-20T20:04:33.129300+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Fixed after \u00a711 is dispatched: the artifact list is document metadata and editing it now would hold \u00a711 behind another review round",
+      "when": "2026-11-20T20:04:23.750358+00:00"
+    },
+    "anchors_resolve-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The review judges it changes no work: the function is named and the store is in it",
+      "when": "2026-11-20T20:04:33.129300+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "145486128bd51b2da846dec10955f3cc4ad76709",
+      "commit_basis": "edit",
+      "note": "Comment c-s13-frame102-moved on \u00a713 records that the frame-102 boundary extraction moved to \u00a711, which commits it; one owner, no duplicate",
+      "reason": "",
+      "when": "2026-11-20T20:03:55.576275+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Same \u00a73 refresh, owned by millisecond-converged-solve; this round builds \u00a79 and \u00a711",
+      "when": "2026-11-20T20:04:14.121389+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The eleven-row refresh is owned by millisecond-converged-solve \u00a72; declined in earlier rounds for the same reason",
+      "when": "2026-11-20T20:04:05.004592+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261120T194001327715-plan-review-of-diiid-vertical-force-balance.json",
+  "review_run_id": "r-20261120T194001327715-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "ba1c5c28f3ef55ca9fa68df1e4dc042fd4254673",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the `plan-artifacts` metadata names `docs/figures/diiid-forward-onboarding/ids-set/ddiid_pf_active_circuits.receipt.json`, which does not exist; every section href and every other cited path resolves.",
+    "done_when": "a finding \u2014 \u00a713 is declared `done` while its done-when (2) still requires frame `:102`'s p\u2032/FF\u2032 extraction, which the landed finite-edge record does not carry and which \u00a711 says it did not.",
+    "evidence_paths": "pass \u2014 records land under `docs/evidence/fragments/diiid-vertical-force-balance/` and `docs/figures/diiid-vertical-force-balance/`, receipts under `scripts/prototypes/diiid_xpoint_coil_correction/receipts/`; \u00a711's `~/.cache/nova-diiid-pinned-reregistration/` output is deliberate (the committed receipt directory is truncated by the entry point) and its record is committed.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags are carried into symbols, and the plan's prose states mechanisms beside its code references.",
+    "reasoning": "a finding \u2014 \u00a73's recorded verdict rests on an eleven-row receipt the plan itself says is blocked by a compiled-in constant, yet the section is presented as landed and the sequencing that resolves it is not wired.",
+    "single_goal": "pass \u2014 each implementable node (\u00a77, \u00a79, \u00a711) names one deliverable; the :102-extraction overlap between \u00a713 and \u00a711 is an ownership inconsistency, reported under done_when rather than as a split goal.",
+    "wiring": "a finding \u2014 \u00a73 declares `done` while its own text says an eleven-row receipt is owed pending `millisecond-converged-solve` \u00a72, and the plan declares no relationship to that plan section."
+  },
+  "section_digests": {
+    "_document": "642eed59c1a3a539a2002d237f3345e1e11ec13304d06032dac3c8c1ede64780",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8c1e90dbaca6ff412cd3c4dc9095191d3bbc6152740bd8d571760568103df4a5",
+    "s12": "9f0b7de609dddf9cec0eead4c27fef615d5275f0957928c862d35cecbbb23ffe",
+    "s13": "e14df5cf0cb26cb414397b74fb90f493b050e0a424f5b4402cd3a7a7de859cac",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "67010ceabd250e895da0e2866c55016f6d94a692436e98f386fbf5a9a62a3df2",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "537b0cbcc96395fb2592a114308b1220125035f6545b23ec029605353edfd7e6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T19:45:56.343232+00:00",
+  "total": null
+}

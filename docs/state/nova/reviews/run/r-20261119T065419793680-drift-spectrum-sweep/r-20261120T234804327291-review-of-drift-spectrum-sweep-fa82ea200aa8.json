@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed logs are logs/baseline_suite.log (revision 54cc8f9, '9 passed', EXIT=0) and logs/after_suite.log (revision fa82ea200, '15 passed', EXIT=0); the after arm fails nothing the baseline arm does not, so no added failure id exists.",
+  "call_site_count": 4,
+  "call_sites": [
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh:38",
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh:42",
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:340",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1050"
+  ],
+  "completed_at": "2026-11-20T23:49:16.952Z",
+  "dispatched_at": "2026-11-20T23:48:54Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py",
+      "line": "30",
+      "severity": "non-blocking",
+      "text": "non-blocking: SIZE_ARMS re-declares four of sweep.SIZE_FACTORS (six size arms exist) and the module docstring at line 3 claims one trace per size arm, so the 0.2 and 0.4 arms are silently omitted and a change to the sweep's size grid never reaches the figure."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py",
+      "line": "39",
+      "severity": "non-blocking",
+      "text": "non-blocking: palette assigns ink.separatrix_color to the size-0.10 trace while both nova marker sets at series.py:111 and :122 use the same separatrix_color as their edge, so a data trace and the cross-code markers share one colour."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read all eight commits against 54cc8f94; only fa82ea200 landed since the review at 4b1b78d0b, and it replaces series.py's private reader, stem template, axis distance and palette with analyse.load, sweep.arms, sweep.label and analyse.axis_distance, draws with nova.media.traces.draw_trace, and moves analyse.LAG_ONE_LIMIT in the white-limit test.",
+    "done_when": "the three clauses are measured by gate.sh's run and analyse pair, whose sweep-analyse.log at fa82ea200 ends CHECKS-PASSED 49 and EXIT=0 with the axis crossing at 0.05 (0.0850 m), the q95 crossing at 0.10 (0.2193), the index-0 control at 0.00150 against the white draw's 0.00150 and a largest per-sensor 0.0487.",
+    "goal": "the reviewed node's goal is to sweep the noise size, the spectral index and the corner frequency for imas-efit on the held ITER state; sweep.py:46-54 fixes the three grids and study/spectrum-summary.json (md5 bff12f86) carries one reduced row per arm, and the newest commit fa82ea200 changes only series.py, analyse.py's shared axis distance and the white-limit test.",
+    "manifest": "read; it records eight commits, both gate commands, the payload md5 bff12f86 and six tests, and its checkpoint claim of a 15-passed head arm at fa82ea200 is now backed by logs/after_suite.log, which ends \"15 passed, 2 warnings\" and EXIT=0 (the prior review read EXIT=143 there).",
+    "write_paths": "the declared roots are docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html, docs/figures/inverse-equilibrium-baseline/drift-spectrum-sweep and scripts/prototypes/drifting_sensor_sequences; all eight paths in 54cc8f94..fa82ea200 lie inside them."
+  },
+  "justifications": {
+    "durability": "test_spectrum_sweep.py:157-167 reddens when sweep.validate keeps a 0.15 literal because a 0.34 value stays inside the moved 0.35 limit while validate still fails it, and :170-211 reddens when the wall write returns to unlink-plus-savez; series.py has no test.",
+    "evidence": "logs/sweep-analyse.log carries the # revision: fa82ea200 header, CHECKS-PASSED 49 and EXIT=0, and logs/after_suite.log now carries \"15 passed\" with EXIT=0 against the baseline's 9 passed.",
+    "fit": "series.py:33-41 takes its colours from nova.media.ink DEFAULT_INK and series.py:65-72 draws with nova.media.traces.draw_trace, matching the reader/label idiom of sweep.py:76-131.",
+    "goal_fidelity": "sweep.py:46-54 fixes the six size, four index and three corner values and spectrum-summary.json carries the twelve reduced arms with the two crossings and the index-0 control.",
+    "reuse": "series.py:28-30 still restates four of sweep.SIZE_FACTORS as SIZE_ARMS while the reader, stem, axis distance, palette and drawing now extend analyse.py:22/:119 and nova/media/traces.py:194.",
+    "scope_discipline": "all eight paths in 54cc8f94..fa82ea200 sit under the three declared roots, and study.py's +17/-3 is the atomic wall write the node's arms need."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to sweep the noise size, the spectral index and the corner frequency for imas-efit on the held ITER state; sweep.py:46-54 fixes the three grids and study/spectrum-summary.json (md5 bff12f86) carries one reduced row per arm, and the newest commit fa82ea200 changes only series.py, analyse.py's shared axis distance and the white-limit test.\nVERDICT done_when: the three clauses are measured by gate.sh's run and analyse pair, whose sweep-analyse.log at fa82ea200 ends CHECKS-PASSED 49 and EXIT=0 with the axis crossing at 0.05 (0.0850 m), the q95 crossing at 0.10 (0.2193), the index-0 control at 0.00150 against the white draw's 0.00150 and a largest per-sensor 0.0487.\nVERDICT write_paths: the declared roots are docs/evidence/fragments/inverse-equilibrium-baseline/drift-spectrum-sweep.html, docs/figures/inverse-equilibrium-baseline/drift-spectrum-sweep and scripts/prototypes/drifting_sensor_sequences; all eight paths in 54cc8f94..fa82ea200 lie inside them.\nVERDICT manifest: read; it records eight commits, both gate commands, the payload md5 bff12f86 and six tests, and its checkpoint claim of a 15-passed head arm at fa82ea200 is now backed by logs/after_suite.log, which ends \"15 passed, 2 warnings\" and EXIT=0 (the prior review read EXIT=143 there).\nVERDICT diff: read all eight commits against 54cc8f94; only fa82ea200 landed since the review at 4b1b78d0b, and it replaces series.py's private reader, stem template, axis distance and palette with analyse.load, sweep.arms, sweep.label and analyse.axis_distance, draws with nova.media.traces.draw_trace, and moves analyse.LAG_ONE_LIMIT in the white-limit test.\nCALL_SITES: scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh:38, scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh:42, scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:340, scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:1050\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: sweep.py:46-54 fixes the six size, four index and three corner values and spectrum-summary.json carries the twelve reduced arms with the two crossings and the index-0 control.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/sweep-analyse.log carries the # revision: fa82ea200 header, CHECKS-PASSED 49 and EXIT=0, and logs/after_suite.log now carries \"15 passed\" with EXIT=0 against the baseline's 9 passed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all eight paths in 54cc8f94..fa82ea200 sit under the three declared roots, and study.py's +17/-3 is the atomic wall write the arms need.\nSCORE durability: 16\nJUSTIFICATION durability: test_spectrum_sweep.py:157-167 reddens when sweep.validate keeps a 0.15 literal because moving analyse.LAG_ONE_LIMIT to 0.35 leaves a 0.34 value inside the moved limit while validate still fails it, and :170-211 reddens when the wall write returns to unlink-plus-savez; series.py has no test.\nSCORE fit: 17\nJUSTIFICATION fit: series.py:33-41 takes its colours from nova.media.ink DEFAULT_INK and series.py:65-72 draws with nova.media.traces.draw_trace, matching the prototype's reader/label idiom in sweep.py:76-131.\nSCORE reuse: 15\nJUSTIFICATION reuse: series.py:28-30 still restates four of sweep.SIZE_FACTORS as SIZE_ARMS while the reader, stem, axis distance, palette and drawing now extend analyse.py:22/:119 and nova/media/traces.py:194.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py:30 non-blocking: SIZE_ARMS re-declares four of sweep.SIZE_FACTORS (six size arms exist) and the module docstring at line 3 claims one trace per size arm, so the 0.2 and 0.4 arms are silently omitted and a change to the sweep's size grid never reaches the figure.\nFINDING scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py:39 non-blocking: palette assigns ink.separatrix_color to the size-0.10 trace while both nova marker sets at series.py:111 and :122 use the same separatrix_color as their edge, so a data trace and the cross-code markers share one colour.\n",
+  "review_run_id": "r-20261120T234804327291-review-of-drift-spectrum-sweep-fa82ea200aa8",
+  "reviewed_base_sha": "54cc8f94f3ff8fafc359291fb5e18e88ae7bf7a8",
+  "reviewed_head_sha": "fa82ea200aa8c99e8025a3f7f10a0ae84f6c9bcc",
+  "reviewed_run_id": "r-20261119T065419793680-drift-spectrum-sweep",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T23:55:26.608354+00:00",
+  "total": 103
+}

@@ -57,7 +57,7 @@ class MagneticsBudgetClass(enum.StrEnum):
 class MetricTolerance:
     """One numeric bound together with the measurement that licensed it."""
 
-    field: ScorecardField
+    field: ScorecardField | str
     bound: float
     direction: BoundDirection
     unit: str
@@ -254,6 +254,17 @@ def registered_tolerances(
 
 PARITY_TOLERANCES = registered_tolerances()
 
+# Stored-equilibrium comparisons use physical distances and flux-span fractions.
+IMAS_COMPARISON_BANDS = MappingProxyType(
+    {
+        "magnetic_axis_distance_m": 0.20,
+        "plasma_current_relative_error": 0.015,
+        "axis_flux_span_error": 0.05,
+        "boundary_flux_span_error": 0.05,
+        "q95_magnitude_error": 2.0,
+    }
+)
+
 
 def validate_scorecard_fields(fields: Iterable[str]) -> None:
     """Reject a scorecard unless its fields exactly match the registry."""
@@ -337,3 +348,122 @@ def draw_held_out_extension(
 
 
 HELD_OUT_EXTENSION = draw_held_out_extension()
+
+
+STATE_RECEIPT = (
+    "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json"
+)
+
+STATE_SCOREBOARD_FIELDS = (
+    ScorecardField.MAGNETIC_AXIS_DISTANCE_M.value,
+    "plasma_current_fraction",
+    "axis_flux_fraction",
+    "boundary_flux_fraction",
+    "q95_difference",
+)
+
+REFERENCE_FREE_FIELDS = ("boundary_area_fraction",)
+
+
+def _state_scoreboard_tolerances() -> dict[str, MetricTolerance]:
+    """Return the bands one reconstructed state is judged against a reference by.
+
+    The four bands are the ones recorded on the row-exchange case, read from the
+    receipt committed beside its panels; the axis band is a metre distance and
+    every flux band is a fraction of the reference's axis-to-boundary span.
+    """
+
+    return {
+        ScorecardField.MAGNETIC_AXIS_DISTANCE_M.value: MetricTolerance(
+            field=ScorecardField.MAGNETIC_AXIS_DISTANCE_M.value,
+            bound=0.02,
+            direction=BoundDirection.AT_MOST,
+            unit="m",
+            basis="the recorded row-exchange band on the magnetic axis position",
+            evidence=STATE_RECEIPT,
+        ),
+        "plasma_current_fraction": MetricTolerance(
+            field="plasma_current_fraction",
+            bound=0.015,
+            direction=BoundDirection.AT_MOST,
+            unit="fraction of the reference current",
+            basis="the recorded row-exchange band on the plasma current",
+            evidence=STATE_RECEIPT,
+        ),
+        "axis_flux_fraction": MetricTolerance(
+            field="axis_flux_fraction",
+            bound=0.02,
+            direction=BoundDirection.AT_MOST,
+            unit="fraction of the reference flux span",
+            basis="the recorded row-exchange band on the axis flux",
+            evidence=STATE_RECEIPT,
+        ),
+        "boundary_flux_fraction": MetricTolerance(
+            field="boundary_flux_fraction",
+            bound=0.02,
+            direction=BoundDirection.AT_MOST,
+            unit="fraction of the reference flux span, after gauge alignment",
+            basis="the recorded row-exchange band on the boundary flux",
+            evidence=STATE_RECEIPT,
+        ),
+        "q95_difference": MetricTolerance(
+            field="q95_difference",
+            bound=0.1,
+            direction=BoundDirection.AT_MOST,
+            unit="magnitude",
+            basis=(
+                "the recorded row-exchange band on q95 read from both states' own "
+                "profiles, magnitudes compared with each stored sign reported"
+            ),
+            evidence=STATE_RECEIPT,
+        ),
+    }
+
+
+STATE_SCOREBOARD_TOLERANCES = MappingProxyType(_state_scoreboard_tolerances())
+
+REFERENCE_FREE_TOLERANCES = MappingProxyType(
+    {
+        "boundary_area_fraction": MetricTolerance(
+            field="boundary_area_fraction",
+            bound=0.5,
+            direction=BoundDirection.AT_LEAST,
+            unit="fraction of the boundary's bounding box",
+            basis=(
+                "a closed outline that fails to cover half its own bounding box is "
+                "not a plasma boundary"
+            ),
+            evidence="nova/imas/mast_efit_referee.py",
+        )
+    }
+)
+
+
+def state_scoreboard_verdicts(metrics: Mapping[str, float]) -> Mapping[str, bool]:
+    """Return one verdict per registered state-scoreboard metric."""
+
+    return MappingProxyType(
+        {
+            field: STATE_SCOREBOARD_TOLERANCES[field].passes(float(metrics[field]))
+            for field in STATE_SCOREBOARD_FIELDS
+        }
+    )
+
+
+def reference_free_verdicts(
+    checks: Mapping[str, float | bool | None],
+) -> Mapping[str, bool]:
+    """Return one verdict per reference-free check, refusing an absent measure."""
+
+    verdicts: dict[str, bool] = {}
+    for field in REFERENCE_FREE_FIELDS:
+        value = checks.get(field)
+        if value is None or (isinstance(value, float) and not math.isfinite(value)):
+            raise ValueError(f"reference-free check {field!r} carries no measure")
+        verdicts[field] = REFERENCE_FREE_TOLERANCES[field].passes(float(value))
+    for field in ("axis_inside_wall", "axis_inside_boundary"):
+        value = checks.get(field)
+        if value is None:
+            raise ValueError(f"reference-free check {field!r} carries no measure")
+        verdicts[field] = bool(value)
+    return MappingProxyType(verdicts)

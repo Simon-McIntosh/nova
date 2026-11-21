@@ -25,7 +25,49 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 49,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "43ea8ffb492d430c8f3da575148b680c18aac659",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The section now says nova sets imas-efit degrees explicitly for this run and why: its automatic choice resolves no pressure coefficient on magnetics-only ITER rows, where no state with an axis exists.",
+      "reason": "",
+      "when": "2026-11-17T21:56:18.674108+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "43ea8ffb492d430c8f3da575148b680c18aac659",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The flux band is now on the boundary flux after the axis flux is aligned, which is the flux span, and the clause says so; the axis flux is no longer banded.",
+      "reason": "",
+      "when": "2026-11-17T21:58:42.534195+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "43ea8ffb492d430c8f3da575148b680c18aac659",
+      "commit_basis": "edit",
+      "note": "The flux band is now on the boundary flux after the axis flux is aligned, which is the flux span, and the clause says so; the axis flux is no longer banded.",
+      "reason": "",
+      "when": "2026-11-17T21:58:42.534195+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "43ea8ffb492d430c8f3da575148b680c18aac659",
+      "commit_basis": "edit",
+      "note": "The section now says nova sets imas-efit degrees explicitly for this run and why: its automatic choice resolves no pressure coefficient on magnetics-only ITER rows, where no state with an axis exists.",
+      "reason": "",
+      "when": "2026-11-17T21:56:18.674108+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261117T165830532623-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261117T165830532623-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "d55c949cccc852c779b3055a7d5cd4de474bdd24",
   "rubric": "content",

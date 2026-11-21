@@ -53,9 +53,7 @@ from typing import Any
 
 import numpy as np
 
-DEFAULT_SESSION_ROOT = Path(
-    "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29"
-)
+DEFAULT_SESSION_ROOT = Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29")
 DEFAULT_LEVEL1_ROOT = Path("/work/projects/imas_gpu/mast/level1/shots")
 DEFAULT_LEVEL2_ROOT = Path("/work/projects/imas_gpu/mast/level2/shots")
 FROZEN_CARRIER_SHOTS = (21978, 21983, 21985, 21986, 21989, 22086)

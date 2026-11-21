@@ -635,7 +635,7 @@ def test_the_limited_boundary_defect_is_visible_rather_than_silent():
 # so the carrier slow tests above must read the root that has them rather
 # than the production root where every frame's polyline is still empty.
 BOUNDARY_LABEL_ROOT = Path(
-    "/work/projects/imas_gpu/sophelio/labeller_sessions/"
+    "/work/projects/imas_gpu/nova/labeller_sessions/"
     "boundary-repair-validation-20260907T1124Z"
 )
 

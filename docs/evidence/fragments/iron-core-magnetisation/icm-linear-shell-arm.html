@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="icm-linear-shell-arm">
+  <meta name="plan-evidence-for" content="iron-core-magnetisation">
+  <meta name="plan-verifies" content="iron-core-magnetisation#s11">
+  <title>Coarse shell arm for the piecewise-linear basis | nova</title>
+</head>
+<body>
+<main class="plan-doc">
+  <h2 id="icm-linear-shell-arm-result">The linear shell criterion can fail: 80 mm passes, 120 mm misses</h2>
+  <!-- measured-result -->
+  <p id="icm-linear-shell-arm-verdict">On the &mu;<sub>r</sub> = 1000 closed shell the
+  piecewise-linear basis at <strong>80&nbsp;mm spacing (76 cells, 456 unknowns) reads
+  0.136630&nbsp;% worst-probe error</strong> against the dipole reference and meets the
+  0.5&nbsp;% criterion. The next coarser spacing, <strong>120&nbsp;mm (38 cells,
+  228 unknowns), reads 0.557274&nbsp;% and misses it</strong>. Every coarser mesh measured
+  below misses by more. Clause (3) of §5b is met at the second rung: one arm of the
+  linear basis misses the criterion.</p>
+  <!-- measured-result-end -->
+
+  <p id="icm-linear-shell-arm-method">Geometry, source, probes and reference are the
+  existing shell measurement: <code>scripts/iron_linear_magnetisation/controls.py</code>
+  holds the 0.9–1.0&nbsp;m polygonal half-section, the one-ampere 50&nbsp;mm loop at
+  the origin, the probes (2,&nbsp;0), (0,&nbsp;2) and (3,&nbsp;1)&nbsp;m, and
+  <code>exact_shielding() = 61.101838</code> for the dipole reference. Only the
+  uniform spacing changes between rows; no operator, default or tolerance was
+  altered. Errors are <code>|S<sub>measured</sub>/S<sub>dipole</sub> − 1|</code> at
+  each probe.</p>
+
+  <table id="icm-linear-shell-arm-table">
+    <thead><tr><th>spacing [mm]</th><th>cells</th><th>unknowns</th><th>(2, 0) error [%]</th><th>(0, 2) error [%]</th><th>(3, 1) error [%]</th><th>worst, dipole [%]</th><th>worst, finite loop [%]</th><th>total wall [s]</th><th>verdict</th></tr></thead>
+    <tbody>
+      <tr><td>80</td><td>76</td><td>456</td><td>0.084463</td><td>0.136630</td><td>0.083196</td><td>0.136630</td><td>0.121316</td><td>403.2</td><td>meets</td></tr>
+      <tr><td>120</td><td>38</td><td>228</td><td>0.459020</td><td>0.557274</td><td>0.435477</td><td><strong>0.557274</strong></td><td>0.508374</td><td>375.5</td><td><strong>misses</strong></td></tr>
+      <tr><td>160</td><td>25</td><td>150</td><td>0.988142</td><td>1.104580</td><td>1.082202</td><td>1.104580</td><td>1.094737</td><td>381.6</td><td>misses</td></tr>
+      <tr><td>240</td><td>13</td><td>78</td><td>3.390176</td><td>3.502014</td><td>3.124491</td><td>3.502014</td><td>3.454562</td><td>389.1</td><td>misses</td></tr>
+      <tr><td>320</td><td>8</td><td>48</td><td>22.190394</td><td>21.396549</td><td>21.846943</td><td>22.190394</td><td>22.219094</td><td>384.9</td><td>misses</td></tr>
+      <tr><td>480</td><td>6</td><td>36</td><td>31.780779</td><td>25.128224</td><td>30.246288</td><td>31.780779</td><td>31.805941</td><td>377.3</td><td>misses</td></tr>
+    </tbody>
+  </table>
+
+  <p id="icm-linear-shell-arm-monotone">The error rises monotonically with spacing:
+  0.1366, 0.5573, 1.1046, 3.5020, 22.190394 and 31.780779&nbsp;%, so the ladder is
+  measuring spacing rather than run-to-run variation. The recorded 40&nbsp;mm point of
+  this same script, 0.0625439&nbsp;% at 1,368 unknowns, lies below the 80&nbsp;mm point:
+  the coarse arm is above the previously measured fine arm, as a refinement curve
+  should be. The finite-loop column is the independently transmitted reference and
+  tracks the dipole column, so the crossing is not an artefact of the reference
+  choice.</p>
+
+  <p id="icm-linear-shell-arm-mesher-limit">The mesher is the limit on going coarser,
+  not the criterion. One logged run over twelve spacings records the admitted cell
+  count and the refusal at each: every spacing from 10&nbsp;mm to 480&nbsp;mm is
+  admitted, 480&nbsp;mm at 6 cells and 36 unknowns, with the meshed cell area summing
+  to 0.2984508339013301&nbsp;m² at every admitted size. The 640, 960 and
+  1000&nbsp;mm spacings are refused with exactly:</p>
+  <p id="icm-linear-shell-arm-mesher-refusal"><code>unresolved iron sliver; refine the
+  cell-size field or reduce cell_size</code></p>
+  <p id="icm-linear-shell-arm-mesher-limit-close">So 480&nbsp;mm is the coarsest uniform
+  spacing this mesher admits, the criterion is already failed at 120&nbsp;mm, and no
+  coarser body was invented. Receipt
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/shell-arm/mesh-limit.json</code>,
+  job 1324644, log
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/shell-arm/logs/mesh-limit-1324644.log</code>.</p>
+
+  <h3 id="icm-linear-shell-arm-lane">Lane: the assembly cost is size-independent, and CPU cannot serve the sweep</h3>
+  <p id="icm-linear-shell-arm-lane-cpu">An identical sweep was first submitted to
+  <code>rigel</code> (16 cores, <code>--mem=110G</code>, job 1324235, one hour). It
+  completed no row: the 80&nbsp;mm interaction assembly had not finished when the job
+  hit <code>TIMEOUT</code> at 60&nbsp;min (receipt <code>coarse/linear-0.08.json</code>
+  records the mesh and <code>completed: false</code>). A bounded in-allocation probe of
+  the 480&nbsp;mm, 6-cell assembly also exceeded 300&nbsp;s. The same six spacings then
+  completed on one Titan Tesla P100-PCIE-16GB in 39&nbsp;min 30&nbsp;s (job 1324373).</p>
+  <p id="icm-linear-shell-arm-lane-floor">Assembly time is 361.9–370.5&nbsp;s at
+  <em>every</em> spacing from 480&nbsp;mm down to 80&nbsp;mm, while the unknown count
+  falls from 456 to 36; the cost is a size-independent floor, not the mesh density.
+  That floor is what the CPU lane could not pay. The walls quoted above are P100 walls
+  and are not H200 timing claims.</p>
+
+  <h3 id="icm-linear-shell-arm-provenance">Provenance and verification</h3>
+  <p id="icm-linear-shell-arm-receipts">All six rows ran at revision
+  <code>1ad97626d2adcaa9ce5bef38e1895ae0121969e6</code> at clean source, with
+  <code>measure.py</code> blob <code>4a7859361b9c533916951ba0387675fe04f1e149</code>,
+  <code>x64</code> asserted before any array, module
+  <code>nova/biot/magnetisation.py</code> imported from the job's extracted tree. Each
+  row converged in one Newton step with terminal material residual between
+  1.6&nbsp;×&nbsp;10<sup>−15</sup> and 4.9&nbsp;×&nbsp;10<sup>−15</sup>. Receipts:
+  <code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/shell-arm/coarse/linear-*.json</code>;
+  job logs <code>.../shell-arm/logs/measure-titan-1324373.log</code> and
+  <code>.../logs/measure-1324235.log</code>.</p>
+  <p id="icm-linear-shell-arm-reference-restore">This node also repaired the base tree's
+  <code>scripts/iron_linear_magnetisation/reference.py</code>, which held only a
+  docstring while <code>measure.py</code> imports <code>exterior_reference</code> for the
+  finite-loop column; the script refused with
+  <code>ImportError: cannot import name 'exterior_reference'</code>. The module was
+  restored from its last complete revision and reproduces the recorded finite-loop
+  shielding vector <code>[61.12438346603941, 61.0718066323272, 61.109581606774945]</code>
+  against <code>dipole = 61.101838</code>. The gate now imports this module:
+<code>tests/test_magnetisation.py::test_finite_loop_reference_module_transmits_the_shell</code>
+checks the degree-one transmission against the closed-form shell shielding in
+<code>controls.py</code> and pins the recorded finite-loop vector, so a repeat
+truncation fails the suite instead of surfacing when a measurement next runs.</p>
+</main>
+</body>
+</html>

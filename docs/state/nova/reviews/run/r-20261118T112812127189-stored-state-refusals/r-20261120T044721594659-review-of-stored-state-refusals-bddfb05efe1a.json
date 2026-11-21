@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-20T04:48:33.625Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-stored-state-refusals-bddfb05efe1a",
+      "recorded_at": "2026-11-20T07:26:10.608875+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-20T04:48:04Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/stored_state_refusals/report.py",
+      "line": 60,
+      "severity": "non-blocking",
+      "text": "records() orders both the measurement and the failure receipts by filesystem mtime, an out-of-band fact, so re-copying or re-touching a run directory silently flips which measurement of an arm wins and is fragile across any archive restore, where the receipt's own source_revision or a written sequence would be."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/report.py",
+      "line": 86,
+      "severity": "non-blocking",
+      "text": "history_fields repeats the rejected-history reader added at run_cases.py:96 in the same commit, and the copies already diverge (report.py:104-105 returns {} while run_cases.py:112-113 returns finite_residual_entries=0), so one capability now needs two fixes."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/submit.sh",
+      "line": 86,
+      "severity": "non-blocking",
+      "text": "the sbatch line exports no TMPDIR before submitting, and the repository's AGENTS.md holds that exporting it only inside the payload is not enough because slurmstepd resolves the inherited login-node value first."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/manifest.md",
+      "line": 9,
+      "severity": "non-blocking",
+      "text": "test_files names tests/test_unqualified_axis_eager_routes.py, a pre-existing test no commit in the diff touches, so neither armed arm exercises report.py or run_cases.py and the arm pair would stay green through a regression in the only files this node changed."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/manifest.md",
+      "line": 12,
+      "severity": "non-blocking",
+      "text": "the after arm's log armed-repair3.log carries no '# command:' header and no closing 'EXIT=<code>' line, so the after_suite exit_status the manifest records cannot be read from the log promotion cites."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the section's deliverable in docs/plans/forward-solve-near-stored-states.html:63-79 beside the three repair commits; the six arms remain reproducible from stored inputs and are folded into docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html, and the record now prints the TCV and ITER coefficient vectors, the live displaced coordinate, and a lowest-recorded-residual column, but the recorded residuals (4.70674 stored, 5.03224 displaced, 0.905546 TCV) are orders of magnitude from the banked 4.9e-10, 1.2e-4 and 0.030 and the positive control refuses instead of qualifying.\nVERDICT done_when: the done_when pins one batch job per case family with residuals within a factor of three of 4.9e-10 / 1.2e-4 / 0.030, a MAST-U continuation qualifying below 1e-10, and per-solve mesh, route, coefficients, displacement and panel; the arms' JSON receipts and the fragment carry parts (3), and parts (1) and (2) are measured but contradicted, while the recorded gate (tests/test_unqualified_axis_eager_routes.py) asserts none of them.\nVERDICT write_paths: read the declared paths and the a148a0a9d176713a90cd24ffa7de2966b0c55654..bddfb05efe1a3e06674394fbed4f262a9ae7f0f2 diff; all twelve changed paths (fragment, eight SVGs, two preview PNGs, report.py, run_cases.py, submit.sh) sit inside the declared evidence, figure and script paths.\nVERDICT manifest: read r-20261118T112812127189-stored-state-refusals/manifest.md; status complete, all eight commits named, baseline_suite and after_suite each recorded as exit 0 with 0 failures over tests/test_unqualified_axis_eager_routes.py, and the landing line giving each arm's terminal residual state.\nVERDICT diff: read fbfeafd36316f86b924745f2cf343733ee35cc63..bddfb05efe1a3e06674394fbed4f262a9ae7f0f2 commit by commit (68abc69f5, d1739fbcb, bddfb05ef) and the accumulating a148a0a9..bddfb05efe1a diff; the three commits answer the prior review's two blocking and four non-blocking findings inside the declared scope, and add no test file.\nCALL_SITES: scripts/prototypes/stored_state_refusals/submit.sh:79 (invokes run_cases.py), tests/test_magnetics_fit_efit_comparison.py:107 (_write, now imported by run_cases.py:53), tests/test_magnetics_fit_efit_comparison.py:112 (_residual_fields, now imported by run_cases.py:53), tests/test_equilibrium_magnetics_fit.py:1216 (_persist_forward_failure, the writer of the receipts both scripts read)\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals.html:4 tabulates mastu-stored-default at 4.70674 and tcv-stored-default at 0.905546 against the banked 4.9e-10 and 0.030, and the continuation paragraph on line 5 records 0 finite entries, so done_when (1) and (2) are reported honestly but unmet.\nSCORE evidence: 10\nJUSTIFICATION evidence: the fragment's numbers reconcile with mastu-displaced3/measurement.json and mastu-titan2/measurement.json, but the recorded gate in manifest.md:10 is a pre-existing test that never imports report.py or run_cases.py, and armed-repair3.log ends at '4 passed' with no EXIT= line.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat a148a0a9d176713a90cd24ffa7de2966b0c55654..bddfb05efe1a3e06674394fbed4f262a9ae7f0f2 lists only paths inside the declared fragment, figures and scripts/prototypes/stored_state_refusals scope.\nSCORE durability: 3\nJUSTIFICATION durability: no assertion was added anywhere in the diff; report.py:38-77 and run_cases.py:96-118 have no test that reddens if the union merge, the mtime ordering or the displacement index regress.\nSCORE fit: 15\nJUSTIFICATION fit: report.py:38 and run_cases.py:221 follow the sibling prototype scripts' plain-function idiom and free of forbidden names, but report.py:86 and run_cases.py:96 are two divergent copies of one reader (the empty case returns {} in one and finite_residual_entries=0 in the other).\nSCORE reuse: 12\nJUSTIFICATION reuse: run_cases.py:53-55 now extends tests/test_magnetics_fit_efit_comparison.py:107,112 instead of duplicating _write and _residual_fields, but report.py:86 forks the rejected-history reader that run_cases.py:96 added in the same commit 68abc69f5.\nFINDING scripts/prototypes/stored_state_refusals/report.py:60 non-blocking: records() orders both the measurement and the failure receipts by filesystem mtime, an out-of-band fact, so re-copying or re-touching a run directory silently flips which measurement of an arm wins and is fragile across any archive restore, where the receipt's own source_revision or a written sequence would be.\nFINDING scripts/prototypes/stored_state_refusals/report.py:86 non-blocking: history_fields repeats the rejected-history reader added at run_cases.py:96 in the same commit, and the copies already diverge (report.py:104-105 returns {} while run_cases.py:112-113 returns finite_residual_entries=0), so one capability now needs two fixes.\nFINDING scripts/prototypes/stored_state_refusals/submit.sh:86 non-blocking: the sbatch line export no TMPDIR before submitting, and the binding rule in the repository's AGENTS.md holds that exporting it only inside the payload is not enough because slurmstepd resolves the inherited login-node value first.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/manifest.md:9 non-blocking: test_files names tests/test_unqualified_axis_eager_routes.py, a pre-existing test no commit in the diff touches, so neither armed arm exercises report.py or run_cases.py and the arm pair would stay green through a regression in the only files this node changed.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T112812127189-stored-state-refusals/manifest.md:12 non-blocking: the after arm's log armed-repair3.log carries no '# command:' header and no closing 'EXIT=<code>' line, so the after_suite exit_status the manifest records cannot be read from the log promotion cites.\n",
+  "review_run_id": "r-20261120T044721594659-review-of-stored-state-refusals-bddfb05efe1a",
+  "reviewed_base_sha": "fbfeafd36316f86b924745f2cf343733ee35cc63",
+  "reviewed_head_sha": "bddfb05efe1a3e06674394fbed4f262a9ae7f0f2",
+  "reviewed_run_id": "r-20261118T112812127189-stored-state-refusals",
+  "scores": {
+    "durability": 3,
+    "evidence": 10,
+    "fit": 15,
+    "goal_fidelity": 12,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T04:58:31.670516+00:00",
+  "total": 71
+}

@@ -1,0 +1,124 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-19T18:20:33.194Z",
+  "dispatched_at": "2026-11-19T18:20:12Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:85",
+      "id": "reasoning-1",
+      "reason": "the section's stated open question is unresolved by a comparison whose two outcomes both match one of its branches; an independent reference (EFIT's lower X-point, as \u00a710 and \u00a713 already use) must be named, or a null move beyond 1 mm must be recorded as evidence for the second alternative rather than as a failed run.",
+      "text": "\u00a77's own text leaves two alternatives open (\"Either the mask disturbs the solver at the cycling active set, or the unmasked base's convergence leaned on the inactive compensator's image\"), and its done-when makes \"each row's lower X-point lies within 1 mm of its unmasked solve\" the pass condition; under the second alternative the unmasked state is the one the section calls \"not a valid equilibrium\", so a correct mask must move the lower null outside the band and the node records a failure for the outcome the section itself names as legitimate \u2014 the clause has no arm separating a mask that disturbs the solver from an unmasked solution the image carried, and the finite-edge unmasked states the plan now relies on (137D 1.250 cm, 146D 1.791 cm, 146L 4.850 cm, 179L 1.499 cm from EFIT) give no evidence for a 1 mm bound on the mask's effect.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:85",
+      "id": "done_when-1",
+      "reason": "the tolerance decides the node's verdict; either the band is derived from a stated expected movement of the equilibrium under an image the section says should not act (which would be far smaller than 1 mm) or the measure needs a different quantity, and as written the first correct run may fail on a threshold no evidence supports.",
+      "text": "the 1 mm band has no basis in the plan's own measurement: the recovery record (`docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html`) is the only matched masked/unmasked pair the plan cites, and its 137D lower-null offsets differ by 2.9544 mm (10.4798913313 mm unmasked, 7.5254723398 mm masked), about three times the band the done-when imposes; a band tighter than the one measured effect of the change being gated will fail a correct mask, and no finite-edge masked arm exists yet from which 1 mm could be inferred.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-vertical-force-balance.html:114",
+      "id": "anchors_resolve-1",
+      "reason": "a section whose done-when's only named record never landed is either undeclared or under-evidenced, and the plan's evidence trail must name what exists.",
+      "text": "\u00a712 (declared done) names `docs/evidence/fragments/diiid-vertical-force-balance/diiid-137d-refusal.html` and `docs/figures/diiid-vertical-force-balance/diiid-137d-refusal/` as the section's record but neither exists in the tree (all sibling fragment records resolve, and no figure directory of that name exists), so the done declaration points at a record a reader cannot open.",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "7ee4fa80433045b2d3482cdc48ae3dac6bb5ae47",
+  "plan_fingerprint": "8c00e27fce9185a951a58fb0af748bd3d4db33e899a5d9c6e98a538499b5aa77",
+  "plan_slug": "diiid-vertical-force-balance",
+  "plan_version": 145,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f8e7459be0393615d31b3ca56bbbe51ecd8e2694",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Lead decision: the retry is judged against EFIT's lower null, not the unmasked solve, and the record reports the shift and the inactive compensator field at each unmasked terminal state, which separates a disturbing mask from an image the unmasked solve leaned on",
+      "reason": "",
+      "when": "2026-11-20T07:58:16.166829+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f8e7459be0393615d31b3ca56bbbe51ecd8e2694",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The 1 mm band against the unmasked solve is replaced by: each masked lower null no farther from EFIT than the unmasked one, within 1 mm, with the shift reported",
+      "reason": "",
+      "when": "2026-11-20T07:59:21.503961+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-1",
+      "reason": "\u00a712 was closed by lead decision without running; its closing comment c-closed-s12-finite-edge records that no refusal mechanism was measured and the run was discarded, so the named record never existing is the documented outcome",
+      "when": "2026-11-20T08:00:21.778199+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a712 was closed by lead decision without running; its closing comment c-closed-s12-finite-edge records that no refusal mechanism was measured and the run was discarded, so the named record never existing is the documented outcome",
+      "when": "2026-11-20T08:00:21.778199+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f8e7459be0393615d31b3ca56bbbe51ecd8e2694",
+      "commit_basis": "edit",
+      "note": "The 1 mm band against the unmasked solve is replaced by: each masked lower null no farther from EFIT than the unmasked one, within 1 mm, with the shift reported",
+      "reason": "",
+      "when": "2026-11-20T07:59:21.503961+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f8e7459be0393615d31b3ca56bbbe51ecd8e2694",
+      "commit_basis": "edit",
+      "note": "Lead decision: the retry is judged against EFIT's lower null, not the unmasked solve, and the record reports the shift and the inactive compensator field at each unmasked terminal state, which separates a disturbing mask from an image the unmasked solve leaned on",
+      "reason": "",
+      "when": "2026-11-20T07:58:16.166829+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-vertical-force-balance/r-20261119T181740153574-plan-review-of-diiid-vertical-force-balance.json",
+  "review_run_id": "r-20261119T181740153574-plan-review-of-diiid-vertical-force-balance",
+  "reviewed_blob_sha": "d0367b114b5ef4add13f34a76ca4a6bd97db51e0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the `508124520`/`37d974e55` commits and the `diiid-inactive-compensator-recovery` record all resolve for \u00a77, but `docs/plans/diiid-vertical-force-balance.html` \u00a712 still cites `docs/evidence/fragments/diiid-vertical-force-balance/diiid-137d-refusal.html` and that file (and its figure directory) does not exist while \u00a712 is declared done.",
+    "done_when": "a finding \u2014 s7's clause (2) sets a threshold with no cited basis (1 mm) and, in clause (1) alone, is the only negative control; the report's findings carry the detail.",
+    "evidence_paths": "pass \u2014 \u00a77 names `docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge.html` and `docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-finite-edge/`, both under the repository's tracked evidence and figure trees, alongside the 146L/137D comparison directory that the existing recovery record already uses.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach the code; the section cites mechanism names (`UniformRadialFieldUnknown.flux_delta`, `_rebuilt_model_promotion`) rather than a tracker id.",
+    "reasoning": "a finding \u2014 the threshold in s7's clause (2) cannot adjudicate the two mechanisms the section itself states: a masked solve that moves the lower X-point by more than 1 mm is exactly the signature of \"the unmasked convergence leaned on the inactive compensator's image\", yet the done-when records that outcome as failure and treats the unmasked arm as the reference.",
+    "single_goal": "pass \u2014 \u00a77 delivers one thing (an inactive compensator contributes no flux or tangent on any proposal route), with its test, its finite-edge measurement and its suite arm as evidence for that one deliverable.",
+    "wiring": "pass \u2014 `plan-section-depends-on` records s7 <- {s6, s10, s13}, which matches the text (\"follows \u00a76, and \u00a710's single-kernel coupling\") and the done-when (\"the head carrying \u00a713's finite-edge profiles\"); the stale \u00a712 wait is gone, consistent with \u00a712's closure comment."
+  },
+  "section_digests": {
+    "_document": "1521260222faccb369b644ad24c59d32b09a89ffded99da40ab36806830d9b99",
+    "s1": "31e2d612067694b3998b89b2ebfac251cbb38cbb50848a19072046164e243980",
+    "s10": "1013842b5220c92e995cd562f3d2a1f541c22ded511002edf42379257a20dcf9",
+    "s11": "8221264aa226d15c859f15d29e63bdc333dd055f1fa3f0ad1683edb6aba86e66",
+    "s12": "95c2ca272095b9a7723109be1e1906771bb259110daaf42b9ab5a27c90ee76f2",
+    "s13": "e14df5cf0cb26cb414397b74fb90f493b050e0a424f5b4402cd3a7a7de859cac",
+    "s2": "3155ba5eacef306e334030504e7afb83e3de97c9c9aa71789414acba1981ddc5",
+    "s3": "cd474030b9148965d2054639c5205417b755490c53b95384b3aea10d9cafe42f",
+    "s4": "637353e58dac0f1a4edaa5974b07ba020038b1a24ca059a7470237a17d2d3ee4",
+    "s5": "26dc2d8e05ec7551178e60496ebf7bfff3b5f80282c8285360f916177746e711",
+    "s6": "a585defbf40f7629873e5488e8f4ddfbfb420da18642d358942a629a061f8d8d",
+    "s7": "b1586b74fcab1154965d4d6d1f66488b6d8c7663f0c76010175dbaad1b25e5e2",
+    "s8": "947496a5661facc0e84af20b07da019a130e6d538d4e68c6ad9b46949d4e6693",
+    "s9": "e271ff6bea81d38978dc69676bd68fb859ed8acdb19e0f221800643e24111acf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T18:32:22.613120+00:00",
+  "total": null
+}

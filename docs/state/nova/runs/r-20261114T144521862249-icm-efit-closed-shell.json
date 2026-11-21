@@ -1,0 +1,504 @@
+{
+  "agent": {
+    "backend": "omp-local",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "local/deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "omp-local",
+  "base_sha": "b8effbfe0c2b85a9a8a37642121e52e0f205bf5f",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 0,
+      "cached_input_tokens_cumulative": 0,
+      "input_tokens": 34454882,
+      "input_tokens_cumulative": 34454882,
+      "output_tokens": 126326,
+      "output_tokens_cumulative": 126326
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 87,
+    "files": 1,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "d80bc195ea50e8ae64cba23e2fb6d6ee775077c3"
+  ],
+  "completed_at": "2026-11-17T12:11:30.092Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-17T12:11:11Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.542483660130719,
+    "plan": "iron-core-magnetisation",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane": null,
+  "lane_advisory": {
+    "backend": "omp-local",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'omp-local'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-11-17T15:10:00.888440+00:00",
+    "horizon_seconds": 10800,
+    "metered": true,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "omp-local",
+    "headroom": null,
+    "metered": true,
+    "observed_at": null,
+    "read_at": "2026-11-17T12:10:00Z",
+    "resolved_backend": "omp-local",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 24,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 8,
+    "headroom": 3,
+    "mean_context": 93333,
+    "observed_at": "2026-11-17T12:09:36Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 24,
+      "aggregate_tokens_per_second": 353.206,
+      "detail": "",
+      "mean_tokens_per_second": 44.151,
+      "observed_at": "2026-11-17T12:09:36Z",
+      "runs": 8.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-17T12:11:30.092Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144521862249-icm-efit-closed-shell/manifest.md",
+  "member": "disposable-r-20261114T144521862249-icm-efit-closed-shell",
+  "model_key": null,
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "icm-efit-closed-shell",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "standard",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "Done when (1) at μ r = 1000 and a/b = 0.9, where the exact S is 61.10, the converged imas-efit shielding factor is recorded beside nova's, and it is scored as reproducing S if within 2 % of 61.10 and as missing S otherwise; (2) the same configuration at a/b = 0.5, where the exact S is 195.1, reproduces that value to the same 2 %, the control that the shell geometry is read as intended (a solid body, a wrong radius or a wrong orientation moves S with a/b; μ r = 1 would not, since S = 1 for every geometry there); (3) the result is sent to the imas-efit owners with the message recorded in that receipt directory, and the one-directional verdict that rule gives (a miss implicates the representation; a reproduction leaves the §1 disagreement unexplained) is written into the plan for §9 to read.",
+    "estimated_hours": 3.0,
+    "goal": "Run the closed-shell shielding control through imas-efit's iron model and report the verdict to its owners",
+    "id": "icm-efit-closed-shell",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "omp-local",
+      "headroom": null,
+      "metered": true,
+      "observed_at": null,
+      "read_at": "2026-11-17T12:10:00Z",
+      "resolved_backend": "omp-local",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 24,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 8,
+      "headroom": 3,
+      "mean_context": 93333,
+      "observed_at": "2026-11-17T12:09:36Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 24,
+        "aggregate_tokens_per_second": 353.206,
+        "detail": "",
+        "mean_tokens_per_second": 44.151,
+        "observed_at": "2026-11-17T12:09:36Z",
+        "runs": 8.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144521862249-icm-efit-closed-shell/manifest.md",
+    "mcp_set": "",
+    "negative_control": "the same configuration at a/b = 0.5 must reproduce S = 195.1 to 2 percent, so a solid body, wrong radius or wrong orientation would move S",
+    "over_fence_note": "",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "diiid-adapter-current-refusal-carried": [
+        "benchmarks/diiid_forward_gs_match.py",
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-adapter-current-refusal-carried.html",
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-adapter-current-refusal.html",
+        "docs/figures/diiid-vertical-force-balance/diiid-adapter-current-refusal-carried",
+        "nova/imas/diiid_current.py",
+        "scripts/prototypes/diiid_adapter_current_refusal",
+        "tests/imas/test_diiid_current.py"
+      ],
+      "diiid-coil-correction-resolve": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-coil-correction-resolve.html",
+        "docs/figures/diiid-coil-correction-resolve",
+        "scripts/prototypes/diiid_xpoint_coil_correction"
+      ],
+      "diiid-inactive-compensator-retry": [
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-recovery.html",
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-inactive-compensator-retry.html",
+        "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-recovery",
+        "docs/figures/diiid-vertical-force-balance/diiid-inactive-compensator-retry",
+        "nova/equilibrium/constraint.py",
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/reduced_newton.py",
+        "scripts/prototypes/diiid_inactive_compensator",
+        "tests/equilibrium/test_solve_vertical_pin.py"
+      ],
+      "diiid-pinned-seed-drift": [
+        "benchmarks/diiid_current_pinned_forward.py",
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-seed-drift.html",
+        "docs/figures/diiid-vertical-force-balance/diiid-pinned-seed-drift",
+        "scripts/prototypes/diiid_pinned_seed_drift",
+        "tests/imas/test_diiid_current_pinned_forward.py"
+      ],
+      "diiid-single-kernel-coupling": [
+        "benchmarks/diiid_forward_gs_match.py",
+        "docs/evidence/fragments/diiid-vertical-force-balance/diiid-single-kernel-coupling.html",
+        "docs/figures/diiid-vertical-force-balance/diiid-single-kernel-coupling",
+        "scripts/prototypes/diiid_single_kernel_coupling",
+        "tests/equilibrium/test_diiid_single_kernel_coupling.py"
+      ],
+      "dina-flattop-rerun": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/dina-flattop-rerun.html",
+        "docs/figures/sub-millisecond-forward-path/dina-flattop-rerun",
+        "nova/equilibrium/drive_continuation.py",
+        "nova/equilibrium/support_read.py",
+        "scripts/prototypes/dina_flattop_scenario"
+      ],
+      "edge-term-tangent-rows": [
+        "docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html",
+        "docs/figures/kernel-compile-barrier/edge-term-tangent-rows",
+        "nova/biot/polygonanalytic.py",
+        "scripts/prototypes/edge_term_tangent_rows",
+        "tests/biot"
+      ],
+      "efit-comparison": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html",
+        "docs/figures/inverse-equilibrium-baseline/efit-comparison",
+        "nova/equilibrium/magnetics_fit.py",
+        "nova/equilibrium/measurement.py",
+        "nova/imas/mast_efit_referee.py",
+        "nova/imas/parity_tolerances.py",
+        "tests/test_equilibrium_forward.py",
+        "tests/test_equilibrium_magnetics_fit.py",
+        "tests/test_magnetics_fit_efit_comparison.py"
+      ],
+      "efit-on-nova-rows": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html",
+        "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows"
+      ],
+      "estimator-scoreboard": [
+        "benchmarks/estimator_scoreboard.py",
+        "docs/evidence/fragments/inverse-equilibrium-baseline/estimator-scoreboard.html",
+        "nova/imas/mast_efit_referee.py",
+        "nova/imas/parity_tolerances.py",
+        "tests/test_estimator_scoreboard.py"
+      ],
+      "iter-bank-recertify": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/iter-bank-recertify.html",
+        "docs/figures/sub-millisecond-forward-path/iter-bank",
+        "docs/figures/sub-millisecond-forward-path/iter-bank-recertify",
+        "scripts/prototypes/iter_bank",
+        "tests/test_iter_bank.py"
+      ],
+      "point-program-attribution": [
+        "docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html",
+        "docs/figures/kernel-compile-barrier/point-program-attribution",
+        "scripts/prototypes/point_program_attribution"
+      ],
+      "polygon-stable-evaluator": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/polygon-stable-evaluator.html",
+        "docs/figures/sub-millisecond-forward-path/polygon-stable-evaluator",
+        "nova/biot/polygonanalytic.py",
+        "scripts/prototypes/polygon_stable_evaluator",
+        "tests/biot"
+      ],
+      "reconstruction-cost": [
+        "benchmarks/reconstruction_cost.py",
+        "docs/evidence/fragments/inverse-equilibrium-baseline/reconstruction-cost.html",
+        "tests/test_reconstruction_cost.py"
+      ],
+      "smfp-lever-closing-h200": [
+        "docs/evidence/fragments/sub-millisecond-forward-path/lever-closing-h200.html",
+        "docs/figures/sub-millisecond-forward-path/lever-closing-h200",
+        "nova/equilibrium/current.py",
+        "nova/equilibrium/support_read.py",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/h200_levers",
+        "tests/test_book_primal_buckets.py"
+      ],
+      "topology-read-compile-clause": [
+        "docs/evidence/fragments/kernel-compile-barrier/topology-read-compile-clause.html",
+        "docs/figures/kernel-compile-barrier/topology-read-compile-clause",
+        "nova/equilibrium/topology.py",
+        "scripts/prototypes/topology_read_compile_clause",
+        "tests/equilibrium/test_topology_read.py"
+      ],
+      "white-noise-covariance": [
+        "docs/evidence/fragments/inverse-equilibrium-baseline/white-noise-covariance.html",
+        "docs/figures/inverse-equilibrium-baseline/white-noise-covariance"
+      ]
+    },
+    "plan": "iron-core-magnetisation",
+    "regenerate_paths": [],
+    "requested_backend": "omp-local",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§10",
+    "spec_level": "guided",
+    "time_budget": "3h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "docs/evidence/fragments/iron-core-magnetisation/icm-efit-closed-shell.html",
+      "docs/figures/iron-core-magnetisation/icm-efit-closed-shell"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [
+    "install/bin/efit++.exe",
+    "tests/ANALYTIC/circleTest;",
+    "/tmp/efit-build",
+    "/nova/figures/iron-magnetisation/"
+  ],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "omp-local",
+    "lift_id": null,
+    "member": null,
+    "node": "icm-efit-closed-shell",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-17T12:10:42.485955+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "records: UnreadableRunStoreError: cannot read the run store at /home/ITER/mcintos/.config/reckon/crew/run_store.db: OperationalError: database is locked; verdict_inputs: UnreadableRunStoreError: cannot read the run store at /home/ITER/mcintos/.config/reckon/crew/run_store.db: OperationalError: database is locked; budget_snapshot: UnreadableRunStoreError: cannot read the run store at /home/ITER/mcintos/.config/reckon/crew/run_store.db: OperationalError: database is locked",
+    "family": null,
+    "input_errors": {
+      "budget_snapshot": "UnreadableRunStoreError: cannot read the run store at /home/ITER/mcintos/.config/reckon/crew/run_store.db: OperationalError: database is locked",
+      "records": "UnreadableRunStoreError: cannot read the run store at /home/ITER/mcintos/.config/reckon/crew/run_store.db: OperationalError: database is locked",
+      "verdict_inputs": "UnreadableRunStoreError: cannot read the run store at /home/ITER/mcintos/.config/reckon/crew/run_store.db: OperationalError: database is locked"
+    },
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 0.0,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": "iron-core-magnetisation",
+  "plan_impl_at_dispatch": 0.542483660130719,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "d80bc195ea50e8ae64cba23e2fb6d6ee775077c3",
+  "resume_waiver": {
+    "reason": "the rerun is a new measurement after imas-efit changes; its case builder, report and resume recipe are on GPFS under evidence/iron-core-magnetisation/imas-efit/closed-shell/ and in the evidence fragment, so a fresh node needs nothing from this session",
+    "session_id": "01a1e96b-5dac-7000-9a66-469d86b9186f",
+    "source": "pointer"
+  },
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261114T144521862249-icm-efit-closed-shell",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§10",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "omp",
+  "session_id": "01a1e96b-5dac-7000-9a66-469d86b9186f",
+  "session_model": "local/deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 34454882,
+    "detail": "tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 126326,
+    "peak_input_tokens": 225438
+  },
+  "time_budget": "3h",
+  "tool_steps": 0.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 19,
+  "watch_override": {
+    "arming_line": "reckon crew watch --project nova",
+    "attach_line": "/home/ITER/mcintos/Code/reckon/.venv/bin/reckon crew follow --project nova --session 5b10be66-c69b-456f-9a85-3840909f1723",
+    "requested": true,
+    "session_attached": true,
+    "watcher_live": true
+  },
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-17T13:24:39Z",
+    "last_record_type": "agent_end",
+    "launched_at": "2026-11-17T12:11:25Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261114T144521862249-icm-efit-closed-shell",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 44155,
+    "worker_pid": 2784300
+  },
+  "worker_seconds": 0,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-11-17T12:11:30.092Z",
+    "session_id": "01a1e96b-5dac-7000-9a66-469d86b9186f",
+    "session_source": "pointer",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-efit-closed-shell"
+  }
+}

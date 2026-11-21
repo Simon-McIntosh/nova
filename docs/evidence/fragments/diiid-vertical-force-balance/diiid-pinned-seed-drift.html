@@ -1,0 +1,121 @@
+<article id="diiid-pinned-seed-drift-outcome">
+<h3>Pinned seed current: reproduced drift, independent numerical changes</h3>
+<p><strong>Unresolved.</strong> The benchmark entry point refuses frame
+<code>d3d_shot_00000c4a7b.parquet:102</code> at the current numerical head:
+<strong>1119833.5841760212 A</strong> against the registered
+<strong>1137702.226779481 A</strong>. The recorded point-route probe reproduces
+at <strong>1119994.1652867154 A</strong>. Neither the registration nor the
+relative tolerance, <code>2e-6</code>, has been changed. The required
+single-change undo restoring the registration has not been demonstrated.</p>
+
+<h4 id="diiid-pinned-seed-drift-authorities">The physical input did not change</h4>
+<p>The receipt-producing revision <code>a60f1852178da8c0ba920241596c50de4ac96c3a</code>
+reproduces <strong>1137702.0764874697 A</strong>, a relative difference of
+<code>-1.3210136e-7</code> from registration. Its corpus file SHA256,
+33-by-33 labelled flux map, 132-node wall coordinates, frame time (2200 ms),
+target current (1283617.6680326462 A), and all 24 circuit-driven conductor
+current values agree with the base of this investigation. The corpus SHA256 is
+<code>400d1f791ab5ca332b3a51b4d8a25d4f2a9fb4ade3c66766d4672ea57e8896c9</code>.
+The seed vector acquires sampling-node rows on the booked route; its unchanged
+label and wall blocks are compared separately rather than claiming that the
+longer vector has the original identity.</p>
+
+<table>
+<thead><tr><th>Measured revision</th><th>Unscaled seed current [A]</th><th>What the measurement establishes</th></tr></thead>
+<tbody>
+<tr><td><code>a60f18521</code></td><td>1137702.0764874697</td><td>The producing revision reproduces its banked reading.</td></tr>
+<tr><td><code>044adfdfc</code>, parent of <code>862e712ae</code></td><td>1137702.0764874695</td><td>The parent remains inside registration tolerance.</td></tr>
+<tr><td><code>862e712ae</code></td><td>1136049.5373650398</td><td>The first measured departure introduces the five-point cell average.</td></tr>
+<tr><td><code>9518e6f17</code></td><td>1137702.0764874700</td><td>Profile-owned averaging participation restores the registered reading.</td></tr>
+<tr><td><code>8b88abb7a</code></td><td>1137702.0764874700</td><td>The later source-selection change still reproduces registration.</td></tr>
+<tr><td><code>31daffeef</code> and its parent <code>48a22a103</code></td><td>1137702.0764874700</td><td>This polishing change alone does not move the reading.</td></tr>
+<tr><td><code>dfd9c48e5</code>, parent of <code>a3fa8b9be</code></td><td>1137466.6197945330</td><td>A different axis value already precedes spline-authored publication.</td></tr>
+<tr><td><code>a3fa8b9be</code></td><td>1127531.7447787407</td><td>Publishing spline-authored stationary values changes normalization again.</td></tr>
+<tr><td><code>62562397d</code></td><td>1216181.5634824173</td><td>The September read selects a different saddle; the sampled profile representation is now used.</td></tr>
+<tr><td><code>37b9ba7c4</code></td><td>1119994.1652867154</td><td>The reported point-route probe reproduces exactly.</td></tr>
+<tr><td><code>b0adebdf3</code> and the instrumented head</td><td>1119833.5841760212</td><td>The booked integral is 160.5811106942 A below the point probe.</td></tr>
+</tbody>
+</table>
+
+<h4 id="diiid-pinned-seed-drift-controls">Controls at the head</h4>
+<p>Holding the head's profile, seed and circuit inputs fixed, the point route
+with five-point averaging gives <code>1119994.1652867154 A</code>; disabling
+only that average gives <code>1119994.1690596598 A</code>. Their difference is
+0.0037729444 A. Thus the first historical averaging departure does not explain
+the present 17708 A point-route shortfall.</p>
+<p>The historical stationary values were axis flux
+<code>1.322664577093323 Wb</code> and boundary flux
+<code>-0.5302247400998766 Wb</code>. The head reads
+<code>1.322965835030387 Wb</code> and
+<code>-0.5178277880307274 Wb</code>, respectively. The admitted core changes
+from 273 to 267 cells. A control substitutes only the old stationary flux
+values while retaining the head domain labels, source and current owners.</p>
+<p>A separate control restores the original <code>jnp.interp</code> endpoint
+hold on the same extracted source knots. The shared DIII-D builder adopted
+<code>SampledFluxFunction</code> at <code>62562397d</code>; its compact quintic
+outer cap changes the supplied function outside the reliable knot interval.
+For this frame it returns zero at normalized flux one, whereas the original
+endpoint hold returns finite <code>p_prime=-3262.9392101572676</code> and
+<code>ff_prime=-0.013014528399534793</code>. Holding the endpoints restores
+sampled source values to the historical values (maximum pressure-gradient
+sampling difference below <code>7.3e-11</code>; diamagnetic samples equal).
+This is a change of prescribed profile, rather than merely moving its values
+into array leaves.</p>
+<table>
+<thead><tr><th>Head control</th><th>Point current [A]</th><th>Booked current [A]</th></tr></thead>
+<tbody>
+<tr><td>Current read and sampled cap</td><td>1119994.1652867154</td><td>1119833.5841760212</td></tr>
+<tr><td>Historical stationary flux values only</td><td>1130983.8121355993</td><td>1130872.4196546364</td></tr>
+<tr><td>Historical endpoint hold only</td><td>1127447.0473863399</td><td>1126928.9417723920</td></tr>
+<tr><td>Historical stationary values and endpoint hold</td><td>1139814.9440008700</td><td>1139385.2787764096</td></tr>
+</tbody>
+</table>
+<p>Even both substitutions leave the point current 2112.7172213891 A above
+registration. They do not restore the historical domain partition. The
+registration cannot be repaired by disabling the cell average, and a claim
+that either stationary normalization or profile extension alone explains it
+would contradict these controls.</p>
+<p id="diiid-pinned-seed-drift-replay"><strong>The complete historical
+functional does restore the registration:</strong> the head's source and
+point-current owners, given the recorded historical domain labels and
+normalized flux, the original endpoint-holding profiles, and point-current
+integration, return <strong>1137702.0764874700 A</strong>. This is within
+<code>1.3210136e-7</code> relative of registration. The replay is stored in
+<code>restored-read.json</code> and <code>replay-job.log</code>; the historical
+arrays and their import provenance are in
+<code>partition-reference/8b88abb7a5207451035efe579c5324675eb62801.json</code>.
+It restores the read partition, profile-extension policy and integration
+route together. It is a positive control for the full historical functional,
+not the single-change undo required by the node's causal clause.</p>
+
+<h4 id="diiid-pinned-seed-drift-delivery">Code, validation and remaining decision</h4>
+<p>The benchmark now offers <code>--preflight-frame 102 --output PATH</code>,
+which runs its existing qualification before solver scoring, persists
+<code>seed_preflight.json</code> before a refusal and requires an output
+separate from the banked receipt directory. It does not truncate the committed
+cohort bank. Three additional focused cases cover passing and refusing
+qualification and refusal of the banked output path. The all_debug CPU suite
+passes 11 tests at base and 14 with the entry-point change, with zero added
+failures. A red readback of the actually measured point-current vector fails
+<code>registration_check.py::test_seed_current_matches_original_registration</code>
+at 1119994.1652867154 A; it is a receipt readback, not an asserted fresh solve.
+CPU and P100 nominal booked readings agree within 3e-10 A.</p>
+<p>The remaining decision is how to satisfy the causal gate for multiple
+independent numerical changes. A followup should settle preservation of the
+finite extracted profile at the edge and then qualify the full current
+functional under the accepted read and integration policies before changing
+registration. This record supplies no new physical profile, solver policy,
+registration, tolerance, or terminal forward equilibrium.</p>
+<p>Run root:
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T235243862922-diiid-pinned-seed-drift</code>.
+The benchmark entry receipt is <code>evidence/head-entry/seed_preflight.json</code>;
+its refusal log is <code>entry-head.log</code>. Named-revision receipts and
+import provenance are in <code>history/</code>, <code>support-history/</code>
+and <code>null-polish-history/</code>. The integration, normalization and
+endpoint controls are under <code>evidence/integration/</code>,
+<code>evidence/normalisation/</code> and <code>evidence/profile/</code>, with
+<code>integration-launch.log</code>, <code>normalisation-cpu.log</code> and
+<code>profile-control-cpu.log</code>. <code>negative-control.log</code> carries
+the failed test id and terminal <code>EXIT=1</code>. Full test receipts and
+commit identities are bound in <code>manifest.md</code>.</p>
+</article>

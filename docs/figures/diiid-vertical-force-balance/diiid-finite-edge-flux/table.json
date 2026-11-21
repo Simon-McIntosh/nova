@@ -1,0 +1,223 @@
+{
+  "boundary_agreement": {
+    "137D": {
+      "builder_ff_prime": -0.03856068650596385,
+      "builder_p_prime": -26045.143809357043,
+      "extracted_ff_prime": -0.03856068650596384,
+      "extracted_p_prime": -26045.143809357047
+    },
+    "146D": {
+      "builder_ff_prime": -0.017640573133397584,
+      "builder_p_prime": -34562.24879756775,
+      "extracted_ff_prime": -0.017640573133397553,
+      "extracted_p_prime": -34562.24879756775
+    },
+    "146L": {
+      "builder_ff_prime": -0.017640573133397584,
+      "builder_p_prime": -34562.24879756775,
+      "extracted_ff_prime": -0.017640573133397553,
+      "extracted_p_prime": -34562.24879756775
+    },
+    "179L": {
+      "builder_ff_prime": 0.022715025366450436,
+      "builder_p_prime": -37395.876175623285,
+      "extracted_ff_prime": 0.022715025366450453,
+      "extracted_p_prime": -37395.8761756233
+    }
+  },
+  "relative_tolerance": 1e-10,
+  "rows": {
+    "137D": {
+      "base": {
+        "boundary_class": "diverted",
+        "converged": false,
+        "coordinate_count": 19,
+        "coordinate_last": 0.95,
+        "efit_x_rz_m": [
+          1.2928092462110807,
+          -1.1850521964855898
+        ],
+        "ff_prime_at_boundary": 0.0,
+        "has_finite_edge": false,
+        "lower_saddle_distance_m": 0.02317404361161881,
+        "lower_x_rz_m": [
+          1.305497139150985,
+          -1.165660093194334
+        ],
+        "p_prime_at_boundary": 0.0,
+        "residual": 0.00033280654880608906,
+        "revision": "d0947cef28a8b539e0d4de9ed11eeebd29c84021",
+        "support_cells": 346,
+        "termination_code": 12,
+        "termination_reason": "ACTIVE_SET_STEP_REFUSED"
+      },
+      "head": {
+        "boundary_class": "diverted",
+        "converged": true,
+        "coordinate_count": 19,
+        "coordinate_last": 0.95,
+        "efit_x_rz_m": [
+          1.2928092462110807,
+          -1.1850521964855898
+        ],
+        "ff_prime_at_boundary": -0.03856068650596385,
+        "has_finite_edge": true,
+        "lower_saddle_distance_m": 0.012495120154647626,
+        "lower_x_rz_m": [
+          1.2946339319393734,
+          -1.172691025437827
+        ],
+        "p_prime_at_boundary": -26045.143809357043,
+        "residual": 9.06107112825653e-09,
+        "revision": "7823f636f6fd23072defd6be1d5030759bb52b9",
+        "support_cells": 339,
+        "termination_code": 1,
+        "termination_reason": "CONVERGED"
+      }
+    },
+    "146D": {
+      "base": {
+        "boundary_class": "diverted",
+        "converged": true,
+        "coordinate_count": 19,
+        "coordinate_last": 0.95,
+        "efit_x_rz_m": [
+          1.2964334165884246,
+          -1.1876873281466465
+        ],
+        "ff_prime_at_boundary": 0.0,
+        "has_finite_edge": false,
+        "lower_saddle_distance_m": 0.02882879385523485,
+        "lower_x_rz_m": [
+          1.3042252545866173,
+          -1.159931488837457
+        ],
+        "p_prime_at_boundary": -0.0,
+        "residual": 1.6095988951179343e-12,
+        "revision": "d0947cef28a8b539e0d4de9ed11eeebd29c84021",
+        "support_cells": 346,
+        "termination_code": 1,
+        "termination_reason": "CONVERGED"
+      },
+      "head": {
+        "boundary_class": "diverted",
+        "converged": true,
+        "coordinate_count": 19,
+        "coordinate_last": 0.95,
+        "efit_x_rz_m": [
+          1.2964334165884246,
+          -1.1876873281466465
+        ],
+        "ff_prime_at_boundary": -0.017640573133397584,
+        "has_finite_edge": true,
+        "lower_saddle_distance_m": 0.0179110553223831,
+        "lower_x_rz_m": [
+          1.2982811153189036,
+          -1.16987183174147
+        ],
+        "p_prime_at_boundary": -34562.24879756775,
+        "residual": 2.281335313487005e-14,
+        "revision": "7823f636f6fd23072defd6be1d5030759bb52b9",
+        "support_cells": 338,
+        "termination_code": 1,
+        "termination_reason": "CONVERGED"
+      }
+    },
+    "146L": {
+      "base": {
+        "boundary_class": "limited",
+        "converged": false,
+        "coordinate_count": 19,
+        "coordinate_last": 0.95,
+        "efit_x_rz_m": [
+          1.2964334165884246,
+          -1.1876873281466465
+        ],
+        "ff_prime_at_boundary": 0.0,
+        "has_finite_edge": false,
+        "lower_saddle_distance_m": 0.08115286787503681,
+        "lower_x_rz_m": [
+          1.3347457088980166,
+          -1.1161474356227716
+        ],
+        "p_prime_at_boundary": -0.0,
+        "residual": 0.005766724941982211,
+        "revision": "d0947cef28a8b539e0d4de9ed11eeebd29c84021",
+        "support_cells": 288,
+        "termination_code": 9,
+        "termination_reason": "ACTIVE_SET_STAGNATED"
+      },
+      "head": {
+        "boundary_class": "limited",
+        "converged": true,
+        "coordinate_count": 19,
+        "coordinate_last": 0.95,
+        "efit_x_rz_m": [
+          1.2964334165884246,
+          -1.1876873281466465
+        ],
+        "ff_prime_at_boundary": -0.017640573133397584,
+        "has_finite_edge": true,
+        "lower_saddle_distance_m": 0.04849739156708523,
+        "lower_x_rz_m": [
+          1.3388379020771697,
+          -1.1641531700090373
+        ],
+        "p_prime_at_boundary": -34562.24879756775,
+        "residual": 2.7642753868947547e-09,
+        "revision": "7823f636f6fd23072defd6be1d5030759bb52b9",
+        "support_cells": 275,
+        "termination_code": 1,
+        "termination_reason": "CONVERGED"
+      }
+    },
+    "179L": {
+      "base": {
+        "boundary_class": "limited",
+        "converged": false,
+        "coordinate_count": 19,
+        "coordinate_last": 0.95,
+        "efit_x_rz_m": [
+          1.2104174789799869,
+          -1.2142137852082322
+        ],
+        "ff_prime_at_boundary": 0.0,
+        "has_finite_edge": false,
+        "lower_saddle_distance_m": 0.0300311641959893,
+        "lower_x_rz_m": [
+          1.2226454394589756,
+          -1.1867848259590963
+        ],
+        "p_prime_at_boundary": 0.0,
+        "residual": 0.0025831686346920782,
+        "revision": "d0947cef28a8b539e0d4de9ed11eeebd29c84021",
+        "support_cells": 286,
+        "termination_code": 12,
+        "termination_reason": "ACTIVE_SET_STEP_REFUSED"
+      },
+      "head": {
+        "boundary_class": "limited",
+        "converged": true,
+        "coordinate_count": 19,
+        "coordinate_last": 0.95,
+        "efit_x_rz_m": [
+          1.2104174789799869,
+          -1.2142137852082322
+        ],
+        "ff_prime_at_boundary": 0.022715025366450436,
+        "has_finite_edge": true,
+        "lower_saddle_distance_m": 0.01499434107874243,
+        "lower_x_rz_m": [
+          1.2235691078844624,
+          -1.2070120547533605
+        ],
+        "p_prime_at_boundary": -37395.876175623285,
+        "residual": 4.2059470211378e-11,
+        "revision": "7823f636f6fd23072defd6be1d5030759bb52b9",
+        "support_cells": 294,
+        "termination_code": 1,
+        "termination_reason": "CONVERGED"
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-21T04:03:59.989Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-pinned-point-program-fe5f2294c543",
+      "recorded_at": "2026-11-21T05:10:49.889447+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-21T03:56:40Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/pinned_point_program/run_job.sh",
+      "line": 64,
+      "severity": "non-blocking",
+      "text": "run_log, the header block, ARMS, subset_arguments and the warm/control loops duplicate scripts/prototypes/cached_point_remeasure/run_job.sh rather than adding a pinned-root mode to that existing driver, so the two prototype drivers will drift; the repository already owns this orchestration."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/pinned-point-program.html",
+      "line": 24,
+      "severity": "non-blocking",
+      "text": "The census paragraph attributes four jit__source_jets rows to the census read's guard rows, but the read's own CACHE_GUARD_RECEIPT carries only the 250-cell and 500-cell programs as hits=1 (jit__source_jets-a557e410 and -05e44f0d); the other two named rows (-3cfcee9b, -cbc06ad3) come from the replayed CACHE_GUARD_PREWARM record, not from the read, so 'every point program of that read' overstates provenance even though the read's requested programs did hit."
+    },
+    {
+      "file": "scripts/prototypes/pinned_point_program/run_job.sh",
+      "line": 78,
+      "severity": "non-blocking",
+      "text": "The comment refers to 'the earlier node', a plan-node reference the naming rules forbid in source comments; state the mechanism (a 64-node grid subset exercises the same first call) without the plan reference."
+    },
+    {
+      "file": "scripts/prototypes/pinned_point_program/run_job.sh",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "The usage header documents only STEP and RECEIPT_DIRECTORY, but the census and control steps exit on the undocumented NOVA_PINNED_CACHE_COPY (line 167), NOVA_PINNED_OPERAND_STORE (line 175) and NOVA_PINNED_CONTROL_CACHE (line 110) without which those steps cannot run, so the committed driver is not reproducible from its own header."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from fe05f648d to fe5f2294c; five commits, two files, both inside scope, with conventional subjects and bodies and no AI attribution.",
+    "done_when": "The done_when's load clause is asserted by the lane gate over tests/test_cached_point_remeasure.py (misses==0, first_call_seconds<=60, peak<=64GB); the manifest records that run (1 passed, 2 skipped, EXIT=0) and the warm receipts corroborate it.",
+    "goal": "The node goal is to measure the four point-program arms served from the pinned cache and record the result; scripts/prototypes/pinned_point_program/run_job.sh and docs/evidence/fragments/kernel-compile-barrier/pinned-point-program.html deliver both, with the four-row table, control, job ids and log paths.",
+    "manifest": "Read; it records status complete, the five commits, the lane gate command and the control log, and its claimed numbers match the receipts on disk.",
+    "write_paths": "The diff touches only scripts/prototypes/pinned_point_program/run_job.sh and docs/evidence/fragments/kernel-compile-barrier/pinned-point-program.html, both inside the declared paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261121T035554344913-review-of-pinned-point-program-fe5f2294c543",
+  "reviewed_base_sha": "fe05f648d4fb181edc102d6904ecc3ed7fa2fbeb",
+  "reviewed_head_sha": "fe5f2294c543998ffbefc95342cfbed699942620",
+  "reviewed_run_id": "r-20261121T013213071208-pinned-point-program",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T04:05:34.874023+00:00",
+  "total": 90
+}

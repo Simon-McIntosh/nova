@@ -26,7 +26,7 @@ from nova.media.poloidal import draw_nulls, draw_scattered_contours, draw_wall
 from tests.equilibrium.test_topology_read import _analytic_inputs
 
 
-STORE = Path("/work/projects/imas_gpu/sophelio/nova-assembled-step-bank")
+STORE = Path("/work/projects/imas_gpu/nova/nova-assembled-step-bank")
 
 
 def main():

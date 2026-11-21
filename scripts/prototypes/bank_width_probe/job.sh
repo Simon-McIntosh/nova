@@ -10,7 +10,7 @@ FIGURE=$5
 PYTHON=${NOVA_MEASUREMENT_PYTHON:-/home/ITER/mcintos/Code/nova/.venv/bin/python}
 export PYTHONPATH=$ROOT
 export MPLBACKEND=Agg
-export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 printf '# revision: %s tree: %s command: PYTHONPATH=%s %s -m scripts.prototypes.bank_width_probe.run %s %s %s --inputs %s\n' "$REVISION" "$ROOT" "$ROOT" "$PYTHON" "$ROOT" "$RUN" "$REVISION" "$INPUTS"
 "$PYTHON" -m pytest -p no:cacheprovider -q "$ROOT/scripts/prototypes/bank_width_probe/test_contracts.py"
 RESULT=$?

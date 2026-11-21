@@ -13,7 +13,7 @@ export TMPDIR=/tmp
 WORKTREE=${WORKTREE:?}
 OUT=${OUT:?}
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
-CACHE=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 SCRIPT=$WORKTREE/scripts/prototypes/bank_matrix_free_step/diagnose.py
 
 mkdir -p "$OUT"

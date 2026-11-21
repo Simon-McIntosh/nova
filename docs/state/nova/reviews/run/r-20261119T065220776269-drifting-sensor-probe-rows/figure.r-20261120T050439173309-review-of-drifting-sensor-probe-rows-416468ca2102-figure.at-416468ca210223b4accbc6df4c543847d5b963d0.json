@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-20T05:05:25Z",
+  "figures": {
+    "docs/figures/inverse-equilibrium-baseline/drifting-sensor-sequences/drifting-sensor-probe-rows-white-0-efit.svg": {
+      "attachment": "image-0.png",
+      "contrast": "pass - black wall, #333333 title and legend text on white; orange #c06a1b contours at 3.95:1, above the 3:1 bar for a graphical object.",
+      "data_ink": "pass - contour lines and null marks carry the ink; no fill or shading.",
+      "decoration": "pass - white background, no gradient, no gridlines, no frame; axis off.",
+      "label_collision": "pass - the title above the panel and the single legend entry below it sit in clear space; no label is clipped or overlaps data.",
+      "legibility": "pass - twelve unfilled orange contours, the limiter ring and both null marks read at a glance.",
+      "table_form": "pass - spatial flux map, not tabular information."
+    },
+    "docs/figures/inverse-equilibrium-baseline/drifting-sensor-sequences/drifting-sensor-probe-rows-white-0-nova.svg": {
+      "attachment": "image-1.png",
+      "contrast": "pass - black wall, #333333 title and legend text on white; blue #1f5fa8 contours at 6.44:1.",
+      "data_ink": "pass - contour lines and null marks carry the ink; no fill or shading.",
+      "decoration": "pass - white background, no gradient, no gridlines, no frame; axis off.",
+      "label_collision": "pass - the title above the panel and the single legend entry below it sit in clear space; no label is clipped or overlaps data.",
+      "legibility": "pass - twelve unfilled blue contours, the limiter ring, the axis triangle and the admitted saddle cross all read at a glance.",
+      "table_form": "pass - spatial flux map, not tabular information."
+    },
+    "docs/figures/inverse-equilibrium-baseline/drifting-sensor-sequences/drifting-sensor-probe-rows-white-0.svg": {
+      "attachment": "image-2.png",
+      "contrast": "pass - black wall and #333333 title and legend text on white (12.6:1); blue #1f5fa8 measures 6.44:1 and orange #c06a1b 3.95:1 against white, clearing the 3:1 bar for a graphical object.",
+      "data_ink": "pass - contour lines, the limiter ring and the null marks carry all the ink; no fill, no shading, no colour map.",
+      "decoration": "pass - white background, no gradient, no background fill, no gridlines, no frame; the axis is switched off and scale comes from the drawn wall.",
+      "label_collision": "pass - no text is clipped or overlapping: the title sits above the panel and the two-row legend in the lower-right whitespace, neither touching the wall or the contours. The null-mark overlap is recorded as a legibility defect, not a label collision.",
+      "legibility": "defect stated - both contour fields read at a glance as twelve unfilled lines each, separated by colour and weight (nova thin blue, imas-efit thicker orange), with the limiter ring clear of both; what does not read is the second null set, because imas-efit's orange axis triangle and saddle cross sit 2-3 px from nova's and are drawn over them, so a reader sees one null set where the caption states both codes'.",
+      "table_form": "pass - a poloidal flux comparison is inherently spatial; the panel carries nothing that is naturally a table."
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py",
+      "id": "fb4e433cf46",
+      "line": 58,
+      "severity": "non-blocking",
+      "summary": "In the combined panel (image-2.png) nova's null set is drawn first and imas-efit's second and thicker over it, and the two sit 2-3 px apart, so imas-efit's axis triangle and saddle cross occlude nova's. Reproduced on the rendered PNG with a positive control: a compact-blob scan at the marker colours finds nova's triangle (378 px, 27x27 at y907 x712) and cross (630 px, 31x30 at y1575 x481) in the nova-alone panel, and imas-efit's triangle (365 px at y907 x709) and cross (630 px at y1577 x483) in the efit-alone panel; in the combined panel it finds both of imas-efit's markers and no blue marker blob at all, only the 57 px legend swatch. The evidence caption states both null sets are drawn in their own code's colour, so the picture does not carry what the caption claims. The underlying positions do agree (0.017 m apart on the axis, 0.016 m on the admitted saddle), so the figure does not mislead about the data; this is a comparison-completeness defect, not a readability blocker. Making nova's set hollow, drawing it on top, or annotating the coincidence would make the claim visible. This defect was recorded by the figure review at 06f50708c5a6 and still reproduces at this head."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py",
+      "id": "f32a1781c1a",
+      "line": 73,
+      "severity": "non-blocking",
+      "summary": "Each single-code panel is titled with the code and the slice ('nova, white slice 0', 'imas-efit, white slice 0') and then carries a one-entry legend naming the same code again, whose imas-efit wording is chosen for the two-code panel it is not in ('imas-efit, same slice'). In image-0.png the legend sits under a panel that shows imas-efit alone, so 'same slice' invites a comparison the figure does not contain; the same legend is pure repetition in image-1.png. The project figure style puts panel identity in the caption and the file name rather than in a title plus a one-entry legend, so these panels spend ink on information the caption already carries. Non-blocking: nothing is unreadable; a one-line change to the label table and the title call closes it."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py",
+      "id": "f8f47438fee",
+      "line": 48,
+      "severity": "non-blocking",
+      "summary": "None of the three panels carries a contour level value: each draws twelve unlabelled contours, and the level array is published only in the combined figure's evidence caption as a range (-67.76 to -3.33 Wb of a 76.70 Wb span). A reader of either single-code panel cannot attach a flux to any contour. The project rule asks for contours on stated levels and the receipt does state them, so this is under-communication rather than misstatement; a label on one contour per panel, or the level list in each caption, would close it. Non-blocking."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py",
+      "id": "f24ce9e9bb7",
+      "line": 22,
+      "severity": "non-blocking",
+      "summary": "ORANGE is set to #c06a1b, which sits in the deep rust-leaning orange family the project figure style reserves for marks identifying agentic work and forbids for a physical component or reference code. imas-efit is a physical reference code, so its hue should be a clean orange or another clean hue. The rendered contrast is adequate (3.95:1), so this is a palette-rule correction, not a readability defect. Recorded because the colour now carries the imas-efit role across all three panels and will be copied by later figures in this study; still present at this head."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261120T050439173309-review-of-drifting-sensor-probe-rows-416468ca2102-figure",
+  "reviewed_base_sha": "eda6cfd6e7b90de3ab254bfbb1f267044ecf432d",
+  "reviewed_head_sha": "416468ca210223b4accbc6df4c543847d5b963d0",
+  "reviewed_run_id": "r-20261119T065220776269-drifting-sensor-probe-rows",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T05:13:26.454459+00:00",
+  "total": null
+}

@@ -1,0 +1,32 @@
+<section id="diiid-finite-edge-flux">
+<h2>Sampled flux functions take a finite edge value, and all four DIII-D rows close 38 to 50 percent of the lower-X offset</h2>
+<p>The sampled flux function now has a finite-edge form that returns a supplied boundary value at psi_N = 1, and the DIII-D builder prescribes EFIT's p-prime and FF-prime on the boundary shell.</p>
+<p><strong>Every one of the four rows converges on the finite-edge form and every one moves its lower X-point toward EFIT by between 38 and 50 percent, on boundary values the builder reproduces from EFIT's own extraction to 4e-16 relative.</strong></p>
+<p>The capped form holds the last knot's value and slope and reaches zero one sample spacing past the knot, so a table stopping at 0.95 is zero at the boundary. The finite-edge form adds the third Hermite basis over the span from the last knot to psi_N = 1: value and slope stay continuous at the knot, and the supplied value is returned exactly at the boundary and held beyond it. A table that already reaches 1.0 is refused rather than reinterpreted.</p>
+<p>The builder keeps its 19 shell centres, 0.05 to 0.95, and takes the boundary value from the same extraction continued to psi_N = 1; <code>scripts/prototypes/diiid_finite_edge_flux/extract.py</code> calls the builder's own <code>_profile_edge_values</code>, so the receipt is what the builder prescribes. On frame 137, diverted, the finite-edge arm converges to 9.06e-9 and its lower X-point lies 1.250 cm from EFIT's null, against 2.317 cm for the capped tables with support retained at 339 of 346 cells: 46 percent of the offset.</p>
+<p>With the corpus restored, all four rows were then solved on the finite-edge arm and every one terminates converged.</p>
+<table>
+<caption>Terminal state under the two forms. Distances are to each row's own EFIT null; termination is the fixed-point enum.</caption>
+<thead><tr><th>row</th><th>arm</th><th>residual</th><th>converged</th><th>termination</th><th>support</th><th>lower X (R, Z) [m]</th><th>distance from EFIT [cm]</th></tr></thead>
+<tbody>
+<tr><td>137D</td><td>capped</td><td>3.33e-4</td><td>no</td><td>STEP_REFUSED</td><td>346</td><td>(1.30550, -1.16566)</td><td>2.317</td></tr>
+<tr><td>137D</td><td>finite edge</td><td>9.06e-9</td><td>yes</td><td>CONVERGED</td><td>339</td><td>(1.29463, -1.17269)</td><td>1.250</td></tr>
+<tr><td>146D</td><td>capped</td><td>1.61e-12</td><td>yes</td><td>CONVERGED</td><td>346</td><td>(1.30423, -1.15993)</td><td>2.883</td></tr>
+<tr><td>146D</td><td>finite edge</td><td>2.28e-14</td><td>yes</td><td>CONVERGED</td><td>338</td><td>(1.29828, -1.16987)</td><td>1.791</td></tr>
+<tr><td>146L</td><td>capped</td><td>5.77e-3</td><td>no</td><td>STAGNATED</td><td>288</td><td>(1.33475, -1.11615)</td><td>8.115</td></tr>
+<tr><td>146L</td><td>finite edge</td><td>2.76e-9</td><td>yes</td><td>CONVERGED</td><td>275</td><td>(1.33884, -1.16415)</td><td>4.850</td></tr>
+<tr><td>179L</td><td>capped</td><td>2.58e-3</td><td>no</td><td>STEP_REFUSED</td><td>286</td><td>(1.22265, -1.18678)</td><td>3.003</td></tr>
+<tr><td>179L</td><td>finite edge</td><td>4.21e-11</td><td>yes</td><td>CONVERGED</td><td>294</td><td>(1.22357, -1.20701)</td><td>1.499</td></tr>
+</tbody></table>
+<p>Seven tests in <code>tests/equilibrium/test_finite_edge_flux_function.py</code> hold the behaviour: the boundary value returns to the bit, the zero-edge form returns 0 there, both agree on every interior knot, the profile is continuous across the last knot, a vmapped profile returns the boundary value on every entry, a table reaching psi_N = 1 is refused, and the builder reproduces the committed extraction at 1e-10 relative on the row the committed test checks (P102); the record's receipt shows all four rows reproduced to 4e-16. The declared negative control restores the zero end cap for the finite-edge form: its log records 2 failed, 4 passed and 1 skipped (corrected 2026-11-21 from an earlier "three of the seven" that did not match the log), including the boundary value itself.</p>
+<figure>
+<img src="/nova/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-137-diverted-lower-xpoint.svg" alt="Frame 137 diverted terminal flux panels on both arms">
+<figcaption>Frame 137, diverted: capped arm left, finite-edge arm right, full field and lower-X window, with EFIT contours, the wall and both null sets.</figcaption>
+</figure>
+<figure>
+<img src="/nova/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-146-diverted-lower-xpoint.svg" alt="Frame 146 diverted terminal flux panels on both arms">
+<img src="/nova/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-146-limited-lower-xpoint.svg" alt="Frame 146 limited terminal flux panels on both arms">
+<img src="/nova/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-179-limited-lower-xpoint.svg" alt="Frame 179 limited terminal flux panels on both arms">
+<figcaption>Frames 146 diverted, 146 limited and 179 limited, same reading as above: capped arm left, finite-edge arm right.</figcaption>
+</figure>
+</section>

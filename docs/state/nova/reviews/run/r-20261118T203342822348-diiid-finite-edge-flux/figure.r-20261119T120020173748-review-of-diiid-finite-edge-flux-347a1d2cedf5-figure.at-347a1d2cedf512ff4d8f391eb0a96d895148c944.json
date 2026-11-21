@@ -1,0 +1,109 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-19T12:13:30.176Z",
+  "dispatched_at": "2026-11-19T12:02:38Z",
+  "figures": {
+    "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-137-diverted-lower-xpoint.svg": {
+      "contrast": "pass \u2014 black text on white, and the light-grey wall reads as a reference outline without competing with the contours.",
+      "data_ink": "pass \u2014 line contours and the thick separatrix carry the visual weight, with no filled areas.",
+      "decoration": "pass \u2014 no gridlines, background fill, gradient, frame or shading; the wall is the only non-data outline.",
+      "label_collision": "pass \u2014 no text is clipped or overlapping; the nested EFIT square and blue solved-null X at the upper saddle both remain visible.",
+      "legibility": "pass with one local defect \u2014 the single figure-level legend, the per-arm notes and the residual/converged lines are readable at 14 pt, and the two arms read left to right with the lower-X window showing both null sets at visibly different offsets; at the vessel bottom a chain of hollow shadow nodes overlaps itself and the wall, so those marks are not individually separable at full-field scale.",
+      "table_form": "pass \u2014 this is spatial flux geometry, not information a table would carry better."
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-146-diverted-lower-xpoint.svg": {
+      "contrast": "pass \u2014 black text on white; the wall outline is legible without dominating.",
+      "data_ink": "pass \u2014 contours and the thick separatrix carry the weight; no filled areas.",
+      "decoration": "pass \u2014 no gridlines, fills or shading.",
+      "label_collision": "pass \u2014 no clipped or overlapping text; the null markers at the lower X remain separable.",
+      "legibility": "pass \u2014 both converged arms are distinguishable at a glance and each lower-X window shows both null sets with a visible offset.",
+      "table_form": "pass \u2014 spatial geometry rather than a table's content."
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-146-limited-lower-xpoint.svg": {
+      "contrast": "pass \u2014 black text on white; the wall outline is legible.",
+      "data_ink": "pass \u2014 line contours and the separatrix carry the weight, with no filled areas.",
+      "decoration": "pass \u2014 no gridlines, fills or shading.",
+      "label_collision": "pass \u2014 no clipped or overlapping text.",
+      "legibility": "pass with one local defect \u2014 the right (finite-edge) arm reads fully, but the left (base tables) lower-X window draws the solved field only as two disconnected blue stubs at its top edge and no solved null, so that window shows a single null set; the full-field panel beside it shows the solved separatrix crossing well away from EFIT's square.",
+      "table_form": "pass \u2014 spatial geometry, not a table's content."
+    },
+    "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-179-limited-lower-xpoint.svg": {
+      "contrast": "pass \u2014 black text on white; the wall outline is legible.",
+      "data_ink": "pass \u2014 line contours and the separatrix carry the weight; shadow nodes are small hollow measurements, not fill.",
+      "decoration": "pass \u2014 no gridlines, fills or shading.",
+      "label_collision": "pass \u2014 no clipped or overlapping text.",
+      "legibility": "pass with one local defect \u2014 the lower-X subject reads, but at the top of both full-field panels the hollow shadow-node circles and a filled solved-axis/null cluster overlap into one blue blob on the wall, so no mark in that cluster is separable at a glance.",
+      "table_form": "pass \u2014 spatial geometry, not a table's content."
+    }
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the reviewer confirms the figure, its notes and the record table carry the comparison; the lower-X subject is readable",
+      "recorded_at": "2026-11-19T18:14:20.168467+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the reviewer confirms the figure, its notes and the record table carry the comparison; the lower-X subject is readable",
+      "recorded_at": "2026-11-19T18:14:32.906973+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the reviewer confirms the figure, its notes and the record table carry the comparison; the lower-X subject is readable",
+      "recorded_at": "2026-11-19T18:14:43.887659+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the reviewer confirms the figure, its notes and the record table carry the comparison; the lower-X subject is readable",
+      "recorded_at": "2026-11-19T18:14:53.235200+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the reviewer confirms the figure, its notes and the record table carry the comparison; the lower-X subject is readable",
+      "recorded_at": "2026-11-19T18:15:03.453507+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-146-limited-lower-xpoint.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The left (base tables) lower-X window is centred on EFIT's null while this arm's solved lower null lies 8.115 cm away, outside the 10 cm window, so the panel draws the solved field only as two disconnected blue stubs at its top edge and no solved-null marker. A reader comparing the two zoom panels sees one null set in the left one. The panel's own note (residual 0.00577; converged 0), the full-field panel beside it and the record's table carry the offset, so the figure as a whole still conveys it."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-137-diverted-lower-xpoint.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The legend gives the filled blue star as 'solved null' and the hollow square as 'EFIT null', but the full-field panels also draw each arm's other qualified null as a hollow blue X nested in a black square (clear at the upper saddle of every figure), and no legend entry names that hollow X, so a reader may take it for a solved-null marker that failed to fill or for a second EFIT null. Present in all four figures."
+    },
+    {
+      "file": "scripts/prototypes/diiid_finite_edge_flux/render.py",
+      "line": 46,
+      "severity": "non-blocking",
+      "summary": "The panel notes label the left arm 'base tables' while the record's caption and body call the same arm 'capped'; a reader moving between the figure and its caption has to infer that the record's 'capped' is the figure's 'base tables'."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-179-limited-lower-xpoint.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "At the top of both full-field panels the hollow shadow-node circles and a filled solved-axis/null cluster overlap into a single blue blob on the wall line, so none of those marks is separable at a glance. The cluster sits well away from the lower-X subject the figure is about."
+    },
+    {
+      "file": "docs/figures/diiid-vertical-force-balance/diiid-finite-edge-flux/frame-137-diverted-lower-xpoint.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Along the vessel bottom a chain of six or more hollow shadow nodes overlaps itself and the wall, merging into one tang; the same crowding appears in 146 limited and 179 limited. Secondary to the lower-X subject, but it makes the shadow-node set uncountable at full-field scale."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261119T120020173748-review-of-diiid-finite-edge-flux-347a1d2cedf5-figure",
+  "reviewed_base_sha": "d0947cef28a8b539e0d4de9ed11eeebd29c84021",
+  "reviewed_head_sha": "347a1d2cedf512ff4d8f391eb0a96d895148c944",
+  "reviewed_run_id": "r-20261118T203342822348-diiid-finite-edge-flux",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T12:14:22.490389+00:00",
+  "total": null
+}

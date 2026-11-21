@@ -1,0 +1,148 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite, so no added-failure measurement exists; 0 and [] are the declared empty values, not an observed green run.",
+  "caption_note": "The page has no figcaption. The image's alt text describes the three panels rather than repeating the title, and the paragraph after the image names each panel, states that the middle panel is symmetric-log and why, and quotes the same -96 percent plateau the panel and the prose table carry. The caption's claim that the plateau sits about fifty pixels below zero measures 53 px at this head, row 548 against the zero rule at row 495.",
+  "completed_at": "2026-11-21T16:00:46.994Z",
+  "dispatched_at": "2026-11-21T15:26:33Z",
+  "figure_evidence": {
+    "canvas": "768x864 px RGBA at 120 dpi, three stacked panels from plt.subplots(3, 1, figsize=(6.4, 7.2), height_ratios=(2.0, 1.0, 1.2), constrained_layout=True), drawn by scripts/iron_field_source/figure.py.",
+    "edge_scan": "Zero non-white pixels in the outer 3 px band on all four sides; the content bounding box is columns 4-764 and rows 5-857, so no artist touches or crosses the canvas border.",
+    "identity": "Both attached PNGs are one figure: sha256 5e26278532028ce2feb2647ee727980c06cc09d6f88659035da094f02f7bbab5 for each, 768x864 RGBA, and each path's blob is 33f5a475cecaba0c66bbbe962fb53c13bef94ac6 at reviewed head cfb786340d69, equal to git hash-object of the working file; both paths are clean at that head. Every verdict applies to both paths.",
+    "legend_rows": "Top-panel legend text bands at rows 38-51, 59-72 and 80-93; middle-panel legend text bands at rows 419-432, 440-453 and 461-474, both at columns 652-768. Each region carries only the 56 colour pixels of its own handle, so no data ink lies inside either legend.",
+    "magnification": "Regions inspected at 2x to 4x from the named PNG: the near-edge peak, both legs of the repair spike, both legends, the symlog axis labels, the title and the whole lower panel.",
+    "middle_panel_ink": "Blue 200 px (56 of them the legend handle), orange 56 px (all of them the legend handle, so the Fb-plane curve has no visible ink in the data region), teal 1898 px.",
+    "middle_panel_rows": "The grey zero rule is at row 495 spanning 656 px; the iron-share plateau is at row 548 spanning 652 px in teal rgb(0,153,136), 53 px below the rule, matching the caption's 'about fifty pixels below zero' and the -96 percent share in the prose table.",
+    "repair_verified": "The blocking finding recorded at head 01d8d65 (middle-panel legend at lower right, where the teal plateau row 548 ran through the Fh plane entry at rows 540-553) is repaired at this head: the legend moved to upper right into empty space, its text occupying rows 419-474 while the grey zero rule lies 21 px below it at row 495 and the plateau 74 px below it at row 548.",
+    "upper_panel_ink": "Whole top panel: midplane blue 141 px, Fb orange 157 px, Fh teal 1639 px. Outside the legend handle at columns 652-679, blue and orange appear only in columns 74-133 across a plot area of columns 73-763, so the two lie under the teal trace over about 91 percent of the width."
+  },
+  "figures": {
+    "docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png": {
+      "contrast": "pass - identical pixels: text 19.68:1, inline note 9.74:1, blue 5.37:1, teal 3.55:1, orange 3.37:1, zero rule 3.54:1 on white.",
+      "data_ink": "pass - 94.9 percent of the canvas is pure white; the ink is line strokes, marker glyphs and text with no filled region, band, gradient or shadow.",
+      "decoration": "pass - no gridlines, no background fill, no styling; the only added marks are the air-core note, the peak annotation and the grey zero rule.",
+      "label_collision": "pass - byte-identical twin of the west-stray-field copy: zero ink in the outer 3 px band, no label over data, and the repaired middle-panel legend sits 21 px above the zero rule and 74 px above the plateau.",
+      "legibility": "pass - byte-identical to the west-stray-field copy and reads the same: three stacked panels, an annotated +6787 percent peak, a -96 percent plateau 53 px below the zero rule, and a probe scatter, all legible at 768x864. The same two non-blocking caveats apply: the Fb-plane trace is not separable from the Fh trace beyond the near-edge band, and the edge structure is compressed into about 9 percent of the x axis.",
+      "table_form": "pass - plotted field profiles and a probe scatter on one side, prose table. No table-shaped information is depicted."
+    },
+    "docs/figures/west-stray-field/west-62751-iron-stray-field.png": {
+      "contrast": "pass - measured on the rendered PNG: text rgb(11,11,11) 19.68:1 on white, inline note rgb(68,68,68) 9.74:1, midplane blue 5.37:1, Fh teal 3.55:1, Fb orange 3.37:1 and the zero rule rgb(136,136,136) 3.54:1. Every data mark clears the 3:1 floor and every text clears 4.5:1.",
+      "data_ink": "pass - measured on the rendered PNG, 94.9 percent of the canvas is pure white; the ink is line strokes, marker glyphs and text only, with no filled region, band, gradient or shadow.",
+      "decoration": "pass - no gridlines (no column or row carries faint grid ink in any panel), no background fill, no frame beyond the left and bottom spines, and no themed styling; the only added marks are the air-core note, the peak annotation and the grey zero rule, each of which carries information.",
+      "label_collision": "pass - measured on the rendered PNG, the outer 3 px band on all four sides carries zero non-white pixels, so no artist is clipped. The middle-panel legend occupies text rows 419-474 while the grey zero rule is at row 495 and the plateau at row 548, and only legend-sample ink (56 px per colour) falls inside its region, so the legend-over-plateau collision recorded at head 01d8d65 is repaired. The peak annotation has no curve pixel inside its band, and the inline note at rows 321-329 sits 17 px below the lowest curve ink in its columns.",
+      "legibility": "pass - the three stacked panels read at a glance at 768x864: a titled field profile with a three-entry legend and an inline air-core note, a symmetric-log iron-share panel whose +6787 percent peak is annotated and whose -96 percent plateau sits 53 px below a grey zero rule, and a probe scatter. Two non-blocking caveats are recorded as findings: the Fb-plane trace is not separable from the Fh trace beyond the near-edge band, and the edge structure is compressed into about 9 percent of the x axis.",
+      "table_form": "pass - two panels plot continuous field against radius and the third plots discrete probe positions; the per-plane values beside the figure are a prose table, not depicted here, and the radial shape is what a table cannot carry."
+    }
+  },
+  "finding_counts": {
+    "blocking": 0,
+    "non-blocking": 5
+  },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-field-source-polish",
+      "recorded_at": "2026-11-21T16:01:24.644614+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "icm-field-source-polish",
+      "recorded_at": "2026-11-21T16:01:32.352377+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "icm-field-source-polish",
+      "recorded_at": "2026-11-21T16:01:39.084563+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "icm-field-source-polish",
+      "recorded_at": "2026-11-21T16:01:45.396467+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "icm-field-source-polish",
+      "recorded_at": "2026-11-21T16:01:51.722862+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/iron_field_source/figure.py",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The three with-iron curves are drawn in the order midplane, Fb plane, Fh plane, so the last-drawn teal trace covers the other two wherever they agree. Measured on the rendered PNG, outside the legend sample the blue and orange traces carry ink only in columns 74 to 133 of the 691 px plot area, about 9 percent of the width; across the remaining 91 percent the reader sees one teal curve under a three-entry legend. The coincidence is the physics the section reports (iron share -96.5, -96.8 and -97.1 percent at +1 m), not a plotting fault, but the picture does not let a reader tell agreement from absence for the two hidden planes. A panel note stating that the planes coincide in the far field, or a dash or lightness separation, would let a reader tell the two apart."
+    },
+    {
+      "file": "scripts/iron_field_source/figure.py",
+      "line": 62,
+      "severity": "non-blocking",
+      "summary": "The same three-entry plane legend is drawn twice on one figure, here in the upper panel and again in the middle panel at line 113, and never in the lower panel, although the colours name the same three planes in every panel. One figure-level legend would carry the information once; the second copy spends ink and is what placed a legend over the plateau at the previous head."
+    },
+    {
+      "file": "scripts/iron_field_source/figure.py",
+      "line": 133,
+      "severity": "non-blocking",
+      "summary": "The lower panel's y-axis label names the air-core field as (bars), but those marks are drawn with the horizontal-dash marker underscore at line 127 and render as short grey dashes and small squares, not as bars. A reader who wants the air-core value looks for a mark that is not there and may read the dashes as a third series; the label should name the marks as drawn, or the marks should become bars."
+    },
+    {
+      "file": "scripts/iron_field_source/figure.py",
+      "line": 61,
+      "severity": "non-blocking",
+      "summary": "The x axis is linear across the whole plotted range of about 11 m, so the near-edge structure that the figure exists to show is compressed into a sliver: the peak at about 0.4 m and the fall by 0.5 m occupy roughly 50 px of the 691 px plot width in the upper panel, and the annotated +6787 percent spike occupies about 14 px in the middle panel. A reader can see that a spike exists but cannot read its shape, and the three planes' near-edge separation is the only place the upper panel shows a difference between them."
+    },
+    {
+      "file": "scripts/iron_field_source/figure.py",
+      "line": 44,
+      "severity": "non-blocking",
+      "summary": "All three air-core traces are drawn in one grey with the label _air, so no legend entry or label distinguishes them, while the inline note says only dashed grey air-core. The three strands are visibly separate near the edge, where the prose table puts them at 7.2, 8.2 and 9.2 mT at +1 m, about 8 px apart on this axis, so a reader sees three dashes and cannot say which plane each belongs to. This is the only place in the upper panel where a plane difference is visible at all, which makes the missing attribution costly rather than cosmetic."
+    }
+  ],
+  "notes": "Read-only figure review of the two named PNGs, which are byte-identical copies of one figure. Judged only the rendered pixels. The blocking finding from the review at head 01d8d65603f7 - the middle-panel legend drawn over the iron-share plateau - is repaired at this head and is recorded as verified rather than carried: the legend now sits at upper right with no data ink in its region, 21 px above the zero rule and 74 px above the plateau. Three non-blocking findings from that earlier review still reproduce at this head (the hidden Fb-plane trace, the duplicated three-entry legend, and the bars label for dash markers), and two further non-blocking observations are added (the linear x axis compressing the near-edge structure into about 9 percent of the width, and the three air-core strands sharing one unlabelled grey). All six rubric items pass on both paths. No suite runs for a figure review, so added_failure_count is 0 with an empty id list.",
+  "project": "nova",
+  "review_run_id": "r-20261121T152554772571-review-of-icm-iron-field-source-cfb786340d69-figure",
+  "review_scope_note": "Read-only review: no file in the repository was edited, created, moved, deleted, redrawn, relabelled or reformatted. Only the two named PNGs were opened, plus PNG crops of them for close inspection; no SVG and no other image was read or shown.",
+  "reviewed_base_sha": "9b016126111a5acaebca064c07432042b5a2628c",
+  "reviewed_figures": [
+    "docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png",
+    "docs/figures/west-stray-field/west-62751-iron-stray-field.png"
+  ],
+  "reviewed_head_sha": "cfb786340d695a3cf22ba6691b1b3f6c92f654e8",
+  "reviewed_run_id": "r-20261114T144505738776-icm-iron-field-source",
+  "rubric": "figure",
+  "rubric_items": {
+    "caption_not_title_repeat": "pass - the image carries a descriptive alt text and the page paragraph after it names each panel and states the symmetric-log rationale; neither repeats the title.",
+    "contrast": "pass - text 19.68:1, inline note 9.74:1, blue 5.37:1, teal 3.55:1, orange 3.37:1, zero rule 3.54:1 on white: every data mark clears 3:1 and every text clears 4.5:1.",
+    "data_ink": "pass - 94.9 percent pure white; line strokes, markers and text only, with no fill or band.",
+    "decoration": "pass - no gridlines, background fill, frame or themed styling.",
+    "label_collision": "pass - zero non-white pixels in the outer 3 px band on all four sides, no label over data, the middle-panel legend 21 px above the zero rule and 74 px above the plateau, and the peak annotation clear of every curve.",
+    "legibility": "pass - both paths render one 768x864 figure of three stacked panels; all text, both legends, the peak annotation and the axis labels are legible, and the two defects recorded (hidden Fb trace, compressed edge region) are non-blocking.",
+    "table_form": "pass - two radial profiles and one probe scatter; the numeric per-plane summary is a prose table and is not depicted in the image."
+  },
+  "rubric_lines": [
+    "RUBRIC legibility: pass - docs/figures/west-stray-field/west-62751-iron-stray-field.png: three stacked panels read at a glance, with the peak annotated and the plateau marked only inside sample colours; the hidden Fb trace and the compressed edge are recorded as non-blocking findings.",
+    "RUBRIC data_ink: pass - docs/figures/west-stray-field/west-62751-iron-stray-field.png: 94.9 percent pure white, ink is strokes, markers and text only.",
+    "RUBRIC decoration: pass - docs/figures/west-stray-field/west-62751-iron-stray-field.png: no gridlines, no background fill, no frame beyond the left and bottom spines, and no themed styling.",
+    "RUBRIC contrast: pass - docs/figures/west-stray-field/west-62751-iron-stray-field.png: text 19.68:1, inline note 9.74:1, blue 5.37:1, teal 3.55:1, orange 3.37:1 on white.",
+    "RUBRIC table_form: pass - docs/figures/west-stray-field/west-62751-iron-stray-field.png: radial profiles and a probe scatter, not tabular information.",
+    "RUBRIC label_collision: pass - docs/figures/west-stray-field/west-62751-iron-stray-field.png: zero ink in the outer 3 px band, no label over data, the middle legend 21 px above the zero rule.",
+    "RUBRIC legibility: pass - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: byte-identical twin, same reading and same two non-blocking caveats.",
+    "RUBRIC data_ink: pass - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: 94.9 percent pure white, strokes and text only.",
+    "RUBRIC decoration: pass - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: no gridlines, background fill or styling.",
+    "RUBRIC contrast: pass - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: same pixels, every mark clears 3:1 and every text 4.5:1.",
+    "RUBRIC table_form: pass - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: plotted field profiles and a probe scatter.",
+    "RUBRIC label_collision: pass - docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png: zero ink in the outer 3 px band, no label over data."
+  ],
+  "rubric_verdicts": {
+    "caption_not_title_repeat": "pass",
+    "contrast": "pass",
+    "data_ink": "pass",
+    "decoration": "pass",
+    "label_collision": "pass",
+    "legibility": "pass",
+    "table_form": "pass"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T16:45:00Z",
+  "total": null
+}

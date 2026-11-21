@@ -2112,7 +2112,14 @@ def _polygon_current_evaluator(flux_only, nodes, kernel="quadrature"):
 
 
 def _polygon_current_response(
-    polygons, points, plan, *, packed=None, flux_only=False, kernel="quadrature"
+    polygons,
+    points,
+    plan,
+    *,
+    packed=None,
+    flux_only=False,
+    kernel="quadrature",
+    columns=None,
 ):
     """Evaluate uniform volume currents through the polygon quadrature owner.
 
@@ -2122,6 +2129,10 @@ def _polygon_current_response(
     The angular rule integrates the section analytically before quadrature;
     it never samples the spatial filament singularity. Exact axis fields use
     the closed owner's finite axis reduction instead of a flux derivative.
+    ``columns`` is an optional boolean mask over the source polygons: the
+    returned last axis then holds the selected polygons in ascending order, and
+    only those columns are evaluated.  The near-field section rule reads it to
+    refine a single cell's quadrature against its near neighbours alone.
     """
     edge, weight, norm, incidence = packed or _polygon_current_geometry(polygons)
     from nova.biot.polygonanalytic import _packed_axis_vertical_field, _packed_topology
@@ -2132,12 +2143,27 @@ def _polygon_current_response(
         np.hypot(edge[:, 2] - edge[:, 0], edge[:, 3] - edge[:, 1]), axis=0
     )
     components = 1 if flux_only else 3
-    result = np.zeros((components, len(points), len(polygons)))
+    mask = None
+    keep = None
+    if columns is not None:
+        mask = np.asarray(columns, dtype=bool)
+        if mask.shape != (len(polygons),):
+            raise ValueError("columns must be a boolean mask over the polygons")
+        owner = incidence.indices[incidence.indptr[:-1]]
+        keep = mask[owner]
+        polygon_columns = np.flatnonzero(mask)
+        result = np.zeros((components, len(points), int(mask.sum())))
+    else:
+        result = np.zeros((components, len(points), len(polygons)))
     for target, source in tile.tiles(len(points), len(norm)):
         rows = np.arange(target.start, target.stop)
-        columns = np.arange(source.start, source.stop)
-        rr = np.repeat(rows, len(columns))
-        cc = np.tile(columns, len(rows))
+        tile_columns = np.arange(source.start, source.stop)
+        if keep is not None:
+            tile_columns = tile_columns[keep[tile_columns]]
+            if not len(tile_columns):
+                continue
+        rr = np.repeat(rows, len(tile_columns))
+        cc = np.tile(tile_columns, len(rows))
         axis = points[rows, 0] == 0
         near = np.linalg.norm(points[rr] - centres[cc], axis=1) < 4 * diameters[cc]
         value = np.empty((components, len(rr)))
@@ -2156,19 +2182,179 @@ def _polygon_current_response(
                         norm[c],
                     )
                 )[:, : len(chosen)]
-        value = value.reshape(components, len(rows), len(columns))
+        value = value.reshape(components, len(rows), len(tile_columns))
         if np.any(axis):
             value[:, axis] = 0.0
             if not flux_only:
-                ar = np.repeat(rows[axis], len(columns))
-                ac = np.tile(columns, int(axis.sum()))
+                ar = np.repeat(rows[axis], len(tile_columns))
+                ac = np.tile(tile_columns, int(axis.sum()))
                 _, present, _, _ = _packed_topology(np, weight[:, ac])
                 value[2, axis] = _packed_axis_vertical_field(
                     np, points[ar, 1], edge[:, :, ac], present, norm[ac]
-                ).reshape(int(axis.sum()), len(columns))
+                ).reshape(int(axis.sum()), len(tile_columns))
+        selected = (
+            incidence[source]
+            if mask is None
+            else incidence[source][keep[source]][:, polygon_columns]
+        )
         for component in range(components):
-            result[component, target] += value[component] @ incidence[source]
+            result[component, target] += value[component] @ selected
     return result
+
+
+def _volume_section_order(order):
+    """Return the section-rule order of the distant pairs' volume potential.
+
+    The volume potential's target points are a quadrature of a self-term that is
+    logarithmic at the cell's own boundary, so the rule controls whether the
+    assembled form stays dissipative.  A quarter of the edge order, six nodes per
+    triangle at the default order, is not converged where that self-term is
+    near-singular; it reproduces the distant pairs to 1e-10 or better and holds
+    the metric-weighted quotient below one there.  The near pairs are integrated
+    at :func:`_volume_near_section_order` instead.
+
+    A quarter of the edge order at the default edge order is six nodes, which is
+    the delivered rule for distant pairs.
+    """
+    return max(6, order // 4)
+
+
+def _volume_near_section_order(order):
+    """Return the section-rule order the near-field volume quadrature uses.
+
+    Twelve nodes per triangle at the default edge order: the first rule that
+    resolves the logarithmic self-term far enough to keep every measured gate
+    shell below the demagnetisation bound.
+    """
+    return max(12, order // 2)
+
+
+# Separation, in units of the narrower cell's least width, within which a pair's
+# volume potential is integrated at the refined section order.  Chosen from the
+# six-against-twelve node measurement of the assembled block on the 115-cell
+# graded 16/80 shell (receipts/nearfield3 job log, nearfield-graded-16-80.npz):
+# the block's largest entry is 9.5e-12 and the change it takes from the refined
+# rule is 2.9e-18, so this compares the change against a scale three hundred
+# times larger than the delivered rule's whole error.  The worst pair left at the
+# coarse rule changes by 3.1e-9 of that scale at one cell width, 8.6e-10 at two,
+# 2.4e-10 at three, 8.7e-11 at four and six (the same pair, at a ratio between
+# four and six), and 5.6e-12 at eight, which is the first factor that puts the
+# pair three decades below the six-node rule's own 1e-6-scale error rather than
+# on it.  It refines 4299 of the shell's 13225 pairs, 33 per cent, because the
+# graded mesh's 6 x 40 mm band has many neighbours inside eight of its least
+# width.  Three quarters of the block's total change is carried by pairs inside
+# one cell width, so the criterion is choosing a neighbourhood and not a
+# threshold that happens to work.
+_VOLUME_NEAR_FACTOR = 8.0
+
+
+def _volume_near_mask(polygons):
+    """Return which volume-potential pairs are integrated at the refined order.
+
+    The volume potential's target points are the cell's own section quadrature,
+    so a pair is near-singular when the two cells lie within a small multiple of
+    the narrower cell's least width: the cell's own pair (separation zero), its
+    adjacent pairs (separation zero through a shared edge), and the pairs across
+    a thin band, such as the 6 x 40 mm cells of the graded mesh.  Bounding-box
+    separation is the cell distance for the axis-aligned mesh this assembles and
+    an upper bound on it for a general polygon, which flags a few extra pairs
+    rather than dropping a singular one.  The mask is symmetric, because entry
+    (i, j) reads row i's quadrature and entry (j, i) reads row j's.
+    """
+    vertices = [np.asarray(polygon, dtype=float) for polygon in polygons]
+    bounds = np.array(
+        [
+            [
+                vertex[:, 0].min(),
+                vertex[:, 1].min(),
+                vertex[:, 0].max(),
+                vertex[:, 1].max(),
+            ]
+            for vertex in vertices
+        ]
+    )
+    x0, y0, x1, y1 = bounds.T
+    gap = np.maximum(
+        0.0,
+        np.maximum(x0[:, None] - x1[None, :], x0[None, :] - x1[:, None]),
+    )
+    rise = np.maximum(
+        0.0,
+        np.maximum(y0[:, None] - y1[None, :], y0[None, :] - y1[:, None]),
+    )
+    separation = np.hypot(gap, rise)
+    least = np.minimum(x1 - x0, y1 - y0)
+    within = separation <= _VOLUME_NEAR_FACTOR * np.minimum(
+        least[:, None], least[None, :]
+    )
+    return within | within.T
+
+
+def volume_mutual(polygons, plan, *, packed=None, section_order=6, refine_order=None):
+    """Return the section-quadrature volume potential of every cell pair.
+
+    Row ``i`` is cell ``i``'s section rule of ``section_order`` nodes against
+    every polygon: the continuous volume potential's target points are a
+    quadrature of a self-term that is logarithmic at the cell's own boundary, so
+    the node count is the rule and not a resolution knob.  ``refine_order``
+    replaces the entries of the pairs :func:`_volume_near_mask` flags, which is
+    how the linear Galerkin interaction integrates the near-singular pairs at
+    the higher rule while the distant pairs keep the area rule that matches the
+    local law.
+
+    The owner of the block is this function: the Galerkin interaction adds it to
+    the energy, and the near-field study measures it at two section orders
+    rather than rebuilding it.
+    """
+    from nova.biot.sectionaverage import section_nodes
+
+    packed = packed or _polygon_current_geometry(polygons)
+    response = np.empty((len(polygons), len(polygons)))
+    pending, pending_weights, first, point_count = [], [], 0, 0
+    for cell, polygon in enumerate(polygons):
+        points, weights = section_nodes(polygon, section_order)
+        pending.append(points)
+        pending_weights.append(weights)
+        point_count += len(points)
+        if point_count < 4096 and cell + 1 < len(polygons):
+            continue
+        flux = _polygon_current_response(
+            polygons, np.concatenate(pending), plan, packed=packed, flux_only=True
+        )[0]
+        offset = 0
+        for local, weight in enumerate(pending_weights):
+            response[first + local] = weight @ flux[offset : offset + len(weight)]
+            offset += len(weight)
+        pending, pending_weights, first, point_count = [], [], cell + 1, 0
+    if refine_order is not None and refine_order > section_order:
+        near = _volume_near_mask(polygons)
+        if near.any():
+            refined = _volume_near_entries(
+                polygons, plan=plan, packed=packed, section_order=refine_order
+            )
+            response[near] = refined[near]
+    return response
+
+
+def _volume_near_entries(polygons, *, plan, packed, section_order):
+    """Return the refined section quadrature of every near pair's potential.
+
+    Each cell is sampled at ``section_order`` nodes and only against the
+    polygons its row of :func:`_volume_near_mask` marks, so the refinement costs
+    the near columns alone.
+    """
+    from nova.biot.sectionaverage import section_nodes
+
+    near = _volume_near_mask(polygons)
+    entries = np.zeros((len(polygons), len(polygons)))
+    for cell in np.flatnonzero(near.any(axis=1)):
+        mask = near[cell]
+        points, weights = section_nodes(polygons[cell], section_order)
+        flux = _polygon_current_response(
+            polygons, points, plan, packed=packed, flux_only=True, columns=mask
+        )[0]
+        entries[cell, mask] = weights @ flux
+    return entries
 
 
 def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 24):
@@ -2178,7 +2364,6 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
     bound currents: affine boundary sheets plus constant curl M in the volume.
     The reciprocal current energy is contracted before the local Gram solve.
     """
-    from nova.biot.sectionaverage import section_nodes
 
     geometry = linear_magnetisation_geometry(polygons)
     atoms = geometry["atoms"]
@@ -2216,25 +2401,17 @@ def linear_galerkin_cell_interaction(polygons, *, plan: TilePlan, order: int = 2
     energy += cross + cross.T
     del cross, edge_volume
     # The continuous volume potential uses the same area rule as the local law;
-    # the logarithmic edge-pair singularities alone need the higher Duffy order.
-    volume_mutual = np.empty((len(polygons), len(polygons)))
-    pending, pending_weights, first, point_count = [], [], 0, 0
-    for cell, polygon in enumerate(polygons):
-        points, weights = section_nodes(polygon, max(6, order // 4))
-        pending.append(points)
-        pending_weights.append(weights)
-        point_count += len(points)
-        if point_count < 4096 and cell + 1 < len(polygons):
-            continue
-        flux = _polygon_current_response(
-            polygons, np.concatenate(pending), plan, packed=packed, flux_only=True
-        )[0]
-        offset = 0
-        for local, weight in enumerate(pending_weights):
-            volume_mutual[first + local] = weight @ flux[offset : offset + len(weight)]
-            offset += len(weight)
-        pending, pending_weights, first, point_count = [], [], cell + 1, 0
-    energy += np.asarray((volume @ volume_mutual) @ volume.T)
+    # the logarithmic edge-pair singularities alone need the higher Duffy order,
+    # and the near pairs take the refined rule rather than the area rule; both
+    # live in the owner :func:`volume_mutual`, which this study reads as well.
+    volume_block = volume_mutual(
+        polygons,
+        plan,
+        packed=packed,
+        section_order=_volume_section_order(order),
+        refine_order=_volume_near_section_order(order),
+    )
+    energy += np.asarray((volume @ volume_block) @ volume.T)
     energy = (energy + energy.T) / 2
     blocks = geometry["gram"]
     count = len(polygons)

@@ -42,7 +42,7 @@ from nova.jax.config import configure_dtypes
 
 ROOT = Path(__file__).resolve().parents[1]
 CENSUS = ROOT / "docs/figures/limited-boundary-census/limited-class-census.npz"
-SESSION_ROOT = Path("/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29")
+SESSION_ROOT = Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29")
 STORE_ROOT = Path("/work/projects/imas_gpu/mast/level1/shots")
 OUTPUT = ROOT / "docs/figures/playable-forward-solve/span-ratio"
 EXPECTED_ROWS = 43_017

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -u
-export TMPDIR=/tmp NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+export TMPDIR=/tmp NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm
 ROOT=$(git rev-parse --show-toplevel)
 RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261103T095720496569-bank-tangent-contract
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python

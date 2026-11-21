@@ -1,0 +1,150 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/fit_inside_iteration/run.py:_run_known",
+    "scripts/prototypes/fit_inside_iteration/run.py:_run_stored",
+    "scripts/prototypes/fit_inside_iteration/run.py:_flux_solver"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-17T22:56:16Z",
+  "evidence_paths": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T165817283570-review-of-fit-inside-the-iteration-98dc1aa8b85f/review.txt",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T165817283570-review-of-fit-inside-the-iteration-98dc1aa8b85f/update-probe.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T165817283570-review-of-fit-inside-the-iteration-98dc1aa8b85f/receipt-summary.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T165817283570-review-of-fit-inside-the-iteration-98dc1aa8b85f/figures/render.log"
+  ],
+  "figure_review": {
+    "inspected": 5,
+    "rendered": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T165817283570-review-of-fit-inside-the-iteration-98dc1aa8b85f/figures/known-states-mast.png",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T165817283570-review-of-fit-inside-the-iteration-98dc1aa8b85f/figures/known-states-solovev.png",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T165817283570-review-of-fit-inside-the-iteration-98dc1aa8b85f/figures/stored-cases-iter.png",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T165817283570-review-of-fit-inside-the-iteration-98dc1aa8b85f/figures/stored-cases-mastu.png",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T165817283570-review-of-fit-inside-the-iteration-98dc1aa8b85f/figures/stored-cases-tcv.png"
+    ],
+    "result": "No clipped or overlapping text seen. Stored ITER lacks every blue flux contour; the SVG control confirms twelve nonempty grey paths and twelve empty blue paths. Other four maps render legibly."
+  },
+  "findings": [
+    {
+      "file": "nova/equilibrium/flux_iteration.py",
+      "id": "fdfc2b9103a",
+      "line": "420",
+      "severity": "blocking",
+      "text": "blocking: The correction changes coefficients after active/operator were built at lines 369-370, but the map still uses that old operator or active.source at line 448; neither update path lays down the newly fitted profiles. The exact target-blob probe fits [1.0,-0.4] from [1.05,-0.42], sends [1.05,-0.42] to the callback, and reports converged=true with update=2.22e-16 and misfit=5.55e-17 while terminal flux differs by 0.00485 from the independently computed map for [1.0,-0.4]. Rebuild the update profile from the corrected coefficients and add a one-pass assertion on the independently expected terminal map; the existing test at tests/test_flux_iteration.py:211 does not assert that map."
+    },
+    {
+      "file": "scripts/prototypes/fit_inside_iteration/run.py",
+      "id": "ffe4a47c89e",
+      "line": "165",
+      "severity": "blocking",
+      "text": "blocking: Both measured routes install _flux_solver, whose callback invokes profile.solve on every pass and returns only terminal_state.flux, discarding the nested solve's qualification, termination and iteration count. The live section explicitly requires one linear flux update per fitted pass, and nova/equilibrium/flux_iteration.py:76-78 describes flux_evaluations as that whole cost, although line 451 now counts complete solves as one. This is a different algorithm and an understated work receipt; restore the required update route and measure it, or obtain a plan decision before substituting converged solves."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html",
+      "id": "f2591e4dd18",
+      "line": "6",
+      "severity": "blocking",
+      "text": "blocking: The required three known states have not converged: Solov'ev stops after one accepted pass at flux error 0.032308 and residual 0.015935 against 1e-6/1e-8; MAST is explicitly converged=false and rejected at pass 4 with last update 0.0007473; ITER has no terminal state. The source gate-12/solovev-result.json and gate-11/mast-result.json confirm these values. The live section allows refusal records for stored cases only; it does not waive known-answer convergence. Keep the section unmet and repair/re-measure; scripts/prototypes/fit_inside_iteration/run.py:487-499 also needs to refuse an unsuccessful mandatory known-state measurement rather than exit zero whenever no exception escaped."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html",
+      "id": "fb05fbaf1e9",
+      "line": "13",
+      "severity": "blocking",
+      "text": "blocking: The statement that the scaled control left the 1.5 percent band on all five measured cases is false: evidence/gate-12/solovev-result.json records scaled_control_relative_error=0.013840648014421593 and scaled_control_fired=false, agreeing with this table's 0.0138. Only four of five measured controls exceed 0.015. Since no case converged, this is not independently a violation of the conditional control clause, but the evidence and source manifest must not claim an all-five pass."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html",
+      "id": "f95b5f33291",
+      "line": "14",
+      "severity": "blocking",
+      "text": "blocking: The claimed current sign reversals in TCV and ITER compare fitted signed currents with absolute reference magnitudes introduced at scripts/prototypes/fit_inside_iteration/run.py:137. gate-titan-14-1326273.log CASE_INPUT lines 55 and 90 contain signed reference currents -240259.2274515095 A and -15544546.67645363 A, respectively; fitted -237997.517869401 A and -11795018.833607439 A have those same signs. Preserve the reference sign and correct both this paragraph and the following stored-branch diagnosis before attributing axis loss to a sign reversal."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html",
+      "id": "ff86bab378c",
+      "line": "5",
+      "severity": "blocking",
+      "text": "blocking: The published per-case record lacks the required wall beside the nested class's solve count for known states and replaces stored-case terminal misfits with em dashes; it also omits stopped_improving_pass and the ITER different-constraints label from the table. The raw receipts already contain known wall/count pairs (Solov'ev 855.591 s/20; MAST 67.909 s/15) and stored terminal misfits 50.0, 4.83410582 and 44.3902644, with null stopped_improving_pass and axis loss 2/0/2. Publish those quantities with provenance and explain when axis loss occurred before improvement could be determined; one completed sequential six-case job remains absent, with known ITER stalled in a separate job."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-inside-the-iteration/stored-cases/iter.svg",
+      "id": "fa1adc9a67e",
+      "line": "39",
+      "severity": "blocking",
+      "text": "blocking: The rendered ITER comparison contains no nova flux contours: all 12 paths in TriContourSet_1 have no d attribute, while the imas-efit control contour set has 12 populated paths. Only the blue seed markers and legend remain, despite the caption claiming an overlaid terminal-map contour panel. Render and inspect a shared-level comparison that shows the terminal map (with any sign/additive alignment stated) or explicitly show and label why its levels are outside the plotted range; the current artifact cannot communicate the failed flux update the section asks the panel to diagnose."
+    },
+    {
+      "file": "nova/equilibrium/flux_iteration.py",
+      "id": "f970cb9543a",
+      "line": "434",
+      "severity": "non-blocking",
+      "text": "non-blocking: conductor_current_field accepts both current and prescribed_current and is stored at line 187, but is never read again; fitted currents are always passed through the positional current slot and the callback has no field selector. The existing measurement routes use the default current field, so this does not explain their result; narrow the advertised API or implement and test the prescribed-current route in a follow-on repair."
+    },
+    {
+      "file": "nova/equilibrium/flux_iteration.py",
+      "id": "f02f4cb488f",
+      "line": "164",
+      "severity": "non-blocking",
+      "text": "non-blocking: The basis validation/name construction and _source conversion duplicate MagneticsFit's owner at nova/equilibrium/magnetics_fit.py:132-202; the addition duplicates rather than wraps or extends that capability. Share that fitted-source/basis mechanism while keeping the two distinct iteration algorithms separate."
+    },
+    {
+      "file": "tests/test_flux_iteration.py",
+      "id": "f4650112f19",
+      "line": "395",
+      "severity": "non-blocking",
+      "text": "non-blocking: The prescribed-field test supplies exactly the stored [0.5] vector and asserts only evaluation count and absence of axis loss, so dropping the explicit vector and silently using the stored field still passes. Supply a different explicit vector and assert the independently expected map or field contribution to guard the override the test claims to exercise."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read b14c343547132859c56dc052f78550611eadac57..98dc1aa8b85f5af1f6c488e083c273a8595a6fee and its commit changes; 10 files add 2273 lines, including the coefficient-to-map defect at nova/equilibrium/flux_iteration.py:420 and the full-solve callback at scripts/prototypes/fit_inside_iteration/run.py:159.",
+    "done_when": "Read all three clauses at live docs/plans/inverse-equilibrium-baseline.html:194; the source receipts show no converged known-answer case, the published table omits required timing and terminal diagnostics, and no completed six-case job is supplied.",
+    "goal": "Read source prompt.txt:38-42 and live docs/plans/inverse-equilibrium-baseline.html:194; the new fitter performs per-pass least squares, but the measured route reconverges a forward solve and updates with the preceding coefficients rather than those just fitted.",
+    "manifest": "Read source manifest.md and logs/after-suite-final.log; nine algebraic tests passed in 3.83s, but baseline-suite.log exits 4 because the file did not exist, the tests field is prose, and the manifest's all-five-controls claim disagrees with its Solov'ev receipt.",
+    "write_paths": "Read the source live pointer and manifest orientation_write_paths; the 10-file diff adds source, tests and a runner beyond the two expected artifact paths, all implied by the reconstruction goal and permitted by the current mergeable-file scope rule."
+  },
+  "justifications": {
+    "durability": "tests/test_flux_iteration.py:211-443 independently guards coefficient recovery, conductor rows, callback delivery, axis-loss indexing and scale response, but its recovery test checks only that terminal flux is finite and passes despite the stale-map false convergence reproduced in update-probe.log.",
+    "evidence": "The source gate-titan-14-1326273.log supplies real three-case pass and terminal receipts, but docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:5-15 omits required misfit/timing comparisons and contradicts its own control and signed-current inputs.",
+    "fit": "nova/equilibrium/flux_iteration.py uses the repository's typed sources, immutable receipt, dtype configuration and whitened_solve, but its advertised conductor_current_field at :136 is ignored and the new nova/equilibrium/AGENTS.md:59-63 redefines a rejected nonconverged solve as successful recovery contrary to the section requirement.",
+    "goal_fidelity": "nova/equilibrium/flux_iteration.py:420-448 retains the pre-fit active profile, scripts/prototypes/fit_inside_iteration/run.py:165 runs a complete profile.solve, and the known-state rows at docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:6-8 do not satisfy the required convergence.",
+    "reuse": "nova/equilibrium/flux_iteration.py:144-210 and :222-238 duplicate polynomial validation, basis construction, coefficient names and source rebuilding already owned by nova/equilibrium/magnetics_fit.py:114-202 instead of extending a shared owner; the runner does correctly reuse existing case readers, painters and scoring primitives.",
+    "scope_discipline": "All 10 paths in the b14c3435..98dc1aa8b85f diff implement or document the reconstruction and its measurement, and the current dispatch permits implied mergeable-source additions beyond the expected artifact paths."
+  },
+  "plan": "inverse-equilibrium-baseline",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read source prompt.txt:38-42 and live docs/plans/inverse-equilibrium-baseline.html:194; the new fitter performs per-pass least squares, but the measured route reconverges a forward solve and updates with the preceding coefficients rather than those just fitted.\nVERDICT done_when: Read all three clauses at live docs/plans/inverse-equilibrium-baseline.html:194; the source receipts show no converged known-answer case, the published table omits required timing and terminal diagnostics, and no completed six-case job is supplied.\nVERDICT write_paths: Read the source live pointer and manifest orientation_write_paths; the 10-file diff adds source, tests and a runner beyond the two expected artifact paths, all implied by the reconstruction goal and permitted by the current mergeable-file scope rule.\nVERDICT manifest: Read source manifest.md and logs/after-suite-final.log; nine algebraic tests passed in 3.83s, but baseline-suite.log exits 4 because the file did not exist, the tests field is prose, and the manifest's all-five-controls claim disagrees with its Solov'ev receipt.\nVERDICT diff: Read b14c343547132859c56dc052f78550611eadac57..98dc1aa8b85f5af1f6c488e083c273a8595a6fee and its commit changes; 10 files add 2273 lines, including the coefficient-to-map defect at nova/equilibrium/flux_iteration.py:420 and the full-solve callback at scripts/prototypes/fit_inside_iteration/run.py:159.\nCALL_SITES: scripts/prototypes/fit_inside_iteration/run.py:_run_known, scripts/prototypes/fit_inside_iteration/run.py:_run_stored, scripts/prototypes/fit_inside_iteration/run.py:_flux_solver\nSCORE goal_fidelity: 6\nJUSTIFICATION goal_fidelity: nova/equilibrium/flux_iteration.py:420-448 retains the pre-fit active profile, scripts/prototypes/fit_inside_iteration/run.py:165 runs a complete profile.solve, and the known-state rows at docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:6-8 do not satisfy the required convergence.\nSCORE evidence: 7\nJUSTIFICATION evidence: The source gate-titan-14-1326273.log supplies real three-case pass and terminal receipts, but docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:5-15 omits required misfit/timing comparisons and contradicts its own control and signed-current inputs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All 10 paths in the b14c3435..98dc1aa8b85f diff implement or document the reconstruction and its measurement, and the current dispatch permits implied mergeable-source additions beyond the expected artifact paths.\nSCORE durability: 9\nJUSTIFICATION durability: tests/test_flux_iteration.py:211-443 independently guards coefficient recovery, conductor rows, callback delivery, axis-loss indexing and scale response, but its recovery test checks only that terminal flux is finite and passes despite the stale-map false convergence reproduced in update-probe.log.\nSCORE fit: 15\nJUSTIFICATION fit: nova/equilibrium/flux_iteration.py uses the repository's typed sources, immutable receipt, dtype configuration and whitened_solve, but its advertised conductor_current_field at :136 is ignored and the new nova/equilibrium/AGENTS.md:59-63 redefines a rejected nonconverged solve as successful recovery contrary to the section requirement.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/equilibrium/flux_iteration.py:144-210 and :222-238 duplicate polynomial validation, basis construction, coefficient names and source rebuilding already owned by nova/equilibrium/magnetics_fit.py:114-202 instead of extending a shared owner; the runner does correctly reuse existing case readers, painters and scoring primitives.\nFINDING nova/equilibrium/flux_iteration.py:420 blocking: The correction changes coefficients after active/operator were built at lines 369-370, but the map still uses that old operator or active.source at line 448; neither update path lays down the newly fitted profiles. The exact target-blob probe fits [1.0,-0.4] from [1.05,-0.42], sends [1.05,-0.42] to the callback, and reports converged=true with update=2.22e-16 and misfit=5.55e-17 while terminal flux differs by 0.00485 from the independently computed map for [1.0,-0.4]. Rebuild the update profile from the corrected coefficients and add a one-pass assertion on the independently expected terminal map; the existing test at tests/test_flux_iteration.py:211 does not assert that map.\nFINDING scripts/prototypes/fit_inside_iteration/run.py:165 blocking: Both measured routes install _flux_solver, whose callback invokes profile.solve on every pass and returns only terminal_state.flux, discarding the nested solve's qualification, termination and iteration count. The live section explicitly requires one linear flux update per fitted pass, and nova/equilibrium/flux_iteration.py:76-78 describes flux_evaluations as that whole cost, although line 451 now counts complete solves as one. This is a different algorithm and an understated work receipt; restore the required update route and measure it, or obtain a plan decision before substituting converged solves.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:6 blocking: The required three known states have not converged: Solov'ev stops after one accepted pass at flux error 0.032308 and residual 0.015935 against 1e-6/1e-8; MAST is explicitly converged=false and rejected at pass 4 with last update 0.0007473; ITER has no terminal state. The source gate-12/solovev-result.json and gate-11/mast-result.json confirm these values. The live section allows refusal records for stored cases only; it does not waive known-answer convergence. Keep the section unmet and repair/re-measure; scripts/prototypes/fit_inside_iteration/run.py:487-499 also needs to refuse an unsuccessful mandatory known-state measurement rather than exit zero whenever no exception escaped.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:13 blocking: The statement that the scaled control left the 1.5 percent band on all five measured cases is false: evidence/gate-12/solovev-result.json records scaled_control_relative_error=0.013840648014421593 and scaled_control_fired=false, agreeing with this table's 0.0138. Only four of five measured controls exceed 0.015. Since no case converged, this is not independently a violation of the conditional control clause, but the evidence and source manifest must not claim an all-five pass.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:14 blocking: The claimed current sign reversals in TCV and ITER compare fitted signed currents with absolute reference magnitudes introduced at scripts/prototypes/fit_inside_iteration/run.py:137. gate-titan-14-1326273.log CASE_INPUT lines 55 and 90 contain signed reference currents -240259.2274515095 A and -15544546.67645363 A, respectively; fitted -237997.517869401 A and -11795018.833607439 A have those same signs. Preserve the reference sign and correct both this paragraph and the following stored-branch diagnosis before attributing axis loss to a sign reversal.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/fit-inside-the-iteration.html:5 blocking: The published per-case record lacks the required wall beside the nested class's solve count for known states and replaces stored-case terminal misfits with em dashes; it also omits stopped_improving_pass and the ITER different-constraints label from the table. The raw receipts already contain known wall/count pairs (Solov'ev 855.591 s/20; MAST 67.909 s/15) and stored terminal misfits 50.0, 4.83410582 and 44.3902644, with null stopped_improving_pass and axis loss 2/0/2. Publish those quantities with provenance and explain when axis loss occurred before improvement could be determined; one completed sequential six-case job remains absent, with known ITER stalled in a separate job.\nFINDING docs/figures/inverse-equilibrium-baseline/fit-inside-the-iteration/stored-cases/iter.svg:39 blocking: The rendered ITER comparison contains no nova flux contours: all 12 paths in TriContourSet_1 have no d attribute, while the imas-efit control contour set has 12 populated paths. Only the blue seed markers and legend remain, despite the caption claiming an overlaid terminal-map contour panel. Render and inspect a shared-level comparison that shows the terminal map (with any sign/additive alignment stated) or explicitly show and label why its levels are outside the plotted range; the current artifact cannot communicate the failed flux update the section asks the panel to diagnose.\nFINDING nova/equilibrium/flux_iteration.py:434 non-blocking: conductor_current_field accepts both current and prescribed_current and is stored at line 187, but is never read again; fitted currents are always passed through the positional current slot and the callback has no field selector. The existing measurement routes use the default current field, so this does not explain their result; narrow the advertised API or implement and test the prescribed-current route in a follow-on repair.\nFINDING nova/equilibrium/flux_iteration.py:164 non-blocking: The basis validation/name construction and _source conversion duplicate MagneticsFit's owner at nova/equilibrium/magnetics_fit.py:132-202; the addition duplicates rather than wraps or extends that capability. Share that fitted-source/basis mechanism while keeping the two distinct iteration algorithms separate.\nFINDING tests/test_flux_iteration.py:395 non-blocking: The prescribed-field test supplies exactly the stored [0.5] vector and asserts only evaluation count and absence of axis loss, so dropping the explicit vector and silently using the stored field still passes. Supply a different explicit vector and assert the independently expected map or field contribution to guard the override the test claims to exercise.\n",
+  "recommendation": "repair-before-landing",
+  "review_run_id": "r-20261118T165817283570-review-of-fit-inside-the-iteration-98dc1aa8b85f",
+  "review_worktree_sha": "14a2e8b77aca808acdd496c70e872e199db8bbd0",
+  "reviewed_at": "2026-11-18T17:07:10.462557+00:00",
+  "reviewed_base_sha": "b14c343547132859c56dc052f78550611eadac57",
+  "reviewed_head_sha": "98dc1aa8b85f5af1f6c488e083c273a8595a6fee",
+  "reviewed_run_id": "r-20261117T225500180499-fit-inside-the-iteration",
+  "scores": {
+    "durability": 9,
+    "evidence": 7,
+    "fit": 15,
+    "goal_fidelity": 6,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "section": "s9",
+  "status": "parsed",
+  "suite_evidence": {
+    "base_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225500180499-fit-inside-the-iteration/logs/baseline-suite.log",
+    "comparative_suite_measured": false,
+    "head_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225500180499-fit-inside-the-iteration/logs/after-suite-final.log",
+    "note": "The source pointer declares suite_gate=unarmed because its expected paths were artifacts; zero added suite failures is a non-applicable gate value, not an asserted comparable pair. The recorded head has 9 passed in 3.83s; the base log exits 4 with no tests because the file did not yet exist.",
+    "source_suite_gate": "unarmed"
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T17:52:10.140575+00:00",
+  "total": 62
+}

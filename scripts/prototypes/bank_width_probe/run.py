@@ -87,7 +87,7 @@ def main():
     assert digest == "52f8d4fb9e60dbdbe1530e8b64a171d3bb6470fb5cf73a1ddcf760895d09a0e9"
     env = profile.measurement_environment(output)
     env["NOVA_COMPILATION_CACHE_ROOT"] = (
-        "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm"
+        "/work/projects/imas_gpu/nova/jax-cache/nova-prewarm"
     )
     env.pop("TF_GPU_ALLOCATOR", None)
     summary = dict(

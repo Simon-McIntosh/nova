@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-21T00:51:40.249Z",
+  "dispatched_at": "2026-11-21T00:44:14Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/flux_iteration.py",
+      "line": 286,
+      "severity": "non-blocking",
+      "text": "_mixed_step re-implements the safeguarded Anderson mixing that nova/equilibrium/fixed_point.py:3144 anderson already owns: identical Walker-Ni type-II algebra, the same 1e-10 ridge relative to the Gram trace and the same step_cap of 2.0 against the relaxed step, in NumPy rather than by wrapping the owner, and it omits the owner's residual-growth history restart and warmup delay. The Solov'ev receipt records seven of seventy-nine passes where the applied update grows (largest 1.29x at pass 8), which is the non-monotonicity that guard exists to suppress; the owner is jit and fixed-shape, so a direct call is awkward, but the mixing algebra should be shared rather than forked."
+    },
+    {
+      "file": "nova/equilibrium/flux_iteration.py",
+      "line": 400,
+      "severity": "non-blocking",
+      "text": "_coupled_merit recomputes max|operator(flux) - flux| / span by calling active.operator directly (including the prescribed-current branch), duplicating the module's own _cycle at line 252 and _cycle_residual at line 277 rather than calling self._cycle_residual(coefficients, flux, span); the two copies of the prescribed-current branch can diverge silently."
+    },
+    {
+      "file": "nova/equilibrium/flux_iteration.py",
+      "line": 676,
+      "severity": "non-blocking",
+      "text": "the step_rule validation here is unreachable: line 495 already refuses any value outside (contraction, coupled, cycle, picard), and the coupled branch has returned at line 659, so this raise can never fire and reads as a guard that is not one."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html",
+      "line": 5,
+      "severity": "non-blocking",
+      "text": "the record states that at half a cycle 'the same start contracts on every pass', and the node manifest repeats 'contracts on every pass', but evidence-known-states/solovev-result.json carries seven of seventy-nine intervals where pass_flux_update rises (0.0244 to 0.0316 at pass 8, 0.0193 to 0.0233 at pass 10, and five more near pass 31 to 36); the sampled table at line 15 is accurate because it is sampled every fifth pass, so the two sentences should be narrowed to the sampled intervals rather than claiming per-pass monotonicity that the done_when's wording asks for and the receipt does not show."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from 364a99271 to 56d5c3f0c: eleven commits, seven paths, 894 insertions and 80 deletions; the code commits are the coupled step rule, the half-cycle base and the pass budget, the control-scaling repair, and the harness records, with docs and figures after them.",
+    "done_when": "The done_when names one titan allocation for both known states, a per-pass table beside the prior head's stalled table, two inspected panels, and both suite arms; the manifest records all four and jobs 1334215 / 1334124 / 1332272 carry the rows, though the record's claim of contraction 'on every pass' is not what the receipt holds.",
+    "goal": "The node's goal is to make the Solov'ev known state converge inside both bands from the largest perturbation the recovery record uses; nova/equilibrium/flux_iteration.py:596 adds the coupled step rule that does so, and the receipt at evidence-known-states/solovev-result.json records 4.137e-10 of the span and a 1.890e-10 residual.",
+    "manifest": "The manifest at the reviewed run directory reports the Suite arms at 364a99271 (12 passed) and c71a8184f (13 passed), zero failures each, and names the log paths; both logs end in a bare EXIT=0 line and their header lines name the revision, tree and command actually run.",
+    "write_paths": "The declared write paths are nova/equilibrium/flux_iteration.py, nova/equilibrium/magnetics_fit.py, tests/test_flux_iteration.py, scripts/prototypes/fit_inside_iteration and the two evidence/figure directories; every one of the seven paths in the diff lies inside them, and magnetics_fit.py was not needed."
+  },
+  "justifications": {
+    "durability": "tests/test_flux_iteration.py:251 test_a_far_start_recovers_the_state_the_rows_came_from compares the receipt against the fixture's independent TRUTH/flux/cells and asserts the cycle rule stalls, so reverting the coupled rule reddens it; the coupled branch's rejection and backtracking paths carry no assertion.",
+    "evidence": "the gate records both suite arms (baseline_suite-1795221486599756497.log, after_suite-1795221530662430796.log, each EXIT=0) and one titan job for both known states, but docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:5 asserts contraction on every pass where the receipt shows seven increases.",
+    "fit": "nova/equilibrium/flux_iteration.py:335 _fit_rows follows the module's NumPy plus NamedTuple idiom and its docstrings describe the mechanism, though nova/equilibrium/flux_iteration.py:676 keeps an unreachable step_rule validation.",
+    "goal_fidelity": "nova/equilibrium/flux_iteration.py:596 carries the coupled rule that takes the Solov'ev state from 1.76 spans out to 4.137e-10 of the span, which is the goal the node states.",
+    "reuse": "nova/equilibrium/flux_iteration.py:286 _mixed_step re-implements the Walker-Ni type-II mixing that nova/equilibrium/fixed_point.py:3144 anderson already owns, with the same 1e-10 ridge and the same twice-the-relaxed-step cap, and without the last three lines of the owner's guard.",
+    "scope_discipline": "every path in the diff is inside the declared write paths listed in the node manifest, and no file outside them was touched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261121T004320200960-review-of-fit-iteration-converges-known-states-56d5c3f0ca02",
+  "reviewed_base_sha": "364a99271fe3d1a4d18f9fbd093785145504571f",
+  "reviewed_head_sha": "56d5c3f0ca0280c99a4a5642a4c7835b007a2b95",
+  "reviewed_run_id": "r-20261120T080021687060-fit-iteration-converges-known-states",
+  "rubric": "landed_node",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T00:51:57.075488+00:00",
+  "total": 88
+}

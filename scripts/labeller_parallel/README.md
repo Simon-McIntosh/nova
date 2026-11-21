@@ -45,7 +45,7 @@ Submit one resumable production job with:
 
 ```bash
 scripts/labeller_parallel/run.sh --submit \
-  --output-root /work/projects/imas_gpu/sophelio/labeller_sessions/76906a29
+  --output-root /work/projects/imas_gpu/nova/labeller_sessions/76906a29
 ```
 
 The default launcher uses one H200, four host CPUs, 128 GiB and a 24-hour bound.

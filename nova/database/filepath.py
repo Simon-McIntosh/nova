@@ -21,7 +21,7 @@ import nova
 from nova.definitions import root_dir
 
 
-OPERAND_CACHE_ROOT = Path("/work/projects/imas_gpu/sophelio/evidence/operands")
+OPERAND_CACHE_ROOT = Path("/work/projects/imas_gpu/nova/evidence/operands")
 """Default GPFS root for cached Biot-Savart value and jet operands.
 
 The matrices are gigabytes at production resolution and identical across
@@ -79,9 +79,7 @@ DERIVED_CACHE_ROOT = Path.home() / ".cache" / "nova-mast"
 ``NOVA_CACHE_ROOT`` overrides the root.
 """
 
-LABELLER_SESSION_ROOT = Path(
-    "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29"
-)
+LABELLER_SESSION_ROOT = Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29")
 """Default labeller session holding the pulse labels.
 
 ``NOVA_LABELLER_SOURCE`` overrides the session directory.

@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-18T16:58:04.202Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "repair-of-kernel-compile-barrier-s3-one-traced-body-098010058c0e",
+      "recorded_at": "2026-11-18T17:38:23.175464+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-18T16:57:41Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html",
+      "line": 7,
+      "severity": "non-blocking",
+      "text": "The residual is reported as '45,471 instructions after the variadic splitter', but the receipt it cites carries no post-splitter field: residual-h200/attribution.json records instructions_first=3963 and instructions_peak=45471, the peak being the after_priority-fusion/cse dump, while its own after_pipeline-start/variadic-op-splitter row reads 55, and the driver that separates the two measures is scripts/prototypes/point_program_attribution/summarise.py:107 against :111; a reader comparing this figure with node (b)'s 267,438 post-splitter bound is comparing against a metric this run did not record."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html",
+      "line": 57,
+      "severity": "non-blocking",
+      "text": "The done_when's clause (1) and the section's declared control require the base at 681a6ecd2 to be compiled as a base arm that misses the 60 s bound beside a head arm profiled in one job; no such arm exists in the run's receipts (the only profile.json is residual-h200/profile.json and no log records a base cold compile near 405 s), so the brief's control was never exercised, though the record makes no 60 s acceptance claim for a fold it rejected."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html",
+      "line": 3,
+      "severity": "non-blocking",
+      "text": "The fragment says STABLEHLO_CEILING 'remains 10,000,000' but reports no lowered size for the fixture tests/equilibrium/test_bounded_point_program.py measures, which the brief's step 5 requires when the ceiling is not returned to 6,000,000 or below; no receipt under ~/.cache/nova-kernel-compile-barrier/one-traced-body/ carries that fixture's size either, so a reader cannot tell whether the 6,000,000 bound was reachable."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "None: nova/ source is byte-identical to 681a6ecd2, the pin at tests/biot/test_kernel_compile_cost.py:25 is read only by tests, and the added scripts are manual prototypes.",
+    "diff": "Four paths and 182 insertions; the six intermediate nova/biot/polygonanalytic.py edits are reverted by 5c35fb4f6 so head content equals 681a6ecd2.",
+    "done_when": "reference-identity-1325816.log records clause (2) complete at helper commit 3c4e66d7 whose nova/ equals 681a6ecd2; clause (1)'s paired base/head profile and clause (3)'s arms were not run.",
+    "goal": "docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html:3 records no folded form accepted and the kernel restored, so the one-traced-body mechanism and the 60 s compile the goal names do not land.",
+    "manifest": "It states twelve commits, baseline and after arms both 20 passed EXIT=0, the residual receipt at 32.232170674949884 s, and an empty negative_control_log.",
+    "write_paths": "The four delivered paths (the evidence fragment, two scripts under scripts/prototypes/one_traced_body and tests/biot/test_kernel_compile_cost.py) are all inside the declared ten."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html:3 records no folded form accepted and the restored kernel, so the one-traced-body mechanism and the 60 s compile the goal names do not land.\nVERDICT done_when: prompt.txt:251 clause (2) is recorded complete in reference-identity-1325816.log at helper commit 3c4e66d7 whose nova/ equals 681a6ecd2; clause (1)'s paired base/head profile and clause (3)'s arms were not run.\nVERDICT write_paths: the four delivered paths are all inside the declared ten.\nVERDICT manifest: it states twelve commits, baseline and after arms both 20 passed EXIT=0, the residual receipt at 32.232170674949884 s, and an empty negative_control_log.\nVERDICT diff: four paths and 182 insertions, with the intermediate nova/biot/polygonanalytic.py edits reverted by 5c35fb4f6.\nCALL_SITES: none\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: one-traced-body.html:3 delivers a negative result, not the folded program the goal names.\nSCORE evidence: 10\nJUSTIFICATION evidence: the manifest's only gate is a CPU suite that asserts none of the compile measure prompt.txt:251 names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in c9a2cb2d2..098010058c0 is inside the declared ten and no plan file is edited.\nSCORE durability: 12\nJUSTIFICATION durability: the pin at tests/biot/test_kernel_compile_cost.py:25 is guarded by the identity rows imported at tests/biot/test_moment_program_identity.py:176, but no test fails if the negative claim regresses.\nSCORE fit: 16\nJUSTIFICATION fit: lowered_structure.py:23 names its parser inspect, shadowing the stdlib module, and otherwise follows the prototype shape.\nSCORE reuse: 19\nJUSTIFICATION reuse: lowered_structure.py imports the StableHLO body parser from scripts/prototypes/point_program_attribution/bodies.py and no owner of a reduced-point identity runner was found.\nFINDING docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html:7 non-blocking: the residual's 45,471 is the receipt's instructions_peak at after_priority-fusion/cse, not the post-splitter count the paragraph names.\nFINDING docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html:57 non-blocking: the declared base arm that must miss the 60 s bound was never run, so no paired profile or compile-bound control exists.\nFINDING docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html:3 non-blocking: leaving STABLEHLO_CEILING at 10,000,000 carries no measured size for the fixture the ceiling test lowers.",
+  "review_run_id": "r-20261118T164626613153-review-of-kernel-compile-barrier-s3-one-traced-body-098010058c0e",
+  "reviewed_base_sha": "c9a2cb2d270dfb529272bb0a3c4f38fd553d53e1",
+  "reviewed_head_sha": "098010058c0ebc6d3a1c00d144728cea4096a933",
+  "reviewed_run_id": "r-20261118T071941834311-kernel-compile-barrier-s3-one-traced-body",
+  "scores": {
+    "durability": 12,
+    "evidence": 10,
+    "fit": 16,
+    "goal_fidelity": 9,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T17:25:17.006525+00:00",
+  "total": 86
+}

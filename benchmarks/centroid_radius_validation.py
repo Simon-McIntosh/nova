@@ -57,9 +57,7 @@ CARRIER_SHOTS = (21978, 21983, 21985, 21986, 21989, 22086)
 #: The stride applied to the stored efm axis by the labeller's operator build.
 GRID_STRIDE = 2
 #: Persisted solved sessions: one manifest per shot on the reserved-card runs.
-DEFAULT_CORPUS_ROOT = Path(
-    "/work/projects/imas_gpu/sophelio/labeller_sessions/76906a29"
-)
+DEFAULT_CORPUS_ROOT = Path("/work/projects/imas_gpu/nova/labeller_sessions/76906a29")
 DEFAULT_OUTPUT = ROOT / "docs/figures/playable-forward-solve/centroid-radius"
 RECEIPT_NAME = "centroid-radius-validation.json"
 FIGURE_NAME = "centroid-radius-distribution.png"

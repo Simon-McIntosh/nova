@@ -38,7 +38,7 @@ from nova.media.ink import DEFAULT_INK
 NETCDF_SOURCE = Path("/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc")
 COMPETITION_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
 SUBTRACTION_RECEIPT = Path(
-    "/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_plasma_subtraction_gate.json"
+    "/work/projects/imas_gpu/nova/vacuum-gate/diiid_plasma_subtraction_gate.json"
 )
 DEFAULT_OUTPUT = Path("docs/figures/diiid-forward-onboarding/poloidal")
 

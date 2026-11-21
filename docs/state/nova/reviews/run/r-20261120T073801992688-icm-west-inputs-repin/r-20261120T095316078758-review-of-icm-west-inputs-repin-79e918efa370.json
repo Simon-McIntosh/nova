@@ -1,0 +1,120 @@
+{
+  "added_failure_basis": "The reviewed run declares no suite arms: its manifest carries no baseline_suite or after_suite object and its brief states 'No product code changes, so no suite arms are required'. With no pair of gate logs there is nothing to diff, so added_failure_count is 0 and added_failure_ids is empty on the basis that no suite ran, not as a measured zero. The run's only recorded gate is west-inputs-verify.log, which ends EXIT=0.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "2b010f5740ebbcf80a302f6dbd6b9431dc2a12a7",
+    "85f8be7ee701af7b15912c62f3723d5f86ec224e",
+    "8d452b55849a8e45ed130cd9814347278d0c1a81",
+    "95f7b1d0897a8962eaead6a114b269678117261f",
+    "d069cac93f220c3d41b8bc04bd7538fac9c84178",
+    "a64ca00879a4481d3ecf796a596489d0ffea59e1",
+    "431c2e096bd50a320edac702eaf69f4db07a7f23",
+    "79e918efa3701f3a19f94c26572731182eb8f6a7"
+  ],
+  "completed_at": "2026-11-20T10:04:12.104Z",
+  "dispatched_at": "2026-11-20T09:54:19Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "count wording only: the log's twenty COMPARE rows all pass; the fragment's nineteen understates them and changes no verdict",
+      "recorded_at": "2026-11-20T11:07:46.444456+00:00"
+    },
+    "1": {
+      "kind": "exempted",
+      "reason": "by design: the shared-root path node (kernel-compile-barrier s3) owns repointing REFERENCE; the fragment discloses that production west_inputs() waits on it",
+      "recorded_at": "2026-11-20T11:07:59.773173+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "the fallback exists only until the path node repoints REFERENCE; the coordinator removes it when that node lands, so the guard then reads the tracked root alone",
+      "recorded_at": "2026-11-20T11:08:07.069510+00:00"
+    },
+    "3": {
+      "kind": "exempted",
+      "reason": "a redundant assertion in a test whose other checks (record values, digest) carry the guard; noted for removal with the fallback above",
+      "recorded_at": "2026-11-20T11:08:14.700170+00:00"
+    },
+    "4": {
+      "kind": "exempted",
+      "reason": "the missing-pin control is what the brief asked for; the record-misread control is a manifest overstatement, not a missing guard on a delivered claim",
+      "recorded_at": "2026-11-20T11:08:22.847187+00:00"
+    },
+    "5": {
+      "kind": "exempted",
+      "reason": "the verify job's log carries the pass and fail evidence the done-when names; the pytest file runs in the nova suite on its next arm",
+      "recorded_at": "2026-11-20T11:08:31.594265+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-west-inputs-repin.html",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "The fragment states 'Nineteen comparisons pass' while west-inputs-verify.log and the regeneration receipt both carry twenty COMPARE rows, so the delivered evidence contradicts the log it cites."
+    },
+    {
+      "file": "scripts/west_iron_galerkin_pair/measure.py",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "REFERENCE still points at the retired sophelio root and verify.py overrides it in-process, so the pin this node regenerated remains unreachable to production west_inputs() and the three blocked arms are not unblocked by this node alone; the fragment discloses this and the shared-root path node owns the repoint."
+    },
+    {
+      "file": "tests/test_west_solve_inputs_pin.py",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "pin_path() falls back to SHARED_ROOT_PIN when the tracked REFERENCE is not a file, so the guard passes while production west_inputs() is broken and would not catch a shift of the tracked root."
+    },
+    {
+      "file": "tests/test_west_solve_inputs_pin.py",
+      "line": "86",
+      "severity": "non-blocking",
+      "text": "assert pin['source_sha256'] == pin['source_sha256'].lower() compares the pin's field to itself, so it holds whatever the hash is and guards nothing."
+    },
+    {
+      "file": "scripts/west_iron_inputs/verify.py",
+      "line": "197",
+      "severity": "non-blocking",
+      "text": "The negative control deletes the copied pin and asserts FileNotFoundError, which only proves json.load fails on a missing file; the record-misread control claimed in the manifest negative_control_note has no delivered log."
+    },
+    {
+      "file": "manifest.md",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "The tests line names a pytest command but test_logs lists only west-inputs-verify.log, so the pytest result is claimed and not recorded in a cited log."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from 999c9d5fe to 79e918efa; the repair round added committed.py readers, the standing test, the shared code_provenance owner, a label fix and the disclosure fragment; no measurement number changed.",
+    "done_when": "west-inputs-verify.log records all twenty COMPARE rows, WEST_INPUTS_PASS drift 0, NEGATIVE_CONTROL_PASS, PRODUCTION_REFERENCE exists=False and EXIT=0; clauses (2) and (3) met, clause (1) 'original GPFS path' not met.",
+    "goal": "Restore the WEST 62751 solve-inputs pin so west_inputs() passes; the pin is regenerated with correct, independently checked values at the new imas_gpu/nova root, but scripts/west_iron_galerkin_pair/measure.py:43 still names sophelio so production west_inputs() raises.",
+    "manifest": "Read; status complete, eight commits, seven changed_paths, evidence_inputs states the tracked constant still names sophelio.",
+    "write_paths": "Declared path is the fragment; the diff also adds scripts/west_iron_inputs/{pin,verify,committed}.py and tests/test_west_solve_inputs_pin.py and edits two measurement scripts, disclosed in manifest changed_paths."
+  },
+  "justifications": {
+    "durability": "tests/test_west_solve_inputs_pin.py:42 fails if the pin is deleted or a value drifts from its committed record, but tests/test_west_solve_inputs_pin.py:31 falls back to SHARED_ROOT_PIN so the test stays green while production west_inputs() raises.",
+    "evidence": "west-inputs-verify.log records the twenty COMPARE rows, WEST_INPUTS_PASS, NEGATIVE_CONTROL_PASS and EXIT=0, and committed.py reads each expected value from its record, but the fragment states nineteen comparisons where the log and receipt carry twenty.",
+    "fit": "The new modules follow the scripts/ measurement idiom of scripts/west_iron_galerkin_pair/measure.py:1-20 and carry no plan or ticket identifiers.",
+    "goal_fidelity": "scripts/west_iron_galerkin_pair/measure.py:43 still resolves REFERENCE under the retired sophelio root, so the regenerated pin is unreachable in production and the three arms stay blocked.",
+    "reuse": "scripts/west_iron_inputs/pin.py:49 and scripts/iron_graded_refinement/measure.py:97 now call the single code_provenance owner at scripts/west_iron_galerkin_pair/measure.py:277, and committed.py's record readers have no prior owner.",
+    "scope_discipline": "The one declared path is the fragment, while scripts/west_iron_inputs/committed.py:1 and tests/test_west_solve_inputs_pin.py:1 add 226 lines and two measurement scripts are edited."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to restore the deleted WEST 62751 solve-inputs pin so west_inputs() passes and the three blocked arms unblock; the pin is regenerated with correct, independently checked values at /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/west-62751/mesh-pair/inputs/, but scripts/west_iron_galerkin_pair/measure.py:43 still resolves REFERENCE under the retired sophelio root, so production west_inputs() still raises and this node alone does not unblock them.\nVERDICT done_when: west-inputs-verify.log records all twenty COMPARE rows, WEST_INPUTS_PASS with pin_air_drift=0.000 and six segments, NEGATIVE_CONTROL_PASS on FileNotFoundError in a TMPDIR scratch copy, PRODUCTION_REFERENCE exists=False, and EXIT=0; clauses (2) and (3) are met and clause (1)'s 'original GPFS path' is not.\nVERDICT write_paths: the declared fragment docs/evidence/fragments/iron-core-magnetisation/icm-west-inputs-repin.html is delivered; the diff also adds scripts/west_iron_inputs/{pin,verify,committed}.py and tests/test_west_solve_inputs_pin.py and edits two measurement scripts, all outside the one declared path and all disclosed in the manifest changed_paths.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T073801992688-icm-west-inputs-repin/manifest.md; it declares status complete, eight commits, changed_paths naming all seven paths, and evidence_inputs stating the tracked constant still names sophelio.\nVERDICT diff: read commit by commit from 999c9d5fe to 79e918efa; the repair round added committed.py record readers and the standing test (d069cac93), the shared code_provenance owner (95f7b1d08, a64ca0087), a label fix (431c2e096) and the disclosure fragment (79e918efa); no measurement number changed.\nCALL_SITES: scripts/west_iron_galerkin_pair/measure.py:320, scripts/iron_graded_refinement/measure.py:97, scripts/iron_graded_refinement/measure.py:428, scripts/west_iron_linear/check_mesh.py:32, scripts/west_iron_linear/measure.py:234\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: scripts/west_iron_galerkin_pair/measure.py:43 still resolves REFERENCE under the retired sophelio root, so the regenerated pin is unreachable in production and the three arms stay blocked until the shared-root path node lands.\nSCORE evidence: 15\nJUSTIFICATION evidence: west-inputs-verify.log records the twenty COMPARE rows, WEST_INPUTS_PASS, NEGATIVE_CONTROL_PASS and EXIT=0, and committed.py now reads each expected value from its record, but the fragment states nineteen comparisons where the log and receipt carry twenty.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: the one declared path is the fragment, while scripts/west_iron_inputs/committed placeholder\nJUSTIFICATION scope_discipline: the one declared path is the fragment, while scripts/west_iron_inputs/committed.py:1 and tests/test_west_solve_inputs_pin.py:1 add 226 lines and two measurement scripts are edited, all mergeable and disclosed but well beyond the declared scope.\nJUSTIFICATION durability: tests/test_west_solve_inputs_pin.py:42 fails if the pin is deleted or a value drifts from its committed record, but tests/test_west_solve_inputs_pin.py:31 falls back to SHARED_ROOT_PIN so the test stays green while production west_inputs() raises.\nSCORE fit: 16\nJUSTIFICATION fit: the new modules follow the scripts/ measurement idiom of scripts/west_iron_galerkin_pair/measure.py:1-20 with configure_dtypes() before arrays and late # noqa: E402 imports, and carry no plan or ticket identifiers.\nSCORE reuse: 19\nJUSTIFICATION reuse: scripts/west_iron_inputs/pin.py:49 and scripts/iron_graded_refinement/measure.py:97 now call the single code_provenance owner at scripts/west_iron_galerkin_pair/measure.py:277, and committed.py's record readers have no prior owner in scripts/.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-west-inputs-repin.html:3 non-blocking: the fragment states 'Nineteen comparisons pass' while west-inputs-verify.log and the regeneration receipt both carry twenty COMPARE rows, so the delivered evidence contradicts the log it cites.\nFINDING scripts/west_iron_galerkin_pair/measure.py:43 non-blocking: REFERENCE still points at the retired sophelio root and verify.py overrides it in-process, so the pin this node regenerated remains unreachable to production west_inputs() and the three blocked arms are not unblocked by this node alone.\nFINDING tests/test_west_solve_inputs_pin.py:31 non-blocking: pin_path() falls back to SHARED_ROOT_PIN when the tracked REFERENCE is not a file, so the new guard passes while production west_inputs() is broken and would not catch a shift of the tracked root.\nFINDING tests/test_west_solve_inputs_pin.py:86 non-blocking: 'assert pin[\"source_sha256\"] == pin[\"source_sha256\"].lower()' compares the pin's field to itself, so it holds whatever the hash is and guards nothing.\nFINDING scripts/west_iron_inputs/verify.py:197 non-blocking: the negative control deletes the copied pin and asserts FileNotFoundError, which only proves json.load fails on a missing file, and the record-misread control claimed in the manifest negative_control_note has no delivered log to read.\nFINDING manifest.md:1 non-blocking: the tests line names a pytest command but test_logs lists only west-inputs-verify.log (the verify.py run), so the 'five tests in 3.09 s' result is claimed by the manifest and not recorded in any cited log.",
+  "review_run_id": "r-20261120T095316078758-review-of-icm-west-inputs-repin-79e918efa370",
+  "reviewed_base_sha": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+  "reviewed_head_sha": "79e918efa3701f3a19f94c26572731182eb8f6a7",
+  "reviewed_run_id": "r-20261120T073801992688-icm-west-inputs-repin",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 19,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T10:04:37.768283+00:00",
+  "total": 92
+}

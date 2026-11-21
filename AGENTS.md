@@ -87,7 +87,7 @@ add a hundred packages the environment never carried.
   ```bash
   srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=64G \
     bash -lc 'export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=<worktree>:<worktree>/scripts/h200_test_lane; \
-      export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm; \
+      export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/nova/jax-cache/nova-prewarm; \
       /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest \
         -p no:cacheprovider -p cache_guard <targets>' > <log> 2>&1; echo EXIT=$?
   ```
@@ -97,7 +97,7 @@ add a hundred packages the environment never carried.
   is composed from that root alone and the lane and the pre-warm that filled it
   agree on it; with the variable unset the drivers keep the per-user location
   under `$HOME/.cache`. The location is
-  `/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm`, shared storage
+  `/work/projects/imas_gpu/nova/jax-cache/nova-prewarm`, shared storage
   outside every pruner root, distinct from `~/.cache/nova/jax-compilation`. The
   `cache_guard` plugin prints the directory served, the revision the pin was
   compiled for, one row per program with its compile seconds and hit or miss
@@ -120,6 +120,60 @@ add a hundred packages the environment never carried.
   seconds with an empty log, because `/run/user` is node-local tmpfs that does
   not exist on a compute node. Export it before `sbatch`/`srun` and again inside
   the payload; one of the two is not enough.
+
+### Nothing is removed or moved under /work (binding, lead 2026-11-19)
+
+**No worker, job script or brief runs `rm`, `mv`, `find -delete`,
+`rsync --delete`, `shutil.rmtree` or any other removal or move on a path under
+`/work`.** That holds for a directory the worker created itself and for
+"cleanup at the end". A removal on shared project storage has no undo and no
+snapshot.
+
+- A private cache, a scratch tree or any directory that must be removed lives
+  on the compute node's local disk, inside the job:
+  `D=$(mktemp -d /tmp/$USER-${SLURM_JOB_ID:-$$}-XXXX); trap 'rm -rf "$D"' EXIT`.
+  That trap, on the path `mktemp` just returned, is the only removal a job
+  writes. Steps that must share the directory run in one job.
+- Logs and receipts a later reader needs go under `~/.cache/<repo>-<topic>/`
+  and are left in place.
+- A worker does not write the pinned pre-warm cache and does not publish a
+  pin. It measures from a job-local cache; the coordinator pre-warms from main
+  after the landing.
+- A coordinator who needs something removed under `/work` lists the one
+  absolute path, shows the listing, and asks the lead first.
+
+Measured 2026-11-19: a worker removing its own private cache directory ran
+`rm -rf <private dir> /work/projects/imas_gpu`, with the second argument a typo
+and the output discarded. It deleted the project's whole shared data directory
+(pinned pre-warm cache, operand cache, labeller sessions, evidence receipts)
+and about 24 other top-level entries before it was stopped. The brief had asked
+it to create a directory on shared storage and remove it at the end.
+
+### A worker never drops its fence to start a job (binding, lead 2026-11-21)
+
+**A job payload written by a worker must not unset or change any environment
+variable whose name begins `RECKON_`, and must not start a nested shell that
+clears the environment.** Those variables carry the worker's write fence into
+the job. A job that only starts with them removed is a job the worker may not
+run.
+
+The GPU nodes `98dci4-gpu-0003` (H200) and `98dci4-gpu-0002` (titan) have no
+`bwrap` binary, so a fenced worker's job is refused there in zero seconds with
+exit 127 and `fence program bwrap cannot run on <node>`. Until reckon carries a
+fence program to those nodes:
+
+- A worker whose job is refused this way stops with `status: blocked`, names
+  the job id and the refusal, and commits the driver it wanted to run.
+- The coordinator submits the job itself, outside any fence, from the worker's
+  committed head, with logs under `~/.cache/<repo>-<topic>/`.
+- The worker is then resumed to write its record from those logs. Its
+  manifest's `artifacts` names the submitting session, each job id and each log
+  path, and cites no figure from a job that ran with the fence removed.
+
+Measured 2026-11-21: a worker measuring against the pinned cache unset the fence
+environment in its own payloads after three refusals and ran its H200 jobs
+unfenced. The jobs only read, but the bypass was the worker's own choice, and
+the lead ruled the evidence out; the coordinator reran the three steps.
 
 ### One measurement, one SLURM job (binding, lead 2026-09-09)
 
@@ -457,7 +511,7 @@ The launcher submits to `betelgeuse` under `gpu_0003_grpA`, runs pytest from
 the repository's shared environment without invoking uv on the compute node,
 and appends both the pytest wall time and exit status to the named log. It serves
 the pinned pre-warm cache published by `scripts/h200_test_lane/prewarm.sh` under
-`/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm`, prints the cache
+`/work/projects/imas_gpu/nova/jax-cache/nova-prewarm`, prints the cache
 contract and one row per program with its compile seconds and hit or miss
 outcome, and samples GPU utilisation at 10, 30 and 60 seconds from allocation.
 The samples are taken while pytest runs, so a reading above zero is the test

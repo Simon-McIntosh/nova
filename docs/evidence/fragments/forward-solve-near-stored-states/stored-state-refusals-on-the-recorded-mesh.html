@@ -86,7 +86,10 @@ coefficient 14731.018 where the earlier run read 13465.688.</p>
 the record's own revision, 9047a3fe50708d6dd20ebe672d0dc22f40b0ae50, gives TCV a
 default-arm residual of 0.0005241157425587287 against 0.0005241157519662908 on
 this revision — the same terminal state to seven significant figures. The
-difference from the recorded 0.0303 therefore belongs to the input data.</p>
+difference from the recorded 0.0303 therefore belongs to the input data and not
+to the solver. That control was stopped once the TCV default arm had landed, so
+ITER was not re-run at the record revision; its receipt is published at
+<code>~/.cache/nova-stored-state-refusals/record-revision/</code>.</p>
 </section>
 
 <section id="stored-state-refusals-on-the-recorded-mesh-mastu">
@@ -121,7 +124,7 @@ ink in both series, so a panel cannot carry the stored contours alone.</p>
 <code>docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html</code>
 at revision 9047a3fe50708d6dd20ebe672d0dc22f40b0ae50. The arms ran as one titan
 job, 1334842 on 98dci4-gpu-0002, and the record-revision control as job 1335055
-on the same node. Per-arm receipts, their terminal flux arrays and the run's
+on the same node, stopped after its first arm. Per-arm receipts, their terminal flux arrays and the run's
 measurement summary are published at
 <code>~/.cache/nova-stored-state-refusals/recorded-cases/</code>; the test that
 holds them to the recorded values is <code>tests/test_stored_state_refusals.py</code>

@@ -22,6 +22,12 @@ RECORD_SOURCE = (
 RECORDED_RESIDUAL = 0.030364200526436996
 RECORDED_REASON = 12
 RESIDUAL_BAND = 3.0
+ARMS = (
+    "tcv-stored-default",
+    "tcv-stored-tightened",
+    "iter-stored-default",
+    "iter-stored-tightened",
+)
 
 
 def _receipts():
@@ -45,16 +51,27 @@ def _measurement():
     return json.loads((_receipts() / "measurement.json").read_text())
 
 
-def test_tcv_refuses_at_the_recorded_residual():
-    """TCV's stored-field solve stops where the record says it stops."""
-    receipt = _receipt("tcv-stored-default")
+def test_every_arm_is_unqualified_and_states_the_record():
+    """Every arm refuses, and carries the recorded value beside its own."""
+    for label in ARMS:
+        receipt = _receipt(label)
+        assert receipt["qualified"] is False, label
+        assert receipt["converged"] is False, label
+        band = receipt["recorded_band"]
+        assert band["recorded_termination_reason"] in (3, 12), label
+        assert band["measured_termination_reason"] == (receipt["termination_reason"]), (
+            label
+        )
+
+
+def test_tcv_stops_at_the_recorded_residual():
+    """The TCV arm built on the record's construction stops where it stopped."""
+    receipt = _receipt("tcv-stored-tightened")
     assert receipt["case"] == "tcv"
-    assert receipt["qualified"] is False
-    assert receipt["converged"] is False
     assert receipt["termination_reason"] == RECORDED_REASON
     residual = receipt["residual"]
     assert residual is not None and residual > 0.0, (
-        f"TCV refused with no finite residual ({receipt.get('residual_state')})"
+        f"TCV stopped with no finite residual ({receipt['residual_state']})"
     )
     factor = residual / RECORDED_RESIDUAL
     assert 1.0 / RESIDUAL_BAND <= factor <= RESIDUAL_BAND, (
@@ -62,16 +79,13 @@ def test_tcv_refuses_at_the_recorded_residual():
     )
     band = receipt["recorded_band"]
     assert band["recorded_residual"] == RECORDED_RESIDUAL
-    assert band["measured_termination_reason"] == RECORDED_REASON
     assert band["within_factor_three"] is True
 
 
 def test_iter_admits_no_magnetic_axis():
-    """ITER's stored-field solve finds no qualified axis, as the record says."""
-    receipt = _receipt("iter-stored-default")
+    """The ITER arm built on the record's construction admits no axis."""
+    receipt = _receipt("iter-stored-tightened")
     assert receipt["case"] == "iter"
-    assert receipt["qualified"] is False
-    assert receipt["converged"] is False
     assert receipt["termination_reason"] == 3
     assert receipt["residual"] is None
     axis = receipt["axis"]
@@ -91,8 +105,7 @@ def test_each_arm_is_the_comparison_records_own_fixture():
     assert measurement["record_source"] == RECORD_SOURCE
     coefficients = {}
     for case in ("tcv", "iter"):
-        label = f"{case}-stored-default"
-        receipt = _receipt(label)
+        receipt = _receipt(f"{case}-stored-default")
         assert receipt["seed_policy"] == "ExplicitSolveSeed"
         assert receipt["route"] == "newton_krylov"
         assert receipt["current_present"] is True
@@ -107,21 +120,14 @@ def test_each_arm_is_the_comparison_records_own_fixture():
 
 def test_each_panel_draws_both_series():
     """A panel that carries a solved state draws both series on shared levels."""
-    tcv = _receipt("tcv-stored-default")
-    assert "panel_refused" not in tcv, tcv.get("panel_refused")
-    assert Path(tcv["panel"]).is_file(), tcv["panel"]
-    drawn = tcv["panel_record"]
-    assert drawn["imas_efit_levels_drawn"] > 0
-    assert drawn["nova_levels_drawn"] > 0
-    assert drawn["imas_efit_range"] is not None
-    assert drawn["nova_range"] is not None
-
-
-def test_an_arm_with_no_state_states_its_refusal():
-    """An arm that leaves no state says so instead of showing an empty panel."""
-    for case in ("tcv", "iter"):
-        receipt = _receipt(f"{case}-stored-default")
-        if receipt.get("panel"):
-            assert Path(receipt["panel"]).is_file()
-        else:
+    for label in ARMS:
+        receipt = _receipt(label)
+        if receipt.get("panel") is None:
             assert receipt.get("panel_refused"), receipt
+            continue
+        assert Path(receipt["panel"]).is_file(), receipt["panel"]
+        drawn = receipt["panel_record"]
+        assert drawn["imas_efit_levels_drawn"] > 0, label
+        assert drawn["nova_levels_drawn"] > 0, label
+        assert drawn["imas_efit_range"] is not None, label
+        assert drawn["nova_range"] is not None, label

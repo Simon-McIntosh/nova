@@ -24,9 +24,13 @@ rung='titan'
 wall='05:00:00'
 output_name='measurement'
 job_name=''
+tree=''
+revision=''
 while (($#)); do
   case "$1" in
     --log) log=$2; shift 2 ;;
+    --tree) tree=$2; shift 2 ;;
+    --revision) revision=$2; shift 2 ;;
     --rung) rung=$2; shift 2 ;;
     --time) wall=$2; shift 2 ;;
     --output-name) output_name=$2; shift 2 ;;
@@ -42,7 +46,11 @@ done
 readonly run_dir=$(dirname "${log}")
 readonly output_dir="${run_dir}/${output_name}"
 readonly figure_dir="${run_dir}/${output_name}-figures"
-readonly revision=$(git -C "${WORKTREE}" rev-parse HEAD)
+[[ -n ${tree} ]] || tree=${WORKTREE}
+readonly tree
+[[ ${tree} = /* ]] || { printf 'error: --tree must be absolute\n' >&2; exit 2; }
+[[ -n ${revision} ]] || revision=$(git -C "${WORKTREE}" rev-parse HEAD)
+readonly revision
 mkdir -p "${output_dir}" "${figure_dir}"
 
 if [[ ${rung} == h200 ]]; then
@@ -61,14 +69,14 @@ cat > "${payload_file}" <<PAYLOAD
 set -uo pipefail
 export TMPDIR=/tmp
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
-export PYTHONPATH="${WORKTREE}"
+export PYTHONPATH="${tree}"
 export JAX_PLATFORMS=cuda,cpu
 export SOURCE_REVISION="${revision}"
 export STORED_STATE_REFUSALS_OUTPUT="${output_dir}"
 export STORED_STATE_REFUSALS_FIGURES="${figure_dir}"
-cd "${WORKTREE}"
+cd "${tree}"
 {
-  printf '# revision=%s tree=%s\n' "${revision}" "${WORKTREE}"
+  printf '# revision=%s tree=%s\n' "${revision}" "${tree}"
   printf '# command: %s -u scripts/prototypes/stored_state_refusals/run_recorded_cases.py\n' "${SHARED_PYTHON}"
 } > "${log}"
 "${SHARED_PYTHON}" -u scripts/prototypes/stored_state_refusals/run_recorded_cases.py >> "${log}" 2>&1

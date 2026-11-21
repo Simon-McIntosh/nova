@@ -1,0 +1,110 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "answered": {
+    "durability": "answered",
+    "evidence": "answered",
+    "fit": "answered",
+    "goal_fidelity": "answered",
+    "reuse": "answered",
+    "scope_discipline": "answered"
+  },
+  "call_sites": [],
+  "completed_at": "2026-11-21T11:30:25.874Z",
+  "dispatched_at": "2026-11-21T11:16:48Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/stored_state_refusals/run_recorded_cases.py",
+      "line": 102,
+      "severity": "non-blocking",
+      "text": "run_recorded_cases.py:102 re-implements _profile_coefficients, which scripts/prototypes/stored_state_refusals/run_cases.py:68 already owns in the same directory, byte for byte; the addition duplicates rather than extends the owner, so a fixture change must be made in two places."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/run_recorded_cases.py",
+      "line": 109,
+      "severity": "non-blocking",
+      "text": "run_recorded_cases.py:109 re-implements _mesh_record, which scripts/prototypes/stored_state_refusals/run_cases.py:91 already owns and whose fields are identical, so the two prototypes can drift apart on what a receipt records about the mesh."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/submit_recorded.sh",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "submit_recorded.sh:1 duplicates the job-submission capability of scripts/prototypes/stored_state_refusals/submit.sh:1 \u2014 the same argument parsing, the same two partition rungs and the same payload construction, differing mainly in the runner it names \u2014 instead of parameterising the existing script, so both must be maintained for one behaviour."
+    },
+    {
+      "file": "tests/test_stored_state_refusals.py",
+      "line": 102,
+      "severity": "non-blocking",
+      "text": "tests/test_stored_state_refusals.py:102 asserts measurement['measurement_module'].endswith('tests/test_magnetics_fit_efit_comparison.py') and :105 asserts measurement['record_source'] == RECORD_SOURCE, but both values are constants written by the runner itself at run_recorded_cases.py:253 and :251, so the assertion stays true even if the runner stops importing the comparison's fixtures and restates them; it is not independent of the value under test."
+    },
+    {
+      "file": "tests/test_stored_state_refusals.py",
+      "line": 62,
+      "severity": "non-blocking",
+      "text": "tests/test_stored_state_refusals.py:62 asserts band['measured_termination_reason'] compares against receipt['termination_reason'], and :81/:95 compare band['recorded_residual'] and band['recorded_axis_admitted'] against constants the runner writes from its own RECORDED literal at run_recorded_cases.py:67, so these three assertions move with the code they claim to check and would not redden on a wrong recorded value."
+    },
+    {
+      "file": "tests/test_stored_state_refusals.py",
+      "line": 129,
+      "severity": "non-blocking",
+      "text": "tests/test_stored_state_refusals.py:129 asserts Path(receipt['panel']).is_file() while each receipt's panel path names the reviewed run's directory (.../crew/runs/r-20261121T073723231702-.../recorded-cases/measurement-figures/recorded-name.svg), which crew archives on release; the negative-control log shows that exact assertion failing on an already-archived run, so the gate will redden with no code change once this run is released."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh.html",
+      "line": 16,
+      "severity": "non-blocking",
+      "text": "docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh.html:16 records that the default arms do not reach the recorded refusals, so the section's clause that each refusal reproduces under the solver's default policy is unmet; the reproduction rests on an arm seeded from another solve's terminal state (run_recorded_cases.py:292), not on the stored flux map."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/submit_recorded.sh",
+      "line": 23,
+      "severity": "non-blocking",
+      "text": "submit_recorded.sh:23 defaults the rung to titan with the H200 offered only on request, against the plan's H200-first-then-titan clause and the repository's compute hierarchy in AGENTS.md; the arms therefore ran on a P100; the fragment's per-arm figures are honest about the card."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/submit_recorded.sh",
+      "line": 59,
+      "severity": "non-blocking",
+      "text": "submit_recorded.sh:59 defaults --revision to git rev-parse HEAD without checking the tree is clean, so the receipts record source_revision 6816484212613ba4657e3083620bb32b0bd75277, a revision that contains no run_recorded_cases.py, and the measured arms cannot be tied to the code that produced them."
+    },
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/tcv-stored-tightened.svg",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The four published panels (e.g. docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/tcv-stored-tightened.svg:1) draw a narrow plasma column inside a fixed 14x7.2 in canvas, leaving roughly four fifths of the figure blank; the data are legible and both series are present, but the canvas is not sized to the subject."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_stored_state_refusals.py:129 asserts a panel path inside the reviewed run's own directory, which crew archives at release (measured by the negative-control log against an archived run, 5 failed), and :62 compares two fields of the same receipt, so the guards do not survive a runner regression.",
+    "evidence": "tests/test_stored_state_refusals.py:64 and :86 assert the tightened arm's TCV band and ITER no-axis refusal, and the results are recorded in the receipts at ~/.cache/nova-stored-state-refusals/recorded-cases and in the gate log, but the default-policy arm that done_when (1) names as the stored-state solve is asserted only to be unqualified, never the recorded refusal.",
+    "fit": "The naming is clean across the added modules and the runner follows the sibling prototype's own conventions, including the sys.path bootstrap and the panels import at scripts/prototypes/stored_state_refusals/run_recorded_cases.py:46.",
+    "goal_fidelity": "scripts/prototypes/stored_state_refusals/run_recorded_cases.py:292 seeds the arm that reproduces the recorded refusal from the default arm's terminal state, so the standing case does not reproduce the refusal from the stored flux map under the default policy that docs/evidence/fragments/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh.html:16 states it does not reach.",
+    "reuse": "scripts/prototypes/stored_state_refusals/run_recorded_cases.py:102 and :109 duplicate _profile_coefficients and _mesh_record that the sibling scripts/prototypes/stored_state_refusals/run_cases.py:68 and :91 already own, and submit_recorded.sh:1 duplicates the submission capability of submit.sh:1 rather than extending it.",
+    "scope_discipline": "Every path in the diff is inside the four declared write paths, and nothing outside them is touched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261121T111618152173-review-of-stored-state-refusals-on-the-recorded-mesh-88647ab5294d",
+  "reviewed_base_sha": "6816484212613ba4657e3083620bb32b0bd75277",
+  "reviewed_head_sha": "88647ab5294d455f2b31cedcc143b32f48391572",
+  "reviewed_run_id": "r-20261121T073723231702-stored-state-refusals-on-the-recorded-mesh",
+  "scores": {
+    "durability": 11,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 11,
+    "reuse": 3,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T11:30:36.603413+00:00",
+  "total": 73,
+  "verdicts": {
+    "call_sites": "none \u2014 the landed change is a prototype runner plus a receipt-reading test; the only runtime functions it reaches are the six helpers imported from tests/test_magnetics_fit_efit_comparison.py, which is a test module and not production code.",
+    "diff": "Read the five commits against base 6816484212613ba4657e3083620bb32f48391572: two prototype scripts, one test module, one evidence fragment and four figure pairs (twelve paths, 1478 insertions, no deletions), each inside the declared write paths.",
+    "done_when": "The dispatched done_when asks for a TCV residual within 3x of 0.030 with reason 12 and an ITER refusal with no axis, a tightened-policy positive control reported against the record, and MAST-U left unmeasured with its wall and device memory; tests/test_stored_state_refusals.py:64 asserts the tightened-arm TCV residual band and reason, :86 asserts the ITER no-axis refusal, the fragment states MAST-U's 3508.56 s wall and 12801015808-byte card limit, and the gate ran green on the receipts.",
+    "goal": "The node goal is to reproduce the recorded TCV and ITER forward-solve refusals as standing cases built from the comparison's own fixtures; scripts/prototypes/stored_state_refusals/run_recorded_cases.py:20 imports the comparison's own reader, machine, mesh, seed and current binding, but the recorded refusal is reached only by the tightened continuation arm (seeded from the default arm's terminal state) while the default-policy arm the record refused under does not reach it.",
+    "manifest": "Read the reviewed manifest: it records five commits, the literal gate command, the five-pass gate log at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T073723231702-stored-state-refusals-on-the-recorded-mesh/scoped-gate-1795259216335062968.log, the EXIT=1 negative control, and an outside_scope note on the rewritten imas-efit test data.",
+    "write_paths": "The declared paths are scripts/prototypes/stored_state_refusals, the forward-solve-near-stored-states evidence fragment, its figures directory and tests/test_stored_state_refusals.py; every one of the twelve paths in 6816484212613ba4657e3083620bb32b0bd75277..88647ab5294d455f2b31cedcc143b32f48391572 lies inside them."
+  }
+}

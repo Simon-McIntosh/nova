@@ -4,6 +4,13 @@
   "added_failure_ids": [],
   "call_sites": [],
   "completed_at": "2026-11-21T04:03:59.989Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-pinned-point-program-fe5f2294c543",
+      "recorded_at": "2026-11-21T05:10:49.889447+00:00"
+    }
+  },
   "dispatched_at": "2026-11-21T03:56:40Z",
   "findings": [
     {

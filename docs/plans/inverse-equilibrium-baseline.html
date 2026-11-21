@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="87">
+<meta name="plan-version" content="88">
 <meta name="plan-modified" content="2026-11-21">
 </head>
 <body>
@@ -404,7 +404,10 @@
     <div class="r-comment-body"><p>Review of r-20261120T080021687060-fit-iteration-converges-known-states at ee49fb5ff46fbc17fc60bb128d7cecd66860be66 against base 56d5c3f0ca0280c99a4a5642a4c7835b007a2b95, covering only the two documentation commits the run gained since it was reviewed: the record now reports the seven rising passes its own receipt carries instead of claiming per-pass contraction, and cites the mutation receipt that shows the far-start test fails under the cycle rule; goal_fidelity 18, evidence 16, scope_discipline 20, durability 11, fit 18, reuse 20; one non-blocking finding, that the fall count reads 72 of 79 passes where the receipt holds 71 decreases among 78 comparisons.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261121T082432411504-review-of-fit-iteration-converges-known-states-ee49fb5ff46f-figure" data-who="reckon-build" data-when="2026-11-21T08:56:06.429Z">
-    <div class="r-comment-body"><p>figure review of ee49fb5 recorded as parsed at both declared paths: all six rubric items pass on both rendered panels, 6 non-blocking findings and 0 blocking, so the node&#x27;s measure is met and the sibling non-blocking items are for the coordinator to fold or exempt.</p></div>
+    <div class="r-comment-body"><p>figure review of ee49fb5 recorded as parsed at both declared paths: all six rubric items pass on both rendered panels, 6 non-blocking findings and 0 blocking, so the node's measure is met and the sibling non-blocking items are for the coordinator to fold or exempt.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261120T080021687060-fit-iteration-converges-known-states" data-who="reckon-build" data-when="2026-11-21T08:21:44Z">
+    <div class="r-comment-body"><p>The held-map pass now fits the coefficients the held map&#x27;s rows name and lays one whole cycle of them down, Anderson-mixing that map walk over the steps already taken, with the base step at half a cycle because the mixture extrapolates to at least twice the step and the rejection fence is one span. On the Solov&#x27;ev known state, which enters 1.76 spans from its answer, the walk contracts by about three quarters a pass on average — the applied update falls on 72 of the walk&#x27;s 79 passes and rises locally on seven (passes 8, 10, 12, 31, 33, 34 and 36), each rise at most a factor of 1.29 and never carrying the update back above 0.032 of the span — reaching a flux error of 4.137e-10 of the span (band 1e-6) and a whitened residual of 1.890e-10 (band 1e-8) in 79 passes, recovering the generating amplitudes to ten significant figures; the ITER 135013 known state converges in one pass to a flux error of 6.948e-16 and a residual of 2.833e-16 in the same allocation. The predecessor&#x27;s ladder on the same start stopped at pass 3 with 0.9164 of the span and a residual of 0.3266. The default pass budget rose from 64 to 96 because the mixed walk contracts by about three quarters a pass. Contract: `test_a_far_start_recovers_the_state_the_rows_came_from` in `tests/test_flux_iteration.py` asserts the default rule reaches the generating amplitudes and flux, and asserts the `cycle` ladder on the same start does not converge and stays above 1e-6.</p></div>
 </div>
 </section>
 </main>

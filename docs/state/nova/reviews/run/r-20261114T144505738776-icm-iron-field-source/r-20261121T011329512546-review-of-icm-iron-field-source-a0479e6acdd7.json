@@ -56,6 +56,13 @@
   "completed_at": "2026-11-21T02:35:26.116Z",
   "dispatched_at": "2026-11-21T02:34:55Z",
   "failure_derivation": "baseline arm /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/baseline_arm.log (job 1334053, checkout at 9b016126111a5acaebca064c07432042b5a2628c) ends '7 failed, 104 passed in 8150.07s (2:15:50)'; after arm /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/after_arm.log (job 1334054 at a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2) ends '7 failed, 112 passed in 8613.34s (2:23:33)'; the seven FAILED ids are identical in both logs, each a FileNotFoundError on /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/case.json or .../production/material-refinement-20261114/summary.json, so the added failure count is 0 and the added id list is empty.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-icm-iron-field-source-a0479e6acdd7",
+      "recorded_at": "2026-11-21T07:51:47.112079+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/iron_field_source/run_arms.sh",

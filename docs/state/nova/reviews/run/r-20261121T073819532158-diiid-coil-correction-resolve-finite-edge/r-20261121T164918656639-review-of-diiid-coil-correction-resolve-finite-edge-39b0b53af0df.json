@@ -14,6 +14,13 @@
   ],
   "completed_at": "2026-11-21T16:57:55.528Z",
   "dispatched_at": "2026-11-21T16:50:04Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "The build-seam control that counts ran as its own allocation (job 1335481) and the record quotes the adapter's own refusal naming F1A; only the in-cohort repeat of that control was satisfied by an unrelated missing receipt",
+      "recorded_at": "2026-11-21T20:19:44.249522+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh",

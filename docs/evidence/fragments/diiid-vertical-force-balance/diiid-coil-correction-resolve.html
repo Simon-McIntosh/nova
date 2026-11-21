@@ -1,0 +1,87 @@
+<section id="diiid-coil-correction-resolve">
+<h2>The fitted conductor correction reaches the DIII-D solve, and everywhere it lands it makes the agreement with EFIT worse</h2>
+<p id="diiid-coil-correction-resolve-landing-outcome"><strong>landing:</strong> the fitted vector is written into the corpus current columns and reaches the solve on all four X-point rows, entry by entry over the nineteen shipped conductors; applied there it closes no part of the lower-X offset.</p>
+<p><strong>Writing the fitted equivalent forward-field error into the corpus current columns, rather than into the build seam, carries the correction into the solve on all four rows: every fitted arm's installed current vector equals the measured vector less that frame's fitted correction over the nineteen shipped conductors, entry by entry, with no conductor left unchanged.</strong> On 137D the installed F1A current is &minus;231.293 kA&middot;turn, which is the measured &minus;177.235 less the fitted +54.058. The earlier record's "no movement" was an instrument artefact: at the build seam the current adapter replaces the operator's current with its own resolution, so the correction never reached the field. Applied at the seam, the adapter now refuses the vector outright and names the reason; applied to the corpus columns it accepts it, and the solved state changes.</p>
+<p><strong>Where the fitted arm converges it moves the lower X-point further from EFIT's null, and where it does not converge it loses the plasma.</strong> 146D and 146L both converge and both move their lower X-point from within 1.8 and 4.9 cm of EFIT's null to 8.97 cm, and both land on the same terminal state. 137D and 179L both refuse a step with their support collapsed, from 339 cells to 10 and from 294 cells to 6, which is a different equilibrium rather than a smaller offset. No row closes any part of the offset, so the fitted vector is not the missing physics that the offset was attributed to: applied where the solve reads it, it is a correction that makes the agreement with EFIT worse.</p>
+
+<h3>What the correction is and where it is applied</h3>
+<p>The fit is the gauge-free external-field difference over the governed vessel, projected onto the nineteen conductor response columns by a column-scaled SVD with relative cutoff 10<sup>-8</sup>. Every frame has rank 19 at scaled condition number 2984.57, the known injected 1 kA&middot;turn positive control is recovered at 3.5&middot;10<sup>-16</sup>, and the columns represent between 90.05 and 93.11 percent of the difference over the fitted region. The coefficients are the equivalent error of the forward field, so the corrected current is the measured current minus that error.</p>
+<table>
+<caption>Conductor fit per frame. The mismatch column is the share of the external-field difference the nineteen columns represent over the fitted region. The two 146 rows share one fit because the difference is built from the frame's measured currents and EFIT map, neither of which differs between the diverted and limited branches.</caption>
+<thead><tr><th>case</th><th>rank</th><th>scaled condition</th><th>mismatch represented [%]</th><th>F1A equivalent error [kA&middot;turn]</th><th>conductors with a correction above 5 % of their own current</th><th>largest relative correction [%]</th></tr></thead>
+<tbody>
+<tr><td>137D</td><td>19</td><td>2984.57</td><td>93.11</td><td>+54.06</td><td>13 of 19</td><td>2473.1 (ECOILA)</td></tr>
+<tr><td>146D</td><td>19</td><td>2984.57</td><td>90.05</td><td>+52.14</td><td>14 of 19</td><td>547.6 (F9B)</td></tr>
+<tr><td>146L</td><td>19</td><td>2984.57</td><td>90.05</td><td>+52.14</td><td>14 of 19</td><td>547.6 (F9B)</td></tr>
+<tr><td>179L</td><td>19</td><td>2984.57</td><td>90.79</td><td>&minus;4.54</td><td>11 of 19</td><td>4278.1 (F9A)</td></tr>
+</tbody></table>
+<p><strong>The correction is implausible as a current-measurement error on its own terms, and the frames that carry it most strongly are the ones that break.</strong> A magnet calibration error is a gain, so it would be one fraction of each coil's current; these fractions range from 0.1 to 2473 percent within a single frame, and on 137D ECOILA's measured &minus;12.993 kA&middot;turn becomes +308.3, a sign flip. That vector is what drives 179L's support to six cells, so the implausibility verdict and the non-convergence are the same observation seen from two sides.</p>
+
+<h3>The two arms</h3>
+<table>
+<caption>Each row solved twice in one allocation: measured currents, and the same corpus columns less the fitted equivalent error. Residual, convergence flag, termination, support and in-plasma extrema come from the solve and the retained census; the distance is measured to the same EFIT null the banked cohort was measured against. "Share closed" is read only on a row whose fitted arm converged with its support retained, because a terminal state that has moved to another plasma has a different distance rather than a smaller error.</caption>
+<thead><tr><th>case</th><th>arm</th><th>residual</th><th>converged</th><th>termination</th><th>in-plasma maxima / minima</th><th>support cells</th><th>lower-X offset (R,Z) [cm]</th><th>distance from EFIT [cm]</th><th>share closed</th></tr></thead>
+<tbody>
+<tr><td>137D</td><td>measured</td><td>9.06&middot;10<sup>-9</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>339</td><td>(+0.182, +1.236)</td><td>1.250</td><td>&mdash;</td></tr>
+<tr><td>137D</td><td>fitted</td><td>9.13&middot;10<sup>-3</sup></td><td>no</td><td>ACTIVE_SET_STEP_REFUSED</td><td>1 / 0</td><td>10</td><td>(+18.857, &minus;21.563)</td><td>28.645</td><td>not read</td></tr>
+<tr><td>146D</td><td>measured</td><td>2.28&middot;10<sup>-14</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>338</td><td>(+0.185, +1.782)</td><td>1.791</td><td>&mdash;</td></tr>
+<tr><td>146D</td><td>fitted</td><td>2.54&middot;10<sup>-10</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>289</td><td>(&minus;4.221, +7.910)</td><td>8.966</td><td>not read: support moved 338&rarr;289 cells</td></tr>
+<tr><td>146L</td><td>measured</td><td>2.76&middot;10<sup>-9</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>275</td><td>(+4.240, +2.353)</td><td>4.850</td><td>&mdash;</td></tr>
+<tr><td>146L</td><td>fitted</td><td>6.60&middot;10<sup>-10</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>289</td><td>(&minus;4.221, +7.910)</td><td>8.966</td><td>not read: support moved 275&rarr;289 cells</td></tr>
+<tr><td>179L</td><td>measured</td><td>4.21&middot;10<sup>-11</sup></td><td>yes</td><td>CONVERGED</td><td>1 / 0</td><td>294</td><td>(+1.315, +0.720)</td><td>1.499</td><td>&mdash;</td></tr>
+<tr><td>179L</td><td>fitted</td><td>4.01&middot;10<sup>-3</sup></td><td>no</td><td>ACTIVE_SET_STEP_REFUSED</td><td>1 / 0</td><td>6</td><td>(+54.880, &minus;34.657)</td><td>64.907</td><td>not read</td></tr>
+</tbody></table>
+<p>The measured arms reproduce the banked cohort on every row, which is the control: the fitted arms are compared against a working reference and not against a broken run. The two 146 rows converge onto the same terminal state because they share one fit and one frame; their measured arms differ only by the branch's own starting profile.</p>
+
+<figure>
+<img src="/nova/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-137-diverted-lower-xpoint.svg" alt="137D lower X-point zoom for the measured and fitted current arms, with the wall, both null sets and the EFIT reference">
+<figcaption>137D: measured currents (left pair) and fitted currents (right pair), same vocabulary. The measured arm's null sits just above and right of EFIT's; the fitted arm terminated <code>ACTIVE_SET_STEP_REFUSED</code> with ten support cells, and the drawn field is an open, collapsed structure rather than a displaced X-point.</figcaption>
+</figure>
+
+<figure>
+<img src="/nova/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-146-diverted-lower-xpoint.svg" alt="146D lower X-point zoom for the measured and fitted current arms, with the wall, both null sets and the EFIT reference">
+<figcaption>146D: measured currents (left pair) and fitted currents (right pair). Each arm shows the full poloidal flux field and a 10 cm zoom on the lower X (dashed reference contour and hollow square for EFIT's null, solid contour and filled cross for the solved null). Both arms converged; the fitted state's null sits far to the left and above EFIT's, with its flux surfaces closed but displaced. The wall, both axial null markers and the EFIT axis marker are drawn on every panel.</figcaption>
+</figure>
+<figure>
+<img src="/nova/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-146-limited-lower-xpoint.svg" alt="146L lower X-point zoom for the two current arms">
+<figcaption>146L: measured currents (left pair) and fitted currents (right pair), same vocabulary. The measured arm's lower null nearly coincides with EFIT's; the fitted arm's is displaced by several centimetres, and its support has moved.</figcaption>
+</figure>
+<figure>
+<img src="/nova/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-179-limited-lower-xpoint.svg" alt="179L lower X-point zoom for the two current arms">
+<figcaption>179L: measured currents (left pair) and fitted currents (right pair). The fitted arm terminated <code>ACTIVE_SET_STEP_REFUSED</code> at residual 4.0&middot;10<sup>-3</sup> with six support cells: the drawn contours are open, the closed surfaces are gone, and the state is a different plasma rather than a displaced X-point.</figcaption>
+</figure>
+
+<h3>How the correction reaches the solve</h3>
+<p>The forward solve builds its operator from the corpus <code>magnetics_*</code> columns, and its current adapter then installs its own resolution read from those same columns. A correction written into the build seam is therefore replaced before the field is built: the operator's current disagrees with the adapter's, and the adapter refuses it. Writing the correction into the columns, scaled per conductor by <code>&minus;error / (1000 &middot; applied_multiplier)</code>, makes the build and the adapter read one vector, so the field and the installed current carry the same correction and the adapter's agreement check passes.</p>
+<p>The two controls are what make that a measurement rather than a claim. Pairing each measured arm with itself reddens the solved-vector check on all nineteen conductors of all four rows, so the check can see an absent correction; and applying the same vector at the build seam alone makes the adapter refuse with <code>build-time conductor current disagrees with the shipped current resolution for F1A: build &minus;231293.185532 A, resolved &minus;177235.036006 A; a conductor-current override belongs in the corpus columns this adapter reads, not the build seam</code>.</p>
+<table>
+<caption>137D, the record case: each conductor's measured current, the fitted equivalent error, the current the solve installed, and the correction as a fraction of the conductor's own current. The equivalent errors are the frame's committed receipt; the installed vector is the solve's own record.</caption>
+<thead><tr><th>conductor</th><th>measured [kA&middot;turn]</th><th>fitted equivalent error [kA&middot;turn]</th><th>installed [kA&middot;turn]</th><th>correction [% of measured]</th></tr></thead>
+<tbody>
+<tr><td>F1A</td><td>&minus;177.235</td><td>+54.058</td><td>&minus;231.293</td><td>30.5</td></tr>
+<tr><td>F2A</td><td>&minus;168.819</td><td>+55.243</td><td>&minus;224.062</td><td>32.7</td></tr>
+<tr><td>F3A</td><td>&minus;3.700</td><td>+54.209</td><td>&minus;57.909</td><td>1465.2</td></tr>
+<tr><td>F4A</td><td>+30.403</td><td>+78.284</td><td>&minus;47.881</td><td>257.5</td></tr>
+<tr><td>F5A</td><td>+160.368</td><td>+46.603</td><td>+113.765</td><td>29.1</td></tr>
+<tr><td>F6A</td><td>&minus;248.255</td><td>&minus;3.539</td><td>&minus;244.716</td><td>1.4</td></tr>
+<tr><td>F7A</td><td>&minus;251.115</td><td>+6.681</td><td>&minus;257.795</td><td>2.7</td></tr>
+<tr><td>F8A</td><td>+113.457</td><td>+30.910</td><td>+82.547</td><td>27.2</td></tr>
+<tr><td>F9A</td><td>&minus;86.964</td><td>&minus;2.271</td><td>&minus;84.693</td><td>2.6</td></tr>
+<tr><td>F1B</td><td>&minus;155.924</td><td>+55.180</td><td>&minus;211.104</td><td>35.4</td></tr>
+<tr><td>F2B</td><td>&minus;122.701</td><td>+58.270</td><td>&minus;180.971</td><td>47.5</td></tr>
+<tr><td>F3B</td><td>&minus;168.625</td><td>+55.893</td><td>&minus;224.517</td><td>33.1</td></tr>
+<tr><td>F4B</td><td>+124.456</td><td>+66.550</td><td>+57.906</td><td>53.5</td></tr>
+<tr><td>F5B</td><td>+195.552</td><td>+80.078</td><td>+115.474</td><td>40.9</td></tr>
+<tr><td>F6B</td><td>&minus;195.398</td><td>&minus;0.170</td><td>&minus;195.228</td><td>0.1</td></tr>
+<tr><td>F7B</td><td>&minus;400.016</td><td>&minus;4.541</td><td>&minus;395.475</td><td>1.1</td></tr>
+<tr><td>F8B</td><td>+181.436</td><td>&minus;5.619</td><td>+187.055</td><td>3.1</td></tr>
+<tr><td>F9B</td><td>&minus;8.023</td><td>+18.776</td><td>&minus;26.800</td><td>234.0</td></tr>
+<tr><td>ECOILA</td><td>&minus;12.993</td><td>&minus;321.329</td><td>+308.335</td><td>2473.1</td></tr>
+</tbody></table>
+
+<h3>What follows</h3>
+<p>Nothing in the prescription or the solver was changed. The correction reaches the solve and does not close the offset on any row, so the offset is not the fitted conductor-field mismatch applied at the currents, whatever the fit's representation of the external-field difference says. The earlier record's ruling-out of a per-coil calibration error stands, and the common-mode explanation it left standing still has no measured counterpart: the fitted vector is a change in the conductor response or in EFIT's implied external field, and applying it as a current correction is not the same intervention.</p>
+
+<h3>Measurement</h3>
+<p>The four measured and four fitted arms were solved in one allocation on the titan rung, four cards, with the fits taken from the measured arms' own solved bases and the fitted arms reading those fits. The H200 lane carried seven of its eight cards at submission, so a four-card cohort could not be placed there and the run took the next rung; this is a titan measurement and its compile and execute walls are titan's. Every row's installed current vector is the solve's own record, written by the adapter at the moment it installed it. The build-seam control ran as its own single-card allocation against the same fit receipt. The solved-current check and its negative control read those records only.</p>
+</section>

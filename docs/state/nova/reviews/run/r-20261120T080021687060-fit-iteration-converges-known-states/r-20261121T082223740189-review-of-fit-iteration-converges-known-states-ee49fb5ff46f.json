@@ -1,0 +1,54 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-21T08:53:08.498Z",
+  "dispatched_at": "2026-11-21T08:25:42Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: the count \"falls on 72 of the 79 passes\" (repeated at lines 4 and 5) is one too high: evidence-known-states/solovev-result.json holds 78 consecutive comparisons, of which 71 fall and 7 rise, so 71 passes decrease and pass 0 has no predecessor to fall from."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit, 891becc2f and ee49fb5ff change only the evidence fragment (6 insertions, 5 deletions), narrowing the contraction claim, adding the pass-by-pass rise list, and citing the negative-control receipt at logs/negative-control.log.",
+    "done_when": "the reviewed node's done_when asks for the per-pass table beside the prior head's stalled table; the delta keeps that table at docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:15 and now reports the seven rises the receipt carries, verified against evidence-known-states/solovev-result.json.",
+    "goal": "the delta's goal is to bring the record's account of the Solov'ev walk into agreement with its own receipt, and docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:4-5 now states the seven rising passes instead of claiming per-pass contraction.",
+    "manifest": "the reviewed manifest records the delta's commits through head ee49fb5ff and the suite arms at 12 passed (364a99271) and 13 passed (891becc2f), both EXIT=0, receipts baseline_suite-1795248250427086673.log and after_suite-1795248293658406441.log.",
+    "write_paths": "both delta commits touch only docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html, which is inside the node's declared write paths."
+  },
+  "justifications": {
+    "durability": "logs/negative-control.log shows test_a_far_start_recovers_the_state_the_rows_came_from failing under the cycle mutation, so the coupled rule is guarded, but no assertion ties the fragment's counts to the receipt.",
+    "evidence": "every number reconciles with evidence-known-states/solovev-result.json except the fall count at docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:15, where 71 of the 78 comparisons fall rather than 72.",
+    "fit": "the new prose at docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:15 cites job ids, revisions and log names as the record already does, and names no plan label or ticket.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:4 now says the applied update falls on 72 of the 79 passes and rises on seven, so the record no longer asserts the monotonicity its own receipt contradicts.",
+    "reuse": "the delta adds no function, class or module, so it forks no capability the repository already owns.",
+    "scope_discipline": "git diff 56d5c3f0c..ee49fb5ff touches only docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html, inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the delta's goal is to bring the record's account of the Solov'ev walk into agreement with its own receipt, and docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:4-5 now states the seven rising passes instead of claiming per-pass contraction.\nVERDICT done_when: the reviewed node's done_when asks for the per-pass table beside the prior head's stalled table; the delta keeps that table at docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:15 and now reports the seven rises the receipt carries, verified against evidence-known-states/solovev-result.json.\nVERDICT write_paths: both delta commits touch only docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html, which is inside the node's declared write paths.\nVERDICT manifest: the reviewed manifest records the delta's commits through head ee49fb5ff and the suite arms at 12 passed (364a99271) and 13 passed (891becc2f), both EXIT=0, receipts baseline_suite-1795248250427086673.log and after_suite-1795248293658406441.log.\nVERDICT diff: read commit by commit, 891becc2f and ee49fb5ff change only the evidence fragment (6 insertions, 5 deletions), narrowing the contraction claim, adding the pass-by-pass rise list, and citing the negative-control receipt at logs/negative-control.log.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:4 now says the applied update falls on 72 of the 79 passes and rises on seven, so the record no longer asserts the monotonicity its own receipt contradicts.\nSCORE evidence: 16\nJUSTIFICATION evidence: every number reconciles with evidence-known-states/solovev-result.json except the fall count at docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:15, where 71 of the 78 comparisons fall rather than 72.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 56d5c3f0c..ee49fb5ff touches only docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html, inside the declared write paths.\nSCORE durability: 11\nJUSTIFICATION durability: logs/negative-control.log shows test_a_far_start_recovers_the_state_the_rows_came_from failing under the cycle mutation, so the coupled rule is guarded, but no assertion ties the fragment's counts to the receipt.\nSCORE fit: 18\nJUSTIFICATION fit: the new prose at docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:15 cites job ids, revisions and log names as the record already does, and names no plan label or ticket.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no function, class or module, so it forks no capability the repository already owns.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-converges-known-states.html:15 non-blocking: the count \"falls on 72 of the 79 passes\" (repeated at lines 4 and 5) is one too high: evidence-known-states/solovev-result.json holds 78 consecutive comparisons, of which 71 fall and 7 rise, so 71 passes decrease and pass 0 has no predecessor to fall from.\n",
+  "review_run_id": "r-20261121T082223740189-review-of-fit-iteration-converges-known-states-ee49fb5ff46f",
+  "reviewed_base_sha": "56d5c3f0ca0280c99a4a5642a4c7835b007a2b95",
+  "reviewed_head_sha": "ee49fb5ff46fbc17fc60bb128d7cecd66860be66",
+  "reviewed_run_id": "r-20261120T080021687060-fit-iteration-converges-known-states",
+  "rubric": "landed_node",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T08:53:24.793402+00:00",
+  "total": 103
+}

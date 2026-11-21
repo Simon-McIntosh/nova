@@ -156,6 +156,22 @@ census_step() {
   # its own 900 s marker are.  The point program is what the pinned cache must
   # serve, and the guard's miss count is reported beside the wall.
   export NOVA_CACHE_MISS_BUDGET=1000000
+  # A pytest process does not configure the persistent cache by itself, so the
+  # directory is exported here. It is a job-local copy of every runtime directory
+  # the pinned root holds, because the pinned entries are split across two of
+  # them and each consumer resolves only one: the point program was compiled
+  # where extended precision was enabled before the cache was configured, and the
+  # helper programs of the same read were compiled under the other identity. The
+  # copy is what makes the pinned entries sufficient without writing the pinned
+  # root, which only the pre-warm may do.
+  cache_copy="${NOVA_PINNED_CACHE_COPY:?missing job-local copy of the pinned cache}"
+  mkdir -p -- "${cache_copy}"
+  for directory in "${PINNED_ROOT}"/nova/jax-compilation/runtime-*; do
+    printf 'CENSUS_PINNED_SOURCE=%s\n' "${directory}"
+    cp -a -- "${directory}/." "${cache_copy}/"
+  done
+  export JAX_COMPILATION_CACHE_DIR="${cache_copy}"
+  printf 'CENSUS_CACHE_DIRECTORY=%s\n' "${JAX_COMPILATION_CACHE_DIR}"
   operand_store="${NOVA_PINNED_OPERAND_STORE:?missing empty job-local operand store}"
   mkdir -p -- "${operand_store}"
   export NOVA_OPERAND_CACHE="${operand_store}"

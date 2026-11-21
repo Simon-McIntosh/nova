@@ -1,0 +1,49 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "call_sites_verdict": "none - no tracked runtime code invokes scripts/prototypes/pinned_point_program/run_job.sh or the pinned mode of scripts/prototypes/cached_point_remeasure/run_job.sh; they are operator entry points reached only from the untracked submit payload under ~/.cache.",
+  "completed_at": "2026-11-21T09:23:16.712Z",
+  "dispatched_at": "2026-11-21T09:03:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/pinned-point-program.html",
+      "kind": "goal_fidelity",
+      "line": 28,
+      "severity": "non-blocking",
+      "text": "The record cites no lane run through scripts/h200_test_lane/run.sh over tests/test_cached_point_remeasure.py, although the brief's clause 1 and the plan's node clause name that lane run as the instrument that shows the four point-program rows served as hits, and say the lane run and the warm bounds together close the clause. The only lane log on disk (lane-gate.log, slurm job 1334454 at a1f59f93c) is a fence-bypassed run the lead ruled out. The hits it would show are present in the job 1334715 warm receipts (hits=1, misses=0, compile_seconds=0 per arm), so the facts are evidenced; what is missing is a recorded run of the named gate over the warm receipts at the promoted head. Either run it once or state in the record that the warm receipts stand in for the lane."
+    },
+    {
+      "file": "scripts/prototypes/cached_point_remeasure/run_job.sh",
+      "kind": "scope_discipline",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The file is outside the node's declared write paths (scripts/prototypes/pinned_point_program, docs/evidence/fragments/kernel-compile-barrier/pinned-point-program.html, docs/figures/kernel-compile-barrier/pinned-point-program). The change to it is the reuse repair the prior review asked for, and it is the right owner, but it is a merge-reconciled path the coordinator must ratify rather than a path the node was fenced to write."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from fe05f648d to 8e8bcd09e; eight commits, three files, two inside, with conventional subjects and bodies and no AI attribution.",
+    "done_when": "The done_when's clause 1 is measured by the four warm receipts (first calls 26.16-27.49 s, peaks 2.53-2.60 GiB against the 60 s and 64 GB bounds) and clause 3 by the census test log (2 passed in 308.35s, EXIT=0) and clause 2 by the control receipts (misses=1 at budget 0, receipt check 1 failed 2 skipped, EXIT=1). The lane run the clause also names is not cited.",
+    "goal": "The node goal is that the four point-program rows are served from the pinned cache; docs/evidence/fragments/kernel-compile-barrier/pinned-point-program.html:11-14 records hits=1 / misses=0 and compile_seconds=0 for row-132, census-250, census-500 and census-2132, which the receipts under coordinator/warm/warm/ confirm.",
+    "manifest": "Read; status complete, eight commits, the census gate command and its log, and the control receipt-check log; every number it states reconciles with the logs under ~/.cache/nova-kernel-compile-barrier/pinned-point-program/.",
+    "write_paths": "Read the manifest's declared paths; two of the three changed paths are inside them, and scripts/prototypes/cached_point_remeasure/run_job.sh is outside."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261121T090251022455-review-of-pinned-point-program-8e8bcd09e98b",
+  "reviewed_base_sha": "fe05f648d4fb181edc102d6904ecc3ed7fa2fbeb",
+  "reviewed_head_sha": "8e8bcd09e98b6f42b4c527658e04bb0cfc4dd0e0",
+  "reviewed_run_id": "r-20261121T013213071208-pinned-point-program",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T09:23:32.218938+00:00",
+  "total": 94
+}

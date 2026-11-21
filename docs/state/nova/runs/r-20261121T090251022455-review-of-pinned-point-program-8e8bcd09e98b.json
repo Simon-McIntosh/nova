@@ -1,0 +1,1441 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "584d7879a5bdcff8b34911dc16e76f1d2538c025",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T090251022455-review-of-pinned-point-program-8e8bcd09e98b/brief.md",
+    "sha256": "264ac1418a1c6930752241dd9e6792b9eb670ed14e78d8687b943e8302c8321b"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6616253,
+      "input_tokens_cumulative": 6616253,
+      "output_tokens": 34428,
+      "output_tokens_cumulative": 34428,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-21T09:23:16.712Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-21T09:03:31Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.5757575757575758,
+    "plan": "kernel-compile-barrier",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-21T13:02:51.224917+00:00",
+    "horizon_seconds": 14400,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-21T09:02:51Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 26,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 12,
+    "headroom": -2,
+    "mean_context": 145455,
+    "observed_at": "2026-11-21T09:02:25Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 26,
+      "aggregate_tokens_per_second": 379.409,
+      "detail": "",
+      "mean_tokens_per_second": 34.492,
+      "observed_at": "2026-11-21T09:02:25Z",
+      "runs": 11.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-21T09:23:16.712Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T090251022455-review-of-pinned-point-program-8e8bcd09e98b/manifest.md",
+  "member": "disposable-r-20261121T090251022455-review-of-pinned-point-program-8e8bcd09e98b",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-pinned-point-program-8e8bcd09e98b",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T013213071208-pinned-point-program/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T090251022455-review-of-pinned-point-program-8e8bcd09e98b/brief.md",
+    "brief_sha256": "264ac1418a1c6930752241dd9e6792b9eb670ed14e78d8687b943e8302c8321b",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1262,
+          "cached_input_tokens": 450656,
+          "input_tokens": 451920,
+          "output_tokens": 251,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 452171,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "session_id": "0f4fa699-2444-4d93-b978-9931302ff6f8"
+    },
+    "done_when": "the review for r-20261121T013213071208-pinned-point-program stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261121T013213071208-pinned-point-program, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261121T013213071208-pinned-point-program",
+    "id": "review-of-pinned-point-program-8e8bcd09e98b",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-21T09:02:51Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 26,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 12,
+      "headroom": -2,
+      "mean_context": 145455,
+      "observed_at": "2026-11-21T09:02:25Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 26,
+        "aggregate_tokens_per_second": 379.409,
+        "detail": "",
+        "mean_tokens_per_second": 34.492,
+        "observed_at": "2026-11-21T09:02:25Z",
+        "runs": 11.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T090251022455-review-of-pinned-point-program-8e8bcd09e98b/manifest.md",
+    "mcp_set": "",
+    "negative_control": "",
+    "node_body": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T090251022455-review-of-pinned-point-program-8e8bcd09e98b/node.json",
+    "over_fence_note": "",
+    "over_fence_reason": "",
+    "peer_scopes": {},
+    "plan": "kernel-compile-barrier",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "4h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T013213071208-pinned-point-program/review-records/r-20261121T013213071208-pinned-point-program.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T013213071208-pinned-point-program/review-records/r-20261121T013213071208-pinned-point-program.at-8e8bcd09e98b6f42b4c527658e04bb0cfc4dd0e0.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "review-of-pinned-point-program-8e8bcd09e98b",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-21T09:03:14.964395+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 988.976336,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 33.364,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 3.8838685118447334,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.0807782240625,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-fable-5-1",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.02012102164621474,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T11:00:00.741955+00:00",
+        "stale": true,
+        "suits": "The most capable and most expensive Claude model, about two and a half times Opus's token price. Reserve it for the very hardest nodes.",
+        "utilisation_pct": 51.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 988.976336,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 33.364,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 3.8838685118447334,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.0807782240625,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.02012102164621474,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T11:00:00.741955+00:00",
+        "stale": true,
+        "suits": "The lane's fastest and cheapest model, about a twentieth of Sonnet's token price. Suits light, well-defined work.",
+        "utilisation_pct": 51.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 988.976336,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 33.364,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 3.8838685118447334,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.0807782240625,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.02012102164621474,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T11:00:00.741955+00:00",
+        "stale": true,
+        "suits": "A strong general model for deep or open-ended work, about twice Sonnet's token price.",
+        "utilisation_pct": 51.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 988.976336,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 33.364,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 3.8838685118447334,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.0807782240625,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.02012102164621474,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T11:00:00.741955+00:00",
+        "stale": true,
+        "suits": "The lane default, an everyday coding model at about half of Opus's token price. Suits guided implementation and full reviews.",
+        "utilisation_pct": 51.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 10,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 334,
+          "passed": 18,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 352,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        },
+        "reserved": true,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": 1
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 223873.503396,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": null,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.269117907295835,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 1.484322877361111,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.8667437388412699,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-22T20:41:07+00:00",
+        "stale": true,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 223873.503396,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": null,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.269117907295835,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 1.484322877361111,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.8667437388412699,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-22T20:41:07+00:00",
+        "stale": true,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 223873.503396,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": null,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.269117907295835,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 1.484322877361111,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6.1-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 47,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 47,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.8667437388412699,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-22T20:41:07+00:00",
+        "stale": true,
+        "suits": "The lane default, the current-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "in-harness-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "omp-local",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 10,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "omp",
+        "local": false,
+        "model": "local/deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 143,
+          "passed": 3,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 146,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "local-backend: local work is offered through clive"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": 1
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 327.675,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"review\",\"spec_level\":\"exact\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"critical\"}},\"goal\":\"attach an independent review to run r-20261121T013213071208-pinned-point-program\",\"done_when\":\"the review for r-20261121T013213071208-pinned-point-program stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261121T013213071208-pinned-point-program, and never in the worktree; the turn ends once that record is stored and the manifest reads complete\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":50392,\"estimated_hours\":8.0,\"estimated_hours_source\":\"request\",\"attempts\":0,\"write_path_count\":2,\"negative_control_declared\":false,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null,\"lift_preference\":null},\"orchestrator_comment\":\"\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":10582.0,\"expected_wait_profile_age_s\":1137.254481,\"running\":10,\"waiting\":0,\"queue_position\":1,\"headroom\":1,\"worker_slots\":1,\"tokens_per_second\":38.571,\"read_at\":\"2026-11-21T09:03:41.795680+00:00\"}}",
+    "rendered_token_estimate": 376,
+    "stage_ms": {
+      "budget-snapshot": 1335.903,
+      "context-estimate": 13.346,
+      "records": 1168.073,
+      "verdict-inputs": 240.866
+    },
+    "template_digest": "5ea6c8844f959f84293c0d2c90c1db0de4375d09e641cca7be7c360603b00202",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5757575757575758,
+  "plan_link": null,
+  "promoted_by": "review-self",
+  "promoted_revision": "584d7879a5bdcff8b34911dc16e76f1d2538c025",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261121T090251022455-review-of-pinned-point-program-8e8bcd09e98b",
+    "reviewed_base_sha": "fe05f648d4fb181edc102d6904ecc3ed7fa2fbeb",
+    "reviewed_head_sha": "8e8bcd09e98b6f42b4c527658e04bb0cfc4dd0e0",
+    "scores": {
+      "durability": 11,
+      "evidence": 15,
+      "fit": 17,
+      "goal_fidelity": 17,
+      "reuse": 19,
+      "scope_discipline": 15
+    },
+    "status": "parsed",
+    "total": 94
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261121T090251022455-review-of-pinned-point-program-8e8bcd09e98b",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+  "session_harness": "claude",
+  "session_id": "76128fed-09b1-4c06-856f-1e037bafc273",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 6616253,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1176.835,
+    "generated_tokens": 34428,
+    "generation_seconds": 1148.119,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 71.5,
+    "machine_seconds": 28.716,
+    "peak_input_tokens": 164455,
+    "tokens_per_second": 29.99,
+    "wall_tokens_per_second": 29.25
+  },
+  "time_budget": "4h",
+  "tool_steps": 70.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "omp-local",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 28800,
+        "classification": "blocked",
+        "commits_beyond_base": 9,
+        "delivery": {},
+        "detail": "the worker manifest reports blocked: the manifest reports a blocker",
+        "effective_phase": "complete",
+        "elapsed_seconds": 0,
+        "exit_record": {
+          "attempt": 5,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-21T04:34:16Z",
+          "last_record_type": "agent_end",
+          "launched_at": "2026-11-20T21:43:01Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261115T223952454215-edge-term-tangent-rows",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 105142,
+          "worker_pid": 3470891
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "the manifest reports a blocker",
+          "lifting_condition": null,
+          "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T223952454215-edge-term-tangent-rows/manifest.md; resolve the blocker before resuming the run",
+          "promotion_recorded": false,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": null,
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-21T04:34:16Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 16121,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "8a1cb3b44ebd2b2586b8be4f2dcac66702d9986ecea6166e219fe68f5ec99895",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T223952454215-edge-term-tangent-rows/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": null,
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T223952454215-edge-term-tangent-rows/manifest.md; resolve the blocker before resuming the run",
+        "node": "edge-term-tangent-rows",
+        "orientation_check": {
+          "checked_at": "2026-11-21T04:35:12Z",
+          "detail": "",
+          "expected": {
+            "base_sha": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/edge-term-tangent-rows",
+            "write_paths": [
+              "docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html",
+              "docs/figures/kernel-compile-barrier/edge-term-tangent-rows",
+              "nova/biot/polygonanalytic.py",
+              "scripts/prototypes/edge_term_tangent_rows",
+              "tests/biot"
+            ]
+          },
+          "inputs": {
+            "commits": [],
+            "expected": {
+              "base_sha": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/edge-term-tangent-rows",
+              "write_paths": [
+                "docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html",
+                "docs/figures/kernel-compile-barrier/edge-term-tangent-rows",
+                "nova/biot/polygonanalytic.py",
+                "scripts/prototypes/edge_term_tangent_rows",
+                "tests/biot"
+              ]
+            },
+            "head": "d6cf0cd7db9ebbb7019efa7001a91756703d3fb2",
+            "reported": {
+              "base_sha": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/edge-term-tangent-rows",
+              "write_paths": [
+                "docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html",
+                "docs/figures/kernel-compile-barrier/edge-term-tangent-rows",
+                "nova/biot/polygonanalytic.py",
+                "scripts/prototypes/edge_term_tangent_rows",
+                "tests/biot"
+              ]
+            },
+            "status": "blocked"
+          },
+          "matched": true,
+          "mismatches": [],
+          "reported": {
+            "base_sha": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/edge-term-tangent-rows",
+            "write_paths": [
+              "docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html",
+              "docs/figures/kernel-compile-barrier/edge-term-tangent-rows",
+              "nova/biot/polygonanalytic.py",
+              "scripts/prototypes/edge_term_tangent_rows",
+              "tests/biot"
+            ]
+          }
+        },
+        "phase": "complete",
+        "plan": "kernel-compile-barrier",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261115T223952454215-edge-term-tangent-rows",
+        "session": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261115T223952454215-edge-term-tangent-rows",
+          "session_id": "01a1f7e6-bc4d-7000-b0cf-7ef0c5046475",
+          "source": "pointer"
+        },
+        "settled": null,
+        "stored_phase": "complete",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 16133,
+        "terminal_at": "2026-11-21T04:33:59Z",
+        "wait_age_seconds": null,
+        "wait_class": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/edge-term-tangent-rows"
+      },
+      {
+        "backend": "omp-local",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 28800,
+        "classification": "blocked",
+        "commits_beyond_base": 6,
+        "delivery": {},
+        "detail": "commit '64379dbc9' is not in worktree '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/cached-point-program' history: git merge-base --is-ancestor 64379dbc9 HEAD exited 1; orientation mismatch: write_paths expected=[\"docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html\", \"docs/figures/kernel-compile-barrier/cached-point-program\", \"scripts/h200_test_lane\", \"scripts/prototypes/cached_point_program\", \"tests/test_fixed_points.py\"] reported=[\"docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html\", \"scripts/h200_test_lane\", \"scripts/prototypes/cached_point_program\", \"tests/test_fixed_points.py\"]",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 0,
+        "exit_record": {
+          "attempt": 6,
+          "ended_during": "working",
+          "ended_pids": [
+            3854085,
+            3854088,
+            3854096,
+            647586
+          ],
+          "exit_code": null,
+          "exited_at": "2026-11-19T02:53:08Z",
+          "forced_exit": {
+            "phase": "complete",
+            "reason": "terminal-run",
+            "signalled_at": "2026-11-19T02:53:04Z"
+          },
+          "last_record_type": "agent_end",
+          "launched_at": "2026-11-19T00:00:06Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261118T185447788898-cached-point-program",
+          "signal": 15,
+          "signal_name": "SIGTERM",
+          "stream_records_seen": 56736,
+          "worker_pid": 3854085
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "commit '64379dbc9' is not in worktree '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/cached-point-program' history: git merge-base --is-ancestor 64379dbc9 HEAD exited 1; orientation mismatch: write_paths expected=[\"docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html\", \"docs/figures/kernel-compile-barrier/cached-point-program\", \"scripts/h200_test_lane\", \"scripts/prototypes/cached_point_program\", \"tests/test_fixed_points.py\"] reported=[\"docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html\", \"scripts/h200_test_lane\", \"scripts/prototypes/cached_point_program\", \"tests/test_fixed_points.py\"]",
+          "lifting_condition": null,
+          "next_action": "inspect the worktree at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/cached-point-program before promoting run r-20261118T185447788898-cached-point-program",
+          "promotion_recorded": false,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": null,
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-19T02:53:08Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 194989,
+        "log_fresh": false,
+        "manifest_commits": [
+          "64379dbc9",
+          "7ba824b7f",
+          "17f249a07",
+          "e6187694b",
+          "325ac67e9",
+          "8004c117f"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "c340aa13547308399e409b6d7fc275bf08c7715c9f267c8593d5d1e4ed267686",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T185447788898-cached-point-program/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": null,
+        "needs_help_complete": null,
+        "next_action": "inspect the worktree at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/cached-point-program before promoting run r-20261118T185447788898-cached-point-program",
+        "node": "cached-point-program",
+        "orientation_check": {
+          "checked_at": "2026-11-19T03:00:03Z",
+          "detail": "commit '64379dbc9' is not in worktree '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/cached-point-program' history: git merge-base --is-ancestor 64379dbc9 HEAD exited 1; orientation mismatch: write_paths expected=[\"docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html\", \"docs/figures/kernel-compile-barrier/cached-point-program\", \"scripts/h200_test_lane\", \"scripts/prototypes/cached_point_program\", \"tests/test_fixed_points.py\"] reported=[\"docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html\", \"scripts/h200_test_lane\", \"scripts/prototypes/cached_point_program\", \"tests/test_fixed_points.py\"]",
+          "expected": {
+            "base_sha": "88604e24cc22c778a7fc6d7e0fd961d64b2336e3",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/cached-point-program",
+            "write_paths": [
+              "docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html",
+              "docs/figures/kernel-compile-barrier/cached-point-program",
+              "scripts/h200_test_lane",
+              "scripts/prototypes/cached_point_program",
+              "tests/test_fixed_points.py"
+            ]
+          },
+          "inputs": {
+            "commits": [
+              "64379dbc9",
+              "7ba824b7f",
+              "17f249a07",
+              "e6187694b",
+              "325ac67e9",
+              "8004c117f"
+            ],
+            "expected": {
+              "base_sha": "88604e24cc22c778a7fc6d7e0fd961d64b2336e3",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/cached-point-program",
+              "write_paths": [
+                "docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html",
+                "docs/figures/kernel-compile-barrier/cached-point-program",
+                "scripts/h200_test_lane",
+                "scripts/prototypes/cached_point_program",
+                "tests/test_fixed_points.py"
+              ]
+            },
+            "head": "8004c117f2988721d5ce2b43b67da2db37aef4dc",
+            "reported": {
+              "base_sha": "88604e24cc22c778a7fc6d7e0fd961d64b2336e3",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/cached-point-program",
+              "write_paths": [
+                "docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html",
+                "scripts/h200_test_lane",
+                "scripts/prototypes/cached_point_program",
+                "tests/test_fixed_points.py"
+              ]
+            },
+            "status": "complete"
+          },
+          "matched": false,
+          "mismatches": [
+            "write_paths"
+          ],
+          "reported": {
+            "base_sha": "88604e24cc22c778a7fc6d7e0fd961d64b2336e3",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/cached-point-program",
+            "write_paths": [
+              "docs/evidence/fragments/kernel-compile-barrier/cached-point-program.html",
+              "scripts/h200_test_lane",
+              "scripts/prototypes/cached_point_program",
+              "tests/test_fixed_points.py"
+            ]
+          }
+        },
+        "phase": "blocked",
+        "plan": "kernel-compile-barrier",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261118T185447788898-cached-point-program",
+        "session": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261118T185447788898-cached-point-program",
+          "session_id": "01a1f02e-e8b5-7000-ab75-7f6a31023d1a",
+          "source": "pointer"
+        },
+        "settled": null,
+        "stored_phase": "blocked",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 195019,
+        "terminal_at": "2026-11-19T02:52:34Z",
+        "wait_age_seconds": null,
+        "wait_class": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0f4fa699-2444-4d93-b978-9931302ff6f8/cached-point-program"
+      }
+    ]
+  },
+  "wall_seconds": 1185,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-21T09:23:21Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-21T09:03:38Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261121T090251022455-review-of-pinned-point-program-8e8bcd09e98b",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6045,
+    "worker_pid": 3371840
+  },
+  "worker_seconds": 1157,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

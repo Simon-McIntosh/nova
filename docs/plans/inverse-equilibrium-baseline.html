@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="82">
+<meta name="plan-version" content="83">
 <meta name="plan-modified" content="2026-11-21">
 </head>
 <body>
@@ -365,7 +365,7 @@
     <div class="r-comment-body"><p>Independent review of r-20261119T065419793680-drift-spectrum-sweep at base 54cc8f94 head 4b1b78d0b is parsed with scores goal_fidelity 18, evidence 14, scope_discipline 19, durability 15, fit 15, reuse 5 (total 86), added_failure_count 0 over the reviewed baseline arm (9 passed) and a head re-run (14 passed, 1 skipped, EXIT=0), and seven non-blocking findings, no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261120T234804327291-review-of-drift-spectrum-sweep-fa82ea200aa8" data-who="reckon-build" data-when="2026-11-20T23:49:16.952Z">
-    <div class="r-comment-body"><p>Attached a parsed independent review of r-20261119T065419793680-drift-spectrum-sweep read at base 54cc8f94 and head fa82ea200: goal_fidelity 18, evidence 18, scope_discipline 19, durability 16, fit 17, reuse 15 (total 103), added_failure_count 0 over the reviewed baseline arm (9 passed, EXIT=0) and head arm (15 passed, EXIT=0), with two non-blocking findings in series.py (SIZE_ARMS restates four of the sweep&#x27;s six size factors while the docstring claims one trace per size arm, and the size-0.10 trace shares separatrix_color with the nova marker edges) and no blocking finding.</p></div>
+    <div class="r-comment-body"><p>Attached a parsed independent review of r-20261119T065419793680-drift-spectrum-sweep read at base 54cc8f94 and head fa82ea200: goal_fidelity 18, evidence 18, scope_discipline 19, durability 16, fit 17, reuse 15 (total 103), added_failure_count 0 over the reviewed baseline arm (9 passed, EXIT=0) and head arm (15 passed, EXIT=0), with two non-blocking findings in series.py (SIZE_ARMS restates four of the sweep's six size factors while the docstring claims one trace per size arm, and the size-0.10 trace shares separatrix_color with the nova marker edges) and no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261117T043314861081-review-of-efit-on-nova-rows-86b64c13475d" data-who="reckon-build" data-when="2026-11-17T04:38:15.860Z">
     <div class="r-comment-body"><p>independent review of r-20261115T202050274305-efit-on-nova-rows stored at review-records/r-20261115T202050274305-efit-on-nova-rows.json (and its .at-86b64c13 sibling) with status parsed, scores goal_fidelity 17, evidence 16, scope_discipline 18, durability 6, fit 15, reuse 20 (total 92), reviewed_base_sha 1f788362e8e1ca19bb5691fff8b31d25ed825f0e and reviewed_head_sha 86b64c13475d0d589ff836eaec44affff1ca7d56, added_failure_count 0 over an unarmed reviewed run, and four non-blocking findings.</p></div>
@@ -390,6 +390,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261119T083017996699-review-of-fit-inside-the-iteration-82edcf8b2d9f" data-who="reckon-build" data-when="2026-11-19T09:02:04.744Z">
     <div class="r-comment-body"><p>review of r-20261117T225500180499-fit-inside-the-iteration at 82edcf8b2d9f029b32f930c24cab452135d71049: parsed record, six dimensions scored 13/14/20/16/17/15, added_failure_count 0, 2 blocking and 3 non-blocking findings, recommendation repair-before-landing.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261121T004320200960-review-of-fit-iteration-converges-known-states-56d5c3f0ca02" data-who="reckon-build" data-when="2026-11-21T00:51:40.249Z">
+    <div class="r-comment-body"><p>Review of r-20261120T080021687060-fit-iteration-converges-known-states at 56d5c3f0ca0280c99a4a5642a4c7835b007a2b95 against base 364a99271fe3d1a4d18f9fbd093785145504571f: the Solov&#x27;ev known state converges inside both bands (4.137e-10 of the span against a 1e-6 band, 1.890e-10 residual against 1e-8) and ITER re-measures in the same allocation; goal_fidelity 18, evidence 15, scope_discipline 19, durability 15, fit 16, reuse 5; four non-blocking findings, the material one being that the record&#x27;s &quot;contracts on every pass&quot; claim is contradicted by seven increasing passes in its own receipt.</p></div>
 </div>
 </section>
 </main>

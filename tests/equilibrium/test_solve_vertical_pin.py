@@ -20,7 +20,7 @@ from nova.equilibrium.constraint import (
     assemble_augmented_system,
     uniform_radial_field_jet,
 )
-from nova.equilibrium import fixed_point
+from nova.equilibrium import fixed_point, reduced_newton
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import PrescribedCurrentField
 from nova.equilibrium.observation import CurrentMomentObservation, MomentIntegralSupport
@@ -360,3 +360,224 @@ def test_one_augmented_newton_program_serves_free_and_pinned_requests():
         assert abs(_booked_terminal_height(flux) - expected) <= 1e-10
         if not active:
             np.testing.assert_array_equal(unknown, [0.0])
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("route", ["newton", "rebuilt", "continuation", "descent"])
+@pytest.mark.parametrize("source", ["radial", "circuit"])
+@pytest.mark.parametrize("shadowed", [False, True])
+@pytest.mark.parametrize("active", [False, True])
+def test_compensator_image_and_tangent_on_every_proposal_route(
+    route, source, shadowed, active, monkeypatch
+):
+    """Observe every scored proposal, including off-root inactive unknowns.
+
+    Two readings are taken at every scored candidate. ``images`` records the
+    bound flux image the applied image owner returns: rounding cannot enter it,
+    so an inactive binding must slice exactly zero. ``route_images`` reads the
+    same quantity from the outside, as the difference between a route's own map
+    at this state and that map with the compensator unknown held at zero, which
+    proves the image reached the route rather than only the owner; a map
+    difference carries roundoff, so it is held to the double-precision floor.
+    The unknown-direction tangent is the route map's JVP.
+    """
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    profile = _profile()
+    profile.operator.grid.coordinate = profile.operator.grid.coordinate.at[4, 1].set(
+        -1.0 / (4 * jnp.pi)
+    )
+    direction = None
+    if source == "circuit":
+        profile.operator.prescribed_current_field = PrescribedCurrentField(
+            response=jnp.asarray([[0.0, 0.0]] * 4 + [[0.0, 0.5], [0.0, 1.0]]),
+            current=jnp.zeros(2),
+        )
+        direction = np.asarray([0.0, 1.0])
+    pair = VerticalPositionPin(
+        0.7, active=active, coil_direction=direction, initial_unknown=0.25
+    ).pair(profile.operator)
+    target = jnp.asarray([1.0, 0.8, 0.3, 1.0, 1.4, 0.9])
+
+    def base_map(flux):
+        return target
+
+    system = assemble_augmented_system(
+        profile,
+        jnp.asarray(SEED),
+        (pair,),
+        base_map=base_map,
+        base_shadow_mask=lambda flux: jnp.zeros_like(flux, dtype=bool),
+        base_promoted_shadow_mask=lambda flux, previous: previous,
+        base_shadowed_map=lambda flux, shadow: jnp.where(shadow, flux, target),
+        requested_class=None,
+        target_current=None,
+    )
+    images, route_images, tangents, frozen_changes = [], [], [], []
+    original_image = type(pair).flux_delta
+
+    def observed_image(*args):
+        delta = original_image(*args)
+        jax.debug.callback(lambda image: images.append(np.asarray(image)), delta)
+        return delta
+
+    monkeypatch.setattr(type(pair), "flux_delta", observed_image)
+
+    @jax.jit
+    def propose(runtime_pair):
+        def raw_map(state):
+            if shadowed:
+                return system.shadowed_map_fn(
+                    state,
+                    jnp.zeros_like(state, dtype=bool).at[4].set(True),
+                    (runtime_pair,),
+                )
+            return system.map_fn(state, (runtime_pair,))
+
+        def observed_map(state):
+            mapped = raw_map(state)
+            jax.debug.callback(
+                lambda value: frozen_changes.append(np.asarray(value)),
+                mapped[4] - state[4],
+            )
+            held = state.at[-1].set(0.0)
+            jax.debug.callback(
+                lambda value: route_images.append(np.asarray(value)),
+                mapped[: system.flux_size] - raw_map(held)[: system.flux_size],
+            )
+            unknown_direction = jnp.zeros_like(state).at[-1].set(1.0)
+            tangent = jax.jvp(raw_map, (state,), (unknown_direction,))[1]
+            jax.debug.callback(
+                lambda value: tangents.append(np.asarray(value)),
+                tangent[:6],
+            )
+            return mapped
+
+        state = system.initial
+        mapped, tangent = jax.linearize(observed_map, state)
+        residual = fixed_point._relative_residual(mapped, state)
+        merit = fixed_point._smooth_relative_sup_merit(mapped, state)
+        if route == "rebuilt":
+            return fixed_point._rebuilt_model_promotion(
+                observed_map,
+                state,
+                residual,
+                merit,
+                gmres_iterations=7,
+                maximum_step=jnp.asarray(1.0),
+                initial_damping=jnp.asarray(1e-3),
+                model_trust_selection=False,
+            )
+        if route == "descent":
+            return fixed_point._steepest_descent_promotion(
+                observed_map, state, residual, merit, False
+            )
+        jacobian = jax.vmap(tangent)(jnp.eye(state.size)).T
+        # Frozen flux coordinates have zero residual and a null Newton row.
+        step = jnp.linalg.lstsq(
+            jnp.eye(state.size) - jacobian, mapped - state, rcond=None
+        )[0]
+
+        def model(candidate):
+            return mapped + tangent(candidate - state)
+
+        return fixed_point._backtracked_promotion(
+            observed_map,
+            model,
+            state,
+            step if route == "newton" else -step,
+            step,
+            residual,
+            merit,
+            jnp.asarray(0.1),
+            False,
+        )
+
+    proposal = propose(pair)
+    jax.block_until_ready(proposal)
+    jax.effects_barrier()
+    assert bool(proposal.accepted), route
+    assert not np.array_equal(proposal.state, system.initial), route
+    if route in ("newton", "continuation"):
+        assert bool(proposal.recovery_activated) == (route == "continuation")
+    assert len(images) > 1 and len(tangents) > 1, "candidate evaluations must run"
+    images, tangents = np.stack(images), np.stack(tangents)
+    route_images = np.stack(route_images)
+    if shadowed:
+        np.testing.assert_allclose(frozen_changes, 0.0, rtol=0, atol=1e-15)
+        np.testing.assert_array_equal(tangents[:, 4], 0.0)
+    else:
+        assert np.any(np.abs(frozen_changes) > 1e-3), "live coordinate must move"
+    if active:
+        assert np.any(images != 0), "active source is the known-present control"
+        assert np.any(tangents != 0), "active tangent is the known-present control"
+        assert np.any(np.abs(route_images) > 1e-12), "the route must apply the image"
+    else:
+        np.testing.assert_array_equal(images, np.zeros_like(images))
+        np.testing.assert_array_equal(tangents, np.zeros_like(tangents))
+        np.testing.assert_allclose(route_images, 0.0, rtol=0, atol=1e-15)
+
+
+@pytest.mark.parametrize("active", [False, True])
+def test_reduced_compensator_image_and_tangent(active):
+    """The reduced reconstruction obeys the runtime binding off the root."""
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    profile = _profile()
+    profile.operator.prescribed_current_field = PrescribedCurrentField(
+        response=jnp.asarray([[0.0, 0.0]] * 5 + [[0.0, 1.0]]),
+        current=jnp.zeros(2),
+    )
+    pair = VerticalPositionPin(
+        0.7, active=active, coil_direction=np.asarray([0.0, 1.0])
+    ).pair(profile.operator)
+    augmentation = reduced_newton._RowAugmentation(
+        profile, (pair,), (slice(0, 1),), 1, jnp.asarray(1.0), None, None
+    )
+
+    @jax.jit
+    def evaluate(runtime_pair, unknown):
+        image, tangent = jax.jvp(
+            lambda value: augmentation.flux_delta(value, (runtime_pair,)),
+            (unknown,),
+            (jnp.ones_like(unknown),),
+        )
+        row = augmentation.rows(jnp.asarray(SEED), unknown, None, (runtime_pair,), None)
+        return image, tangent, row
+
+    # Both bindings go through the same compiled program and nonzero unknown.
+    unknown = jnp.asarray([0.25])
+    image, tangent, row = evaluate(pair, unknown)
+    control = replace(pair, binding=replace(pair.binding, payload=jnp.asarray(True)))
+    control_image, control_tangent, _ = evaluate(control, unknown)
+    assert np.any(np.asarray(control_image) != 0)
+    assert np.any(np.asarray(control_tangent) != 0)
+    if active:
+        np.testing.assert_array_equal(image, control_image)
+        np.testing.assert_array_equal(tangent, control_tangent)
+    else:
+        np.testing.assert_array_equal(image, np.zeros_like(image))
+        np.testing.assert_array_equal(tangent, np.zeros_like(tangent))
+        np.testing.assert_array_equal(row, unknown)
+
+
+def test_compensator_gate_delegates_to_shared_arm_runner(monkeypatch, tmp_path):
+    """One owner executes CPU arms and decides whether their receipts completed."""
+    from scripts.prototypes.diiid_core_hold.regressions import gate as shared_gate
+    from scripts.prototypes.diiid_inactive_compensator import gate as gates
+
+    assert getattr(gates, "core_gate", None) is shared_gate
+    calls = []
+
+    class RunnerReached(Exception):
+        pass
+
+    def observe(*args):
+        calls.append(args)
+        raise RunnerReached
+
+    monkeypatch.setattr(gates, "core_gate", observe)
+    with pytest.raises(RunnerReached):
+        gates.arm(tmp_path, "revision", tmp_path, "arm", gates.PIN)
+    assert len(calls) == 1
+    assert calls[0][:3] == (tmp_path, "revision", gates.PIN)

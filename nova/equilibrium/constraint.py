@@ -156,6 +156,21 @@ class ConstraintFunctional(Protocol[Payload]):
     ) -> jax.Array: ...
 
 
+def active_payload_mask(
+    functional: ConstraintFunctional[object], payload: object
+) -> jax.Array | None:
+    """Return the runtime active mask a functional's payload carries, if any.
+
+    Only the current-centroid row publishes its payload as an active flag; every
+    other functional's payload is row data (sampled points, a level set) that
+    says nothing about whether its compensator is active.  This is the one
+    declaration of that rule, read by the residual and by the flux-image owner.
+    """
+    if payload is None or not isinstance(functional, CurrentCentroidConstraint):
+        return None
+    return jnp.reshape(jnp.asarray(payload, dtype=bool), (-1,))
+
+
 def _constraint_residual(
     functional: ConstraintFunctional[object],
     profile: ForwardProfile,
@@ -169,9 +184,12 @@ def _constraint_residual(
 ) -> jax.Array:
     """Apply one scaled-observation residual, retaining inactive row values."""
     residual = (functional.observed(profile, context, payload) - target) / scale
-    if not payload_is_active_mask or payload is None:
+    if not payload_is_active_mask:
         return residual
-    return jnp.where(jnp.asarray(payload, dtype=bool), residual, unknown)
+    mask = active_payload_mask(functional, payload)
+    if mask is None:
+        return residual
+    return jnp.where(mask, residual, unknown)
 
 
 class CompensatingUnknown(Protocol):
@@ -287,6 +305,30 @@ class ConstraintPair:
     def row_count(self) -> int:
         """Return the fixed number of residual rows in this tuple position."""
         return int(self.functional.row_count)
+
+    def flux_delta(
+        self,
+        profile: ForwardProfile,
+        context: ConstraintContext | None,
+        normalized: jax.Array,
+    ) -> jax.Array:
+        """Apply the bound source, absent while its active mask is off.
+
+        This is the one place a compensator's flux image is applied, so every
+        proposal route -- Newton, the rebuilt-model promotion, continuation and
+        descent recovery -- inherits the same rule rather than gating the image
+        per route.  An inactive binding contributes neither flux nor tangent
+        off the root; the authored scalar row stays present and still drives
+        its unknown to zero.
+        """
+        delta = self.unknown.flux_delta(
+            profile, context, self.functional, self.binding.payload, normalized
+        )
+        mask = active_payload_mask(self.functional, self.binding.payload)
+        if mask is None:
+            return delta
+        shape = (-1,) + (1,) * (jnp.ndim(delta) - 1)
+        return jnp.where(jnp.reshape(mask, shape), delta, jnp.zeros_like(delta))
 
     def tree_flatten(self):
         """Keep the functional type static and map over unknown/binding leaves."""
@@ -2096,9 +2138,7 @@ def assemble_augmented_system(
         steps = []
         for pair, row_slice in zip(runtime_pairs, row_slices, strict=True):
             value = unknowns[row_slice]
-            delta = pair.unknown.flux_delta(
-                profile, context, pair.functional, pair.binding.payload, value
-            )
+            delta = pair.flux_delta(profile, context, value)
             mapped_flux = mapped_flux + jnp.where(flux_shadow, 0.0, delta)
             row = jnp.ravel(
                 pair.functional.residual(

@@ -7,6 +7,14 @@
   "call_sites": [],
   "completed_at": "2026-11-20T23:59:26.277Z",
   "dispatched_at": "2026-11-20T23:52:48Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-21T00:04:36.896770+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261120T201203285388-bank-hessian-blowup"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/bank_hessian_blowup/attribute.py",

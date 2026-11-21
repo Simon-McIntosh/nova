@@ -1,0 +1,49 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "call_sites_verdict": "none - no tracked production code invokes scripts/prototypes/pinned_point_program/run_job.sh or the pinned mode of scripts/prototypes/cached_point_remeasure/run_job.sh; they are operator entry points reached only from an untracked submit payload under ~/.cache. scripts/h200_test_lane/prewarm.sh invokes scripts/prototypes/cached_point_remeasure/measure.py, which the diff does not touch.",
+  "completed_at": "2026-11-21T15:29:57.681Z",
+  "dispatched_at": "2026-11-21T15:22:31Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/cached_point_remeasure/run_job.sh",
+      "kind": "scope_discipline",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The file is outside the node's declared write paths (scripts/prototypes/pinned_point_program, docs/evidence/fragments/kernel-compile-barrier/pinned-point-program.html, docs/figures/kernel-compile-barrier/pinned-point-program). The edit is the reuse repair that folded the duplicated per-arm loops into the shared driver, and it is the right owner, but it is a merge-reconciled path the coordinator must ratify rather than a path the node was fenced to write."
+    },
+    {
+      "file": "scripts/prototypes/pinned_point_program/run_job.sh",
+      "kind": "durability",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "No committed test exercises this wrapper or the pinned mode it selects. The cited gate runs tests/test_cached_point_remeasure.py over saved receipts, so it would still pass if the wrapper stopped exporting NOVA_REMEASURE_CACHE_MODE=pinned or NOVA_REMEASURE_STEPS, or set either to a value that reads the wrong root. The reuse refactor's own negative control (logs/reuse-check-base.log failing four conditions and logs/reuse-check-head.log passing them) is a shell check in the run directory, not a regression guard in the suite."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from fe05f648d to 4b2054acf; nine commits, three files (one new), every commit carrying a conventional subject and a body, no AI attribution: two code commits, six evidence commits, and the final 4b2054acf adds the coordinator lane-gate paragraph and table to the fragment.",
+    "done_when": "The done_when's three clauses are measured: clause 1 by the four warm receipts (first call 26.16-27.49 s and peaks 2.53-2.60 GiB against the 60 s and 64 GB bounds, hits=1 misses=0 compile_seconds=0), by the 500-cell census read (2 passed in 308.35s, EXIT=0) and by the lane gate at head (2 passed, 1 skipped, CACHE_GUARD_MARKER=wall-clock-reliable misses=0 budget=0, EXIT=0); clause 2 by the four control receipts (misses=1 at miss_budget=0) and the receipt check (1 failed, 2 skipped in 5.86s, EXIT=1); clause 3 by the fragment's two tables with pre-warm seconds, lane warm seconds, hits/misses, control marker and exit, job ids and log paths.",
+    "goal": "The goal is that the four point-program rows are served from the pinned cache; docs/evidence/fragments/kernel-compile-barrier/pinned-point-program.html:11-14 records hits=1 / misses=0 and compile_seconds=0 for row-132, census-250, census-500 and census-2132, which the receipts under coordinator/warm/warm/ confirm.",
+    "manifest": "Read; status complete, nine commits, the census gate command and its log at revision d4110b9bf, the control receipt-check log, and the reuse negative-control logs; every figure it states reconciles with the logs under ~/.cache/nova-kernel-compile-barrier/pinned-point-program/ and the run's logs/ directory.",
+    "write_paths": "Read the manifest's declared paths; two of the three changed paths are inside them, and scripts/prototypes/cached_point_remeasure/run_job.sh is outside."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261121T152204046382-review-of-pinned-point-program-4b2054acf8a2",
+  "reviewed_base_sha": "fe05f648d4fb181edc102d6904ecc3ed7fa2fbeb",
+  "reviewed_head_sha": "4b2054acf8a2b7c1c57480179ab36898ec77a24c",
+  "reviewed_run_id": "r-20261121T013213071208-pinned-point-program",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T15:30:51.431338+00:00",
+  "total": 97
+}

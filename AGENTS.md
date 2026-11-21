@@ -157,10 +157,12 @@ clears the environment.** Those variables carry the worker's write fence into
 the job. A job that only starts with them removed is a job the worker may not
 run.
 
-The GPU nodes `98dci4-gpu-0003` (H200) and `98dci4-gpu-0002` (titan) have no
-`bwrap` binary, so a fenced worker's job is refused there in zero seconds with
-exit 127 and `fence program bwrap cannot run on <node>`. Until reckon carries a
-fence program to those nodes:
+The H200 node `98dci4-gpu-0003` has no `bwrap` binary of its own. Since
+2026-11-21 reckon carries a fence program there, and a fenced worker's job has
+been confirmed running on it (job 1335907), so a worker submits its own H200
+jobs as ordinary jobs. Where a worker's job is still refused in zero seconds
+with exit 127 and `fence program bwrap cannot run on <node>`, on that node or
+any other:
 
 - A worker whose job is refused this way stops with `status: blocked`, names
   the job id and the refusal, and commits the driver it wanted to run.

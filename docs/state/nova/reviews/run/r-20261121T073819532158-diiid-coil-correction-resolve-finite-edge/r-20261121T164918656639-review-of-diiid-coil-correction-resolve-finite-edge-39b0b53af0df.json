@@ -24,6 +24,11 @@
       "kind": "exempted",
       "reason": "Prototype receipt hook; every call site passes the argument by keyword and the run's records were written",
       "recorded_at": "2026-11-21T20:19:52.679700+00:00"
+    },
+    "2": {
+      "kind": "exempted",
+      "reason": "The column write is measured end to end: every fitted arm's solved vector equals measured minus correction on all nineteen conductors, and pairing a measured arm with itself reddens that check",
+      "recorded_at": "2026-11-21T20:20:00.234178+00:00"
     }
   },
   "findings": [

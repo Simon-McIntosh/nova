@@ -1,0 +1,130 @@
+<section id="stored-state-refusals-on-the-recorded-mesh-record">
+<h2>The recorded TCV and ITER stored-state refusals, reproduced from the comparison's own fixtures</h2>
+<p>The magnetics-fit comparison records that a public forward solve started from
+the stored imas-efit flux map, with imas-efit's fitted conductor currents, stops
+unqualified on TCV at relative residual 0.030364200526436996 with reason 12 and
+on ITER with no magnetic axis admitted. This record rebuilds both cases from the
+comparison's own machinery — its case reader, fixture machine, receipt mesh,
+stored seed, fitted-current binding and policy, imported rather than restated —
+and runs each as four arms in one batch job on a single titan card, one receipt
+per arm.</p>
+<p>Two arms run the comparison's default policy, which is the policy the record's
+TCV attempt ran, and two run the construction the record used for the arm it
+shows qualifying on MAST-U: internal stopping tolerance 1e-12, forty Newton
+steps, sixty-four active-set steps, seeded from the default arm's terminal state.
+The tightened arm is the positive control. It reaches the recorded refusal in
+both cases, and the default arms do not, which is stated below arm by arm.</p>
+
+<section id="stored-state-refusals-on-the-recorded-mesh-arms">
+<h3>Every arm, beside the recorded value</h3>
+<table><thead><tr><th>arm</th><th>case</th><th>seed</th><th>residual</th><th>reason</th><th>axis admitted</th><th>qualified</th><th>converged</th><th>wall s</th></tr></thead><tbody>
+<tr><td><code>tcv-stored-default</code></td><td>TCV workshop at 0.4 s</td><td>stored field</td><td>0.0005241157519662908</td><td>8, ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED</td><td>yes, at (0.8855, -0.01505), diverted</td><td>no</td><td>no</td><td>847.06</td></tr>
+<tr><td><code>tcv-stored-tightened</code></td><td>TCV workshop at 0.4 s</td><td>default arm terminal state</td><td>0.023974836483438934</td><td>12, ACTIVE_SET_STEP_REFUSED</td><td>yes, at (0.7816, -0.04395), diverted</td><td>no</td><td>no</td><td>4242.43</td></tr>
+<tr><td><code>iter-stored-default</code></td><td>ITER 135013 at 75 s</td><td>stored field</td><td>0.12310610396423093</td><td>12, ACTIVE_SET_STEP_REFUSED</td><td>yes, at (5.585, 2.413), diverted</td><td>no</td><td>no</td><td>978.33</td></tr>
+<tr><td><code>iter-stored-tightened</code></td><td>ITER 135013 at 75 s</td><td>default arm terminal state</td><td>unavailable, no residual written on a refusal</td><td>3, NONFINITE_RESIDUAL; <code>NoQualifiedAxisError</code></td><td>no</td><td>no</td><td>no</td><td>1131.03</td></tr>
+</tbody></table>
+<table><thead><tr><th>case</th><th>arm</th><th>measured</th><th>recorded</th><th>measured / recorded</th></tr></thead><tbody>
+<tr><td>TCV</td><td><code>tcv-stored-tightened</code></td><td>residual 0.023974836483438934, reason 12</td><td>residual 0.030364200526436996, reason 12</td><td>0.790, within a factor of three, same reason code</td></tr>
+<tr><td>TCV</td><td><code>tcv-stored-default</code></td><td>residual 0.0005241157519662908, reason 8, axis admitted</td><td>residual 0.030364200526436996, reason 12</td><td>0.0173, outside a factor of three, different reason code</td></tr>
+<tr><td>ITER</td><td><code>iter-stored-tightened</code></td><td>no magnetic axis admitted, reason 3, <code>NoQualifiedAxisError</code></td><td>no magnetic axis admitted, reason 3, <code>NoQualifiedAxisError</code></td><td>same refusal</td></tr>
+<tr><td>ITER</td><td><code>iter-stored-default</code></td><td>residual 0.12310610396423093, reason 12, axis admitted</td><td>no axis admitted, reason 3</td><td>different refusal</td></tr>
+</tbody></table>
+<p>Every arm is unqualified and unconverged. The tightened arm reproduces the
+recorded TCV residual to a factor of 0.79 and the recorded ITER refusal exactly;
+the default arm reaches neither: on TCV it exhausts its active-set iteration
+budget at a residual fifty-eight times smaller than the recorded one, and on ITER
+it refuses an active-set step after admitting an axis.</p>
+</section>
+
+<section id="stored-state-refusals-on-the-recorded-mesh-positive-control">
+<h3>The tightened policy is the positive control</h3>
+<p>The comparison's continuation construction is the only arm it shows reaching a
+qualified state, on MAST-U. Applying the same tightening to TCV and ITER is what
+forces the recorded refusal here: the default policy stops short of it in both
+cases, at a residual below the recorded one on TCV and with an admitted axis on
+ITER.</p>
+<table><thead><tr><th>policy field</th><th>default arm</th><th>tightened arm</th></tr></thead><tbody>
+<tr><td><code>route</code></td><td>newton_krylov</td><td>newton_krylov</td></tr>
+<tr><td><code>newton_steps</code></td><td>10</td><td>40</td></tr>
+<tr><td><code>gmres_iterations</code></td><td>30</td><td>30</td></tr>
+<tr><td><code>active_set_steps</code></td><td>16</td><td>64</td></tr>
+<tr><td><code>kernel_tolerance</code></td><td>1e-08</td><td>1e-12</td></tr>
+<tr><td><code>qualification_tolerance</code></td><td>1e-10</td><td>1e-10</td></tr>
+</tbody></table>
+</section>
+
+<section id="stored-state-refusals-on-the-recorded-mesh-inputs">
+<h3>Inputs, mesh and coefficients per case</h3>
+<pre id="stored-state-refusals-on-the-recorded-mesh-tcv-inputs">case=TCV workshop at 0.4 s, imas-efit data
+
+mesh={"kind": "StencilMesh", "nodes": 355, "stencil_rows": 234, "machine_nodes": 355}
+route=newton_krylov; seed=ExplicitSolveSeed(stored flux map)
+coefficients=[0.0, 0.38252056259720846, -0.38252056259720846]
+fitted conductor currents: 288 entries, first three [-8565.178, -5080.899, -10161.782] A</pre>
+<pre id="stored-state-refusals-on-the-recorded-mesh-iter-inputs">case=ITER 135013 at 75 s, standalone IDS
+
+mesh={"kind": "StencilMesh", "nodes": 341, "stencil_rows": 257, "machine_nodes": 341}
+route=newton_krylov; seed=ExplicitSolveSeed(stored flux map)
+coefficients=[14731.017960210365, -14731.017960210365, 0.7978971347099374, 0.37643051040271125, -1.1743276451126485]
+fitted conductor currents: 117 entries, first three [-10007.239, 17968.657, 33231.052] A</pre>
+</section>
+
+<section id="stored-state-refusals-on-the-recorded-mesh-drift">
+<h3>The fixtures are not the bytes the record measured</h3>
+<p>The record's values cannot be re-derived from the fixtures on disk today,
+because the imas-efit test data was rewritten on 2026-11-18 at 21:25, and that
+directory is untracked in imas-efit, so the bytes the record read are not in any
+revision. The same harness read the following before and after that rewrite:</p>
+<table><thead><tr><th>case</th><th>record-era input</th><th>input on disk since the rewrite</th><th>read at</th></tr></thead><tbody>
+<tr><td>TCV</td><td>ip -240259.2274515095 A</td><td>ip -240244.32344723385 A</td><td>2026-11-18 13:14, then 2026-11-20 08:20</td></tr>
+<tr><td>ITER</td><td>ip -15544546.67645363 A</td><td>ip -14845717.84262754 A</td><td>2026-11-18 15:59, then 2026-11-20 08:21</td></tr>
+</tbody></table>
+<p>The profile coefficients drift with it: TCV's live FF-prime coefficient reads
+0.38252056 today against 0.38275327 in the earlier run, and ITER's leading
+coefficient 14731.018 where the earlier run read 13465.688.</p>
+<p>The code revision is not the cause. Running the same runner on an archive of
+the record's own revision, 9047a3fe50708d6dd20ebe672d0dc22f40b0ae50, gives TCV a
+default-arm residual of 0.0005241157425587287 against 0.0005241157519662908 on
+this revision — the same terminal state to seven significant figures. The
+difference from the recorded 0.0303 therefore belongs to the input data.</p>
+</section>
+
+<section id="stored-state-refusals-on-the-recorded-mesh-mastu">
+<h3>MAST-U, and why it is not measured here</h3>
+<p>The record's MAST-U solve is the only arm it shows qualifying: a continuation
+at 5.307643379157493e-16, inside a complete case wall of 3508.560784 s on a titan
+P100, of which one call is recorded at 213.338199 s. The record states no device
+memory figure for it, so the requirement is taken from the card the solves ran
+on: the backend on that card reports a 12 801 015 808-byte device limit.</p>
+<p>MAST-U is left unmeasured here, pending the H200. It is not run on this node
+because its recorded wall is more than twice the longest arm measured here and
+its continuation needs the larger card's memory; no claim is made about its
+outcome on today's fixtures beyond the record's own.</p>
+</section>
+
+<section id="stored-state-refusals-on-the-recorded-mesh-panels">
+<h3>Every terminal state beside the stored state</h3>
+<p>Each panel contours both fields on one shared level array spanning the two
+finite ranges, draws the wall, and draws both null sets where each admits one.
+Where an arm admitted no axis the read is refused and the panel says so in its
+caption instead of inventing a marker. Every panel's preview was measured for
+ink in both series, so a panel cannot carry the stored contours alone.</p>
+<figure id="stored-state-refusals-on-the-recorded-mesh-tcv-stored-default"><img src="/nova/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/tcv-stored-default.svg" width="100%" alt="tcv-stored-default: imas-efit stored state over [-0.7445, -0.03763] and the nova terminal iterate over [-0.7399, -0.3294] Wb/rad, both contoured on one shared level array spanning [-0.7163, -0.06591] Wb/rad at 24 levels; 15 imas-efit and 14 nova levels carried a contour; the nova axis and X-point are drawn; terminal residual 0.0005241157519662908, reason 8, qualified no."><figcaption>tcv-stored-default: imas-efit stored state over [-0.7445, -0.03763] and the nova terminal iterate over [-0.7399, -0.3294] Wb/rad, both contoured on one shared level array spanning [-0.7163, -0.06591] Wb/rad at 24 levels; 15 imas-efit and 14 nova levels carried a contour; the nova axis and X-point are drawn; terminal residual 0.0005241157519662908, reason 8, qualified no.</figcaption></figure>
+<figure id="stored-state-refusals-on-the-recorded-mesh-tcv-stored-tightened"><img src="/nova/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/tcv-stored-tightened.svg" width="100%" alt="tcv-stored-tightened: imas-efit stored state over [-0.7445, -0.03763] and the nova terminal iterate over [-0.5341, -0.09924] Wb/rad, both contoured on one shared level array spanning [-0.7163, -0.06591] Wb/rad at 24 levels; 15 imas-efit and 15 nova levels carried a contour; the nova axis and X-point are drawn; terminal residual 0.023974836483438934, reason 12, qualified no."><figcaption>tcv-stored-tightened: imas-efit stored state over [-0.7445, -0.03763] and the nova terminal iterate over [-0.5341, -0.09924] Wb/rad, both contoured on one shared level array spanning [-0.7163, -0.06591] Wb/rad at 24 levels; 15 imas-efit and 15 nova levels carried a contour; the nova axis and X-point are drawn; terminal residual 0.023974836483438934, reason 12, qualified no. This is the arm that reaches the record's TCV refusal.</figcaption></figure>
+<figure id="stored-state-refusals-on-the-recorded-mesh-iter-stored-default"><img src="/nova/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/iter-stored-default.svg" width="100%" alt="iter-stored-default: imas-efit stored state over [-89.37, 87.14] and the nova terminal iterate over [24.52, 159.5] Wb/rad, both contoured on one shared level array spanning [-79.41, 149.6] Wb/rad at 24 levels; 8 imas-efit and 13 nova levels carried a contour; the nova axis and X-point are drawn; terminal residual 0.12310610396423093, reason 12, qualified no."><figcaption>iter-stored-default: imas-efit stored state over [-89.37, 87.14] and the nova terminal iterate over [24.52, 159.5] Wb/rad, both contoured on one shared level array spanning [-79.41, 149.6] Wb/rad at 24 levels; 8 imas-efit and 13 nova levels carried a contour; the nova axis and X-point are drawn; terminal residual 0.12310610396423093, reason 12, qualified no.</figcaption></figure>
+<figure id="stored-state-refusals-on-the-recorded-mesh-iter-stored-tightened"><img src="/nova/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/iter-stored-tightened.svg" width="100%" alt="iter-stored-tightened: imas-efit stored state over [-89.37, 87.14] and the nova terminal iterate over [25.37, 162.1] Wb/rad, both contoured on one shared level array spanning [-79.31, 152] Wb/rad at 24 levels; 8 imas-efit and 13 nova levels carried a contour; the nova solved-null read refused with NoQualifiedAxisError, so no blue null marker is drawn; terminal residual unavailable, reason 3, qualified no."><figcaption>iter-stored-tightened: imas-efit stored state over [-89.37, 87.14] and the nova terminal iterate over [25.37, 162.1] Wb/rad, both contoured on one shared level array spanning [-79.31, 152] Wb/rad at 24 levels; 8 imas-efit and 13 nova levels carried a contour; the nova solved-null read refused with NoQualifiedAxisError, so no blue null marker is drawn; terminal residual unavailable, reason 3, qualified no. This is the arm that reaches the record's ITER refusal.</figcaption></figure>
+</section>
+
+<section id="stored-state-refusals-on-the-recorded-mesh-evidence">
+<h3>Evidence</h3>
+<p>The comparison record this reproduces is
+<code>docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html</code>
+at revision 9047a3fe50708d6dd20ebe672d0dc22f40b0ae50. The arms ran as one titan
+job, 1334842 on 98dci4-gpu-0002, and the record-revision control as job 1335055
+on the same node. Per-arm receipts, their terminal flux arrays and the run's
+measurement summary are published at
+<code>~/.cache/nova-stored-state-refusals/recorded-cases/</code>; the test that
+holds them to the recorded values is <code>tests/test_stored_state_refusals.py</code>
+and reads that directory.</p>
+</section>
+</section>

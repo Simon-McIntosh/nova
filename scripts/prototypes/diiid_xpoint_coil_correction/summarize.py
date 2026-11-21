@@ -82,8 +82,24 @@ def read_only(row):
     return (base["distance_cm"] - corrected["distance_cm"]) / base["distance_cm"], None
 
 
+def measured_inputs(root, case):
+    """The measured vector, from whichever arm recorded it.
+
+    The corpus-column writer records the measured vector only on a corrected
+    arm, because it is written where the shift is applied. A measured arm's
+    vector is the same read of the same corpus row, so it is taken from the
+    corrected arm when the measured arm records none.
+    """
+
+    for arm in ("base", "corrected"):
+        path = root / arm / case / "current-inputs.json"
+        if path.is_file():
+            return json.loads(path.read_text())
+    raise FileNotFoundError(root / "base" / case / "current-inputs.json")
+
+
 def coil_rows(root, case, frame):
-    applied = json.loads((root / "base" / case / "current-inputs.json").read_text())
+    applied = measured_inputs(root, case)
     fit_path = root / "fits" / case / f"conductor-fit-{frame}.json"
     names = applied["names"]
     fit = json.loads(fit_path.read_text()) if fit_path.is_file() else None

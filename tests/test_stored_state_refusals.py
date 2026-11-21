@@ -4,24 +4,40 @@ The arms are produced by ``scripts/prototypes/stored_state_refusals/
 run_recorded_cases.py`` on a GPU lane, which drives the earlier comparison
 record's own case reader, fixture machine, receipt mesh, stored seed, fitted
 conductor currents and policy.  This module holds those receipts to the values
-the record reports, each set beside the recorded value, and needs no GPU.
+the record reports, each written here rather than read back from a value the
+runner also wrote, and needs no GPU.
 
 ``STORED_STATE_REFUSALS_RECEIPTS`` names the directory holding the arm
 receipts; unset, it is the durable cache path the runner's output is copied to.
+The measured refusals are asserted under the comparison's continuation policy,
+which is the arm the record shows reaching them; the default-policy arms are
+asserted only to be unqualified, because under today's fixtures they stop
+short.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import os
+import xml.etree.ElementTree as ElementTree
 from pathlib import Path
 
-RECORD_SOURCE = (
+ROOT = Path(__file__).resolve().parents[1]
+RUNNER = ROOT / "scripts/prototypes/stored_state_refusals/run_recorded_cases.py"
+FIGURES = (
+    ROOT / "docs/figures/forward-solve-near-stored-states/"
+    "stored-state-refusals-on-the-recorded-mesh"
+)
+
+RECORD_PATH = (
     "docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html"
 )
 RECORDED_RESIDUAL = 0.030364200526436996
 RECORDED_REASON = 12
 RESIDUAL_BAND = 3.0
+MESH_NODES = {"tcv": 355, "iter": 341}
+COMPARISON_MODULE = "tests.test_magnetics_fit_efit_comparison"
 ARMS = (
     "tcv-stored-default",
     "tcv-stored-tightened",
@@ -36,54 +52,48 @@ def _receipts():
         directory = "~/.cache/nova-stored-state-refusals/recorded-cases"
     path = Path(directory).expanduser()
     if not path.is_dir():
-        raise AssertionError(f"no arm receipts at {path}")
+        raise FileNotFoundError("no arm receipts at %s" % path)
     return path
 
 
 def _receipt(label):
-    path = _receipts() / f"{label}.json"
+    path = _receipts() / ("%s.json" % label)
     if not path.is_file():
-        raise AssertionError(f"arm {label} left no receipt at {path}")
+        raise FileNotFoundError("arm %s left no receipt at %s" % (label, path))
     return json.loads(path.read_text())
 
 
-def _measurement():
-    return json.loads((_receipts() / "measurement.json").read_text())
+def _svg(label):
+    return FIGURES / ("%s.svg" % label)
 
 
-def test_every_arm_is_unqualified_and_states_the_record():
-    """Every arm refuses, and carries the recorded value beside its own."""
+def test_every_arm_is_unqualified():
+    """No arm is qualified or converged: the refusal is the finding."""
     for label in ARMS:
         receipt = _receipt(label)
         assert receipt["qualified"] is False, label
         assert receipt["converged"] is False, label
-        band = receipt["recorded_band"]
-        assert band["recorded_termination_reason"] in (3, 12), label
-        assert band["measured_termination_reason"] == (receipt["termination_reason"]), (
-            label
-        )
+        assert receipt["termination_reason"] in (3, 8, 12), label
 
 
 def test_tcv_stops_at_the_recorded_residual():
-    """The TCV arm built on the record's construction stops where it stopped."""
+    """The TCV continuation arm stops where the record says it stopped."""
     receipt = _receipt("tcv-stored-tightened")
     assert receipt["case"] == "tcv"
     assert receipt["termination_reason"] == RECORDED_REASON
     residual = receipt["residual"]
-    assert residual is not None and residual > 0.0, (
-        f"TCV stopped with no finite residual ({receipt['residual_state']})"
+    assert residual is not None and math.isfinite(residual) and residual > 0.0, (
+        "TCV stopped with no finite residual (%s)" % receipt["residual_state"]
     )
     factor = residual / RECORDED_RESIDUAL
     assert 1.0 / RESIDUAL_BAND <= factor <= RESIDUAL_BAND, (
-        f"TCV residual {residual} is {factor:.3f}x the recorded {RECORDED_RESIDUAL}"
+        "TCV residual %s is %.3fx the recorded %s"
+        % (residual, factor, RECORDED_RESIDUAL)
     )
-    band = receipt["recorded_band"]
-    assert band["recorded_residual"] == RECORDED_RESIDUAL
-    assert band["within_factor_three"] is True
 
 
 def test_iter_admits_no_magnetic_axis():
-    """The ITER arm built on the record's construction admits no axis."""
+    """The ITER continuation arm refuses with no magnetic axis admitted."""
     receipt = _receipt("iter-stored-tightened")
     assert receipt["case"] == "iter"
     assert receipt["termination_reason"] == 3
@@ -91,44 +101,67 @@ def test_iter_admits_no_magnetic_axis():
     axis = receipt["axis"]
     assert axis["admitted"] is False
     assert axis["error"] == "NoQualifiedAxisError"
-    band = receipt["recorded_band"]
-    assert band["recorded_axis_admitted"] is False
-    assert band["measured_axis_admitted"] is False
 
 
-def test_each_arm_is_the_comparison_records_own_fixture():
-    """Every arm names the comparison module, its mesh, route and coefficients."""
-    measurement = _measurement()
-    assert measurement["measurement_module"].endswith(
-        "tests/test_magnetics_fit_efit_comparison.py"
-    )
-    assert measurement["record_source"] == RECORD_SOURCE
+def test_arms_are_the_comparison_records_own_fixture():
+    """The arms are the comparison's reader, mesh, route and seed, not restated.
+
+    The runner's import is read from the committed source rather than from the
+    receipt it writes, so a runner that began restating the fixtures would fail
+    this even if it went on labelling its output a comparison.
+    """
+    source = RUNNER.read_text()
+    assert "from %s import (" % COMPARISON_MODULE in source
+    for name in ("_attempt", "_problem", "_read_case", "_residual_fields"):
+        assert name in source, name
     coefficients = {}
     for case in ("tcv", "iter"):
-        receipt = _receipt(f"{case}-stored-default")
+        receipt = _receipt("%s-stored-default" % case)
         assert receipt["seed_policy"] == "ExplicitSolveSeed"
         assert receipt["route"] == "newton_krylov"
         assert receipt["current_present"] is True
         mesh = receipt["mesh"]
         assert mesh["kind"] == "StencilMesh"
-        assert mesh["nodes"] > 0
+        assert mesh["nodes"] == MESH_NODES[case], mesh
+        assert mesh["machine_nodes"] == MESH_NODES[case], mesh
         assert mesh["stencil_rows"] > 0
-        assert mesh["machine_nodes"] > 0
-        assert len(receipt["coefficients"]) >= 3
         coefficients[case] = receipt["coefficients"]
+        assert len(coefficients[case]) >= 3
     assert coefficients["tcv"] != coefficients["iter"]
 
 
-def test_each_panel_draws_both_series():
-    """A panel that carries a solved state draws both series on shared levels."""
+def test_the_record_cited_is_the_comparison_record():
+    """The evidence fragment names the record these values come from."""
+    fragment = (
+        ROOT / "docs/evidence/fragments/forward-solve-near-stored-states/"
+        "stored-state-refusals-on-the-recorded-mesh.html"
+    )
+    assert RECORD_PATH in fragment.read_text()
+
+
+def test_each_committed_panel_draws_both_series():
+    """Every arm's committed SVG carries both series, and one SVG per figure.
+
+    The panel a receipt names lives in the run directory, which is archived on
+    release, so the check reads the published figure instead.
+    """
     for label in ARMS:
-        receipt = _receipt(label)
-        if receipt.get("panel") is None:
-            assert receipt.get("panel_refused"), receipt
+        svg = _svg(label)
+        assert svg.is_file(), svg
+        assert not (svg.parent / ("%s-preview.png" % svg.stem)).exists(), svg
+        for series, colour in (("imas-efit", "#929292"), ("nova", "#3366cc")):
+            count = _paths_with_colour(svg, colour)
+            assert count > 0, "%s draws no %s path" % (svg.name, series)
+
+
+def _paths_with_colour(svg, colour: str) -> int:
+    root = ElementTree.parse(svg).getroot()
+    count = 0
+    for element in root.iter():
+        if element.tag.rsplit("}", 1)[-1] != "path":
             continue
-        assert Path(receipt["panel"]).is_file(), receipt["panel"]
-        drawn = receipt["panel_record"]
-        assert drawn["imas_efit_levels_drawn"] > 0, label
-        assert drawn["nova_levels_drawn"] > 0, label
-        assert drawn["imas_efit_range"] is not None, label
-        assert drawn["nova_range"] is not None, label
+        if not element.get("d"):
+            continue
+        if "stroke: %s" % colour in (element.get("style") or ""):
+            count += 1
+    return count

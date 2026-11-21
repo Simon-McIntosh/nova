@@ -51,7 +51,12 @@ from nova.equilibrium.source import (  # noqa: E402
     PolynomialFluxFunction,
 )
 from nova.equilibrium.solve_request import ExplicitSolveSeed  # noqa: E402
-from records import next_sequence, residual_fields  # noqa: E402
+from records import (  # noqa: E402
+    mesh_record,
+    next_sequence,
+    profile_coefficients,
+    residual_fields,
+)
 from tests.test_magnetics_fit_efit_comparison import (  # noqa: E402
     _attempt,
     _problem,
@@ -63,13 +68,6 @@ from tests.test_magnetics_fit_efit_comparison import (  # noqa: E402
 import panels  # noqa: E402
 
 DIFFERENCE_STEP = 1.0e-4
-
-
-def _profile_coefficients(source):
-    core = source.core
-    pressure = np.asarray(core.p_prime.coefficients, dtype=float)
-    field = np.asarray(core.ff_prime.coefficients, dtype=float)
-    return np.r_[pressure, field]
 
 
 def _displaced_source(source, index, step):
@@ -88,22 +86,12 @@ def _displaced_source(source, index, step):
     )
 
 
-def _mesh_record(data):
-    lattice = data["profile"].lattice
-    return dict(
-        kind=type(lattice).__name__,
-        nodes=int(np.asarray(lattice.coordinate).shape[0]),
-        stencil_rows=int(np.asarray(lattice.stencil).shape[0]),
-        machine_nodes=int(np.asarray(data["machine"].node).shape[0]),
-    )
-
-
 def _record(data, label, request, receipt, record, started):
     flux = data.get("terminal_flux")
     residual = data.get("terminal_residual")
     record.update(
         policy=request.policy.to_dict(),
-        coefficients=_profile_coefficients(request.source_profile).tolist(),
+        coefficients=profile_coefficients(request.source_profile).tolist(),
         seed_policy=type(request.seed_policy).__name__,
         current_present=bool(np.size(np.asarray(request.current))),
         qualified=receipt is not None,
@@ -169,7 +157,7 @@ def _report(measurement):
 def _mastu(monkeypatch, records):
     data = _problem(_read_case("mastu"), monkeypatch)
     stored = data["request"]
-    records["mesh"] = _mesh_record(data)
+    records["mesh"] = mesh_record(data)
     receipt = getattr(data["machine"], "cache_receipt", None)
     if receipt is not None:
         records["machine_cache"] = dict(
@@ -181,7 +169,7 @@ def _mastu(monkeypatch, records):
             store_seconds=receipt.store_seconds,
         )
     records["default_policy"] = stored.policy.to_dict()
-    records.setdefault("stored_coefficients", {})["mastu"] = _profile_coefficients(
+    records.setdefault("stored_coefficients", {})["mastu"] = profile_coefficients(
         stored.source_profile
     ).tolist()
     _report(records)
@@ -215,7 +203,7 @@ def _mastu(monkeypatch, records):
 
 
 def _displaced(monkeypatch, records, data, stored, qualified_terminal):
-    raw = _profile_coefficients(stored.source_profile)
+    raw = profile_coefficients(stored.source_profile)
     pressure_size = int(
         np.asarray(stored.source_profile.core.p_prime.coefficients).size
     )
@@ -267,8 +255,8 @@ def _mastu_displaced_only(monkeypatch, records):
     """Re-run the displaced arms alone, seeded from the landed stored solve."""
     data = _problem(_read_case("mastu"), monkeypatch)
     stored = data["request"]
-    records["mesh"] = _mesh_record(data)
-    records.setdefault("stored_coefficients", {})["mastu"] = _profile_coefficients(
+    records["mesh"] = mesh_record(data)
+    records.setdefault("stored_coefficients", {})["mastu"] = profile_coefficients(
         stored.source_profile
     ).tolist()
     seed_path = os.environ.get("STORED_STATE_REFUSALS_SEED_FLUX")
@@ -285,9 +273,9 @@ def _stored_case(name, monkeypatch, records):
     data = _problem(_read_case(name), monkeypatch)
     request = data["request"]
     records["meshes"] = records.get("meshes", {})
-    records["meshes"][name] = _mesh_record(data)
+    records["meshes"][name] = mesh_record(data)
     records["stored_coefficients"] = records.get("stored_coefficients", {})
-    records["stored_coefficients"][name] = _profile_coefficients(
+    records["stored_coefficients"][name] = profile_coefficients(
         request.source_profile
     ).tolist()
     _report(records)

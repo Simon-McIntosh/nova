@@ -23,6 +23,25 @@ import numpy as np
 PROTOTYPE = Path(__file__).resolve().parent
 
 
+def profile_coefficients(source) -> np.ndarray:
+    """Return the pressure and field coefficients of a solved profile."""
+    core = source.core
+    pressure = np.asarray(core.p_prime.coefficients, dtype=float)
+    field = np.asarray(core.ff_prime.coefficients, dtype=float)
+    return np.r_[pressure, field]
+
+
+def mesh_record(data) -> dict:
+    """Return what a receipt records about the mesh a solve was differentiated on."""
+    lattice = data["profile"].lattice
+    return dict(
+        kind=type(lattice).__name__,
+        nodes=int(np.asarray(lattice.coordinate).shape[0]),
+        stencil_rows=int(np.asarray(lattice.stencil).shape[0]),
+        machine_nodes=int(np.asarray(data["machine"].node).shape[0]),
+    )
+
+
 def order_key(path: Path) -> tuple[int, str, str]:
     """Return the written order of one receipt, never its filesystem time.
 

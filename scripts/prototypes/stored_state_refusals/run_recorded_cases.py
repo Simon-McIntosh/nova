@@ -19,9 +19,11 @@ Two arms per case, both started from the stored imas-efit flux map:
 
 Each arm is written as its own receipt as it lands, so an expiry loses at most
 the running arm.  Each arm's terminal state is drawn beside the stored
-imas-efit state on one shared level array, with both null sets and the wall.
-Run it through ``scripts/prototypes/stored_state_refusals/submit_recorded.sh``;
-it needs a GPU lane.
+imas-efit state on one shared level array, with its null set and the wall.
+Run it through ``scripts/prototypes/stored_state_refusals/submit.sh`` with
+``--runner run_recorded_cases.py``; it needs a GPU lane.  ``--render <receipts>
+<figures>`` redraws the panels from the terminal fluxes a run already stored,
+so a caption or null-set change costs no solve.
 """
 
 from __future__ import annotations
@@ -39,12 +41,21 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-OUTPUT = Path(os.environ["STORED_STATE_REFUSALS_OUTPUT"]).resolve()
-FIGURES = Path(os.environ["STORED_STATE_REFUSALS_FIGURES"]).resolve()
-OUTPUT.mkdir(parents=True, exist_ok=True)
-FIGURES.mkdir(parents=True, exist_ok=True)
-os.environ["NOVA_EFIT_COMPARISON_OUTPUT"] = str(OUTPUT / "comparison")
-os.environ["NOVA_EFIT_COMPARISON_FIGURES"] = str(OUTPUT / "comparison")
+OUTPUT = (
+    Path(os.environ["STORED_STATE_REFUSALS_OUTPUT"]).resolve()
+    if "STORED_STATE_REFUSALS_OUTPUT" in os.environ
+    else None
+)
+FIGURES = (
+    Path(os.environ["STORED_STATE_REFUSALS_FIGURES"]).resolve()
+    if "STORED_STATE_REFUSALS_FIGURES" in os.environ
+    else None
+)
+if OUTPUT is not None and FIGURES is not None:
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    FIGURES.mkdir(parents=True, exist_ok=True)
+    os.environ["NOVA_EFIT_COMPARISON_OUTPUT"] = str(OUTPUT / "comparison")
+    os.environ["NOVA_EFIT_COMPARISON_FIGURES"] = str(OUTPUT / "comparison")
 
 import jax  # noqa: E402
 import numpy as np  # noqa: E402
@@ -62,6 +73,7 @@ from tests.test_magnetics_fit_efit_comparison import (  # noqa: E402
 )
 
 import panels  # noqa: E402
+from records import mesh_record, profile_coefficients  # noqa: E402
 
 CASES = ("tcv", "iter")
 RECORDED = {
@@ -99,20 +111,18 @@ def _finite(value):
     return value if math.isfinite(value) else None
 
 
-def _coefficients(source):
-    core = source.core
-    pressure = np.asarray(core.p_prime.coefficients, dtype=float)
-    field = np.asarray(core.ff_prime.coefficients, dtype=float)
-    return np.r_[pressure, field]
-
-
-def _mesh_record(data):
-    lattice = data["profile"].lattice
-    return dict(
-        kind=type(lattice).__name__,
-        nodes=int(np.asarray(lattice.coordinate).shape[0]),
-        stencil_rows=int(np.asarray(lattice.stencil).shape[0]),
-        machine_nodes=int(np.asarray(data["machine"].node).shape[0]),
+def _solved_nulls_attribute(data, record):
+    """Attach the arm's recorded refusal, or clear it when an axis was admitted."""
+    axis = record.get("axis") or {}
+    if axis.get("admitted"):
+        data.pop("solved_nulls", None)
+        return
+    # A refused solved-null read is passed to the panel so it says which error
+    # refused instead of reading a topology the solve never reached.
+    data["solved_nulls"] = (
+        f"refused: {axis.get('error')}: {axis.get('message')}"
+        if axis.get("error")
+        else "not read"
     )
 
 
@@ -163,12 +173,12 @@ def _band(record):
     return band
 
 
-def _draw(data, case, label, record):
+def _draw(data, case, label, record, figures=None):
     """Draw the arm's terminal state and record what the file actually carries."""
     if data.get("terminal_flux") is None:
         record["panel_refused"] = "the arm returned no terminal flux to contour"
         return
-    destination = FIGURES / f"{case}-{label[len(case) + 1 :]}.svg"
+    destination = (figures or FIGURES) / f"{case}-{label[len(case) + 1 :]}.svg"
     try:
         drawn = panels.draw_panel(data, data["terminal_flux"], destination, "")
         drawn.update(
@@ -205,10 +215,10 @@ def _arm(data, request, label, case):
             receipt.resolved_defaults.policy.to_dict() if receipt is not None else None
         ),
         route=request.policy.route,
-        coefficients=_coefficients(request.source_profile).tolist(),
+        coefficients=profile_coefficients(request.source_profile).tolist(),
         seed_policy=type(request.seed_policy).__name__,
         current_present=bool(np.size(np.asarray(request.current))),
-        mesh=_mesh_record(data),
+        mesh=mesh_record(data),
         device=str(jax.devices()[0]),
         qualified=bool(receipt is not None),
         converged=bool(data.get("terminal_converged")),
@@ -218,17 +228,7 @@ def _arm(data, request, label, case):
         **_residual_fields(_finite(data.get("terminal_residual"))),
         axis=_axis_admission(data, flux),
     )
-    if not (record.get("axis") or {}).get("admitted"):
-        # A refused solved-null read is passed to the panel so it says which
-        # error refused instead of reading a topology the solve never reached.
-        axis = record["axis"] or {}
-        data["solved_nulls"] = (
-            f"refused: {axis.get('error')}: {axis.get('message')}"
-            if axis.get("error")
-            else "not read"
-        )
-    else:
-        data.pop("solved_nulls", None)
+    _solved_nulls_attribute(data, record)
     if flux is not None:
         path = OUTPUT / f"{label}-terminal-flux.npz"
         np.savez(path, flux=np.asarray(flux))
@@ -239,7 +239,56 @@ def _arm(data, request, label, case):
     return record
 
 
-def main():
+def render(receipts: Path, figures: Path) -> None:
+    """Redraw the arms' panels from the terminal fluxes their receipts name.
+
+    The receipts keep each arm's measured outcome, so a caption or a null-set
+    change is repaired by redrawing from the stored flux rather than by solving
+    the case again.  Each redrawn panel's record is written back into the arm's
+    receipt, so the captions and the fragment read what the files carry.
+    """
+    receipts, figures = receipts.resolve(), figures.resolve()
+    figures.mkdir(parents=True, exist_ok=True)
+    scratch = receipts / "render-scratch"
+    scratch.mkdir(exist_ok=True)
+    os.environ.setdefault("NOVA_EFIT_COMPARISON_OUTPUT", str(scratch))
+    os.environ.setdefault("NOVA_EFIT_COMPARISON_FIGURES", str(scratch))
+    configure_dtypes()
+    monkeypatch = pytest.MonkeyPatch()
+    data_by_case: dict = {}
+    for case in CASES:
+        for arm in ("default", "tightened"):
+            label = f"{case}-stored-{arm}"
+            path = receipts / f"{label}.json"
+            if not path.is_file():
+                continue
+            record = json.loads(path.read_text())
+            flux_path = record.get("terminal_flux")
+            if not flux_path:
+                continue
+            if case not in data_by_case:
+                data_by_case[case] = _problem(_read_case(case), monkeypatch)
+            data = data_by_case[case]
+            _solved_nulls_attribute(data, record)
+            data["terminal_flux"] = np.load(flux_path)["flux"]
+            _draw(data, case, label, record, figures)
+            _write(path, record)
+            print(
+                "PANEL " + label + " " + json.dumps(record.get("panel_record", {})),
+                flush=True,
+            )
+
+
+def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv[:1] == ["--render"]:
+        render(Path(argv[1]), Path(argv[2]))
+        return
+    if OUTPUT is None or FIGURES is None:
+        raise SystemExit(
+            "STORED_STATE_REFUSALS_OUTPUT and STORED_STATE_REFUSALS_FIGURES must "
+            "name this job's output directories"
+        )
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
     assert jax.default_backend() == "gpu", "the recorded refusals need a GPU lane"

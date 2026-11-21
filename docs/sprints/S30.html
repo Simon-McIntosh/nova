@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="sprint">
+  <meta name="reckon-id" content="S30">
+  <meta name="reckon-version" content="3">
+  <title>One IDS seam: IMAS is the only interface between machine data and the solver | sprint</title>
+</head>
+<body>
+<main class="reckon-resource" data-type="sprint" data-id="S30">
+  <ol data-reckon="sprint-items">
+  <li data-slug="cocos-standalone-distribution" data-item="{&quot;done_when&quot;: &quot;The nova.io.cocos re-export is removed once no importer remains in nova or imas-ambix.&quot;, &quot;slug&quot;: &quot;cocos-standalone-distribution&quot;, &quot;why_now&quot;: &quot;It carried no sprint; its remaining section waits only on imas-ambix importing nova_cocos directly.&quot;}">cocos-standalone-distribution</li>
+  </ol>
+  <script type="application/json" id="reckon-resource-state">{"description":"Opened 2026-11-21 by the lead's consolidation. Priority three. The generic IMAS layer (machine.py, equilibrium.py, pf_active, pf_passive, magnetics, dataset.py) is the capability. About 39 machine-specific modules and roughly 30k lines grew beside it from August 2026 (mast_*, diiid_*, machine_*). Done when: (1) a stored duplicate-path review of nova/imas names every overlap; (2) unreached modules are deleted and machine-specific authoring moves to an ingest package that writes IDSs once; (3) the forward and inverse solves read only through the generic readers and write equilibrium through dataset.py, with imas-efit reading the result back. Needs a new plan; mostly local workers.","ends":"","id":"S30","items":[{"done_when":"The nova.io.cocos re-export is removed once no importer remains in nova or imas-ambix.","slug":"cocos-standalone-distribution","why_now":"It carried no sprint; its remaining section waits only on imas-ambix importing nova_cocos directly."}],"starts":"","status":"active","summary":"","theme":"One IDS seam: IMAS is the only interface between machine data and the solver","type":"sprint","version":3}</script>
+</main>
+</body>
+</html>

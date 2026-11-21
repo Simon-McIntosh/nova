@@ -444,6 +444,7 @@ def main():
     parser.add_argument("--resume-refinement", action="store_true")
     parser.add_argument("--compare-routes", action="store_true")
     parser.add_argument("--cholesky", action="store_true")
+    parser.add_argument("--assemble-only", action="store_true")
     replay_mode = parser.add_mutually_exclusive_group()
     replay_mode.add_argument("--replay", action="store_true")
     replay_mode.add_argument("--half-drive-only", action="store_true")
@@ -691,6 +692,11 @@ def main():
     )
     row["operator_path"] = str(operator_path)
     row["geometry_digest"] = interaction.geometry_digest
+    if args.assemble_only:
+        row["assembly_only"] = True
+        save(path, row)
+        print(json.dumps(row), flush=True)
+        return
     save(path, row)
     row["full_drive"] = solve(
         inputs,

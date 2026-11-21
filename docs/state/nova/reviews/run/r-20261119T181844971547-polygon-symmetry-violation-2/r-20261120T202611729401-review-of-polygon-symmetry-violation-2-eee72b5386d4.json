@@ -17,6 +17,13 @@
     }
   },
   "dispatched_at": "2026-11-20T21:24:10Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "diagnosis prototype that informs the moment-row fix and is not reused as an owner; consolidation and control wording belong to any node that promotes these scripts",
+      "recorded_at": "2026-11-21T00:31:51.392930+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/polygon_symmetry_violation/compare.py",

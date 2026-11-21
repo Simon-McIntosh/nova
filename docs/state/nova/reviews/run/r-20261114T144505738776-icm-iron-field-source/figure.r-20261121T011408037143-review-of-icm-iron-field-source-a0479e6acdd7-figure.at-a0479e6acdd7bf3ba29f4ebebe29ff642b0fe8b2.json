@@ -3,7 +3,7 @@
   "added_failure_ids": [],
   "added_failure_note": "A figure review runs no suite; the zero count and the empty list are the neutral value the record shape requires, not a measurement. No base/head gate pair was read and no suite delta is claimed.",
   "caption_note": "The section's caption does not merely repeat the figure title: the prose before the figure states the three planes, 40 radii per plane and the R = 16 m extent, and the paragraph after it names each panel's content. Pass, and the caption is not changed by this review.",
-  "completed_at": "",
+  "completed_at": "2026-11-21T01:40:40.642Z",
   "dispatched_at": "2026-11-21T01:14:48Z",
   "figure_evidence": {
     "canvas": "768x864 px, plt.subplots(3, 1, figsize=(6.4, 7.2), constrained_layout=True).",

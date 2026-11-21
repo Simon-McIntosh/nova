@@ -1,0 +1,1489 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "91de28fdd157a76967cea142da097ab0cfededb9",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T011408037143-review-of-icm-iron-field-source-a0479e6acdd7-figure/brief.md",
+    "sha256": "2f1c5fff3759addeea2a1d8a615a1f06c4d0690f8a8f6a2ae13fe9bfdcce45c8"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 5576051,
+      "input_tokens_cumulative": 5576051,
+      "output_tokens": 35647,
+      "output_tokens_cumulative": 35647,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-21T01:40:40.642Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-21T01:14:48Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.5915032679738562,
+    "plan": "iron-core-magnetisation",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-21T05:14:09.803027+00:00",
+    "horizon_seconds": 14400,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-21T01:14:09Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 12,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 11,
+    "headroom": -11,
+    "mean_context": 87273,
+    "observed_at": "2026-11-21T01:13:57Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 12,
+      "aggregate_tokens_per_second": 212.822,
+      "detail": "",
+      "mean_tokens_per_second": 19.347,
+      "observed_at": "2026-11-21T01:13:57Z",
+      "runs": 11.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-21T01:40:40.642Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T011408037143-review-of-icm-iron-field-source-a0479e6acdd7-figure/manifest.md",
+  "member": "disposable-r-20261121T011408037143-review-of-icm-iron-field-source-a0479e6acdd7-figure",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-icm-iron-field-source-a0479e6acdd7-figure",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/figure-review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T011408037143-review-of-icm-iron-field-source-a0479e6acdd7-figure/brief.md",
+    "brief_sha256": "2f1c5fff3759addeea2a1d8a615a1f06c4d0690f8a8f6a2ae13fe9bfdcce45c8",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "standard",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "5b10be66-c69b-456f-9a85-3840909f1723"
+    },
+    "done_when": "the figure review for r-20261114T144505738776-icm-iron-field-source stores a parsed read-only rubric record with all 6 rubric items at a declared write path, anchored to the reviewed base and head",
+    "estimated_hours": null,
+    "goal": "attach an independent figure review to run r-20261114T144505738776-icm-iron-field-source",
+    "id": "review-of-icm-iron-field-source-a0479e6acdd7-figure",
+    "images": [
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-iron-field-source/docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png",
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-iron-field-source/docs/figures/west-stray-field/west-62751-iron-stray-field.png"
+    ],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-21T01:14:09Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 12,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 11,
+      "headroom": -11,
+      "mean_context": 87273,
+      "observed_at": "2026-11-21T01:13:57Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 12,
+        "aggregate_tokens_per_second": 212.822,
+        "detail": "",
+        "mean_tokens_per_second": 19.347,
+        "observed_at": "2026-11-21T01:13:57Z",
+        "runs": 11.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T011408037143-review-of-icm-iron-field-source-a0479e6acdd7-figure/manifest.md",
+    "mcp_set": "",
+    "negative_control": "",
+    "node_body": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T011408037143-review-of-icm-iron-field-source-a0479e6acdd7-figure/node.json",
+    "over_fence_note": "",
+    "over_fence_reason": "",
+    "peer_scopes": {},
+    "plan": "iron-core-magnetisation",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "4h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/review-records/r-20261114T144505738776-icm-iron-field-source.figure.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/review-records/r-20261114T144505738776-icm-iron-field-source.figure.at-a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2983327.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "docs/plans/*.html",
+    "docs/state/nova"
+  ],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "review-of-icm-iron-field-source-a0479e6acdd7-figure",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-21T01:14:20.577669+00:00",
+    "score": 0.625,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 1812.641076,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 104.543,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 2.71136228674204,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.406127363981482,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-fable-5-1",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.029876783213653352,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T11:00:00.708720+00:00",
+        "stale": true,
+        "suits": "The most capable and most expensive Claude model, about two and a half times Opus's token price. Reserve it for the very hardest nodes.",
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 1812.641076,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 104.543,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 2.71136228674204,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.406127363981482,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.029876783213653352,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T11:00:00.708720+00:00",
+        "stale": true,
+        "suits": "The lane's fastest and cheapest model, about a twentieth of Sonnet's token price. Suits light, well-defined work.",
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 1812.641076,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 104.543,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 2.71136228674204,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.406127363981482,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.029876783213653352,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T11:00:00.708720+00:00",
+        "stale": true,
+        "suits": "A strong general model for deep or open-ended work, about twice Sonnet's token price.",
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 1812.641076,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 104.543,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 2.71136228674204,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.406127363981482,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.029876783213653352,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T11:00:00.708720+00:00",
+        "stale": true,
+        "suits": "The lane default, an everyday coding model at about half of Opus's token price. Suits guided implementation and full reviews.",
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "congested",
+          "running": 11,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 343,
+          "passed": 19,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 362,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": 0
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 195763.304472,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": null,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.348682000451839,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 1.8096724019444446,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.8156110926307871,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-22T20:41:07+00:00",
+        "stale": true,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 195763.304472,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": null,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.348682000451839,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 1.8096724019444446,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.8156110926307871,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-22T20:41:07+00:00",
+        "stale": true,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 195763.304472,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": null,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.348682000451839,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 1.8096724019444446,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6.1-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 47,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 47,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.8156110926307871,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-22T20:41:07+00:00",
+        "stale": true,
+        "suits": "The lane default, the current-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 100.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "in-harness-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "omp-local",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "congested",
+          "running": 11,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "omp",
+        "local": false,
+        "model": "local/deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 142,
+          "passed": 3,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 145,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "local-backend: local work is offered through clive"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": 0
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 1097.905,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"review\",\"spec_level\":\"exact\",\"capability\":{\"version\":\"1.0\",\"class\":\"general\",\"requirements\":{\"reasoning\":\"standard\",\"verification\":\"strict\",\"risk\":\"moderate\"}},\"goal\":\"attach an independent figure review to run r-20261114T144505738776-icm-iron-field-source\",\"done_when\":\"the figure review for r-20261114T144505738776-icm-iron-field-source stores a parsed read-only rubric record with all 6 rubric items at a declared write path, anchored to the reviewed base and head\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":50392,\"estimated_hours\":4.0,\"estimated_hours_source\":\"request\",\"attempts\":0,\"write_path_count\":2,\"negative_control_declared\":false,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null,\"lift_preference\":null},\"orchestrator_comment\":\"\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":4977.0,\"expected_wait_profile_age_s\":1105.058278,\"running\":11,\"waiting\":0,\"queue_position\":1,\"headroom\":-11,\"worker_slots\":0,\"tokens_per_second\":34.692,\"read_at\":\"2026-11-21T01:15:12.327546+00:00\"}}",
+    "rendered_token_estimate": 278,
+    "stage_ms": {
+      "budget-snapshot": 2176.602,
+      "context-estimate": 123.329,
+      "records": 1374.242,
+      "verdict-inputs": 436.92
+    },
+    "template_digest": "5ea6c8844f959f84293c0d2c90c1db0de4375d09e641cca7be7c360603b00202",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5915032679738562,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "91de28fdd157a76967cea142da097ab0cfededb9",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261121T011408037143-review-of-icm-iron-field-source-a0479e6acdd7-figure",
+    "reviewed_base_sha": "9b016126111a5acaebca064c07432042b5a2628c",
+    "reviewed_head_sha": "a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2",
+    "scores": {},
+    "status": "parsed",
+    "total": null
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261121T011408037143-review-of-icm-iron-field-source-a0479e6acdd7-figure",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+  "session_harness": "claude",
+  "session_id": "e85768cc-e7fb-4505-885d-ca94c3198f4a",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 5576051,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1523.448,
+    "generated_tokens": 35647,
+    "generation_seconds": 1478.646,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 56.1,
+    "machine_seconds": 44.802,
+    "peak_input_tokens": 129198,
+    "tokens_per_second": 24.11,
+    "wall_tokens_per_second": 23.4
+  },
+  "time_budget": "4h",
+  "tool_steps": 62.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "omp-local",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 14400,
+        "classification": "scoring",
+        "commits_beyond_base": 35,
+        "delivery": {
+          "status": "delivered"
+        },
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 0,
+        "exit_record": {
+          "attempt": 13,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-21T00:05:34Z",
+          "last_record_type": "agent_end",
+          "launched_at": "2026-11-20T21:38:53Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261114T144505738776-icm-iron-field-source",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 175335,
+          "worker_pid": 3433782
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/review-brief.md --plan iron-core-magnetisation --section '§6' --role review --spec-level exact --node review-of-icm-iron-field-source-a0479e6acdd7 --goal 'attach an independent review to run r-20261114T144505738776-icm-iron-field-source' --done-when 'the review for r-20261114T144505738776-icm-iron-field-source stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261114T144505738776-icm-iron-field-source, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/review-records/r-20261114T144505738776-icm-iron-field-source.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/review-records/r-20261114T144505738776-icm-iron-field-source.at-a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2.json --time-budget 4h --session 5b10be66-c69b-456f-9a85-3840909f1723 --allow-unreconciled-runs --backend omp-local",
+          "promotion_recorded": false,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": null,
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-21T00:05:34Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 4128,
+        "log_fresh": false,
+        "manifest_commits": [
+          "52aafad41 feat(biot): carry solved iron magnetisation as one passive CoilSet frame",
+          "74367072a test(frame): pin the iron frame on a reloaded coilset and record the seam receipts",
+          "d245ba8d2 feat(evidence): publish the iron stray-field figure and the probe and loop tables",
+          "5b09aa17d docs(evidence): move the iron stray-field figure to the west-stray-field directory",
+          "d7f8955e9 docs(evidence): drop the figure path the relocation replaced",
+          "f64c1a648 docs(evidence): show the iron stray-field figure inline",
+          "c9daf95e7 fix(scripts): keep the sampled stage off the dated field arrays",
+          "63b51cf7e docs(evidence): record the zero control on the production WEST CoilSet",
+          "20a660ed3 Merge remote-tracking branch 'origin/main' into HEAD",
+          "291a81c10 feat(evidence): record the response slice walls and pin its refusals",
+          "4ece0c325 feat(scripts): run both suite arms as one scheduler job",
+          "97eccea7a fix(scripts): name the checkout instead of deriving it from the batch script"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "5072e0be5e5c691a806d40e3eaa40ca993d9664bcaa9c7bb743a8f914b42003c",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": null,
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/review-brief.md --plan iron-core-magnetisation --section '§6' --role review --spec-level exact --node review-of-icm-iron-field-source-a0479e6acdd7 --goal 'attach an independent review to run r-20261114T144505738776-icm-iron-field-source' --done-when 'the review for r-20261114T144505738776-icm-iron-field-source stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261114T144505738776-icm-iron-field-source, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/review-records/r-20261114T144505738776-icm-iron-field-source.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/review-records/r-20261114T144505738776-icm-iron-field-source.at-a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2.json --time-budget 4h --session 5b10be66-c69b-456f-9a85-3840909f1723 --allow-unreconciled-runs --backend omp-local",
+        "node": "icm-iron-field-source",
+        "orientation_check": {
+          "checked_at": "2026-11-21T00:06:32Z",
+          "detail": "",
+          "expected": {
+            "base_sha": "9b016126111a5acaebca064c07432042b5a2628c",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-iron-field-source",
+            "write_paths": [
+              "docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html",
+              "docs/figures/iron-core-magnetisation/icm-iron-field-source",
+              "docs/figures/west-stray-field",
+              "nova/biot/magnetisation.py",
+              "nova/biot/solve.py",
+              "nova/biot/tiledassembly.py",
+              "nova/frame/iron.py",
+              "scripts/iron_field_source",
+              "scripts/iron_field_source/sampled.py",
+              "scripts/west_iron_galerkin_pair/measure.py",
+              "tests/test_imas_iron_read.py",
+              "tests/test_iron_field_source.py",
+              "tests/test_magnetisation.py"
+            ]
+          },
+          "inputs": {
+            "commits": [
+              "52aafad41 feat(biot): carry solved iron magnetisation as one passive CoilSet frame",
+              "74367072a test(frame): pin the iron frame on a reloaded coilset and record the seam receipts",
+              "d245ba8d2 feat(evidence): publish the iron stray-field figure and the probe and loop tables",
+              "5b09aa17d docs(evidence): move the iron stray-field figure to the west-stray-field directory",
+              "d7f8955e9 docs(evidence): drop the figure path the relocation replaced",
+              "f64c1a648 docs(evidence): show the iron stray-field figure inline",
+              "c9daf95e7 fix(scripts): keep the sampled stage off the dated field arrays",
+              "63b51cf7e docs(evidence): record the zero control on the production WEST CoilSet",
+              "20a660ed3 Merge remote-tracking branch 'origin/main' into HEAD",
+              "291a81c10 feat(evidence): record the response slice walls and pin its refusals",
+              "4ece0c325 feat(scripts): run both suite arms as one scheduler job",
+              "97eccea7a fix(scripts): name the checkout instead of deriving it from the batch script"
+            ],
+            "expected": {
+              "base_sha": "9b016126111a5acaebca064c07432042b5a2628c",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-iron-field-source",
+              "write_paths": [
+                "docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html",
+                "docs/figures/iron-core-magnetisation/icm-iron-field-source",
+                "docs/figures/west-stray-field",
+                "nova/biot/magnetisation.py",
+                "nova/biot/solve.py",
+                "nova/biot/tiledassembly.py",
+                "nova/frame/iron.py",
+                "scripts/iron_field_source",
+                "scripts/iron_field_source/sampled.py",
+                "scripts/west_iron_galerkin_pair/measure.py",
+                "tests/test_imas_iron_read.py",
+                "tests/test_iron_field_source.py",
+                "tests/test_magnetisation.py"
+              ]
+            },
+            "head": "a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2",
+            "reported": {
+              "base_sha": "9b016126111a5acaebca064c07432042b5a2628c",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-iron-field-source",
+              "write_paths": [
+                "docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html",
+                "docs/figures/west-stray-field",
+                "scripts/iron_field_source",
+                "tests/test_iron_field_source.py"
+              ]
+            },
+            "status": "complete"
+          },
+          "matched": true,
+          "mismatches": [
+            "write_paths"
+          ],
+          "repaired_echo": {
+            "write_paths": {
+              "expected": [
+                "docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html",
+                "docs/figures/iron-core-magnetisation/icm-iron-field-source",
+                "docs/figures/west-stray-field",
+                "nova/biot/magnetisation.py",
+                "nova/biot/solve.py",
+                "nova/biot/tiledassembly.py",
+                "nova/frame/iron.py",
+                "scripts/iron_field_source",
+                "scripts/iron_field_source/sampled.py",
+                "scripts/west_iron_galerkin_pair/measure.py",
+                "tests/test_imas_iron_read.py",
+                "tests/test_iron_field_source.py",
+                "tests/test_magnetisation.py"
+              ],
+              "reported": [
+                "docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html",
+                "docs/figures/west-stray-field",
+                "scripts/iron_field_source",
+                "tests/test_iron_field_source.py"
+              ]
+            }
+          },
+          "reported": {
+            "base_sha": "9b016126111a5acaebca064c07432042b5a2628c",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-iron-field-source",
+            "write_paths": [
+              "docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html",
+              "docs/figures/west-stray-field",
+              "scripts/iron_field_source",
+              "tests/test_iron_field_source.py"
+            ]
+          }
+        },
+        "phase": "complete",
+        "plan": "iron-core-magnetisation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261114T144505738776-icm-iron-field-source",
+        "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+        "stored_phase": "complete",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 4133,
+        "terminal_at": "2026-11-21T00:05:23Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-iron-field-source"
+      },
+      {
+        "backend": "omp-local",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 28800,
+        "classification": "blocked",
+        "commits_beyond_base": 7,
+        "delivery": {},
+        "detail": "the worker manifest reports blocked: Measured weighted Newton matrix is indefinite; so exact Cholesky as specified is mathematically unavailable. The brief forbids changing interaction values; changing the solve to Cholesky-preconditioned GMRES awaits the requested ruling. Fine fields and both completed equivalence rows remain unmeasured.",
+        "effective_phase": "stopped",
+        "elapsed_seconds": 18535,
+        "exit_record": {
+          "attempt": 7,
+          "detail": "crew stop observed the process tree gone; run r-20261117T223040695957-icm-linear-refinement ended: SIGTERM sent to 0 process(es) [2579368]",
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": null,
+          "exited_at": "2026-11-20T20:05:54Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-20T20:05:22Z",
+          "reason": "run-stop",
+          "recorded_by": "crew-stop",
+          "removed_harness_caches": [],
+          "run_id": "r-20261117T223040695957-icm-linear-refinement",
+          "signal": null,
+          "signal_name": null,
+          "stop": {
+            "reason": "run-stop",
+            "stopped_at": "2026-11-20T20:05:54Z"
+          },
+          "stream_records_seen": 790,
+          "worker_pid": null
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Measured weighted Newton matrix is indefinite; so exact Cholesky as specified is mathematically unavailable. The brief forbids changing interaction values; changing the solve to Cholesky-preconditioned GMRES awaits the requested ruling. Fine fields and both completed equivalence rows remain unmeasured.",
+          "lifting_condition": null,
+          "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223040695957-icm-linear-refinement/manifest.md; resolve the blocker before resuming the run",
+          "promotion_recorded": false,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-20T20:05:54Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 188667,
+        "log_fresh": false,
+        "manifest_commits": [
+          "2c6dbb043a5839ab7615c0a552a558038930ae9c",
+          "183124d5f78e138420e8f3a0adbdbe9be48bc862",
+          "f9723f8fcf6695d263499382d7a3719df80a75d3",
+          "2ff4127c7b84dec626333a75d6a02724e2beb0f3",
+          "4b8e3d440ceac7608cff3f0393d59ca3253ab27c",
+          "59e1a985d6e87fd84525044a0bfe73a8e08ca603",
+          "58087a9755bb2043ac1f768dc2b1aba1cfce744c"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "33c363b5e5debc453f63f7aa0016edddae24c953c82722491cfd50b707b6d86a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223040695957-icm-linear-refinement/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "sol",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223040695957-icm-linear-refinement/manifest.md; resolve the blocker before resuming the run",
+        "node": "icm-linear-refinement",
+        "orientation_check": {
+          "checked_at": "2026-11-18T20:50:45Z",
+          "detail": "",
+          "expected": {
+            "base_sha": "c97c56ee268b8535ba58cd42b458a35d4718544b",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-linear-refinement",
+            "write_paths": [
+              "docs/evidence/fragments/iron-core-magnetisation/icm-linear-refinement.html",
+              "docs/figures/iron-core-magnetisation/icm-linear-refinement",
+              "nova/biot/magnetisation.py",
+              "nova/biot/tiledassembly.py",
+              "scripts/west_iron_linear",
+              "tests/test_magnetisation.py"
+            ]
+          },
+          "inputs": {
+            "commits": [
+              "2c6dbb043a5839ab7615c0a552a558038930ae9c",
+              "183124d5f78e138420e8f3a0adbdbe9be48bc862",
+              "f9723f8fcf6695d263499382d7a3719df80a75d3",
+              "2ff4127c7b84dec626333a75d6a02724e2beb0f3",
+              "4b8e3d440ceac7608cff3f0393d59ca3253ab27c",
+              "59e1a985d6e87fd84525044a0bfe73a8e08ca603",
+              "58087a9755bb2043ac1f768dc2b1aba1cfce744c"
+            ],
+            "expected": {
+              "base_sha": "c97c56ee268b8535ba58cd42b458a35d4718544b",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-linear-refinement",
+              "write_paths": [
+                "docs/evidence/fragments/iron-core-magnetisation/icm-linear-refinement.html",
+                "docs/figures/iron-core-magnetisation/icm-linear-refinement",
+                "nova/biot/magnetisation.py",
+                "nova/biot/tiledassembly.py",
+                "scripts/west_iron_linear",
+                "tests/test_magnetisation.py"
+              ]
+            },
+            "head": "58087a9755bb2043ac1f768dc2b1aba1cfce744c",
+            "reported": {
+              "base_sha": "c97c56ee268b8535ba58cd42b458a35d4718544b",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-linear-refinement",
+              "write_paths": [
+                "docs/evidence/fragments/iron-core-magnetisation/icm-linear-refinement.html",
+                "docs/figures/iron-core-magnetisation/icm-linear-refinement",
+                "nova/biot/magnetisation.py",
+                "nova/biot/tiledassembly.py",
+                "scripts/west_iron_linear",
+                "tests/test_magnetisation.py"
+              ]
+            },
+            "status": "blocked"
+          },
+          "matched": true,
+          "mismatches": [],
+          "reported": {
+            "base_sha": "c97c56ee268b8535ba58cd42b458a35d4718544b",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-linear-refinement",
+            "write_paths": [
+              "docs/evidence/fragments/iron-core-magnetisation/icm-linear-refinement.html",
+              "docs/figures/iron-core-magnetisation/icm-linear-refinement",
+              "nova/biot/magnetisation.py",
+              "nova/biot/tiledassembly.py",
+              "scripts/west_iron_linear",
+              "tests/test_magnetisation.py"
+            ]
+          }
+        },
+        "phase": "stopped",
+        "plan": "iron-core-magnetisation",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261117T223040695957-icm-linear-refinement",
+        "session": "5b10be66-c69b-456f-9a85-3840909f1723",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "detail": "no session id in the live pointer, the run's own stream or the promoted ledger row; all three were consulted, so this is an absence rather than a reading nobody has taken yet",
+          "resolved": false,
+          "run_id": "r-20261117T223040695957-icm-linear-refinement",
+          "session_id": null,
+          "source": null
+        },
+        "stored_phase": "stopped",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 188689,
+        "terminal_at": "2026-11-18T20:49:27Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5b10be66-c69b-456f-9a85-3840909f1723/icm-linear-refinement"
+      }
+    ]
+  },
+  "wall_seconds": 1552,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-21T01:40:44Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-21T01:15:10Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261121T011408037143-review-of-icm-iron-field-source-a0479e6acdd7-figure",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6205,
+    "worker_pid": 721302
+  },
+  "worker_seconds": 1482,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

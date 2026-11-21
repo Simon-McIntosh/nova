@@ -8,7 +8,7 @@
 <meta name="plan-slug" content="diiid-vertical-force-balance">
 <meta name="plan-title" content="DIII-D vertical force balance — why a solve seeded at the EFIT axis ends a metre away">
 <meta name="plan-summary" content="Find why DIII-D forward solves miss EFIT near the X-point and fix it: finite-edge profiles, one coupling kernel, honest conductor currents.">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="done">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort-hours" content="12.0">
 <meta name="plan-capability-version" content="1.0">
@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="168">
+<meta name="plan-version" content="170">
 <meta name="plan-modified" content="2026-11-21">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -252,6 +252,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s12" data-id="c-closed-s12-finite-edge" data-who="35a66cc6-f4f1-4358-8dbb-99c9333c7249" data-when="2026-11-19T13:20:00+00:00">
     <div class="r-comment-body"><p>Closed without diagnosis by lead decision on 2026-11-19. On §13's finite-edge profiles 137D converges at 9.06e-9 with its lower null 1.250 cm from EFIT's, and 146D, 146L and 179L converge as well. The refusal this section set out to explain came from the zeroed edge, not from a solver mechanism that persists on the profiles the solve now uses. No refusal mechanism was measured; run r-20261117T165550735467-diiid-137d-refusal is discarded.</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-close-s12" data-who="35a66cc6-f4f1-4358-8dbb-99c9333c7249" data-when="2026-11-21T21:05:00+00:00">
+    <div class="r-comment-body"><p>Closed without a landing, by lead decision on 2026-11-19; no node ran this section, and the refusal run r-20261117T165550735467-diiid-137d-refusal was discarded. On §13's finite-edge profiles 137D converges at 9.06e-9 with its lower null 1.250 cm from EFIT's, so the refusal came from the zeroed edge. The full account is comment c-closed-s12-finite-edge.</p></div>
 </div>
 <div class="r-comment" data-section="s13" data-id="c-run-r-20261119T104720206556-review-of-diiid-finite-edge-flux-2ffdb3b1fb99-figure" data-who="reckon-build" data-when="2026-11-19T11:10:02.352Z">
     <div class="r-comment-body"><p>figure review of r-20261118T203342822348-diiid-finite-edge-flux at 2ffdb3b1fb9979aa098aa49b11629a4d2df14bb2 is parsed: all six rubric items answered for all four attached figures, four non-blocking findings and no blocking finding, added_failure_count 0 with an empty added_failure_ids.</p></div>

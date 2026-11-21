@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, fields, replace
+from pathlib import Path
 from types import SimpleNamespace
 
 import jax
@@ -76,6 +77,21 @@ def test_comparison_receipts_delegate_to_durable_json_owner(tmp_path, monkeypatc
     assert len(calls) == 1
     assert destination.read_bytes() == before
     print(f"STRICT_JSON_BEFORE_ATOMIC_OWNER_REFUSED {refusal.value}")
+
+
+def test_missing_response_carrier_is_a_named_refusal(tmp_path):
+    from benchmarks import mast_response_carrier_warm as carrier
+    from nova.imas.mast_solve_inputs import SHOT_STORE
+
+    assert SHOT_STORE == Path("/work/projects/imas_gpu/mast/level1/shots")
+    absent = tmp_path / f"{carrier.SEMANTIC_RESPONSE_IDENTITY}.npz"
+    with pytest.raises(carrier.MissingResponseCarrier) as refusal:
+        carrier.load_carrier(absent)
+    message = str(refusal.value)
+    print(f"MISSING_CARRIER_REFUSED {message}")
+    assert str(absent) in message
+    assert carrier.CONSUMER_CARRIER_GRID in message
+    assert "build --grid" in message
 
 
 def test_passive_zero_turns_remain_zero_response_weights():

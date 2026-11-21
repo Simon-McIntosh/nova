@@ -27,8 +27,17 @@ from typing import Any, Iterator
 import numpy as np
 
 
-CARRIER_STORE = Path("/work/projects/imas_gpu/nova/mast_frozen_six_response_carriers")
+CARRIER_STORE = Path(
+    os.environ.get(
+        "NOVA_MAST_RESPONSE_CARRIER_STORE",
+        "/work/projects/imas_gpu/nova/mast_frozen_six_response_carriers",
+    )
+)
 STORED_CIRCUIT_COUNT = 101
+
+
+class MissingResponseCarrier(RuntimeError):
+    """The store holds no carrier for the requested pinned identity."""
 
 
 @dataclass(frozen=True)
@@ -222,6 +231,20 @@ def load_carrier(
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """Load a response only after its complete persisted contract matches."""
     started = perf_counter()
+    if not path.exists():
+        grid_name = next(
+            (
+                grid.name
+                for grid in CARRIER_GRIDS.values()
+                if grid.semantic_identity == semantic_identity
+            ),
+            "stored-axis-stride",
+        )
+        raise MissingResponseCarrier(
+            f"response carrier {path} is absent; rebuild the store with "
+            f"`python benchmarks/mast_response_carrier_warm.py build "
+            f"--grid {grid_name}`"
+        )
     with np.load(path, allow_pickle=False) as archive:
         stored_identity = _scalar(archive, "semantic_response_identity")
         if stored_identity != semantic_identity:

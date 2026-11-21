@@ -531,8 +531,14 @@ def build(
 
 def check(carrier: Path, receipt: Path) -> dict[str, Any]:
     """Run the named cache-only check and cross-check the committed receipt."""
+    grid = grid_for_carrier(carrier)
     with _guard_direct_builders() as guard:
-        _response, warm = load_carrier(carrier)
+        _response, warm = load_carrier(
+            carrier,
+            semantic_identity=grid.semantic_identity,
+            resolved_target_digest=grid.resolved_target_digest,
+            response_shape=grid.response_shape,
+        )
     if guard.entered:
         raise RuntimeError("cache-only check entered a direct Green builder")
     report = json.loads(receipt.read_text(encoding="utf-8"))

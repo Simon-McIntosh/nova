@@ -94,6 +94,46 @@ def test_missing_response_carrier_is_a_named_refusal(tmp_path):
     assert "build --grid" in message
 
 
+def test_check_resolves_the_grid_contract_from_the_carrier_name(tmp_path, monkeypatch):
+    from contextlib import nullcontext
+
+    from benchmarks import mast_response_carrier_warm as carrier
+
+    grid = carrier.CARRIER_GRIDS["stored-axis-full"]
+    monkeypatch.setattr(
+        carrier,
+        "_guard_direct_builders",
+        lambda: nullcontext(SimpleNamespace(entered=[])),
+    )
+    warm = {
+        "path": str(grid.path().resolve()),
+        "semantic_response_identity": grid.semantic_identity,
+        "resolved_target_digest": grid.resolved_target_digest,
+        "response_sha256": "response-digest",
+        "response_shape": list(grid.response_shape),
+        "stored_circuit_count": carrier.STORED_CIRCUIT_COUNT,
+        "file_sha256": "file-digest",
+        "size_bytes": 1,
+    }
+    seen = {}
+
+    def load(path, **contract):
+        seen.update(contract)
+        return None, dict(warm)
+
+    monkeypatch.setattr(carrier, "load_carrier", load)
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text(json.dumps({"carrier": warm, "verdict": {"passes": True}}))
+    report = carrier.check(grid.path(), receipt)
+    print(f"CHECK_RESOLVED_CONTRACT {seen}")
+    assert seen == dict(
+        semantic_identity=grid.semantic_identity,
+        resolved_target_digest=grid.resolved_target_digest,
+        response_shape=grid.response_shape,
+    )
+    assert report["direct_builder_modules_entered"] == []
+
+
 def test_passive_zero_turns_remain_zero_response_weights():
     from tests.test_magnetics_fit_efit_comparison import _passive_signed_turns
 

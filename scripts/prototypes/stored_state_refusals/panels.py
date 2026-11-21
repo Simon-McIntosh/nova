@@ -112,7 +112,7 @@ def draw_panel(data, flux, destination, caption):
         axis_markersize=10.0,
         xpoint_markersize=11.0,
     )
-    poloidal.draw_nulls(
+    reference_tally = poloidal.draw_nulls(
         ax,
         magnetic_axis=case.axis,
         x_points=case.x_point,
@@ -120,6 +120,7 @@ def draw_panel(data, flux, destination, caption):
         contain=data["wall_units"],
     )
     nulls = {"nova": data.get("solved_nulls") or "not read"}
+    solved_tally = None
     try:
         if data.get("solved_nulls"):
             # A machine loaded from the store carries no forward operator, so
@@ -137,28 +138,39 @@ def draw_panel(data, flux, destination, caption):
             axis_color=blue,
             xpoint_color=blue,
             axis_marker="^",
-            axis_markersize=6.0,
-            xpoint_markersize=7.0,
+            axis_markersize=8.0,
+            xpoint_markersize=9.0,
+            xpoint_markeredgewidth=1.6,
         )
-        poloidal.draw_nulls(
+        _back_solved_markers(
+            ax,
+            stationary["x_points"],
+            solved_style,
+            data["wall_units"],
+            avoid=_stored_null_points(case),
+        )
+        solved_tally = poloidal.draw_nulls(
             ax,
             **stationary,
             style=solved_style,
             contain=data["wall_units"],
         )
-        nulls["nova"] = "drawn"
+        nulls["nova"] = _solved_null_state(solved_tally, bool(topology.diverted))
     except _SolvedNullsRecorded:
         pass
     except ValueError as error:
         # A refused solve admits no qualified stationary point, so there is no
         # solved null to draw; the caption says which error refused the read.
         nulls["nova"] = f"refused: {type(error).__name__}: {error}"
+    nulls = dict(nova=nulls["nova"], reference_tally=reference_tally)
+    if solved_tally is not None:
+        nulls["solved_tally"] = solved_tally
     solved_handle = Line2D(
         [],
         [],
         color=blue,
         lw=1.4,
-        marker=None if nulls["nova"] != "drawn" else "^",
+        marker=None if not nulls["nova"].startswith(AXIS_DRAWN) else "^",
         markersize=6,
     )
     legend = figure.legend(
@@ -223,6 +235,96 @@ def drawn_counts(path) -> dict:
     )
 
 
+AXIS_DRAWN = "the nova axis is drawn"
+"""Every state in which the solved-null read admitted an axis, drawn or not."""
+
+
+def _stored_null_points(case):
+    """Return the stored state's axis and saddle positions, for overlap tests."""
+    points = []
+    for value in (case.axis, case.x_point):
+        array = np.atleast_2d(np.asarray(value, dtype=float))
+        array = array[np.all(np.isfinite(array[:, :2]), axis=1)]
+        points.extend(array[:, :2].tolist())
+    return np.asarray(points, dtype=float) if points else None
+
+
+def _back_solved_markers(ax, x_points, style, contain, avoid=None) -> None:
+    """Put a white disc under each solved saddle marker.
+
+    A filled cross in the panel colour is invisible where the terminal state's
+    own contours cross beneath it: the marker, the contour lines and the loop
+    it sits in merge into one blob, and a reader looking for the admitted
+    saddle finds nothing of the shape the vocabulary promises. The disc is
+    drawn under the marker only, at the same points the marker is, so the mark
+    does not hide the field around it.
+
+    A disc is skipped where a stored-state null lies within a few marker
+    widths, because there the two marks carry information by coinciding and
+    the stored one must not be painted over.
+    """
+    if x_points is None:
+        return
+    points = np.atleast_2d(np.asarray(x_points, dtype=float))
+    if points.size == 0:
+        return
+    points = points[np.all(np.isfinite(points[:, :2]), axis=1)]
+    if points.shape[0] == 0:
+        return
+    from nova.media.poloidal import inside_wall_units
+
+    if contain is not None:
+        points = points[
+            np.asarray(inside_wall_units(points[:, :2], contain), dtype=bool)
+        ]
+    if points.shape[0] == 0:
+        return
+    if avoid is not None:
+        stored = np.atleast_2d(np.asarray(avoid, dtype=float))
+        stored = stored[np.all(np.isfinite(stored[:, :2]), axis=1)]
+        if stored.shape[0]:
+            x_low, x_high = ax.get_xlim()
+            y_low, y_high = ax.get_ylim()
+            span = max(abs(x_high - x_low), abs(y_high - y_low), 1e-12)
+            distances = np.min(
+                np.hypot(
+                    stored[None, :, 0] - points[:, None, 0],
+                    stored[None, :, 1] - points[:, None, 1],
+                ),
+                axis=1,
+            )
+            points = points[distances > 0.03 * span]
+            if points.shape[0] == 0:
+                return
+    ax.plot(
+        points[:, 0],
+        points[:, 1],
+        marker="o",
+        markersize=style.xpoint_markersize + 6.0,
+        color="white",
+        linestyle="none",
+        zorder=style.zorder_markers - 1,
+    )
+
+
+def _solved_null_state(tally, diverted: bool) -> str:
+    """Return what the solved null set actually put on the panel.
+
+    ``draw_nulls`` drops an interior x-point that falls outside the wall, and
+    the counts it returns are the only record of that. A caption written from
+    the field read alone would claim a cross the panel does not carry.
+    """
+    if tally.get("x_points_drawn"):
+        return "both null sets drawn"
+    if tally.get("x_points_dropped_outside_wall"):
+        return (
+            AXIS_DRAWN + "; its admitted saddle falls outside the wall and is not drawn"
+        )
+    if diverted:
+        return AXIS_DRAWN + "; no saddle reached the drawn set"
+    return AXIS_DRAWN + "; the terminal state is limited, so there is no saddle"
+
+
 def _pair(values) -> str:
     return "[" + ", ".join(f"{value:.4g}" for value in values) + "]"
 
@@ -255,8 +357,10 @@ def caption(record) -> str:
             f"{record.get('nova_levels_drawn')} nova levels carried a contour)"
         )
     nulls = (record.get("nulls") or {}).get("nova")
-    if nulls == "drawn":
+    if nulls == "both null sets drawn":
         parts.append("both null sets drawn")
+    elif nulls and str(nulls).startswith(AXIS_DRAWN):
+        parts.append(str(nulls) + ", so the blue series carries no cross marker")
     elif nulls:
         parts.append(
             "the nova solved-null read refused ("

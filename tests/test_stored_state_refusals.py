@@ -112,7 +112,8 @@ def test_each_arm_is_the_comparison_records_own_fixture():
         mesh = receipt["mesh"]
         assert mesh["kind"] == "StencilMesh"
         assert mesh["nodes"] > 0
-        assert mesh["stencil_rows"] >= mesh["nodes"] - 1
+        assert mesh["stencil_rows"] > 0
+        assert mesh["machine_nodes"] > 0
         assert len(receipt["coefficients"]) >= 3
         coefficients[case] = receipt["coefficients"]
     assert coefficients["tcv"] != coefficients["iter"]

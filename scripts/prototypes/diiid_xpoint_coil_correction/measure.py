@@ -45,6 +45,18 @@ from benchmarks import diiid_forward_gs_match as bench  # noqa: E402
 import conductor_correction  # noqa: E402
 
 
+def carries_currents(row):
+    """Whether this read is the full row the solve and the adapter consume.
+
+    The cohort reader also reads frames with a narrow column set to pick them,
+    and that row carries no conductor columns. Shifting it is meaningless and
+    asking for its description raises, so the shift applies only to a read that
+    carries the geometry the description needs.
+    """
+
+    return all(column in row for column in bench._GEOMETRY_COLUMNS)
+
+
 def conduct_columns(row):
     description = bench.dataset_machine_description(
         row, source_row=str(row.get("_source_path", "corpus row"))
@@ -97,7 +109,7 @@ def install_corpus_correction(correction, output, frame, names):
 
     def corrected_read(path, columns):
         row = original(path, columns)
-        if not correction:
+        if not correction or not carries_currents(row):
             return row
         row["_source_path"] = str(path)
         conductors = conduct_columns(row)

@@ -86,6 +86,16 @@ def main():
     failures = 0
     for frame, branch in ROWS:
         case = case_name(frame, branch)
+        measured_path = args.input / "base" / case / "solve-currents.json"
+        fitted_path = args.input / "corrected" / case / "solve-currents.json"
+        wanted = measured_path if args.control == "base-base" else fitted_path
+        if not measured_path.is_file() or not wanted.is_file():
+            report["rows"][case] = {
+                "missing": str(wanted if not wanted.is_file() else measured_path)
+            }
+            failures += 1
+            print("%s arm missing: %s" % (case, report["rows"][case]["missing"]))
+            continue
         measured, fitted, correction = arm_pair(args.input, case, frame, args.control)
         rows, mismatched = compare(measured, fitted, correction)
         unchanged = [
@@ -107,8 +117,11 @@ def main():
             flush=True,
         )
     report["confirmed"] = failures == 0 and all(
-        not item["unchanged_under_a_fitted_correction"]
+        not item.get("unchanged_under_a_fitted_correction")
         for item in report["rows"].values()
+    )
+    report["rows_present"] = sum(
+        1 for item in report["rows"].values() if "conductors" in item
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n")

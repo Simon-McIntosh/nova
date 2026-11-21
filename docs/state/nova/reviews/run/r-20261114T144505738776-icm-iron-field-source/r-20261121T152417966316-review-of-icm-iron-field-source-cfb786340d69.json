@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "assertion": "tests/test_iron_field_source.py:193 assert not (box.y0 - 2.0 <= plateau <= box.y1 + 2.0)",
+      "fails_when": "figure.py:109 places the legend so its renderer box spans the symbol at the -96 row; reinstating loc=\"lower right\" reddens it, and the base PNG at 01d8d6560 shows legend rows 539-553 over the plateau at rows 547-549."
+    },
+    {
+      "assertion": "tests/test_iron_field_source.py:197 assert plateau < zero_rule_row - 20",
+      "fails_when": "the middle axis stops using a symlog scale or the zero rule moves within 20 px of the plateau; reinstating a linear share axis reddens it."
+    },
+    {
+      "assertion": "tests/test_iron_field_source.py:210-223 mktemp/trap//work/TMPDIR-order assertions",
+      "fails_when": "run_arms.sh:27-41 returns the scratch to a fixed path, drops the EXIT trap, drops the EXIT trap, removes a /work path, or moves mktemp above export TMPDIR; none of them fails on the unquoted tests=/base_tests= assignments of d65d3dfcd, which is the defect cfb786340 fixed."
+    }
+  ],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/iron_field_source/run_cpu.sh:41 (figure stage execs scripts/iron_field_source/figure.py)",
+    "scripts/iron_field_source/run_cpu.sh:46 (the all stage runs figure.py after diagnostics)"
+  ],
+  "completed_at": "2026-11-21T15:25:41.095Z",
+  "dispatched_at": "2026-11-21T15:25:10Z",
+  "failure_derivation": "baseline arm job 1335024 (arms/baseline-arm-1335024.log) reports '7 failed, 104 passed in 8281.11s'; after arm job 1335023 (arms/after-arm-1335023.log) reports '7 failed, 114 passed in 8468.69s' with the same seven FAILED ids, all tests/test_magnetisation.py cases failing FileNotFoundError on /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/{case.json,production/material-refinement-20261114/summary.json}; after minus baseline is empty.",
+  "findings": [
+    {
+      "file": "tests/test_iron_field_source.py",
+      "line": "201",
+      "severity": "non-blocking",
+      "text": "non-blocking: the arms-runner guard asserts mktemp, the EXIT trap, no /work removal and the TMPDIR export order, but not that the target-list assignments are quoted; run against the d65d3dfcd script it passes, and that script's unquoted tests= assignment makes bash execute tests/test_iron_field_source.py as a command and exit 127 before pytest starts, so the assertion does not protect the regression cfb786340 fixed."
+    },
+    {
+      "file": "scripts/iron_field_source/run_arms.sh",
+      "line": "100",
+      "severity": "non-blocking",
+      "text": "non-blocking: baseline_log is written with the writing job's own SLURM_JOB_ID, so when the arms run as two jobs the later after job records a baseline log no job wrote; the committed /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/commands.json names baseline-arm-1335023.log while the baseline ran as job 1335024 and that file does not exist."
+    },
+    {
+      "file": "scripts/iron_field_source/run_arms.sh",
+      "line": "95",
+      "severity": "non-blocking",
+      "text": "non-blocking: every printf format in the commands.json block the gained commit rewrote carries a doubled backslash before n, so the emitted file holds literal backslash-n sequences on one line and json.load fails at line 1 column 2; the baseline_log value above therefore cannot be read by any JSON consumer."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read both commits 01d8d6560..cfb786340 commit by commit; d65d3dfcd changes six files (legend loc to upper right, export TMPDIR above mktemp, two added tests, one fragment sentence, both PNG twins as one blob 33f5a475c) and cfb786340 quotes tests= and base_tests= in scripts/iron_field_source/run_arms.sh.",
+    "done_when": "read node.done_when (a with-iron figure from the production path, the probe and flux-loop table from the same seam, and a zero-magnetisation control that reproduces air-core to round-off) against the gate the run recorded, the arm pair at jobs 1335024 (base 9b0161261) and 1335023 (head cfb786340); the pair runs tests/test_imas_iron_read.py, tests/test_magnetisation.py and tests/test_iron_field_source.py, which assert the seam contracts and the new figure guard but not the probe table or the zero control.",
+    "goal": "read the source node's goal in dispatch-detail.json (\"Insert the solved iron magnetisation into the CoilSet as one passive frame so every grid and point solve carries the iron field\") and the two commits the run gained since its last review, 01d8d6560..cfb786340; d65d3dfcd moves the middle panel's legend off the plateau and cfb786340 quotes the arm target lists, both repair-round changes that leave the frame seam untouched.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/manifest.md; it records both blocking repair findings as acted with negative controls and the arm summaries \"7 failed, 104 passed in 8281.11s\" for job 1335024 and \"7 failed, 114 passed in 8468.69s\" for job 1335023, and names arms/baseline-arm-1335024.log and arms/after-arm-1335023.log.",
+    "write_paths": "read the declared write paths in this node's brief; all six paths in the gained diff (scripts/iron_field_source/figure.py, scripts/iron_field_source/run_arms.sh, tests/test_iron_field_source.py, docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html, and the two west-62751-iron-stray-field.png copies) lie inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_iron_field_source.py:193 would redden if the legend returned to the plateau, but tests/test_iron_field_source.py:201-223 passes unchanged on the unquoted runner at d65d3dfcd, so it does not guard the regression cfb786340 repaired.",
+    "evidence": "the arm pair's result is recorded and re-read from /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/{baseline-arm-1335024.log,after-arm-1335023.log} (\"7 failed, 104 passed\" and \"7 failed, 114 passed\"), but the source done_when's figure, probe-table and zero-control clauses are only partly asserted by tests/test_iron_field_source.py:173-197.",
+    "fit": "the added assertions and helpers follow the file's existing _measure/ROOT idiom and both changed Python files are ruff-format clean.",
+    "goal_fidelity": "scripts/iron_field_source/figure.py:109 now places the legend where the published PNG has it 73 rows clear of the plateau (measured rows 419-474 against rows 547-549), repairing the previous review's blocking legend finding without touching the frame seam.",
+    "reuse": "no repository owner exists for legend placement (searched nova/media, nova/graphics/pyplot.py and scripts/*/figure.py) and the added test helper parallels the in-file _measure at tests/test_iron_field_source.py:30 rather than forking an owned mechanism.",
+    "scope_discipline": "the two gained commits touch only the six paths listed in the declared write paths (git show --stat d65d3dfcd and cfb786340)."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the source node's goal in dispatch-detail.json (\"Insert the solved iron magnetisation into the CoilSet as one passive frame so every grid and point solve carries the iron field\") and the two commits the run gained since its last review, 01d8d6560..cfb786340; d65d3dfcd moves the middle panel's legend off the plateau and cfb786340 quotes the arm target lists, both repair-round changes that leave the frame seam untouched.\nVERDICT done_when: read node.done_when (a with-iron figure from the production path, the probe and flux-loop table from the same seam, and a zero-magnetisation control that reproduces air-core to round-off) against the gate the run recorded, the arm pair at jobs 1335024 (base 9b0161261) and 1335023 (head cfb786340); the pair runs tests/test_imas_iron_read.py, tests/test_magnetisation.py and tests/test_iron_field_source.py, which assert the seam contracts and the new figure guard but not the probe table or the zero control.\nVERDICT write_paths: read the declared write paths in this node's brief; all six paths in the gained diff (scripts/iron_field_source/figure.py, scripts/iron_field_source/run_arms.sh, tests/test_iron_field_source.py, docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html, and the two west-62751-iron-stray-field.png copies) lie inside them.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T144505738776-icm-iron-field-source/manifest.md; it records both blocking repair findings as acted with negative controls and the arm summaries \"7 failed, 104 passed in 8281.11s\" for job 1335024 and \"7 failed, 114 passed in 8468.69s\" for job 1335023, and names arms/baseline-arm-1335024.log and arms/after-arm-1335023.log.\nVERDICT diff: read both commits 01d8d6560..cfb786340 commit by commit; d65d3dfcd changes six files (legend loc to upper right, export TMPDIR above mktemp, two added tests, one fragment sentence, both PNG twins as one blob 33f5a475c) and cfb786340 quotes tests= and base_tests= in scripts/iron_field_source/run_arms.sh.\nCALL_SITES: scripts/iron_field_source/run_cpu.sh:41, scripts/iron_field_source/run_cpu.sh:46\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/iron_field_source/figure.py:109 now places the legend where the published PNG has it 73 rows clear of the plateau (measured rows 419-474 against rows 547-549), repairing the previous review's blocking legend finding without touching the frame seam.\nSCORE evidence: 15\nJUSTIFICATION evidence: the arm pair's result is recorded and re-read from /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/{baseline-arm-1335024.log,after-arm-1335023.log} (\"7 failed, 104 passed\" and \"7 failed, 114 passed\"), but the source done_when's figure, probe-table and zero-control clauses are only partly asserted by tests/test_iron_field_source.py:173-197.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two gained commits touch only the six paths listed in the declared write paths (git show --stat d65d3dfcd and cfb786340).\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_iron_field_source.py:193 would redden if the legend returned to the plateau, but tests/test_iron_field_source.py:201-223 passes unchanged on the unquoted runner at d65d3dfcd, so it does not guard the regression cfb786340 repaired.\nSCORE fit: 18\nJUSTIFICATION fit: the added assertions and helpers follow the file's existing _measure/ROOT idiom and both changed Python files are ruff-format clean.\nSCORE reuse: 19\nJUSTIFICATION reuse: no repository owner exists for legend placement (searched nova/media, nova/graphics/pyplot.py and scripts/*/figure.py) and the added test helper parallels the in-file _measure at tests/test_iron_field_source.py:30 rather than forking an owned mechanism.\nFINDING tests/test_iron_field_source.py:201 non-blocking: the arms-runner guard asserts mktemp, the EXIT trap, no /work removal and the TMPDIR export order, but not that the target-list assignments are quoted; run against the d65d3dfcd script it passes, and that script's unquoted tests= assignment makes bash execute tests/test_iron_field_source.py as a command and exit 127 before pytest starts, so the assertion does not protect the regression cfb786340 fixed.\nFINDING scripts/iron_field_source/run_arms.sh:100 non-blocking: baseline_log is written with the writing job's own SLURM_JOB_ID, so when the arms run as two jobs the later after job records a baseline log no job wrote; the committed /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/commands.json names baseline-arm-1335023.log while the baseline ran as job 1335024 and that file does not exist.\nFINDING scripts/iron_field_source/run_arms.sh:95 non-blocking: every printf format in the commands.json block the gained commit rewrote carries a doubled backslash before n, so the emitted file holds literal backslash-n sequences on one line and json.load fails at line 1 column 2; the baseline_log value above therefore cannot be read by any JSON consumer.",
+  "review_run_id": "r-20261121T152417966316-review-of-icm-iron-field-source-cfb786340d69",
+  "reviewed_base_sha": "01d8d65603f7c6926bc9d87f72fab8e28b320e51",
+  "reviewed_head_sha": "cfb786340d695a3cf22ba6691b1b3f6c92f654e8",
+  "reviewed_run_id": "r-20261114T144505738776-icm-iron-field-source",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T15:42:25.834293+00:00",
+  "total": 104
+}

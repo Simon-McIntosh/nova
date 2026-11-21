@@ -1476,13 +1476,47 @@ def _panel(
         linewidth=2.6,
         zorder=1,
     )
+    own_levels_label = None
     if sampled_grid is None:
         node = data["machine"].node
+        values = np.asarray(flux)[: len(node)]
+        shared = float(np.min(values)) <= float(levels[-1]) and float(
+            np.max(values)
+        ) >= float(levels[0])
+        if not shared:
+            # the two maps are drawn on one level array, so a map whose range
+            # misses it would draw no contour at all and read as a blank
+            # overlay; state the two ranges and draw nova on its own levels
+            low, high = float(np.min(values)), float(np.max(values))
+            print(
+                "FIGURE_LEVELS_DISJOINT "
+                + json.dumps(
+                    dict(
+                        case=data["name"],
+                        shared=[float(levels[0]), float(levels[-1])],
+                        nova=[low, high],
+                    )
+                ),
+                flush=True,
+            )
+            own = np.sort(np.linspace(low, high, 14))[1:-1]
+            poloidal.draw_scattered_contours(
+                ax,
+                node[:, 0],
+                node[:, 1],
+                values,
+                own,
+                data["wall_units"],
+                color=blue,
+                linewidth=1.0,
+                zorder=2,
+            )
+            own_levels_label = f"nova, own levels {low:.3g} to {high:.3f}"
         poloidal.draw_scattered_contours(
             ax,
             node[:, 0],
             node[:, 1],
-            np.asarray(flux)[: len(node)],
+            values,
             levels,
             data["wall_units"],
             color=blue,
@@ -1546,15 +1580,23 @@ def _panel(
         print(
             "TERMINAL_NULL_READ_REFUSED", type(error).__name__, str(error), flush=True
         )
+    handles = [
+        Line2D([], [], color=grey, lw=2.6, marker="^", markersize=9),
+        Line2D([], [], color=blue, lw=1.4, marker="^", markersize=6),
+    ]
+    labels = [
+        "imas-efit",
+        "nova current replay" if sampled_grid is not None else "nova",
+    ]
+    if own_levels_label is not None:
+        handles.append(Line2D([], [], color=blue, lw=1.0, alpha=0.6))
+        labels.append(own_levels_label)
     legend = figure.legend(
-        [
-            Line2D([], [], color=grey, lw=2.6, marker="^", markersize=9),
-            Line2D([], [], color=blue, lw=1.4, marker="^", markersize=6),
-        ],
-        ["imas-efit", "nova current replay" if sampled_grid is not None else "nova"],
+        handles,
+        labels,
         loc="upper center",
         frameon=False,
-        ncol=2,
+        ncol=len(labels),
         fontsize=14,
     )
     figure.canvas.draw()

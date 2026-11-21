@@ -27,14 +27,18 @@ from nova.equilibrium.solve_request import (
     ForwardSolveReceipt,
     ForwardSolveRequest,
 )
-from nova.equilibrium.source import ForwardSource, PolynomialFluxFunction
+from nova.equilibrium.source import (
+    DomainProfile,
+    ForwardSource,
+    PolynomialFluxFunction,
+)
 from nova.jax.config import configure_dtypes
 
 if TYPE_CHECKING:
     from nova.biot.biot import Biot
     from nova.equilibrium.forward import ForwardProfile
 
-__all__ = ["MagneticsFit", "MagneticsFitReceipt"]
+__all__ = ["CoefficientBasis", "MagneticsFit", "MagneticsFitReceipt"]
 
 
 @dataclass(frozen=True)
@@ -68,6 +72,88 @@ class MagneticsFitReceipt:
     wall_seconds: float
     device: str
     rejected_trials: tuple[dict[str, object], ...] = ()
+
+
+@dataclass(frozen=True)
+class CoefficientBasis:
+    """The fitted amplitudes' map onto the source's polynomial coefficients.
+
+    ``matrix`` has one column per fitted amplitude and one row per raw
+    coefficient, so ``matrix @ amplitudes`` is the coefficient vector.
+
+    ``initial`` are the amplitudes the supplied source resolves to, which exists
+    only when the source belongs to the basis; ``names`` name the amplitudes in
+    the order they are fitted, and ``pressure_count`` splits the raw vector into
+    the pressure coefficients and the diamagnetic ones.
+    """
+
+    matrix: np.ndarray
+    initial: np.ndarray
+    names: tuple[str, ...]
+    pressure_count: int
+
+    @classmethod
+    def of(
+        cls, core: DomainProfile, coefficient_basis: np.ndarray | None = None
+    ) -> CoefficientBasis:
+        """Validate a declared basis against the source's polynomial core.
+
+        The default basis fits every raw coefficient. A declared basis must be
+        finite, full column rank and wide enough to hold the source the caller
+        supplied, so the fit starts from the coefficients that source already
+        carries rather than from a projection of them.
+        """
+        pressure_count = core.p_prime.coefficients.size
+        names = tuple(
+            f"pressure_{order}" for order in range(pressure_count)
+        ) + tuple(
+            f"diamagnetic_{order}" for order in range(core.ff_prime.coefficients.size)
+        )
+        raw = np.r_[core.p_prime.coefficients, core.ff_prime.coefficients]
+        matrix = (
+            np.eye(raw.size)
+            if coefficient_basis is None
+            else np.asarray(coefficient_basis, dtype=np.float64).copy()
+        )
+        if (
+            matrix.ndim != 2
+            or matrix.shape[0] != raw.size
+            or matrix.shape[1] < 1
+            or not np.all(np.isfinite(matrix))
+            or np.linalg.matrix_rank(matrix) != matrix.shape[1]
+        ):
+            raise ValueError("coefficient basis must have finite independent columns")
+        initial = np.linalg.lstsq(matrix, raw, rcond=None)[0]
+        if not np.allclose(matrix @ initial, raw, rtol=1e-12, atol=1e-12):
+            raise ValueError("the initial source must belong to the coefficient basis")
+        matrix.setflags(write=False)
+        initial.setflags(write=False)
+        if coefficient_basis is not None:
+            names = tuple(f"basis_{index}" for index in range(matrix.shape[1]))
+        return cls(
+            matrix=matrix,
+            initial=np.array(initial, dtype=np.float64),
+            names=names,
+            pressure_count=pressure_count,
+        )
+
+    def source(self, base: ForwardSource, amplitudes) -> ForwardSource:
+        """Return ``base`` carrying the polynomial coefficients these amplitudes fit."""
+        coefficients = self.matrix @ np.asarray(amplitudes)[: self.initial.size]
+        core = base.core
+        split = self.pressure_count
+        return replace(
+            base,
+            core=replace(
+                core,
+                p_prime=replace(
+                    core.p_prime, coefficients=jnp.asarray(coefficients[:split])
+                ),
+                ff_prime=replace(
+                    core.ff_prime, coefficients=jnp.asarray(coefficients[split:])
+                ),
+            ),
+        )
 
 
 class MagneticsFit:
@@ -121,38 +207,13 @@ class MagneticsFit:
         self.request = request
         self.magnetics = magnetics
         self.magnetic_source = magnetic_source
-        self._pressure_count = core.p_prime.coefficients.size
-        self._names = tuple(
-            f"{family}_{order}"
-            for family, function in (
-                ("pressure", core.p_prime),
-                ("diamagnetic", core.ff_prime),
-            )
-            for order in range(function.coefficients.size)
-        )
-        raw = np.r_[core.p_prime.coefficients, core.ff_prime.coefficients]
-        basis = (
-            np.eye(raw.size)
-            if coefficient_basis is None
-            else np.asarray(coefficient_basis, dtype=np.float64).copy()
-        )
-        if (
-            basis.ndim != 2
-            or basis.shape[0] != raw.size
-            or basis.shape[1] < 1
-            or not np.all(np.isfinite(basis))
-            or np.linalg.matrix_rank(basis) != basis.shape[1]
-        ):
-            raise ValueError("coefficient basis must have finite independent columns")
-        initial = np.linalg.lstsq(basis, raw, rcond=None)[0]
-        if not np.allclose(basis @ initial, raw, rtol=1e-12, atol=1e-12):
-            raise ValueError("the initial source must belong to the coefficient basis")
-        basis.setflags(write=False)
-        self._basis = basis
-        self._initial = initial
-        if coefficient_basis is not None:
-            self._names = tuple(f"basis_{index}" for index in range(basis.shape[1]))
-        self._profile_count = initial.size
+        space = CoefficientBasis.of(core, coefficient_basis)
+        self._space = space
+        self._pressure_count = space.pressure_count
+        self._names = space.names
+        self._basis = space.matrix
+        self._initial = space.initial
+        self._profile_count = space.initial.size
         self._conductor_field = conductor_current_field
         self._conductor_response = np.empty((magnetics.number, 0))
         if conductor_response is not None:
@@ -179,26 +240,11 @@ class MagneticsFit:
                 raise ValueError("conductor names must be unique and column-aligned")
             response.setflags(write=False)
             self._conductor_response = response
-            self._initial = np.r_[initial, currents]
+            self._initial = np.r_[space.initial, currents]
             self._names += names
 
     def _source(self, coefficients):
-        coefficients = self._basis @ coefficients[: self._profile_count]
-        source = self.request.source_profile
-        core = source.core
-        split = self._pressure_count
-        return replace(
-            source,
-            core=replace(
-                core,
-                p_prime=replace(
-                    core.p_prime, coefficients=jnp.asarray(coefficients[:split])
-                ),
-                ff_prime=replace(
-                    core.ff_prime, coefficients=jnp.asarray(coefficients[split:])
-                ),
-            ),
-        )
+        return self._space.source(self.request.source_profile, coefficients)
 
     def _evaluate(self, coefficients, seed):
         request = replace(self.request, source_profile=self._source(coefficients))

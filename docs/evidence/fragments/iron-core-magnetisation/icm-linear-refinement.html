@@ -1,0 +1,203 @@
+<section id="icm-linear-refinement-state">
+<h3>WEST affine refinement: staging repaired; weighted Newton matrix is indefinite</h3>
+<p>The graded 8/40 mm interaction is persisted with its geometry digest.
+Single-transfer staging and a donated float64 Cholesky factor now work on the
+H200, including a factor at the fine mesh's full dimension. However, the
+actual graded 16/80 mm weighted Newton matrix is indefinite: its minimum
+diagonal is −0.0225203602061 and a stored vector has Rayleigh quotient
+−0.0248960031604. The requested Cholesky-only Newton route therefore cannot
+complete its first comparison. The underlying interaction has a measured
+metric-weighted quotient of 1.02585274855 times μ₀, contradicting the assumed
+upper bound of μ₀. The interaction values have not been changed.</p>
+<p>No fine-mesh probe field, refinement change, or completed large-mesh
+Cholesky/LU equivalence is reported as measured. The numerical criteria remain
+unmet. The independent diagnostic below separates the operator-bound failure
+from the earlier staging defect.</p>
+
+<h4>Measured assembly</h4>
+<table><thead><tr><th>quantity</th><th>measurement</th></tr></thead><tbody>
+<tr><td>cells / affine unknowns</td><td>11 708 / 70 248</td></tr>
+<tr><td>interaction storage</td><td>39.478252032 GB</td></tr>
+<tr><td>assembly wall</td><td>23 263.762956 s</td></tr>
+<tr><td>evaluator compilation</td><td>5.664510 s</td></tr>
+<tr><td>evaluator execution</td><td>7 942.076623 s</td></tr>
+<tr><td>host remainder</td><td>15 316.021823 s</td></tr>
+<tr><td>process peak host RSS through assembly</td><td>124.483842048 GB</td></tr>
+<tr><td>JAX-managed device peak through assembly</td><td>16.918528 MB</td></tr>
+</tbody></table>
+<p>Host remainder is assembly wall minus synchronised evaluator compilation
+and execution. The small device peak belongs to the tiled evaluator: the dense
+energy and interaction matrices are assembled on the host. It does not measure
+total GPU driver memory. These assembly observations precede the attempted
+material solve. Continuation reload validated the saved operator against the
+same ordered mesh geometry, without repeating assembly.</p>
+
+<h4>Compiled factor capacity and actual staging refusal</h4>
+<p>The combined factor reproduces the recorded physical-memory overflow. An
+opt-in <code>linear_factorisation="split"</code> route constructs the identical
+local-tangent Jacobian in one compiled call and donates its disposable buffer
+to LU in another. The Newton loop releases each factor after its update so it
+cannot remain live beside the next factor. The combined default, interaction
+arithmetic and numerical tolerances remain unchanged.</p>
+<table><thead><tr><th>compiled stage or memory bound</th><th>storage [GB]</th></tr></thead><tbody>
+<tr><td>combined factor live peak</td><td>157.961968936</td></tr>
+<tr><td>split Jacobian live peak</td><td>118.486807672</td></tr>
+<tr><td>donated LU live peak, including retained interaction</td><td>118.435037361</td></tr>
+<tr><td>physical H200 memory</td><td>150.754820096</td></tr>
+<tr><td>90% physical capacity</td><td>135.679338086</td></tr>
+<tr><td>first process allocator limit</td><td>112.585605120</td></tr>
+<tr><td>continuation allocator limit</td><td>135.102726144</td></tr>
+</tbody></table>
+<p>In job <code>1324237</code>, the interaction persisted successfully, then
+operand staging failed at the first <code>jax.block_until_ready((state,
+operands))</code>, before Newton could run. The log records
+<code>RESOURCE_EXHAUSTED: Out of memory while trying to allocate 36.77GiB</code>
+from <code>jit_stage</code>. The requested allocation was 39 478 252 032 bytes,
+exactly one dense interaction. The process allocator limit was below the
+compiled split peak, so physical-card capacity alone was an insufficient
+admission check.</p>
+<p>The refinement launcher was changed to set
+<code>XLA_PYTHON_CLIENT_MEM_FRACTION=0.90</code> with preallocation disabled.
+The capacity check now compares the compiled peak against both 90% of
+physical memory and the allocator's reported byte limit. Job
+<code>1324984</code> reloaded the persisted operator with the enlarged
+135.102726144 GB allocator limit. It passed that capacity check but failed
+at the same pre-Newton staging call, again requesting one 39.478252032 GB
+buffer. Both failures occurred before factorisation. The compiled factor
+peak therefore does not establish the peak of operand preparation. Duplicate
+transfers and staging-buffer lifetimes remain a hypothesis to investigate,
+not a measured cause. The two-failure stop rule ended that attempt. A subsequent explicit
+ruling authorized the metric-Cholesky repair and further H200 measurement;
+those results follow below.</p>
+
+<h4>Single-transfer staging and float64 factor ownership</h4>
+<p>The linear branch now calls <code>_stage_linear_interaction</code> once
+and reuses that device array, rather than constructing the dense interaction
+twice in operand tuples. On the graded 16/80 mesh, the first transfer starts
+with zero live device bytes and ends with exactly 9 903 310 848 bytes, one
+interaction. Every one of its 1 237 913 856 entries agrees exactly with the
+persisted source. The Cholesky comparison also records one transfer, with
+zero entry error. The constant branch retains its operand arithmetic.</p>
+<p>The new route uses the full local volume Gram matrix Q and material
+differential A. With D = Q A, R = sqrt(D), and W = inv(Q) R, the Newton system
+has symmetric form B = (1 + λ) I − R G W. The inverse formula
+p = (b + W B⁻¹ R G b)/(1 + λ) avoids inverting R, so zero differential
+directions remain representable. Row tiles build B into one column-major
+buffer, donated to Cholesky; corrections are refined in the original
+float64 differential system. No float32 factor was used.</p>
+<table><thead><tr><th>known-SPD identity control</th><th>unknowns</th><th>diagonal error</th><th>same donated buffer</th><th>observed device peak [GB]</th></tr></thead><tbody>
+<tr><td>graded comparison dimension</td><td>35 184</td><td>0</td><td>true</td><td>9.908151808</td></tr>
+<tr><td>fine dimension</td><td>70 248</td><td>0</td><td>true</td><td>39.497542656</td></tr>
+</tbody></table>
+<p>These are actual H200 allocator peaks. The full-dimensional factor control
+holds one matrix and no dense interaction, so it proves float64 factorisation
+without a matrix copy; it does not establish a completed fine solve's peak.
+For the graded 16/80 Newton matrix, the compiled construction peak including
+G is 20.026282128 GB and the donated factor peak including retained G is
+19.806622209 GB. The failed factor leaves 19.839303936 GB live. The comparison
+process's cumulative peak is 39.643942144 GB from its preceding LU solve, so
+that cumulative number is not attributed to Cholesky. No fine-mesh staging
+or G-plus-factor runtime result is substituted for a measurement.</p>
+
+<h4>Independent definiteness counterexample</h4>
+<p>H200 job <code>1327469</code> reaches the graded 16/80 comparison. Combined
+LU converges in eight corrections, terminal residual 8.71113792505e-16.
+Cholesky refuses its first Newton matrix. Independent job
+<code>1327536</code> first factors known identity matrices at both full
+problem dimensions, then captures the actual graded matrix before Cholesky.</p>
+<table><thead><tr><th>diagnostic</th><th>measurement</th></tr></thead><tbody>
+<tr><td>minimum diagonal of B</td><td>−0.02252036020610193</td></tr>
+<tr><td>maximum diagonal of B</td><td>0.9914102694644059</td></tr>
+<tr><td>assembled versus direct action, relative norm at one seeded vector</td><td>3.350560959398e-16</td></tr>
+<tr><td>normalised bilinear asymmetry at two seeded vectors</td><td>5.469397436580e-18</td></tr>
+<tr><td>smallest eigenvalue estimate</td><td>−0.02489600316043086</td></tr>
+<tr><td>stored vector Rayleigh quotient</td><td>−0.024896003160430776</td></tr>
+<tr><td>eigenvector residual norm</td><td>1.920590347590e-8</td></tr>
+<tr><td>corresponding metric-weighted G quotient / μ₀</td><td>1.0258527485498994</td></tr>
+<tr><td>largest weighted material differential eigenvalue × μ₀</td><td>0.9991968312167876</td></tr>
+</tbody></table>
+<p>A negative diagonal already rules out positive definiteness. The stored
+vector independently gives a negative quadratic form, irrespective of how
+accurately the iterative eigenvalue estimate has converged. Its transformed
+vector gives (uᵀ Q G u)/(μ₀ uᵀ Q u) = 1.02585274855, while the material
+differential remains below its bound. Thus the measured interaction does not
+satisfy the bound assumed by the Cholesky-only ruling. The action comparison
+and known-SPD controls distinguish this from an incorrect row contraction
+or a full-size Cholesky backend failure.</p>
+<p>The counterexample is retained as <code>cholesky-diagnostic.json</code>
+and <code>cholesky-rayleigh-witness.npy</code> under the GPFS evidence root.
+Possible continuations are to preserve G and use shifted Cholesky only as a
+preconditioner for an exact unshifted iterative Newton solve, or to repair the
+interaction under a separate decision that permits its values to change.
+Neither continuation has been silently substituted for the specified solve.</p>
+
+<h4>Acceptance checks that remain open</h4>
+<table><thead><tr><th>required measurement</th><th>observed state</th></tr></thead><tbody>
+<tr><td>8/40 full-drive solve from M = 0</td><td>not reached after graded comparison definiteness refusal</td></tr>
+<tr><td>midplane fields at +1, +2 and +4 m</td><td>unmeasured</td></tr>
+<tr><td>change against graded 16/80 below 1% at every probe</td><td>unmeasured</td></tr>
+<tr><td>same-process interaction and probe agreement at 1e-12 on graded 16/80</td><td>incomplete: Cholesky refused its first matrix</td></tr>
+<tr><td>same-process interaction and probe agreement at 1e-12 on uniform 40 mm</td><td>not reached</td></tr>
+</tbody></table>
+<p>These missing rows are consequences of the first graded comparison's
+indefinite Newton matrix. No stored reference is substituted for the required same-process
+comparison, and no further refinement or tolerance change was attempted.</p>
+
+<h4>Controls and bounded evidence</h4>
+<p>The unchanged shell operator pin passed both H200 cases: 2 passed, 102
+deselected in 16.45 s, with compact relative error zero and batched-edge
+Frobenius / maximum-entry relative errors 3.129988135484e-15 /
+7.533115359696e-15. Focused CPU differential, nonlinear field and refusal
+checks passed 11 tests in 35.66 s. These small controls support the implemented
+arithmetic but do not establish the missing large-mesh comparisons.</p>
+<p>The filtered CPU gate passed 101 tests at the base and 112 at the
+implementation head, with 11 deselected in each. The metric-Cholesky
+implementation's paired gate passes 101 tests at the base and 118 at the head,
+again with 11 deselected. Its six focused differential, fill, regularisation,
+partial-tile and nonlinear checks also pass. A scratch mutation that
+admits a perturbed interaction and raises the refinement threshold makes
+four named tests fail: interaction perturbation, +1%, +1.01% and −1.01%.
+The clean head passes those tests, so both acceptance guards are shown to
+refuse their declared cases. The production thresholds remain 1e-12 relative
+agreement and strictly less than 1% refinement change. Full-suite arm
+commands, exact revisions, completion flags and the failure delta are
+recorded in the run manifest. The H200 default-constant control compares
+against the base in one process and is byte-identical for magnetisation,
+permeability, residual history, step scales, regularisation, reduction ratios
+and probe fields.</p>
+
+<h4>Revisions, geometry binding and retained receipts</h4>
+<p>Metric-Cholesky implementation and comparison: revision
+<code>2ff4127c7b84dec626333a75d6a02724e2beb0f3</code>. Independent diagnostic:
+revision <code>59e1a985d6e87fd84525044a0bfe73a8e08ca603</code>, executed blob
+<code>6bd6c250b2af2b500586ed9a9406139a90328f8c</code>. The current receipts
+<code>constant-bit-identity.json</code> and
+<code>graded-16-80-cholesky.json</code> retain the successful controls and
+incomplete comparison; the failed comparison snapshot also remains in the
+run directory as <code>graded-16-80-cholesky-as-failed.json</code>.</p>
+<p>Assembly and first solve attempt: revision
+<code>2c6dbb043a5839ab7615c0a552a558038930ae9c</code>, executed measurement blob
+<code>fd461c52c9597db06979a0182a3b37b2b2be39e5</code>. Allocator-budget and
+persisted-operator continuation: revision
+<code>183124d5f78e138420e8f3a0adbdbe9be48bc862</code>. Its executed measurement
+blob is <code>acd0e8abbf1c0246b9ac6eb404bb7f294e90b837</code>, matching the
+stamp in <code>graded-8-40.json</code>. The launcher
+refuses a dirty tree, checks the extracted measurement script against its
+committed blob, enables x64 before array construction and runs from a
+job-local archive that is removed on exit.</p>
+<p>The evidence root is
+<code>/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/linear-magnetisation/west-h200/refinement/</code>.
+It retains <code>graded-8-40-assembly.json</code> from the first attempt and
+<code>graded-8-40.json</code> from the continuation. Both report
+<code>completed=false</code>. The persisted matrix is
+<code>graded-8-40-operator.npy</code>; its companion metadata binds it to
+geometry digest
+<code>0d51ea9c2ee5677db8aee521fa73070927595831300f91e17c53bc617f32435e</code>.</p>
+<p>Run logs and the manifest live under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223040695957-icm-linear-refinement/</code>.
+The original receipt is preserved there as
+<code>graded-8-40-as-failed.json</code>; <code>h200-measure.log</code> and
+<code>h200-continuation.log</code> retain both allocation refusals. The
+original scheduler-wrapper failure, before any measurement code ran, remains
+separate in <code>h200-job.log</code>.</p>
+</section>

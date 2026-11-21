@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import conductor_correction
 import summarize
+import verify
 
 
 def test_applied_currents_removes_the_fitted_error():
@@ -104,6 +105,40 @@ def test_a_fall_is_not_read_when_the_corrected_arm_did_not_converge():
     share, reason = summarize.read_only(row)
     assert share is None
     assert "ACTIVE_SET_STEP_REFUSED" in reason
+
+
+def test_the_corpus_column_shift_is_the_negated_error_in_kiloamps():
+    """A column read as kiloamps at unit turn multiplier moves by error/1000."""
+
+    assert conductor_correction.column_shift(54058.0, 1.0) == pytest.approx(-54.058)
+
+
+def test_the_shifted_column_reaches_the_error_the_fit_asked_for():
+    """F1A on 137D: measured -177.235 kA.turn less a +54.058 error reads -231.293."""
+
+    source_time = [0.0, 1000.0]
+    measured_column = [-177.235, -177.235]
+    shift = conductor_correction.column_shift(54058.0, 1.0)
+    shifted = [value + shift for value in measured_column]
+    applied = conductor_correction.current_at(source_time, shifted, 500.0, 1.0)
+    assert applied / 1000.0 == pytest.approx(-231.293, abs=1e-6)
+
+
+def test_the_solved_current_check_reddens_when_the_correction_did_not_land():
+    """Pairing the measured arm with itself is the negative control: it fails."""
+
+    measured = {"F1A": -177235.04, "F2A": -168819.0}
+    correction = {"F1A": 54058.0, "F2A": 52140.0}
+    _rows, mismatched = verify.compare(measured, measured, correction)
+    assert mismatched == ["F1A", "F2A"]
+
+
+def test_the_solved_current_check_passes_when_the_correction_landed():
+    measured = {"F1A": -177235.04, "F2A": -168819.0}
+    correction = {"F1A": 54058.0, "F2A": 52140.0}
+    fitted = {name: value - correction[name] for name, value in measured.items()}
+    _rows, mismatched = verify.compare(measured, fitted, correction)
+    assert mismatched == []
 
 
 def test_a_fall_is_not_read_when_the_support_moved():

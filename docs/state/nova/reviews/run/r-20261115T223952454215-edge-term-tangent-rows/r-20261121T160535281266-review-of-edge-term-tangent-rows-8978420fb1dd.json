@@ -18,6 +18,13 @@
   "call_site_note": "No production runtime code can reach the landed change: the diff is confined to tests/biot, scripts/prototypes and docs/evidence, and no module under nova/ changed. The code the rows exercise is nova/biot/polygonanalytic.py:_edge_terms_tangent, which the node neither imports nor edits.",
   "call_sites": [],
   "completed_at": "2026-11-21T16:21:57.172Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "repair-of-edge-term-tangent-rows-8978420fb1dd",
+      "recorded_at": "2026-11-21T22:09:40.313139+00:00"
+    }
+  },
   "dispatched_at": "2026-11-21T16:21:46Z",
   "failure_id_comparison": {
     "cpu_suite_pair": {

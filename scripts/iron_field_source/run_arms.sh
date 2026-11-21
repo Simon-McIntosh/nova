@@ -37,8 +37,8 @@ trap 'rm -rf "$scratch"' EXIT
 # The gate the rounds record: the fence's three files at this head. The base
 # revision predates test_iron_field_source.py, so its arm names the two files
 # that exist there.
-tests=tests/test_imas_iron_read.py tests/test_iron_field_source.py tests/test_magnetisation.py
-base_tests=tests/test_imas_iron_read.py tests/test_magnetisation.py
+tests="tests/test_imas_iron_read.py tests/test_iron_field_source.py tests/test_magnetisation.py"
+base_tests="tests/test_imas_iron_read.py tests/test_magnetisation.py"
 
 mkdir -p "$out"
 

@@ -200,4 +200,37 @@ The original receipt is preserved there as
 <code>h200-continuation.log</code> retain both allocation refusals. The
 original scheduler-wrapper failure, before any measurement code ran, remains
 separate in <code>h200-job.log</code>.</p>
+
+<h4>Repaired-operator refinement attempt and its launch refusal</h4>
+<p>The Cholesky branch was merged onto the repaired operator without resolving
+any value: the merge carries the operator-bound shell pin at its re-baselined
+value and the Cholesky route unchanged, and the constant-basis reference is
+recorded as absent rather than asserted, because those receipts were lost with
+the shared storage deletion and cannot be recorded as if present. A new guard
+test drives the in-place Cholesky route at a scaled matrix with one negative
+eigenvalue and requires the <code>not positive definite</code> refusal. Removing
+the guard from a scratch tree makes that test fail with <code>DID NOT
+RAISE</code>, so the test is shown to exercise the guard rather than to pass
+alongside it.</p>
+<p>On CPU, the focused arm passed 13 tests and exited zero, including the
+1e-12 shell pin on the re-baselined control and every metric-Cholesky and
+split-route test. The fine 8/40 operator and both coarse meshes then needed the
+H200. Job <code>1334888</code> was submitted to the
+<code>gpu_0003_grpA</code> reservation and was refused in zero seconds by the
+node's write fence: <code>fence program bwrap cannot run on
+98dci4-gpu-0003.iter.org: looked at /usr/bin/bwrap (absent); the job's task was
+not started and the fence was not dropped</code>. No measurement code ran, and
+the fence was not removed in order to start it. The launcher is committed
+at revision <code>19503b9db</code> as
+<code>scripts/west_iron_linear/refinement.sh</code>, which prints the revision
+and the executed measure blob, refuses a dirty source tree, and runs the coarse
+assembly and comparison stream beside the fine assembly on one card before the
+fine solve resumes the persisted operator.</p>
+<p>No probe field, refinement change, or route agreement at this revision is
+reported as measured. The clause rows above remain unmeasured for the reason
+recorded here, which is a launch refusal rather than a numerical result. The
+refinement receipts for this attempt belong to the nova evidence root
+<code>/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/linear-magnetisation/west-h200/refinement/</code>;
+the earlier sophelio root named above is the record of the previous attempt and
+is left as written.</p>
 </section>

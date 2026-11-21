@@ -41,6 +41,7 @@ SPEC.loader.exec_module(held_measure)
 import numpy as np  # noqa: E402
 
 from benchmarks import diiid_forward_gs_match as bench  # noqa: E402
+from nova.imas.diiid_current import shipped_current_at  # noqa: E402
 
 import conductor_correction  # noqa: E402
 
@@ -57,28 +58,24 @@ def carries_currents(row):
     return all(column in row for column in bench._GEOMETRY_COLUMNS)
 
 
-def conduct_columns(row):
+def machine_description(row):
+    """The machine description the row's conductor columns are named by."""
+
     description = bench.dataset_machine_description(
         row, source_row=str(row.get("_source_path", "corpus row"))
     )
-    return {item.name: item for item in description.physical.conductors}
+    return description.physical
 
 
-def measured_current(row, conductors, names, time_ms):
-    """The ampere-turns per conductor, read from the row as it stands."""
+def measured_current(row, machine, names, time_ms):
+    """The ampere-turns per conductor, read from the row as it stands.
 
-    values = []
-    for name in names:
-        conductor = conductors[name]
-        values.append(
-            conductor_correction.current_at(
-                row["magnetics_time"],
-                row[conductor.input_column],
-                time_ms,
-                conductor.turns.applied_multiplier,
-            )
-        )
-    return values
+    The adapter installs this same function's result, so the measured vector the
+    receipt records is the vector the solve would have been handed uncorrected.
+    """
+
+    resolved = shipped_current_at(row, machine, names, time_ms)
+    return [float(resolved[name]) for name in names]
 
 
 def column_shifts(conductors, correction, names):
@@ -112,12 +109,13 @@ def install_corpus_correction(correction, output, frame, names):
         if not correction or not carries_currents(row):
             return row
         row["_source_path"] = str(path)
-        conductors = conduct_columns(row)
+        machine = machine_description(row)
+        conductors = {item.name: item for item in machine.conductors}
         time_ms = float(row["efit_times"][frame])
-        measured = measured_current(row, conductors, names, time_ms)
+        measured = measured_current(row, machine, names, time_ms)
         for column, shift in column_shifts(conductors, correction, names).items():
             row[column] = np.asarray(row[column], dtype=float) + shift
-        applied = measured_current(row, conductors, names, time_ms)
+        applied = measured_current(row, machine, names, time_ms)
         error = conductor_correction.equivalent_error(names, correction)
         output.mkdir(parents=True, exist_ok=True)
         (output / "current-inputs.json").write_text(

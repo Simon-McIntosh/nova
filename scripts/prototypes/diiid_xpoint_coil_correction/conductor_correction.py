@@ -5,29 +5,16 @@ same three quantities: the measured ampere-turns a frame carries, the fitted
 equivalent error per conductor, and the current the solve was actually handed.
 Keeping that arithmetic in one place makes the two agree by construction, and
 lets it be checked against a hand-computed case without a solve.
+
+The measured vector itself is not re-derived here. The current adapter installs
+``nova.imas.diiid_current.shipped_current_at``, so the arm reads the same
+function; anything else would be a second interpolation of the same columns and
+could disagree with the vector the solve records.
 """
 
 from __future__ import annotations
 
 from typing import Iterable, Mapping
-
-
-def current_at(source_time, column, time_ms: float, applied_multiplier: float) -> float:
-    """Interpolate one corpus column to a time, in ampere-turns.
-
-    The column is in kiloamps, so the interpolation is scaled by a thousand and
-    by the conductor's applied turn multiplier.
-    """
-
-    import numpy as np
-
-    source_time = np.asarray(source_time, dtype=float)
-    column = np.asarray(column, dtype=float)
-    valid = np.isfinite(source_time) & np.isfinite(column)
-    if np.count_nonzero(valid) < 2:
-        raise ValueError("a corpus current column needs two finite samples")
-    kiloamp = np.interp(time_ms, source_time[valid], column[valid])
-    return 1000.0 * float(kiloamp) * float(applied_multiplier)
 
 
 def equivalent_error(names: Iterable[str], correction: Mapping[str, float]) -> list:

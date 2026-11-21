@@ -113,15 +113,34 @@ def test_the_corpus_column_shift_is_the_negated_error_in_kiloamps():
     assert conductor_correction.column_shift(54058.0, 1.0) == pytest.approx(-54.058)
 
 
-def test_the_shifted_column_reaches_the_error_the_fit_asked_for():
-    """F1A on 137D: measured -177.235 kA.turn less a +54.058 error reads -231.293."""
+def _machine(name="F1A", column="magnetics_conductors", multiplier=1.0):
+    """A machine description carrying one conductor, for the column read."""
 
-    source_time = [0.0, 1000.0]
-    measured_column = [-177.235, -177.235]
-    shift = conductor_correction.column_shift(54058.0, 1.0)
-    shifted = [value + shift for value in measured_column]
-    applied = conductor_correction.current_at(source_time, shifted, 500.0, 1.0)
-    assert applied / 1000.0 == pytest.approx(-231.293, abs=1e-6)
+    from types import SimpleNamespace
+
+    turns = SimpleNamespace(applied_multiplier=multiplier)
+    conductor = SimpleNamespace(name=name, input_column=column, turns=turns)
+    return SimpleNamespace(conductors=(conductor,))
+
+
+def test_the_shifted_column_reads_back_as_the_applied_current():
+    """F1A on 137D: measured -177.235 kA.turn less a +54.058 error reads -231.293.
+
+    The column is shifted the way the arm shifts it and read back through the
+    interpolation the current adapter installs, so a wrong shift and a wrong
+    read both fail rather than cancelling.
+    """
+
+    from nova.imas.diiid_current import shipped_current_at
+
+    shift = conductor_correction.column_shift(54058.1495258983, 1.0)
+    column = -177.235036006 + shift
+    row = {
+        "magnetics_time": [0.0, 1000.0],
+        "magnetics_conductors": [column, column],
+    }
+    resolved = shipped_current_at(row, _machine(), ["F1A"], 500.0)
+    assert resolved["F1A"] == pytest.approx(-231293.185532, abs=1e-6)
 
 
 def test_the_solved_current_check_reddens_when_the_correction_did_not_land():
@@ -134,11 +153,25 @@ def test_the_solved_current_check_reddens_when_the_correction_did_not_land():
 
 
 def test_the_solved_current_check_passes_when_the_correction_landed():
-    measured = {"F1A": -177235.04, "F2A": -168819.0}
-    correction = {"F1A": 54058.0, "F2A": 52140.0}
-    fitted = {name: value - correction[name] for name, value in measured.items()}
-    _rows, mismatched = verify.compare(measured, fitted, correction)
+    """The three numbers are the frame's records, not the check's expression.
+
+    The measured F1A current and the fitted equivalent error are the committed
+    receipt's, and the solved vector is the one the adapter quoted when it
+    refused the same vector at the build seam, so the expectation is pinned to
+    what the solve wrote rather than rebuilt from the subtraction the check
+    performs.
+    """
+
+    measured = {"F1A": -177235.036006}
+    correction = {"F1A": 54058.1495258983}
+    fitted = {"F1A": -231293.185532}
+    rows, mismatched = verify.compare(measured, fitted, correction)
     assert mismatched == []
+    assert rows[0]["expected_a_turn"] == pytest.approx(-231293.185532, abs=1e-6)
+    # A check that accepted every vector would pass the line above whatever it
+    # expected, so the same solved vector against the sign-flipped error reddens.
+    _rows, mismatched = verify.compare(measured, fitted, {"F1A": -54058.1495258983})
+    assert mismatched == ["F1A"]
 
 
 def test_a_fall_is_not_read_when_the_support_moved():

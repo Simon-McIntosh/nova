@@ -25,7 +25,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 124,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "900ef402f2a7129ac33038e9f5536b9729feb7ce",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Node (e) now also runs the 500-cell coarse-tie census test against the pinned cache with an empty operand store, closing clause (3) on the pinned path; the text says node (d) measured from a job-local cache and that clause (2) stands on its record.",
+      "reason": "",
+      "when": "2026-11-21T01:02:12.478133+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "900ef402f2a7129ac33038e9f5536b9729feb7ce",
+      "commit_basis": "edit",
+      "note": "Node (e) now also runs the 500-cell coarse-tie census test against the pinned cache with an empty operand store, closing clause (3) on the pinned path; the text says node (d) measured from a job-local cache and that clause (2) stands on its record.",
+      "reason": "",
+      "when": "2026-11-21T01:02:12.478133+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261120T202734758677-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261120T202734758677-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "a966745119650caf22e26da684b47b5d22872ba7",
   "rubric": "content",

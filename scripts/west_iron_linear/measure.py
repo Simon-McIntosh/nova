@@ -119,12 +119,23 @@ def constant_reference(label):
     if label.startswith("uniform-"):
         path = EVIDENCE / "west-62751/mesh-pair/measurement.json"
         key = label.removeprefix("uniform-")
-        document = json.loads(path.read_text())
-        row = document["meshes"][key]
     else:
         path = EVIDENCE / "graded-refinement/west-cpu/measurement.json"
         key = {"graded-16-80": "graded-fine", "graded-8-40": "graded-half"}[label]
-        row = json.loads(path.read_text())["west"][key]
+    if not path.is_file():
+        return dict(
+            receipt=str(path),
+            missing=True,
+            key=key,
+            reason=(
+                "the constant-basis receipt is absent from the evidence root: its "
+                "former path lay under the retired shared root and it was not "
+                "rebuilt there after the storage deletion of 2026-11-19"
+            ),
+        )
+    document = json.loads(path.read_text())
+    table = document["meshes"] if label.startswith("uniform-") else document["west"]
+    row = table[key]
     return dict(
         receipt=str(path),
         sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
@@ -465,7 +476,11 @@ def main():
         factor_dtype="float64",
         factorisation="cholesky" if args.cholesky else "split",
     )
-    assert row["constant"]["cells"] == count, "constant receipt names another mesh"
+    constant = row["constant"]
+    if constant.get("missing"):
+        assert row["cells"] == count
+    else:
+        assert constant["cells"] == count, "constant receipt names another mesh"
     if args.resume_refinement:
         assert args.refinement and args.mesh == "graded-8-40"
         original = json.loads((args.output / f"{args.mesh}.json").read_text())

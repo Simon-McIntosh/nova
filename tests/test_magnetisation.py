@@ -2214,3 +2214,80 @@ def test_metric_cholesky_nonlinear_solution_and_probe_agreement(monkeypatch):
     probes = np.array([[3.0, 0.0], [4.0, 1.0], [6.0, 0.0]])
     expected, actual = (result.field(probes) for result in results)
     assert np.linalg.norm(actual - expected) / np.linalg.norm(expected) < 1e-12
+
+
+@pytest.mark.parametrize("scale, indefinite", [(0.3, False), (1.6, True)])
+def test_metric_cholesky_refuses_a_matrix_with_a_negative_eigenvalue(scale, indefinite):
+    """The in-place Cholesky route refuses an indefinite Newton matrix.
+
+    The symmetric system is B = I - R G W, with the spectrum of the
+    metric-weighted interaction G in [0, mu0] and the material differential
+    bounded by mu0, so B is positive definite. The unrepaired graded operator
+    broke that bound: its quotient was 1.0259, B carried one negative
+    eigenvalue, and no Cholesky factor exists. A failed factorisation must
+    raise rather than return a buffer left holding non-finite entries. The
+    same operands at a bounded quotient must still factor, so the refusal is
+    the indefiniteness and not the route.
+    """
+    from scipy.linalg import block_diag
+
+    cells = iron._mesh(shapely.box(1, 0, 2, 1), 0.5)
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    owners = geometry["owners"]
+    project = np.einsum(
+        "qij,qj,q->qi",
+        np.linalg.inv(geometry["gram"])[owners],
+        geometry["basis"],
+        geometry["weights"],
+    )
+    metric = np.zeros((len(cells.polygons), 6, 6))
+    metric[:, :3, :3] = metric[:, 3:, 3:] = geometry["gram"]
+    full_metric = block_diag(*geometry["gram"], *geometry["gram"])
+    values, vectors = np.linalg.eigh(full_metric)
+    half = (vectors * np.sqrt(values)) @ vectors.T
+    inverse_half = (vectors / np.sqrt(values)) @ vectors.T
+    rng = np.random.default_rng(426)
+    symmetric = rng.normal(size=full_metric.shape)
+    symmetric = symmetric @ symmetric.T
+    interaction = symmetric * scale * iron._MU0 / np.linalg.norm(symmetric, 2)
+    gram = inverse_half @ interaction @ half
+    operands = tuple(
+        map(
+            jnp.asarray,
+            (
+                gram,
+                rng.normal(size=len(gram)) * 0.05,
+                *iron._fit_law([0, 0.2, 1], [2, 4, 2]),
+                geometry["basis"],
+                project,
+                owners,
+            ),
+        )
+    )
+    state = jnp.arange(len(gram), dtype=jnp.float64) * 10
+    local, root, transform, eigenvalues = iron._linear_cholesky_local(
+        state, operands, jnp.asarray(metric)
+    )
+    count = len(cells.polygons)
+    dimension = 6 * count
+    full_root = np.zeros((dimension, dimension))
+    full_transform = np.zeros_like(full_root)
+    for cell in range(count):
+        index = np.r_[3 * cell + np.arange(3), 3 * (count + cell) + np.arange(3)]
+        full_root[np.ix_(index, index)] = np.asarray(root)[cell]
+        full_transform[np.ix_(index, index)] = np.asarray(transform)[cell]
+    system = np.eye(dimension) - full_root @ np.asarray(gram) @ full_transform
+    system = (system + system.T) / 2
+    spectrum = np.linalg.eigh(system)[0]
+    assert np.asarray(eigenvalues).min() > 0
+    assert int(np.sum(spectrum < 0)) == (1 if indefinite else 0)
+    if indefinite:
+        with pytest.raises(ValueError, match="not positive definite"):
+            iron._linear_cholesky_factor(
+                state, operands, jnp.asarray(metric), jnp.asarray(0.0)
+            )
+    else:
+        triangle, *_ = iron._linear_cholesky_factor(
+            state, operands, jnp.asarray(metric), jnp.asarray(0.0)
+        )
+        assert np.isfinite(np.asarray(triangle)).all()

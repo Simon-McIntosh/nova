@@ -106,7 +106,11 @@ def draw(axes, data):
     middle.set_xlim(0, float(distance[-1]))
     middle.set_ylabel("iron share of $|B|$ [%] (symlog)", fontsize=style.label_fontsize)
     middle.set_xlabel(r"$R - R_{\mathrm{edge}}$ [m]", fontsize=style.label_fontsize)
-    middle.legend(fontsize=style.label_fontsize, frameon=False, loc="lower right")
+    # The three planes coincide on the plateau, which fills the bottom of the
+    # panel, so a legend there lies on the data it is naming. The upper right is
+    # empty: the spike and its annotation sit at the left edge, above the
+    # plateau's rise.
+    middle.legend(fontsize=style.label_fontsize, frameon=False, loc="upper right")
 
     lower = axes[2]
     trace_axes(lower)

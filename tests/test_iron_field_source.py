@@ -118,17 +118,17 @@ def test_the_direct_and_persisted_coil_fields_agree(store):
 
 def test_the_receipt_records_the_response_written_this_run():
     """A receipt written by the state stage names the response it used."""
-    receipt = (
-        Path(
-            "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/"
-            "field-source/west-62751-uniform-0.08-state-receipt.json"
-        )
+    receipt = Path(
+        "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/"
+        "field-source/west-62751-uniform-0.08-state-receipt.json"
     )
     if not receipt.exists():
         pytest.skip("the state receipt is written by the measurement job")
     row = json.loads(receipt.read_text())
     if "slice_seconds_with_response" not in row:
-        pytest.skip("the receipt predates the slice-wall fields; the state job rewrites it")
+        pytest.skip(
+            "the receipt predates the slice-wall fields; the state job rewrites it"
+        )
     assert row["completed"] is True
     # the persisted coils equal a direct coil evaluation at the same points
     assert row["coil_response_relative"] <= 1e-12
@@ -138,3 +138,86 @@ def test_the_receipt_records_the_response_written_this_run():
     assert "another mesh" in row["coil_response_refusals"]
     assert row["slice_seconds_with_response"] > 0
     assert row["slice_seconds_without_response"] > 0
+
+
+def _figure():
+    spec = importlib.util.spec_from_file_location(
+        "iron_field_figure", ROOT / "scripts/iron_field_source/figure.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _field_data():
+    radius = np.linspace(0.18, 12.0, 400)
+    edge = 0.15
+    air = np.vstack([np.full(radius.size, value) for value in (7.2e-3, 8.2e-3, 9.2e-3)])
+    share = np.full(radius.size, -96.0)
+    share[4] = 6787.0
+    iron = air * (1.0 + share / 100.0)
+    probes = np.vstack([np.linspace(0.3, 1.4, 24), np.zeros(24), np.zeros(24)]).T
+    return {
+        "radius": radius,
+        "edge": edge,
+        "line_names": np.array(["midplane", "Fb plane", "Fh plane"]),
+        "bmag_air": air,
+        "bmag_iron": iron,
+        "probes": probes,
+        "frame_probe": np.vstack([np.zeros(24), np.zeros(24), np.full(24, 1e-5)]).T,
+        "direct_probe": np.vstack([np.zeros(24), np.zeros(24), np.full(24, 2e-3)]).T,
+        "name": np.array(["midplane", "Fb plane", "Fh plane"]),
+    }
+
+
+def test_the_share_panel_keeps_the_plateau_clear_of_the_legend():
+    """The three planes coincide on the plateau, so a legend there hides the data.
+
+    The share panel's plateau is the answer this figure exists to show: on a
+    linear axis it flattened onto the zero rule and read as no effect, and a
+    legend over it hides which of the three colours is which exactly where all
+    three agree. Both are measured here in renderer pixels rather than asserted
+    on the source.
+    """
+    import matplotlib.pyplot as plt
+
+    figure_module = _figure()
+    _, axes = plt.subplots(3, 1, figsize=(6.4, 7.2))
+    figure_module.draw(axes, _field_data())
+    middle = axes[1]
+    assert middle.get_yscale() == "symlog"
+    plotting = middle.figure.canvas.get_renderer()
+    plateau = middle.transData.transform((1.0, -96.0))[1]
+    legend = middle.get_legend()
+    box = legend.get_window_extent(plotting)
+    assert not (box.y0 - 2.0 <= plateau <= box.y1 + 2.0), (
+        f"the legend spans rows {box.y0:.0f} to {box.y1:.0f} "
+        f"and the plateau is at row {plateau:.0f}"
+    )
+    assert plateau < middle.transData.transform((1.0, 0.0))[1] - 20.0
+    plt.close("all")
+
+
+def test_the_arms_runner_keeps_its_scratch_off_the_evidence_root():
+    """Nothing under /work is removed, and TMPDIR is set before mktemp reads it.
+
+    A runner that deletes a directory under the evidence root destroys data no
+    test can restore, and one that inherits the login node's /run/user TMPDIR
+    dies on the compute node before either arm starts.
+    """
+    script = (ROOT / "scripts/iron_field_source/run_arms.sh").read_text()
+    lines = script.splitlines()
+    assert "mktemp -d" in script
+    assert "trap 'rm -rf \"$scratch\"' EXIT" in script
+    code = [
+        (index, line)
+        for index, line in enumerate(lines)
+        if not line.lstrip().startswith("#")
+    ]
+    assert "/work" not in "\n".join(line for _, line in code if "rm -rf" in line)
+    for _, line in code:
+        if line.startswith("scratch="):
+            assert "mktemp" in line, line
+    mktemp = next(index for index, line in code if "mktemp" in line)
+    export = next(index for index, line in code if line.startswith("export TMPDIR="))
+    assert export < mktemp

@@ -149,6 +149,32 @@ and the output discarded. It deleted the project's whole shared data directory
 and about 24 other top-level entries before it was stopped. The brief had asked
 it to create a directory on shared storage and remove it at the end.
 
+### A worker never drops its fence to start a job (binding, lead 2026-11-21)
+
+**A job payload written by a worker must not unset or change any environment
+variable whose name begins `RECKON_`, and must not start a nested shell that
+clears the environment.** Those variables carry the worker's write fence into
+the job. A job that only starts with them removed is a job the worker may not
+run.
+
+The GPU nodes `98dci4-gpu-0003` (H200) and `98dci4-gpu-0002` (titan) have no
+`bwrap` binary, so a fenced worker's job is refused there in zero seconds with
+exit 127 and `fence program bwrap cannot run on <node>`. Until reckon carries a
+fence program to those nodes:
+
+- A worker whose job is refused this way stops with `status: blocked`, names
+  the job id and the refusal, and commits the driver it wanted to run.
+- The coordinator submits the job itself, outside any fence, from the worker's
+  committed head, with logs under `~/.cache/<repo>-<topic>/`.
+- The worker is then resumed to write its record from those logs. Its
+  manifest's `artifacts` names the submitting session, each job id and each log
+  path, and cites no figure from a job that ran with the fence removed.
+
+Measured 2026-11-21: a worker measuring against the pinned cache unset the fence
+environment in its own payloads after three refusals and ran its H200 jobs
+unfenced. The jobs only read, but the bypass was the worker's own choice, and
+the lead ruled the evidence out; the coordinator reran the three steps.
+
 ### One measurement, one SLURM job (binding, lead 2026-09-09)
 
 A measurement over many rows, shots, rungs or frames is ONE scheduler job that

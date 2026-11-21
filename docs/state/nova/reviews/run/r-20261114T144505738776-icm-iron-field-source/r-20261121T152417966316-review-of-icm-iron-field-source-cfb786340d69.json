@@ -25,6 +25,13 @@
   "completed_at": "2026-11-21T15:25:41.095Z",
   "dispatched_at": "2026-11-21T15:25:10Z",
   "failure_derivation": "baseline arm job 1335024 (arms/baseline-arm-1335024.log) reports '7 failed, 104 passed in 8281.11s'; after arm job 1335023 (arms/after-arm-1335023.log) reports '7 failed, 114 passed in 8468.69s' with the same seven FAILED ids, all tests/test_magnetisation.py cases failing FileNotFoundError on /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/{case.json,production/material-refinement-20261114/summary.json}; after minus baseline is empty.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-field-source-polish",
+      "recorded_at": "2026-11-21T15:58:36.551620+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_iron_field_source.py",

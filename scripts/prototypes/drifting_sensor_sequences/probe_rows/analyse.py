@@ -12,6 +12,11 @@ import numpy as np
 
 STUDY = Path(os.environ.get("DRIFT_STUDY", str(Path(__file__).resolve().parent)))
 BLOCK = 50
+# One lag-one rule for the controls: the white draw and the index-0
+# colouring must sit within this of zero, and the drift sequence above its
+# complement.
+LAG_ONE_LIMIT = 0.15
+DRIFT_LAG_ONE_FLOOR = 0.5
 
 
 def load(path: Path) -> list[dict]:
@@ -19,42 +24,107 @@ def load(path: Path) -> list[dict]:
 
 
 def series(rows: list[dict]) -> dict:
+    """Per-slice series, holding a quantity the record does not carry as NaN.
+
+    A slice whose reconstruction stored no boundary-derived value is written
+    with ``None``; an unwritten DD float reads back beyond 1e30 in magnitude,
+    which is held absent rather than read as a measurement.
+    """
+
+    def column(key, absolute=False):
+        values = np.array(
+            [float("nan") if row.get(key) is None else row[key] for row in rows],
+            dtype=float,
+        )
+        values[np.abs(values) > 1e30] = np.nan
+        return np.abs(values) if absolute else values
+
     return dict(
-        axis=np.array([row["axis"] for row in rows], dtype=float),
-        flux=np.array([row["flux_boundary"] for row in rows], dtype=float),
-        q95=np.abs(np.array([row["q95"] for row in rows], dtype=float)),
-        current=np.array([row["plasma_current"] for row in rows], dtype=float),
+        axis=column("axis"),
+        flux=column("flux_boundary"),
+        q95=column("q95", absolute=True),
+        current=column("plasma_current"),
     )
 
 
 def lag_one(value: np.ndarray) -> float:
-    """Slice-to-slice correlation of one series."""
+    """Slice-to-slice correlation over consecutive finite pairs."""
     value = np.asarray(value, dtype=float)
     if value.ndim == 2:
-        return float(np.mean([lag_one(column) for column in value.T]))
+        finite = np.isfinite(value).all(axis=1)
+        value = value[finite]
+        if value.shape[0] < 3:
+            return float("nan")
+        # A constant column carries no correlation, and corrcoef reports one
+        # for it; leaving it out keeps a degenerate stream from reading as a
+        # perfect memory.
+        varying = [
+            column for column in range(value.shape[1]) if np.ptp(value[:, column]) > 0.0
+        ]
+        if not varying:
+            return float("nan")
+        return float(
+            np.mean(
+                [
+                    np.corrcoef(value[:-1, column], value[1:, column])[0, 1]
+                    for column in varying
+                ]
+            )
+        )
+    value = value[np.isfinite(value)]
     if value.size < 3 or np.std(value) == 0.0:
         return float("nan")
     return float(np.corrcoef(value[:-1], value[1:])[0, 1])
 
 
-def error(series_value: np.ndarray, truth: np.ndarray) -> np.ndarray:
-    return np.sqrt(np.mean(np.sum((series_value - truth) ** 2, axis=1)))
+def rms_error(value: np.ndarray, truth: np.ndarray) -> float:
+    """Root-mean-square error over the slices that carry a value."""
+    value = np.asarray(value, dtype=float)
+    truth = np.asarray(truth, dtype=float).ravel()
+    if value.ndim == 1:
+        residual = value - float(truth[0])
+        finite = np.isfinite(residual)
+        if not finite.any():
+            return float("nan")
+        return float(np.sqrt(np.mean(residual[finite] ** 2)))
+    residual = value - truth
+    finite = np.isfinite(residual).all(axis=1)
+    if not finite.any():
+        return float("nan")
+    return float(np.sqrt(np.mean(np.sum(residual[finite] ** 2, axis=1))))
 
 
 def block_error(value: np.ndarray, truth: np.ndarray, block: int = BLOCK) -> float:
+    """Root-mean-square of each block mean's error, absent slices left out."""
     value = np.asarray(value, dtype=float)
-    truth = np.asarray(truth, dtype=float)
-    count = value.shape[0] // block
-    if count == 0:
+    truth = np.asarray(truth, dtype=float).ravel()
+    if value.shape[0] < block:
         return float("nan")
-    means = np.array(
-        [
-            value[index * block : (index + 1) * block].mean(axis=0)
-            for index in range(count)
-        ]
-    )
-    residual = means - truth
-    return float(np.sqrt(np.mean(np.sum(residual**2, axis=-1))))
+    errors = []
+    for start in range(0, value.shape[0] - block + 1, block):
+        chunk = value[start : start + block]
+        if chunk.ndim == 1:
+            finite = np.isfinite(chunk)
+            if finite.any():
+                errors.append(float(np.abs(chunk[finite].mean() - truth[0])))
+        else:
+            finite = np.isfinite(chunk).all(axis=1)
+            if finite.any():
+                errors.append(float(np.linalg.norm(chunk[finite].mean(axis=0) - truth)))
+    if not errors:
+        return float("nan")
+    return float(np.sqrt(np.mean(np.square(errors))))
+
+
+def axis_distance(rows: list[dict], truth) -> np.ndarray:
+    """Distance of each slice's magnetic axis from the generating state.
+
+    One owner for the per-slice distance: the arm summaries take its RMS and
+    the axis-against-slice figure draws it, so the two cannot disagree about
+    what a slice's axis error is.
+    """
+    centre = np.asarray(truth, dtype=float).ravel()
+    return np.linalg.norm(series(rows)["axis"] - centre, axis=1)
 
 
 def summarise(rows: list[dict], truth: dict, jacobian: dict) -> dict:
@@ -63,7 +133,7 @@ def summarise(rows: list[dict], truth: dict, jacobian: dict) -> dict:
     flux_truth = float(truth["flux_boundary"]) / float(truth["flux_span"])
     q95_truth = abs(float(truth["q95"]))
     flux_fraction = values["flux"] / float(truth["flux_span"])
-    axis_error = np.sqrt(np.mean(np.sum((values["axis"] - axis_truth) ** 2, axis=1)))
+    axis_error = float(np.sqrt(np.mean(axis_distance(rows, axis_truth) ** 2)))
     record = dict(
         slices=len(rows),
         axis_rms=float(axis_error),
@@ -117,19 +187,58 @@ def summarise(rows: list[dict], truth: dict, jacobian: dict) -> dict:
     return record
 
 
+def reduce_arm(rows: list[dict], truth: dict, block: int = BLOCK) -> dict:
+    """Reduce one arm's per-slice rows to the sequence measures.
+
+    The one reduction both the sweep and this module's own summary read, so a
+    NaN-aware rule or a new column cannot land in one of them alone.
+    """
+    values = series(rows)
+    span = float(truth["flux_span"])
+    axis_truth = [float(value) for value in truth["axis"]]
+    flux = values["flux"] / span
+    flux_truth = [float(truth["flux_boundary"]) / span]
+    q95_truth = float(truth["q95"])
+    axis_rms = rms_error(values["axis"], axis_truth)
+    flux_rms = rms_error(flux, flux_truth)
+    q95_rms = rms_error(values["q95"], q95_truth)
+    axis_mean = block_error(values["axis"], axis_truth, block)
+    flux_mean = block_error(flux, flux_truth, block)
+    q95_mean = block_error(values["q95"], q95_truth, block)
+    return dict(
+        slices=len(rows),
+        slices_with_boundary=int(np.sum(np.isfinite(values["q95"]))),
+        converged=float(np.mean([bool(row.get("converged", True)) for row in rows])),
+        axis_rms=axis_rms,
+        axis_mean_50=axis_mean,
+        axis_mean_ratio=axis_mean / axis_rms,
+        flux_rms=flux_rms,
+        flux_mean_50=flux_mean,
+        flux_mean_ratio=flux_mean / flux_rms,
+        q95_rms=q95_rms,
+        q95_mean_50=q95_mean,
+        q95_mean_ratio=q95_mean / q95_rms,
+        axis_lag1=lag_one(values["axis"]),
+        flux_lag1=lag_one(flux),
+        q95_lag1=lag_one(values["q95"]),
+        axis_mean=values["axis"].mean(axis=0).tolist(),
+        q95_mean=float(np.nanmean(values["q95"])),
+    )
+
+
 def thresholds(table: tuple[dict, dict]) -> dict:
     """Clause (2): the lag-one control both sequences must satisfy."""
     white, drift = table
     return dict(
         white_lag1_pass=bool(
-            abs(white["axis_lag1"]) <= 0.15
-            and abs(white["flux_lag1"]) <= 0.15
-            and abs(white["q95_lag1"]) <= 0.15
+            abs(white["axis_lag1"]) <= LAG_ONE_LIMIT
+            and abs(white["flux_lag1"]) <= LAG_ONE_LIMIT
+            and abs(white["q95_lag1"]) <= LAG_ONE_LIMIT
         ),
         drift_lag1_pass=bool(
-            drift["axis_lag1"] > 0.5
-            and drift["flux_lag1"] > 0.5
-            and drift["q95_lag1"] > 0.5
+            drift["axis_lag1"] > DRIFT_LAG_ONE_FLOOR
+            and drift["flux_lag1"] > DRIFT_LAG_ONE_FLOOR
+            and drift["q95_lag1"] > DRIFT_LAG_ONE_FLOOR
         ),
     )
 
@@ -145,11 +254,24 @@ def grouped(paths: list[Path]) -> dict[str, list[dict]]:
     return runs
 
 
-def crossing(points: dict[float, dict], key: str, limit: float) -> float | None:
-    for factor in sorted(points):
-        if points[factor][key] > limit:
-            return factor
-    return None
+def crossing_point(points: dict, key: str, limit: float) -> dict:
+    """The first swept value whose measure exceeds the limit, and its neighbour."""
+    ordered = sorted(points.values(), key=lambda row: row["factor"])
+    for position, row in enumerate(ordered):
+        if row[key] > limit:
+            previous = ordered[position - 1] if position else None
+            return dict(
+                factor=row["factor"],
+                value=row[key],
+                previous_factor=None if previous is None else previous["factor"],
+                previous_value=None if previous is None else previous[key],
+            )
+    return dict(factor=None, value=None, previous_factor=None, previous_value=None)
+
+
+def crossing(points: dict, key: str, limit: float) -> float | None:
+    """The first swept value whose measure exceeds the limit."""
+    return crossing_point(points, key, limit)["factor"]
 
 
 def main() -> int:

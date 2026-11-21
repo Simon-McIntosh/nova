@@ -1003,6 +1003,42 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "d93eb2485f59e2c352e6912fc3222217e62ec2c3",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261121T161800187546-review-of-diiid-coil-correction-resolve-finite-edge-9ce2fe445956",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261121T161800187546-review-of-diiid-coil-correction-resolve-finite-edge-9ce2fe445956",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/35a66cc6-f4f1-4358-8dbb-99c9333c7249/review-of-diiid-coil-correction-resolve-finite-edge-9ce2fe445956",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261121T161800187546-review-of-diiid-coil-correction-resolve-finite-edge-9ce2fe445956-20261121T163438867320Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

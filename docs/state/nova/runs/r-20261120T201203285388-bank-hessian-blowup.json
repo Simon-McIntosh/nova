@@ -2316,6 +2316,24 @@
     "reason": "brief-names-no-plan",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/bank_hessian_blowup/test_fragment.py",
+    "integrated_revision": "fcd0ccaf109ef2c2e7c35387f2d3f98f25a3978c",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261120T201203285388-bank-hessian-blowup/review-landing/gate-fcd0ccaf109ef2c2e7c35387f2d3f98f25a3978c.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'PYTHONPATH=. JAX_PLATFORMS=cpu ./.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/bank_hessian_blowup/test_fragment.py'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/nova"
+    ]
+  },
   "lane": "clive",
   "lane_advisory": {
     "backend": "clive",

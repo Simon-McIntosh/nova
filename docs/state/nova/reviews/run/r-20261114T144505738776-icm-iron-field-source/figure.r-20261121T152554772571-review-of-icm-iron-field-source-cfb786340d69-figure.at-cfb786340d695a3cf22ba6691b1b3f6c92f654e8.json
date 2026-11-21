@@ -38,6 +38,13 @@
     "blocking": 0,
     "non-blocking": 5
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "icm-field-source-polish",
+      "recorded_at": "2026-11-21T16:01:24.644614+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/iron_field_source/figure.py",

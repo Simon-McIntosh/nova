@@ -43,6 +43,13 @@
       "table_form": "pass \u2014 a two-field poloidal comparison, not a table."
     }
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Repaired at the reviewed head 16399ead2, after this figure review of 88647ab52: the iter-stored-default panel now draws the nova axis triangle and the nova saddle cross beside the stored state's, and its caption reads 'both null sets drawn, one axis and one saddle each'. Checked by the coordinator on a 1400 px raster of the committed SVG on 2026-11-21; the code review at 16399ead2 raises no finding against it",
+      "recorded_at": "2026-11-21T20:29:29.338071+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/forward-solve-near-stored-states/stored-state-refusals-on-the-recorded-mesh/iter-stored-default-preview.png",

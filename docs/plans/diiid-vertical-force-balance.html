@@ -22,7 +22,7 @@
 <title>DIII-D vertical force balance | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="166">
+<meta name="plan-version" content="167">
 <meta name="plan-modified" content="2026-11-21">
 <meta name="plan-commits" content="cb9c883b,c4a6dd55,c55c29ce,34b647df,54a611a0,700e8991,5eeca293,f152d4f5,5681764d">
 <meta name="plan-artifacts" content="docs/evidence/archive/diiid-vertical-force-balance-landed.html,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/ids-set/diiid_pf_active_circuits.receipt.json,docs/figures/diiid-forward-onboarding/ids-set/dd_path_validation.report.json,docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py,tests/test_diiid_pf_active_circuits.py">
@@ -456,6 +456,9 @@ decision on where the translation lives (the ambix reader or the Nova consumer) 
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261121T164918656639-review-of-diiid-coil-correction-resolve-finite-edge-39b0b53af0df" data-who="reckon-build" data-when="2026-11-21T16:57:55.528Z">
     <div class="r-comment-body"><p>reviewed the commits r-20261121T073819532158-diiid-coil-correction-resolve-finite-edge gained since its prior review (9ce2fe445..39b0b53af), scoring goal_fidelity 19, evidence 16, scope_discipline 19, durability 14, fit 17, reuse 19, with three non-blocking findings and zero added suite failures.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261121T073819532158-diiid-coil-correction-resolve-finite-edge" data-who="reckon-build" data-when="2026-11-21T16:49:07Z">
+    <div class="r-comment-body"><p>the fitted conductor correction is shown to reach the DIII-D forward solve through the corpus current columns and to close no part of the lower-X offset on any of the four X-point rows, with two rows losing the plasma when it is applied</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

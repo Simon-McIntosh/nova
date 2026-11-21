@@ -25,8 +25,8 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="140">
-<meta name="plan-modified" content="2026-11-20">
+<meta name="plan-version" content="141">
+<meta name="plan-modified" content="2026-11-21">
 </head>
 <body>
   <main class="plan-doc">
@@ -960,6 +960,9 @@ number is reported for either ratio.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261118T163504331318-review-of-icm-iron-field-source-1d739e7ec2c8" data-who="reckon-build" data-when="2026-11-18T16:57:37.849Z">
     <div class="r-comment-body"><p>reviewed r-20261114T144505738776-icm-iron-field-source at 9b016126111a5acaebca064c07432042b5a2628c..1d739e7ec2c85bb661e93afbca84bc9f94b743f5 and stored a parsed record (goal_fidelity 15, evidence 12, scope_discipline 15, durability 11, fit 11, reuse 4, total 68) with 12 findings, two of them blocking: nova/biot/solve.py:432 forms Aphi as psi/(2*pi*R) with no axis guard where polysection.py:283-289 and circle.py:363-372 answer 0 on the axis, and scripts/iron_field_source/sampled.py:111-116 records a 0.0 identity by comparing bound.field() with bound.field().</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261121T011329512546-review-of-icm-iron-field-source-a0479e6acdd7" data-who="reckon-build" data-when="2026-11-21T02:35:26.116Z">
+    <div class="r-comment-body"><p>none — a review lands no code; the verdict is the stored record, promotion lands it as a comment on the plan section.</p></div>
 </div>
 </section>
 </main>

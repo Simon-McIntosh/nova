@@ -1,0 +1,85 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "A figure review runs no suite; the zero count and the empty list are the neutral value the record shape requires, not a measurement. No base/head gate pair was read and no suite delta is claimed.",
+  "caption_note": "The section's caption does not merely repeat the figure title: the prose before the figure states the three planes, 40 radii per plane and the R = 16 m extent, and the paragraph after it names each panel's content. Pass, and the caption is not changed by this review.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-21T01:14:48Z",
+  "figure_evidence": {
+    "canvas": "768x864 px, plt.subplots(3, 1, figsize=(6.4, 7.2), constrained_layout=True).",
+    "edge_scan": "Zero non-white pixels in the outer 2 px band on all four sides (top 0, bottom 0, left 0, right 0), so no artist is clipped at the figure edge.",
+    "identity": "Both attached PNGs are one figure: identical sha256 (9aba68d70207e516fb5b54bf995b37671f479f3aec9077ec54bd7cfbf5d2176c), both 768x864 RGBA, and that digest is byte-identical to the reviewed head's committed blob (git show a0479e6acdd7:docs/figures/west-stray-field/west-62751-iron-stray-field.png). The evidence fragment documents the duplicate publication deliberately, so the duplication is not a defect; every verdict applies to both paths.",
+    "magnified_crops": "Regions inspected at 3x to 18x: the near-edge peak, the far field, both legends, the middle panel's zero band, and the lower panel in two halves. No label overlap or clipping in any crop.",
+    "panel_1_ink": "Teal 1359 px, 905 beyond x = 2 m; blue 136 px (56 beyond x = 2 m); orange 142 px (56 beyond x = 2 m). The three iron curves nearly coincide after the near-edge peak (at 1 m the air-core fields are 7.2/8.2/9.2 mT and the with-iron fields 0.255/0.262/0.269 mT), so the last-drawn teal curve overprints the other two over most of the range.",
+    "panel_2_axes": "Middle panel plot area spans rows ~390 to 564; the black zero line occupies rows 555-556 and the bottom spine is row 564.",
+    "panel_2_ink": "Teal ink in the middle panel: 797 px total, 655 of them in rows 556-560, a ~4 px sliver immediately under the black zero line; blue: 454 px total, 2 px in the zero band; orange: 57 px visible. The post-peak share of all three planes is drawn inside and beneath the zero line.",
+    "panel_2_scale": "share = (bmag_iron - bmag_air)/bmag_air*100 from the run's field.npz spans -97.58 to +6786.9 per cent. One spike at R-R_edge = 0.294 m reaches 6786.9 % on the midplane, 1268.4 % on Fb and 1222.7 % on Fh; at R-R_edge >= 0.5 m the three planes lie between -97.58 and -95.83 %. Linear autoscale then spans about -442 to 7131 %, so -96 % is about 2.4 px at the panel's ~174 px height."
+  },
+  "finding_counts": {
+    "blocking": 1,
+    "non_blocking": 2
+  },
+  "findings": [
+    {
+      "file": "docs/figures/west-stray-field/west-62751-iron-stray-field.png",
+      "id": "fd058faa62c",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The middle panel, the iron's share of the stray field, does not let a reader see its data. One +6787 % spike at R-R_edge = 0.294 m sets a linear axis spanning about -442 to 7131 %, so the -96 % share held from 0.5 m to 11.5 m on all three planes, which is the section's headline result, is drawn as a ~4 px band 2 px below zero and is further covered by the 2 px solid black zero line that scripts/iron_field_source/figure.py:88 draws after the curves. A reader sees a flat line at about 0 % where the plotted values are -96 %, so the panel shows the opposite sign. The ink confirms it: 655 of the panel's 797 teal pixels sit in rows 556-560, inside and just beneath the black rule at rows 555-556. The same -96 % figure survives only in the prose table beside the figure, not in the picture."
+    },
+    {
+      "disposition": {
+        "state": "folded",
+        "target": "the figure-redraw node the coordinator raises for finding 1, which rewrites scripts/iron_field_source/figure.py"
+      },
+      "file": "scripts/iron_field_source/figure.py",
+      "id": "f191bf6e80f",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The upper panel's legend offers three iron colours, but after the near-edge peak only the teal (Fh) curve is visible. The three with-iron curves nearly coincide (0.255, 0.262 and 0.269 mT at 1 m), and because the loop draws midplane, Fb and then Fh, the teal overprints the other two: beyond x = 2 m the render carries 56 blue px and 56 orange px against 905 teal px. A reader cannot tell that the three planes coincide rather than that two curves are missing."
+    },
+    {
+      "disposition": {
+        "state": "folded",
+        "target": "the figure-redraw node the coordinator raises for finding 1, which rewrites scripts/iron_field_source/figure.py"
+      },
+      "file": "scripts/iron_field_source/figure.py",
+      "id": "f00802b676b",
+      "line": 62,
+      "severity": "non-blocking",
+      "summary": "The same three-entry plane legend is drawn twice on one figure, in the upper panel (line 62) and again in the middle panel (line 92), with none in the lower panel. The colours mean the same three planes in both panels, so one figure-level legend would carry it; the repeated block spends vertical space in a figure that already has three stacked panels and narrows the plot area of each."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261121T011408037143-review-of-icm-iron-field-source-a0479e6acdd7-figure",
+  "reviewed_base_sha": "9b016126111a5acaebca064c07432042b5a2628c",
+  "reviewed_figures": [
+    "docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png",
+    "docs/figures/west-stray-field/west-62751-iron-stray-field.png"
+  ],
+  "reviewed_head_sha": "a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2",
+  "reviewed_run_id": "r-20261114T144505738776-icm-iron-field-source",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: defect - the middle panel does not let a reader see its data: a single +6787 % spike sets the linear scale, so the -96 % share that holds from 0.5 m to 11.5 m is drawn as a ~4 px band beneath the black zero line and reads as about 0 %, the opposite sign to the share the section reports. Upper and lower panels are legible at a glance.",
+    "RUBRIC data_ink: pass - no gradient, fill or shading; curves and markers carry the ink. The middle panel's black reference line inks over its own data, recorded under legibility.",
+    "RUBRIC decoration: pass - no background fill, frame, gradient or themed styling; the only added marks are the panel-1 legend-key annotation and the zero reference line.",
+    "RUBRIC contrast: pass - all text is near-black (#000000 labels, #444444 annotation) on white.",
+    "RUBRIC table_form: pass - the figure plots continuous quantities against distance and probe position; the numeric summary in the prose is separate text and the image does not depict it.",
+    "RUBRIC label_collision: pass - no text touches the canvas edge (zero non-white pixels in the figure's outer 2 px band on all four sides) and no label overlaps another label or the plotted data in any magnified crop.",
+    "RUBRIC caption_not_title_repeat: pass - the caption identifies the planes and the panel contents rather than restating the title."
+  ],
+  "rubric_verdicts": {
+    "caption_not_title_repeat": "pass",
+    "contrast": "pass",
+    "data_ink": "pass",
+    "decoration": "pass",
+    "label_collision": "pass",
+    "legibility": "defect",
+    "table_form": "pass"
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T02:40:00Z",
+  "total": null
+}

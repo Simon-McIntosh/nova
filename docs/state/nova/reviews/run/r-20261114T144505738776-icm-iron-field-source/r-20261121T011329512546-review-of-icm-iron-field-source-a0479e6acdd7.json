@@ -1,0 +1,137 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_analysis": [
+    {
+      "site": "tests/test_magnetisation.py:1851-1852",
+      "would_fail_if": "include_iron added a nonzero column while the frame's Ic is zero, or inserting the frame changed the subspace reassembly, so the zero-magnetisation solve no longer equals the air-core solve bit for bit."
+    },
+    {
+      "site": "tests/test_magnetisation.py:1861",
+      "would_fail_if": "the frame's Br/Bz contribution diverged from bound.field through a wrong current ordering, a target-block offset or a source-reduction factor; a defect inside the shared linear_cell_interaction evaluator moves both sides and stays green."
+    },
+    {
+      "site": "tests/test_magnetisation.py:1864",
+      "would_fail_if": "the frame's Psi contribution diverged from bound.psi through the same wiring defects; a wrong linear_cell_flux moves both sides and stays green, which is why the 1.015e-2 flux row is a measurement and not a guard."
+    },
+    {
+      "site": "tests/test_magnetisation.py:1865",
+      "would_fail_if": "the solved state contributed nothing above 1e-6 of the air field, i.e. the frame silently did not carry the iron."
+    },
+    {
+      "site": "tests/test_magnetisation.py:1923,1932-1933",
+      "would_fail_if": "the zero control or the solved contribution failed after the coilset was stored and reloaded, which is the KeyError defect repaired at nova/frame/iron.py:46-50."
+    },
+    {
+      "site": "tests/test_iron_field_source.py:59",
+      "would_fail_if": "the second persist_coil_field call reported a cache miss or reloaded values differing from the values the first call returned."
+    },
+    {
+      "site": "tests/test_iron_field_source.py:78,94",
+      "would_fail_if": "the loader stopped refusing a translated region or a relocated coil key, raised another class, or changed the matched message."
+    },
+    {
+      "site": "tests/test_iron_field_source.py:105",
+      "would_fail_if": "the writer omitted the coil key or wrote another key into the sidecar."
+    },
+    {
+      "site": "tests/test_iron_field_source.py:107,116",
+      "would_fail_if": "the store failed to round-trip through npy; both sides call the same monkeypatched field_at, so a wrong coil-field model cannot redden either assertion."
+    },
+    {
+      "site": "tests/test_iron_field_source.py:120-128",
+      "would_fail_if": "the GPFS state receipt recorded coil_response_relative above 1e-12, external_relative_frobenius above 1e-12, a missing 'another mesh' refusal, or a non-positive slice wall; it skips when the receipt is absent."
+    }
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/biot/solve.py:87 Solve.__post_init__ calls include_iron for every Solve",
+    "nova/biot/magnetisation.py:665-672 MagnetisationSolution.bound_currents and field",
+    "scripts/iron_field_source/measure.py:460-468 insert_iron then set_iron_currents",
+    "scripts/iron_field_source/sampled.py:90 insert_iron zero control",
+    "scripts/iron_field_source/diagnostics.py:58-59 BoundCurrents.field and psi"
+  ],
+  "completed_at": "2026-11-21T02:35:26.116Z",
+  "dispatched_at": "2026-11-21T02:34:55Z",
+  "failure_derivation": "baseline arm /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/baseline_arm.log (job 1334053, checkout at 9b016126111a5acaebca064c07432042b5a2628c) ends '7 failed, 104 passed in 8150.07s (2:15:50)'; after arm /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/after_arm.log (job 1334054 at a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2) ends '7 failed, 112 passed in 8613.34s (2:23:33)'; the seven FAILED ids are identical in both logs, each a FileNotFoundError on /work/projects/imas_gpu/sophelio/evidence/iron-limb-fill/case.json or .../production/material-refinement-20261114/summary.json, so the added failure count is 0 and the added id list is empty.",
+  "findings": [
+    {
+      "file": "scripts/iron_field_source/run_arms.sh",
+      "line": "37",
+      "severity": "blocking",
+      "text": "blocking: prepare_base runs `rm -rf \"$scratch\"` where scratch=$out/base-tree-${SLURM_JOB_ID:-manual} and out=/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms, so a committed job script removes a directory under /work; the repository's binding rule forbids any removal under /work, including a directory the job created itself, and requires the scratch tree to be a mktemp directory on node-local disk removed by the job's own EXIT trap."
+    },
+    {
+      "file": "scripts/iron_field_source/run_arms.sh",
+      "line": "80",
+      "severity": "non-blocking",
+      "text": "non-blocking: the commands.json writer uses printf '{\\\\n' style format strings, so /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms/commands.json carries literal backslash-n and is not parseable JSON (json.load raises at line 1 column 2); its head_sha also still reads 6d1132bf4 rather than the reviewed head, leaving the after arm's revision and command attested only by the manifest prose."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html",
+      "line": "32",
+      "severity": "non-blocking",
+      "text": "non-blocking: the paragraph says BoundCurrents exposes field_matrix and psi_matrix, but f64daac59 deleted both methods; the class now exposes field and psi only (nova/biot/magnetisation.py:1002-1030), so the record names an interface a reader cannot find."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html",
+      "line": "143",
+      "severity": "non-blocking",
+      "text": "non-blocking: the record says the state stage exercises both refusals on every run and that the receipt carries their messages, but west-62751-uniform-0.08-state-receipt.json carries only 'another mesh'; persist_coil_field writes a fresh response when the coil-key file is absent instead of refusing, so the coil-set probe refuses only once a previous run has written that key."
+    },
+    {
+      "file": "tests/test_iron_field_source.py",
+      "line": "116",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_the_direct_and_persisted_coil_fields_agree (and the identical shape at line 107) compares the stored array against measure.field_at, the same monkeypatched evaluator that wrote it, so the plan's persisted-versus-direct 1e-12 identity cannot redden on a wrong coil-field model; the only independent check is the receipt's external_relative_frobenius, which skips when the GPFS receipt is absent."
+    },
+    {
+      "file": "scripts/iron_field_source/diagnostics.py",
+      "line": "38",
+      "severity": "non-blocking",
+      "text": "non-blocking: the figure and the probe and loop tables are built from the prototype west_inputs external term plus BoundCurrents, not from a CoilSet point solve, so done_when (1)'s curves come from the production path only through the operand and not through the solve path the plan's prose names; the measured wall that forced the substitution is recorded at docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html:155."
+    },
+    {
+      "file": "manifest.md",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "non-blocking: the blocker line still says the WEST-scale sampled receipt stays unmeasured, but field-source/west-62751-uniform-0.08-sampled-receipt.json exists (2026-11-20T21:22) and the fragment quotes it; the checkpoint also says the flux row is settled at 257 and 1025 samples while the fragment and the head commit call it unresolved."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read all 33 first-parent commits from 52aafad41 to a0479e6ac plus the merge 20a660ed3; the product change is nova/biot/magnetisation.py, nova/biot/solve.py, nova/biot/tiledassembly.py and the new nova/frame/iron.py, the remainder is measurement scripts, three test files, the evidence fragment and two copies of one PNG, and the Aphi axis guard at nova/biot/solve.py:441-450 together with the independent sampled evaluator at scripts/iron_field_source/sampled.py:39-62 close the two blocking findings of r-20261118T163504331318.",
+    "done_when": "read node.done_when; the gate the worker ran is the rigel suite pair at 9b0161261 and a0479e6ac (7 failed, 104 passed vs 7 failed, 112 passed), which asserts the seam's zero control and solved contribution on a fixture; the figure at docs/figures/west-stray-field/west-62751-iron-stray-field.png and the probe and loop tables come from scripts/iron_field_source/diagnostics.py:38's prototype west_inputs external term plus BoundCurrents rather than a CoilSet point solve, and the sampled receipt's 1.015e-2 flux residual is recorded unresolved at docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html:88.",
+    "goal": "dispatch-detail.json node.goal asks for the solved iron magnetisation as one passive CoilSet frame so every grid and point solve carries its field; nova/frame/iron.py:25 insert_iron writes the frame and nova/biot/solve.py:87 calls include_iron from Solve.__post_init__, adding the frame's Br, Bz, Psi and Aphi to every target set the Solve builds.",
+    "manifest": "read manifest.md in full; it records the two rigel arms at 9b0161261 and a0479e6ac with the same seven environmental failures, the state and sampled receipts with their walls and reuse, and the figure paths, but its blocker line at manifest.md:43 still says the sampled receipt stays unmeasured and its test_logs entries are summaries rather than paths.",
+    "write_paths": "read the node's declared paths; every node-authored path in 9b016126111a5acaebca064c07432042b5a2628c..a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2 lies inside them (nova/biot/magnetisation.py, nova/biot/solve.py, nova/biot/tiledassembly.py, nova/frame/iron.py, scripts/iron_field_source, scripts/west_iron_galerkin_pair/measure.py, tests/test_iron_field_source.py, tests/test_magnetisation.py, tests/test_imas_iron_read.py, the evidence fragment and both figure directories); the docs/plans and docs/state edits in the same range arrive with the merge 20a660ed3 and are not this node's."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:1851-1865 and 1923-1933 redden on a nonzero zero-state, a dropped contribution or a reload failure, but tests/test_iron_field_source.py:116 compares the store against the same monkeypatched field_at that filled it, and no test drives a grid target set through include_iron.",
+    "evidence": "the state receipt west-62751-uniform-0.08-state-receipt.json records 33.92 s against 89.82 s and 0.0 reuse, but the figure and both tables are built from scripts/iron_field_source/diagnostics.py:38's prototype external term rather than a CoilSet solve, and the flux row at docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html:88 is 1.015e-2 relative and unresolved.",
+    "fit": "nova/frame/iron.py:96 follows the FrameSetLoc idiom by asking each holder to update_loc_indexer rather than popping caches by hand, and the module sits beside ferritic.py; nova/biot/magnetisation.py:1020's reference to linear_cell_flux's sibling is the one confusing sentence.",
+    "goal_fidelity": "nova/biot/solve.py:87 calls include_iron from Solve.__post_init__, so every target set built over the iron source carries the frame, and nova/frame/iron.py:25 insert_iron is the only writer of that frame.",
+    "reuse": "the earlier second affine evaluator is gone, with nova/biot/magnetisation.py:1002-1030 calling the owner tiledassembly.linear_cell_interaction and linear_cell_flux, and the coil response extends save/load_magnetisation_interaction rather than adding a second cache.",
+    "scope_discipline": "every node-authored path in the diff is one the node declared, and the unrelated docs/plans, docs/state and plan-review JSON in the same range are carried by the merge 20a660ed3."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: dispatch-detail.json node.goal asks for the solved iron magnetisation as one passive CoilSet frame so every grid and point solve carries its field; nova/frame/iron.py:25 insert_iron writes the frame and nova/biot/solve.py:87 calls include_iron from Solve.__post_init__, adding the frame's Br, Bz, Psi and Aphi to every target set the Solve builds.\nVERDICT done_when: read node.done_when; the gate the worker ran is the rigel suite pair at 9b0161261 and a0479e6ac (7 failed, 104 passed vs 7 failed, 112 passed), which asserts the seam's zero control and solved contribution on a fixture; the figure at docs/figures/west-stray-field/west-62751-iron-stray-field.png and the probe and loop tables come from scripts/iron_field_source/diagnostics.py:38's prototype west_inputs external term plus BoundCurrents rather than a CoilSet point solve, and the sampled receipt's 1.015e-2 flux residual is recorded unresolved at docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html:88.\nVERDICT write_paths: read the node's declared paths; every node-authored path in 9b016126111a5acaebca064c07432042b5a2628c..a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2 lies inside them (nova/biot/magnetisation.py, nova/biot/solve.py, nova/biot/tiledassembly.py, nova/frame/iron.py, scripts/iron_field_source, scripts/west_iron_galerkin_pair/measure.py, tests/test_iron_field_source.py, tests/test_magnetisation.py, tests/test_imas_iron_read.py, the evidence fragment and both figure directories); the docs/plans and docs/state edits in the same range arrive with the merge 20a660ed3 and are not this node's.\nVERDICT manifest: read manifest.md in full; it records the two rigel arms at 9b0161261 and a0479e6ac with the same seven environmental failures, the state and sampled receipts with their walls and reuse, and the figure paths, but its blocker line at manifest.md:43 still says the sampled receipt stays unmeasured and its test_logs entries are summaries rather than paths.\nVERDICT diff: read all 33 first-parent commits from 52aafad41 to a0479e6ac plus the merge 20a660ed3; the product change is nova/biot/magnetisation.py, nova/biot/solve.py, nova/biot/tiledassembly.py and the new nova/frame/iron.py, the remainder is measurement scripts, three test files, the evidence fragment and two copies of one PNG, and the Aphi axis guard at nova/biot/solve.py:441-450 together with the independent sampled evaluator at scripts/iron_field_source/sampled.py:39-62 close the two blocking findings of r-20261118T163504331318.\nCALL_SITES: nova/biot/solve.py:87 Solve.__post_init__ calls include_iron for every Solve, nova/biot/magnetisation.py:665-672 MagnetisationSolution.bound_currents and field, scripts/iron_field_source/measure.py:460-468 insert_iron then set_iron_currents, scripts/iron_field_source/sampled.py:90 insert_iron zero control, scripts/iron_field_source/diagnostics.py:58-59 BoundCurrents.field and psi\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/biot/solve.py:87 calls include_iron from Solve.__post_init__, so every target set built over the iron source carries the frame, and nova/frame/iron.py:25 insert_iron is the only writer of that frame.\nSCORE evidence: 13\nJUSTIFICATION evidence: the state receipt west-62751-uniform-0.08-state-receipt.json records 33.92 s against 89.82 s and 0.0 reuse, but the figure and both tables are built from scripts/iron_field_source/diagnostics.py:38's prototype external term rather than a CoilSet solve, and the flux row at docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html:88 is 1.015e-2 relative and unresolved.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every node-authored path in the diff is one the node declared, and the unrelated docs/plans, docs/state and plan-review JSON in the same range are carried by the merge 20a660ed3.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_magnetisation.py:1851-1865 and 1923-1933 redden on a nonzero zero-state, a dropped contribution or a reload failure, but tests/test_iron_field_source.py:116 compares the store against the same monkeypatched field_at that filled it, and no test drives a grid target set through include_iron.\nSCORE fit: 16\nJUSTIFICATION fit: nova/frame/iron.py:96 follows the FrameSetLoc idiom by asking each holder to update_loc_indexer rather than popping caches by hand, and the module sits beside ferritic.py; nova/biot/magnetisation.py:1020's reference to linear_cell_flux's sibling is the one confusing sentence.\nSCORE reuse: 18\nJUSTIFICATION reuse: the earlier second affine evaluator is gone, with nova/biot/magnetisation.py:1002-1030 calling the owner tiledassembly.linear_cell_interaction and linear_cell_flux, and the coil response extends save/load_magnetisation_interaction rather than adding a second cache.\nFINDING scripts/iron_field_source/run_arms.sh:37 blocking: prepare_base runs rm -rf $scratch where scratch=$out/base-tree-${SLURM_JOB_ID:-manual} and out=/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms, so a committed job script removes a directory under /work; the binding rule forbids any removal under /work, including a directory the job created itself, and requires the scratch tree to be a mktemp directory on node-local disk removed by the job's own EXIT trap.\nFINDING scripts/iron_field_source/run_arms.sh:80 non-blocking: the commands.json writer emits literal backslash-n, so arms/commands.json is not parseable JSON and its head_sha still reads 6d1132bf4 rather than the reviewed head, leaving the after arm's revision and command attested only by the manifest prose.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html:32 non-blocking: the paragraph says BoundCurrents exposes field_matrix and psi_matrix, but f64daac59 deleted both; the class now exposes field and psi only (nova/biot/magnetisation.py:1002-1030), so the record names an interface a reader cannot find.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html:143 non-blocking: the record says the state stage exercises both refusals on every run and the receipt carries their messages, but west-62751-uniform-0.08-state-receipt.json carries only 'another mesh'; persist_coil_field writes a fresh response when the coil-key file is absent instead of refusing, so the coil-set probe refuses only once a previous run has written that key.\nFINDING tests/test_iron_field_source.py:116 non-blocking: test_the_direct_and_persisted_coil_fields_agree (and the identical shape at line 107) compares the stored array against measure.field_at, the same monkeypatched evaluator that wrote it, so the plan's persisted-versus-direct 1e-12 identity cannot redden on a wrong coil-field model; the only independent check is the receipt's external_relative_frobenius, which skips when the GPFS receipt is absent.\nFINDING scripts/iron_field_source/diagnostics.py:38 non-blocking: the figure and the probe and loop tables are built from the prototype west_inputs external term plus BoundCurrents, not from a CoilSet point solve, so done_when (1)'s curves come from the production path only through the operand and not through the solve path the plan's prose names; the measured wall that forced the substitution is recorded at docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html:155.\nFINDING manifest.md:43 non-blocking: the blocker line still says the WEST-scale sampled receipt stays unmeasured, but field-source/west-62751-uniform-0.08-sampled-receipt.json exists (2026-11-20T21:22) and the fragment quotes it; the checkpoint also says the flux row is settled at 257 and 1025 samples while the fragment and the head commit call it unresolved.",
+  "review_run_id": "r-20261121T011329512546-review-of-icm-iron-field-source-a0479e6acdd7",
+  "reviewed_base_sha": "9b016126111a5acaebca064c07432042b5a2628c",
+  "reviewed_head_sha": "a0479e6acdd7bf3ba29f4ebebe29ff642b0fe8b2",
+  "reviewed_run_id": "r-20261114T144505738776-icm-iron-field-source",
+  "scores": {
+    "durability": 13,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-21T02:51:56.392391+00:00",
+  "total": 94
+}

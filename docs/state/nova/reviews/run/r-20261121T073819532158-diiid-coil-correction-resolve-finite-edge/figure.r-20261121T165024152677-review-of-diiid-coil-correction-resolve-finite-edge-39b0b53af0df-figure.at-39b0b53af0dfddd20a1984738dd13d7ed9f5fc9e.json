@@ -9,6 +9,13 @@
     "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-146-limited-lower-xpoint.png",
     "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-179-limited-lower-xpoint.png"
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "exempted",
+      "reason": "Non-blocking legibility note; the lower-X comparison the figure exists for is readable and the record table carries the numbers",
+      "recorded_at": "2026-11-21T20:20:11.567391+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/diiid-vertical-force-balance/diiid-coil-correction-resolve-finite-edge/frame-137-diverted-lower-xpoint.png",

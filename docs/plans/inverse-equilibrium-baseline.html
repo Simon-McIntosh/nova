@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="84">
+<meta name="plan-version" content="85">
 <meta name="plan-modified" content="2026-11-21">
 </head>
 <body>
@@ -366,6 +366,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261120T234804327291-review-of-drift-spectrum-sweep-fa82ea200aa8" data-who="reckon-build" data-when="2026-11-20T23:49:16.952Z">
     <div class="r-comment-body"><p>Attached a parsed independent review of r-20261119T065419793680-drift-spectrum-sweep read at base 54cc8f94 and head fa82ea200: goal_fidelity 18, evidence 18, scope_discipline 19, durability 16, fit 17, reuse 15 (total 103), added_failure_count 0 over the reviewed baseline arm (9 passed, EXIT=0) and head arm (15 passed, EXIT=0), with two non-blocking findings in series.py (SIZE_ARMS restates four of the sweep's six size factors while the docstring claims one trace per size arm, and the size-0.10 trace shares separatrix_color with the nova marker edges) and no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261119T065419793680-drift-spectrum-sweep" data-who="reckon-build" data-when="2026-11-20T21:24:32Z">
+    <div class="r-comment-body"><p>Swept the noise size, spectral index and corner frequency for imas-efit on the held 500-cell ITER state (12 arms x 100 slices), with the reduction owned by probe_rows/analyse.py, an analyse step whose gate is guarded by a committed test file that reddens when validate() or the atomic wall write is reverted, and the plan&#x27;s axis-against-slice figure drawn from the sweep&#x27;s own arm labels and the analysis module&#x27;s own axis distance: at the reference spectrum the axis error first exceeds 0.05 m at a noise size of 0.05 (0.0850 m after 0.0243 m at 0.02) and q95 first exceeds 0.2 at 0.10 (0.2193 after 0.1345 at 0.05), index 0 reproduces the white lag-one correlation (0.00150 against 0.00150 over 2000 slices, every sensor within 0.049), and nova is reported at the reference point only (axis RMSE 0.0177 m white and 0.0236 m drift, 805-1014 s per slice).</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261117T043314861081-review-of-efit-on-nova-rows-86b64c13475d" data-who="reckon-build" data-when="2026-11-17T04:38:15.860Z">
     <div class="r-comment-body"><p>independent review of r-20261115T202050274305-efit-on-nova-rows stored at review-records/r-20261115T202050274305-efit-on-nova-rows.json (and its .at-86b64c13 sibling) with status parsed, scores goal_fidelity 17, evidence 16, scope_discipline 18, durability 6, fit 15, reuse 20 (total 92), reviewed_base_sha 1f788362e8e1ca19bb5691fff8b31d25ed825f0e and reviewed_head_sha 86b64c13475d0d589ff836eaec44affff1ca7d56, added_failure_count 0 over an unarmed reviewed run, and four non-blocking findings.</p></div>

@@ -21,7 +21,11 @@ root=${ICM_ROOT:?export ICM_ROOT with the checkout path before submitting}
 base=9b016126111a5acaebca064c07432042b5a2628c
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 out=/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/arms
-scratch=$out/base-tree-${SLURM_JOB_ID:-manual}
+# The base tree is scratch: it lives on node-local disk and the job removes it
+# through its own EXIT trap. Nothing under /work is ever removed, not even a
+# directory this job created.
+scratch=$(mktemp -d "${TMPDIR:-/tmp}/icm-base-tree-XXXXXX")
+trap 'rm -rf "$scratch"' EXIT
 tests=tests/test_magnetisation.py
 
 export TMPDIR=/tmp
@@ -34,7 +38,6 @@ mkdir -p "$out"
 # Prepared only by an arm that needs it, and under a job-unique path: two arms
 # sharing one scratch directory delete each other's clone mid-checkout.
 prepare_base() {
-    rm -rf "$scratch"
     git clone --shared --no-checkout --quiet "$root" "$scratch"
     git -C "$scratch" checkout --quiet --detach "$base"
     echo "BASE-CHECKOUT $base in $scratch ($(git -C "$scratch" rev-parse HEAD))"

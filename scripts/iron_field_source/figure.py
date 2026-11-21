@@ -77,6 +77,12 @@ def draw(axes, data):
     middle = axes[1]
     trace_axes(middle)
     share = (iron - air) / air * 100
+    # One quadrature point beside the edge carries a few-thousand-percent share,
+    # and on a linear axis it flattens the -96 % share held further out into a
+    # line indistinguishable from zero - the reader then reads the opposite sign.
+    # A symmetric log axis keeps both the outlier and the plateau legible, and the
+    # zero rule is drawn under the curves so it cannot hide them.
+    middle.axhline(0.0, color="#888888", linewidth=0.6, zorder=0)
     for index, name in enumerate(names):
         middle.plot(
             distance,
@@ -84,12 +90,23 @@ def draw(axes, data):
             color=COLORS[index],
             linewidth=style.trace_linewidth,
             label=name,
+            zorder=3,
         )
-    middle.axhline(0.0, color="#000000", linewidth=0.8)
+    middle.set_yscale("symlog", linthresh=1.0)
+    peak = float(np.max(share))
+    middle.annotate(
+        f"peak {peak:+.0f} %",
+        xy=(float(distance[int(np.argmax(share))]), peak),
+        xytext=(6.0, peak),
+        fontsize=style.label_fontsize - 1,
+        color="#444444",
+        va="center",
+    )
+    middle.set_ylim(-1.0e3, 1.0e4)
     middle.set_xlim(0, float(distance[-1]))
-    middle.set_ylabel("iron share of $|B|$ [%]", fontsize=style.label_fontsize)
+    middle.set_ylabel("iron share of $|B|$ [%] (symlog)", fontsize=style.label_fontsize)
     middle.set_xlabel(r"$R - R_{\mathrm{edge}}$ [m]", fontsize=style.label_fontsize)
-    middle.legend(fontsize=style.label_fontsize, frameon=False, loc="upper right")
+    middle.legend(fontsize=style.label_fontsize, frameon=False, loc="lower right")
 
     lower = axes[2]
     trace_axes(lower)

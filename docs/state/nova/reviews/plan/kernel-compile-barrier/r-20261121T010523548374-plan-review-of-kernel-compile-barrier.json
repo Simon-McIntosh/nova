@@ -33,7 +33,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 125,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "91de28fdd157a76967cea142da097ab0cfededb9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Node (e) now runs a warm measure --arm per section-0 arm against the pinned cache and records first-call seconds and peak host memory, which is what closes the 60 s and 64 GB bound of clause (1).",
+      "reason": "",
+      "when": "2026-11-21T02:02:43.547840+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "0f4fa699-2444-4d93-b978-9931302ff6f8",
+      "commit": "91de28fdd157a76967cea142da097ab0cfededb9",
+      "commit_basis": "edit",
+      "note": "Node (e) now runs a warm measure --arm per section-0 arm against the pinned cache and records first-call seconds and peak host memory, which is what closes the 60 s and 64 GB bound of clause (1).",
+      "reason": "",
+      "when": "2026-11-21T02:02:43.547840+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261121T010523548374-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261121T010523548374-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "5e09b21ee7e3a8674906a278d5a56878efd51822",
   "rubric": "content",

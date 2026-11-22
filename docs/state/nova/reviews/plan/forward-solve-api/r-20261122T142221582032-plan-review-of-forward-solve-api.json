@@ -71,6 +71,16 @@
       "note": "\u00a73 clause 3 restated as the nova-side obligation: the receipt carries the transport route as a typed field a consumer reads without configuration; the imas-ambix switch stays with followup f-20260909T210712175233 against the landing SHA.",
       "reason": "",
       "when": "2026-11-22T20:32:02.792338+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1f931664f4a01f653a56223ebdb8b841c554eba9",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "\u00a75 split: \u00a75 keeps the traced edit latency, cache hits and warm-start convergence over the sweep; new \u00a77 carries the labelled flux map in the receipt.",
+      "reason": "",
+      "when": "2026-11-22T20:32:35.489178+00:00"
     }
   ],
   "responses": {
@@ -91,6 +101,15 @@
       "note": "\u00a75 prose now names the per-trip Newton solve cost as the barrier; the traced-current recompile is recorded as already removed (fsa-traced-coil-edit, HLO guard).",
       "reason": "",
       "when": "2026-11-22T20:31:27.172938+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1f931664f4a01f653a56223ebdb8b841c554eba9",
+      "commit_basis": "edit",
+      "note": "\u00a75 split: \u00a75 keeps the traced edit latency, cache hits and warm-start convergence over the sweep; new \u00a77 carries the labelled flux map in the receipt.",
+      "reason": "",
+      "when": "2026-11-22T20:32:35.489178+00:00"
     },
     "wiring-1": {
       "action": "acted",

@@ -78,20 +78,21 @@ def bound_panel(axis, output):
     axis.barh(position, values, height=0.52, color="#3b6ea5", zorder=2)
     axis.axvline(BOUND, color="#4d4d4d", linewidth=1.2, linestyle=":", zorder=3)
     witness = receipt(output, "witness-graded-16-80.json")
+    head = -0.75
     if witness is not None:
         limit = float(witness["seed_definiteness_limit"])
         axis.axvline(limit, color="#8a5a00", linewidth=1.2, linestyle="--", zorder=3)
         axis.text(
             limit,
-            -0.42,
-            "seed limit ",
+            head,
+            "seed limit",
             color="#8a5a00",
             fontsize=14,
             ha="right",
-            va="bottom",
+            va="center",
         )
     axis.text(
-        BOUND, -0.62, " bound", color="#4d4d4d", fontsize=14, ha="left", va="bottom"
+        BOUND, head, "bound", color="#4d4d4d", fontsize=14, ha="left", va="center"
     )
     for index in position:
         axis.text(
@@ -105,22 +106,31 @@ def bound_panel(axis, output):
         )
     axis.set_yticks(position)
     axis.set_yticklabels(names)
-    axis.set_xlabel("largest $x^TQGx\\,/\\,(\\mu_0\\,x^TQx)$")
+    axis.set_xlabel("largest $x^{T}QGx\\,/\\,(\\mu_0\\,x^{T}Qx)$")
+    axis.set_ylim(len(rows) - 0.45, -1.1)
     axis.invert_yaxis()
 
 
 def witness_panel(axis, output, inputs):
-    """Draw the graded witness's share over the iron cross-section."""
+    """Draw the graded witness's share over the iron cross-section.
+
+    The share is signed, so the map is diverging about zero: a cell either adds
+    to the numerator the bound constrains or subtracts from it.
+    """
     shares = np.load(output / "shares-graded-16-80.npy")
     from scripts.iron_operator_bound.persisted import cell_size
 
     field = cell_size("graded-16-80", inputs)
     mesh = iron._mesh(inputs["region"], field)
     polygons = [np.asarray(polygon) for polygon in mesh.polygons]
-    scale = np.abs(shares)
-    scale = scale / scale.max()
+    magnitude = float(np.max(np.abs(shares)))
     collection = PolyCollection(
-        polygons, array=scale, cmap="viridis", edgecolors="none", linewidths=0.0
+        polygons,
+        array=shares,
+        cmap="RdBu_r",
+        clim=(-magnitude, magnitude),
+        edgecolors="none",
+        linewidths=0.0,
     )
     axis.add_collection(collection)
     region = inputs["region"]
@@ -134,6 +144,7 @@ def witness_panel(axis, output, inputs):
     axis.autoscale_view()
     axis.set_aspect("equal")
     axis.set_axis_off()
+    return collection
 
 
 def main():
@@ -147,7 +158,12 @@ def main():
     inputs = west_inputs()
     figure, (left, right) = plt.subplots(1, 2, figsize=(14, 7.2))
     bound_panel(left, args.output)
-    witness_panel(right, args.output, inputs)
+    collection = witness_panel(right, args.output, inputs)
+    bar = figure.colorbar(
+        collection, ax=right, orientation="horizontal", shrink=0.55, pad=0.02
+    )
+    bar.set_label("cell share of $w^{T}QGw$")
+    bar.outline.set_visible(False)
     figure.tight_layout()
     args.figure.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(args.figure, dpi=100)

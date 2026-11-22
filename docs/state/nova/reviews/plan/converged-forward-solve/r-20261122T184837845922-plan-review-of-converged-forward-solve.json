@@ -59,6 +59,16 @@
       "note": "Declared section_depends_on.s5 = [converged-forward-solve#s4], so the solver node waits for the map it differentiates.",
       "reason": "",
       "when": "2026-11-22T19:13:12.907877+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "906c06ae-8766-4281-8a78-e20c226c00f5",
+      "commit": "3b6a43658414973157f6beb4a01a92d06e376472",
+      "commit_basis": "edit",
+      "finding": "wiring-2",
+      "note": "Section 9 states the WEST 62751 recipe inline (data-manifest row, pulse and NICE paths, DD versions, slice index, mesh). The iron plan's unlanded script is named only as the before arm, so no cross-plan wait is needed.",
+      "reason": "",
+      "when": "2026-11-22T19:13:32.464389+00:00"
     }
   ],
   "responses": {
@@ -70,6 +80,15 @@
       "note": "Declared section_depends_on.s5 = [converged-forward-solve#s4], so the solver node waits for the map it differentiates.",
       "reason": "",
       "when": "2026-11-22T19:13:12.907877+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "906c06ae-8766-4281-8a78-e20c226c00f5",
+      "commit": "3b6a43658414973157f6beb4a01a92d06e376472",
+      "commit_basis": "edit",
+      "note": "Section 9 states the WEST 62751 recipe inline (data-manifest row, pulse and NICE paths, DD versions, slice index, mesh). The iron plan's unlanded script is named only as the before arm, so no cross-plan wait is needed.",
+      "reason": "",
+      "when": "2026-11-22T19:13:32.464389+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/converged-forward-solve/r-20261122T184837845922-plan-review-of-converged-forward-solve.json",

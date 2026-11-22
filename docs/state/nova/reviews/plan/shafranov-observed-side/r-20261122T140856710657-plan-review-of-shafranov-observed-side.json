@@ -91,6 +91,13 @@
         "s2"
       ],
       "when": "2026-11-22T18:45:07.695533+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "finding": "reasoning-2",
+      "reason": "the method sentences in sections 1 and 3 are the plan's existing prose; section 3's 'delete rather than move' is the answer to the design review's thin_wrapper finding, which asked for exactly that instruction; the reuse map lives in each node's brief, and a node that finds the stated mechanism wrong against the code records it rather than implementing it",
+      "when": "2026-11-22T18:45:18.430585+00:00"
     }
   ],
   "responses": {
@@ -122,6 +129,12 @@
       "note": "section 4 prose now states the lead's 2026-10-01 ruling (diamagnetic loop where one exists, solved state only elsewhere, provenance per row) in place of 'until the lead rules' (e7210fc72); the s4 node's done-when is unconditional",
       "reason": "",
       "when": "2026-11-22T18:44:48.904262+00:00"
+    },
+    "reasoning-2": {
+      "action": "declined",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "reason": "the method sentences in sections 1 and 3 are the plan's existing prose; section 3's 'delete rather than move' is the answer to the design review's thin_wrapper finding, which asked for exactly that instruction; the reuse map lives in each node's brief, and a node that finds the stated mechanism wrong against the code records it rather than implementing it",
+      "when": "2026-11-22T18:45:18.430585+00:00"
     },
     "wiring-1": {
       "action": "acted",

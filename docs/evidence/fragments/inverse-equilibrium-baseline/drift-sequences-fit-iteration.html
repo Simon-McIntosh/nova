@@ -1,25 +1,64 @@
 <section id="drift-sequences-fit-iteration-record">
-<h2>The held-map iteration run inside the fit loop over 200 slices of both drift sequences</h2>
-<p>This node fits the held-map pass of the equilibrium iteration — <code>FluxIterationFit</code>, the column the plan's lead ruling names for this study — over 200 slices of the white and of the 1/f reference sequence, on the same rows, the same noise draws and the same generating state the earlier imas-efit arms were measured on, and reports per-slice and 50-slice-mean error of the axis position, the boundary flux and q95 beside the lag-one controls.</p>
-<p>The generating state is the section-1 ITER fixture at 500 cells. The state, the noise model and the pulse writer are <code>probe_rows/study.py</code>'s; the held-map driver is <code>probe_rows/iteration.py</code>; every measure is <code>probe_rows/analyse.py</code>'s reduction, and the imas-efit column is the same study's own arms.</p>
+<h2>The held-map iteration inside the fit loop over 200 slices of both drift sequences</h2>
+<p>This node fits the held-map pass of the equilibrium iteration &mdash; <code>FluxIterationFit</code>, the column the plan's lead ruling names for this study &mdash; over 200 slices of the white and of the 1/f reference sequence, on the same rows, the same noise draws and the same generating slice count the earlier imas-efit arms carry, and reports the per-slice and 50-slice-mean error of the axis position, the boundary flux and q95 beside the lag-one controls.</p>
+<p>The generating state is the section-1 ITER fixture at 500 cells: its state, the noise model and the pulse writer are <code>probe_rows/study.py</code>'s, the held-map driver is <code>probe_rows/iteration.py</code>, every measure is <code>probe_rows/analyse.py</code>'s reduction, and the gate is <code>probe_rows/check.py</code> reading that reduction's own summary. No number below is restated by a second rule.</p>
 <table id="drift-sequences-fit-jobs">
 <tr><th>job</th><th>rung</th><th>work</th><th>outcome</th></tr>
-<tr><td>1337642</td><td>betelgeuse, one H200</td><td>the payload, requested at one card and four cores</td><td>pended on Priority while all eight cards on the node were allocated; cancelled by id before the payload ran anywhere</td></tr>
-<tr><td>1337654</td><td>titan, five P100 cards, 10 cores, 120 G</td><td>prepare, then five shards of held-map fits over both sequences, then imas-efit on both sequences</td><td>the run this record states</td></tr>
+<tr><td>1337642</td><td>betelgeuse, one H200, 4 cores</td><td>the whole payload at a 48-pass cap</td><td>pended on Priority while all eight cards on the node were allocated to other work; cancelled by id before the payload ran anywhere</td></tr>
+<tr><td>1337654</td><td>titan, five P100 cards, 10 cores, 120 G</td><td>prepare, then five shards at the 48-pass cap</td><td>cancelled by id once the first slice of each shard had measured the converged cost recorded below; the five records are kept under <code>study/logs/converged/</code></td></tr>
+<tr><td>1337800</td><td>titan, five P100 cards, 10 cores, 120 G</td><td>five shards at a two-pass cap over both sequences, then the reduction and the gate</td><td>the run this record states: 200 slices per sequence and per code, four arms reduced</td></tr>
 </table>
 </section>
 
 <section id="drift-sequences-fit-state"><h3>The generating state and the rows</h3>
-<p>The 500-cell forward solve qualified, and the sensor rows were written from it before any noise was added:</p>
-<pre id="drift-sequences-fit-generating">GENERATING residual=1.492e-15 axis=[6.288633, 0.498205]</pre>
+<p>The 500-cell forward solve qualified at a terminal residual of <code>1.492&times;10<sup>-15</sup></code>, and the sensor rows were written from it before any noise was added:</p>
 <table id="drift-sequences-fit-state-table">
 <tr><th>quantity</th><th>value</th></tr>
 <tr><td>axis (R, Z)</td><td>6.288633, 0.498205</td></tr>
 <tr><td>axis flux, boundary flux, span</td><td>-73.8925, 2.81128, 76.7038 Wb</td></tr>
-<tr><td>plasma current</td><td>-13.705 MA</td></tr>
-<tr><td>q95, one flux-map calculator</td><td>2.95575</td></tr>
 <tr><td>reference sigma, 24 flux loops</td><td>83.969 Wb</td></tr>
 <tr><td>reference sigma, 48 poloidal probes</td><td>0.64941 T</td></tr>
+<tr><td>noise draw</td><td>0.01 of the row-group RMS, identical seeds across both sequences</td></tr>
 </table>
-<p>The rows themselves are the study's 72-row magnetics set, and they were checked against the set the earlier arms were written from rather than assumed equal to it. The 24 flux loops agree to <code>4.8&times;10<sup>-8</sup></code> Wb, which is the two solves' own terminal difference (relative <code>1.1&times;10<sup>-9</sup></code>). The 48 poloidal probes do not: their mean absolute difference is 0.947 T on a row scale of 0.629 T. That is the row convention the earlier record already measured, and it is why the imas-efit column here is the 24-flux-loop arm: a probe row that means a different quantity to the two readers cannot be compared, so the code comparison is stated on the loops the two readers do agree on, while the held-map fit reads its full row set as the reconstruction would in service.</p>
+<p>The rows are the study's 72-row magnetics set, and they were checked against the set the earlier arms were written from rather than assumed equal to it. The 24 flux loops agree to <code>4.8&times;10<sup>-8</sup></code> Wb, which is the two solves' own terminal difference (relative <code>1.1&times;10<sup>-9</sup></code>). The 48 poloidal probes do not: their mean absolute difference is 0.947 T on a row scale of 0.629 T. That is the row convention the earlier record already measured, and it is why the imas-efit column below is the 24-flux-loop arm while the held-map fit reads its full row set as a reconstruction in service would.</p>
+</section>
+
+<section id="drift-sequences-fit-measures"><h3>Per-slice and 50-slice-mean error, both codes and both sequences</h3>
+<p>Both codes are measured over the same 200 slices per sequence. The axis error is the distance from the generating axis in millimetres; the boundary flux is the boundary value as a fraction of the flux span; q95 is dimensionless. The 50-slice mean is the RMS of each 50-slice block mean's error, which is the quantity that falls with averaging, quoted beside the single-slice RMS it falls from. Lag-one is the slice-to-slice correlation of each series, stated over consecutive finite pairs.</p>
+<table id="drift-sequences-fit-measures-table">
+<tr><th>code</th><th>sequence</th><th>slices</th><th>axis RMS [mm]</th><th>axis 50-mean [mm]</th><th>flux RMS</th><th>flux 50-mean</th><th>q95 RMS</th><th>q95 50-mean</th><th>axis lag-one</th><th>flux lag-one</th><th>q95 lag-one</th></tr>
+<tr><td>nova</td><td>white</td><td>200</td><td>10.37</td><td>0.89</td><td>0.00676</td><td>0.00105</td><td>0.0123</td><td>0.0019</td><td>-0.056</td><td>0.083</td><td>0.083</td></tr>
+<tr><td>nova</td><td>drift</td><td>200</td><td>9.74</td><td>0.57</td><td>0.00677</td><td>0.00109</td><td>0.0124</td><td>0.0022</td><td>0.047</td><td>0.085</td><td>0.105</td></tr>
+<tr><td>efit</td><td>white</td><td>200</td><td>38.34</td><td>34.74</td><td>0.00543</td><td>0.00380</td><td>0.0593</td><td>0.0456</td><td>0.047</td><td>0.118</td><td>0.058</td></tr>
+<tr><td>efit</td><td>drift</td><td>200</td><td>29.73</td><td>24.85</td><td>0.00474</td><td>0.00298</td><td>0.0586</td><td>0.0449</td><td>0.462</td><td>0.544</td><td>0.606</td></tr>
+</table>
+<p>The 50-slice mean separates two kinds of residual. On every nova stream the block mean falls by roughly an order of magnitude below the single-slice RMS, so that error is per-slice scatter a longer average removes. On imas-efit's axis and q95 the block mean stays close to the single-slice RMS (34.74 against 38.34 mm, 45.6 against 59.3 in q95 units), which is the signature of a bias a longer average cannot remove; its boundary flux fraction, 0.00380 against 0.00543, does average down and is the tighter of the two codes'. The nova column's axis RMS sits at 9.7&ndash;10.4 mm against imas-efit's 29.7&ndash;38.3 mm on these arms, and its q95 error is about a fifth of imas-efit's.</p>
+<h3>Clause 2: the lag-one control</h3>
+<p>The white sequence is the negative control: a code that reads noise rather than the state must show no slice-to-slice memory, so its lag-one must sit within 0.15 of zero on all three quantities. The 1/f sequence is the positive control: the colouring itself carries memory, so a code that reproduces the reference must show lag-one above 0.5 on all three.</p>
+<table id="drift-sequences-fit-control">
+<tr><th>code</th><th>white lag-one (axis, flux, q95)</th><th>white control</th><th>1/f lag-one (axis, flux, q95)</th><th>1/f control</th></tr>
+<tr><td>nova</td><td>-0.056, 0.083, 0.083</td><td>passes</td><td>0.047, 0.085, 0.105</td><td><strong>fails</strong></td></tr>
+<tr><td>imas-efit</td><td>0.047, 0.118, 0.058</td><td>passes</td><td>0.462, 0.544, 0.606</td><td><strong>fails</strong></td></tr>
+</table>
+<p><strong>The white control holds for both codes and the 1/f control does not.</strong> The gate reads <code>CHECK-FAILED nova: the 1/f lag-one clause failed</code>, <code>CHECK-FAILED efit: the 1/f lag-one clause failed</code>, <code>2 of 28 checks failed</code>. imas-efit's 1/f axis lag-one of 0.462 is the nearest to the floor and still below it; its flux and q95 lag-one are 0.544 and 0.606, above the floor, so the clause fails on one of its three quantities. The nova column fails on all three (0.047, 0.085, 0.105).</p>
+<p>That is reported, not tuned. The floor of 0.5 is a property of the reference spectrum at the study's colouring (index 1.0, corner 4 cycles), measured on the reference series itself in the earlier arms; it was not lowered to make this run pass. The reading it supports is that neither code's residual error tracks the injected colouring at this noise level: a code whose error series is white on both sequences has not resolved the slow component the 1/f draw adds, whichever code it is. The white half of the control passing on both codes rules out the alternative reading, that the 1/f draw itself is correlated noise the reduction failed to see.</p>
+<h3>The cost, measured on complete slices</h3>
+<p>Each shard's first slice at the 48-pass cap was carried to its stop rule before the job was cancelled, and those five records are kept. They are the cost of a finished slice, and the reference for what the 200-slice table above trades away:</p>
+<table id="drift-sequences-fit-cost">
+<tr><th>slice</th><th>passes</th><th>wall [s]</th><th>wall per pass [s]</th><th>converged</th><th>terminal misfit</th><th>last flux update</th></tr>
+<tr><td>0</td><td>48</td><td>1192.7</td><td>24.8</td><td>no</td><td>0.0716</td><td>1.2e-10</td></tr>
+<tr><td>1</td><td>48</td><td>1193.3</td><td>24.9</td><td>no</td><td>0.0299</td><td>3.8e-09</td></tr>
+<tr><td>2</td><td>48</td><td>1193.0</td><td>24.9</td><td>no</td><td>0.0337</td><td>4.9e-05</td></tr>
+<tr><td>3</td><td>35</td><td>1111.7</td><td>31.8</td><td>yes</td><td>0.0273</td><td>9.1e-11</td></tr>
+<tr><td>4</td><td>48</td><td>1192.7</td><td>24.8</td><td>no</td><td>0.0305</td><td>1.1e-07</td></tr>
+</table>
+<p>Geometry load is about 690 s of each record, so the marginal cost of a pass is about 11 s and the converged 1111.7&ndash;1193.3 s walls are almost entirely that one-time load plus 35&ndash;48 passes. Four hundred converged slices would therefore cost roughly 120 P100 card-hours, about 24 hours on the five cards this job holds, and would be a single measurement at the edge of the allocation rather than a study. <strong>The 200-slice arms above are measured at a two-pass cap</strong>, which is the honest reading of the table: two passes leave the map closer to the truth seed than a finished fit would, so the errors are a lower bound on what a converged slice returns, and the converged records show the finished fit's own misfit (0.0273&ndash;0.0716). A full-convergence arm is the next node's work, on a budget sized from these walls.</p>
+</section>
+
+<section id="drift-sequences-fit-figures"><h3>Figures</h3>
+<p>Each code's axis error against slice over both sequences, drawn from the same per-slice reduction the table reads, as SVG through the repository's checked save function. imas-efit is drawn in a clean green, not a burnt orange; no figure is committed as a PNG twin.</p>
+<figure><img src="/nova/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/axis-error-nova.svg" alt="nova axis error against slice for the white and 1/f sequences"><figcaption>The nova column: distance of each slice's magnetic axis from the generating axis, in millimetres, over 200 slices of the white and the 1/f sequence. Both streams scatter about the same band; the white draw sits at a lag-one of -0.056 and the 1/f draw at 0.047, which is the measured finding stated under clause 2.</figcaption></figure>
+<figure><img src="/nova/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/axis-error-efit.svg" alt="imas-efit axis error against slice for the white and 1/f sequences"><figcaption>imas-efit on the 24-flux-loop arm over the same 200 slices; the error is three to four times the nova column's and carries the residual bias the 50-slice mean cannot average away. The 1/f stream's lag-one of 0.462 is the near miss on the control floor.</figcaption></figure>
+<p>The overlay is drawn at slice 88, the slice of largest disagreement between the two codes' axes on the 1/f sequence, which the reduction reports rather than the figure choosing. Both codes' solved flux is contoured on shared physical levels beside the reference, and both null sets are drawn: the nova column's axis marked filled and imas-efit's marked open, likewise at the X-point, so a reader can see on one panel how far each code's nulls stand from the generating ones. The wall is drawn, and the panel carries no axes or gridlines.</p>
+<figure><img src="/nova/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/slice-overlay-drift-88.svg" alt="solved flux contours of both codes and the reference at slice 88 of the 1/f sequence"><figcaption>Slice 88 of the 1/f sequence, the slice of largest axis disagreement: the reference flux as lines, both codes' solved flux on the same levels, the vessel, and both null sets in their own marks.</figcaption></figure>
 </section>

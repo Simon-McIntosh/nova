@@ -373,6 +373,7 @@ def _figure(case_name: str, cells: int = 10000) -> Path:
     style = ink.DEFAULT_INK
     figure, panels = plt.subplots(1, 2, figsize=(14.0, 7.2))
     figure.patch.set_facecolor(style.figure_facecolor)
+    figure.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.99, wspace=0.02)
     for panel, values, reading in (
         (panels[0], image[:grid], image_read),
         (panels[1], exact_grid, exact_read),

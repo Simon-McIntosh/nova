@@ -69,9 +69,30 @@
       "note": "section 4 prose now states the lead's 2026-10-01 ruling (diamagnetic loop where one exists, solved state only elsewhere, provenance per row) in place of 'until the lead rules' (e7210fc72); the s4 node's done-when is unconditional",
       "reason": "",
       "when": "2026-11-22T18:44:48.904262+00:00"
+    },
+    {
+      "action": "carried",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "finding": "done_when-1",
+      "reason": "",
+      "section": "s1",
+      "sections": [
+        "s1"
+      ],
+      "when": "2026-11-22T18:44:56.892792+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "carried",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "reason": "",
+      "section": "s1",
+      "sections": [
+        "s1"
+      ],
+      "when": "2026-11-22T18:44:56.892792+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",

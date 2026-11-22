@@ -63,5 +63,14 @@
     "order": 0.8002767115070913,
     "predicted_order": 1.0,
     "mechanism": "the volume side integrates on cell centres with the mask flux > 0, which carries no boundary correction, so the mis-measured region is a boundary layer one cell thick and the residual falls at first order in the grid step; the contour side is converged at this sampling"
-  }
+  },
+  "grid_tick_values": [
+    1e-06,
+    2e-06
+  ],
+  "contour_tick_values": [
+    0.22,
+    0.24,
+    0.27
+  ]
 }

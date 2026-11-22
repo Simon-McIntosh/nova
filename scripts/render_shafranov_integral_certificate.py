@@ -13,6 +13,7 @@ Run it from the repository root:
 
 import importlib.util
 import json
+import math
 from pathlib import Path
 
 import matplotlib
@@ -112,6 +113,24 @@ def _check_artists(figure, direct_labels, series):
         )
 
 
+def _grid_ticks(receipt):
+    """The grid panel's log-axis ticks, derived from the gaps it plots."""
+    decade = 10.0 ** round(math.log10(min(receipt["grid_gap"])))
+    return [decade, 2.0 * decade]
+
+
+def _contour_ticks(receipt):
+    """The contour panel's ticks, derived from the ladder and its plateau."""
+    limit = receipt["limit"]
+    return sorted(
+        {
+            round(limit, 2),
+            round((limit + max(receipt["errors"])) / 2.0, 2),
+            round(max(receipt["errors"]), 2),
+        }
+    )
+
+
 def _quiet_log_axis(axes):
     """Drop log minor labels and matplotlib's offset multiplier."""
     axes.xaxis.set_minor_formatter(NullFormatter())
@@ -175,7 +194,7 @@ def _plot(receipt):
     grid_axes.set_xlabel("grid nodes per axis", fontsize=ink.label_fontsize)
     grid_axes.set_ylabel("relative gap to analytic route", fontsize=ink.label_fontsize)
     grid_axes.set_xticks(resolutions)
-    grid_axes.set_yticks([1.0e-6, 2.0e-6])
+    grid_axes.set_yticks(receipt["grid_tick_values"])
     grid_axes.set_title(
         f"grid ladder: gap at most {receipt['grid_gap_max']:.2e}",
         fontsize=ink.label_fontsize,
@@ -193,7 +212,6 @@ def _plot(receipt):
         linewidth=ink.trace_linewidth,
         marker="o",
         markersize=ink.trace_markersize,
-        label="contour route",
         zorder=ink.zorder_markers,
     )
     series.append(contour_line)
@@ -202,7 +220,6 @@ def _plot(receipt):
         color="0.5",
         linewidth=1.2,
         linestyle=":",
-        label="plateau",
         zorder=ink.zorder_flux,
     )
     contour_axes.set_xscale("log")
@@ -212,14 +229,7 @@ def _plot(receipt):
         FuncFormatter(lambda value, _: f"{value:.2f}")
     )
     contour_axes.set_ylim(limit * 0.85, max(errors) * 1.25)
-    ticks = sorted(
-        {
-            round(limit, 2),
-            round((limit + max(errors)) / 2.0, 2),
-            round(max(errors), 2),
-        }
-    )
-    contour_axes.set_yticks(ticks)
+    contour_axes.set_yticks(receipt["contour_tick_values"])
     contour_axes.set_xlim(samplings[0] / 1.6, samplings[-1] * 1.6)
     contour_axes.set_xlabel("contour points", fontsize=ink.label_fontsize)
     contour_axes.set_ylabel(
@@ -227,7 +237,6 @@ def _plot(receipt):
     )
     contour_axes.set_xticks(samplings)
     contour_axes.set_xticklabels([str(value) for value in samplings])
-    contour_axes.legend(frameon=False, fontsize=ink.label_fontsize, loc="upper right")
     direct_labels.append(
         contour_axes.annotate(
             f"plateau {limit:.3e}",
@@ -252,6 +261,20 @@ def _plot(receipt):
         )
     )
 
+    direct_labels.append(
+        contour_axes.annotate(
+            "contour route",
+            (samplings[-1], errors[-1]),
+            textcoords="offset points",
+            xytext=(9, 9),
+            ha="left",
+            va="center",
+            fontsize=ink.label_fontsize,
+            color=ink.flux_color,
+            zorder=ink.zorder_label,
+        )
+    )
+
     figure.tight_layout()
     return figure, direct_labels, series
 
@@ -260,6 +283,8 @@ def main():
     module = _load_test_module()
     receipt = module._grid_route_ladder()
     receipt["identity"] = module._identity_ladder()
+    receipt["grid_tick_values"] = _grid_ticks(receipt)
+    receipt["contour_tick_values"] = _contour_ticks(receipt)
     RECEIPT.write_text(json.dumps(receipt, indent=2) + "\n")
 
     figure, direct_labels, series = _plot(receipt)

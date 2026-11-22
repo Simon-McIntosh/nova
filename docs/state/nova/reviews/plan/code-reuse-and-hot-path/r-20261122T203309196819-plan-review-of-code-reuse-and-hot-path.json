@@ -1,0 +1,88 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T20:59:23.725Z",
+  "dispatched_at": "2026-11-22T20:34:01Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/code-reuse-and-hot-path.html:131",
+      "id": "reasoning-1",
+      "reason": "without a reachability check beyond the two routes (public exports plus the coupled repositories' imports), the node's own gate passes while it deletes live library code, which is the one irreversible action in the plan.",
+      "text": "\u00a74 deletes every `nova/` module \"\u00a71 shows unreached by either route\" whose guards are only kept tests and live/held plans, but the two measured routes are the forward solve and the inverse fit; the rest of the package (transport, assembly, biot and its public API, media, apps, and the API that the coupled repositories in `AGENTS.md` call) is reached by entry points \u00a71 never exercises. A working module whose only callers are an adjacent repository, a bokeh app or a kept script can read zero coverage and be deleted, and the \u00a74 negative control \u2014 a \u00a71-reached module being refused \u2014 cannot detect that case",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/code-reuse-and-hot-path.html:91",
+      "id": "evidence_paths-1",
+      "reason": "four independent nodes each pick their own location, and the plan's own cross-section reads (\u00a73 consumes \u00a72, S28 consumes \u00a75) then depend on a path nobody fixed.",
+      "text": "\u00a72's census, \u00a73's batch records, \u00a74's per-package record and \u00a75's duplicates register are each \"one record\" with no durable path, unlike \u00a71 which names `docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html`; \u00a72's verdicts and \u00a75's entries are consumed by later sections and by S28, so a record left in a session scratchpad makes those consumers unable to find it",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/code-reuse-and-hot-path.html:150",
+      "id": "wiring-1",
+      "reason": "the completion condition is owned by another sprint with no declared handoff, so a worker either blocks on an unanswered external actor or closes \u00a75 as met when it is not.",
+      "text": "\u00a75's done-when (2) requires \"S28's coordinator has answered it: accepted for an S28 node, or declined\", and \u00a76's premise is the route \"as measured after the \u00a75 collapses S28 accepted have landed\"; the only declared relationship toward S28 is `plan-informs`, which is a one-way record and carries no answer and no landing signal, so a node dispatched at this plan's head cannot satisfy \u00a75(2) on any in-plan dependency",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/code-reuse-and-hot-path.html:48",
+      "id": "reasoning-2",
+      "reason": "it is motivation only, the plan's other figures reproduce exactly, and nothing in \u00a71\u2013\u00a76 is sized from it.",
+      "text": "\u00a70 states that since 2026-08-01 `nova/` \"gained 175k lines and lost 36k\", while a net diff from the 2026-08-01 revision (`ecfaa0ec`) to `main` under `nova/` measures +146,471 / \u22126,999; the stated figures may be a sum over per-commit numstat (which counts a line added and later deleted twice), but the plan does not say so and no section's endpoint depends on the number",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "5f6012f96f5c7e0e7870c48f686e600f6fdc6f8f",
+  "plan_fingerprint": "743390454533712898a6e0bdb9fb8ec1928b586d893a9b8c6004a13ba706d52e",
+  "plan_slug": "code-reuse-and-hot-path",
+  "plan_version": 3,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "reasoning-2",
+      "reason": "it is motivation only, the plan's other figures reproduce exactly, and nothing in \u00a71\u2013\u00a76 is sized from it.",
+      "when": "2026-11-22T21:00:51.101200+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-2": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "it is motivation only, the plan's other figures reproduce exactly, and nothing in \u00a71\u2013\u00a76 is sized from it.",
+      "when": "2026-11-22T21:00:51.101200+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-code-reuse-and-hot-path.v3.json",
+  "review_run_id": "r-20261122T203309196819-plan-review-of-code-reuse-and-hot-path",
+  "reviewed_blob_sha": "f605b82a3b6f74da2516d8c33c77cce80b729c03",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited file resolves (`nova/equilibrium/AGENTS.md`, the six \u00a70 modules, both informed plans); the evidence fragment under `docs/evidence/fragments/code-reuse-and-hot-path/` is a deliverable rather than an existing target, and its house directory convention exists; no extensionless href is cited.",
+    "done_when": "pass \u2014 each section names a negative control that can fail: an unreached module reading zero lines (\u00a71), a live-test-imported driver forced to delete being refused (\u00a72), a kept file naming a deleted path failing the absence check (\u00a73), a reached module offered for deletion being refused (\u00a74), a perturbed-input disagreement exceeding tolerance (\u00a75), and an added module breaking the head comparison (\u00a76).",
+    "evidence_paths": "a finding \u2014 \u00a71 names a durable fragment path, but \u00a72, \u00a73, \u00a74 and \u00a75 name records and logs with no path at all, so the node chooses one and may choose a scratchpad.",
+    "naming": "pass \u2014 no plan label, sprint number or ticket id reaches a symbol, filename or comment; the only slug-named path is an evidence-fragment directory, which is the plan-record namespace, not source.",
+    "reasoning": "findings \u2014 \u00a74's deletion criterion treats coverage by two routes as the definition of reachable, and \u00a70's churn figure does not reproduce at the revision the plan states.",
+    "single_goal": "pass \u2014 \u00a73's batches each carry one verdict set applied in one pass, and \u00a71 measures one map across two routes rather than two deliverables.",
+    "wiring": "a finding \u2014 \u00a75's second done-when waits on S28's coordinator and \u00a76's premise waits on S28's accepted collapses landing, and no declared relationship carries either."
+  },
+  "section_digests": {
+    "_document": "9466a79366f96d050fb5a94d71c13e5fca67887698a373587be50b73df798a57",
+    "s0": "e6db08d8f54a9d4335cd673fa19ac9d023eba7179593fe0803ecb07b5a41da06",
+    "s1": "46e54aefbb5b38beadd795657da978e29a2f668fae1fe946c832eda8411c9d87",
+    "s2": "0b798e43a8f8d508ef74ef8e5f83c1123ac73604e519e2e2a36f8c5308bdc1b6",
+    "s3": "84209c1bf2549cd4abd6a02cab2304d5cead35b2dfcdc8219fd202bcaecc1ccc",
+    "s4": "c10ebaf9eda8aaaef70632904d495fa0fe11b86a003f47d4c0d7232688ca8c01",
+    "s5": "9aefea04c24ad0f1a6ddc14859f734f6b58e8e428c2bee50851a87e94b5e85d4",
+    "s6": "1bda8e98c25af6dba78705302257637e5dcf4c9e700479afbb496be0d303b998"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T21:00:44.065068+00:00",
+  "total": null
+}

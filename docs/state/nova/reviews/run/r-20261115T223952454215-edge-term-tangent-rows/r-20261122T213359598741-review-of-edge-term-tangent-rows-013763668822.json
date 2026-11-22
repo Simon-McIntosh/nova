@@ -1,0 +1,108 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": {
+    "added": [],
+    "note": "The increment adds no assertions: it is prose and a table. The node's guard remains tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_terms], which is the ONLY guard that reddens when fe186d48e is reverted, as the base arm repair-h200-base-1337098.log shows, so the increment's figures rest on that test rather than on any new line."
+  },
+  "call_site_note": "Docs-only increment; no runtime code can reach it.",
+  "call_sites": [],
+  "completed_at": "2026-11-22T21:34:56.668Z",
+  "dispatched_at": "2026-11-22T21:34:37Z",
+  "failure_id_comparison": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "exit": "ARM_EXIT=1",
+      "failure_count": 10,
+      "failure_ids": [
+        "test_tangent_matches_base_jvp[edge_integrands]",
+        "test_tangent_matches_base_jvp[flux_and_moment_terms]",
+        "test_tangent_matches_base_jvp[edge_terms]",
+        "test_truncated_tangent_fails_identity[edge_integrands]",
+        "test_truncated_tangent_fails_identity[flux_and_moment_terms]",
+        "test_truncated_tangent_fails_identity[edge_terms]",
+        "test_tangent_compiles_within_bound[edge_integrands]",
+        "test_tangent_compiles_within_bound[flux_line_moments]",
+        "test_tangent_compiles_within_bound[flux_and_moment_terms]",
+        "test_tangent_compiles_within_bound[edge_terms]"
+      ],
+      "job": "1337181",
+      "log": "/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/edge-term-tangent-rows/repair-after3-arm-1337181.log",
+      "revision": "013763668822484d43e0799cc04870e678c11d3d",
+      "summary": "10 failed, 16 passed in 5899.76s"
+    },
+    "baseline_suite": {
+      "exit": "BASE_EXIT=1",
+      "failure_count": 10,
+      "failure_ids": [
+        "test_tangent_matches_base_jvp[edge_integrands]",
+        "test_tangent_matches_base_jvp[flux_and_moment_terms]",
+        "test_tangent_matches_base_jvp[edge_terms]",
+        "test_truncated_tangent_fails_identity[edge_integrands]",
+        "test_truncated_tangent_fails_identity[flux_and_moment_terms]",
+        "test_truncated_tangent_fails_identity[edge_terms]",
+        "test_tangent_compiles_within_bound[edge_integrands]",
+        "test_tangent_compiles_within_bound[flux_line_moments]",
+        "test_tangent_compiles_within_bound[flux_and_moment_terms]",
+        "test_tangent_compiles_within_bound[edge_terms]"
+      ],
+      "job": "1335758",
+      "log": "/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/edge-term-tangent-rows/repair-base-arm2-1335758.log",
+      "revision": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+      "summary": "10 failed, 16 passed in 6109.25s"
+    },
+    "note": "Both CPU arms' FAILED sets are identical and every id is a pytest-timeout 300 s absence, so the pair adds nothing; the discriminating pair is the H200 one 1337098/1337031."
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html",
+      "line": "258",
+      "severity": "non-blocking",
+      "text": "the added H200 table is captioned for tests/biot/test_edge_term_tangents.py alone, and the repair-head arms 1337098/1337031 run only that file, so the four test_tangent_compiles_within_three_primals rows of tests/biot/test_vertex_term_tangents.py have no post-repair measurement: on the only same-H200-job pair, coordinator/base-job-1335151.log and coordinator/job-1334717.log, all four are FAILED at both arms, and the fragment records that absence only in the separate section at line 244 rather than beside the new table a reader takes as the repair head's device state."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html",
+      "line": "253",
+      "severity": "non-blocking",
+      "text": "the added heading reuses id=\"edge-term-tangent-rows-h200\", already carried by the earlier H200 section at line 27, so the document has a duplicate id and an anchor or SPA deep link to that id resolves to that first section rather than to the arm table the commit added."
+    }
+  ],
+  "increment_reviewed": "83374ed5e4fdfba7562890882e5a36db2eb239bd..013763668822484d43e0799cc04870e678c11d3d",
+  "item_verdicts": {
+    "diff": "Read the single commit gained since the reviewed head 83374ed5e; 013763668 adds 35 lines of HTML to one fragment and touches no code, test, or path outside the declared write paths.",
+    "done_when": "Read the s6 done_when; clause (2)'s H200 pass is now recorded for all four rows, clause (3)'s failure-id part is recorded from the same H200 job at d6cf0cd7d (1334717: 9 failed/39 passed) against base 999c9d5fe (1335151: 10 failed/38 passed), so no head-only id, and the lowering size reads 10,251,812 bytes on both trees; the residual is that the repair-head arms cover one file, leaving the four test_tangent_compiles_within_three_primals rows of tests/biot/test_vertex_term_tangents.py unmeasured after fe186d48e.",
+    "goal": "The plan's s6 goal is that the four target rows of tests/biot/test_edge_term_tangents.py pass on the H200 with every tolerance unchanged; the increment adds docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:253-268 recording job 1337031 at 83374ed5e (26 passed, EXIT=0), which repair-h200-head-1337031.log confirms.",
+    "manifest": "Read manifest.md; the figures the increment added match repair-h200-head-1337031.log (26 passed in 3424.98 s EXIT=0, edge_terms 2.545e-14 covered_fraction=1.0000, ratios 2.69/1.48/1.70/1.99/2.55/1.83), repair-h200-base-1337098.log (2 failed/24 passed in 3330.53 s, the two named edge_terms ids) and coordinator/job-1334717.log (1.588e-09, 0.9999); the two CPU arms 1335758/1337181 carry the identical ten timeout ids.",
+    "write_paths": "Read the declared paths; the increment touches exactly one file, docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html, inside the declared path of the same name."
+  },
+  "justifications": {
+    "durability": "Reverting fe186d48e reddens test_tangent_matches_base_jvp[edge_terms], as repair-h200-base-1337098.log ends in two FAILED edge_terms ids at 999c9d5fe against 26 passed at head, but the increment itself is prose and adds no assertion that fails if its figures go stale, so the guard is the earlier repair's test, not this commit's.",
+    "evidence": "Clause (2) is measured on the named H200 device and the figures reconcile with the logs, but the repair-head arms cover only tests/biot/test_edge_term_tangents.py, so the vertex file's four compile rows at docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:244 stay red at both arms of the earlier H200 pair and unmeasured after the repair.",
+    "fit": "The added section follows the fragment's h4-plus-table idiom, but its heading repeats the id already carried at docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:27.",
+    "goal_fidelity": "The increment records the H200 head arm for all four clause (2) rows at docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:266-272 (edge_terms 2.545e-14, edge_integrands 0, flux_line_moments 1.000e-12, flux_and_moment_terms 0, all under bound), matching repair-h200-head-1337031.log line for line.",
+    "reuse": "The increment adds no function, class or module; the record is an extension of the fragment that already owns this evidence, not a second store.",
+    "scope_discipline": "The only path in 013763668 is docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html, inside the declared write path."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the plan's s6 goal is that the four target rows of tests/biot/test_edge_term_tangents.py pass on the H200 with every tolerance unchanged; the increment's added section at docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:253 records exactly that H200 arm (job 1337031, 26 passed), which repair-h200-head-1337031.log confirms.\nVERDICT done_when: read the s6 done_when; clause (2)'s H200 pass is recorded for all four rows and reconciles with the logs, clause (3)'s failure-id part is recorded from the same H200 job pair (base 1335151: 10 failed/38 passed; head 1334717: 9 failed/39 passed, no head-only id) and the lowering size is flat at 10,251,812 bytes, but the repair-head H200 arms 1337098/1337031 run only tests/biot/test_edge_term_tangents.py, leaving the four test_tangent_compiles_within_three_primals rows of tests/biot/test_vertex_term_tangents.py red at both arms of the earlier pair and unmeasured after the repair.\nVERDICT write_paths: read the declared paths; the increment 83374ed5e..013763668 touches exactly one file, docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html, inside the declared path of the same name.\nVERDICT manifest: read manifest.md; the figures the increment added match repair-h200-head-1337031.log (26 passed in 3424.98 s, EXIT=0, edge_terms tangent_max_relative=2.545e-14 covered_fraction=1.0000), repair-h200-base-1337098.log (2 failed/24 passed in 3330.53 s, the two named edge_terms ids) and coordinator/job-1334717.log (1.588e-09, covered_fraction=0.9999), and the CPU arms 1335758/1337181 carry identical ten timeout ids.\nVERDICT diff: read the single commit gained since the prior review at 83374ed5e; 013763668 is 35 added lines of HTML in one fragment, with no code, no test and no path outside the declared write paths.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: The increment records the H200 head arm for all four clause (2) rows at docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:266-272 (edge_terms 2.545e-14, edge_integrands 0, flux_line_moments 1.000e-12, flux_and_moment_terms 0, all under bound), matching repair-h200-head-1337031.log line for line.\nSCORE evidence: 15\nJUSTIFICATION evidence: Clause (2) is measured on the named H200 device and the figures reconcile with the logs, but the repair-head arms cover only tests/biot/test_edge_term_tangents.py, so the vertex file's four compile rows at docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:244 stay red at both arms of the earlier H200 pair and unmeasured after the repair.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The only path in 013763668 is docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html, inside the declared write path.\nSCORE durability: 16\nJUSTIFICATION durability: Reverting fe186d48e reddens test_tangent_matches_base_jvp[edge_terms], as repair-h200-base-1337098.log ends in two FAILED edge_terms ids at 999c9d5fe against 26 passed at head, but the increment itself is prose and adds no assertion that fails if its figures go stale, so the guard is the earlier repair's test, not this commit's.\nSCORE fit: 17\nJUSTIFICATION fit: The added section follows the fragment's h4-plus-table idiom, but its heading repeats the id already carried at docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:27.\nSCORE reuse: 20\nJUSTIFICATION reuse: The increment adds no function, class or module; the record is an extension of the fragment that already owns this evidence, not a second store.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:258 non-blocking: the added H200 table is captioned for tests/biot/test_edge_term_tangents.py alone, and the repair-head arms 1337098/1337031 run only that file, so the four test_tangent_compiles_within_three_primals rows of tests/biot/test_vertex_term_tangents.py have no post-repair measurement: on the only same-H200-job pair, coordinator/base-job-1335151.log and coordinator/job-1334717.log, all four are FAILED at both arms, and the fragment records that absence only in the separate section at line 244 rather than beside the new table a reader takes as the repair head's device state.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:253 non-blocking: the added heading reuses id=\"edge-term-tangent-rows-h200\", already carried by the earlier H200 section at line 27, so the document has a duplicate id and an anchor or SPA deep link to that id resolves to that first section rather than to the arm table the commit added.\n",
+  "review_method": "Read the plan s6 goal and done_when, the run manifest, the single commit gained since the review at 83374ed5e, and the logs it cites (repair-h200-head-1337031.log, repair-h200-base-1337098.log, coordinator/job-1334717.log, coordinator/base-job-1335151.log, repair-base-arm2-1335758.log, repair-after3-arm-1337181.log). No suite rerun, no mutation, no out-of-diff code read.",
+  "review_run_id": "r-20261122T213359598741-review-of-edge-term-tangent-rows-013763668822",
+  "reviewed_base_sha": "83374ed5e4fdfba7562890882e5a36db2eb239bd",
+  "reviewed_head_sha": "013763668822484d43e0799cc04870e678c11d3d",
+  "reviewed_run_id": "r-20261115T223952454215-edge-term-tangent-rows",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "source_commits": [
+    "013763668"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T22:04:52.662444+00:00",
+  "total": 105
+}

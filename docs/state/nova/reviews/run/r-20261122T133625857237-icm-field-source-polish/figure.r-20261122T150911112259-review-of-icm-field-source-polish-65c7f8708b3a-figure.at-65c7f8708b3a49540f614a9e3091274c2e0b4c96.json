@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-22T15:19:47.176Z",
+  "dispatched_at": "2026-11-22T15:09:38Z",
+  "findings": [
+    {
+      "file": "docs/figures/west-stray-field/west-62751-iron-stray-field.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The one figure-level legend above panel 1 mixes line keys for panels 1-2 (three iron planes, air-core) with marker keys that appear only in the lower panel (|dB| iron circles, |B_air| dashes). A reader scanning panel 1 sees circle and dash keys with no matching marks in that panel; the mapping is still correct and reaches the reader several panels lower. A reader cost only, not a defect that hides data. Same bytes at docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png."
+    },
+    {
+      "file": "scripts/iron_field_source/figure.py",
+      "line": 173,
+      "severity": "non-blocking",
+      "summary": "The figure is saved at 6.4 x 7.2 in at 120 dpi (768 x 864 px), below the repository's 14 in / 1400 px full-width published-figure convention used by sibling figures. At the ~900 px reckon column it upscales and its text reads slightly lighter than its neighbours. Legible, but inconsistent with the house canvas."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261122T150911112259-review-of-icm-field-source-polish-65c7f8708b3a-figure",
+  "reviewed_base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+  "reviewed_head_sha": "65c7f8708b3a49540f614a9e3091274c2e0b4c96",
+  "reviewed_run_id": "r-20261122T133625857237-icm-field-source-polish",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Pass. All text is dark on white: black axis and tick labels, a #444 annotation, and the #888 zero rule and leader drawn beneath the data. Nothing renders low-contrast.",
+    "data_ink": "Pass. The series are thin traces and small markers; no fill, band or shaded background spends ink. Grey is reserved for the air-core reference, the zero rule and the annotation leader; colour names the three iron planes.",
+    "decoration": "Pass. No gradient, background fill or decorative styling. Panels are despined with no gridlines, and the legend is one frameless figure-level block above the panels.",
+    "label_collision": "Pass. No label is clipped or overlaps another label or the data. Measured: the outer 3 px on all four canvas edges carry 0 non-white pixels, so nothing is clipped at the border; the legend sits above panel 1 with clear margin; the 'peak +6787 %' annotation sits in open space with a single leader to the blue peak.",
+    "legibility": "Pass. Three stacked panels read top to bottom: total |B| with and without the iron on the three planes; the iron's share on a symlog y axis with the +6787 % near-edge spike annotated; the iron's contribution at every in-vessel poloidal probe. Axis labels, tick labels and the single figure-level legend are legible at the 768 px render. The symlog x axis gives the near-edge structure real width. The middle panel's symlog y axis carries only four ticks (-10^2, 0, 10^2, 10^4), so intermediate shares are readable in sign and order but not to a precise value; that is a deliberate compromise and the plateau value is carried by the table.",
+    "table_form": "Pass. Each panel shows a spatial relationship (field versus radial distance; contribution versus probe radius) that a table cannot convey; the probe scatter is naturally a plot."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T15:20:05.876770+00:00",
+  "total": null
+}

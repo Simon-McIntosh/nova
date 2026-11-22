@@ -22,7 +22,8 @@ data:</p>
   <li>the fitted conductor-current vector the fixture supplies, which differs
   from the record-era one on every one of the 288 TCV conductors; and</li>
   <li>the stored flux state the solve starts from, which differs from the
-  record-era state by 21.9 percent of its span in gauge-free RMS on TCV.</li>
+  record-era state by 21.9 percent of its span in gauge-free RMS on TCV and by
+  47.4 percent on ITER.</li>
 </ol>
 <p>Substituting the record-era values for those two inputs, and changing nothing
 else &mdash; same policy, same route, same mesh, same coefficients &mdash;
@@ -42,7 +43,7 @@ exactly as a refusal, no magnetic axis admitted, reason 3,
 <tr><td><code>tcv-record-seed</code></td><td>the comparison's currents and the record-era retained state as the seed</td><td>0.030442406985959472</td><td>12</td><td>admitted, (0.83545, -0.028185), diverted</td><td>10 / 0</td><td>601.75</td></tr>
 <tr><td><code>iter-input-stored</code></td><td>none: today's fixtures, fitted-current binding</td><td>0.12310610396516597</td><td>12</td><td>admitted, (5.5846, 2.4128), diverted</td><td>25 / 13</td><td>940.39</td></tr>
 <tr><td><code>iter-input-comparison</code></td><td>no fitted-current binding, which is how the record's arm was built</td><td>0.023081497957738336</td><td>8</td><td>admitted, (6.4270, 0.65285), diverted</td><td>40 / 23</td><td>779.31</td></tr>
-<tr><td><code>iter-record-seed</code></td><td>no fitted-current binding and the record-era refusal state as the seed</td><td>unavailable: the solve refused before a residual was measured</td><td>3, <code>NoQualifiedAxisError</code></td><td><strong>not admitted</strong></td><td>1 trip</td><td>see the run record</td></tr>
+<tr><td><code>iter-record-seed</code></td><td>no fitted-current binding and the record-era refusal state as the seed</td><td>unavailable: the solve refused before a residual was measured</td><td>3, <code>NoQualifiedAxisError</code></td><td><strong>not admitted</strong></td><td>1 trip</td><td>240.03</td></tr>
 </tbody></table>
 <p>Every arm is unqualified and unconverged. The two <code>*-input-stored</code>
 arms are the standing cases of the solver as it is today; the other four are
@@ -103,10 +104,19 @@ factor of 7.2 that the currents leave.</p>
 state the record's arm held when its topology read refused, with the measured
 conductor currents and no fitted binding, the solve raises
 <code>NoQualifiedAxisError</code> with reason 3 and admits no magnetic axis, in
-one trip, which is the recorded outcome. Neither case's record-era <em>seed</em>
-survives &mdash; both were read from fixture files that no longer hold those
-bytes &mdash; so in both cases the substituted state is the record-era state the
-arm retained rather than the exact seed it consumed.</p>
+one trip, which is the recorded outcome. The ITER seed is the larger of the two
+moves: today's stored seed spans <code>-89.3026</code> to <code>7.6395</code>,
+and the record-era state spans 19.6851 to 170.8987, so the two differ by a
+gauge-free RMS equal to 47.4 percent of today's span. Today's stored-coefficient
+arm reaches the record-era regime only by solving into it, and admits an axis on
+the way; started in that regime, it refuses at its first topology read, which is
+what the record's arm did.</p>
+<p>Neither case's record-era <em>seed</em> survives &mdash; both were read from
+fixture files that no longer hold those bytes &mdash; so in both cases the
+substituted state is the record-era state the arm retained rather than the exact
+seed it consumed. That the substitution lands within 0.26 percent on TCV, and on
+the recorded axis to eight decimal places, says the retained state and the seed
+it started from are interchangeable at the precision the record reports.</p>
 </section>
 
 <section id="default-policy-refusal-drift-sensitivity">

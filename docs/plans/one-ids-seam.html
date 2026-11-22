@@ -14,7 +14,7 @@
 <meta name="plan-status" content="draft">
 <meta name="plan-roi" content="high">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-effort-hours" content="19.0">
+<meta name="plan-effort-hours" content="25.0">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="general">
 <meta name="plan-capability-reasoning" content="deep">
@@ -22,9 +22,9 @@
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-tags" content="machine-description,mast,diii-d,efit">
 <meta name="plan-sprint" content="S30">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
-<meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s3&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s4&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s5&quot;:[&quot;one-ids-seam#s3&quot;,&quot;one-ids-seam#s4&quot;],&quot;s6&quot;:[&quot;one-ids-seam#s5&quot;]}">
-<meta name="plan-version" content="2">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s3&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s4&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s5&quot;:[&quot;one-ids-seam#s3&quot;,&quot;one-ids-seam#s4&quot;],&quot;s6&quot;:[&quot;one-ids-seam#s5&quot;,&quot;one-ids-seam#s7&quot;],&quot;s7&quot;:[&quot;one-ids-seam#s5&quot;]}">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
@@ -58,10 +58,10 @@
 
 <h2 id="s1">§1 — The overlap census</h2>
 <section data-reckon="section" data-id="s1" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>The stored code review of <code>nova/imas</code> on 2026-11-22 (report <code>code-review/213417e86321</code>) found five modules nothing imports and one triplicated boundary comparison. It did not map the machine-specific modules against the generic layer. This section does. The census is a committed, executable import-graph scan, not a hand-written list. It recomputes each module's class and importers from the tree, carries each row's destination, and renders the research record <code>docs/research/imas-seam-census.html</code> that §2 to §4 read. §6's import guard reads the same scan.</p><p>Destinations are by class, not by name. A module classed as machine authoring or publication moves to the ingest member, whatever its name. A generic reader stays in nova. A machine-named module that does generic work is generalised by the §3 or §4 node that moves its machine. An unreached module is deleted by §2.</p>
+<p>The stored code review of <code>nova/imas</code> on 2026-11-22 (report <code>code-review/213417e86321</code>) found five modules nothing imports and one triplicated boundary comparison. It did not map the machine-specific modules against the generic layer. This section does. The census is a committed, executable import-graph scan, not a hand-written list. It recomputes each module's class and importers from the tree, carries each row's destination, and renders the research record <code>docs/research/imas-seam-census.html</code> that §2 to §4 read. §6's import guard reads the same scan.</p><p>Destinations are by class, not by name, and every class has exactly one:</p><ul><li><strong>Machine authoring or publication</strong> moves to the ingest member, whatever its name. That includes the machine-generic publication path and the DDv4 publication floor in <code>machine_artifact.py</code>, which move with their refusal test. The content-addressed cache primitives in that module, which describe no machine, stay in nova.</li><li><strong>Generic reader or generic writer</strong> stays in nova.</li><li><strong>Convention conversion</strong> moves to the ingest member under §5.</li><li><strong>Machine analysis</strong> (adjudications, screens, comparisons) stays on the solver side of the seam but carries no machine name. The §3 or §4 node that moves its machine generalises it: it reads through the generic readers and is named by what it does. Where it reads a machine source directly, that read moves to the member, which writes the quantity into the IDS the analysis then reads. A machine-named module that does generic work is generalised the same way.</li><li><strong>Unreached</strong> modules are deleted by §2.</li></ul>
 <p>Done when:</p>
 <ul>
-<li>The scan emits one row per Python module under <code>nova/imas</code>, plus one row per module in <code>nova/</code>, <code>scripts/</code>, <code>benchmarks/</code>, <code>apps/</code> or <code>tests/</code> that imports a <code>mast_*</code>, <code>diiid_*</code> or <code>machine_*</code> module. It states the file count its rows equal, and a committed test fails when a module under <code>nova/imas</code> has no row. Each row names its class (generic reader, generic writer, machine authoring or publication, machine analysis, convention conversion, unreached), its importers inside the solver packages (<code>nova/equilibrium</code>, <code>nova/transport</code>, <code>nova/biot</code>, <code>nova/frame</code>, <code>nova/circuit</code>), and its destination: stays, moves to the ingest member, generalised by §3 or §4, or deleted by §2.</li>
+<li>The scan emits one row per Python module under <code>nova/imas</code> and per <code>mast_*</code>, <code>diiid_*</code> or <code>machine_*</code> module anywhere else in the nova package (for example <code>nova/catalog/mast_geometry.py</code>, <code>nova/media/sources/mast_efit.py</code>, <code>nova/scripts/diiid_machine_artifact.py</code>). It adds one row per module that imports one of them, in <code>nova/</code>, <code>scripts/</code>, <code>benchmarks/</code>, <code>apps/</code>, <code>tests/</code> or the imas-ambix source and tests. It states the file count its rows equal, and a committed test fails when a module under <code>nova/imas</code> has no row. Each row names its class (generic reader, generic writer, machine authoring or publication, machine analysis, convention conversion, unreached), its importers inside the solver packages (<code>nova/equilibrium</code>, <code>nova/transport</code>, <code>nova/biot</code>, <code>nova/frame</code>, <code>nova/circuit</code>), and its destination by the class rule above: stays, moves to the ingest member, generalised by §3 or §4, moves under §5, or deleted by §2.</li>
 <li>Every row that duplicates a capability names both implementations as <code>path:line</code>. Where the imas-ambix map producer (<code>imas_ambix/data/machine_maps</code>, <code>description_identity.py</code>) covers the same machine description, the row names it too. The record also names, per machine, the reference shot whose IDSs §3 and §4 compare: the shot the machine's current forward-solve tests use.</li>
 <li>Negative control: the same importer scan run over <code>nova.imas.dataset</code> reports its known importers, so a zero elsewhere means absent rather than missed.</li>
 </ul>
@@ -78,36 +78,36 @@
 
 <h2 id="s3">§3 — MAST authoring moves to the ingest member</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="one-ids-seam#s1"></section>
-<p>The ingest member is a uv workspace member under <code>packages/nova-ingest</code>, beside the existing members. It may import nova; nova never imports it. Each MAST row of the §1 census goes to the destination its row names. The existing machine-description authoring and publication path moves into the member. It is not reimplemented there, so the tree keeps one author per machine. This section may be cut into several nodes along the census's groups.</p>
+<p>The ingest member is a uv workspace member under <code>packages/nova-ingest</code>, beside the existing members. It may import nova; nova never imports it. Each MAST row of the §1 census goes to the destination its row names. The existing machine-description authoring and publication path moves into the member. It is not reimplemented there, so the tree keeps one author per machine. This section may be cut into several nodes along the census's groups.</p><p>It also carries the open inventory of machine-description-retirement, whose route into the imas-ambix map producer the ingest-home decision replaced: the MAST registry (<code>nova/catalog/mast_geometry.py</code> and its JSON), <code>mast_geometry.py</code>, <code>mast_solve_input_ids.py</code>, the MAST paths of <code>machine_artifact.py</code>, and their consumers. <code>nova/calibrate/sweep.py</code> selects its shot through the registry and is decoupled from it before that import goes. imas-ambix imports several of these modules today (<code>imas_ambix/gs/artifact_resolution.py</code>, <code>description_artifact.py</code>, <code>artifact_geometry.py</code>, <code>machine_identity.py</code>, <code>imas_ambix/latent/data.py</code>, <code>imas_ambix/spine_bench/runner.py</code> and three test files). Each moves to the member's names in the same landing beat, through an imas-ambix node, so ambix never resolves against a module nova no longer has.</p>
 <p>Done when:</p>
 <ul>
-<li>Every MAST row whose §1 destination is the ingest member is in the member, and exactly one module in the tree authors the MAST description IDSs. No module left in the nova package is named <code>mast_*</code>, imports the member, or imports a module the census moved there. No consumer in <code>apps/</code>, <code>scripts/</code>, <code>benchmarks/</code> or <code>tests/</code> is left importing a moved name.</li>
+<li>Every MAST row whose §1 destination is the ingest member is in the member, and exactly one module in the tree authors the MAST description IDSs. No module left in the nova package is named <code>mast_*</code>, imports the member, or imports a module the census moved there. No consumer in <code>apps/</code>, <code>scripts/</code>, <code>benchmarks/</code>, <code>tests/</code> or imas-ambix is left importing a moved name.</li>
 <li>The member writes the MAST machine description (active coils, passive structures, magnetics and wall) for the §1 reference shot to an IMAS entry once. nova's generic readers read that entry, and every array the forward solve consumes is bit-identical to the array the base revision builds for the same shot.</li>
 <li>The nova suite and the member's tests add no failures against base. Negative control: a coil turn count perturbed in the written entry fails the identity comparison.</li>
 </ul>
 
 <h2 id="s4">§4 — DIII-D authoring moves to the ingest member</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="one-ids-seam#s1"></section>
-<p>The same move for DIII-D, and for the <code>machine_*</code> rows the §1 census assigns to the member.</p>
+<p>The same move for DIII-D, and for the <code>machine_*</code> rows the §1 census assigns to the member. The DIII-D OCI publication path, <code>nova/scripts/diiid_machine_artifact.py</code> with its publication test, moves into the member with it. Its imas-ambix consumers move in the same landing beat, as in §3.</p>
 <p>Done when:</p>
 <ul>
-<li>Every DIII-D and <code>machine_*</code> row whose §1 destination is the ingest member is in the member, and exactly one module in the tree authors the DIII-D description IDSs. No module left in the nova package is named <code>diiid_*</code>, imports the member, or imports a module the census moved there. No consumer in <code>apps/</code>, <code>scripts/</code>, <code>benchmarks/</code> or <code>tests/</code> is left importing a moved name.</li>
+<li>Every DIII-D and <code>machine_*</code> row whose §1 destination is the ingest member is in the member, and exactly one module in the tree authors the DIII-D description IDSs. No module left in the nova package is named <code>diiid_*</code>, imports the member, or imports a module the census moved there. No consumer in <code>apps/</code>, <code>scripts/</code>, <code>benchmarks/</code>, <code>tests/</code> or imas-ambix is left importing a moved name.</li>
 <li>The member writes the DIII-D machine description for the §1 reference shot to an IMAS entry once. nova's generic readers read it, and every array the forward solve consumes is bit-identical to the base revision's.</li>
 <li>The nova suite and the member's tests add no failures against base. Negative control: a coil turn count perturbed in the written entry fails the identity comparison.</li>
 </ul>
 
 <h2 id="s5">§5 — nova holds one convention: COCOS 17 on DDv4</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="one-ids-seam#s3,one-ids-seam#s4"></section>
-<p>nova already states its internal convention once, as COCOS 17. What is still owed is a deletion. nova imports the sixteen-convention COCOS algebra (<code>packages/nova-cocos</code>), and it carries its own DD3 read path, which translates DD3 equilibria on the way in. Both leave nova. The algebra moves into the ingest member and <code>packages/nova-cocos</code> is removed. The DD3 read path is deleted from nova: converting a DD3 source becomes ingest work, done once when the source is written as a DDv4 entry, and nova reads only DDv4, COCOS 17 entries.</p><p>The algebra has consumers outside the nova package: four import sites in imas-ambix across two distributions (the ambix application and <code>packages/imas-alambic</code>, which declares <code>nova-cocos</code> as its own dependency), plus nova's own dependency declaration and workspace member list. Every one moves to the ingest member in the same landing beat, through an imas-ambix node for the ambix sites, so nothing resolves against a missing package.</p>
+<section data-reckon="section" data-id="s5" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="one-ids-seam#s3,one-ids-seam#s4"></section>
+<p>nova already states its internal convention once, as COCOS 17, but it draws that statement from a sixteen-row table. nova imports the sixteen-convention COCOS algebra (<code>packages/nova-cocos</code>), and it carries its own DD3 read path, which translates DD3 equilibria on the way in. Both leave nova. The algebra moves into the ingest member and <code>packages/nova-cocos</code> is removed. The DD3 read path is deleted from nova: converting a DD3 source becomes ingest work, done once when the source is written as a DDv4 entry, and nova reads only DDv4, COCOS 17 entries.</p><p>This is a rehoming, not only a deletion. nova keeps COCOS 17's own signs and exponent, stated once as literal values where nova states its convention today. Eleven nova modules and thirteen test files import the algebra now. Each is rewired to those literal values or, where it converts between conventions, moves to the member or goes with the DD3 read path. The test that nova states its convention once keeps its single-site assertion. Its comparison of nova's values against the algebra's COCOS 17 row moves into the member's tests, the one place that may import both.</p><p>The algebra has consumers outside the nova package: four import sites in imas-ambix across two distributions (the ambix application and <code>packages/imas-alambic</code>, which declares <code>nova-cocos</code> as its own dependency), plus nova's own dependency declaration and workspace member list. Every one moves to the ingest member in the same landing beat, through an imas-ambix node for the ambix sites, so nothing resolves against a missing package.</p>
 <p>Done when:</p>
 <ul>
-<li><code>packages/nova-cocos</code> is gone, from the tree, from nova's declared dependencies and workspace members, and from both imas-ambix distributions' dependencies and lock. The convention algebra exists once, in the ingest member, whose COCOS tests pass with the same count they pass with at base. Nothing in the nova package imports the algebra or reads a DD3 entry. The existing test that nova's convention is stated once still passes.</li>
+<li><code>packages/nova-cocos</code> is gone, from the tree, from nova's declared dependencies and workspace members, and from both imas-ambix distributions' dependencies and lock. The convention algebra exists once, in the ingest member, whose COCOS tests pass with the same count they pass with at base. Nothing in the nova package or nova's tests imports the algebra or reads a DD3 entry. The single-site test passes in nova, and the comparison of nova's COCOS 17 values against the algebra's passes in the member.</li>
 <li>The member converts CORSICA 130506/6 (DD3, COCOS 11) into a DDv4 entry. nova's generic equilibrium reader reads it, and ψ, I<sub>p</sub> and the boundary equal the values today's translate-on-read path returns, within 1e-12 relative. DINA 105014/1 and 105013/1 are refused by name at ingest, as they are today.</li>
 <li>Negative control: nova's reader, handed the unconverted DD3 entry, refuses it by name. The nova suite adds no failures against base.</li>
 </ul>
 
 <h2 id="s6">§6 — The solves pass only through the generic IMAS layer</h2>
-<section data-reckon="section" data-id="s6" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="one-ids-seam#s5"></section>
+<section data-reckon="section" data-id="s6" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="one-ids-seam#s5,one-ids-seam#s7"></section>
 <p>The forward and inverse solves take machine data only through the generic readers and write their equilibria only through <code>nova/imas/dataset.py</code>. imas-efit reads the result back, and that is the independent check that the written IDS means what nova meant.</p>
 <p>Done when:</p>
 <ul>
@@ -116,11 +116,21 @@
 <li>Negative control: an entry written with ψ negated fails the imas-efit comparison.</li>
 </ul>
 
+<h2 id="s7">§7 — nova&#x27;s flux functions carry the COCOS 17 sign at their owner</h2>
+<section data-reckon="section" data-id="s7" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-status="implementable" data-links="one-ids-seam#s5"></section>
+<p>One convention means the flux functions too. nova's owner of the flux-function relation documents p′ as −dp/dΦ and computes j<sub>φ</sub> = −2π(R p′ + FF′/(μ<sub>0</sub> R)), and the flux functions the map extraction publishes carry the same negated derivative. The COCOS 17 relation is p′ = dp/dψ, FF′ = F dF/dψ and j<sub>φ</sub> = +2π(R p′ + FF′/(μ<sub>0</sub> R)). dd-cocos-ingest measured this by two independent routes (record <a href="/nova/evidence/fragments/dd-cocos-ingest/flux-function-sign">flux-function-sign</a>) and left the owner fix open as <code>f-ddc-006</code>, which this section carries. That followup waited on a cut-cell split; the cut-cell plan has since been superseded, so this section waits only on §5, which settles where nova states its convention.</p><p>The sign and the derivative convention move together, at the paired sites the record lists: the map extraction's published derivative; the convention module's docstring, current density and two flux-function integrators; the edge-consistency, DIII-D EFIT, MAST EFIT media and operate readers, or whatever §3 and §4 left of them; and the internal producers (source, continuation, analytic single-null, the profile bases, and the scripts that call the owner). The profile reader's <code>flux_derivative_scale</code> already carries the plus sign and stays.</p>
+<p>Done when:</p>
+<ul>
+<li><code>tests/test_flux_function_sign.py::test_nova_owner_matches_the_cocos_17_relation</code> passes, and its strict xfail marker is removed.</li>
+<li>The certified forward-solve rows and the analytic oracles keep their published magnitudes, judged by delta against base, and every expectation whose sign flips is named beside the producer that flipped it.</li>
+<li>Negative control: one producer left on the old sign fails its COCOS 17 test.</li>
+</ul>
+
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="ingest-home" data-choice="workspace-member" data-by="Simon McIntosh" data-when="2026-11-22">
     <p class="r-dec-q">Where does machine-specific authoring live?</p>
-    <p class="r-dec-ctx">machine-description-retirement planned to replace the MAST surfaces with the imas-ambix map producer. §1 names the producer wherever it covers the same description.</p>
+    <p class="r-dec-ctx">machine-description-retirement planned to replace the MAST surfaces with the imas-ambix map producer. §1 names the producer wherever it covers the same description, and that plan&#x27;s open inventory folds into §3 and §4.</p>
     <p class="r-dec-opts">
       <button class="r-opt chosen" data-value="workspace-member">Separate workspace member</button>
       <button class="r-opt" data-value="nova-subpackage">nova subpackage</button>
@@ -145,6 +155,26 @@
       <button class="r-opt" data-value="park">Move to a parked directory</button>
       </p>
     <p class="r-dec-rat">Unreached code is deleted, and the landing names the deleting commit so it can be revived. &quot;Park, never discard&quot; governs plans, not dead code.</p>
+    </div>
+<div class="r-dec" data-key="retirement-plan" data-choice="fold" data-by="Simon McIntosh" data-when="2026-11-22" data-sections="s3,s4">
+    <p class="r-dec-q">What happens to machine-description-retirement, whose ambix-producer route the ingest-home decision replaced?</p>
+    <p class="r-dec-ctx">Its removal inventory was still open: the MAST registry, mast_geometry, mast_solve_input_ids, machine_artifact&#x27;s MAST paths, the DIII-D publication script, and their nova and imas-ambix consumers.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="fold">Fold into this plan and close it</button>
+      <button class="r-opt" data-value="park">Park it unscheduled</button>
+      <button class="r-opt" data-value="ambix-side">Keep it for the ambix side only</button>
+      </p>
+    <p class="r-dec-rat">Its open inventory moves into §3 and §4 and the plan closes as superseded, so nothing is dropped and one plan owns the move.</p>
+    </div>
+<div class="r-dec" data-key="flux-function-owner" data-choice="own-section" data-by="Simon McIntosh" data-when="2026-11-22" data-sections="s7">
+    <p class="r-dec-q">Where does the COCOS 17 flux-function owner fix (dd-cocos-ingest f-ddc-006) go?</p>
+    <p class="r-dec-ctx">It falls under one convention but was open in S21.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="own-section">Its own section here</button>
+      <button class="r-opt" data-value="fold-s5">A clause on §5</button>
+      <button class="r-opt" data-value="stay-s21">Leave it in S21</button>
+      </p>
+    <p class="r-dec-rat">§7, after §5, so it lands in S30 with the convention work without pushing §5 past three clauses.</p>
     </div>
 </section>
 

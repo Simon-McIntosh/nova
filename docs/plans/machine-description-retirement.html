@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="machine-description-retirement">
   <meta name="plan-title" content="Retire the Bespoke Machine-Description Layer">
   <meta name="plan-summary" content="Retire Nova registry, cache and machine-specific IDS wrappers once the Ambix map producer proves equivalent; preserve validated geometry unchanged.">
-  <meta name="plan-status" content="in-progress">
+  <meta name="plan-status" content="superseded">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="M">
   <meta name="plan-capability-version" content="1.0">
@@ -23,9 +23,8 @@
 <meta name="plan-effort-hours" content="12.0">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;}">
 <meta name="plan-commits" content="d63bca23">
-<meta name="plan-impl" content="0.08">
-<meta name="plan-version" content="14">
-<meta name="plan-modified" content="2026-10-08">
+<meta name="plan-version" content="15">
+<meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
   <main class="plan-doc">
@@ -169,25 +168,31 @@
     <pre class="r-fu-prompt">/reckon-build machine-description-retirement §4</pre>
     <p class="r-fu-outcome">Measured, not asserted: the producer is not equivalent (42 vs 44 unique loop positions, 41 vs 43 joins; coils identical). Evidence anchor producer-equivalence. The re-measure after the imas-ambix map is reconciled is the next §4 node, and f-mdr-ambix-map-reconcile names its owner.</p>
     </article>
-<article class="r-fu" data-id="f-mdr-currency-2026-10-01" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build machine-description-retirement" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mdr-currency-2026-10-01" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build machine-description-retirement" data-resolved-at="2026-11-22T18:49:08+00:00" data-resolved-by="S30 coordinator">
     <h4 class="r-fu-title">Equivalence demonstration first: no deletion while imas-ambix imports nova.imas.machine_artifact</h4>
     <div class="r-fu-body">Currency audit 2026-10-01 (plan-currency-and-depth-b.md, machine-description-retirement row): draft with no retirement landed agrees with the code. imas-ambix imports nova.imas.machine_artifact (imas_ambix/gs/artifact_resolution.py:171,268), so a deletion here breaks imas-ambix the same day. Removal style is locked to clean-deletion. Sharpens f-mdr-001. Done when: the producer path reproduces the 44 unique loop positions and the 43-of-46 solve-input join numerically, with a committed receipt, and imas-ambix has migrated off nova.imas.machine_artifact before any file is deleted.</div>
     <pre class="r-fu-prompt">/reckon-build machine-description-retirement</pre>
+    <p class="r-fu-outcome">superseded by one-ids-seam: the open removal inventory and the imas-ambix consumer migration fold into its §3 and §4 under the ingest-home ruling; the ambix map reconcile stays with imas-ambix.</p>
     </article>
-<article class="r-fu" data-id="f-mdr-ambix-migration" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="s24-nova coordinator" data-written-at="2026-10-08" data-recommends-skill="/reckon-build imas-ambix:nova-physics-consumer-integration" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mdr-ambix-migration" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="s24-nova coordinator" data-written-at="2026-10-08" data-recommends-skill="/reckon-build imas-ambix:nova-physics-consumer-integration" data-resolved-at="2026-11-22T18:49:08+00:00" data-resolved-by="S30 coordinator">
     <h4 class="r-fu-title">imas-ambix migrates off nova.imas.machine_artifact and the registry before any §3 deletion (foreign-owner)</h4>
     <div class="r-fu-body"><p><strong>Exemption: foreign-owner.</strong> §3's deletions wait on imas-ambix no longer importing <code>nova.imas.machine_artifact</code>, <code>nova.imas.mast_geometry</code> or <code>nova.catalog.mast_geometry</code>: <code>imas_ambix/gs/machine_identity.py:152</code>, <code>imas_ambix/gs/artifact_geometry.py:767</code>, <code>imas_ambix/gs/artifact_resolution.py:171,268,315-316</code> and the identity tests. The ambix plan that owns that consumer boundary is <code>imas-ambix:nova-physics-consumer-integration</code>, which states the Ambix-side boundary is what is missing. The producer plan named in plan-depends-on is satisfied but is not this gate. The 2026-10-06 content review found the gate unowned; this pointer names its owner.</p></div>
     <pre class="r-fu-prompt">/reckon-build imas-ambix:nova-physics-consumer-integration</pre>
+    <p class="r-fu-outcome">superseded by one-ids-seam: the open removal inventory and the imas-ambix consumer migration fold into its §3 and §4 under the ingest-home ruling; the ambix map reconcile stays with imas-ambix.</p>
     </article>
-<article class="r-fu" data-id="f-mdr-ambix-map-reconcile" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="s24-nova coordinator" data-written-at="2026-10-08" data-recommends-skill="/reckon-build imas-ambix:nova-physics-consumer-integration" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mdr-ambix-map-reconcile" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="s24-nova coordinator" data-written-at="2026-10-08" data-recommends-skill="/reckon-build imas-ambix:nova-physics-consumer-integration" data-resolved-at="2026-11-22T18:49:08+00:00" data-resolved-by="S30 coordinator">
     <h4 class="r-fu-title">imas-ambix MAST map must carry the restored P4-lower loops and agree on two P5-lower positions (foreign-owner)</h4>
     <div class="r-fu-body"><p><strong>Exemption: foreign-owner.</strong> The producer reads <code>imas_ambix/data/machine_maps/mast.json</code>, which lacks the restored P4-lower flux loops <code>fl_p4l_2</code> and <code>fl_p4l_3</code> and places two P5-lower loops 3.7 mm and 3.0 mm outboard of the nova registry (positions in evidence anchor producer-equivalence). Every imas-ambix plan that built the map has shipped; the live plan owning the nova boundary is <code>imas-ambix:nova-physics-consumer-integration</code>. When the map is reconciled, re-run <code>benchmarks/mast_description_equivalence.py</code> here; its two red pin tests turn green only on equality.</p></div>
     <pre class="r-fu-prompt">/reckon-build imas-ambix:nova-physics-consumer-integration</pre>
+    <p class="r-fu-outcome">superseded by one-ids-seam: the open removal inventory and the imas-ambix consumer migration fold into its §3 and §4 under the ingest-home ruling; the ambix map reconcile stays with imas-ambix.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-20261008-s24-classification" data-who="s24-nova coordinator" data-when="2026-10-08T01:30:00Z">
     <div class="r-comment-body">S24 build classification: §1 and §2 are context. §3's deletions are deferred: they wait on the equivalence gate, on imas-ambix migrating off nova.imas.machine_artifact, and on DIII-D publication moving to the producer after the owner's oras push (deadline 2026-10-18). §4's equivalence demonstration (f-mdr-001, sharpened by f-mdr-currency-2026-10-01) is the one node buildable now; nothing is deleted under it. §3 and §4 now carry the design review's inventory corrections and reuse targets.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-fold-one-ids-seam" data-who="S30 coordinator" data-when="2026-11-22">
+    <div class="r-comment-body"><p>Superseded by <a href="/nova/plans/one-ids-seam">one-ids-seam</a> on the lead's ruling of 2026-11-22: machine-specific authoring moves to a separate uv workspace member, <code>packages/nova-ingest</code>, not into the imas-ambix map producer. The open §3 inventory folds into one-ids-seam §3 (the MAST registry, <code>mast_geometry.py</code>, <code>mast_solve_input_ids.py</code>, the MAST paths of <code>machine_artifact.py</code>, the DDv4 publication floor with its refusal test, the calibration decoupling, and the imas-ambix consumers in the same landing beat) and §4 (the DIII-D publication script). The producer-equivalence gate is replaced by a bit-identity check of the solve's arrays read from the member's written entry. The producer's disagreement with the registry (42 vs 44 loop positions) stays an imas-ambix matter; one-ids-seam §1 names the producer wherever it duplicates a description.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-producer-equivalence" data-who="reckon-build" data-when="2026-10-08T02:55:00Z">
     <div class="r-comment-body">gate test_mast_description_equivalence measured: not equivalent (2 deliberate red pins, 3 green including the 1 mm control); section open — the re-measure waits on f-mdr-ambix-map-reconcile. Correction to f-mdr-ambix-migration: the content review that found that gate unowned ran on 2026-10-08, not 2026-10-06. Evidence: producer-equivalence.</div>

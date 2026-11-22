@@ -377,8 +377,7 @@ def _figure(case_name: str) -> Path:
         (panels[0], image, image_read),
         (panels[1], exact_grid, exact_read),
     ):
-        panel.set_axis_off()
-        panel.set_aspect("equal")
+        ink.poloidal_axes(panel, style)
         poloidal.draw_scattered_contours(
             panel,
             machine.node[:, 0],

@@ -130,17 +130,27 @@ def gram_metric(gram):
 def symmetric_square_root(blocks):
     """Return the symmetric square root of each symmetric positive block.
 
-    The SVD of a symmetric matrix is ``U S V^T`` with ``V = U`` up to column
-    signs, so ``U sqrt(S) V^T`` is its symmetric square root and needs no
-    second eigensolver beside the one this module reports.
+    ``U sqrt(S) V.T`` squares to the block but is not symmetric when a singular
+    value repeats, and this metric repeats every eigenvalue between its two
+    components.  Each left singular vector of a positive block is an
+    eigenvector, so ``sum sqrt(s_i) u_i u_i.T`` is the symmetric root and needs
+    no second eigensolver beside the one this module reports.
     """
-    left, singular, right = np.linalg.svd(blocks)
-    return np.einsum("cij,cj,ckj->cik", left, np.sqrt(singular), right)
+    left, singular, _ = np.linalg.svd(blocks)
+    return np.einsum("cij,cj,ckj->cik", left, np.sqrt(singular), left)
 
 
 def cellwise(blocks, vector):
-    """Apply per-cell six-by-six blocks to a component-major vector."""
-    return jnp.einsum("cij,kci->kcj", blocks, vector.reshape(2, -1, 3)).reshape(-1)
+    """Apply per-cell six-by-six blocks to a component-major vector.
+
+    A block's row and column both index (component, basis) and couple the two
+    components, so the product is taken on the cell-major view and returned to
+    the state's component-major order.
+    """
+    rows = jnp.asarray(blocks)
+    cells = vector.reshape(2, -1, 3).transpose(1, 0, 2).reshape(-1, 6)
+    acted = jnp.einsum("cij,cj->ci", rows, cells)
+    return acted.reshape(-1, 2, 3).transpose(1, 0, 2).reshape(-1)
 
 
 def load(label, inputs):
@@ -234,7 +244,7 @@ def stage(source, *, modify=None):
         label=source["label"],
         cells=source["count"],
         unknowns=source["dimension"],
-        operator_path=str(source["path"]),
+        operator_path=str(source.get("path", "synthetic")),
         geometry_digest=source.get("geometry_digest", "synthetic"),
         module=iron.__file__,
         cwd=str(Path.cwd().resolve()),
@@ -347,11 +357,18 @@ def material_differential(source, inputs):
 
 
 def newton_blocks(source, inputs):
-    """Return the per-cell differential, its root and the route's transform."""
+    """Return the per-cell differential, its root and the route's transform.
+
+    The route forms ``D = Q A``, takes ``R = sqrt(sym D)`` with negative
+    eigenvalues clamped at zero, sets ``W = Q**-1 R`` and factors
+    ``B = I - R G W``.  ``R`` is built here from the same eigen-decomposition
+    and clamp rather than from an SVD, so a differential the route would have
+    refused lands on the same root it would have used.
+    """
     local, origin = material_differential(source, inputs)
     differential = source["metric"] @ local
     differential = (differential + differential.transpose(0, 2, 1)) / 2
-    root = symmetric_square_root(differential)
+    root, minimum = signed_root(differential)
     transform = np.linalg.solve(source["metric"], root)
     try:
         np.linalg.cholesky(differential)
@@ -361,6 +378,10 @@ def newton_blocks(source, inputs):
     return dict(
         local=local,
         differential=differential,
+        minimum=minimum,
+        block_asymmetry=float(
+            np.linalg.norm(local - local.transpose(0, 2, 1)) / np.linalg.norm(local)
+        ),
         root=root,
         transform=transform,
         definite=definite,
@@ -371,36 +392,122 @@ def newton_blocks(source, inputs):
 def newton_actions(source, blocks):
     """Return the seeded Newton matrix's action, its symmetric part and skew.
 
-    ``I - R G W`` is not symmetric, and the route reads only one triangle of
-    it, so the matrix it factors is the symmetric part.  The skew part is
-    returned too, because its size says how far the route's object sits from
-    the matrix the formula states.
+    ``B = I - R G W`` is symmetric only up to the antisymmetric part of ``G``
+    in the ``Q`` inner product: its transpose carries ``W.T G.T R``, not
+    ``W G R``.  The route reads one triangle of ``B`` as if it were symmetric,
+    so the matrix it factors is ``(B + B.T)/2`` and that is what the eigen-solve
+    here takes.  The skew part is returned too, because its size says how far
+    the route's object sits from the matrix its own docstring states.
     """
     device = source["device"]
     root = jax.device_put(blocks["root"])
     transform = jax.device_put(blocks["transform"])
+    transpose = jax.device_put(blocks["transform"].transpose(0, 2, 1))
+
+    @jax.jit
+    def left(vector):
+        return cellwise(root, device @ cellwise(transform, vector))
+
+    @jax.jit
+    def right(vector):
+        return cellwise(transpose, device.T @ cellwise(root, vector))
 
     @jax.jit
     def action(vector):
-        return vector - cellwise(root, device @ cellwise(transform, vector))
+        return vector - left(vector)
 
     @jax.jit
     def symmetric(vector):
-        left = cellwise(root, device @ cellwise(transform, vector))
-        right = cellwise(transform, device @ cellwise(root, vector))
-        return vector - (left + right) / 2
+        return vector - (left(vector) + right(vector)) / 2
 
     @jax.jit
     def skew(vector):
-        left = cellwise(root, device @ cellwise(transform, vector))
-        right = cellwise(transform, device @ cellwise(root, vector))
-        return (left - right) / 2
+        return (right(vector) - left(vector)) / 2
 
     return (
         lambda vector: np.asarray(action(jnp.asarray(vector))),
         lambda vector: np.asarray(symmetric(jnp.asarray(vector))),
         lambda vector: np.asarray(skew(jnp.asarray(vector))),
     )
+
+
+def block_matrix(blocks, count):
+    """Expand per-cell blocks into the full matrix in the state's own order."""
+    position = layout(count)
+    full = np.zeros((6 * count, 6 * count), dtype=np.float64)
+    for cell in range(count):
+        index = position[6 * cell : 6 * cell + 6]
+        full[np.ix_(index, index)] = blocks[cell]
+    return full
+
+
+def newton_identity(count=3, seed=7):
+    """Compare the Newton actions against the dense matrices they state.
+
+    The action path is where a transposed root or a mistransposed transform
+    would hide, so it is checked against a literal ``I - R G W`` on a synthetic
+    per-cell symmetric differential and an unsymmetric interaction.
+    """
+    rng = np.random.default_rng(seed)
+    dimension = 6 * count
+    metric = np.zeros((count, 6, 6))
+    local = np.zeros((count, 6, 6))
+    for cell in range(count):
+        for component in range(2):
+            factor = rng.normal(size=(3, 3))
+            block = factor @ factor.T + 0.5 * np.eye(3)
+            span = slice(3 * component, 3 * component + 3)
+            metric[cell, span, span] = block
+            factor = rng.normal(size=(3, 3))
+            local[cell, span, span] = factor @ factor.T + 0.1 * np.eye(3)
+    differential = metric @ local
+    differential = (differential + differential.transpose(0, 2, 1)) / 2
+    root, _ = signed_root(differential)
+    transform = np.linalg.solve(metric, root)
+    interaction = rng.normal(size=(dimension, dimension))
+    source = dict(device=jax.device_put(interaction), dimension=dimension)
+    blocks = dict(root=root, transform=transform)
+    action, symmetric, skew = newton_actions(source, blocks)
+    dense = np.eye(dimension) - (
+        block_matrix(root, count)
+        @ interaction
+        @ block_matrix(transform, count)
+    )
+    dense_symmetric = (dense + dense.T) / 2
+    dense_skew = (dense - dense.T) / 2
+    error = 0.0
+    for _ in range(3):
+        vector = rng.normal(size=dimension)
+        vector /= np.linalg.norm(vector)
+        scale = max(np.linalg.norm(dense @ vector), np.finfo(np.float64).tiny)
+        error = max(
+            error,
+            float(np.linalg.norm(action(vector) - dense @ vector) / scale),
+            float(
+                np.linalg.norm(symmetric(vector) - dense_symmetric @ vector) / scale
+            ),
+            float(np.linalg.norm(skew(vector) - dense_skew @ vector) / scale),
+        )
+    return error
+
+
+def signed_root(blocks):
+    """Return the symmetric square root with negatives clamped, and its minimum.
+
+    For a symmetric block each left singular vector is its right one up to
+    sign, so ``u_i`` is an eigenvector with eigenvalue ``+/- s_i`` and
+    ``u_i . v_i`` carries the sign.  The root is ``sum sqrt(s_i) u_i u_i.T``
+    over the positive eigenvalues, which is symmetric and equals the clamped
+    root ``eigh`` returns, and the minimum eigenvalue is the smallest signed
+    singular value.  ``numpy.linalg.svd`` returns ``V`` transposed, so the sign
+    is taken against ``right`` with the left vectors' first axis last.
+    """
+    left, singular, right = np.linalg.svd(blocks)
+    sign = np.einsum("cji,cij->ci", left, right)
+    eigenvalues = sign * singular
+    weight = np.where(eigenvalues > 0.0, np.sqrt(singular), 0.0)
+    root = np.einsum("cij,cj,ckj->cik", left, weight, left)
+    return root, float(np.min(eigenvalues))
 
 
 def localise(source, vector, *, share=CELL_SHARE, pairs=PAIR_COUNT, rows=PAIR_ROWS):
@@ -514,13 +621,15 @@ def check(size=0.04, *, seed=4):
         lanczos_residual=peak["residual"],
         relative_difference=abs(peak["quotient"] - owner["maximum"])
         / abs(owner["maximum"]),
+        newton_identity_error=newton_identity(),
+        regularisation=1e-6,
     )
     return row
 
 
 def apply_metric(metric, vector):
     """Apply per-cell metric blocks to a component-major vector, in numpy."""
-    return np.einsum("cij,kci->kcj", metric, vector.reshape(2, -1, 3)).reshape(-1)
+    return np.asarray(cellwise(metric, jnp.asarray(vector)))
 
 
 def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, probes=4):
@@ -553,7 +662,13 @@ def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, pr
     for _ in range(probes):
         trial = random.normal(size=dimension)
         trial /= np.linalg.norm(trial)
-        asymmetry = max(asymmetry, float(np.linalg.norm(skew(trial))))
+        asymmetry = max(
+            asymmetry,
+            float(
+                np.linalg.norm(skew(trial))
+                / max(np.linalg.norm(symmetric(trial)), np.finfo(np.float64).tiny)
+            ),
+        )
     weighted = source["metric_action"](direction)
     top = source["metric_action"](peak["witness"])
     row = dict(source["row"])
@@ -565,7 +680,9 @@ def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, pr
             / (abs(values[0]) * np.linalg.norm(direction))
         ),
         newton_rayleigh=float(direction @ acted / (direction @ direction)),
-        newton_asymmetry=asymmetry,
+        newton_skew_fraction=asymmetry,
+        differential_minimum=blocks["minimum"],
+        material_block_asymmetry=blocks["block_asymmetry"],
         differential_positive_definite=blocks["definite"],
         origin_coefficient_times_mu0=blocks["origin"] * iron._MU0,
         seed_definiteness_limit=1.0 / (1.0 - blocks["origin"] * iron._MU0),

@@ -78,6 +78,30 @@ def _polish_map_saddle(display, seed):
     )
 
 
+def _drawn_converged_position(stored: Any) -> int:
+    """Return the edit position of the drawn panel the solve calls converged.
+
+    The archive persists a full state only for the edits the panel figure
+    draws, under ``state_<position>``, so the drawn set is the set of those
+    suffixes. Which edit the sweep reaches is the solve's own outcome and moves
+    with the sweep, so the position is read from the archive's ``converged``
+    flag rather than pinned to the edit a previous sweep happened to draw.
+    """
+    drawn = sorted(
+        int(name.rsplit("_", 1)[1])
+        for name in stored.files
+        if name.startswith("state_")
+    )
+    converged = np.asarray(stored["converged"], dtype=bool)
+    closing = [position for position in drawn if bool(converged[position])]
+    assert len(closing) == 1, (
+        "a panel figure draws one converged edit and one that did not converge; "
+        f"the drawn positions {drawn} report "
+        f"{[bool(converged[position]) for position in drawn]}"
+    )
+    return closing[0]
+
+
 def test_a_stored_panel_reports_its_lattice_promotions():
     """Read the committed panel's promotions from the solve's own mask.
 
@@ -100,8 +124,11 @@ def test_a_stored_panel_reports_its_lattice_promotions():
         )
     )
     stored = np.load(archive, allow_pickle=False)
-    state = np.asarray(stored["state_12"], dtype=np.float64)
-    promoted_mask = np.asarray(stored["promoted_mask_12"], dtype=bool).reshape(-1)
+    position = _drawn_converged_position(stored)
+    state = np.asarray(stored[f"state_{position}"], dtype=np.float64)
+    promoted_mask = np.asarray(stored[f"promoted_mask_{position}"], dtype=bool).reshape(
+        -1
+    )
     wall_rows = int(np.asarray(stored["wall_coordinate"]).shape[0])
     node_count = int(
         np.asarray(stored["radius"]).size * np.asarray(stored["height"]).size
@@ -126,12 +153,12 @@ def test_a_stored_panel_polishes_its_own_saddle():
         )
     )
     stored = np.load(archive, allow_pickle=False)
+    panel = _drawn_converged_position(stored)
     radius = np.asarray(stored["radius"], dtype=np.float64)
     height = np.asarray(stored["height"], dtype=np.float64)
-    values = np.asarray(stored["psi_12"], dtype=np.float64)
-    seed = np.asarray(stored["xpoints_12"], dtype=np.float64).reshape(-1, 2)[
-        int(np.asarray(stored["saddle_index_12"]))
-    ]
+    values = np.asarray(stored[f"psi_{panel}"], dtype=np.float64)
+    x_points = np.asarray(stored[f"xpoints_{panel}"], dtype=np.float64).reshape(-1, 2)
+    seed = x_points[int(np.asarray(stored[f"saddle_index_{panel}"]))]
     surface = fit_tensor_spline(
         jnp.asarray(radius), jnp.asarray(height), jnp.asarray(values)
     )
@@ -152,7 +179,7 @@ def test_a_stored_panel_polishes_its_own_saddle():
         ),
         dtype=np.float64,
     )
-    mask = np.asarray(stored["promoted_mask_12"], dtype=bool).reshape(-1)[
+    mask = np.asarray(stored[f"promoted_mask_{panel}"], dtype=bool).reshape(-1)[
         : promoted.shape[0]
     ]
     nearest = float(np.min(np.linalg.norm(promoted[mask] - position, axis=1)))
@@ -744,8 +771,6 @@ def test_the_panel_subcommand_persists_its_caption(
     )
 
 
-
-
 #: The five published coil-edit panel sets and the tag of the invocation that
 #: solved each.  A figure's state comes from its own run, so no two figures
 #: cite the same output path.
@@ -765,6 +790,7 @@ COIL_EDIT_PANEL_SETS = tuple(
     )
     for directory, tag in COIL_EDIT_PANEL_DIRECTORIES
 )
+
 
 @pytest.mark.parametrize(
     ("label", "tag", "archive", "receipt"),

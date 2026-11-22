@@ -107,6 +107,16 @@
       "note": "The s1 and s6 briefs name the bank-solve-trace device attribution (scripts/prototypes/bank_solve_profile/report.py) as authoritative for cost and ordering, the line map as authoritative for reach, and require a module present in the kernel trace but absent from the line map to be reported as a contradiction, never read as zero.",
       "reason": "",
       "when": "2026-11-22T20:22:27.599891+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "commit": "455b6b731e863a81bc078299e1d5fc94c2278ae1",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-4",
+      "note": "The s1, s3 and s4 briefs submit their all_debug jobs through scripts/nova_lane/run.sh rather than a hand-written srun recipe; a gate run any other way is a scope defect.",
+      "reason": "",
+      "when": "2026-11-22T20:22:41.070280+00:00"
     }
   ],
   "responses": {
@@ -136,6 +146,15 @@
       "note": "The s1 and s2 briefs stamp revision and repository-relative identity through compute_provenance and repository_relative in nova/database/filepath.py; no per-file git subprocess.",
       "reason": "",
       "when": "2026-11-22T20:22:12.051901+00:00"
+    },
+    "duplicate_owner-4": {
+      "action": "acted",
+      "by": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "commit": "455b6b731e863a81bc078299e1d5fc94c2278ae1",
+      "commit_basis": "edit",
+      "note": "The s1, s3 and s4 briefs submit their all_debug jobs through scripts/nova_lane/run.sh rather than a hand-written srun recipe; a gate run any other way is a scope defect.",
+      "reason": "",
+      "when": "2026-11-22T20:22:41.070280+00:00"
     },
     "reuse_search-1": {
       "action": "acted",

@@ -96,16 +96,31 @@ def _perturbed_state(state_path: Path, target: Path) -> Path:
     return target
 
 
-_DISPLAYS: dict[Path, object] = {}
+_DISPLAYS: dict[tuple[str, float], object] = {}
+
+#: One display build is about 700 s of CPU work, and the figure draw and both
+#: contour tests read the same map for a lane. The producer's own entry point
+#: is memoized for the session so a lane's map is built once rather than three
+#: times, which is what lets the file fit one scheduler job.
+_BUILD_DISPLAY = panel_renderer._panel_state_display
+
+
+def _memoized_state_display(state_path: Path, spacing: float):
+    key = (str(state_path), float(spacing))
+    if key not in _DISPLAYS:
+        _DISPLAYS[key] = _BUILD_DISPLAY(state_path, spacing)
+    return _DISPLAYS[key]
+
+
+panel_renderer._panel_state_display = _memoized_state_display
 
 
 def _display(state_path: Path):
     """Return the state's fine display map, built once per session."""
-    if state_path not in _DISPLAYS:
-        _DISPLAYS[state_path] = panel_renderer._panel_state_display(state_path, SPACING)
-    return _DISPLAYS[state_path]
+    return _memoized_state_display(state_path, SPACING)
 
 
+@pytest.mark.timeout(2400)
 @pytest.mark.parametrize("state_path", STATES, ids=lambda path: path.parent.name)
 def test_committed_panel_state_renders(state_path: Path, tmp_path: Path):
     with np.load(state_path, allow_pickle=False) as state:
@@ -208,6 +223,7 @@ def test_cpu_lane_plain_and_fine_panels_are_different_pictures():
     )
 
 
+@pytest.mark.timeout(2400)
 @pytest.mark.parametrize("state_path", STATES, ids=lambda path: path.parent.name)
 def test_redrawn_contours_leave_the_lattice_rows(state_path: Path, tmp_path: Path):
     data, _coupling, display, _shape, _r, _h, _solved = _display(state_path)
@@ -218,6 +234,7 @@ def test_redrawn_contours_leave_the_lattice_rows(state_path: Path, tmp_path: Pat
     assert np.any(offsets > 1.0e-6)
 
 
+@pytest.mark.timeout(2400)
 @pytest.mark.parametrize("state_path", STATES, ids=lambda path: path.parent.name)
 def test_a_one_percent_current_edit_moves_the_drawn_contours(
     state_path: Path, tmp_path: Path

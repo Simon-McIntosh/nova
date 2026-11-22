@@ -1,0 +1,74 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T14:32:26.915Z",
+  "dispatched_at": "2026-11-22T14:22:03Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:175-178",
+      "id": "done_when-1",
+      "reason": "a node dispatched from \u00a75 can close on three column groups that rank worse than the perturbed control, so the section's own claim that their standing is \"measured rather than assumed\" would be unproven, and a control must be stated before it is built.",
+      "text": "\u00a75's done-when is now dispatchable (the decision is locked and `data-status=\"implementable\"`), yet clause (b) measures only that the \u00a73 table \"carries one column group per retained reconstruction\", a condition that holds however badly a retained reconstruction performs, and the section declares no negative control to show the measure can fail; the earlier review declined this finding only because the section was deferred behind an unlocked decision, a premise the snapshot no longer satisfies.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:170",
+      "id": "reasoning-1",
+      "reason": "a worker reading \u00a75 meets a deferral and a supersede branch the plan has already resolved, so it cannot tell whether the section is dispatchable or which branch its brief owns until the text states the locked decision.",
+      "text": "\u00a75's body still reads \"Deferred until the decision `reduced-reconstructions` is locked on the \u00a73 table\", while the snapshot's decision block carries `data-choice=\"keep-scored\"` locked by the lead on 2026-11-22 and the section is declared `implementable`; the same body then offers the supersede branch (a) that the locked `keep-scored` choice has already excluded.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:173-174",
+      "id": "reasoning-2",
+      "reason": "without naming what each column is built from, clause (b) may be unreachable and the node's scope is silent about the adapter the scoreboard needs, so the endpoint as written cannot be confirmed obtainable.",
+      "text": "\u00a75 requires each retained reconstruction to be \"entered on the \u00a73 scoreboard as its own column\", but \u00a73's done-when (1)-(2) scores a state \"supplied as an IMAS equilibrium\" named by its digest, and none of the three reconstructions' delivered output is stated to be one (their landed reconstruction objects return a flux map or inversion on a grid); \u00a75 states neither that such a state is produced nor that building the conversion belongs to this node.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:175-178",
+      "id": "evidence_paths-1",
+      "reason": "the node would invent a path outside the plan and the reviewer would have no declared artifact to check against, so the record location must be stated for the deliverable to be reviewable.",
+      "text": "\u00a75's done-when names only \"the \u00a73 table\" and gives no evidence record, receipt path or gate log for its own rows and state digests, so a dispatched node has no declared durable location to write, unlike the plan's other landed sections, which name their evidence record or job.",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "",
+  "plan_fingerprint": "fec9396ac9601172913bd3eb3c229a8ba3db656e5cc2b58f398b2f81df53258c",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 93,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T142131601200-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "f588985567ddfd2e219617c6bd83fcc6907385dc",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the decision `reduced-reconstructions` exists in the document with a locked `keep-scored` choice, and the `\u00a73 table` \u00a75 cites resolves to the scoreboard section marked `done`.",
+    "done_when": "a finding \u2014 \u00a75's done-when clause (b) requires only that the \u00a73 table \"carries one column group per retained reconstruction\" and declares no negative control.",
+    "evidence_paths": "a finding \u2014 \u00a75 names no evidence record, receipt or gate log, so a dispatched node has no declared durable path for its rows and state digests.",
+    "naming": "pass \u2014 \u00a75 introduces no symbol, plan label, ticket number or changelog prose.",
+    "reasoning": "findings \u2014 the \u00a75 body still opens \"Deferred until the decision reduced-reconstructions is locked\" while the decision is already locked and the section is `implementable`, and clause (b)'s reachability rests on a conversion into an IMAS equilibrium that \u00a75 does not state.",
+    "single_goal": "pass \u2014 \u00a75 delivers one thing, the three retained reconstructions entered as column groups on the \u00a73 scoreboard.",
+    "wiring": "pass \u2014 \u00a75's only declared dependency is `inverse-equilibrium-baseline#s3` (`s5:[\"s3\"]` in `plan-section-depends-on`), and \u00a73 is the scoreboard \u00a75 writes its columns into, so the relationship points at the right node."
+  },
+  "section_digests": {
+    "_document": "fa5871ae4b88b20178f1ffd3c4b8eb9fd2115767620a814e1410b488b26cb121",
+    "s0": "222214efd929830ab3769e033a76bb2b0b963eee1000f2f8d79d3f78da1ee921",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s2": "1d7c7611f002d7765b98531126cc095d6d244b387578c5d44d7284ff93c9e59c",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "95b901a9be71a11db2f0b5f656f0952915a0c3838fafa8e46f0bf5675bd54527",
+    "s5": "a250f6430b53797cf79ef0deaa5f2d58bdc5a34d235b5ba3b77b7d4fb39c1cf7",
+    "s6": "38673123cc34cb5be04fbd26c1a149df7d18d2adc2937221123fbc79c8308d95",
+    "s7": "46d0b31ae1bfd2347befe820b2b71442fafa724354e9fb3836af929192f8e4d1",
+    "s8": "5f1a44b0fc4688ef69242b46b85666aefaf1d27e32404e14f4874b566bc15a1f",
+    "s9": "6b59708e5b47c987c440323356fb9dd0f2ec4438ce599455f755a5cf0772d5bb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T14:32:31.758215+00:00",
+  "total": null
+}

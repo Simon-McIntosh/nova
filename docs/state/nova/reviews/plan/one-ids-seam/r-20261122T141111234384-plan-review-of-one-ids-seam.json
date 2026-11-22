@@ -51,9 +51,28 @@
       "note": "Added s2 waits on s1; \u00a72 now deletes every module the census classes unreached.",
       "reason": "",
       "when": "2026-11-22T14:36:44.318219+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "84c74ea8d0315632bdde70050847704483af1a15",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a71's scan now covers apps/ and tests/, and \u00a73/\u00a74 require no consumer in apps, scripts, benchmarks or tests to import a moved name.",
+      "reason": "",
+      "when": "2026-11-22T14:36:54.427479+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "84c74ea8d0315632bdde70050847704483af1a15",
+      "commit_basis": "edit",
+      "note": "\u00a71's scan now covers apps/ and tests/, and \u00a73/\u00a74 require no consumer in apps, scripts, benchmarks or tests to import a moved name.",
+      "reason": "",
+      "when": "2026-11-22T14:36:54.427479+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",

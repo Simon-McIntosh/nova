@@ -115,9 +115,28 @@
       "note": "\u00a75's clause no longer asks for a new statement; it requires the existing stated-once test to keep passing, and the deliverable is the deletion.",
       "reason": "",
       "when": "2026-11-22T14:36:15.589874+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "84c74ea8d0315632bdde70050847704483af1a15",
+      "commit_basis": "edit",
+      "finding": "deep_module-1",
+      "note": "\u00a71 is now a committed executable import-graph scan that renders the research record, with a test that fails on a missing row; \u00a76's guard reads the same scan.",
+      "reason": "",
+      "when": "2026-11-22T14:36:25.065685+00:00"
     }
   ],
   "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "84c74ea8d0315632bdde70050847704483af1a15",
+      "commit_basis": "edit",
+      "note": "\u00a71 is now a committed executable import-graph scan that renders the research record, with a test that fails on a missing row; \u00a76's guard reads the same scan.",
+      "reason": "",
+      "when": "2026-11-22T14:36:25.065685+00:00"
+    },
     "duplicate_owner-1": {
       "action": "acted",
       "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",

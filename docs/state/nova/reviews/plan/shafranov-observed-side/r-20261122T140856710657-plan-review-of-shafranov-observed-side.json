@@ -80,6 +80,17 @@
         "s1"
       ],
       "when": "2026-11-22T18:44:56.892792+00:00"
+    },
+    {
+      "action": "carried",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "finding": "done_when-2",
+      "reason": "",
+      "section": "s2",
+      "sections": [
+        "s2"
+      ],
+      "when": "2026-11-22T18:45:07.695533+00:00"
     }
   ],
   "responses": {
@@ -92,6 +103,16 @@
         "s1"
       ],
       "when": "2026-11-22T18:44:56.892792+00:00"
+    },
+    "done_when-2": {
+      "action": "carried",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "reason": "",
+      "section": "s2",
+      "sections": [
+        "s2"
+      ],
+      "when": "2026-11-22T18:45:07.695533+00:00"
     },
     "reasoning-1": {
       "action": "acted",

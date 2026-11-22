@@ -186,14 +186,17 @@ def test_the_share_panel_keeps_the_plateau_clear_of_the_legend():
     figure_module.draw(axes, _field_data())
     middle = axes[1]
     assert middle.get_yscale() == "symlog"
+    # One figure-level legend in clear space above the panels, so no panel
+    # legend can sit on the plateau the curves fill.
+    assert middle.get_legend() is None
+    legend = middle.figure.legends[0]
     plotting = middle.figure.canvas.get_renderer()
-    plateau = middle.transData.transform((1.0, -96.0))[1]
-    legend = middle.get_legend()
     box = legend.get_window_extent(plotting)
-    assert not (box.y0 - 2.0 <= plateau <= box.y1 + 2.0), (
-        f"the legend spans rows {box.y0:.0f} to {box.y1:.0f} "
-        f"and the plateau is at row {plateau:.0f}"
+    top = middle.get_window_extent(plotting).y1
+    assert box.y0 >= top - 1.0, (
+        f"the figure legend starts at row {box.y0:.0f}, below the panel top {top:.0f}"
     )
+    plateau = middle.transData.transform((1.0, -96.0))[1]
     assert plateau < middle.transData.transform((1.0, 0.0))[1] - 20.0
     plt.close("all")
 
@@ -221,3 +224,28 @@ def test_the_arms_runner_keeps_its_scratch_off_the_evidence_root():
     mktemp = next(index for index, line in code if "mktemp" in line)
     export = next(index for index, line in code if line.startswith("export TMPDIR="))
     assert export < mktemp
+
+
+def test_the_arms_runner_quotes_its_target_list_assignments():
+    """An unquoted target list word-splits into one bare filename per test file.
+
+    The assignments are handed to `pytest ... $list`, so a list written without
+    quotes still runs, and the failure surfaces only on a runner whose job has no
+    shell word-splitting guarantee. The quotes are the contract, and an
+    unquoted assignment is the defect.
+    """
+    script = (ROOT / "scripts/iron_field_source/run_arms.sh").read_text()
+    code = [
+        line.strip()
+        for line in script.splitlines()
+        if not line.lstrip().startswith("#")
+    ]
+    assignments = [
+        line for line in code if line.startswith(("tests=", "base_tests="))
+    ]
+    assert assignments, "the runner must assign its target lists"
+    for line in assignments:
+        value = line.split("=", 1)[1]
+        assert value.startswith('"') and value.endswith('"'), (
+            f"target-list assignment is not quoted: {line}"
+        )

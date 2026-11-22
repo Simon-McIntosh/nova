@@ -2461,16 +2461,21 @@ def _merge_receipt(path: Path, record: dict[str, Any]) -> dict[str, Any]:
     does not own is kept, and a mapping present on both sides is merged rather
     than overwritten.
 
-    The ``render`` block is the exception: it describes one run of one command,
-    so a re-render replaces it.  The block it displaces is kept once under
-    ``superseded`` with any ``superseded`` it already carried removed, because
-    merging the two as mappings would nest a predecessor under a predecessor
-    and a reader could no longer tell which run produced the file.
+    The ``render`` and ``solve`` blocks are the exceptions: each describes one
+    run of one command, so a re-run replaces it.  The block a re-render
+    displaces is kept once under ``superseded`` with any ``superseded`` it
+    already carried removed, because merging the two as mappings would nest a
+    predecessor under a predecessor and a reader could no longer tell which run
+    produced the file.
     """
     if not path.exists():
         return record
     try:
-        existing = json.loads(path.read_text(encoding="utf-8"))
+        nested = path.read_text(encoding="utf-8")
+    except OSError:
+        return record
+    try:
+        existing = json.loads(nested)
     except json.JSONDecodeError:
         return record
     if not isinstance(existing, dict):
@@ -2479,7 +2484,7 @@ def _merge_receipt(path: Path, record: dict[str, Any]) -> dict[str, Any]:
         if key not in record:
             record[key] = value
         elif (
-            key == "render"
+            key in ("render", "solve")
             and isinstance(value, dict)
             and isinstance(record[key], dict)
         ):
@@ -2490,6 +2495,33 @@ def _merge_receipt(path: Path, record: dict[str, Any]) -> dict[str, Any]:
         elif isinstance(value, dict) and isinstance(record[key], dict):
             record[key] = {**value, **record[key]}
     return record
+
+
+def _solve_block(receipt_path: Path) -> dict[str, Any]:
+    """Return the solve provenance a panel render carries beside its figure.
+
+    A panel receipt says which command the state it draws was solved with.
+    That is not rediscoverable from the state archive, so the render reads it
+    from the sweep's own receipt where the solve wrote its command, scheduler
+    and device.
+    """
+    solved = json.loads(receipt_path.read_text(encoding="utf-8"))
+    scheduler = solved.get("scheduler") or {}
+    runtime = solved.get("runtime") or {}
+    edits = solved.get("edits") or []
+    return {
+        "command": solved.get("command"),
+        "job_id": scheduler.get("job_id"),
+        "partition": scheduler.get("partition"),
+        "reservation": scheduler.get("reservation"),
+        "node": scheduler.get("node") or runtime.get("host"),
+        "device": runtime.get("device"),
+        "host": runtime.get("host"),
+        "platform": runtime.get("platform"),
+        "source_revision": solved.get("source_revision"),
+        "measurement_state": solved.get("measurement_state"),
+        "sweep_completed_edits": len(edits),
+    }
 
 
 def _render_panel(
@@ -2848,6 +2880,7 @@ def _receipt_document(
         "schema": "nova.coil-edit-latency",
         "measurement_state": measurement_state,
         "verdict": verdict,
+        "command": " ".join([sys.argv[0], *sys.argv[1:]]),
         "gates": gates,
         "gate_notes": _gate_notes(rows),
         "vertical_centroid_constraint": {
@@ -3766,6 +3799,15 @@ def main() -> None:
         default=None,
         help="write the render's host, command and map spacing beside the figure",
     )
+    panel_parser.add_argument(
+        "--solve-receipt",
+        type=Path,
+        default=None,
+        help=(
+            "the sweep receipt whose command, lane and device solved the state "
+            "this figure draws"
+        ),
+    )
     check_parser = subparsers.add_parser("checkcase")
     check_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
@@ -3810,28 +3852,30 @@ def main() -> None:
         )
         if arguments.receipt is not None:
             arguments.receipt.parent.mkdir(parents=True, exist_ok=True)
+            record: dict[str, Any] = {
+                "schema": "nova.coil-edit-panel-render",
+                "command": " ".join([sys.argv[0], *sys.argv[1:]]),
+                "scheduler": _scheduler(),
+                "runtime": {
+                    "host": platform.node(),
+                    "device": jax.devices()[0].device_kind,
+                    "platform": jax.devices()[0].platform,
+                    "jax_platforms": os.environ.get("JAX_PLATFORMS"),
+                },
+                "caption": panel["caption"],
+                "visual_inspection": {
+                    **panel["visual_inspection"],
+                    "inspected_render": str(arguments.panel_figure),
+                },
+                "display_map": panel["display_map"],
+                "state_archive": _declared_path(arguments.panel_data),
+                "state_archive_md5": _sha256(arguments.panel_data),
+            }
+            if arguments.solve_receipt is not None:
+                record["solve"] = _solve_block(arguments.solve_receipt)
             arguments.receipt.write_text(
                 json.dumps(
-                    _merge_receipt(
-                        arguments.receipt,
-                        {
-                            "schema": "nova.coil-edit-panel-render",
-                            "command": " ".join([sys.argv[0], *sys.argv[1:]]),
-                            "scheduler": _scheduler(),
-                            "runtime": {
-                                "host": platform.node(),
-                                "device": jax.devices()[0].device_kind,
-                                "platform": jax.devices()[0].platform,
-                                "jax_platforms": os.environ.get("JAX_PLATFORMS"),
-                            },
-                            "caption": panel["caption"],
-                            "visual_inspection": {
-                                **panel["visual_inspection"],
-                                "inspected_render": str(arguments.panel_figure),
-                            },
-                            "display_map": panel["display_map"],
-                        },
-                    ),
+                    _merge_receipt(arguments.receipt, record),
                     indent=2,
                     sort_keys=True,
                     allow_nan=False,

@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="93">
+<meta name="plan-version" content="94">
 <meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
@@ -167,15 +167,22 @@
 
     <h2 id="s5">§5 — The reduced-model reconstructions</h2>
     <section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>Deferred until the decision <code>reduced-reconstructions</code> is locked on the §3 table. If the
-    lead rules that the inverse class supersedes them, the harmonic, moment and profile reconstructions and
-    their parity chain leave the tree and every consumer moves onto the class or is deleted with them; if
-    they stay, each is entered on the §3 scoreboard as its own column so its standing is measured rather
-    than assumed.</p>
-    <p><strong>Done when.</strong> The decision is locked and either (a) no import of the three
-    reconstructions remains under <code>nova</code>, <code>tests</code>, <code>scripts</code> or
-    <code>benchmarks</code> and the fast test lane adds no failure against its base, or (b) the §3 table
-    carries one column group per retained reconstruction.</p>
+    <p>The lead locked <code>reduced-reconstructions</code> to <code>keep-scored</code> on 2026-11-22: the
+    harmonic, moment and profile reconstructions stay, and each is scored on the §3 scoreboard as its own
+    column, on the same row-exchange case the §3 table already scores, so its standing is measured rather
+    than assumed. The scoreboard scores a state supplied as an IMAS equilibrium named by its digest, so each
+    reconstruction's output is written as one; building that conversion, for any reconstruction whose output
+    is not already such a state, is this section's work.</p>
+    <p><strong>Done when.</strong> (1) The §3 table carries one column group per retained reconstruction on
+    the §3 case, each scored by the same comparator and bands as the existing columns, with its state digest,
+    the IMAS equilibrium it was read from and the three reference-free checks. (2) Each column's band
+    verdicts are stated as measured: a failing band is a result, not a defect, and the record names the band
+    and the margin. (3) Negative control: the perturbed copy the §3 table already scores, entered through
+    each new column's conversion, fails every band, so a conversion cannot pass a state whatever its content.
+    Evidence: the fragment
+    <code>docs/evidence/fragments/inverse-equilibrium-baseline/reduced-reconstructions-scored.html</code>,
+    with the scoreboard receipt written beside the §3 receipt under
+    <code>docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/</code>.</p>
 
     <h2 id="s6">§6 — White sensor noise: is the reported covariance honest?</h2>
 <section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>

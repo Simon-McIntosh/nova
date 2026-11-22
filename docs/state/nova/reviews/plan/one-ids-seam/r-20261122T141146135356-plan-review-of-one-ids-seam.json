@@ -85,6 +85,16 @@
       "note": "\u00a73 and \u00a74 done-whens now require exactly one module in the tree to author each machine's description IDSs, so the move cannot fork a second author.",
       "reason": "",
       "when": "2026-11-22T14:35:49.838492+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "84c74ea8d0315632bdde70050847704483af1a15",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "\u00a75 now deletes nova's DD3 read path rather than relocating it; DD3 sources are converted at ingest, and only the algebra moves into the member.",
+      "reason": "",
+      "when": "2026-11-22T14:35:58.034659+00:00"
     }
   ],
   "responses": {
@@ -105,6 +115,15 @@
       "note": "\u00a73 now says the existing machine-description authoring and publication path moves into the member and is not reimplemented; \u00a71's class column carries machine authoring or publication.",
       "reason": "",
       "when": "2026-11-22T14:35:42.020876+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "84c74ea8d0315632bdde70050847704483af1a15",
+      "commit_basis": "edit",
+      "note": "\u00a75 now deletes nova's DD3 read path rather than relocating it; DD3 sources are converted at ingest, and only the algebra moves into the member.",
+      "reason": "",
+      "when": "2026-11-22T14:35:58.034659+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/one-ids-seam/r-20261122T141146135356-plan-review-of-one-ids-seam.json",

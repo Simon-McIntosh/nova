@@ -61,9 +61,28 @@
       "note": "\u00a75 now declares plan-section-depends-on sub-millisecond-forward-path#s4, the section that removes the per-trip cost.",
       "reason": "",
       "when": "2026-11-22T20:31:49.070730+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1f931664f4a01f653a56223ebdb8b841c554eba9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a73 clause 3 restated as the nova-side obligation: the receipt carries the transport route as a typed field a consumer reads without configuration; the imas-ambix switch stays with followup f-20260909T210712175233 against the landing SHA.",
+      "reason": "",
+      "when": "2026-11-22T20:32:02.792338+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1f931664f4a01f653a56223ebdb8b841c554eba9",
+      "commit_basis": "edit",
+      "note": "\u00a73 clause 3 restated as the nova-side obligation: the receipt carries the transport route as a typed field a consumer reads without configuration; the imas-ambix switch stays with followup f-20260909T210712175233 against the landing SHA.",
+      "reason": "",
+      "when": "2026-11-22T20:32:02.792338+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",

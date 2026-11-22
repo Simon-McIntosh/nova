@@ -1,0 +1,166 @@
+<section id="default-policy-refusal-drift-record">
+<h2>Why the default-policy solve stops elsewhere than the comparison record</h2>
+<p>The comparison record reports two stored-state refusals under the solver's
+default policy: TCV stops unqualified at relative residual 0.030364200526436996
+with reason 12 (ACTIVE_SET_STEP_REFUSED) and a magnetic axis admitted, and ITER
+stops with no magnetic axis admitted, reason 3 (NONFINITE_RESIDUAL) and a
+<code>NoQualifiedAxisError</code>. Started today from the same cases, the same
+stored flux map, the same machine and the same default policy, the solve stops
+elsewhere on both: TCV at 5.2411575147855504e-4 with reason 8
+(ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED) and an axis admitted, ITER at 0.12310610396516597
+with reason 12 and an axis admitted.</p>
+<p>The difference is not the solver. Between the record's cited revisions the
+<code>nova/</code> tree is identical (<code>git diff --stat 9047a3fe5 2a7c7c08b --
+nova/</code> is empty), and the recorded arm's own receipt resolves a
+<code>ForwardSolvePolicy</code> equal field for field to the one today's arms
+resolve, on the same 355-node TCV and 341-node ITER <code>StencilMesh</code> and
+the same coefficient vector. The difference is two inputs the harness takes from
+the stored imas-efit case, both of which the fixtures no longer carry in the form
+the record used, and both of which the record's own run copy preserves as
+data:</p>
+<ol>
+  <li>the fitted conductor-current vector the fixture supplies, which differs
+  from the record-era one on every one of the 288 TCV conductors; and</li>
+  <li>the stored flux state the solve starts from, which differs from the
+  record-era state by 21.9 percent of its span in gauge-free RMS on TCV.</li>
+</ol>
+<p>Substituting the record-era values for those two inputs, and changing nothing
+else &mdash; same policy, same route, same mesh, same coefficients &mdash;
+reproduces the recorded TCV arm at 0.030442406985959472 against the recorded
+0.030364200526436996, a factor of 1.0026, with the same reason code and a
+magnetic axis at <code>(0.83545, -0.028185)</code> against the record's
+<code>(0.83545035, -0.02818493)</code>; and reproduces the recorded ITER arm
+exactly as a refusal, no magnetic axis admitted, reason 3,
+<code>NoQualifiedAxisError</code>.</p>
+</section>
+
+<section id="default-policy-refusal-drift-arms">
+<h3>Every arm, measured on one titan card or one at a time on it</h3>
+<table><thead><tr><th>arm</th><th>inputs that differ from today's fixtures</th><th>residual</th><th>reason</th><th>axis</th><th>promotions attempted / accepted</th><th>wall s</th></tr></thead><tbody>
+<tr><td><code>tcv-input-stored</code></td><td>none: today's fixtures, fitted-current binding</td><td>5.2411575147855504e-4</td><td>8</td><td>admitted, (0.88555, -0.015045), diverted</td><td>152 / 151</td><td>796.78</td></tr>
+<tr><td><code>tcv-input-comparison</code></td><td>the comparison's fitted conductor currents</td><td>0.004253522137685281</td><td>12</td><td>admitted, (0.89044, -0.0043178), diverted</td><td>54 / 32</td><td>1567.12</td></tr>
+<tr><td><code>tcv-record-seed</code></td><td>the comparison's currents and the record-era retained state as the seed</td><td>0.030442406985959472</td><td>12</td><td>admitted, (0.83545, -0.028185), diverted</td><td>10 / 0</td><td>601.75</td></tr>
+<tr><td><code>iter-input-stored</code></td><td>none: today's fixtures, fitted-current binding</td><td>0.12310610396516597</td><td>12</td><td>admitted, (5.5846, 2.4128), diverted</td><td>25 / 13</td><td>940.39</td></tr>
+<tr><td><code>iter-input-comparison</code></td><td>no fitted-current binding, which is how the record's arm was built</td><td>0.023081497957738336</td><td>8</td><td>admitted, (6.4270, 0.65285), diverted</td><td>40 / 23</td><td>779.31</td></tr>
+<tr><td><code>iter-record-seed</code></td><td>no fitted-current binding and the record-era refusal state as the seed</td><td>unavailable: the solve refused before a residual was measured</td><td>3, <code>NoQualifiedAxisError</code></td><td><strong>not admitted</strong></td><td>1 trip</td><td>see the run record</td></tr>
+</tbody></table>
+<p>Every arm is unqualified and unconverged. The two <code>*-input-stored</code>
+arms are the standing cases of the solver as it is today; the other four are
+toggles of one input at a time.</p>
+</section>
+
+<section id="default-policy-refusal-drift-currents">
+<h3>The TCV fitted conductor currents, and what toggling them alone does</h3>
+<p>Both maps were written by the same binding, and their mapping rule and
+measured witness are identical, so the substitution is like for like. On 288
+conductors:</p>
+<table><thead><tr><th>quantity</th><th>measured</th></tr></thead><tbody>
+<tr><td>conductors identical within 1e-6 A</td><td>0 of 288</td></tr>
+<tr><td>median relative difference</td><td>4.94 percent</td></tr>
+<tr><td>largest relative difference</td><td>169.34 percent</td></tr>
+<tr><td>largest absolute difference</td><td>7000.24 A</td></tr>
+<tr><td>L2 difference, and as a fraction of the record-era vector</td><td>8586.08 A; 7.82 percent of 109820.01 A</td></tr>
+</tbody></table>
+<p>Toggling that one input moves the TCV arm from a converged-looking reason 8
+with 151 accepted promotions to reason 12 with every globalised step refused and
+every step length zero, and it reproduces the record's own active-set trajectory
+to between 0.2 and 1.4 percent for its first eight entries:</p>
+<table><thead><tr><th>active-set iteration</th><th>record</th><th><code>tcv-input-comparison</code></th><th>relative difference</th></tr></thead><tbody>
+<tr><td>1</td><td>0.019976914</td><td>0.019835223</td><td>0.71 percent</td></tr>
+<tr><td>2</td><td>0.08211907</td><td>0.082285054</td><td>0.20 percent</td></tr>
+<tr><td>3</td><td>0.03966965</td><td>0.039862383</td><td>0.49 percent</td></tr>
+<tr><td>4</td><td>0.4913729</td><td>0.49126047</td><td>0.02 percent</td></tr>
+<tr><td>5</td><td>0.36755228</td><td>0.3676918</td><td>0.04 percent</td></tr>
+<tr><td>6</td><td>0.58270156</td><td>0.5786932</td><td>0.69 percent</td></tr>
+<tr><td>7</td><td>0.81909716</td><td>0.8079115</td><td>1.37 percent</td></tr>
+<tr><td>8</td><td>0.4547213</td><td>0.45482877</td><td>0.02 percent</td></tr>
+</tbody></table>
+<p>The two arms then part: the record's ninth entry is 0.3685032 and its
+trajectory climbs to 3.5193639 with 20 attempted and 8 accepted promotions,
+while today's replacement reaches 0.20366962 and climbs to 2.4910567 with 54
+attempted and 32 accepted. The currents alone therefore account for the reason
+code and the branch, not for the retained terminal value: at
+0.004253522137685281 that arm sits at a factor of 0.140 of the recorded
+residual, outside a factor of three.</p>
+</section>
+
+<section id="default-policy-refusal-drift-seed">
+<h3>The stored seed, and what substituting the record-era state does</h3>
+<p>The record's run copy keeps the state its TCV arm retained: the same
+2995-node flux grid this branch builds, span 0.48433545231819153. Today's stored
+seed has span 0.43347705160942934, and the two differ by a gauge-free RMS of
+0.09505573396245656, which is 21.9 percent of today's span. The record's own
+policy refuses every globalised step, so the state it retained sits close to the
+state it started from, and it is the only surviving copy of a record-era state.</p>
+<p>Applied as the seed, with the comparison's currents also in place, that state
+reproduces the recorded arm: residual 0.030442406985959472 against
+0.030364200526436996 (factor 1.0026, within a factor of three), reason 12 as
+recorded, and an admitted axis at <code>(0.83545, -0.028185)</code> against the
+record's <code>(0.83545035, -0.02818493)</code>. With today's seed and the same
+currents the same arm gives 0.004253522137685281. The seed accounts for the
+factor of 7.2 that the currents leave.</p>
+<p>On ITER the same substitution reproduces the recorded refusal: seeded from the
+state the record's arm held when its topology read refused, with the measured
+conductor currents and no fitted binding, the solve raises
+<code>NoQualifiedAxisError</code> with reason 3 and admits no magnetic axis, in
+one trip, which is the recorded outcome. Neither case's record-era <em>seed</em>
+survives &mdash; both were read from fixture files that no longer hold those
+bytes &mdash; so in both cases the substituted state is the record-era state the
+arm retained rather than the exact seed it consumed.</p>
+</section>
+
+<section id="default-policy-refusal-drift-sensitivity">
+<h3>A nudge far smaller than the fixture drift already changes the class of outcome</h3>
+<p>The same TCV comparison arm was run twice in one job on one card, once on
+today's seed and once on that seed multiplied by 1.000314066, the ratio of the
+record-era equilibrium's stored flux span (0.19099370558229956 Wb) to today's
+(0.19093372278049314 Wb). Nothing else differed between the two.</p>
+<table><thead><tr><th>seed scale</th><th>residual</th><th>reason</th><th>axis</th></tr></thead><tbody>
+<tr><td>1</td><td>0.0042525413742888945</td><td>12, ACTIVE_SET_STEP_REFUSED</td><td>admitted, (0.89044, -0.0043179)</td></tr>
+<tr><td>1.000314066</td><td>none: the solve refused before a residual was measured</td><td>3, <code>NoQualifiedAxisError</code></td><td><strong>not admitted</strong></td></tr>
+</tbody></table>
+<p>Both arms follow the same trajectory for seven active-set iterations, to
+within 1.6 percent, and then the scaled arm's topology read admits no axis at
+all. A relative change of 3.1e-4 in one input of a refusing solve is therefore
+enough to move the outcome between two of the three recorded refusal classes, so
+no intermediate input reproduces a recorded residual to a tight band: the band
+holds only when the record-era inputs themselves are substituted. That is why
+the reproduction above is a substitution and not a search.</p>
+</section>
+
+<section id="default-policy-refusal-drift-standing-cases">
+<h3>The standing cases for the solver as it is today</h3>
+<p>Read as cases a later section can build on, the arms divide by whether their
+inputs are reproducible from what is on disk today:</p>
+<table><thead><tr><th>case</th><th>arm</th><th>today's terminal state</th><th>standing</th></tr></thead><tbody>
+<tr><td>TCV at 0.4 s</td><td><code>tcv-input-stored</code></td><td>5.2411575147855504e-4, reason 8, axis at (0.88555, -0.015045)</td><td><strong>yes</strong>: the fixtures, the binding and the policy are all in the tree today</td></tr>
+<tr><td>ITER at 75 s</td><td><code>iter-input-stored</code></td><td>0.12310610396516597, reason 12, axis at (5.5846, 2.4128)</td><td><strong>yes</strong>: same</td></tr>
+<tr><td>TCV at 0.4 s</td><td><code>tcv-input-comparison</code></td><td>0.004253522137685281, reason 12, axis at (0.89044, -0.0043178)</td><td>yes for the current vector, which the comparison run copy keeps; no as the record's case, whose seed is gone</td></tr>
+<tr><td>ITER at 75 s</td><td><code>iter-input-comparison</code></td><td>0.023081497957738336, reason 8, axis at (6.4270, 0.65285)</td><td>yes for the absence of a fitted binding; no as the record's case</td></tr>
+<tr><td>TCV at 0.4 s</td><td><code>tcv-record-seed</code></td><td>0.030442406985959472, reason 12, axis at (0.83545, -0.028185)</td><td>yes, from the record's run copy; the closest standing case to the recorded value</td></tr>
+<tr><td>ITER at 75 s</td><td><code>iter-record-seed</code></td><td>no axis admitted, reason 3</td><td>yes, from the record's run copy; the standing case that refuses as the record does</td></tr>
+</tbody></table>
+<p>The two <code>*-input-stored</code> arms are the cases to cite for the solver
+as it is today, because a later section can rebuild them from the tree alone. The
+record's own numbers are reachable only through the record's run copy, which is a
+cache under the workstation's home directory, not a tracked artifact: a section
+that asserts 0.030364 or the ITER no-axis refusal must either pin that copy or
+restate the expected values against the stored arms above.</p>
+</section>
+
+<section id="default-policy-refusal-drift-what-changed">
+<h3>What was rewritten, and what cannot be toggled</h3>
+<p>Both fixture sets were rewritten after the record's runs, and they are
+untracked in imas-efit, so their record-era bytes cannot be recovered:</p>
+<table><thead><tr><th>fixture</th><th>last write</th><th>measured drift against the record</th></tr></thead><tbody>
+<tr><td>TCV workshop, 0.4 s</td><td>2026-11-18 21:25:54 to 21:25:57</td><td>fitted conductor currents, 288 of 288 changed; stored flux span 0.19093372278049314 Wb against the record-era 0.19099370558229956 Wb</td></tr>
+<tr><td>ITER 135013, 75 s</td><td>2026-11-18 21:25:54, and 2026-11-19 00:29:47 to 00:29:48</td><td>plasma current -14845717.84262754 A against the record-era -15544546.67645363 A (4.50 percent); equilibrium flux span 70.03265459172255 Wb against 80.31109243746315 Wb (12.80 percent); conductor set unchanged at 117 conductors, 14 active and 103 passive elements</td></tr>
+</tbody></table>
+<p>On ITER the conductor set, the time slice and the profile's polynomial degree
+structure are unchanged (degree 3, two live coefficients, lowest degree 2), so
+the drift is in the values of the stored data rather than in its shape. The
+record's ITER arm was built by a case file that binds no fitted currents at all:
+<code>tests/test_magnetics_fit_efit_comparison.py</code> at revision
+<code>b7d5484bb</code> contains no call to <code>_fitted_current_binding</code>,
+against three at the head this record was measured on.</p>
+</section>

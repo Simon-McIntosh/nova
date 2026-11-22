@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/topology.py:BiotMomentCoupling.value_gradient",
+    "nova/equilibrium/fixed_points.py:value_gradient",
+    "nova/biot/tiledassembly.py:1383",
+    "nova/biot/polysection.py:241",
+    "nova/equilibrium/extraction_lattice.py:201"
+  ],
+  "completed_at": "2026-11-22T01:23:16.784Z",
+  "dispatched_at": "2026-11-22T01:16:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/moment-row-z-gradient.html",
+      "line": 249,
+      "severity": "non-blocking",
+      "text": "docs/evidence/fragments/sub-millisecond-forward-path/moment-row-z-gradient.html:249 non-blocking: the 2.3 compile-cost gate is measured at edf607514, before the sampled-tangent branch reached its shipped form at 24a2ff0f4, so the landed kernel's instruction and cold-compile ratios are unmeasured even though the fragment states the limitation."
+    },
+    {
+      "file": "tests/biot/test_moment_row_z_gradient.py",
+      "line": 105,
+      "severity": "non-blocking",
+      "text": "tests/biot/test_moment_row_z_gradient.py:105 non-blocking: its last green arm is 484d71057 and test_polygon_vertex_limit.py's is 7a251fa6c, both before 24a2ff0f4, so neither new guard test has been run against the landed kernel."
+    },
+    {
+      "file": "tests/biot/test_polygon_stable_evaluator.py",
+      "line": 42,
+      "severity": "non-blocking",
+      "text": "tests/biot/test_polygon_stable_evaluator.py:42 non-blocking: shifting the edge by 1e-3 moves the existing stable-tangent control off the corner-height coincidence, so that control no longer exercises the degenerate target the new branch exists to handle."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read commit by commit against ffb4c541a; the product change is confined to nova/biot/polygonanalytic.py (gradient rows from the flux moments' height slope, plus a sampled-tangent branch for corner-height and edge-line degeneracies), 34 prototype scripts and three test files.",
+    "done_when": "The done_when asks for one betelgeuse job reporting paired 132-cell instruction and cold-compile ratios at most 2.3; compile-ratios-pair/production-budget.json records 1.0397 and 1.0351 and the fragment records them, but both arms are at head edf607514, which precedes five later kernel commits including 24a2ff0f4, so the landed kernel was not the graph measured.",
+    "goal": "The node goal is to book the moment-1 and moment-2 Z-gradient rows as the height derivative of their own flux rows with flux and uniform rows bit-identical to main; nova/biot/polygonanalytic.py:3510-3527 returns rows 4 and 5 as -conditioned_slope[i]/(2*pi*r) from _conditioned_flux_moments(slopes=True) and leaves rows 0-3 and 6-8 untouched, which is that deliverable.",
+    "manifest": "Read; it reports status complete with final gates at 22bb50a71/46dc2212a, a negative control at 881c4cb19 (2 failed, 6 passed) against a head arm of 8 passed, and explicitly records the H200 compile pair as not repeatable at the final head.",
+    "write_paths": "Declared write paths are nova/biot/polygonanalytic.py, nova/equilibrium/topology.py, tests/biot, scripts/prototypes/moment_row_z_gradient and the evidence fragment; all 38 delivered paths fall inside them and topology.py is not touched."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_moment_row_z_gradient.py:105 fails on the pre-fix tree (2 failed, 6 passed in base-negative-control-booked-gradient.log) and tests/biot/test_polygon_vertex_limit.py:111 bounds the tangent.",
+    "evidence": "compile-ratios-pair/production-budget.json measures head edf607514, five kernel commits before the landed head, and neither new guard test was re-run at 7f2ce51d3.",
+    "fit": "nova/biot/polygonanalytic.py:2552 follows the module's xp-branch idiom and introduces no plan, version or ticket name.",
+    "goal_fidelity": "nova/biot/polygonanalytic.py:3510-3527 forms rows 4 and 5 from conditioned_slope while row_snapshot records rows 0-3 and 6-8 bit-identical at all 43 entries.",
+    "reuse": "the change extends the owner _packed_analytic_moments_primal rather than adding a second evaluator, and a search of nova/biot/greens.py:_horner_polynomial and nova/biot/polygonarc.py:_horner found no owner for a polynomial-derivative helper.",
+    "scope_discipline": "every one of the 38 delivered paths lies inside the declared write paths and no path outside them appears in the diff."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to book the moment-1 and moment-2 Z-gradient rows as the height derivative of their own flux rows with flux and uniform rows bit-identical to main; nova/biot/polygonanalytic.py:3510-3527 returns rows 4 and 5 as -conditioned_slope[i]/(2*pi*r) from _conditioned_flux_moments(slopes=True) and leaves rows 0-3 and 6-8 untouched, which is that deliverable.\nVERDICT done_when: The done_when asks for one betelgeuse job reporting paired 132-cell instruction and cold-compile ratios at most 2.3; compile-ratios-pair/production-budget.json records 1.0397 and 1.0351 and the fragment records them, but both arms are at head edf607514, which precedes five later kernel commits including 24a2ff0f4, so the landed kernel was not the graph measured.\nVERDICT write_paths: Declared write paths are nova/biot/polygonanalytic.py, nova/equilibrium/topology.py, tests/biot, scripts/prototypes/moment_row_z_gradient and the evidence fragment; all 38 delivered paths fall inside them and topology.py is not touched.\nVERDICT manifest: Read; it reports status complete with final gates at 22bb50a71/46dc2212a, a negative control at 881c4cb19 (2 failed, 6 passed) against a head arm of 8 passed, and explicitly records the H200 compile pair as not repeatable at the final head.\nVERDICT diff: Read commit by commit against ffb4c541a; the product change is confined to nova/biot/polygonanalytic.py (gradient rows from the flux moments' height slope, plus a sampled-tangent branch for corner-height and edge-line degeneracies), 34 prototype scripts and three test files.\nCALL_SITES: nova/equilibrium/topology.py:BiotMomentCoupling.value_gradient, nova/equilibrium/fixed_points.py:value_gradient, nova/biot/tiledassembly.py:1383, nova/biot/polysection.py:241, nova/equilibrium/extraction_lattice.py:201\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:3510-3527 forms rows 4 and 5 from conditioned_slope while row_snapshot records rows 0-3 and 6-8 bit-identical at all 43 entries.\nSCORE evidence: 13\nJUSTIFICATION evidence: compile-ratios-pair/production-budget.json measures head edf607514, five kernel commits before the landed head, and neither new guard test was re-run at 7f2ce51d3.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every one of the 38 delivered paths lies inside the declared write paths and no path outside them appears in the diff.\nSCORE durability: 17\nJUSTIFICATION durability: tests/biot/test_moment_row_z_gradient.py:105 fails on the pre-fix tree (2 failed, 6 passed in base-negative-control-booked-gradient.log) and tests/biot/test_polygon_vertex_limit.py:111 bounds the tangent.\nSCORE fit: 18\nJUSTIFICATION fit: nova/biot/polygonanalytic.py:2552 follows the module's xp-branch idiom and introduces no plan, version or ticket name.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends the owner _packed_analytic_moments_primal rather than adding a second evaluator, and a search of nova/biot/greens.py:_horner_polynomial and nova/biot/polygonarc.py:_horner found no owner for a polynomial-derivative helper.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/moment-row-z-gradient.html:249 non-blocking: the 2.3 compile-cost gate is measured at edf607514, before the sampled-tangent branch reached its shipped form at 24a2ff0f4, so the landed kernel's instruction and cold-compile ratios are unmeasured even though the fragment states the limitation.\nFINDING tests/biot/test_moment_row_z_gradient.py:105 non-blocking: its last green arm is 484d71057 and test_polygon_vertex_limit.py's is 7a251fa6c, both before 24a2ff0f4, so neither new guard test has been run against the landed kernel.\nFINDING tests/biot/test_polygon_stable_evaluator.py:42 non-blocking: shifting the edge by 1e-3 moves the existing stable-tangent control off the corner-height coincidence, so that control no longer exercises the degenerate target the new branch exists to handle.\n",
+  "review_run_id": "r-20261122T011546637207-review-of-moment-row-z-gradient-7f2ce51d3a32",
+  "reviewed_base_sha": "ffb4c541a2d00bee790fd8e8c30bc9d079bae784",
+  "reviewed_head_sha": "7f2ce51d3a32f3cb668b16337fbf9060514289e0",
+  "reviewed_run_id": "r-20261120T074051319945-moment-row-z-gradient",
+  "rubric": "",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T01:23:23.774315+00:00",
+  "total": 106
+}

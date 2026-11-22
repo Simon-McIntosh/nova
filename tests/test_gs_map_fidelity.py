@@ -374,7 +374,7 @@ def _figure(case_name: str, cells: int = 10000) -> Path:
     figure, panels = plt.subplots(1, 2, figsize=(14.0, 7.2))
     figure.patch.set_facecolor(style.figure_facecolor)
     for panel, values, reading in (
-        (panels[0], image, image_read),
+        (panels[0], image[:grid], image_read),
         (panels[1], exact_grid, exact_read),
     ):
         ink.poloidal_axes(panel, style)

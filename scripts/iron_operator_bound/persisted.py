@@ -666,12 +666,50 @@ def apply_metric(metric, vector):
     return np.asarray(cellwise(metric, jnp.asarray(vector)))
 
 
+def skew_norm(skew, dimension, *, tolerance=1e-8, ncvec=48, seed=424242):
+    """Return the spectral norm of an antisymmetric operator, and its residual.
+
+    The operator's square is negative semidefinite, so the largest singular
+    value is the square root of the largest eigenvalue of ``-A A``.  The
+    eigen-solve is converged to a tolerance and its residual returned beside
+    the value: this norm is compared against the smallest eigenvalue of a
+    nearly unit matrix, and an estimate that does not say how converged it is
+    cannot carry that comparison.
+    """
+    operator = LinearOperator(
+        (dimension, dimension),
+        matvec=lambda vector: -skew(skew(vector)),
+        dtype=np.float64,
+    )
+    values, vectors = eigsh(
+        operator,
+        k=1,
+        which="LA",
+        tol=tolerance,
+        ncv=ncvec,
+        maxiter=4000,
+        v0=np.random.default_rng(seed).normal(size=dimension),
+    )
+    value = float(values[-1])
+    acted = operator.matvec(np.asarray(vectors[:, -1]))
+    residual = float(
+        np.linalg.norm(acted - value * np.asarray(vectors[:, -1])) / abs(value)
+    )
+    return float(np.sqrt(max(value, 0.0))), residual
+
+
 def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, probes=4):
     """Measure the most negative direction of the seeded Newton matrix.
 
     ``peak`` is the bound result for the same operator, so the witness's
     quotient and alignment are read against one measurement of the operator's
     top direction rather than a second solve.
+
+    The matrix the route actually factors is ``tril(B)`` reflected, which is
+    ``sym(B)`` plus the reflected lower triangle of ``B``'s skew part.  That
+    addition has norm at most the spectral norm of the skew part, so a skew
+    norm below the symmetric matrix's smallest eigenvalue proves the factored
+    object is positive definite however the route reads it.
     """
     blocks = newton_blocks(source, inputs)
     action, symmetric, skew = newton_actions(source, blocks)
@@ -705,6 +743,7 @@ def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, pr
         )
     weighted = source["metric_action"](direction)
     top = source["metric_action"](peak["witness"])
+    skew_spectral, skew_residual = skew_norm(skew, dimension)
     row = dict(source["row"])
     row.update(
         newton_seconds=time.monotonic() - began,
@@ -715,6 +754,8 @@ def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, pr
         ),
         newton_rayleigh=float(direction @ acted / (direction @ direction)),
         newton_skew_fraction=asymmetry,
+        newton_skew_norm=skew_spectral,
+        newton_skew_norm_residual=skew_residual,
         differential_minimum=blocks["minimum"],
         material_generalised_minimum=blocks["generalised_minimum"],
         material_generalised_maximum=blocks["generalised_maximum"],

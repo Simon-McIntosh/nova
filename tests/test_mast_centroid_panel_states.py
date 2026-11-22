@@ -144,6 +144,18 @@ def test_committed_panel_state_renders(state_path: Path, tmp_path: Path):
         "panels command"
     )
     assert vacuum_nulls == committed_nulls
+    # The committed receipt must carry the assembler's own verdict, because a
+    # reader of the figure has only that block to tell an assembled separatrix
+    # from one the fine map refused. A receipt rewritten without it cannot be
+    # distinguished from a refused lane, so its absence fails here.
+    committed_assembler = committed["drawn_plasma_mesh"].get("boundary_assembler")
+    assert committed_assembler is not None, (
+        f"{state_path.parent.name}: the committed receipt carries no "
+        "boundary_assembler block; regenerate it with the panels command"
+    )
+    assert committed_assembler["available"], committed_assembler
+    assert committed_assembler["well_formed"], committed_assembler
+    assert committed_assembler["closed_segment_count"] > 0, committed_assembler
     assert vacuum_nulls["other_x_points_drawn"] == vacuum_nulls["x_points_inside_wall"]
     assert vacuum_nulls["x_points_drawn"] == 0
     assert vacuum_nulls["other_x_points_drawn"] == 1
@@ -160,6 +172,13 @@ def test_committed_panel_state_renders(state_path: Path, tmp_path: Path):
         f"well formed ({assembler}); the panel draws no lobe"
     )
     assert assembler["closed_segment_count"] > 0
+    # The redraw and the committed receipt must agree on the assembly, so a
+    # redraw that has drifted from the receipt beside the figure is not
+    # recorded as if it reproduced it.
+    assert assembler["well_formed"] == committed_assembler["well_formed"]
+    assert (
+        assembler["closed_segment_count"] == committed_assembler["closed_segment_count"]
+    )
     branches = drawn["boundary_branches_drawn"]
     assert branches["closed_drawn"] == 1, (
         f"{state_path.parent.name}: the closed lobe was not drawn ({branches})"

@@ -202,27 +202,89 @@ def measure(scratch: Path) -> dict:
 
 
 def draw(report: dict, path: Path = FIGURE) -> None:
-    """Draw each plant array's relative difference against the declared bound."""
+    """Draw each plant array's relative difference against the declared bound.
+
+    Every sampled difference is drawn; the ones past the declared bound take the
+    limit colour and the top layer, so the miss is visible without reading the
+    numbers, and one shared legend names all three marks.
+    """
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
 
+    plt.style.use("data-ink")
+    bound = report["tolerance"]
     figure, (sections, modes) = plt.subplots(1, 2, figsize=(14, 7.2))
     for axis, values, label in (
-        (sections, report["plot"]["section"], "winding sections"),
-        (modes, report["plot"]["mode"], "passive modes"),
+        (sections, report["plot"]["section"], "winding section index"),
+        (modes, report["plot"]["mode"], "passive mode index"),
     ):
-        axis.plot(np.arange(values.size), values, ".", color="#315f78")
+        values = np.asarray(values, dtype=float)
+        index = np.arange(values.size)
+        within = values <= bound
+        axis.plot(
+            index[within],
+            values[within],
+            ".",
+            color="#929292",
+            markersize=4,
+            zorder=2,
+        )
+        axis.plot(
+            index[~within],
+            values[~within],
+            ".",
+            color="#b2182b",
+            markersize=5,
+            zorder=3,
+        )
         axis.set_yscale("log")
-        axis.set_xlabel(label + " index")
+        axis.set_xlabel(label)
         axis.set_ylabel("relative flux difference")
-        axis.axhline(report["tolerance"], color="#666666", linewidth=1.2, linestyle=":")
-        axis.text(0, report["tolerance"], "1e-3 bound", color="#666666")
-        axis.spines[["top", "right"]].set_visible(False)
-        axis.grid(False)
-    figure.suptitle("")
-    figure.tight_layout()
+        axis.axhline(
+            bound,
+            color="#52514e",
+            linewidth=1.2,
+            linestyle=(0, (1, 2)),
+            zorder=1,
+        )
+    figure.legend(
+        handles=[
+            Line2D(
+                [],
+                [],
+                marker=".",
+                linestyle="",
+                color="#929292",
+                markersize=8,
+                label="within the bound",
+            ),
+            Line2D(
+                [],
+                [],
+                marker=".",
+                linestyle="",
+                color="#b2182b",
+                markersize=8,
+                label="past the bound",
+            ),
+            Line2D(
+                [],
+                [],
+                color="#52514e",
+                linewidth=1.2,
+                linestyle=(0, (1, 2)),
+                label="relative 1e-3 bound",
+            ),
+        ],
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.0),
+        ncol=3,
+        frameon=False,
+    )
+    figure.tight_layout(rect=(0, 0, 1, 0.93))
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, metadata={"Date": None})
     plt.close(figure)

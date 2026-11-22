@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T20:13:11.331Z",
+  "dispatched_at": "2026-11-22T19:46:31Z",
+  "findings": [
+    {
+      "anchor": "pyproject.toml:319",
+      "id": "reuse_search-1",
+      "reason": "\u00a71's done-when says \"every module under nova/\" and \u00a74 makes deletion depend on that coverage, so the brief must either measure with omit disabled (recording the reason) or name both packages as excluded from deletion; without that the plan's own negative control cannot distinguish \"unreached\" from \"not measured\".",
+      "text": "\u00a71 requires \"for every module under nova/, the lines executed by each route against its total\", but the repository's configured coverage run omits `nova/.../scripts/*` and `nova/.../utilities/*` (pyproject.toml:321-324), so a route measured through the configured mechanism reports those packages as absent (not merely zero), and \u00a74 deletes modules \"that \u00a71 shows unreached by either route\" \u2014 so a module in either omitted package that a live lane or a public entry point reaches would read as unreached and be deleted while still live",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/database/filepath.py:254",
+      "id": "duplicate_owner-1",
+      "reason": "the plan names no enumerator, so this changes only the node brief; it is recorded here because the brief must carry the owner and the positive-control requirement, and a census whose candidate list is empty must fail rather than pass.",
+      "text": "\u00a72 must enumerate every Python file under benchmarks/ and scripts/ and make the union of verdicts equal the measured total, and the repository already owns a tree enumeration with a positive control: `worktree_path_candidates()` at nova/database/filepath.py:254, used exactly this way in tests/test_artifacts_carry_no_worktree_paths.py:25, which asserts a known-present path is in the candidate set so an empty scan cannot read as a clean tree \u2014 a second enumerator beside it will drift from the tracked-file definition (`git ls-files` semantics, deletions, untracked scratch) that the owner already handles",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "benchmarks/recovery_ladder_census.py:15",
+      "id": "duplicate_owner-2",
+      "reason": "the plan's \u00a72 negative control and \u00a75 register are already implemented idioms in this repository, so the brief should hand those nodes the existing census/refusal pattern rather than let each author its own, and the plan's own text should stop implying a new census mechanism is needed.",
+      "text": "\u00a72's \"covers every file\" and \"a driver a live test imports, forced to a delete verdict, is refused and named\" is the same shape as the existing recovery-ladder census, and the existing implementation already delivers both halves: benchmarks/recovery_ladder_census.py enumerates by convention and raises naming a renamed entry, with tests/test_recovery_ladder_census.py:20-30 pinning the enumeration to the module and the refusal to a monkeypatched deletion, while scripts/iron_operator_bound/reuse_check.py:1 is the existing ast-based scan that \"refuses a second implementation of a block this repair gave one owner\" over scripts/ and tests/ \u2014 which is the mechanism \u00a75's register and the `hot-path-guard` decision would otherwise author a third time",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/database/filepath.py:356",
+      "id": "duplicate_owner-3",
+      "reason": "the plan is about an endpoint, not a helper, but the brief must route revision stamping through the existing owner and must state that a census which re-shells to git per file duplicates it; recording it here keeps the duplicate from being introduced in the node's own text.",
+      "text": "\u00a71 done-when 3 (\"the record states the revision measured\") and \u00a72 done-when 2 (\"the revision that record ran at, and that revision resolves\") need a revision stamp and a path-relative-to-repository identity; `compute_provenance()` at nova/database/filepath.py:356 and `repository_relative()` at :397 are the owners of generated-artifact identity and repository-relative naming, while roughly twenty scripts currently hand-roll their own git invocation (for example scripts/iron_limb_production/measure.py and scripts/diiid_map_fidelity/measure.py each resolve revision through their own subprocess call)",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace.html:1",
+      "id": "reuse_search-2",
+      "reason": "\u00a76's endpoint is \"the one public forward route, module by module\", and reconciling it with the existing kernel-launch trace is a semantic obligation; the brief needs to say which instrument is authoritative for ordering and which for cost, and that a module absent from the line map but present in the kernel trace is a contradiction to report, not a zero to delete on.",
+      "text": "the plan's \u00a70 quotes the 2026-11-13 H200 profile (\"about 12,500 kernel launches per slice\") and \u00a71 then measures the route a second way (Python line execution), but the existing evidence already attributes the forward route by device kernel (bank-solve-trace.html: the per-solve device attribution table, produced by scripts/prototypes/bank_solve_profile/report.py:14) and by route rows (bank-route-rows.html), so two instruments now describe \"the route\" with no stated relation, and \u00a76 must reconcile them or the documented route will contradict the devicetrace that \u00a70 relies on",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/nova_lane/run.sh:1",
+      "id": "duplicate_owner-4",
+      "reason": "the plan names no launch recipe, so this is a brief-level reuse note; it is recorded because the brief must name the existing launcher and the partition, and a manifest whose gate ran a home-made recipe should be treated as a scope defect.",
+      "text": "\u00a73 and \u00a74 require the suite delta \"run on all_debug\", and \u00a71 requires an all_debug job, while scripts/nova_lane/run.sh and scripts/h200_test_lane/run.sh already own partition submission, interpreter invocation without uv on a compute node, and log shape; a node composing its own srun recipe replays the environment hazards the launchers encode (TMPDIR, NO_SYNC etc.)",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "ee7a8dbafbf483532b6462d3e6b6497790e95b89",
+  "plan_fingerprint": "cc2fcb7cca0d49016d74755a32410037982cd1d878249f3ae35b49d21f35d4e2",
+  "plan_slug": "code-reuse-and-hot-path",
+  "plan_version": 1,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T194505239161-plan-review-of-code-reuse-and-hot-path",
+  "reviewed_blob_sha": "194b9624870ce5ed56434b151857ba1327a3190f",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 each section's endpoint is one stored record (or one documented section) that carries the map, the verdicts and the revision behind a single artifact, rather than a spread of per-file wrappers; \u00a71, \u00a72 and \u00a75 each produce one record that the later nodes read as data.",
+    "duplicate_owner": "a finding \u2014 the census enumerator, the provenance/revision stamp and the \"refuse a second implementation of an owned block\" scan all already have owners (nova/database/filepath.py, benchmarks/recovery_ladder_census.py, scripts/iron_operator_bound/reuse_check.py), and the plan's \u00a72, \u00a75 and \u00a71 each imply a fresh one.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section adds a public definition, a CLI option, an MCP view or a refusal family, and \u00a76 edits an existing document section rather than exposing new surface.",
+    "reuse_search": "a finding \u2014 the plan's \u00a71 measures executed lines per module with no mechanism named, while coverage.py is already a declared dependency (pyproject.toml:92) with a configured run and report section whose omit list hides two whole packages under nova/.",
+    "thin_wrapper": "pass \u2014 no section proposes a wrapper around existing machinery; the four code-bearing endpoints are a measurement, a census, a batch deletion and a document section, none of which forwards without adding behaviour."
+  },
+  "section_digests": {
+    "_document": "a10839c909083d306f707647169fe18b5004ecec6b50e77a2c896cee6af9cb3f",
+    "s0": "e6db08d8f54a9d4335cd673fa19ac9d023eba7179593fe0803ecb07b5a41da06",
+    "s1": "46e54aefbb5b38beadd795657da978e29a2f668fae1fe946c832eda8411c9d87",
+    "s2": "b1b1868eb515554e6c3a69633fcb10246fc251d358786969f2e09c774b21a3ca",
+    "s3": "84209c1bf2549cd4abd6a02cab2304d5cead35b2dfcdc8219fd202bcaecc1ccc",
+    "s4": "c10ebaf9eda8aaaef70632904d495fa0fe11b86a003f47d4c0d7232688ca8c01",
+    "s5": "9aefea04c24ad0f1a6ddc14859f734f6b58e8e428c2bee50851a87e94b5e85d4",
+    "s6": "1bda8e98c25af6dba78705302257637e5dcf4c9e700479afbb496be0d303b998"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T20:13:16.075775+00:00",
+  "total": null
+}

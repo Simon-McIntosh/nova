@@ -12,11 +12,17 @@ conflict was an import block, resolved to the union
 independent appends at one point with no shared test id, so both blocks are
 kept.</p>
 <p>The base arm ran at <code>ee7a8dbafbf4</code>, the head arm and the scoped
-gate at <code>e04eff6b5536</code>. The base arm
-(<code>arm-base.log</code>) is 5 failed / 82 passed and the head arm
-(<code>arm-head.log</code>) is 5 failed / 101 passed, failing exactly the same
-five <code>test_control_receipt_*</code> receipts, so the merge adds no failure
-and the 19 extra passes are the carried route.</p>
+gate at <code>e04eff6b5536</code>. Each arm fails exactly the same five
+<code>test_control_receipt_*</code> receipts, so the merge adds no failure and
+the extra passes at the head are the carried route. The summaries, verbatim:</p>
+<ul>
+<li><code>arm-base.log</code>:
+<code>5 failed, 82 passed, 14 deselected in 590.90s (0:09:50)</code></li>
+<li><code>arm-head.log</code>:
+<code>5 failed, 101 passed, 14 deselected in 1036.21s (0:17:16)</code></li>
+<li><code>scoped-gate-1795360957580188635.log</code>:
+<code>5 failed, 101 passed, 14 deselected in 572.96s (0:09:32)</code></li>
+</ul>
 
 <h4>Route equivalence on the persisted uniform 80&nbsp;mm WEST operator</h4>
 <p>One process loads the persisted

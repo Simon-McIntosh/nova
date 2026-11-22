@@ -13,7 +13,8 @@ one instrument:
   ``G / mu0`` and against that matrix, and the cells and cell pairs that carry
   it;
 * a negative control: the same instrument on a copy of an operator with a
-  planted rank-one term, which must read above the bound.
+  rank-one term planted along its own top direction, which must raise the
+  largest quotient by exactly the planted amount.
 
 The bound is measured in a standard symmetric form.  ``sym(Q G)`` carries the
 same quadratic form as ``Q G`` because the antisymmetric part contributes
@@ -83,7 +84,6 @@ CELL_SHARE = 0.90
 PAIR_COUNT = 12
 PAIR_ROWS = 3
 PLANT = 0.05
-PLANT_SEED = 4242
 
 
 def cell_size(label, inputs):
@@ -194,19 +194,12 @@ def load(label, inputs):
     return source
 
 
-def stage(source, *, modify=None):
-    """Stage the interaction and return the actions every mode reads.
-
-    ``modify(matrix, source)`` may rewrite the host matrix first, which is how
-    the control plants its perturbation without a second definition of the
-    quotient.
-    """
+def stage(source):
+    """Stage the interaction and return the actions every mode reads."""
     began = time.monotonic()
     matrix = np.asarray(
         source["matrix"] if "matrix" in source else source["interaction"].matrix
     )
-    if modify is not None:
-        matrix = modify(matrix, source)
     device = jax.device_put(np.asarray(matrix, dtype=np.float64))
     del matrix
     metric = jax.device_put(source["metric"])
@@ -784,17 +777,22 @@ def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, pr
     return row, direction, energy / float(weighted_vector @ direction)
 
 
-def plant(matrix, source):
-    """Add a rank-one term that lifts the quotient by ``PLANT`` at one direction.
+def plant(matrix, source, direction):
+    """Add a rank-one term that lifts the largest quotient by ``PLANT``.
 
-    With ``p`` normalised so ``p.T Q p = 1`` and ``G' = G + mu0 PLANT p (Q p).T``
-    the added quadratic form is ``mu0 PLANT (x.T Q p)^2``, which is positive
-    semidefinite, so the largest quotient rises by at least ``PLANT`` and a
-    correct instrument reads above the bound.
+    With ``p`` normalised so ``p.T Q p = 1`` and
+    ``G' = G + mu0 PLANT p (Q p).T`` the added quadratic form is
+    ``mu0 PLANT (x.T Q p)^2``, so every quotient rises by
+    ``PLANT (x.T Q p)^2 / (x.T Q x)``.  At ``x = p`` that shift is exactly
+    ``PLANT``, and at the top eigenvector it is ``PLANT`` times the squared
+    Q-overlap of ``p`` with it.  A random direction has an overlap of order
+    ``1 / n``, so its lift is ``PLANT / n`` and unmeasurable; the control plants
+    along the direction its own bound solve found, which is the only choice that
+    tests the instrument rather than the arithmetic of an overlap.
     """
-    direction = np.random.default_rng(PLANT_SEED).normal(size=source["dimension"])
+    direction = np.asarray(direction, dtype=np.float64)
     norm = float(apply_metric(source["metric"], direction) @ direction)
-    direction /= np.sqrt(norm)
+    direction = direction / np.sqrt(norm)
     weighted = apply_metric(source["metric"], direction)
     return matrix + iron._MU0 * PLANT * np.outer(direction, weighted)
 
@@ -836,24 +834,43 @@ def record_witness(label, inputs, output):
     return row
 
 
-def record_control(label, inputs, output):
-    """Measure the bound on a deliberately perturbed copy of an operator."""
-    source = stage(load(label, inputs), modify=plant)
-    peak = bound(source)
-    row = dict(source["row"])
+def record_control(label, inputs, output, *, tolerance=1e-4):
+    """Measure the bound on a deliberately perturbed copy of an operator.
+
+    The perturbation is planted along the top direction the unperturbed solve
+    found, so the largest quotient must rise by ``PLANT`` exactly.  The lift is
+    compared against that value rather than against a bare threshold: a threshold
+    would pass for any rise of the right sign, and the lift is what says the
+    planted term was read at its true size.
+    """
+    source = load(label, inputs)
+    baseline = bound(stage(source))
+    direction = np.asarray(baseline["witness"], dtype=np.float64)
+    matrix = np.asarray(source["interaction"].matrix)
+    planted_matrix = plant(matrix, source, direction)
+    del matrix
+    perturbed = stage(dict(source, matrix=planted_matrix))
+    peak = bound(perturbed)
+    lift = peak["quotient"] - baseline["quotient"]
+    row = dict(perturbed["row"])
     row.update(
         method="lanczos-standard-symmetric",
-        control="planted rank-one term",
+        control="rank-one term planted along the operator's top direction",
         plant=PLANT,
-        plant_seed=PLANT_SEED,
+        baseline=baseline["quotient"],
         maximum=peak["quotient"],
+        lift=lift,
+        lift_expected=PLANT,
         rayleigh=peak["rayleigh"],
         eigen_residual=peak["residual"],
         eigen_seconds=peak["seconds"],
+        baseline_residual=baseline["residual"],
     )
     write(output / f"control-{label}.json", row)
-    if not peak["quotient"] > 1.0 + PLANT / 2:
-        raise SystemExit("the planted term lifted the quotient by less than half")
+    if not abs(lift - PLANT) <= tolerance:
+        raise SystemExit(
+            f"the planted term lifted the quotient by {lift:.9f}, not {PLANT}"
+        )
     return row
 
 

@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="12">
-<meta name="plan-modified" content="2026-11-21">
+<meta name="plan-version" content="15">
+<meta name="plan-modified" content="2026-11-22">
 <meta name="plan-blocks" content="">
 <meta name="plan-standalone" content="The plan it unblocked, constraint-augmented-newton-krylov, is superseded; no open plan waits on the Shafranov observed side and it waits on none.">
 </head>
@@ -91,11 +91,19 @@
     <code>f633a00a</code>, <code>c6dae3cb</code>; record
     <a href="/nova/evidence/archive/shafranov-observed-side-landed.html">shafranov-observed-side-landed</a>. The
     certificate figure is not yet redrawn.</p>
+    <p><strong>Superseded in part on 2026-10-02.</strong> Commit <code>a5d8a4da1</code> replaced the midpoint
+    rule with a fourth-order contour metric (<code>_contour_metric</code>; <code>_segment_mean</code> no longer
+    exists), which moved the radial-moment departure from 5.7e-4 to 8.1e-8 and the identity residuals to
+    1.1e-4, 8.7e-5 and 1.8e-4 at 321, 641 and 1281. The open scope above is therefore restated against the
+    current rule: re-measure the order and the identity rungs at it, state the mechanism of whatever order
+    remains, and replace the order-above-0.5 assertion in <code>tests/test_equilibrium_diagnostics.py</code>, which
+    still neither prints nor persists the order it fits, by the predicted order.</p>
 
     <h2 id="s3">§3 — The constraint's observed side is the contour integral and the six-row receipt is regenerated</h2>
     <p>ExternalShafranovConstraint.observed still embeds the large-aspect-ratio identity. Wire it to
-    beta_p_plus_half_internal_inductance on the solved state's boundary with the grid-imaged field from §1, move
-    the formula helpers out of the constraint module to diagnostics, make the receipt driver's observed column the
+    beta_p_plus_half_internal_inductance on the solved state's boundary with the grid-imaged field from §1, delete
+    the inline inverse of the identity from the constraint module rather than moving it, because diagnostics
+    already owns the formula (<code>shafranov_vertical_field</code>) and a moved copy would duplicate it, make the receipt driver's observed column the
     integral, and regenerate the six-row MAST receipt and its panels. The commensurability finding stands as the
     reference for the panel: EFIT's stored scalars are reproduced by a denominator radius near the boundary
     minor radius, so the panel compares on nova's convention and says so.</p>
@@ -109,7 +117,11 @@
     functional of the boundary field alone; the integral node's derivation shows a single virial field cannot
     remove both. Until the lead rules, Z is the solved state's own integral and every receipt says so. The
     alternative is a diamagnetic-loop measurement where the machine carries one, which makes the observed side
-    fully external at the cost of a new input.</p>
+    fully external at the cost of a new input. The diamagnetic flux enters through the magnetics reader the
+    tree already carries, <code>nova/imas/io_magnetics.py</code>, whose diagnostic table names the
+    <code>diamagnetic_internal</code>, <code>diamagnetic_external</code>, <code>diamagnetic_compensation</code>
+    and <code>diamagnetic_differential</code> flux-loop channels; the store row is sourced through that reader,
+    never a parallel one.</p>
     <p><strong>Done when.</strong> The decision below is locked, the receipt provenance field names the source
     of Z, and, if the diamagnetic route is chosen, the MAST diamagnetic signal is read through the store with its
     calibration stated.</p>

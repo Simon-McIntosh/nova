@@ -25,8 +25,8 @@
   <title>Sub-millisecond Forward Path | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="395">
-<meta name="plan-modified" content="2026-11-21">
+<meta name="plan-version" content="396">
+<meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
   <main class="plan-doc">
@@ -1227,6 +1227,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261117T110237355670-iter-bank-recertify" data-who="reckon-build" data-when="2026-11-17T23:26:49Z">
     <div class="r-comment-body"><p>ITER bank rebuilt on the repaired polygon kernel and re-certified at the 64 retained nodes: psi_RZ 7.00e-9 and psi_ZZ 1.59e-9 against 1e-8 (old bank 0.64-0.71 and 0.23-0.29); lead-accepted exceptions: first-derivative rows depart by at most 7.204e-8 relative on entries above 1e-3, and P100 walls stand in for the H200</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s28-route-ruling-20261122" data-who="reckon-build" data-when="2026-11-22T19:12:00Z">
+    <div class="r-comment-body"><p>Lead ruling of 2026-11-22: the converged-forward-solve route replaces the present production route and becomes the one public forward solve, and 1e-12 governs that public route. This plan's both-routes-viable decision therefore no longer keeps the present route alive. Once converged-forward-solve §8 lands, this section's no-regression clause applies to that route. This plan's 1e-10 precision budget stays the bank route's throughput budget and is not the public route's precision. A follow-up edit of §4's text belongs with that landing. Ruling recorded on <a href="/nova/plans/converged-forward-solve.html#s6">converged-forward-solve §6</a>.</p></div>
 </div>
 </section>
 </main>

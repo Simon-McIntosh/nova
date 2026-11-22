@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="COCOS Without Nova: a Standalone nova-cocos Distribution">
 <meta name="plan-summary" content="Make nova&#x27;s stdlib-only COCOS algebra installable on Python 3.12 without the rest of nova, so a slim facility engine shares nova&#x27;s one factor table">
-<meta name="plan-status" content="in-progress">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="mid">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="1.5">
@@ -21,9 +21,9 @@
 <meta name="plan-capability-reasoning" content="standard">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="moderate">
-<meta name="plan-version" content="12">
-<meta name="plan-modified" content="2026-11-21">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;}">
+<meta name="plan-version" content="14">
+<meta name="plan-modified" content="2026-11-22">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;}">
 <meta name="plan-sprint" content="S30">
 </head>
 <body>
@@ -38,7 +38,7 @@
 </section>
 
 <h2 id="s2">§2 — Retire the nova.io.cocos re-export</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links="imas-ambix:jt60sa-facility-mint#s2"></section>
+<section data-reckon="section" data-id="s2" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links="imas-ambix:jt60sa-facility-mint#s2"></section>
 <p>Once imas-ambix imports <code>nova_cocos</code> directly (<a href="/imas-ambix/jt60sa-facility-mint">jt60sa-facility-mint</a> §2), nothing imports <code>nova.io.cocos</code>, and the re-export is removed so the table has one import path. Done-when: <code>grep -rn 'nova.io.cocos' nova tests</code> in nova and <code>grep -rn 'nova.io.cocos' imas_ambix tests packages</code> in imas-ambix both return nothing; <code>nova/io/cocos.py</code> is gone; the §1 COCOS tests add no failures.</p>
 
 <section data-reckon="followups" id="followups" class="r-followups">
@@ -49,10 +49,11 @@
     <pre class="r-fu-prompt">/reckon-build cocos-standalone-distribution §1</pre>
     <p class="r-fu-outcome"><p>§1 landed at 9829c310c.</p></p>
     </article>
-<article class="r-fu" data-id="f-ncsd-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-build" data-written-at="2026-10-07" data-recommends-skill="/reckon-build cocos-standalone-distribution §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ncsd-002" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-build" data-written-at="2026-10-07" data-recommends-skill="/reckon-build cocos-standalone-distribution §2" data-resolved-at="2026-11-22T13:30:56+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Retire the nova.io.cocos re-export once imas-ambix imports nova_cocos</h4>
     <div class="r-fu-body"><p>Waits on imas-ambix jt60sa-facility-mint §2, which switches ambix's three remaining importers.</p></div>
     <pre class="r-fu-prompt">/reckon-build cocos-standalone-distribution §2</pre>
+    <p class="r-fu-outcome">Shim deleted in 171dbde40 (2026-10-22); ambix imports nova_cocos directly. Recorded 2026-11-22 as a currency correction.</p>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -67,6 +68,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261006T223926457978-review-of-ncsd-nova-cocos-lock" data-who="reckon-build" data-when="2026-10-06T22:46:08.898Z">
     <div class="r-comment-body"><p>independent review of run r-20261006T164310543903-ncsd-nova-cocos-lock (base b85115a12, head 8876ea26) stored as a parsed JSON record scoring all 6 dimensions (goal_fidelity 20, evidence 18, scope_discipline 20, durability 12, fit 20, reuse 20; total 110), with added_failure_count 0 and added_failure_ids []; the reviewed node regenerates uv.lock to add the nova-cocos workspace member</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-22T14:45:00Z">
+    <div class="r-comment-body"><p>§2 closed as a currency correction: <code>nova/io/cocos.py</code> was deleted in commit <code>171dbde40</code> on 2026-10-22, and no importer remains in nova or imas-ambix. <a href="/nova/evidence/archive/cocos-standalone-distribution-landed.html#s2-reexport-retired">evidence</a></p></div>
 </div>
 </section>
 </main>

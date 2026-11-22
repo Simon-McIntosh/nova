@@ -25,6 +25,11 @@
     <p>Two nodes, because nova's 522 kB <code>uv.lock</code> overflowed the local lane's context beside the source files. The first, <code>ncsd-nova-cocos-member</code> (commits <code>54414ccb8</code>, <code>b85115a12</code>), moved the module and switched nova's four source and five test importers. The second, <code>ncsd-nova-cocos-lock</code> (commits <code>4b3d1a90f</code>, <code>8876ea263</code>), regenerated the lock on that commit, adding nova-cocos and changing no other package version. Both merged together at <code>9829c310c</code>, so main never carried a stale lock.</p><ul><li>Wheel <code>nova_cocos-0.11.0.post10057+g54414ccb8</code>: Requires-Python &gt;=3.12, no Requires-Dist, Version equal to the root build.</li><li>Clean <code>uv venv --python 3.12</code>: <code>transform_factor('psi_like', source=11, target=17)</code> is -1.0, as before.</li><li><code>nova.io.cocos.transform_factor is nova_cocos.transform_factor</code>.</li><li>COCOS tests 105 passed at base <code>521b2046a</code> and at head; the negated-factor control failed 8.</li><li>Independent reviews scored the member run 20/17/20/13/18/20 and the lock run 20/18/20/12/20/20 (goal, evidence, scope, durability, fit, reuse), with 0 added failures.</li></ul><p>After the merge, nova's and imas-ambix's shared environments were synced with <code>uv sync --inexact</code> so that <code>nova_cocos</code> imports, and imas-ambix's <code>uv.lock</code> gained nova-cocos at <code>87b9c116</code>.</p>
   </section>
 
+  <section id="s2-reexport-retired" data-evidence-origin="append">
+    <h2>§2 — nova.io.cocos re-export retired</h2>
+    <p>The <code>nova.io.cocos</code> shim was deleted in commit <code>171dbde40</code> (2026-10-22, <em>feat(io): translate Data Dictionary equilibrium reads into COCOS 17 by name</em>), which also moved the four benchmarks that reached through it onto <code>nova_cocos</code>. On 2026-11-22 neither nova nor imas-ambix imports <code>nova.io.cocos</code>: ambix's three importers (<code>imas_ambix/challenge/convention.py</code>, <code>imas_ambix/data/cocos_convention.py</code>, <code>tests/data/test_cocos_convention.py</code>) import <code>nova_cocos</code> directly. The section was already done in code and is recorded here as a currency correction. No worker ran.</p>
+  </section>
+
 </main>
 </body>
 </html>

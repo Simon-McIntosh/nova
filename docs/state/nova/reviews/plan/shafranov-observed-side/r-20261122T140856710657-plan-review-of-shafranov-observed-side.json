@@ -1,0 +1,78 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T14:21:00.000Z",
+  "dispatched_at": "2026-11-22T14:09:23Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#s3",
+      "id": "wiring-1",
+      "reason": "without the declared edges the queue admits \u00a73 concurrently with \u00a71 and \u00a74, and the plan's own sequencing lives only in a followup the queue does not order by.",
+      "text": "the plan carries no `plan-section-depends-on` meta, yet \u00a73 consumes \u00a71's grid-imaged field (\"with the grid-imaged field from \u00a71\"), \u00a74's Z provenance (\"the toroidal term's provenance per \u00a74\"), the residual identity repair whose own landed record says it is \"the next node's work before section 3 wires the constraint\", and the store ingestion owned by followup `f-sos-diamagnetic-input`; all four sections are declared `implementable` with no ordering, so the queue can launch \u00a73 against a \u00a71 field that does not exist in production and a \u00a74 whose receipt provenance is not wired",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#s1",
+      "id": "done_when-1",
+      "reason": "a zero-only assertion is the archetype of a done-when that cannot fail; the plan must name a control (the counter refusing a build without the cached blocks, or asserting the stated build count) or the node's whole measure is unfalsifiable.",
+      "text": "the done-when rests on \"the two-solve test asserts zero kernel evaluations on the second\" and \"the receipt numbers come from the committed counter\", with no control that the counter registers a non-zero count at build; a counter that never increments, or one wired to the wrong path, satisfies the assertion identically to a working cache",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#s2",
+      "id": "done_when-2",
+      "reason": "an omitted measure lets the section be closed on the easy half while the failure its own evidence names proceeds into \u00a73's wiring unchecked.",
+      "text": "the section's own record states that three rungs of `test_shafranov_contour_integrals_equal_their_volume_side` stand red at 321/641/1281 and that the volume side's cell-centre mask carries no boundary correction (orders 0.82 and 0.93), and the comment records both as \"the next node's work before section 3 wires the constraint\"; the done-when asks only for the fitted order, the assertion and the certificate ladder, so a node can close \u00a72 leaving those red tests exactly as they are",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#s4",
+      "id": "reasoning-1",
+      "reason": "a node reading \u00a74's prose implements the solved-state fallback, which is the option the lead declined, and would write the wrong provenance into every receipt.",
+      "text": "the section body states \"Until the lead rules, Z is the solved state's own integral and every receipt says so\" and its effort row reads \"0 (awaits the lead)\", while the decision block eight lines below is locked to `diamagnetic-loop` since 2026-10-01; the done-when is also conditional (\"if the diamagnetic route is chosen\") on a choice already made",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#s1",
+      "id": "reasoning-2",
+      "reason": "a plan-level method is a guess the node must implement or contradict, and the reuse map belongs to the brief composed from this review; stating it in the plan fixes the node to a mechanism that has not been tested against the code.",
+      "text": "the forward instructions prescribe implementation rather than an endpoint: \"Construct the blocks inside the operator build from the machine's cached radial and vertical field tuples, replace the reuse test with one counting kernel evaluations across two solves on one operator\", and \u00a73's \"Wire it to beta_p_plus_half_internal_inductance ... delete the inline inverse of the identity from the constraint module rather than moving it\"",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3a7d3057155f104c13a55e73a0fb380f55635a18",
+  "plan_fingerprint": "5fe6f7215d5c6e4ab76fbc45bb56651d0601d4e058030f8c4c38460ba35d7150",
+  "plan_slug": "shafranov-observed-side",
+  "plan_version": 15,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T140856710657-plan-review-of-shafranov-observed-side",
+  "reviewed_blob_sha": "6b73337ab5761d3b2e4c9d9852694b122d2b458c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/archive/shafranov-observed-side-landed.html`, `docs/evidence/archive/figure-and-solver-audit-landed.html#figures-newton-krylov` (id present), `nova/imas/io_magnetics.py` (all four `diamagnetic_*` channels present), `tests/test_equilibrium_diagnostics.py` and the figure directory all resolve; `_segment_mean` is named as deliberately deleted with its replacement given, not cited as live.",
+    "done_when": "a finding \u2014 \u00a71's gate asserts zero kernel evaluations on the second solve and names no control showing the counter ever counts, and \u00a72's done-when omits the three identity rungs its own landed record calls blocking.",
+    "evidence_paths": "pass \u2014 the landed record `docs/evidence/archive/shafranov-observed-side-landed.html` and the receipt `docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json` are both tracked, durable paths that resolve in the tree.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach any symbol the plan asks for; the sections cite no new code names beyond the mechanism terms already in the tree.",
+    "reasoning": "a finding \u2014 \u00a74's body and effort row still state the pre-decision fallback (\"Until the lead rules, Z is the solved state's own integral\") and a conditional done-when against a decision locked to `diamagnetic-loop` on 2026-10-01, and \u00a71/\u00a73 forward instructions prescribe implementation rather than an endpoint.",
+    "single_goal": "pass \u2014 \u00a71 (field blocks in production with measured reuse), \u00a72 (grid-route order), \u00a73 (constraint observed side) and \u00a74 (the Z ruling) each name one deliverable, though see the done_when finding on \u00a72's omitted scope.",
+    "wiring": "a finding \u2014 the plan declares no `plan-section-depends-on`, although \u00a73 consumes \u00a71's grid-imaged field and \u00a74's provenance, \u00a72's own record puts its residual identity repair before \u00a73, and \u00a73's diamagnetic route depends on followup `f-sos-diamagnetic-input`."
+  },
+  "section_digests": {
+    "_document": "bed068e052bd6353ddf47129e3245da7ac804b6801e0c33dd7e736e266afe7ea",
+    "s-contract": "61c7b0c442759ab5a82fd40553b706909db7709feb4d44f4c9ea07221e6c0c82",
+    "s0": "d88c6a2860e5b0c59b37aa9054e43e4eb03dfa63d26c9d615ff39140715c16ac",
+    "s1": "cc5b8c2ec683e593e614ec0df4316cd8a23972b3e6132a02cc8226bf1e6cdd5e",
+    "s2": "a65e4034bc865f895d045dd9a91dd94f5e1b38efe7a2abd7129d4a1347f2fe7d",
+    "s3": "c4931d9dc0bee67ee86e4e0bf0466385ebfe14007f6efa4017e45ca900293d90",
+    "s4": "d93e7ccda64c641c4f1b7d61acf0736e6532e2d19e1f6f0ff0024b050a1854ac"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T14:21:07.283119+00:00",
+  "total": null
+}

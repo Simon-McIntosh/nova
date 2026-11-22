@@ -45,8 +45,11 @@ def _difference(seed, stored):
     seed = np.asarray(seed, dtype=float).ravel()
     stored = np.asarray(stored, dtype=float).ravel()
     if seed.shape != stored.shape:
-        return dict(comparable=False, seed_shape=list(seed.shape),
-                    stored_shape=list(stored.shape))
+        return dict(
+            comparable=False,
+            seed_shape=list(seed.shape),
+            stored_shape=list(stored.shape),
+        )
     difference = seed - stored
     gauge_free = difference - difference.mean()
     span = float(stored.max() - stored.min())
@@ -97,10 +100,16 @@ def main():
         data, request, "tcv-record-seed", "tcv", f"{provenance} + record-era seed flux"
     )
     record["seed_source"] = str(RECORD_RECEIPT)
-    record["record_seed_reason"] = int(
-        np.asarray(record_receipt.termination_reason)
-    )
+    record["record_seed_reason"] = int(np.asarray(record_receipt.termination_reason))
     record["seed_difference"] = _difference(seed, stored_seed)
+    if not record.get("within_factor_three") or not record.get("same_reason_code"):
+        raise SystemExit(
+            "tcv-record-seed does not reproduce the recorded arm: residual "
+            f"{record.get('residual')} against {record['recorded']['residual']} "
+            f"(factor {record.get('factor_of_recorded_residual')}), reason "
+            f"{record.get('termination_reason')} against "
+            f"{record['recorded']['termination_reason']}"
+        )
     record["finished"] = True
     drift._write(drift.OUTPUT / "tcv-record-seed.json", record)
     drift._write(

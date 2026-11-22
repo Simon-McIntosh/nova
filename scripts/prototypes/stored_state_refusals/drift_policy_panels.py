@@ -124,9 +124,11 @@ def draw(run: Path, destination_root: Path, machine_cache: Path, scratch: Path):
         data = data_by_case[case_name]
         flux = _terminal_flux(source, run / flux_name)
         node = np.asarray(data["machine"].node)
-        if flux.size != len(node):
+        # The state carries the node, wall and sample coordinates in that order,
+        # so it is longer than the solve mesh and the panel slices it back.
+        if flux.size < len(node):
             raise ValueError(
-                f"{label}: {flux.size} terminal values against {len(node)} nodes"
+                f"{label}: {flux.size} terminal values carry {len(node)} nodes"
             )
         recorded = _recorded_axis(arm)
         drawn_axis, refusal = _solved_axis(data, flux)

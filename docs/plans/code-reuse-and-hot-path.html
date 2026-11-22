@@ -76,12 +76,14 @@ known-state recovery test.</li>
 executed by each route against its total, and the union; a machine-readable
 copy sits beside the evidence fragment
 <code>docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html</code>.</li>
-<li>A negative control passes: a module the run cannot reach, imported by
-nothing on either route, reads zero executed lines, and a module both routes
-must reach (the public solve entry) reads nonzero.</li>
+<li>The public solve entry, which both routes must reach, reads nonzero
+executed lines on each.</li>
 <li>The record states the revision measured, and the measurement ran on
 <code>all_debug</code> as one job.</li>
 </ol>
+<p>Negative control: a module imported by nothing on either route reads zero
+executed lines in the same measurement, so a map that marks everything
+reached fails.</p>
 
 <h2 id="s2">§2 — Census of benchmarks and scripts</h2>
 <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
@@ -102,9 +104,11 @@ measured total of both trees.</li>
 <li>Each delete verdict names every evidence record that cites the file and
 the revision that record ran at, and that revision resolves
 (<code>git cat-file -e &lt;rev&gt;:&lt;path&gt;</code>).</li>
-<li>A negative control passes: a driver a live test imports is classified
-keep, and the census refuses to mark it delete.</li>
+<li>Each merge verdict names the driver it folds into, and that driver is
+itself classified keep.</li>
 </ol>
+<p>Negative control: a driver a live test imports, forced to a delete
+verdict, is refused by the census and named.</p>
 
 <h2 id="s3">§3 — Delete and merge benchmarks and scripts</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -118,6 +122,8 @@ or names it (grep every deleted path, including tests and AGENTS.md).</li>
 <li>The batch record states the lines removed, and the running total across
 batches.</li>
 </ol>
+<p>Negative control: a kept file that still names one deleted path makes the
+absence check in (1) fail and report that path.</p>
 
 <h2 id="s4">§4 — Delete unreached library modules</h2>
 <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
@@ -130,6 +136,8 @@ module a live run's worktree imports is held back and named.</li>
 <li>The suite delta adds no failures, on <code>all_debug</code>.</li>
 <li>The record states lines removed per package.</li>
 </ol>
+<p>Negative control: a module §1 shows reached, offered for deletion, is
+refused by the check in (1) and named.</p>
 
 <h2 id="s5">§5 — Register of duplicates on the hot path</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
@@ -144,6 +152,9 @@ measured disagreement.</li>
 coordinator has answered it: accepted for an S28 node, or declined with a
 reason.</li>
 </ol>
+<p>Negative control: one entry's comparison rerun with a deliberately
+perturbed input to one implementation reports a disagreement beyond the
+stated tolerance.</p>
 
 <h2 id="s6">§6 — The hot path, written down</h2>
 <section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
@@ -155,6 +166,8 @@ collapses S28 accepted have landed. Done when:</p>
 measurement at the head.</li>
 <li>Every module the section names exists at the head.</li>
 </ol>
+<p>Negative control: adding to the section one module the routes do not
+execute makes the comparison in (1) fail and name it.</p>
 
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

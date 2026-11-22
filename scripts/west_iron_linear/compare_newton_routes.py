@@ -76,13 +76,22 @@ def main():
         )
         args.output.write_text(json.dumps(row, indent=2) + "\n")
         assert row[route]["converged"], row[route]["termination"]
-    row["probe_relative"] = probe_agreement(
-        row["combined"]["field_T"], row["cholesky"]["field_T"]
+    reference = np.asarray(row["combined"]["field_T"])
+    candidate = np.asarray(row["cholesky"]["field_T"])
+    row["probe_relative"] = (
+        np.linalg.norm(candidate - reference, axis=1)
+        / np.linalg.norm(reference, axis=1)
+    ).tolist()
+    expected = np.asarray(coefficients["combined"])
+    actual = np.asarray(coefficients["cholesky"])
+    row["coefficient_relative"] = dict(
+        frobenius_relative=float(
+            np.linalg.norm(actual - expected) / np.linalg.norm(expected)
+        ),
+        maximum_entry_relative=float(
+            np.abs(actual - expected).max() / np.abs(expected).max()
+        ),
     )
-    row["coefficient_relative"] = coefficient_agreement(
-        coefficients["combined"], coefficients["cholesky"]
-    )
-    row["completed"] = True
     args.output.write_text(json.dumps(row, indent=2) + "\n")
     print(
         "AGREEMENT "
@@ -94,6 +103,16 @@ def main():
         ),
         flush=True,
     )
+    row["probe_pass"] = max(row["probe_relative"]) <= 1e-12
+    row["coefficient_pass"] = max(row["coefficient_relative"].values()) <= 1e-12
+    row["completed"] = bool(row["probe_pass"] and row["coefficient_pass"])
+    args.output.write_text(json.dumps(row, indent=2) + "\n")
+    print(
+        f"PASS probe {row['probe_pass']} coefficient {row['coefficient_pass']}",
+        flush=True,
+    )
+    if not row["completed"]:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

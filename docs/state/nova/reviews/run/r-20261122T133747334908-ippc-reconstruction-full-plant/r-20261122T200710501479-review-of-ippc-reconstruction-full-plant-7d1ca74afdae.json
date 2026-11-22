@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/circuit/coupled_plant.py:coupled_plant",
+    "nova/circuit/passive.py:load_sectioned_machine",
+    "nova/imas/plasma_source.py:PlasmaSource.from_imas",
+    "nova/imas/plasma_source.py:CoilCurrentSeries.at"
+  ],
+  "completed_at": "2026-11-22T21:07:01.881Z",
+  "dispatched_at": "2026-11-22T20:07:58Z",
+  "findings": [
+    {
+      "file": "scripts/reconstructed_plasma_source/reconstruction.py",
+      "line": 215,
+      "severity": "non-blocking",
+      "summary": "The report's 'rebuilds' field is the literal 0, not a count. The zero-rebuild claim is carried by rebuild_spy, which raises if either build function is called, so the literal overstates what it says: a reader comparing a field named 'rebuilds' against a counter reads a claim as a counter, and a binding the spy fails to find would leave both the guard and the reported zero green."
+    },
+    {
+      "file": "scripts/reconstructed_plasma_source/reconstruction.py",
+      "line": 131,
+      "severity": "non-blocking",
+      "summary": "_relative_error sets the relative difference to 0 wherever the reference is exactly zero, so a nonzero presented flux against a zero generic flux is counted as agreement. The gate's 'zero violations' is therefore an absence claim only over nonzero-reference samples, and a section or mode whose generic flux is zero could regress arbitrarily without reddening the test."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-passive-plasma-circuit/reconstruction-full-plant.html",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The retained localisation section still concludes that the node 'ends blocked on the one clause that misses by measurement', which contradicts the delivered complete status and the one-boundary comparison the same fragment opens with; a reader meeting this paragraph sees an active contradiction in the record."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-passive-plasma-circuit/reconstruction-full-plant.html",
+      "line": 57,
+      "severity": "non-blocking",
+      "summary": "The declared negative control mutates the expectation (match='linkage.npy', a file the entry does carry) rather than removing the refusal, so its red log demonstrates that the message names the absent file specifically, not that the shipped test reddens when the guard is removed; the plan asked for the latter."
+    },
+    {
+      "file": "tests/test_coupled_plant.py",
+      "line": 1017,
+      "severity": "non-blocking",
+      "summary": "assert plant.provenance['plasma_source'] == reconstruction.label compares the plant's recorded provenance against the label the test itself passed into corsica_source, so the two sides move together with the input; it cannot fail on any change to the plant's numerics and survives the regressions the surrounding assertions are meant to catch."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261122T200710501479-review-of-ippc-reconstruction-full-plant-7d1ca74afdae",
+  "reviewed_base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+  "reviewed_head_sha": "7d1ca74afdae111e3cae19d1a3ae31363058c678",
+  "reviewed_run_id": "r-20261122T133747334908-ippc-reconstruction-full-plant",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T21:34:11.759831+00:00",
+  "total": 107,
+  "verdicts": {
+    "call_sites": "Searched for importers of the new module: only tests/test_coupled_plant.py and tests/test_plasma_source.py import it; no production module does, so the production code reached by the change is the plant and source API the script drives, listed on the CALL_SITES line.",
+    "diff": "Read commit by commit against the base; fifteen commits add one module (scripts/reconstructed_plasma_source/reconstruction.py, 476 lines), two test files (+179 and +29 lines), one evidence fragment (+85) and two figures.",
+    "done_when": "The done_when is measured by tests/test_coupled_plant.py::test_one_boundary_presentation_agrees_on_sections_and_modes, which asserts both plant arrays against rtol 1e-3 inside a rebuild_spy that raises on any sectioned-set refiner or linkage build, and by logs/one-boundary-final.log, which records 1 passed, MEASURE_EXIT=0 and EXIT=0; the one-boundary refinement is the lead ruling recorded in resume-2-advice.txt.",
+    "goal": "The goal is section 6 check 3: a reconstruction-style CORSICA 130506/6 presentation drives the full ITER plant from the cache with zero sectioned-set rebuilds and agrees within relative 1e-3 with the plant the same equilibrium gives through the generic path, and an entry without geometry is refused by name; scripts/reconstructed_plasma_source/reconstruction.py:38-66 implements the presentation and :184-241 the comparison.",
+    "manifest": "Read; it records status complete, the fifteen commits, base b62734cdf '2 failed, 24 passed' and head 9d713ae15 '2 failed, 27 passed, 1 xfailed' with the same two failing ids, both the one-boundary and the two-boundary numbers, the negative control and every job id and log path.",
+    "write_paths": "Read the manifest's eight declared write paths; each of the six paths in the diff (the evidence fragment, the two SVGs, scripts/reconstructed_plasma_source/reconstruction.py, tests/test_coupled_plant.py and tests/test_plasma_source.py) lies inside them, and the two declared nova/ paths were deliberately not needed."
+  }
+}

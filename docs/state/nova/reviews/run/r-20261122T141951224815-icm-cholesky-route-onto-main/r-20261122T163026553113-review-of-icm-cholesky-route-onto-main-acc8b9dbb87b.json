@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/biot/magnetisation.py:solve_magnetisation",
+    "scripts/west_iron_linear/prepare.py:35",
+    "scripts/west_iron_linear/measure.py:178",
+    "scripts/iron_graded_refinement/measure.py:152",
+    "scripts/iron_limb_production/outline.py:164"
+  ],
+  "completed_at": "2026-11-22T16:40:57.970Z",
+  "dispatched_at": "2026-11-22T16:30:49Z",
+  "findings": [
+    {
+      "file": "scripts/west_iron_linear/compare_newton_routes.py",
+      "line": "108",
+      "severity": "non-blocking",
+      "text": "non-blocking: the committed comparator's pass criterion is max(Frobenius, maximum-entry) <= 1e-12 and every recorded run fails it (compare-08-titan.json frobenius 8.53e-13 but maximum_entry 1.67e-12, coefficient_pass false, completed false, EXIT=1), so the artefact the node cites as its route evidence records a failed gate while the manifest and fragment read the norm figure as agreement."
+    },
+    {
+      "file": "nova/biot/magnetisation.py",
+      "line": "728",
+      "severity": "non-blocking",
+      "text": "non-blocking: _linear_cholesky_local rebuilds the total/values/material/tangent/integrand/local block that _linear_jacobian assembles at nova/biot/magnetisation.py:652, so the same local-differential construction now exists twice in one module and can drift."
+    },
+    {
+      "file": "scripts/west_iron_linear/gate.py",
+      "line": "32",
+      "severity": "non-blocking",
+      "text": "non-blocking: the committed gate's negative control mutates the measure.py interaction and refinement thresholds, not the Cholesky definiteness guard the done_when names, whose only red log comes from an uncommitted script under ~/.cache/nova-icm-integration/negative_control_job.sh and so cannot be reproduced from the repository."
+    },
+    {
+      "file": "scripts/west_iron_linear/refinement.sh",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: refinement.sh, run.sh, diagnose.py and constant_control.py add refinement and assembly drivers the node goal does not ask for, expanding the delivered surface beyond the merge, equivalence measure and guard control inside an otherwise declared directory."
+    },
+    {
+      "file": "tests/test_magnetisation.py",
+      "line": "2077",
+      "severity": "non-blocking",
+      "text": "non-blocking: the first new parametrised test is appended with no blank line after test_reloaded_coilset_accepts_the_iron_frame, which ruff does not police because tests/ is excluded from the lint configuration."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read commit by commit over ee7a8dbaf..acc8b9dbb: 9869794d1 is the merge, ac1686994 and 72f944603 add the one-process comparison driver and lower its assertion to the recorded figures, e04eff6b5/d45403001/acc8b9dbb add and revise the evidence fragment, and no interaction value, quadrature order or tolerance is changed.",
+    "done_when": "The done_when's suite and guard measures are recorded in the reviewed run's arm-base.log and arm-head.log (each 5 failed with the same five test_control_receipt ids, head adding 19 passes) and in negative-control.log:79 (DID NOT RAISE ValueError, EXIT=1), but the 1e-12 route equivalence on the persisted 80 mm operator is recorded only in ~/.cache/nova-icm-integration/compare-08-titan.json, which carries completed false and exited 1.",
+    "goal": "The brief asks this node to merge 64090647d onto the iron field-source line keeping both \u00a76's passive CoilSet frame and \u00a75b's in-place Cholesky Newton route with its definiteness guard, and the landed merge 9869794d1 has exactly the parents ee7a8dbaf and 64090647d with both sides present in nova/biot/magnetisation.py (cached_property at nova/biot/magnetisation.py:15, _linear_cholesky_factor at nova/biot/magnetisation.py:840).",
+    "manifest": "The manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T141951224815-icm-cholesky-route-onto-main/manifest.md records the two suite arms with their log paths and failure ids, the negative control and its log, and the comparison metrics, but its landing line reports the Frobenius 8.53e-13 as agreement while omitting that the committing comparator's own run recorded completed false and EXIT=1.",
+    "write_paths": "The declared paths are nova/biot/magnetisation.py, tests/test_magnetisation.py, scripts/west_iron_linear, the cholesky-route evidence fragment and its figures directory; the delivered diff ee7a8dbaf..acc8b9dbb touches those plus docs/evidence/fragments/iron-core-magnetisation/icm-linear-refinement.html and scripts/iron_operator_bound/west.sh, both of which enter only through the merge (09ef5da61) and are byte-identical to 64090647d at head."
+  },
+  "justifications": {
+    "durability": "tests/test_magnetisation.py:2315 runs solve_magnetisation by both routes on one mesh and would fail if the Cholesky route diverged from the LU route, and tests/test_magnetisation.py:2350 would fail if the indefiniteness refusal disappeared.",
+    "evidence": "the suite pair is recorded from arm-base.log and arm-head.log with identical failure ids and the guard control is red at negative-control.log:79, but scripts/west_iron_linear/compare_newton_routes.py:108 records completed false on every comparison artefact.",
+    "fit": "names state the mechanism (nova/biot/magnetisation.py:652 _linear_jacobian, :840 _linear_cholesky_factor) with no plan label or version token in the added source or tests, matching the surrounding module style.",
+    "goal_fidelity": "nova/biot/magnetisation.py:1045 accepts linear_factorisation of combined/split/cholesky and nova/biot/magnetisation.py:1109-1119 selects the route, so the Cholesky route is carried onto the field-source tree beside the \u00a76 frame.",
+    "reuse": "nova/biot/magnetisation.py:728 recomputes the total/values/tangent/integrand/local block that _linear_jacobian already owns at nova/biot/magnetisation.py:652, forking a ~15-line block inside one file rather than factoring it.",
+    "scope_discipline": "every delivered source path is declared except the two merge carries, which no node commit edits (scripts/iron_operator_bound/west.sh is byte-identical to 64090647d at head)."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The brief asks this node to merge 64090647d onto the iron field-source line keeping both \u00a76's passive CoilSet frame and \u00a75b's in-place Cholesky Newton route with its definiteness guard, and the landed merge 9869794d1 has exactly the parents ee7a8dbaf and 64090647d with both sides present in nova/biot/magnetisation.py (cached_property at nova/biot/magnetisation.py:15, _linear_cholesky_factor at nova/biot/magnetisation.py:840).\nVERDICT done_when: The done_when's suite and guard measures are recorded in the reviewed run's arm-base.log and arm-head.log (each 5 failed with the same five test_control_receipt ids, head adding 19 passes) and in negative-control.log:79 (DID NOT RAISE ValueError, EXIT=1), but the 1e-12 route equivalence on the persisted 80 mm operator is recorded only in ~/.cache/nova-icm-integration/compare-08-titan.json, which carries completed false and exited 1.\nVERDICT write_paths: The declared paths are nova/biot/magnetisation.py, tests/test_magnetisation.py, scripts/west_iron_linear, the cholesky-route evidence fragment and its figures directory; the delivered diff ee7a8dbaf..acc8b9dbb touches those plus docs/evidence/fragments/iron-core-magnetisation/icm-linear-refinement.html and scripts/iron_operator_bound/west.sh, both of which enter only through the merge (09ef5da61) and are byte-identical to 64090647d at head.\nVERDICT manifest: The manifest at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T141951224815-icm-cholesky-route-onto-main/manifest.md records the two suite arms with their log paths and failure ids, the negative control and its log, and the comparison metrics, but its landing line reports the Frobenius 8.53e-13 as agreement while omitting that the committing comparator's own run recorded completed false and EXIT=1.\nVERDICT diff: Read commit by commit over ee7a8dbaf..acc8b9dbb: 9869794d1 is the merge, ac1686994 and 72f944603 add the one-process comparison driver and lower its assertion to the recorded figures, e04eff6b5/d45403001/acc8b9dbb add and revise the evidence fragment, and no interaction value, quadrature order or tolerance is changed.\nCALL_SITES: nova/biot/magnetisation.py:solve_magnetisation, scripts/west_iron_linear/prepare.py:35, scripts/west_iron_linear/measure.py:178, scripts/iron_graded_refinement/measure.py:152, scripts/iron_limb_production/outline.py:164\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/biot/magnetisation.py:1045 accepts linear_factorisation of combined/split/cholesky and nova/biot/magnetisation.py:1109-1119 selects the route, so the Cholesky route is carried onto the field-source tree beside the \u00a76 frame.\nSCORE evidence: 12\nJUSTIFICATION evidence: the suite pair is recorded from arm-base.log and arm-head.log with identical failure ids and the guard control is red at negative-control.log:79, but scripts/west_iron_linear/compare_newton_routes.py:108 records completed false on every comparison artefact.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every delivered source path is declared except the two merge carries, which no node commit edits (scripts/iron_operator_bound/west.sh is byte-identical to 64090647d at head).\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_magnetisation.py:2315 runs solve_magnetisation by both routes on one mesh and would fail if the Cholesky route diverged from the LU route, and tests/test_magnetisation.py:2350 would fail if the indefiniteness refusal disappeared.\nSCORE fit: 17\nJUSTIFICATION fit: names state the mechanism (nova/biot/magnetisation.py:652 _linear_jacobian, :840 _linear_cholesky_factor) with no plan label or version token in the added source or tests, matching the surrounding module style.\nSCORE reuse: 13\nJUSTIFICATION reuse: nova/biot/magnetisation.py:728 recomputes the total/values/tangent/integrand/local block that _linear_jacobian already owns at nova/biot/magnetisation.py:652, forking a ~15-line block inside one file rather than factoring it.\nFINDING scripts/west_iron_linear/compare_newton_routes.py:108 non-blocking: the committed comparator's pass criterion is max(Frobenius, maximum-entry) <= 1e-12 and every recorded run fails it (compare-08-titan.json frobenius 8.53e-13 but maximum_entry 1.67e-12, coefficient_pass false, completed false, EXIT=1), so the artefact the node cites as its route evidence records a failed gate while the manifest and fragment read the norm figure as agreement.\nFINDING nova/biot/magnetisation.py:728 non-blocking: _linear_cholesky_local rebuilds the total/values/material/tangent/integrand/local block that _linear_jacobian assembles at nova/biot/magnetisation.py:652, so the same local-differential construction now exists twice in one module and can drift.\nFINDING scripts/west_iron_linear/gate.py:32 non-blocking: the committed gate's negative control mutates the measure.py interaction and refinement thresholds, not the Cholesky definiteness guard the done_when names, whose only red log comes from an uncommitted script under ~/.cache/nova-icm-integration/negative_control_job.sh and so cannot be reproduced from the repository.\nFINDING scripts/west_iron_linear/refinement.sh:1 non-blocking: refinement.sh, run.sh, diagnose.py and constant_control.py add refinement and assembly drivers the node goal does not ask for, expanding the delivered surface beyond the merge, equivalence measure and guard control inside an otherwise declared directory.\nFINDING tests/test_magnetisation.py:2077 non-blocking: the first new parametrised test is appended with no blank line after test_reloaded_coilset_accepts_the_iron_frame, which ruff does not police because tests/ is excluded from the lint configuration.",
+  "review_run_id": "r-20261122T163026553113-review-of-icm-cholesky-route-onto-main-acc8b9dbb87b",
+  "reviewed_base_sha": "ee7a8dbafbf483532b6462d3e6b6497790e95b89",
+  "reviewed_head_sha": "acc8b9dbb87b239fecb43450e09a8bf7a39756b7",
+  "reviewed_run_id": "r-20261122T141951224815-icm-cholesky-route-onto-main",
+  "scores": {
+    "durability": 17,
+    "evidence": 12,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 13,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T16:41:15.260766+00:00",
+  "total": 91
+}

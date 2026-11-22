@@ -57,7 +57,30 @@
   "plan_slug": "code-reuse-and-hot-path",
   "plan_version": 1,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "commit": "455b6b731e863a81bc078299e1d5fc94c2278ae1",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "The s1 brief measures with the coverage omit list disabled (an explicit --rcfile or omit override), and records that nova/scripts and nova/utilities were measured; the s4 brief refuses deletion of any module the s1 record marks as not measured rather than zero.",
+      "reason": "",
+      "when": "2026-11-22T20:21:29.933780+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "commit": "455b6b731e863a81bc078299e1d5fc94c2278ae1",
+      "commit_basis": "edit",
+      "note": "The s1 brief measures with the coverage omit list disabled (an explicit --rcfile or omit override), and records that nova/scripts and nova/utilities were measured; the s4 brief refuses deletion of any module the s1 record marks as not measured rather than zero.",
+      "reason": "",
+      "when": "2026-11-22T20:21:29.933780+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/code-reuse-and-hot-path/r-20261122T194505239161-plan-review-of-code-reuse-and-hot-path.json",
   "review_run_id": "r-20261122T194505239161-plan-review-of-code-reuse-and-hot-path",
   "reviewed_blob_sha": "194b9624870ce5ed56434b151857ba1327a3190f",
   "rubric": "design",

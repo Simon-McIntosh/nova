@@ -11,7 +11,8 @@ stay inside this module. Fields and magnetisations use component order
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from functools import cached_property
+from dataclasses import dataclass, field, replace
 import hashlib
 import json
 from pathlib import Path
@@ -28,6 +29,7 @@ from nova.biot.tiledassembly import (
     TilePlan,
     cell_interaction,
     galerkin_cell_interaction,
+    linear_cell_flux,
     linear_cell_interaction,
     linear_galerkin_cell_interaction,
     linear_magnetisation_geometry,
@@ -44,6 +46,9 @@ __all__ = [
     "galerkin_spectrum",
     "gate_shell",
     "graded_cell_size",
+    "BoundCurrents",
+    "bound_currents",
+    "linear_cell_interaction",
     "solve_magnetisation",
 ]
 
@@ -264,8 +269,8 @@ def _galerkin_interaction(cells, plan=_PLAN, *, basis="constant"):
 
 
 def _geometry_digest(cells, basis):
-    if basis not in {"constant", "linear"}:
-        raise ValueError("basis must be constant or linear")
+    if basis not in {"constant", "linear", "coil"}:
+        raise ValueError("basis must be constant, linear or coil")
     digest = hashlib.sha256(basis.encode("ascii"))
     for polygon in cells.polygons:
         vertices = np.asarray(polygon, dtype="<f8")
@@ -289,9 +294,10 @@ class MagnetisationInteraction:
             or self.basis != basis
         ):
             raise ValueError("interaction geometry digest does not match the mesh")
-        unknowns = len(cells.polygons) * (6 if basis == "linear" else 2)
-        if self.matrix.shape != (unknowns, unknowns):
-            raise ValueError("interaction shape does not match the mesh and basis")
+        if basis != "coil":
+            unknowns = len(cells.polygons) * (6 if basis == "linear" else 2)
+            if self.matrix.shape != (unknowns, unknowns):
+                raise ValueError("interaction shape does not match the mesh and basis")
         if (
             self.matrix.dtype != np.dtype("float64")
             or not np.isfinite(self.matrix).all()
@@ -300,12 +306,15 @@ class MagnetisationInteraction:
 
 
 def save_magnetisation_interaction(
-    path, matrix, *, region, cell_size, basis="constant"
+    path, matrix, *, region, cell_size, basis="constant", coil_key=None
 ):
     """Persist a float64 response and its mesh identity as NPY and JSON.
 
-    The caller supplies the Galerkin matrix assembled on this exact mesh.
-    No currents, material law or time slice enter the geometry identity.
+    The caller supplies the Galerkin matrix assembled on this exact mesh. No
+    currents, material law or time slice enter the geometry identity. A
+    ``coil_key`` records the coil set whose external field the payload is, in
+    the same container, with the same digest rule and the same refusal family,
+    so the package keeps one response cache rather than one per consumer.
     """
     cells = _mesh(region, cell_size)
     response = MagnetisationInteraction(
@@ -315,19 +324,24 @@ def save_magnetisation_interaction(
     path = Path(path)
     with path.open("wb") as stream:
         np.save(stream, response.matrix, allow_pickle=False)
-    path.with_suffix(".json").write_text(
-        json.dumps(dict(geometry_digest=response.geometry_digest, basis=basis)) + "\n"
-    )
+    metadata = dict(geometry_digest=response.geometry_digest, basis=basis)
+    if coil_key is not None:
+        metadata["coil_key"] = coil_key
+    path.with_suffix(".json").write_text(json.dumps(metadata) + "\n")
     return response
 
 
-def load_magnetisation_interaction(path, *, region, cell_size, basis="constant"):
-    """Load a response only when the ordered mesh geometry and basis match."""
+def load_magnetisation_interaction(
+    path, *, region, cell_size, basis="constant", coil_key=None
+):
+    """Load a response only when the mesh geometry, basis and key match."""
     path = Path(path)
     metadata = json.loads(path.with_suffix(".json").read_text())
     cells = _mesh(region, cell_size)
     if metadata["geometry_digest"] != _geometry_digest(cells, basis):
         raise ValueError("interaction geometry digest does not match the mesh")
+    if coil_key is not None and metadata.get("coil_key") != coil_key:
+        raise ValueError("magnetisation response serves another coil set")
     response = MagnetisationInteraction(
         np.load(path, mmap_mode="r", allow_pickle=False),
         metadata["geometry_digest"],
@@ -686,7 +700,9 @@ class MagnetisationSolution:
     ``reduction_ratios`` and ``step_types`` describe each accepted step beside
     ``step_scales``. The ratio measures reduction of the regularised local
     equation, so a regularised step can increase the unregularised residual.
-    ``field`` evaluates the iron contribution alone through the sheet tile.
+    ``field`` evaluates the iron contribution alone through the bound-current
+    seam :class:`BoundCurrents`, which is also what the CoilSet carries as one
+    passive frame, so the two cannot drift apart.
     """
 
     magnetisation: np.ndarray
@@ -703,6 +719,16 @@ class MagnetisationSolution:
     linear_coefficients: np.ndarray | None = field(default=None, repr=False)
     fill_fraction: np.ndarray = field(default_factory=lambda: np.ones(0))
     cross_field_factor: np.ndarray = field(default_factory=lambda: np.zeros((0, 2)))
+    linear_geometry: dict | None = field(default=None, repr=False)
+
+    def bound_currents(self) -> "BoundCurrents":
+        """Return the affine magnetisation as the CoilSet's passive sources."""
+        if self.linear_coefficients is None:
+            raise ValueError(
+                "bound currents need the piecewise-linear basis; the constant "
+                "basis field stays on the centroid interaction"
+            )
+        return bound_currents(self)
 
     @property
     def iron_magnetisation(self) -> np.ndarray:
@@ -723,10 +749,7 @@ class MagnetisationSolution:
         if not len(points):
             return np.empty((0, 2))
         if self.linear_coefficients is not None:
-            response = linear_cell_interaction(
-                self._mesh.polygons, points, plan=self._plan
-            )
-            return (response @ self.linear_coefficients.reshape(-1)).reshape(2, -1).T
+            return self.bound_currents().field(points)
         response = _interaction(self._mesh, points, self._plan)
         return (response @ self.magnetisation.T.reshape(-1)).reshape(2, -1).T
 
@@ -975,4 +998,109 @@ def solve_magnetisation(
         fill_fraction=fill,
         cross_field_factor=cross,
         linear_coefficients=linear_coefficients,
+        linear_geometry=geometry if basis == "linear" else None,
+    )
+
+
+@dataclass(frozen=True)
+class BoundCurrents:
+    """The solved magnetisation as the bound currents a CoilSet carries.
+
+    ``atoms`` are the mesh's split edge segments [m]; ``edge`` is the
+    ``(unknowns, 2*atoms)`` incidence of a uniform sheet and an affine
+    remainder per atom, and ``volume`` the ``(unknowns, cells)`` incidence of
+    the uniform azimuthal bound volume current. ``currents`` is the affine
+    state the material solve writes, ordered by component, cell and basis, the
+    order ``MagnetisationSolution.linear_coefficients`` flattens to.
+
+    ``field`` and ``psi`` are the single evaluation the package uses: the
+    passive frame's field and :meth:`MagnetisationSolution.field` are the same
+    call on the same operands. A zero state returns exactly zero at every
+    target, so the air-core field passes through unchanged, and a solved state
+    adds the iron.
+    """
+
+    polygons: tuple
+    atoms: np.ndarray
+    edge: object
+    volume: object
+    plan: TilePlan
+    currents: np.ndarray
+    basis: str = "linear"
+
+    @property
+    def unknowns(self) -> int:
+        """Return the number of affine state components."""
+        return int(self.edge.shape[0])
+
+    def set_currents(self, currents) -> "BoundCurrents":
+        """Return the same geometry carrying a different affine state."""
+        currents = np.asarray(currents, dtype=np.float64)
+        if currents.shape != (self.unknowns,):
+            raise ValueError(f"currents must have shape ({self.unknowns},)")
+        return replace(self, currents=currents.copy())
+
+    def zero(self) -> "BoundCurrents":
+        """Return this source set with the magnetisation set to zero.
+
+        The control this node's measure uses: the frame stays in the CoilSet,
+        the sources stay in the source list, and the frame contributes exactly
+        zero, so the solve must reproduce the air-core field bit for bit.
+        """
+        return self.set_currents(np.zeros(self.unknowns))
+
+    @cached_property
+    def geometry(self) -> dict:
+        """Return the interaction geometry this source's cells carry."""
+        return dict(
+            atoms=self.atoms,
+            edge_coefficient=self.edge,
+            volume_coefficient=self.volume,
+        )
+
+    def field(self, points: np.ndarray, order: int = 24) -> np.ndarray:
+        """Return the iron's (B_R, B_Z) [T] at (R, Z) points [m].
+
+        The evaluation is :func:`nova.biot.tiledassembly.linear_cell_interaction`,
+        so a source and the linear operator share one evaluator.
+        """
+        points = _points(points)
+        if not len(points):
+            return np.empty((0, 2))
+        response = linear_cell_interaction(
+            self.polygons, points, plan=self.plan, order=order, geometry=self.geometry
+        )
+        return (response @ self.currents).reshape(2, -1).T
+
+    def psi(self, points: np.ndarray, order: int = 24) -> np.ndarray:
+        """Return the iron's poloidal flux [Wb] at (R, Z) points [m].
+
+        The flux companion of :meth:`field`, evaluated by
+        :func:`nova.biot.tiledassembly.linear_cell_flux`'s sibling.
+        """
+        points = _points(points)
+        if not len(points):
+            return np.empty(0)
+        response = linear_cell_flux(
+            self.polygons,
+            points,
+            plan=self.plan,
+            order=order,
+            geometry=self.geometry,
+        )
+        return response @ self.currents
+
+
+def bound_currents(solution: MagnetisationSolution) -> BoundCurrents:
+    """Return a solved affine magnetisation as bound-current sources."""
+    geometry = solution.linear_geometry
+    if geometry is None:
+        geometry = linear_magnetisation_geometry(solution._mesh.polygons)
+    return BoundCurrents(
+        polygons=solution._mesh.polygons,
+        atoms=np.asarray(geometry["atoms"]),
+        edge=geometry["edge_coefficient"],
+        volume=geometry["volume_coefficient"],
+        plan=solution._plan,
+        currents=np.asarray(solution.linear_coefficients, dtype=np.float64).reshape(-1),
     )

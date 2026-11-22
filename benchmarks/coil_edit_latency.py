@@ -3881,6 +3881,13 @@ def main() -> None:
                 "schema": "nova.coil-edit-panel-render",
                 "command": " ".join([sys.argv[0], *sys.argv[1:]]),
                 "scheduler": _scheduler(),
+                "render": {
+                    "command": " ".join([sys.argv[0], *sys.argv[1:]]),
+                    "host": platform.node(),
+                    "device": jax.devices()[0].device_kind,
+                    "platform": jax.devices()[0].platform,
+                    **_scheduler(),
+                },
                 "runtime": {
                     "host": platform.node(),
                     "device": jax.devices()[0].device_kind,

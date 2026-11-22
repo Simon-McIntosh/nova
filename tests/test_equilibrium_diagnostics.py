@@ -465,8 +465,9 @@ def test_shafranov_radial_moment_is_resolved_by_the_gate_contour_sampling():
     near the X-point leaves it unresolved at the sampling the volume-side gate
     uses, and the gate then reports quadrature error as an identity residual.
     The departure from the 8001-point value isolates the contour discretisation
-    from the volume-side grid, which this comparison never touches.  A
-    second-order chord rule departs by 5.7e-4 here.
+    from the volume-side grid, which this comparison never touches.  It is
+    8.1e-8 here, at the volume-side floor; a rule whose error concentrates at
+    the X-point leaves it far above this.
     """
     case = cerfon_freidberg_single_null()
     moments = {}
@@ -477,13 +478,25 @@ def test_shafranov_radial_moment_is_resolved_by_the_gate_contour_sampling():
     assert departure < 1.0e-5, f"radial moment departs {departure:.3e} at 2001 points"
 
 
-def test_shafranov_contour_integral_error_falls_with_resolution():
-    """The contour/volume mismatch is quadrature error and shrinks with grid size."""
+#: The volume-side cell-centre mask ``flux > 0`` carries no boundary
+#: correction, so the identity residual falls at first order in the grid step.
+#: The rungs start at 321 because the coarser 161 rung leaves that asymptote.
+#: Measured 0.80 over 321 to 1281, a little below one because the mask boundary
+#: carries a curvature correction.
+IDENTITY_RESOLUTIONS = (321, 641, 1281)
+IDENTITY_CONTOUR_SAMPLING = 2001
+IDENTITY_ORDER = 1.0
+IDENTITY_ORDER_TOLERANCE = 0.4
+
+
+def _identity_ladder():
+    """Measure the contour/volume identity residual over the grid rungs."""
     case = cerfon_freidberg_single_null()
-    errors = []
-    resolutions = (161, 321, 641)
-    for resolution in resolutions:
-        row = _analytic_row(case, sampling=2001, resolution=resolution)
+    residuals = {"vertical": [], "radial": [], "stress": []}
+    for resolution in IDENTITY_RESOLUTIONS:
+        row = _analytic_row(
+            case, sampling=IDENTITY_CONTOUR_SAMPLING, resolution=resolution
+        )
         count = row.contour.shape[0]
         size = count + 7
         integrals = shafranov_contour_integrals(
@@ -493,15 +506,59 @@ def test_shafranov_contour_integral_error_falls_with_resolution():
             jnp.asarray(_padded(row.toroidal_field, size)),
             count,
         )
-        errors.append(
-            abs(float(integrals.vertical_moment) - row.volume_sides[0])
-            / abs(row.volume_sides[0])
+        members = (
+            float(integrals.vertical_moment),
+            float(integrals.radial_moment),
+            float(integrals.toroidal_stress),
         )
-    assert errors[-1] < errors[0], f"errors did not fall: {errors}"
-    order = math.log(errors[0] / errors[-1]) / math.log(
-        resolutions[-1] / resolutions[0]
+        for name, value, side in zip(residuals, members, row.volume_sides, strict=True):
+            residuals[name].append(abs(value - side) / abs(side))
+    vertical = residuals["vertical"]
+    order = math.log(vertical[0] / vertical[-1]) / math.log(
+        IDENTITY_RESOLUTIONS[-1] / IDENTITY_RESOLUTIONS[0]
     )
-    assert order > 0.5, f"fitted order {order:.3f} from errors {errors}"
+    return {
+        "resolutions": list(IDENTITY_RESOLUTIONS),
+        "contour_sampling": IDENTITY_CONTOUR_SAMPLING,
+        "vertical_residual": residuals["vertical"],
+        "radial_residual": residuals["radial"],
+        "stress_residual": residuals["stress"],
+        "order": order,
+        "predicted_order": IDENTITY_ORDER,
+        "mechanism": (
+            "the volume side integrates on cell centres with the mask "
+            "flux > 0, which carries no boundary correction, so the "
+            "mis-measured region is a boundary layer one cell thick and the "
+            "residual falls at first order in the grid step; the contour side "
+            "is converged at this sampling"
+        ),
+    }
+
+
+def test_shafranov_contour_integral_error_fits_the_volume_mask_order(tmp_path: Path):
+    """The contour/volume residual follows the volume mask at first order.
+
+    The residual falls with the grid step rather than with the contour
+    sampling, so it is the volume side's cell-centre mask ``flux > 0``;
+    the mask carries no boundary correction, so a cell straddling the last
+    closed flux surface is counted whole or not at all and the relative error
+    falls at first order in the grid step.  The fitted order is printed and
+    written to a receipt beside the ladder it was fitted from; the tracked
+    certificate receipt is written only by the regeneration script, never by
+    this test.
+    """
+    receipt = _identity_ladder()
+    print(json.dumps(receipt, indent=2))
+    (tmp_path / "identity_order.json").write_text(json.dumps(receipt, indent=2) + "\n")
+
+    errors = receipt["vertical_residual"]
+    order = receipt["order"]
+    assert errors[0] > errors[-1], f"errors did not fall: {errors}"
+    assert abs(order - IDENTITY_ORDER) <= IDENTITY_ORDER_TOLERANCE, (
+        f"fitted order {order:.3f} at resolutions {IDENTITY_RESOLUTIONS} does "
+        f"not match the volume mask's predicted {IDENTITY_ORDER:.1f} "
+        f"(tolerance {IDENTITY_ORDER_TOLERANCE}); residuals {errors}"
+    )
 
 
 def test_beta_p_plus_half_internal_inductance_matches_the_volume_definition():
@@ -624,29 +681,15 @@ def _grid_imaged_contour_field(case, lattice, contour):
     return np.asarray(stencil(field.radial)), np.asarray(stencil(field.vertical))
 
 
-def test_grid_imaged_biot_field_converges_to_the_volume_definition(
-    tmp_path: Path,
-):
-    """The grid-imaged route converges at the order its quadrature predicts.
+def _grid_route_ladder():
+    """Measure the grid-imaged route: the contour and grid convergence ladders.
 
     The positive control images analytic Biot field values through one fixed
     response column, then uses the operator mesh's shared-node stencil at the
     moving contour.  The direct analytic contour field is never passed to the
-    integral, so this test distinguishes the grid-imaged route from the
-    analytic-row gate above.
-
-    The route's error is dominated by the contour quadrature, which is the
-    periodic trapezoidal rule over the vertices with a fourth-order tangent.
-    The separatrix sample places a vertex on the X-point corner, where the
-    central tangent stencil is off by order one, so the decay of the vertical
-    moment and the toroidal stress is second order in the contour sampling.
-    The grid interpolation is third order and its contribution to the
-    combination is seven orders down at the grid this ladder runs on, so the
-    fitted order here is the quadrature's and two is what it is expected to be.
-    The measured order is printed and written to the receipt beside the ladder
-    it was fitted from.
+    integral, so the measured order is the grid-imaged route's and not the
+    analytic-row gate's.
     """
-    tracked_digest = hashlib.sha256(TRACKED_RECEIPT.read_bytes()).hexdigest()
     case = cerfon_freidberg_single_null()
     row = _analytic_row(case, sampling=501, resolution=401)
     exact = 4.0 * row.pressure_integral / (
@@ -690,34 +733,73 @@ def test_grid_imaged_biot_field_converges_to_the_volume_definition(
         imaged = _contour_combination(row, contour, grid_radial, grid_vertical)
         grid_gaps.append(abs(imaged - analytic_value) / abs(analytic_value))
 
-    receipt = {
+    return {
         "exact": exact,
+        "analytic_route_value": analytic_value,
         "grid_resolution": GRID_RESOLUTION,
         "contour_samplings": list(CONTOUR_SAMPLINGS),
         "errors": errors,
         "limit": limit,
+        "plateau_absolute": limit * abs(exact),
         "departure_from_limit": departure,
         "quadrature_order": order,
+        "quadrature_order_range": [CONTOUR_SAMPLINGS[0], CONTOUR_SAMPLINGS[-2]],
         "grid_resolutions": list(GRID_RESOLUTIONS),
         "grid_gap": grid_gaps,
+        "grid_gap_max": max(grid_gaps),
         "mechanism": (
-            "the contour quadrature is the periodic trapezoidal rule with a "
-            "fourth-order tangent, limited to second order in the contour "
-            "sampling by the X-point corner vertex; the shared-node stencil is "
-            "third order and the field imaging is exact on this positive "
-            "control, so the fitted order is the quadrature's"
+            "the contour quadrature is the periodic trapezoidal rule over the "
+            "vertices with a fourth-order tangent, limited to second order in "
+            "the contour sampling by a vertex on the X-point corner where the "
+            "central tangent is off by order one; the shared-node stencil is "
+            "third order and its gap to the analytic route is six orders below "
+            "the plateau, so the fitted order is the quadrature's.  The route "
+            "settles onto a plateau rather than onto the exact value because "
+            "the combination subtracts nearly equal terms: twice the vertical "
+            "moment is 5.88 against a toroidal volume of 5.87, so the volume "
+            "side's 2e-4 identity residual in the vertical moment is amplified "
+            "by 2*mu0*|Sv|/|W| near 7000 and holds the combination 0.223 off "
+            "exact"
         ),
     }
+
+
+def test_grid_imaged_biot_field_converges_to_the_volume_definition(
+    tmp_path: Path,
+):
+    """The grid-imaged route converges at the order its quadrature predicts.
+
+    The positive control images analytic Biot field values through one fixed
+    response column, then uses the operator mesh's shared-node stencil at the
+    moving contour.  The direct analytic contour field is never passed to the
+    integral, so this test distinguishes the grid-imaged route from the
+    analytic-row gate above.
+
+    The route's error is dominated by the contour quadrature, which is the
+    periodic trapezoidal rule over the vertices with a fourth-order tangent.
+    The separatrix sample places a vertex on the X-point corner, where the
+    central tangent stencil is off by order one, so the decay of the vertical
+    moment and the toroidal stress is second order in the contour sampling.
+    The grid interpolation is third order and its gap to the analytic route
+    is six orders below the plateau at the grid this ladder runs on, so the
+    fitted order here is the quadrature's and two is what it is
+    expected to be.  The measured order is printed and written to a receipt
+    beside the ladder it was fitted from; the tracked certificate receipt is
+    written only by the regeneration script, never by this test.
+    """
+    tracked_digest = hashlib.sha256(TRACKED_RECEIPT.read_bytes()).hexdigest()
+    receipt = _grid_route_ladder()
     print(json.dumps(receipt, indent=2))
     (tmp_path / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
 
-    assert order > QUADRATURE_ORDER_FLOOR, (
-        f"contour quadrature fitted order {order:.3f} at samplings "
-        f"{CONTOUR_SAMPLINGS}, departures {departure}"
+    assert receipt["quadrature_order"] > QUADRATURE_ORDER_FLOOR, (
+        f"contour quadrature fitted order {receipt['quadrature_order']:.3f} at "
+        f"samplings {CONTOUR_SAMPLINGS}, departures "
+        f"{receipt['departure_from_limit']}"
     )
-    assert grid_gaps[-1] < grid_gaps[0], (
+    assert receipt["grid_gap"][-1] < receipt["grid_gap"][0], (
         f"grid-imaged route did not close on the analytic route at grids "
-        f"{GRID_RESOLUTIONS}: {grid_gaps}"
+        f"{GRID_RESOLUTIONS}: {receipt['grid_gap']}"
     )
     assert hashlib.sha256(TRACKED_RECEIPT.read_bytes()).hexdigest() == tracked_digest, (
         f"the diagnostics test rewrote a tracked receipt: {TRACKED_RECEIPT}"

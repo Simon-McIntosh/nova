@@ -25,8 +25,8 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="133">
-<meta name="plan-modified" content="2026-11-21">
+<meta name="plan-version" content="134">
+<meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
   <main class="plan-doc">
@@ -349,6 +349,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261121T160535281266-review-of-edge-term-tangent-rows-8978420fb1dd" data-who="reckon-build" data-when="2026-11-21T16:21:57.172Z">
     <div class="r-comment-body"><p>Reviewed r-20261115T223952454215-edge-term-tangent-rows at 999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c..8978420fb1dd3c0902254b2bfe4a2e54b85f6f7d: goal_fidelity 8, evidence 11, scope_discipline 19, durability 12, fit 17, reuse 18, added_failure_count 0, one blocking finding — test_tangent_matches_base_jvp[edge_terms] lands red at 1.588e-09 against the 1e-09 bound on H200 job 1334717, so the four-pass goal is unmet.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261122T120043166405-review-of-edge-term-tangent-rows-83374ed5e4fd" data-who="reckon-build" data-when="2026-11-22T12:01:45.817Z">
+    <div class="r-comment-body"><p>review of r-20261115T223952454215-edge-term-tangent-rows at 8978420fb..83374ed5 recorded: the arsinh-derivative reorder at nova/biot/polygonanalytic.py:391 matches JAX&#x27;s atanh jvp and is green on the titan P100 (26 passed, tangent_max_relative=3.677e-12 against 1e-09), but no post-repair H200 arm exists, so done_when clause (2)&#x27;s named device is unmeasured; one blocking finding, scores 13/11/18/18/18/19, added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261120T120704016466-review-of-shared-root-paths-da2abb6c3b3c" data-who="reckon-build" data-when="2026-11-20T12:13:47.058Z">
     <div class="r-comment-body"><p>Independent review of r-20261120T094110687720-shared-root-paths at base 789479f7 and head da2abb6c3 is parsed with scores goal_fidelity 20, evidence 15, scope_discipline 19, durability 8, fit 18, reuse 5 (total 85) and five non-blocking findings; the rename verifies independently at 88 default references across 82 files at base against 0 at head with all 29 corpus lines byte-identical, and both suite arms carry the same six failure ids.</p></div>

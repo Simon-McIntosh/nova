@@ -1,0 +1,118 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": [
+    {
+      "conditions_for_failure": "The row reddens when the hand tangent departs from jax.jvp of the present primal by more than SCAN_TOLERANCE (1e-9) normwise on any of the 10,000 samples; restoring the old 2*q_t/(1-q**2) association at nova/biot/polygonanalytic.py:391 is exactly such a departure, measured at 1.588e-09 in repin-rows-1334090.log.",
+      "independence": "The expected side is jax.jvp of the present primal and the measured side is _arsinh_terms_tangent's hand chain, so the two sides are separate code paths and the assertion is not fed the value it checks.",
+      "limit": "No assertion was added by this increment; the guard predates it, and the direct bit-identity claim for the new ordering (0 mismatched nodes) rests on repair_order.py, a printed probe with no assertion.",
+      "location": "tests/biot/tangent_identity.py:142 via tests/biot/test_edge_term_tangents.py:287"
+    }
+  ],
+  "call_site_note": "No production runtime code can reach the landed change: the only external callers of the hand-tangent functions are the node's own tests (tests/biot/test_edge_term_tangents.py:166 calls polygonanalytic._edge_terms_tangent, tests/biot/test_vertex_term_tangents.py:200 and :214 call the flux-moment and horizontal tangent functions). Inside the module the changed branch is reached only from nova/biot/polygonanalytic.py:3942 in _arsinh_terms_tangent, and the other call site at :843 passes no differential and returns before the changed line.",
+  "call_sites": [],
+  "completed_at": "2026-11-22T12:01:45.817Z",
+  "dispatched_at": "2026-11-22T12:01:29Z",
+  "failure_id_comparison": {
+    "cpu_suite_pair": {
+      "after": {
+        "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/biot/test_edge_term_tangents.py",
+        "completed": true,
+        "failure_count": 10,
+        "job": "1335780",
+        "log_path": "/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/edge-term-tangent-rows/repair-after-arm-1335780.log",
+        "observed_summary": "10 failed, 16 passed in 6112.75s (1:41:52), AFTER_EXIT=1",
+        "revision": "37178a1d5a5fd0415c44ca6c141a379cd90d2f63"
+      },
+      "base_only_ids": [],
+      "baseline": {
+        "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/biot/test_edge_term_tangents.py",
+        "completed": true,
+        "failure_count": 10,
+        "job": "1335758",
+        "log_path": "/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/edge-term-tangent-rows/repair-base-arm2-1335758.log",
+        "observed_summary": "10 failed, 16 passed in 6109.25s (1:41:49), BASE_EXIT=1",
+        "revision": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c"
+      },
+      "failure_ids": [
+        "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_integrands]",
+        "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_and_moment_terms]",
+        "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_terms]",
+        "tests/biot/test_edge_term_tangents.py::test_truncated_tangent_fails_identity[edge_integrands]",
+        "tests/biot/test_edge_term_tangents.py::test_truncated_tangent_fails_identity[flux_and_moment_terms]",
+        "tests/biot/test_edge_term_tangents.py::test_truncated_tangent_fails_identity[edge_terms]",
+        "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[edge_integrands]",
+        "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[flux_line_moments]",
+        "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[flux_and_moment_terms]",
+        "tests/biot/test_edge_term_tangents.py::test_tangent_compiles_within_bound[edge_terms]"
+      ],
+      "head_only_ids": []
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html",
+      "line": "268",
+      "severity": "blocking",
+      "text": "blocking: the green head arm at revision 37178a1d5 is the titan P100, and no H200 arm exists after fe186d48e, so done_when clause (2)'s requirement that the four rows pass on the H200 is not measured; the last H200 head arm (coordinator/job-1334717.log at d6cf0cd7d) is the pre-repair tree and still carries test_tangent_matches_base_jvp[edge_terms] red at 1.588e-09 against the 1e-09 bound."
+    },
+    {
+      "file": "/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/edge-term-tangent-rows/repair-identity-1335745.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the header names REV=8978420fb, which lacks the repair at nova/biot/polygonanalytic.py:391, yet the log reports the post-repair 3.677e-12; its 18:30:48 mtime is after fe186d48e's 18:26:40 commit, so it measured an uncommitted tree and cannot be reproduced from the revision it names. The same figure is reproduced at AFTER_REVISION=37178a1d5 in repair-gpu-head-1335817.log, but lowering-head.json:5 and repair-compile-1335735.log:1 carry the same stale REVISION=8978420fb for later claims."
+    },
+    {
+      "file": "scripts/prototypes/edge_term_tangent_rows/repair_arsinh.py",
+      "line": "134",
+      "severity": "non-blocking",
+      "text": "non-blocking: compare(\"ring_ratio\", d_ratio, jax.jvp(...)[1] * 0.0 + d_ratio) subtracts the hand tangent from itself plus 0.0, so the line always prints gap 0 and cannot report the departure it is named to localise."
+    },
+    {
+      "file": "scripts/prototypes/edge_term_tangent_rows/repair_bisect.py",
+      "line": "96",
+      "severity": "non-blocking",
+      "text": "non-blocking: stage(\"first(ad d)\", ...) at :96 and stage(\"residual(ad d)\", ...) at :98 compare jax.jvp's own value against itself, so two of the ten bisect stages are tautologies that report equal=True whatever the hand chain does."
+    }
+  ],
+  "increment_reviewed": "8978420fb1dd3c0902254b2bfe4a2e54b85f6f7d..83374ed5e4fdfba7562890882e5a36db2eb239bd",
+  "item_verdicts": {
+    "diff": "Read the three commits gained since the prior review at 8978420fb, commit by commit: fe186d48e is the one-expression reorder at nova/biot/polygonanalytic.py:391 (verified equal to jax's atanh jvp rule at jax/_src/lax/lax.py:4704-4705), 37178a1d5 and 83374ed5e change only docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html, and the six repair scripts are new read-only probes under scripts/prototypes/edge_term_tangent_rows.",
+    "done_when": "Read the s6 done_when; the per-intermediate attribution and the truncation-control error are recorded in the fragment, and the lowered StableHLO size is recorded at 10,251,812 bytes on both trees (lowering-base.json, lowering-head.json), but clause (2)'s 'four rows pass on the H200' has no post-repair H200 arm: docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:268 names the titan P100 for the green head.",
+    "goal": "The node goal is that the four target rows of tests/biot/test_edge_term_tangents.py pass on the H200 with every tolerance unchanged; the landed increment repairs nova/biot/polygonanalytic.py:391 to form d(2 atanh q) in JAX's atanh-jvp association, and the only post-repair arm recorded (repair-gpu-head-1335817.log at revision 37178a1d5) is a titan P100 run reading 26 passed.",
+    "manifest": "Read manifest.md; it reports the H200 arms at d6cf0cd7d (9 failed/39 passed) and 999c9d5fe (10 failed/38 passed), and recomputing their FAILED sets from coordinator/job-1334717.log and coordinator/base-job-1335151.log confirms no head-only id and the one base-only id the manifest names, alongside the titan head arm 26 passed and the two sirius suite arms of 10 failed/16 passed each.",
+    "write_paths": "Read the dispatch's declared paths; the increment touches exactly eight files and all of them lie inside nova/biot/polygonanalytic.py, scripts/prototypes/edge_term_tangent_rows and docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html; the 181-path delivered range outside them is main merged in at ea9029961, not authored by this node."
+  },
+  "justifications": {
+    "durability": "Reinstating the old association reddens tests/biot/tangent_identity.py:142's assert tangent <= bound through test_edge_term_tangents.py:287, as repin-rows-1334090.log shows at 1.588e-09 on the P100 before the fix.",
+    "evidence": "The post-repair gate is repair-gpu-head-1335817.log (titan P100, 26 passed) while the done_when names the H200, and the recorded CPU suite pair is an absence in which 10 timeout ids fail at both arms.",
+    "fit": "The comment and reorder at nova/biot/polygonanalytic.py:386-393 follow the surrounding arithmetic style, and the probes follow the one-directory-per-investigation pattern of scripts/prototypes.",
+    "goal_fidelity": "nova/biot/polygonanalytic.py:391 now reproduces the traced derivative and the row reads 3.677e-12 on the P100, but the goal's named H200 device is unmeasured after the repair.",
+    "reuse": "The change edits the owner _small_corner_arsinh rather than forking it, and a search of scripts/prototypes and tests/biot/tangent_identity.py for an existing localiser or ordering matcher found only the generic scripts/prototypes/edge_tangent_failures/cpu_arm.sh launcher.",
+    "scope_discipline": "All eight increment paths lie inside the declared write paths, and the out-of-scope paths in the 181-path delivered range come from the main merge at ea9029961."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is that the four target rows of tests/biot/test_edge_term_tangents.py pass on the H200 with every tolerance unchanged; the landed increment repairs nova/biot/polygonanalytic.py:391 to form d(2 atanh q) in JAX's atanh-jvp association, and the only post-repair arm recorded (repair-gpu-head-1335817.log at revision 37178a1d5) is a titan P100 run reading 26 passed.\nVERDICT done_when: read the s6 done_when; the per-intermediate attribution and the truncation-control error are recorded in the fragment, and the lowered StableHLO size is recorded at 10,251,812 bytes on both trees, but clause (2)'s four-rows-pass-on-the-H200 has no post-repair H200 arm: docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:268 names the titan P100 for the green head.\nVERDICT write_paths: read the dispatch's declared paths; the increment touches exactly eight files and all of them lie inside nova/biot/polygonanalytic.py, scripts/prototypes/edge_term_tangent_rows and docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html; the 181-path delivered range outside them is main merged at ea9029961, not authored by this node.\nVERDICT manifest: read manifest.md; it reports the H200 arms at d6cf0cd7d (9 failed/39 passed) and 999c9d5fe (10 failed/38 passed), and recomputing their FAILED sets from coordinator/job-1334717.log and coordinator/base-job-1335151.log confirms no head-only id and the one base-only id the manifest names, alongside the titan head arm 26 passed and the two sirius suite arms of 10 failed/16 passed each.\nVERDICT diff: read the three commits gained since the prior review at 8978420fb, commit by commit: fe186d48e is the one-expression reorder at nova/biot/polygonanalytic.py:391 (verified equal to jax's atanh jvp rule at jax/_src/lax/lax.py:4704-4705), 37178a1d5 and 83374ed5e change only docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html, and the six repair scripts are new read-only probes under scripts/prototypes/edge_term_tangent_rows.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:391 now reproduces the traced derivative and the row reads 3.677e-12 on the P100, but the goal's named H200 device is unmeasured after the repair.\nSCORE evidence: 11\nJUSTIFICATION evidence: the post-repair gate is repair-gpu-head-1335817.log (titan P100, 26 passed) while the done_when names the H200, and the recorded CPU suite pair is an absence with 10 timeout ids failing at both arms.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: all eight increment paths lie inside the declared write paths, and the out-of-scope paths in the 181-path delivered range come from the main merge at ea9029961.\nSCORE durability: 18\nJUSTIFICATION durability: reinstating the old association reddens tests/biot/tangent_identity.py:142's assert tangent <= bound through test_edge_term_tangents.py:287, as repin-rows-1334090.log shows at 1.588e-09 on the P100 before the fix.\nSCORE fit: 18\nJUSTIFICATION fit: the comment and reorder at nova/biot/polygonanalytic.py:386-393 follow the surrounding arithmetic style, and the probes follow the one-directory-per-investigation pattern of scripts/prototypes.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change edits the owner _small_corner_arsinh rather than forking it, and a search of scripts/prototypes and tests/biot/tangent_identity.py for an existing localiser or ordering matcher found only the generic scripts/prototypes/edge_tangent_failures/cpu_arm.sh launcher.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-term-tangent-rows.html:268 blocking: the green head arm at revision 37178a1d5 is the titan P100, and no H200 arm exists after fe186d48e, so done_when clause (2)'s requirement that the four rows pass on the H200 is not measured; the last H200 head arm (coordinator/job-1334717.log at d6cf0cd7d) is the pre-repair tree and still carries test_tangent_matches_base_jvp[edge_terms] red at 1.588e-09 against the 1e-09 bound.\nFINDING /home/ITER/mcintos/.cache/nova-kernel-compile-barrier/edge-term-tangent-rows/repair-identity-1335745.log:1 non-blocking: the header names REV=8978420fb, which lacks the repair at nova/biot/polygonanalytic.py:391, yet the log reports the post-repair 3.677e-12; its 18:30:48 mtime is after fe186d48e's 18:26:40 commit, so it measured an uncommitted tree and cannot be reproduced from the revision it names, though the same figure is reproduced at AFTER_REVISION=37178a1d5 in repair-gpu-head-1335817.log.\nFINDING scripts/prototypes/edge_term_tangent_rows/repair_arsinh.py:134 non-blocking: the ring_ratio comparison subtracts the hand tangent from itself plus 0.0, so the line always prints gap 0 and cannot report the departure it is named to localise.\nFINDING scripts/prototypes/edge_term_tangent_rows/repair_bisect.py:96 non-blocking: the first(ad d) and residual(ad d) stages at :96 and :98 compare jax.jvp's own value against itself, so two of the ten bisect stages are tautologies that report equal=True whatever the hand chain does.",
+  "review_method": "Read-only review of the dispatch goal, done_when and write paths, the run manifest, the three commits gained since the prior review (8978420fb..83374ed5), the six suite and device arm logs in the cache dirs, the JAX atanh jvp rule in the installed venv, and the fragment. No suite rerun and no mutation; the only outside-diff reads were the reuse search over scripts/prototypes and tests/biot/tangent_identity.py.",
+  "review_run_id": "r-20261122T120043166405-review-of-edge-term-tangent-rows-83374ed5e4fd",
+  "reviewed_base_sha": "999c9d5fe6e84e9e2bfbf989ad0f79a989d7692c",
+  "reviewed_head_sha": "83374ed5e4fdfba7562890882e5a36db2eb239bd",
+  "reviewed_run_id": "r-20261115T223952454215-edge-term-tangent-rows",
+  "scores": {
+    "durability": 18,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "source_commits": [
+    "fe186d48e",
+    "37178a1d5",
+    "83374ed5e"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T12:12:28.309537+00:00",
+  "total": 97
+}

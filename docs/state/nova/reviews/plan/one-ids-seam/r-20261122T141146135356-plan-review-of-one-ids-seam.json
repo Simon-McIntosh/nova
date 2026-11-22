@@ -65,7 +65,30 @@
   "plan_slug": "one-ids-seam",
   "plan_version": 0,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "84c74ea8d0315632bdde70050847704483af1a15",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "\u00a73 now says the existing machine-description authoring and publication path moves into the member and is not reimplemented; \u00a71's class column carries machine authoring or publication.",
+      "reason": "",
+      "when": "2026-11-22T14:35:42.020876+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "84c74ea8d0315632bdde70050847704483af1a15",
+      "commit_basis": "edit",
+      "note": "\u00a73 now says the existing machine-description authoring and publication path moves into the member and is not reimplemented; \u00a71's class column carries machine authoring or publication.",
+      "reason": "",
+      "when": "2026-11-22T14:35:42.020876+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/one-ids-seam/r-20261122T141146135356-plan-review-of-one-ids-seam.json",
   "review_run_id": "r-20261122T141146135356-plan-review-of-one-ids-seam",
   "reviewed_blob_sha": "868c233f0440c7c2ad301c6eab1966d3c3c7c407",
   "rubric": "design",

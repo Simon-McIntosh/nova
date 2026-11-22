@@ -1,0 +1,64 @@
+<section data-reckon="evidence" id="centroid-panels-separatrix">
+<h2>The centroid panels draw their assembled separatrix at the raised branch capacity</h2>
+
+<p id="centroid-panels-separatrix-summary">The three MAST centroid states are
+drawn from their stored currents and cell moments at a branch capacity of 2,048
+segments, and on every lane the separatrix assembly succeeds. The previous
+record on the same lanes found the assembler refusing with
+<code>overflow</code> true at the 256-segment capacity the fine display grid then
+carried; the capacity is now
+<code>1 &lt;&lt; (2 * (radius.size + height.size) - 1).bit_length()</code>, which
+is 2,048 for a 401 by 195 display grid, and the refusal does not recur. The
+figure below is the cpu lane's committed panel pair, drawn from that lane's
+stored state without a solve.</p>
+
+<p id="centroid-panels-separatrix-figure"><img
+  src="/nova/figures/mast-centroid-capability/cpu-lane/vacuum-and-plasma-panels.png"
+  alt="MAST centroid cpu lane: vacuum flux contours with the admitted X-point and
+  the plasma response, and the plasma panel with the assembled separatrix and the
+  cut plasma mesh"></p>
+
+<table id="centroid-panels-separatrix-table">
+<caption>Read from each lane's committed <code>centroid-solve.json</code>: the
+assembler's own verdict at the map's saddle level, and what the panel drew.</caption>
+<thead><tr><th>lane</th><th>well_formed</th><th>closed segments</th><th>open segments</th><th>lobe / legs drawn</th><th>boundary vertices</th><th>clipped cells</th></tr></thead>
+<tbody>
+<tr><td>cpu-lane</td><td>true</td><td>677</td><td>657</td><td>1 / 2</td><td>8125</td><td>4250</td></tr>
+<tr><td>titan-lane</td><td>true</td><td>677</td><td>657</td><td>1 / 2</td><td>8125</td><td>1453</td></tr>
+<tr><td>full-axis-lane</td><td>true</td><td>675</td><td>653</td><td>1 / 2</td><td>8101</td><td>1449</td></tr>
+</tbody>
+</table>
+
+<p id="centroid-panels-separatrix-map">Each lane's map is built at the 10 mm
+display spacing floor: 78,195 points, the saddle polished on the map's own
+tensor spline, and the branches assembled at the map's own saddle flux. The
+saddle sits 13.19 mm (cpu and titan) and 9.91 mm (full-axis) from the lattice
+spline's own saddle, and the map reproduces the operator's raster image at the
+lattice nodes to 0.0e0 and 2.7e-16 relative error. The node mismatch against the
+converged state remains 8.25e-3 Wb (cpu and titan) and 8.42e-3 Wb (full-axis),
+as the earlier record reported: it is the fixed-point residual of the state the
+panel draws, and it is reported rather than absorbed.</p>
+
+<p id="centroid-panels-separatrix-assertion">The delivered test checked the
+redrawn receipt's assembler block but not the committed one, so a receipt
+rewritten without it would have been indistinguishable from a lane whose map was
+refused. That gap was reproduced before it was closed: a receipt with the
+<code>boundary_assembler</code> block stripped passed the earlier committed-side
+checks and is refused by the ones committed here. The test now asserts the block
+on the committed receipt — <code>available</code>, <code>well_formed</code> and a
+positive closed-segment count — and asserts that the redraw agrees with it on
+both <code>well_formed</code> and <code>closed_segment_count</code>.</p>
+
+<p id="centroid-panels-separatrix-control">The current-perturbation control had
+no way to be run on demand. It is now switched by
+<code>NOVA_PANEL_STATIC_CURRENT_CONTROL=1</code>: the redraw's copy of the state
+keeps the stored current, so the one-percent edit never reaches the draw and the
+contour-movement guard must fail. A control that passes is a guard that does not
+fire, and this one is reported by its failure, not its success.</p>
+
+<p id="centroid-panels-separatrix-cost">The gate is CPU work on a shared
+partition. One display-map build measured 705, 693 and 667 seconds across the cpu
+lane's three tests, so the producer's entry point is now memoized per state for
+the session and each lane builds its map once; that is what lets the file be
+measured inside one allocation.</p>
+</section>

@@ -79,12 +79,20 @@ control. The band is still recorded as a failure, because an absent measure fail
 rule, and both sides of the comparison carry the same absence. It therefore cannot be read as a pass,
 and it is the one control band whose failure is a report of absence rather than of disagreement.</p>
 <h3>Measured at the delivered revision</h3>
-<p>All of the above stands at revision 6e66c58829a4da19b111d7861ee6321b7d549e3d. The focused
-conversion tests ran there as <code>3 passed in 18.87s</code>, and the scoped gate re-run on
-<code>all_debug</code> against the same revision reported the same three tests
-(<code>3 passed in 15.68s</code>) and exited 0. The acceptance control, which asserts that each
-perturbed column is accepted as a faithful reconstruction and is expected to fail, failed on all
-three with exit 1, listing every band each control violates.</p>
+<p>The conversion code and the receipt stand at revision
+6e66c58829a4da19b111d7861ee6321b7d549e3d. The focused conversion tests ran there as
+<code>3 passed in 18.87s</code>, and the scoped gate re-run on <code>all_debug</code> against the
+same revision reported the same three tests (<code>3 passed in 15.68s</code>) and exited 0. The
+acceptance control, which asserts that each perturbed column is accepted as a faithful
+reconstruction and is expected to fail, failed on all three with exit 1, listing every band each
+control violates.</p>
+<p>Both suite arms cover the three modules the conversions sit in
+(<code>tests/test_equilibrium_moment.py</code>, <code>tests/test_equilibrium_harmonic.py</code> and
+<code>tests/test_equilibrium_profile.py</code>). At the base revision
+06d728006cba140ec3cf0670927100f31f8cfce0 the arm reported <code>48 passed in 42.27s</code>. At the
+delivered revision aeda56d56, with the new conversion tests added to the same three files, it
+reported <code>51 passed in 54.70s</code>: the three added tests and the base's 48, with no base
+failure introduced.</p>
 <h3>Where the evidence lives</h3>
 <ul>
 <li>Scoreboard receipt, beside the section 3 receipt:

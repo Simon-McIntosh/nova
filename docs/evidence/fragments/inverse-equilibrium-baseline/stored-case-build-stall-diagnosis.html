@@ -1,0 +1,47 @@
+<section id="stored-case-build-stall-diagnosis">
+<h2>Where the stored-case build spends its hours</h2>
+<p>The stored MAST-U case (45272) never reaches its first plasma-grid batch on a cold fixture machine. In the recorded stored-case run the process is silent from <code>CASE_INPUT</code> at 15:18:36 until the <code>plasmagrid</code> bar begins, and that bar then runs to 59/60 of 60 in 9 minutes before the job is cancelled at its 4-hour limit. The three hours are therefore not in the grid solve; they are in the conductor insertion that precedes it, and this fragment records the frames that hold them.</p>
+
+<h3>Stack sample</h3>
+<p>Sixteen stack dumps were taken at 180-second intervals over a 50-minute run of the same case at <code>be5ee98f7</code> (main), on a compute node, with the fixture machine cache isolated so the build runs cold and with <code>JAX_PLATFORMS=cpu</code> — legitimate here because the stall is host-side and no batch is ever dispatched. Fourteen of the sixteen dumps sit on one path, and the count of innermost frames is eleven at <code>columnar.py:84 get_loc</code>, two at <code>multipoint.py:78 sort_link</code> and one at <code>multipoint.py:76 sort_link</code>; the remaining two are inside the numpy comparison that <code>get_loc</code> runs and at import. The full path, outermost first:</p>
+<pre id="stored-case-build-stall-diagnosis-stack"><code>tests/test_magnetics_fit_efit_comparison.py:782 _problem
+tests/test_equilibrium_forward_reference.py:1207 cached_machine
+tests/test_equilibrium_forward_reference.py:1278 build_machine
+nova/frame/coil.py:79 insert
+nova/frame/poloidalgrid.py:54 insert
+nova/frame/poloidalgrid.py:98 subframe_insert
+nova/frame/framelink.py:191 concatenate
+nova/frame/framespace.py:33 __init__
+nova/frame/framelink.py:31 __init__
+nova/frame/dataframe.py:430 frame_attrs
+nova/frame/multipoint.py:70 initialize
+nova/frame/multipoint.py:78 sort_link
+nova/frame/columnar.py:84 get_loc</code></pre>
+<p><code>get_loc</code> resolves a label by scanning the whole index — <code>np.flatnonzero(self.values == label)</code> — and <code>sort_link</code> calls it once per row of the frame. The frame it scans is the one the insert is rebuilding: every conductor element is inserted separately, and each insert concatenates the new subframe onto the accumulated one and re-derives its attributes, so the sort is quadratic in the number of elements already placed.</p>
+
+<h3>What the insert path costs, measured</h3>
+<p>Timing every <code>sort_link</code> call out of the process, on the plain CPU partition, gives the cost law directly. The frame grows by 24 or 25 rows per inserted element, and the largest call in each insert grows with it:</p>
+<table id="stored-case-build-stall-diagnosis-cost">
+<thead><tr><th>Rows in the frame</th><th>Largest <code>sort_link</code> call (s)</th><th>Cumulative <code>sort_link</code> (s)</th></tr></thead>
+<tbody>
+<tr><td>3 750</td><td>0.538</td><td>—</td></tr>
+<tr><td>6 750</td><td>1.714</td><td>—</td></tr>
+<tr><td>9 716</td><td>3.878</td><td>&mdash;</td></tr>
+<tr><td>11 756</td><td>4.806</td><td>825.8</td></tr>
+</tbody></table>
+<p>Over the 242 calls that exceed half a second the fitted exponent is 2.06 — the cost is quadratic in the accumulated row count, not in the work the insert adds. The MAST-U case inserts 1 200 active elements (24 conductors, <code>active_element_count</code> 1 200, no passive elements), so the frame ends near 30 000 rows and the last sort alone is about 50 s. Summing the measured quadratic over those 1 200 inserts gives about 3.8 h of <code>sort_link</code> for one cold build, which is the order of the 3.4 h of silence the recorded run shows before its grid solve.</p>
+
+<h3>Both revisions</h3>
+<p>The same build was run in the same job on the same node at <code>be5ee98f7</code> and at <code>77283793bc</code>, each in its own tree with its own data home so both cache the machine from scratch, each bounded at 900 s:</p>
+<table id="stored-case-build-stall-diagnosis-arms">
+<thead><tr><th>Revision</th><th>Phase reached at 900 s</th><th><code>sort_link</code> calls</th><th>Cumulative <code>sort_link</code> (s)</th><th>Largest frame</th></tr></thead>
+<tbody>
+<tr><td><code>be5ee98f7</code> (main)</td><td>mid-insertion, 92 % of wall in <code>sort_link</code></td><td>1907</td><td>825.8</td><td>11 756</td></tr>
+<tr><td><code>77283793bc</code></td><td>mid-insertion, 91 % of wall in <code>sort_link</code> 815 s</td><td>1906</td><td>814.8</td><td>11 756</td></tr>
+</tbody></table>
+<p>Both arms stop at the same place in the same work: 1 907 and 1 906 <code>sort_link</code> calls, the same largest frame of 11 756 rows, and 825.8 s against 814.8 s of that wall in <code>sort_link</code> — a difference of 1.3 %, with the base arm running second and so reading a warmer page cache. Neither arm reaches <code>BUILD_MACHINE_END</code> or the grid solve inside its 900 s, so the build is not finishing within 15 minutes at either revision.</p>
+
+<h3>No landed change moves this cost</h3>
+<p>Nothing between the two revisions touches the code on that stack. No commit in <code>77283793bc..HEAD</code> changes <code>nova/frame/multipoint.py</code>, <code>nova/frame/columnar.py</code>, <code>nova/frame/framelink.py</code>, <code>nova/frame/poloidalgrid.py</code>, <code>nova/frame/coil.py</code>, <code>nova/frame/dataframe.py</code>, <code>nova/frame/framespace.py</code> or the fixture at <code>tests/test_equilibrium_forward_reference.py</code>. The only change under <code>nova/frame/</code> in that range is 122 added lines in <code>nova/frame/iron.py</code>, which is on the iron-core path and is not reached: the MAST-U case declares <code>"iron_core": []</code>. So the cost is not a regression that a bisect would find, and it is not attributable to the change that landed between the two revisions.</p>
+<p>What distinguishes a build that stalls from one that does not is the machine cache, not the revision. On a cache hit <code>cached_machine</code> returns from <code>_load_cached_machine</code> before <code>build_machine</code> is called at all, so no element is inserted and no frame is re-sorted; on a miss the element-by-element insertion rebuilds the frame and pays the quadratic sort. The stored-case run that was cancelled was a cold build: its three hours of silence sit before the grid solve, which the quadratic insertion accounts for, and the grid solve itself then ran 9 minutes.</p>
+</section>

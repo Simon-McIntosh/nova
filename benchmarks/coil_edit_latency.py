@@ -836,6 +836,29 @@ def _vertical_centroid_row(result: Any) -> dict[str, Any] | None:
     }
 
 
+def _finite_tree(value: Any) -> Any:
+    """Return a document with every non-finite float persisted as null."""
+    if isinstance(value, dict):
+        return {key: _finite_tree(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_finite_tree(item) for item in value]
+    if isinstance(value, float):
+        return value if np.isfinite(value) else None
+    return value
+
+
+def _strict_json(document: Any) -> str:
+    """Serialise a receipt as strict JSON, with an unevaluated value as null.
+
+    A non-finite float is not a number a reader can use, and the sweep's
+    remaining edits are still sound, so it is persisted as null rather than
+    aborting the run on a strict dump.
+    """
+    return json.dumps(
+        _finite_tree(document), indent=2, sort_keys=True, allow_nan=False
+    )
+
+
 def _achieved_class(profile: Any, state: Any) -> dict[str, Any]:
     """Read the saddle-aware class the read derives, or its refusal."""
     try:
@@ -1229,7 +1252,7 @@ def _write_diagnostics(
         document["display_map"] = panel["display_map"]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        json.dumps(document, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        _strict_json(document) + "\n",
         encoding="utf-8",
     )
 
@@ -1443,6 +1466,7 @@ def _panel_display_map(
     coupling: Any = None,
     target_current: Any = None,
     compensation: Any = None,
+    extent: tuple[float, float, float, float] | None = None,
 ):
     """Return one stored panel state's field evaluated on the display grid.
 
@@ -1508,6 +1532,7 @@ def _panel_display_map(
         requested_class=requested_class,
         axis_rz=np.asarray(panel["axis"], dtype=np.float64),
         xpoint_rz=np.asarray(seed, dtype=np.float64),
+        extent=extent,
         promoted=panel.get("promoted_mask"),
         compensation=compensation,
     )
@@ -3398,7 +3423,7 @@ def run(
             )
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(
-                json.dumps(landing, indent=2, sort_keys=True, allow_nan=False) + "\n",
+                _strict_json(landing) + "\n",
                 encoding="utf-8",
             )
             _write_diagnostics(diagnostics, prepared=prepared, rows=rows)
@@ -3455,7 +3480,7 @@ def run(
         )
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(
-            json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
+            _strict_json(receipt) + "\n",
             encoding="utf-8",
         )
         exit_marker = int(receipt["runtime"]["exit_marker"])
@@ -3874,13 +3899,7 @@ def main() -> None:
             if arguments.solve_receipt is not None:
                 record["solve"] = _solve_block(arguments.solve_receipt)
             arguments.receipt.write_text(
-                json.dumps(
-                    _merge_receipt(arguments.receipt, record),
-                    indent=2,
-                    sort_keys=True,
-                    allow_nan=False,
-                )
-                + "\n",
+                _strict_json(_merge_receipt(arguments.receipt, record)) + "\n",
                 encoding="utf-8",
             )
         print(json.dumps(panel, indent=2, sort_keys=True))

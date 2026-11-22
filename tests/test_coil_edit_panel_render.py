@@ -742,3 +742,175 @@ def test_the_panel_subcommand_persists_its_caption(
     assert written["visual_inspection"]["inspected_render"] == str(
         tmp_path / "panel.png"
     )
+
+
+
+
+#: The five published coil-edit panel sets and the tag of the invocation that
+#: solved each.  A figure's state comes from its own run, so no two figures
+#: cite the same output path.
+COIL_EDIT_PANEL_DIRECTORIES = (
+    ("forward-solve-api/coil-edit-nonconvergence", "h200-fsapi"),
+    ("mast-centroid-capability", "h200-mast"),
+    ("single-grid-solver-cutover", "titan-single-grid"),
+    ("cpu-compile-abort/coil-edit-regeneration-row", "h200-cca-row"),
+    ("cpu-compile-abort/coil-edit-regeneration-row/titan", "titan-cca-titan"),
+)
+COIL_EDIT_PANEL_SETS = tuple(
+    (
+        directory,
+        tag,
+        Path("docs/figures") / directory / "panel-states.npz",
+        Path("docs/figures") / directory / "panel-receipt.json",
+    )
+    for directory, tag in COIL_EDIT_PANEL_DIRECTORIES
+)
+
+@pytest.mark.parametrize(
+    ("label", "tag", "archive", "receipt"),
+    COIL_EDIT_PANEL_SETS,
+    ids=[entry[0] for entry in COIL_EDIT_PANEL_SETS],
+)
+def test_each_published_figure_records_the_solve_it_draws(
+    label: str, tag: str, archive: Path, receipt: Path
+):
+    """A figure's receipt names the invocation, lane and device that solved it.
+
+    All five figures previously drew one regenerated archive, so a receipt
+    could not say which sweep a figure's state came from.  The state now comes
+    from the figure's own run, and its receipt names that run rather than
+    leaving a figure's provenance to be inferred from a neighbour.
+    """
+    assert archive.is_file(), f"{label} must publish its own state archive"
+    assert archive.stat().st_size <= 300_000
+    recorded = json.loads(receipt.read_text(encoding="utf-8"))
+    solve = recorded["solve"]
+    command = solve["command"]
+    assert "benchmarks/coil_edit_latency.py run" in command
+    assert f"/solve/{tag}/" in command, (
+        f"{label} must cite its own invocation's output path, got {command}"
+    )
+    assert solve["partition"] in {"betelgeuse", "titan"}
+    assert solve["device"]
+    assert solve["source_revision"]
+    for panel_label in ("converged", "failed"):
+        assert recorded["display_map"]["panels"][panel_label]["spacing_m"] <= 0.010
+    assert (
+        "the non-converged panel draws the field of its terminal currents on a "
+        "10 mm map" in recorded["caption"]
+    )
+    assert "largest node mismatch" in recorded["caption"]
+
+
+def _contour_points(display: Any, levels: Any) -> np.ndarray:
+    """Return the vertices of the contours drawn on one display map."""
+    figure, axis = plt.subplots()
+    contour = axis.contour(
+        display.radius,
+        display.height,
+        display.flux.T,
+        levels=np.asarray(levels, dtype=float),
+    )
+    segments = [
+        np.asarray(segment, dtype=float)
+        for collection in contour.allsegs
+        for segment in collection
+    ]
+    plt.close(figure)
+    if not segments:
+        return np.zeros((0, 2))
+    return np.concatenate(segments)
+
+
+def _directed_distance(one: np.ndarray, other: np.ndarray) -> float:
+    """Return the largest distance from a point of ``one`` to ``other`` [m]."""
+    if not one.size or not other.size:
+        return float("inf")
+    distances = np.linalg.norm(one[:, None, :] - other[None, :, :], axis=2)
+    return float(np.max(np.min(distances, axis=1)))
+
+
+def _panel_extent(panel: dict[str, Any]) -> tuple[float, float, float, float]:
+    """Return a display extent holding the plotted nulls with a 0.2 m margin.
+
+    The published lattice box is about 2 m by 4 m while the plasma and the
+    plotted nulls occupy a fraction of it, so a redraw keeps the 10 mm spacing
+    the builder enforces and evaluates far fewer points.  The receipt's
+    node-level pins are measured on the lattice nodes, so they do not depend on
+    this extent.
+    """
+    points = [np.asarray(panel["axis"], dtype=float).reshape(1, 2)]
+    xpoints = np.atleast_2d(np.asarray(panel["xpoints"], dtype=float))
+    if xpoints.size:
+        points.append(xpoints)
+    coordinates = np.vstack(points)
+    low = coordinates.min(axis=0) - 0.20
+    high = coordinates.max(axis=0) + 0.20
+    return (float(low[0]), float(high[0]), float(low[1]), float(high[1]))
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(3300)
+@pytest.mark.parametrize(
+    ("label", "tag", "archive", "receipt"),
+    COIL_EDIT_PANEL_SETS,
+    ids=[entry[0] for entry in COIL_EDIT_PANEL_SETS],
+)
+def test_each_published_panel_redraws_from_its_own_state_file(
+    label: str, tag: str, archive: Path, receipt: Path
+):
+    """Redraw one figure from its state file alone; a 1 % current move lands.
+
+    The figure is drawn from this panel's own archive with no solve in the
+    loop, so the field on the panel is the stored terminal currents and moments
+    or nothing.  Perturbing one stored conductor current by 1 % must move the
+    contour paths, which is what shows the redraw reads the current rather than
+    printing the receipt's numbers back.
+    """
+    del tag
+    loaded = _panel_load(archive)
+    recorded = json.loads(receipt.read_text(encoding="utf-8"))
+    profile, prepared, _carrier = _prepare_case(response_carrier.DEFAULT_CARRIER)
+    panel = loaded["converged"]
+    assert panel["converged"]
+    extent = _panel_extent(panel)
+    display = _panel_display_map(
+        profile,
+        prepared["circuit_context"],
+        panel,
+        spacing=DEFAULT_DISPLAY_SPACING,
+        target_current=prepared["target_current"],
+        extent=extent,
+    )
+    step = float(display.radius[1] - display.radius[0])
+    assert step == pytest.approx(DEFAULT_DISPLAY_SPACING, abs=1.0e-12)
+    assert float(display.radius[-1] - display.radius[0]) < 1.6
+    reported = recorded["display_map"]["panels"]["converged"]
+    assert reported["spacing_m"] <= step
+    assert display.promoted_node_count == reported["promoted_node_count"]
+    assert display.max_solved_node_mismatch_wb == pytest.approx(
+        reported["max_solved_node_mismatch_wb"], abs=1.0e-12
+    )
+    assert display.nearest_promoted_to_xpoint_m == pytest.approx(
+        reported["nearest_promoted_to_xpoint_m"], abs=1.0e-9
+    )
+    levels = np.asarray(loaded["levels"], dtype=float)
+    drawn = _contour_points(display, levels)
+    assert drawn.shape[0] > 0
+    perturbed = dict(panel)
+    perturbed["current"] = np.asarray(panel["current"], dtype=float) * 1.01
+    moved_display = _panel_display_map(
+        profile,
+        prepared["circuit_context"],
+        perturbed,
+        spacing=DEFAULT_DISPLAY_SPACING,
+        target_current=prepared["target_current"],
+        extent=extent,
+    )
+    moved = _contour_points(moved_display, levels)
+    displacement = _directed_distance(drawn, moved)
+    assert displacement > 1.0e-4, (
+        f"{label}: a 1 % conductor-current perturbation left the contour paths "
+        f"in place (largest displacement {displacement:.3e} m), so the redraw "
+        "does not read the stored current"
+    )

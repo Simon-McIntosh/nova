@@ -1,0 +1,70 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T14:30:26.675Z",
+  "dispatched_at": "2026-11-22T14:11:37Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:26",
+      "id": "wiring-1",
+      "reason": "without the s2\u2192s1 edge the queue dispatches the deletion node against an unclassified tree, and a module \u00a71 finds reached could be deleted on a stale guess.",
+      "text": "`plan-section-depends-on` declares `{s3:[s1], s4:[s1], s5:[s3,s4], s6:[s5]}` and leaves `s2` unconstrained, yet \u00a72 says \"`contour_tree_layout.py` is also unreached ... \u00a71 decides it\" and its five deletions take their authority from \u00a72's source review plus \u00a71's classification; the deletion node would therefore be admitted while the census that defines its scope is still unlanded",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:62",
+      "id": "done_when-1",
+      "reason": "the census is the authority every later node reads, and a set that omits `apps/` lets a live consumer of a `machine_*` module fall between \u00a71's census and \u00a73/\u00a74's package-scoped gates.",
+      "text": "\u00a71 enumerates importers only under `nova/`, `scripts/` and `benchmarks/`, but `apps/playable/machines.py:151` imports `nova.imas.machine_artifact` and resolves a machine description through it; \u00a72's scan does include `apps/`, while \u00a73 and \u00a74 constrain only \"no module left in the nova package\", so this out-of-package consumer is neither recorded nor owned and breaks when the module moves or is generalised",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:99",
+      "id": "reasoning-1",
+      "reason": "a node acting on \"three places\" removes `packages/nova-cocos` and leaves `imas-alambic` and nova's own workspace and dependency declarations resolving against a missing package, the failure \u00a75 says the landing beat exists to prevent.",
+      "text": "the plan says imas-ambix \"imports the algebra from `nova_cocos` in three places\" and that \"its dependency\" moves in the same landing beat, but the measured set is four source sites (`imas_ambix/challenge/convention.py:28`, `imas_ambix/data/cocos_convention.py:26`, `tests/data/test_cocos_convention.py:11`, `packages/imas-alambic/src/imas_alambic/cocos.py:21`), with `packages/imas-alambic/pyproject.toml:31` declaring `nova-cocos` as its own dependency. nova also still declares it at `pyproject.toml:41` and lists it in `[tool.uv.workspace] members` (line 168), and imas-ambix's `uv.lock` carries two dependents on the package \u2014 none of which the removal's done-when covers",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:62",
+      "id": "reasoning-2",
+      "reason": "a census destination with no owning node produces a record whose decision is never executed, so the plan should either narrow the destination vocabulary to what \u00a72\u2013\u00a74 land or name the node that lands the remainder.",
+      "text": "\u00a71 assigns every census row one of four destinations (`stays in nova`, `moves to the ingest member`, `generalised into a generic module`, `deleted`), but no node lands \"generalised into a generic module\" or \"deleted\" for any row outside \u00a72's five named files; \u00a72 deletes five specific modules and \u00a73/\u00a74 only move `mast_*`, `diiid_*` and `machine_*` rows",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "84c74ea8d0315632bdde70050847704483af1a15",
+  "plan_fingerprint": "243430df2ed5cf54b222f33e06876e51413c0ad481712aef1ddbfe527fe71b15",
+  "plan_slug": "one-ids-seam",
+  "plan_version": 0,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T141111234384-plan-review-of-one-ids-seam",
+  "reviewed_blob_sha": "868c233f0440c7c2ad301c6eab1966d3c3c7c407",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/contour-tree-topology-authority/reuse-map.md` (its contour-tree verdict calls `contour_tree_layout.py` a design sketch, as \u00a72 states), `packages/nova-cocos`, `nova/imas/dataset.py`, `nova/circuit`, `imas_ambix/data/machine_maps`, `imas_ambix/data/description_identity.py` and `code-review/213417e86321` all resolve; the five module names and their 636 lines match.",
+    "done_when": "a finding \u2014 \u00a71's census scan list (`nova/`, `scripts/`, `benchmarks/`) omits `apps/` and `tests/`, so a live `apps/` importer of a `machine_*` module is never recorded and no later done-when constrains it.",
+    "evidence_paths": "pass \u2014 the only named evidence artifact is `docs/research/imas-seam-census.html` in the repository, and every other node's gate is a suite or identity comparison rather than a scratch path.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags appear where they would reach code, and there is no changelog prose; `DDv4` and `COCOS 17` are domain vocabulary, not plan tags.",
+    "reasoning": "a finding \u2014 \u00a75's \"three places\" undercounts the `nova_cocos` consumption (four source sites across two distributions, plus nova's and imas-alambic's own declared dependencies and lock entries), so the removal as scoped leaves package-resolution breakage the plan says it prevents; and \u00a71's destination vocabulary contains values that no node in the plan lands.",
+    "single_goal": "pass \u2014 each of the six nodes carries one deliverable (\u00a71 census record, \u00a72 deletion, \u00a73 MAST move, \u00a74 DIII-D swap, \u00a75 one convention, \u00a76 solves through the generic layer).",
+    "wiring": "a finding \u2014 `plan-section-depends-on` is missing s2 \u2192 s1 even though \u00a72's own text hands `contour_tree_layout.py` to \u00a71 and its five deletions rest on \u00a71's classification."
+  },
+  "section_digests": {
+    "_document": "42299a2042da4bdef623fe13f09e17db8cc5998484451f66799d8f7f16743ad6",
+    "s1": "2487abcb8759613d2a3083705bf392d4b978556cb3639922e48cf7da48f7cbf9",
+    "s2": "261ea58586558510d7bc8ab53d0ac6d1aaffd2f2d629a1dacd679385b392e51d",
+    "s3": "e12a50dc59cee2227c7fb97f2d71fec69c238ca1a85db4651ef3c0bffe4aa4fc",
+    "s4": "a0b874c3f768a13fdd75593516bbf1cc218f25d6c984ec32402af64bbf4834b9",
+    "s5": "a764836056c64ac2f4595cbb30c2382d2f963b63be8dbfaafbfae5dbe5466d9c",
+    "s6": "add490fe515223c5348ded1e13f2c925f686573cb26e8fb716b61c2b44961341"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T14:26:23.817024+00:00",
+  "total": null
+}

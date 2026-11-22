@@ -136,6 +136,7 @@ def summarise(rows: list[dict], truth: dict, jacobian: dict) -> dict:
     axis_error = float(np.sqrt(np.mean(axis_distance(rows, axis_truth) ** 2)))
     record = dict(
         slices=len(rows),
+        slices_with_boundary=int(np.sum(np.isfinite(values["q95"]))),
         axis_rms=float(axis_error),
         flux_rms=float(np.sqrt(np.mean((flux_fraction - flux_truth) ** 2))),
         q95_rms=float(np.sqrt(np.mean((values["q95"] - q95_truth) ** 2))),

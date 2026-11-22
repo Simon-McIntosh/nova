@@ -95,10 +95,19 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
             "svg.fonttype": "none",
         }
     )
+    # The axes are placed by hand so the strip above them carries the legend
+    # and every margin around a tick label is explicit; a layout engine that
+    # decides both leaves a label flush with the canvas edge.
     figure, axes = plt.subplots(figsize=(14.0, 7.2), dpi=100)
+    figure.subplots_adjust(left=0.085, right=0.945, top=0.855, bottom=0.115)
+    handles = []
+    tallest = 0.0
     for sequence in SEQUENCES:
         error = axis_error(arm_rows(code, sequence), truth) * 1000.0
-        axes.plot(
+        if not error.size:
+            continue
+        tallest = max(tallest, float(np.nanmax(error)))
+        (line,) = axes.plot(
             np.arange(error.size),
             error,
             color=COLOURS[code] if sequence == "drift" else CONTROL,
@@ -106,10 +115,19 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
             zorder=3 if sequence == "drift" else 2,
             label="1/f drift" if sequence == "drift" else "white (control)",
         )
+        handles.append(line)
     axes.set_xlabel("slice")
     axes.set_ylabel("axis error [mm]")
-    axes.legend(frameon=False, loc="upper center", ncol=2, bbox_to_anchor=(0.5, 1.13))
-    figure.tight_layout()
+    axes.set_xlim(0, SLICES - 1)
+    axes.set_ylim(0.0, tallest * 1.14 if tallest > 0.0 else 1.0)
+    if handles:
+        figure.legend(
+            handles=handles,
+            loc="upper center",
+            bbox_to_anchor=(0.5, 0.995),
+            ncol=max(1, len(handles)),
+            frameon=False,
+        )
     output.parent.mkdir(parents=True, exist_ok=True)
     save_checked(figure, str(output))
     plt.close(figure)

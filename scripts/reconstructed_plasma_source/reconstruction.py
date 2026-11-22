@@ -39,6 +39,7 @@ FIGURE = Path(
     "docs/figures/iter-passive-plasma-circuit/ippc-reconstruction-full-plant"
     "/agreement.svg"
 )
+FIGURE_ONE_BOUNDARY = FIGURE.with_name("one-boundary-agreement.svg")
 
 
 def corsica_source(
@@ -139,26 +140,66 @@ def _relative_error(reference: np.ndarray, measured: np.ndarray) -> dict:
     }
 
 
-def measure(scratch: Path) -> dict:
-    """Drive both presentations through the full plant and compare their flux."""
+def _drive(scratch: Path, generic: PlasmaSource, reconstruction: PlasmaSource):
+    """Build both plants on the cached machine with zero sectioned-set rebuilds.
+
+    Every sectioned-set refinement and linkage build is refused for the
+    duration, so a call raises rather than counting a quiet zero.
+    """
     from nova.circuit.coupled_plant import coupled_plant
     from nova.circuit.passive import load_sectioned_machine
 
     scratch = Path(scratch)
-    generic = corsica_source(provenance="CORSICA 130506/6")
-    reconstruction = reconstruction_style(
-        corsica_source(provenance="CORSICA 130506/6 as a reconstruction")
-    )
-
     with rebuild_spy() as guarded:
         assert guarded, "no rebuild binding was guarded"
         machine = load_sectioned_machine(
             CACHE / "sectioned-conductor-set" / SECTIONED_KEY
         )
-        generic_plant = coupled_plant(machine, generic, cache_dir=scratch / "generic")
-        reconstruction_plant = coupled_plant(
+        baseline = coupled_plant(machine, generic, cache_dir=scratch / "generic")
+        plant = coupled_plant(
             machine, reconstruction, cache_dir=scratch / "reconstruction"
         )
+    return machine, baseline, plant, guarded
+
+
+def one_boundary_sources() -> tuple[PlasmaSource, PlasmaSource]:
+    """Present the same slice twice with the same boundary resolved.
+
+    Both presentations drop the stored separatrix outline and every x-point, so
+    both resolve the stored last closed flux surface and neither can differ from
+    the other in the boundary it prescribes the current inside.  The one
+    presentation difference left is the coil-current cadence: every row of the
+    credited clock against every fourth.  The comparison therefore tests the
+    cached machine and the presentation rather than the boundary choice.
+    """
+    generic = reconstruction_style(
+        corsica_source(provenance="CORSICA 130506/6 as the generic path"), stride=1
+    )
+    reconstruction = reconstruction_style(
+        corsica_source(provenance="CORSICA 130506/6 as a reconstruction")
+    )
+    return generic, reconstruction
+
+
+def measure(scratch: Path, *, one_boundary: bool = False) -> dict:
+    """Drive both presentations through the full plant and compare their flux.
+
+    With ``one_boundary`` the second presentation resolves the same boundary as
+    the first, so the comparison holds the boundary common and turns on the
+    cached machine and the coil cadence alone.
+    """
+    if one_boundary:
+        generic, reconstruction = one_boundary_sources()
+        figure = FIGURE_ONE_BOUNDARY
+    else:
+        generic = corsica_source(provenance="CORSICA 130506/6")
+        reconstruction = reconstruction_style(
+            corsica_source(provenance="CORSICA 130506/6 as a reconstruction")
+        )
+        figure = FIGURE
+    machine, generic_plant, reconstruction_plant, guarded = _drive(
+        scratch, generic, reconstruction
+    )
 
     sections = _relative_error(
         generic_plant.section_plasma_flux, reconstruction_plant.section_plasma_flux
@@ -175,8 +216,13 @@ def measure(scratch: Path) -> dict:
         "tolerance": TOLERANCE,
         "generic_label": generic.label,
         "reconstruction_label": reconstruction.label,
+        "one_boundary": one_boundary,
         "generic_boundary": generic.prescribe(0).boundary_source,
         "reconstruction_boundary": reconstruction.prescribe(0).boundary_source,
+        "boundaries_agree": (
+            generic.prescribe(0).boundary_source
+            == reconstruction.prescribe(0).boundary_source
+        ),
         "coil_rows": [
             int(reconstruction.coils.time.size),
             int(generic.coils.time.size),
@@ -192,12 +238,14 @@ def measure(scratch: Path) -> dict:
                 generic_plant.plasma_times, reconstruction_plant.plasma_times
             )
         ),
-        "figure": str(FIGURE),
+        "figure": str(figure),
         "plot": {
             "section": sections["relative"].ravel(),
             "mode": modes["relative"].ravel(),
         },
     }
+    if one_boundary and not report["boundaries_agree"]:
+        raise AssertionError("the one-boundary arms resolved different boundaries")
     return report
 
 
@@ -398,16 +446,18 @@ def _printable(report: dict) -> dict:
 
 def main() -> None:
     scratch = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("scratch")
-    if "--localise" in sys.argv[2:]:
+    arguments = sys.argv[2:]
+    if "--localise" in arguments:
         report = localise(scratch)
         print(
             "LOCALISE " + json.dumps(_printable(report), sort_keys=True, default=float)
         )
         return
-    report = measure(scratch)
-    draw(report)
+    one_boundary = "--one-boundary" in arguments
+    report = measure(scratch, one_boundary=one_boundary)
+    draw(report, Path(report["figure"]))
     print(
-        "RECONSTRUCTION "
+        ("ONE_BOUNDARY " if one_boundary else "RECONSTRUCTION ")
         + json.dumps(_printable(report), sort_keys=True, default=float)
     )
     if (

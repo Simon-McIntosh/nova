@@ -28,6 +28,7 @@ from scripts.reconstructed_plasma_source.reconstruction import (
     CACHE as RECONSTRUCTION_CACHE,
     SECTIONED_KEY,
     corsica_source,
+    one_boundary_sources,
     reconstruction_style,
     rebuild_spy,
 )
@@ -1071,6 +1072,45 @@ def test_corsica_reconstruction_mode_projection_meets_the_stated_tolerance(
         rtol=1e-3,
         atol=0.0,
     )
+
+
+@pytest.mark.slow
+def test_one_boundary_presentation_agrees_on_sections_and_modes(tmp_path):
+    """Hold the boundary common, and the presentation is the only variable.
+
+    Both presentations resolve the stored last closed flux surface, so the
+    comparison measures the cached machine and the coil cadence rather than the
+    boundary choice.  The winding sections and every passive mode must agree
+    within the predeclared relative 1e-3, on a machine assembled and driven
+    without refining the sectioned set or rebuilding its linkage.
+    """
+    if not (RECONSTRUCTION_ENTRY / "geometry.npz").exists():
+        pytest.skip("the repaired 12 mm sectioned-set entry is not present")
+    from nova.circuit.passive import load_sectioned_machine
+
+    generic, reconstruction = one_boundary_sources()
+    assert generic.prescribe(0).boundary_source == "boundary_outline"
+    assert reconstruction.prescribe(0).boundary_source == "boundary_outline"
+    assert reconstruction.coils.time.size < generic.coils.time.size
+    with rebuild_spy() as guarded:
+        assert guarded, "no sectioned-set build binding was guarded"
+        machine = load_sectioned_machine(RECONSTRUCTION_ENTRY)
+        baseline = coupled_plant(machine, generic, cache_dir=tmp_path / "generic")
+        plant = coupled_plant(
+            machine, reconstruction, cache_dir=tmp_path / "reconstruction"
+        )
+    np.testing.assert_array_equal(plant.plasma_times, baseline.plasma_times)
+    for name in ("section_plasma_flux", "mode_plasma_flux"):
+        reference = getattr(baseline, name)
+        measured = getattr(plant, name)
+        np.testing.assert_allclose(measured, reference, rtol=1e-3, atol=0.0)
+        relative = np.abs(measured - reference) / np.abs(reference)
+        print(
+            f"CORSICA_ONE_BOUNDARY {name} "
+            f"max_rel={float(np.max(relative)):.3e} "
+            f"violations={int(np.sum(relative > 1e-3))} of "
+            f"{relative.size}"
+        )
 
 
 def test_driving_a_new_source_at_an_entry_without_geometry_is_refused(tmp_path):

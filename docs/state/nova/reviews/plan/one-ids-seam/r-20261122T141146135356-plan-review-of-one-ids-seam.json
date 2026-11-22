@@ -105,6 +105,16 @@
       "note": "\u00a75 now names four ambix sites across two distributions, including imas-alambic and its own nova-cocos dependency, plus nova's dependency and workspace declarations, all removed in one beat.",
       "reason": "",
       "when": "2026-11-22T14:36:07.154346+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "84c74ea8d0315632bdde70050847704483af1a15",
+      "commit_basis": "edit",
+      "finding": "reuse_search-3",
+      "note": "\u00a75's clause no longer asks for a new statement; it requires the existing stated-once test to keep passing, and the deliverable is the deletion.",
+      "reason": "",
+      "when": "2026-11-22T14:36:15.589874+00:00"
     }
   ],
   "responses": {
@@ -134,6 +144,15 @@
       "note": "\u00a75 now names four ambix sites across two distributions, including imas-alambic and its own nova-cocos dependency, plus nova's dependency and workspace declarations, all removed in one beat.",
       "reason": "",
       "when": "2026-11-22T14:36:07.154346+00:00"
+    },
+    "reuse_search-3": {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "84c74ea8d0315632bdde70050847704483af1a15",
+      "commit_basis": "edit",
+      "note": "\u00a75's clause no longer asks for a new statement; it requires the existing stated-once test to keep passing, and the deliverable is the deletion.",
+      "reason": "",
+      "when": "2026-11-22T14:36:15.589874+00:00"
     },
     "thin_wrapper-1": {
       "action": "acted",

@@ -16,6 +16,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T133747334908-ippc-reconstruction-full-plant",
       "section": "\u00a76"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-22T21:36:10.628616+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T133747334908-ippc-reconstruction-full-plant",
+      "section": "\u00a76"
     }
   },
   "findings": [

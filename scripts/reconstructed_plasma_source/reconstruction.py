@@ -278,7 +278,7 @@ def draw(report: dict, path: Path = FIGURE) -> None:
             ".",
             color="#929292",
             markersize=4,
-            zorder=2,
+            zorder=4,
         )
         axis.plot(
             index[~within],
@@ -286,12 +286,12 @@ def draw(report: dict, path: Path = FIGURE) -> None:
             ".",
             color="#b2182b",
             markersize=5,
-            zorder=3,
+            zorder=5,
         )
         if values.size and not np.any(values > 0):
             # a log axis would carry no scale here, and an empty panel reads as
             # an absent measurement rather than as an exact one
-            axis.set_ylim(0.0, bound * 1.5)
+            axis.set_ylim(-0.05 * bound, bound * 1.5)
         else:
             axis.set_yscale("log")
         axis.set_xlabel(label)

@@ -225,12 +225,128 @@ def draw(report: dict, path: Path = FIGURE) -> None:
     plt.close(figure)
 
 
+def _polygon_area(polygon: np.ndarray) -> float:
+    x = np.asarray(polygon)[:, 0]
+    z = np.asarray(polygon)[:, 1]
+    return float(0.5 * abs(np.dot(x, np.roll(z, -1)) - np.dot(z, np.roll(x, -1))))
+
+
+def _redistribution(generic, presented) -> dict:
+    """How much of the prescribed current the two boundaries move."""
+    density_difference = np.abs(
+        presented.current_density - generic.current_density
+    )
+    cell_difference = np.abs(presented.cell_current - generic.cell_current)
+    return {
+        "boundary_source": [generic.boundary_source, presented.boundary_source],
+        "boundary_points": [int(len(generic.boundary)), int(len(presented.boundary))],
+        "boundary_area_m2": [
+            _polygon_area(generic.boundary),
+            _polygon_area(presented.boundary),
+        ],
+        "scale_factor": [generic.scale_factor, presented.scale_factor],
+        "sum_abs_cell_current": float(np.abs(generic.cell_current).sum()),
+        "sum_abs_cell_difference": float(cell_difference.sum()),
+        "max_abs_cell_difference": float(cell_difference.max()),
+        "redistributed_fraction": float(
+            cell_difference.sum() / np.abs(generic.cell_current).sum()
+        ),
+        "max_abs_density_difference": float(density_difference.max()),
+    }
+
+
+def _violating_modes(generic_plant, plant) -> list[dict]:
+    reference = np.asarray(generic_plant.mode_plasma_flux.ravel(), float)
+    measured = np.asarray(plant.mode_plasma_flux.ravel(), float)
+    relative = np.abs(measured - reference) / np.where(
+        np.abs(reference) > 0, np.abs(reference), np.inf
+    )
+    rows = []
+    for index in np.flatnonzero(relative > TOLERANCE):
+        rows.append(
+            {
+                "mode": int(index),
+                "tau_s": float(plant.mode_tau[index]),
+                "reference_wb": float(reference[index]),
+                "presented_wb": float(measured[index]),
+                "abs_difference_wb": float(abs(measured[index] - reference[index])),
+                "relative": float(relative[index]),
+            }
+        )
+    rows.sort(key=lambda row: row["relative"], reverse=True)
+    return rows
+
+
+def localise(scratch: Path) -> dict:
+    """Drive four presentations that differ from the generic one in one input.
+
+    The generic slice, the coil clock alone coarsened, the boundary alone moved
+    to the last closed flux surface, and both, each built on the same cached
+    machine.  The arm that moves the modes names the input the tolerance
+    responds to.
+    """
+    from nova.circuit.coupled_plant import coupled_plant
+    from nova.circuit.passive import load_sectioned_machine
+
+    scratch = Path(scratch)
+    generic = corsica_source(provenance="CORSICA 130506/6")
+    presented = reconstruction_style(
+        corsica_source(provenance="CORSICA 130506/6 as a reconstruction")
+    )
+    arms = {
+        "generic": generic,
+        "coil_plasma_clock_only": replace(generic, coils=presented.coils
+                                          ),
+        "last_closed_surface_only": replace(generic, slices=presented.slices),
+        "both": presented,
+    }
+    machine = load_sectioned_machine(
+        CACHE / "sectioned-conductor-set" / SECTIONED_KEY
+    )
+    baseline = coupled_plant(machine, generic, cache_dir=scratch / "arm-generic")
+    table = {}
+    for name, source in arms.items():
+        plant = (
+            baseline
+            if name == "generic"
+            else coupled_plant(machine, source, cache_dir=scratch / f"arm-{name}")
+        )
+        table[name] = {
+            "section": _relative_error(
+                baseline.section_plasma_flux, plant.section_plasma_flux
+            ),
+            "mode": _relative_error(
+                baseline.mode_plasma_flux, plant.mode_plasma_flux
+            ),
+        }
+        table[name]["section"].pop("relative", None)
+        table[name]["mode"].pop("relative", None)
+    return {
+        "machine": machine.label,
+        "n_section": int(machine.section_inductance.shape[0]),
+        "n_modes": int(baseline.n_modes),
+        "redistribution": _redistribution(generic.prescribe(0), presented.prescribe(0)),
+        "arms": table,
+        "violating_modes": _violating_modes(baseline, coupled_plant(
+            machine, presented, cache_dir=scratch / "arm-both"
+        )),
+        "tolerance": TOLERANCE,
+    }
+
+
+def _printable(report: dict) -> dict:
+    return {key: value for key, value in report.items() if key != "plot"}
+
+
 def main() -> None:
     scratch = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("scratch")
+    if "--localise" in sys.argv[2:]:
+        report = localise(scratch)
+        print("LOCALISE " + json.dumps(_printable(report), sort_keys=True, default=float))
+        return
     report = measure(scratch)
     draw(report)
-    printable = {key: value for key, value in report.items() if key != "plot"}
-    print("RECONSTRUCTION " + json.dumps(printable, sort_keys=True, default=float))
+    print("RECONSTRUCTION " + json.dumps(_printable(report), sort_keys=True, default=float))
     if (
         report["section_plasma_flux"]["violations"]
         or report["mode_plasma_flux"]["violations"]

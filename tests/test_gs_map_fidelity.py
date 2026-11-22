@@ -341,15 +341,15 @@ def test_map_boundary_flux_jvp_matches_central_difference(forcing_direction):
     assert error < BOUNDARY_JVP_TOLERANCE
 
 
-def _figure(case_name: str) -> Path:
-    """Draw the map image beside the analytic state at the 10,000-cell rung."""
+def _figure(case_name: str, cells: int = 10000) -> Path:
+    """Draw the map image beside the analytic state at one carrier rung."""
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from nova.media import ink, poloidal
 
-    carrier = _carrier(case_name, 10000)
+    carrier = _carrier(case_name, cells)
     machine = carrier["machine"]
     analytic = carrier["analytic"]
     active = carrier["active"]
@@ -399,7 +399,7 @@ def _figure(case_name: str) -> Path:
         )
     directory = ROOT / "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs"
     directory.mkdir(parents=True, exist_ok=True)
-    path = directory / f"{case_name}-map-fidelity.svg"
+    path = directory / f"{case_name}-map-fidelity-{cells}.svg"
     figure.savefig(
         path, format="svg", facecolor=style.figure_facecolor, metadata={"Date": None}
     )
@@ -417,7 +417,10 @@ def main() -> None:
     cases = arguments.case or list(CASES)
     if arguments.figure:
         for case_name in cases:
-            print("MAP_FIDELITY_FIGURE " + str(_figure(case_name)), flush=True)
+            for cells in arguments.cells or [10000]:
+                print(
+                    "MAP_FIDELITY_FIGURE " + str(_figure(case_name, cells)), flush=True
+                )
         return
     cells = arguments.cells or sorted(RUNG_REQUESTS)
     rows = []

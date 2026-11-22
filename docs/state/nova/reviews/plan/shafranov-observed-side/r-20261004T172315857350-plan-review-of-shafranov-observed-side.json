@@ -44,6 +44,16 @@
       "note": "Section 2 now carries a dated note at 3a7d30571: a5d8a4da1 replaced the midpoint rule with a fourth-order contour metric (_segment_mean is gone), and the open scope is restated as re-measuring the order and identity rungs at that rule and replacing the order-above-0.5 assertion with the predicted order",
       "reason": "",
       "when": "2026-11-22T13:51:09.063398+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "commit": "3a7d3057155f104c13a55e73a0fb380f55635a18",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "Section 3 now says to delete the inline inverse of the identity from the constraint module rather than move it, because diagnostics owns shafranov_vertical_field",
+      "reason": "",
+      "when": "2026-11-22T13:51:16.167704+00:00"
     }
   ],
   "responses": {
@@ -55,6 +65,15 @@
       "note": "Section 2 now carries a dated note at 3a7d30571: a5d8a4da1 replaced the midpoint rule with a fourth-order contour metric (_segment_mean is gone), and the open scope is restated as re-measuring the order and identity rungs at that rule and replacing the order-above-0.5 assertion with the predicted order",
       "reason": "",
       "when": "2026-11-22T13:51:09.063398+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "commit": "3a7d3057155f104c13a55e73a0fb380f55635a18",
+      "commit_basis": "edit",
+      "note": "Section 3 now says to delete the inline inverse of the identity from the constraint module rather than move it, because diagnostics owns shafranov_vertical_field",
+      "reason": "",
+      "when": "2026-11-22T13:51:16.167704+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/shafranov-observed-side/r-20261004T172315857350-plan-review-of-shafranov-observed-side.json",

@@ -87,6 +87,16 @@
       "note": "The s2 brief extends the benchmarks/recovery_ladder_census.py refusal idiom (enumerate, raise naming the forced entry) for the negative control; the s5 brief reuses scripts/iron_operator_bound/reuse_check.py's ast scan to find candidate duplicates rather than authoring a third scanner.",
       "reason": "",
       "when": "2026-11-22T20:21:54.768894+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "commit": "455b6b731e863a81bc078299e1d5fc94c2278ae1",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-3",
+      "note": "The s1 and s2 briefs stamp revision and repository-relative identity through compute_provenance and repository_relative in nova/database/filepath.py; no per-file git subprocess.",
+      "reason": "",
+      "when": "2026-11-22T20:22:12.051901+00:00"
     }
   ],
   "responses": {
@@ -107,6 +117,15 @@
       "note": "The s2 brief extends the benchmarks/recovery_ladder_census.py refusal idiom (enumerate, raise naming the forced entry) for the negative control; the s5 brief reuses scripts/iron_operator_bound/reuse_check.py's ast scan to find candidate duplicates rather than authoring a third scanner.",
       "reason": "",
       "when": "2026-11-22T20:21:54.768894+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "commit": "455b6b731e863a81bc078299e1d5fc94c2278ae1",
+      "commit_basis": "edit",
+      "note": "The s1 and s2 briefs stamp revision and repository-relative identity through compute_provenance and repository_relative in nova/database/filepath.py; no per-file git subprocess.",
+      "reason": "",
+      "when": "2026-11-22T20:22:12.051901+00:00"
     },
     "reuse_search-1": {
       "action": "acted",

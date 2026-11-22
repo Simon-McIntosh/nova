@@ -61,6 +61,16 @@
       "note": "section 5 rewritten at 6213f54ab: locked keep-scored stated, each reconstruction scored as an IMAS equilibrium with the conversion named as this section's work, measured band verdicts, a perturbed-copy negative control through each conversion, and a named fragment and receipt path",
       "reason": "",
       "when": "2026-11-22T18:47:47.008312+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "commit": "898e5527a3858244579ddf1462d8ce3f31da9408",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "section 5 rewritten at a08522831: locked keep-scored stated, each reconstruction scored as an IMAS equilibrium with the conversion named as this section's work, measured band verdicts, a perturbed-copy negative control through each conversion, and a named fragment and receipt path",
+      "reason": "",
+      "when": "2026-11-22T18:48:23.786516+00:00"
     }
   ],
   "responses": {
@@ -81,6 +91,15 @@
       "note": "section 5 rewritten at 6213f54ab: locked keep-scored stated, each reconstruction scored as an IMAS equilibrium with the conversion named as this section's work, measured band verdicts, a perturbed-copy negative control through each conversion, and a named fragment and receipt path",
       "reason": "",
       "when": "2026-11-22T18:47:47.008312+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "commit": "898e5527a3858244579ddf1462d8ce3f31da9408",
+      "commit_basis": "edit",
+      "note": "section 5 rewritten at a08522831: locked keep-scored stated, each reconstruction scored as an IMAS equilibrium with the conversion named as this section's work, measured band verdicts, a perturbed-copy negative control through each conversion, and a named fragment and receipt path",
+      "reason": "",
+      "when": "2026-11-22T18:48:23.786516+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261122T142131601200-plan-review-of-inverse-equilibrium-baseline.json",

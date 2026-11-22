@@ -26,6 +26,10 @@ LEVEL_FRACTIONS = (0.2, 0.4, 0.6, 0.8)
 #: The declared control's switch: pin the assembler to the 256 slots the fine
 #: display grid overflowed, so the well_formed guard must fail.
 SLOT_CONTROL_ENV = "NOVA_PANEL_256_SLOT_CONTROL"
+#: The current-perturbation control's switch: the copy handed to the redraw
+#: keeps the stored current, so the 1 % edit never reaches the draw and the
+#: contour-movement guard must fail.
+STATIC_CURRENT_CONTROL_ENV = "NOVA_PANEL_STATIC_CURRENT_CONTROL"
 
 if os.environ.get(SLOT_CONTROL_ENV) == "1":
     import nova.equilibrium.display_flux as _display_flux
@@ -84,23 +88,39 @@ def _perturbed_state(state_path: Path, target: Path) -> Path:
         payload = {name: np.asarray(data[name]) for name in data.files}
     current = np.asarray(payload["conductor_current"], dtype=float).copy()
     moved = int(np.argmax(np.abs(current)))
-    current[moved] *= CURRENT_PERTURBATION
+    if os.environ.get(STATIC_CURRENT_CONTROL_ENV) != "1":
+        current[moved] *= CURRENT_PERTURBATION
     payload["conductor_current"] = current
     target.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(target, **payload)
     return target
 
 
-_DISPLAYS: dict[Path, object] = {}
+_DISPLAYS: dict[tuple[str, float], object] = {}
+
+#: One display build is about 700 s of CPU work, and the figure draw and both
+#: contour tests read the same map for a lane. The producer's own entry point
+#: is memoized for the session so a lane's map is built once rather than three
+#: times, which is what lets the file fit one scheduler job.
+_BUILD_DISPLAY = panel_renderer._panel_state_display
+
+
+def _memoized_state_display(state_path: Path, spacing: float):
+    key = (str(state_path), float(spacing))
+    if key not in _DISPLAYS:
+        _DISPLAYS[key] = _BUILD_DISPLAY(state_path, spacing)
+    return _DISPLAYS[key]
+
+
+panel_renderer._panel_state_display = _memoized_state_display
 
 
 def _display(state_path: Path):
     """Return the state's fine display map, built once per session."""
-    if state_path not in _DISPLAYS:
-        _DISPLAYS[state_path] = panel_renderer._panel_state_display(state_path, SPACING)
-    return _DISPLAYS[state_path]
+    return _memoized_state_display(state_path, SPACING)
 
 
+@pytest.mark.timeout(2400)
 @pytest.mark.parametrize("state_path", STATES, ids=lambda path: path.parent.name)
 def test_committed_panel_state_renders(state_path: Path, tmp_path: Path):
     with np.load(state_path, allow_pickle=False) as state:
@@ -144,6 +164,18 @@ def test_committed_panel_state_renders(state_path: Path, tmp_path: Path):
         "panels command"
     )
     assert vacuum_nulls == committed_nulls
+    # The committed receipt must carry the assembler's own verdict, because a
+    # reader of the figure has only that block to tell an assembled separatrix
+    # from one the fine map refused. A receipt rewritten without it cannot be
+    # distinguished from a refused lane, so its absence fails here.
+    committed_assembler = committed["drawn_plasma_mesh"].get("boundary_assembler")
+    assert committed_assembler is not None, (
+        f"{state_path.parent.name}: the committed receipt carries no "
+        "boundary_assembler block; regenerate it with the panels command"
+    )
+    assert committed_assembler["available"], committed_assembler
+    assert committed_assembler["well_formed"], committed_assembler
+    assert committed_assembler["closed_segment_count"] > 0, committed_assembler
     assert vacuum_nulls["other_x_points_drawn"] == vacuum_nulls["x_points_inside_wall"]
     assert vacuum_nulls["x_points_drawn"] == 0
     assert vacuum_nulls["other_x_points_drawn"] == 1
@@ -160,6 +192,13 @@ def test_committed_panel_state_renders(state_path: Path, tmp_path: Path):
         f"well formed ({assembler}); the panel draws no lobe"
     )
     assert assembler["closed_segment_count"] > 0
+    # The redraw and the committed receipt must agree on the assembly, so a
+    # redraw that has drifted from the receipt beside the figure is not
+    # recorded as if it reproduced it.
+    assert assembler["well_formed"] == committed_assembler["well_formed"]
+    assert (
+        assembler["closed_segment_count"] == committed_assembler["closed_segment_count"]
+    )
     branches = drawn["boundary_branches_drawn"]
     assert branches["closed_drawn"] == 1, (
         f"{state_path.parent.name}: the closed lobe was not drawn ({branches})"
@@ -184,6 +223,7 @@ def test_cpu_lane_plain_and_fine_panels_are_different_pictures():
     )
 
 
+@pytest.mark.timeout(2400)
 @pytest.mark.parametrize("state_path", STATES, ids=lambda path: path.parent.name)
 def test_redrawn_contours_leave_the_lattice_rows(state_path: Path, tmp_path: Path):
     data, _coupling, display, _shape, _r, _h, _solved = _display(state_path)
@@ -194,6 +234,7 @@ def test_redrawn_contours_leave_the_lattice_rows(state_path: Path, tmp_path: Pat
     assert np.any(offsets > 1.0e-6)
 
 
+@pytest.mark.timeout(2400)
 @pytest.mark.parametrize("state_path", STATES, ids=lambda path: path.parent.name)
 def test_a_one_percent_current_edit_moves_the_drawn_contours(
     state_path: Path, tmp_path: Path

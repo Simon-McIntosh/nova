@@ -26,10 +26,21 @@ matrix does not have.
 The Newton matrix is the one the in-place Cholesky route assembles.  At a state
 the local material differential is ``A`` (six by six per cell, from the law's
 tangent at the quadrature nodes), ``D = Q A``, ``R`` its symmetric square root
-and ``W = Q^-1 R``; the rows written are ``I - R G W``.  The route reads only a
-triangle of that matrix, so the object it actually factors is its symmetric
-part, and that is what this module measures.  The solve seeds at a zero state,
-so the tangent depends only on the field prescribed in the cells.
+and ``W = Q^-1 R``; the rows written are ``I - R G W``.  That matrix is not
+symmetric, and the route factors it with ``symmetrize_input=False``, which
+reads one triangle and reflects it: the object factored is the symmetric part
+plus the lower triangle of the skew part, reflected, not the symmetric part
+alone.  Both are measured here, so a refusal can be attributed to whichever of
+them is indefinite.  The solve seeds at a zero state, so the tangent depends
+only on the field prescribed in the cells.
+
+For the seed state the relation is closed.  A uniform tangent is ``A = c I``,
+so ``R = sqrt(c) Q^1/2`` and ``W = sqrt(c) Q^-1/2``, and the symmetric part is
+``I - c S`` with ``S = Q^-1/2 sym(Q G) Q^-1/2``.  The largest element of ``S``
+is the largest quotient times ``mu0``, so the seed matrix is definite exactly
+while the largest quotient stays below ``1 / (c mu0)``: a linear law of slope
+``c`` amplifies every metric quotient by ``c mu0`` and the material is what
+sets the distance to the singularity, not the bound.
 
     python scripts/iron_operator_bound/persisted.py --mode bound \
         --label graded-16-80 --output <run-dir>
@@ -356,6 +367,23 @@ def material_differential(source, inputs):
     return np.asarray(local), float(np.asarray(end_values)[0])
 
 
+def generalised_spectrum(blocks, metric):
+    """Return the extreme eigenvalues of each block against the metric block.
+
+    ``Q`` is symmetric positive definite, so ``C`` with ``Q = C C.T`` turns the
+    generalised problem ``D z = l Q z`` into the ordinary one for
+    ``C**-1 D C**-T``, which is symmetric and whose signed singular values are
+    its eigenvalues.
+    """
+    factor = np.linalg.cholesky(metric)
+    inverse = np.linalg.inv(factor)
+    reduced = np.einsum("cij,cjk,clk->cil", inverse, blocks, inverse)
+    left, singular, right = np.linalg.svd(reduced)
+    sign = np.einsum("cji,cij->ci", left, right)
+    values = sign * singular
+    return float(np.min(values)), float(np.max(values))
+
+
 def newton_blocks(source, inputs):
     """Return the per-cell differential, its root and the route's transform.
 
@@ -365,12 +393,19 @@ def newton_blocks(source, inputs):
     eigenvectors, so the signed polar root built here is that decomposition
     with its negative eigenvalues dropped, and a differential the route would
     have refused lands on the root the route would have used.
+
+    The differential's eigenvalues against the metric are returned beside the
+    ones against the identity.  For a uniform linear law the material blocks
+    are ``A = c I``, so the generalised spectrum is the susceptibility itself;
+    how far it departs from one repeated value is what makes the seed-state
+    Newton matrix's definiteness a per-cell statement rather than one number.
     """
     local, origin = material_differential(source, inputs)
     differential = source["metric"] @ local
     differential = (differential + differential.transpose(0, 2, 1)) / 2
     root, minimum = signed_root(differential)
     transform = np.linalg.solve(source["metric"], root)
+    low, high = generalised_spectrum(differential, source["metric"])
     try:
         np.linalg.cholesky(differential)
         definite = True
@@ -380,6 +415,8 @@ def newton_blocks(source, inputs):
         local=local,
         differential=differential,
         minimum=minimum,
+        generalised_minimum=low,
+        generalised_maximum=high,
         block_asymmetry=float(
             np.linalg.norm(local - local.transpose(0, 2, 1)) / np.linalg.norm(local)
         ),
@@ -470,9 +507,7 @@ def newton_identity(count=3, seed=7):
     blocks = dict(root=root, transform=transform)
     action, symmetric, skew = newton_actions(source, blocks)
     dense = np.eye(dimension) - (
-        block_matrix(root, count)
-        @ interaction
-        @ block_matrix(transform, count)
+        block_matrix(root, count) @ interaction @ block_matrix(transform, count)
     )
     dense_symmetric = (dense + dense.T) / 2
     dense_skew = (dense - dense.T) / 2
@@ -484,9 +519,7 @@ def newton_identity(count=3, seed=7):
         error = max(
             error,
             float(np.linalg.norm(action(vector) - dense @ vector) / scale),
-            float(
-                np.linalg.norm(symmetric(vector) - dense_symmetric @ vector) / scale
-            ),
+            float(np.linalg.norm(symmetric(vector) - dense_symmetric @ vector) / scale),
             float(np.linalg.norm(skew(vector) - dense_skew @ vector) / scale),
         )
     return error
@@ -683,10 +716,15 @@ def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, pr
         newton_rayleigh=float(direction @ acted / (direction @ direction)),
         newton_skew_fraction=asymmetry,
         differential_minimum=blocks["minimum"],
+        material_generalised_minimum=blocks["generalised_minimum"],
+        material_generalised_maximum=blocks["generalised_maximum"],
+        material_anisotropy=blocks["generalised_maximum"]
+        / blocks["generalised_minimum"],
         material_block_asymmetry=blocks["block_asymmetry"],
         differential_positive_definite=blocks["definite"],
         origin_coefficient_times_mu0=blocks["origin"] * iron._MU0,
-        seed_definiteness_limit=1.0 / (1.0 - blocks["origin"] * iron._MU0),
+        seed_limit_quotient=1.0 / (blocks["origin"] * iron._MU0),
+        predicted_newton_minimum=1.0 - blocks["origin"] * iron._MU0 * peak["quotient"],
         witness_operator_quotient=quotient(source, direction),
         operator_maximum=peak["quotient"],
         operator_rayleigh=peak["rayleigh"],

@@ -63,7 +63,7 @@ def style():
 
 
 def bound_panel(axis, output):
-    """Draw each operator's largest quotient against the bound and the limit."""
+    """Draw each operator's largest quotient against the bound."""
     rows = []
     for label, title in LABELS:
         row = receipt(output, f"bound-{label}.json")
@@ -77,20 +77,7 @@ def bound_panel(axis, output):
     position = np.arange(len(rows))
     axis.barh(position, values, height=0.52, color="#3b6ea5", zorder=2)
     axis.axvline(BOUND, color="#4d4d4d", linewidth=1.2, linestyle=":", zorder=3)
-    witness = receipt(output, "witness-graded-16-80.json")
     head = -0.75
-    if witness is not None:
-        limit = float(witness["seed_definiteness_limit"])
-        axis.axvline(limit, color="#8a5a00", linewidth=1.2, linestyle="--", zorder=3)
-        axis.text(
-            limit,
-            head,
-            "seed limit",
-            color="#8a5a00",
-            fontsize=14,
-            ha="right",
-            va="center",
-        )
     axis.text(
         BOUND, head, "bound", color="#4d4d4d", fontsize=14, ha="left", va="center"
     )

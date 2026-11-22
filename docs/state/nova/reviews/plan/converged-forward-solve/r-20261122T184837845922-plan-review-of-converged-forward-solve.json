@@ -69,9 +69,28 @@
       "note": "Section 9 states the WEST 62751 recipe inline (data-manifest row, pulse and NICE paths, DD versions, slice index, mesh). The iron plan's unlanded script is named only as the before arm, so no cross-plan wait is needed.",
       "reason": "",
       "when": "2026-11-22T19:13:32.464389+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "906c06ae-8766-4281-8a78-e20c226c00f5",
+      "commit": "3b6a43658414973157f6beb4a01a92d06e376472",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "Section 9 now carries the full input recipe inline, with absolute data paths, and no longer cites scripts/west_forward_iron/machine.py at 403337a04 as its input; that commit is named only as the source of the before-arm receipts.",
+      "reason": "",
+      "when": "2026-11-22T19:13:56.816195+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "906c06ae-8766-4281-8a78-e20c226c00f5",
+      "commit": "3b6a43658414973157f6beb4a01a92d06e376472",
+      "commit_basis": "edit",
+      "note": "Section 9 now carries the full input recipe inline, with absolute data paths, and no longer cites scripts/west_forward_iron/machine.py at 403337a04 as its input; that commit is named only as the source of the before-arm receipts.",
+      "reason": "",
+      "when": "2026-11-22T19:13:56.816195+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "906c06ae-8766-4281-8a78-e20c226c00f5",

@@ -9,6 +9,15 @@
   ],
   "completed_at": "2026-11-22T21:07:01.881Z",
   "dispatched_at": "2026-11-22T20:07:58Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-22T21:36:10.628616+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T133747334908-ippc-reconstruction-full-plant",
+      "section": "\u00a76"
+    }
+  },
   "findings": [
     {
       "file": "scripts/reconstructed_plasma_source/reconstruction.py",

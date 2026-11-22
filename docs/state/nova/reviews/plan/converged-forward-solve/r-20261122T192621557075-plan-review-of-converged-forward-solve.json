@@ -43,9 +43,28 @@
       "note": "\u00a710 no longer migrates or re-verifies the reduced-Newton route: \u00a76 deletes it and \u00a76 already waits on \u00a710. \u00a710 migrates the batched labeller onto topology.read and current.book (solve.fixed_point under vmap per the 2026-10-05 ruling) and deletes the legacy read.",
       "reason": "",
       "when": "2026-11-22T20:38:17.522422+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "be5ee98f736dcc20393153f8bb6e7bf163ef873e",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a710 clause 3 names its referents: tests/test_batched_labeller.py and tests/test_labeller_receipt.py pass at the head with no assertion or tolerance edited, beside the paired suite arms.",
+      "reason": "",
+      "when": "2026-11-22T20:38:26.463347+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "be5ee98f736dcc20393153f8bb6e7bf163ef873e",
+      "commit_basis": "edit",
+      "note": "\u00a710 clause 3 names its referents: tests/test_batched_labeller.py and tests/test_labeller_receipt.py pass at the head with no assertion or tolerance edited, beside the paired suite arms.",
+      "reason": "",
+      "when": "2026-11-22T20:38:26.463347+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",

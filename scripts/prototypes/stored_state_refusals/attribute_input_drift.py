@@ -182,7 +182,10 @@ def _failure_trajectory(label):
 
     def array(name):
         value = getattr(result, name, None)
-        return None if value is None else np.asarray(value).ravel().tolist()
+        if value is None:
+            return None
+        values = np.asarray(value, dtype=float).ravel()
+        return [float(item) if np.isfinite(item) else None for item in values]
 
     return dict(
         exception=failure.get("exception"),

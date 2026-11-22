@@ -49,7 +49,30 @@
   "plan_slug": "shafranov-observed-side",
   "plan_version": 15,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "commit": "e7210fc727895ca27b83f6cc76dc9490a6f0afd8",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "plan-section-depends-on now declares s3 waits on s1, s2 and s4 (e7210fc72); the queued s3 node already waited on the s1 and s4 nodes",
+      "reason": "",
+      "when": "2026-11-22T18:44:40.387582+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "commit": "e7210fc727895ca27b83f6cc76dc9490a6f0afd8",
+      "commit_basis": "edit",
+      "note": "plan-section-depends-on now declares s3 waits on s1, s2 and s4 (e7210fc72); the queued s3 node already waited on the s1 and s4 nodes",
+      "reason": "",
+      "when": "2026-11-22T18:44:40.387582+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/shafranov-observed-side/r-20261122T140856710657-plan-review-of-shafranov-observed-side.json",
   "review_run_id": "r-20261122T140856710657-plan-review-of-shafranov-observed-side",
   "reviewed_blob_sha": "6b73337ab5761d3b2e4c9d9852694b122d2b458c",
   "rubric": "content",

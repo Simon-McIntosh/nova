@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T21:48:32.009Z",
+  "dispatched_at": "2026-11-22T21:32:58Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:61",
+      "id": "reasoning-1",
+      "reason": "two nodes would act on the same module with opposite destinations, and the seam's single convention statement is left unowned.",
+      "text": "\u00a71's class rule sends \"Convention conversion\" rows to the ingest member, and the changed done-when clause (line 64) classifies as convention conversion every module that imports the COCOS algebra; but \u00a75 (line 101) keeps nova's convention owner in place \u2014 `nova/equilibrium/convention.py:76` is `CONVENTION = convention(17)`, exactly \"where nova states its convention today\", and it imports `nova_cocos` \u2014 so \u00a71 would move the very module \u00a75 rewires in place to literal values",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:66",
+      "id": "done_when-1",
+      "reason": "without a control the added class can ship empty and \u00a75 receives no convention-conversion rows to act on.",
+      "text": "the negative control runs \"the same importer scan\" over `nova.imas.dataset`, which validates only the importer graph; the clause added at line 64 also requires a row for every module importing `nova_cocos` or converting between DD versions, and that detector has no positive control, so an empty convention-conversion class is indistinguishable from a detector that misses them \u2014 the same silent gap as the earlier classification finding",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:104",
+      "id": "reasoning-2",
+      "reason": "the implementation either breaks two nova/io modules or leaves a second convention live inside nova, contradicting the section's own endpoint.",
+      "text": "\u00a75's done-when claims \"Nothing in the nova package or nova's tests \u2026 reads a DD3 entry or writes one\", yet `nova/io/ingest.py:92-94` and `nova/io/signalstore.py:60-62` derive a COCOS value from a DD3 `dd_version` through `nova.io.sourcemap.dd_equilibrium_convention`, and `signalstore` keys its cache group on that convention; \u00a75 names neither module, and the new \u00a71 detector misses them because they import sourcemap's helper rather than `nova_cocos`, so once sourcemap's algebra import must go they have no stated destination",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "dddfc3e6dad075e19756739bdf5217325d65ab1c",
+  "plan_fingerprint": "240de3f88bbbe22bd366f536b549cb6be45afb4b349a117075c4aca7c1a48722",
+  "plan_slug": "one-ids-seam",
+  "plan_version": 6,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T213208152864-plan-review-of-one-ids-seam",
+  "reviewed_blob_sha": "53b7e76edac8e0d61c069d30ba0486c6a10b431d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/contour-tree-topology-authority/reuse-map.md`, `packages/nova-cocos`, `imas_ambix/data/machine_maps`, `imas_ambix/data/description_identity.py` and `packages/imas-alambic` (which declares `nova-cocos`) all resolve; the extensionless `/nova/evidence/fragments/dd-cocos-ingest/flux-function-sign` resolves as `flux-function-sign.html`, and the cited CORSICA 130506/6 and DINA 105014/1, 105013/1 shots exist in the tests.",
+    "done_when": "a finding \u2014 \u00a71's negative control validates only the importer graph and leaves the convention-conversion detector added by the changed done-when clause without a positive control.",
+    "evidence_paths": "pass \u2014 the census record renders under `docs/research` and the evidence it cites sits under `docs/evidence`, both durable repository paths; no gate log is sent to a scratchpad or node-local temporary directory.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach code; `f-ddc-006` and `f-ois-001` stay in plan decision and followup text only.",
+    "reasoning": "two findings \u2014 \u00a71's class rule and \u00a75 state opposite destinations for the module that holds nova's convention statement, and \u00a75's \"one convention\" endpoint leaves nova/io's DD\u2192COCOS mapping and its two consumers unassigned.",
+    "single_goal": "pass \u2014 each section names one endpoint (census, deletion, MAST move, DIII-D move, one convention, generic-layer solve, flux-function sign), and \u00a75's added DD3 write path sits inside the same single-convention endpoint with three done-when clauses.",
+    "wiring": "pass \u2014 every `plan-section-depends-on` entry (s2/s3/s4\u2192s1, s5\u2192s3,s4, s6\u2192s5,s7, s7\u2192s5) names a section present in the snapshot, and each section's `data-links` agrees with it."
+  },
+  "section_digests": {
+    "_document": "a72509674351b1f6c6da6c018f610d8a4b6d279fba4f1c6c3983c4984eaa69d0",
+    "s1": "24326e71d2e248bede308417a9f3253a5ba4728fb5e516c80f9f1e941c2fa1ed",
+    "s2": "ac3c831e8e3eb29f1c887227a9908231f5cf74e6e3e7f08dec963678fed26c90",
+    "s3": "7a8863c3597b21f5d7818ddb1b676a0845a1ddcd70262330939be14f55c253ff",
+    "s4": "4e7c9afbff46d47d2d199ce6001bb7a3900c9b1841434faccd2ae76cc7b1ebb7",
+    "s5": "be4eb593e541325e3839352407ee905af411f41bc470e937501ded89a9e449b3",
+    "s6": "e8683fc2c1f7e0c827c6e7825b90a3907be409c0ebb99a64c29d956ee77e81d3",
+    "s7": "953227931f58fcac68dba80d7a089238e98ad7483629eed3a39e52c94effb2fa"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T21:49:04.348959+00:00",
+  "total": null
+}

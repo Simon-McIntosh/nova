@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-22T20:53:21.700Z",
+  "dispatched_at": "2026-11-22T20:08:48Z",
+  "figures_reviewed": [
+    {
+      "figure": "docs/figures/iter-passive-plasma-circuit/ippc-reconstruction-full-plant/agreement.svg",
+      "identified_by": "log-scale panels, 48 red modes past the relative 1e-3 bound, matching the alt text and caption in the reconstruction-full-plant evidence fragment",
+      "rendered_png": "image-1.png"
+    },
+    {
+      "figure": "docs/figures/iter-passive-plasma-circuit/ippc-reconstruction-full-plant/one-boundary-agreement.svg",
+      "identified_by": "linear panels bounded by 1e-3 with every sample on zero, matching the one-boundary alt text and caption in the reconstruction-full-plant evidence fragment",
+      "rendered_png": "image-0.png"
+    }
+  ],
+  "findings": [
+    {
+      "file": "scripts/reconstructed_plasma_source/reconstruction.py",
+      "line": 280,
+      "severity": "non-blocking",
+      "summary": "In agreement.svg's left panel the 415 winding-section samples are drawn as 4 pt markers across a panel about 550 px wide, roughly 1.3 px between samples, so adjacent markers merge; the series reads along its flat stretches as a continuous interpolated stroke rather than as 415 discrete samples, and the reader loses the sample density and can mistake it for a fitted line. The band, the dip near sections 120-160 and the rising cluster near 350-410 remain readable, so the figure still carries its result; a smaller marker or a thinner series would let the discreteness show."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261122T200809674238-review-of-ippc-reconstruction-full-plant-7d1ca74afdae-figure",
+  "reviewed_base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+  "reviewed_head_sha": "7d1ca74afdae111e3cae19d1a3ae31363058c678",
+  "reviewed_run_id": "r-20261122T133747334908-ippc-reconstruction-full-plant",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Both pass. All text, tick labels, axis labels and legend entries render near-black on white and clear contrast comfortably; the mid-grey population mark (#929292) is data rather than text and is distinguishable from the white ground and from the darker threshold line.",
+    "data_ink": "agreement.svg: pass. The 415 section samples and 1432 mode samples, the red past-bound subset and the single threshold line are the only marks; no ink is spent outside them. one-boundary-agreement.svg: pass. The data sit exactly on zero, so the flat stroke is the whole data content and it is drawn cleanly; nothing decorative competes with it.",
+    "decoration": "Both pass. No gradient, no background fill, no confidence band, no figure border and no decorative styling; the only non-data line is the declared 1e-3 threshold, which is itself data. No fill or shading appears anywhere in either figure.",
+    "label_collision": "Both pass. No text ink reaches the canvas edge (measured: the outermost rows and columns of both rendered PNGs carry no dark pixels), so no label is clipped. The single figure-level legend sits above the panels in clear space, the axis labels clear their tick labels, and no direct label overlaps data. The only marks that overlap data are the red mode markers, which lie on the threshold and are drawn on top of it.",
+    "legibility": "agreement.svg: pass. Two panels, decade-spaced y ticks, one shared legend and the dotted 1e-3 threshold read at a glance; the 48 past-bound modes stand out as red against the grey population. The left panel's 415 winding-section samples merge into a continuous stroke along the flat band (see finding), which reduces but does not prevent reading: the dips near sections 120-160 and 350-410 remain clear. one-boundary-agreement.svg: pass. The flat zero stroke and the dotted bound a full decade higher state the result immediately, and both panels' axes and legends are legible without magnification.",
+    "table_form": "Both pass. Each is a two-panel scatter of 415 winding-section and 1432 passive-mode relative differences against an index; this is a distribution and a threshold comparison, not information that is naturally a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T20:54:50.949807+00:00",
+  "total": null
+}

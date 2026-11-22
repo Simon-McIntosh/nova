@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T14:50:06.082Z",
+  "dispatched_at": "2026-11-22T14:38:20Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:104",
+      "id": "reasoning-1",
+      "reason": "a worker cannot satisfy both halves of the done-when; the plan must say where the digits table and its statement test live after the package is removed, which changes \u00a75's deliverable and its effort.",
+      "text": "\u00a75's done-when requires `packages/nova-cocos` to be gone and simultaneously requires \"the existing test that nova's convention is stated once still passes\", but that test is `tests/test_internal_cocos_sites.py::test_the_internal_convention_is_stated_once`, whose first assertion is `CONVENTION.digits == convention(17).digits` with `convention` imported from `nova_cocos`; removing the package deletes that import, so the named test cannot still pass. The same removal touches 11 package modules (`nova/equilibrium/convention.py`, `nova/io/sourcemap.py`, `nova/imas/plasma_source.py`, \u2026) and 13 test files that import `nova_cocos`, so \"what is still owed is a deletion\" understates the work as a rehoming of the convention's digits-table authority \u2014 and the \u00a75 estimate (3.0 h) and the \"nova suite adds no failures\" line cover none of it.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:61",
+      "id": "reasoning-2",
+      "reason": "without a class-to-destination rule for machine analysis, the census row each \u00a73/\u00a74 node consumes is undecidable, and those nodes will either delete analysis code or place it against the plan's own seam rule.",
+      "text": "\u00a71's rule is \"Destinations are by class, not by name\", but the stated mapping covers only machine authoring/publication (moves), generic readers (stay), machine-named modules doing generic work (generalised) and unreached modules (deleted), while the row vocabulary it defines \u2014 generic writer, machine analysis, convention conversion \u2014 has no destination rule; convention conversion is settled only later in \u00a75, and machine analysis is settled nowhere. \u00a73 and \u00a74 then require that no module left in nova be named `mast_*` or `diiid_*`, which forces the machine-analysis rows (e.g. the adjudication and screen modules under `nova/imas`) to move to the member, contradicting the plan's own separation of authoring into the member from analysis on the solver side, and leaving a census author to invent the rule the plan says the census carries.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "",
+  "plan_fingerprint": "fc045498f3de192e399272b893be2c86351fb0a4a037b308843339f229e127e9",
+  "plan_slug": "one-ids-seam",
+  "plan_version": 1,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T143742898359-plan-review-of-one-ids-seam",
+  "reviewed_blob_sha": "0a47098f471ca27a9b473cbe759d47e2f717473f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited anchor resolves: the five deleted modules plus `contour_tree_layout.py` and `dataset.py` exist under `nova/imas`; `docs/evidence/contour-tree-topology-authority/reuse-map.md` exists; `packages/nova-cocos` exists and is declared in `pyproject.toml` (dependency, workspace member, source); `130506/6`, `105014/1` and `105013/1` resolve to DD3 samples in `tests/test_dd_translator.py`, and the ambix consumer count resolves to four sites across the ambix application and `packages/imas-alambic`.",
+    "done_when": "pass \u2014 each of s1, s2, s3, s4 and s5 declares a negative control that can fail: the dataset-importer positive control (s1, s2), a perturbed coil turn count (s3, s4), and the unconverted-DD3 refusal (s5).",
+    "evidence_paths": "pass \u2014 the census record lands at `docs/research/imas-seam-census.html` and the gates write into the repository, not a scratch path.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers appear in the unit text or in the symbols the sections name.",
+    "reasoning": "two findings below \u2014 s5 asks an existing test that imports the package it removes to \"still pass\", and s1's class-to-destination rule leaves three of its own classes without a destination.",
+    "single_goal": "pass \u2014 each unit names one endpoint; s3's and s4's bit-identity check verifies the move rather than adding a second deliverable.",
+    "wiring": "pass \u2014 the declaration now wires every unit: `s2/s3/s4` wait on `s1`, `s5` on `s3` and `s4`, `s6` on `s5`, and every target section exists in the document."
+  },
+  "section_digests": {
+    "_document": "42299a2042da4bdef623fe13f09e17db8cc5998484451f66799d8f7f16743ad6",
+    "s1": "ba09b6512f83542d7aee380a13fadefc017c40c99293d4db8aeeed8d04e9461a",
+    "s2": "ac3c831e8e3eb29f1c887227a9908231f5cf74e6e3e7f08dec963678fed26c90",
+    "s3": "4def39b88f2805e9778e8689d72fddc3e2f59e842b367b21a13aba45b144aac2",
+    "s4": "105b190b7c196869368ec13e2383535559e3108c9ee150c60020e164c84ed079",
+    "s5": "ae096d9742c8f6e33dd091f28a6d0cdc44d59de48b0b46ef8705b5ac332ebb4d",
+    "s6": "add490fe515223c5348ded1e13f2c925f686573cb26e8fb716b61c2b44961341"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T14:48:14.456716+00:00",
+  "total": null
+}

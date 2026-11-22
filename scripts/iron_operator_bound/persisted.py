@@ -361,9 +361,10 @@ def newton_blocks(source, inputs):
 
     The route forms ``D = Q A``, takes ``R = sqrt(sym D)`` with negative
     eigenvalues clamped at zero, sets ``W = Q**-1 R`` and factors
-    ``B = I - R G W``.  ``R`` is built here from the same eigen-decomposition
-    and clamp rather than from an SVD, so a differential the route would have
-    refused lands on the same root it would have used.
+    ``B = I - R G W``.  A symmetric block's left singular vectors are its
+    eigenvectors, so the signed polar root built here is that decomposition
+    with its negative eigenvalues dropped, and a differential the route would
+    have refused lands on the root the route would have used.
     """
     local, origin = material_differential(source, inputs)
     differential = source["metric"] @ local

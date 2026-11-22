@@ -1,6 +1,6 @@
 <section id="sos-diamagnetic-source">
 <h2>The magnetics reader publishes a verified sign and provenance; the MAST store carries no calibrated diamagnetic flux</h2>
-<p id="sos-diamagnetic-source-revision">Recorded at revision <code>aaf0f00d4017d810055cf9175f1fb3bb717a06ae</code>; the focused gate <code>tests/test_diamagnetic_shot_store.py</code> ran at that revision and its log ends <code>8 passed</code> with <code>EXIT=0</code>.
+<p id="sos-diamagnetic-source-revision">Recorded at revision <code>aaf0f00d4017d810055cf9175f1fb3bb717a06ae</code>; the focused gate <code>tests/test_diamagnetic_shot_store.py</code> ran at that revision and its log ends <code>8 passed in 4.39s</code> with <code>EXIT=0</code>.
 <p id="sos-diamagnetic-source-outcome"><strong>landing:</strong> a diamagnetic loop can now be read and stored with its source, weber units, COCOS convention and calibration on the row, and a row whose excursion does not follow the toroidal field is refused. The measurement the toroidal volume term needs on MAST is not in that store, so no MAST row is written and no solved-state value is substituted.</p>
 
 <p><strong>Reader.</strong> <code>nova/imas/io_magnetics.py</code> reads <code>magnetics.diamagnetic_flux(:).data/.time</code> at whichever dictionary the entry was written in, and falls back to the <code>flux_*</code> loop types labelled <code>diamagnetic_internal</code>,

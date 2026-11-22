@@ -1,0 +1,92 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T14:26:20.425Z",
+  "dispatched_at": "2026-11-22T14:12:14Z",
+  "findings": [
+    {
+      "anchor": "nova/imas/machine_artifact.py:1",
+      "id": "reuse_search-1",
+      "reason": "the plan's \u00a73/\u00a74 done-when is largely a capability that already exists, so the plan should be restated as moving and generalising that path rather than delivering it new.",
+      "text": "\u00a71 proposes to map the module population before authoring, but the machinery \u00a73/\u00a74 need already exists in nova: `nova/imas/machine_artifact.py` creates and verifies content-addressed machine-description artifacts with DD-version pinning, `nova/imas/diiid_machine_ids.py:676 build_diiid_machine_ids` authors the DIII-D description IDS set, `nova/imas/mast_geometry.py:33` and `nova/imas/mast_solve_input_ids.py:39 author the MAST description and a shot's dynamic inputs, and `nova/scripts/mast_machine_artifact.py:31` and `nova/scripts/diiid_machine_artifact.py:17` publish both. The census must classify this existing authoring/publication path before the plan proposes a member that writes each machine's description \"to an IMAS entry once\".",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/machine_artifact.py:1",
+      "id": "duplicate_owner-1",
+      "reason": "a forked author drifts from the DD-pinning, artifact-identity and round-trip-verification behaviour the owner already carries, and \u00a74's bit-identity gate would then compare two authors.",
+      "text": "a new ingest member that authors and publishes machine descriptions duplicates the owner of that mechanism. The existing implementation spans `nova/imas/machine_artifact.py`, `nova/imas/diiid_machine_ids.py:676`, `nova/imas/mast_geometry.py:33`, `nova/imas/mast_solve_input_ids.py:39`, `nova/scripts/mast_machine_artifact.py:31`, `nova/scripts/diiid_machine_artifact.py:17`, and its placement/path owner is `nova/database/filepath.py:111 diiid_machine_source`. The node brief must extend or move this one owner, not fork a second author; if the member is the chosen home, the move is of this machinery, not a reimplementation.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/io/sourcemap.py:944",
+      "id": "thin_wrapper-1",
+      "reason": "\u00a75 must say the DD3 read path is deleted from nova (verified by refusal) and only the algebra relocates, otherwise the plan preserves the translation it is meant to remove.",
+      "text": "\u00a75 says \"the convention algebra and the DD3 translation move into the ingest member\" and \"packages/nova-cocos is removed\", treating them as one mechanism. They are two owners: the sixteen-convention algebra is `packages/nova-cocos/src/nova_cocos/__init__.py:153 class ConventionTransform` / `:215 convention_transform`, while the DD3 translation is nova's own `nova/io/sourcemap.py:944 translate_equilibrium` with `:818 dd_equilibrium_factor`, consumed at `nova/imas/equilibrium.py:558,591` and `nova/imas/getslice.py:66`. Moving nova's translation into the ingest member retains a DD3 read path in a package nova must not import, while \u00a75's own done-when and \u00a76 require nova to read only DDv4 and to refuse DD3 by name.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "packages/nova-cocos/src/nova_cocos/__init__.py:1",
+      "id": "reuse_search-2",
+      "reason": "the same-landing-beat dependency migration \u00a75 promises must name imas-alambic too, or that package resolves against a missing `nova-cocos` after the removal.",
+      "text": "\u00a75 states imas-ambix imports the algebra \"in three places\"; the measured census is four import sites: `imas_ambix/challenge/convention.py:28`, `imas_ambix/data/cocos_convention.py:26`, `packages/imas-alambic/src/imas_alambic/cocos.py:21` and `tests/data/test_cocos_convention.py:11` in `/home/ITER/mcintos/Code/imas-ambix`. `imas-alambic` is a separate distributable package within that repo, so its dependency does not move with the ambix application's.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/convention.py:78",
+      "id": "reuse_search-3",
+      "reason": "the done-when as written invites a node to re-state the convention somewhere new; it should be phrased as an invariant to preserve and verify, with the deletion as the deliverable.",
+      "text": "\u00a75's done-when \"nova states its one convention, COCOS 17 on DDv4, in one place\" is already true: `nova/equilibrium/convention.py:78 CONVENTION = convention(17)` derives `:81 COCOS`, `nova/io/sourcemap.py:741 NOVA_CONVENTION = COCOS` defers to it (`:744` calls it \"the one statement\"), and `tests/test_internal_cocos_sites.py:29 test_the_internal_convention_is_stated_once` asserts it. The remaining work is to delete the *sixteen-convention import and the DD3 site*, not to add a second declaration.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/one-ids-seam.html:112",
+      "id": "deep_module-1",
+      "reason": "one scan module consumed by both the census record and the guard hides the whole graph behind one interface and makes \u00a73/\u00a74's move lists computed rather than transcribed, which is the difference between a census that can be wrong and one that cannot.",
+      "text": "the \u00a71 census (`docs/plans/one-ids-seam.html:59`) and \u00a76's committed import guard are two implementations of the same artifact: a module-import graph over `nova/equilibrium`, `nova/transport`, `nova/biot`, `nova/frame`, `nova/circuit` and `nova/imas`, with each module's class and destination. \u00a71 renders it as prose rows in a research HTML that \u00a73/\u00a74 read by hand; \u00a76 re-derives it inside a test. The existing import-guard pattern to extend is `tests/test_base_install_imports.py:1` (a subprocess whose import machinery refuses named modules) and `tests/test_internal_cocos_sites.py:1` (a site census), not a hand-written record.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/diiid_machine_ids.py:1",
+      "id": "thin_wrapper-2",
+      "reason": "the \u00a71 census's destination column can classify this row as \"generalised into a generic module\" rather than \"moves to ingest\", so the plan's name-based rule is refined by the census it already requires and the endpoint does not move.",
+      "text": "\u00a74's first done-when \"no module left in the nova package is named `diiid_*`\" would evict `nova/imas/diiid_machine_ids.py`, which is the generic IDS-set authoring and round-trip-verification path for a machine description (it takes a source path and builds `IDS_NAMES = (\"wall\", \"pf_active\", \"magnetics\")`), while its generic companion `nova/imas/machine_artifact.py` stays. The machine-name prefix and the machine-specific source are not the same thing, and a name-based eviction moves the generic half into the ingest member where nova's readers lose the publication path.",
+      "type": "thin_wrapper",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "84c74ea8d0315632bdde70050847704483af1a15",
+  "plan_fingerprint": "243430df2ed5cf54b222f33e06876e51413c0ad481712aef1ddbfe527fe71b15",
+  "plan_slug": "one-ids-seam",
+  "plan_version": 0,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T141146135356-plan-review-of-one-ids-seam",
+  "reviewed_blob_sha": "868c233f0440c7c2ad301c6eab1966d3c3c7c407",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the \u00a71 census and the \u00a76 import guard are two implementations of the same module-import graph, and \u00a73/\u00a74 consume the census as prose rows a human reads.",
+    "duplicate_owner": "a finding \u2014 a new ingest author forges a second machine-description author beside `nova/imas/machine_artifact.py`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a75 retires the `packages/nova-cocos` member and \u00a73/\u00a74 retire the `mast_*`/`diiid_*`/`machine_*` modules, so no family grows with a surface the plan does not account for.",
+    "reuse_search": "a finding \u2014 \u00a73/\u00a74's authoring endpoint already exists as `nova/imas/machine_artifact.py` with `nova/imas/diiid_machine_ids.py` and the two publication scripts, and \u00a75's ambix import census is short by one package.",
+    "thin_wrapper": "a finding \u2014 \u00a75 relocates nova's own DD3 read path (`nova/io/sourcemap.translate_equilibrium`) instead of deleting it, and conflates that path with the `packages/nova-cocos` algebra."
+  },
+  "section_digests": {
+    "_document": "42299a2042da4bdef623fe13f09e17db8cc5998484451f66799d8f7f16743ad6",
+    "s1": "2487abcb8759613d2a3083705bf392d4b978556cb3639922e48cf7da48f7cbf9",
+    "s2": "261ea58586558510d7bc8ab53d0ac6d1aaffd2f2d629a1dacd679385b392e51d",
+    "s3": "e12a50dc59cee2227c7fb97f2d71fec69c238ca1a85db4651ef3c0bffe4aa4fc",
+    "s4": "a0b874c3f768a13fdd75593516bbf1cc218f25d6c984ec32402af64bbf4834b9",
+    "s5": "a764836056c64ac2f4595cbb30c2382d2f963b63be8dbfaafbfae5dbe5466d9c",
+    "s6": "add490fe515223c5348ded1e13f2c925f686573cb26e8fb716b61c2b44961341"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T14:26:23.902017+00:00",
+  "total": null
+}

@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T19:09:12.942Z",
+  "dispatched_at": "2026-11-22T18:50:32Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:101",
+      "id": "reasoning-1",
+      "reason": "the stated endpoint is false as scoped, so \u00a75 needs a clause on the write path (retarget the writers to DDv4 or move the DD3 factor to the census's member), which changes the deliverable and effort.",
+      "text": "\u00a75 removes only the DD3 read path while nova's write path still converts to COCOS 11: nova/imas/sample.py:22 sets DEFAULT_DD_VERSION = \"3.39.0\" and line 352 applies dd_equilibrium_factor(dd_version, PSI_LIKE), pinned at -1.0 by tests/test_internal_cocos_sites.py::test_a_dd3_write_carries_the_flux_sign_flip; a worker can satisfy every \u00a75 done-when clause and leave nova writing a second convention by default",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/one-ids-seam.html:64",
+      "id": "done_when-1",
+      "reason": "\u00a71's class rule gives convention conversion a destination while its scan cannot emit a row for that class outside nova/imas, so the census cannot evidence the class was classified and its member needs the algebra importers as a row source.",
+      "text": "\u00a71's row sources cover nova/imas plus mast_*/diiid_*/machine_* modules anywhere and their importers, so a convention-conversion module outside nova/imas that imports the algebra but no machine module gets no row and no class: nova/io/sourcemap.py:53 imports nova_cocos and nova/equilibrium/convention.py:66 imports convention",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "dd5d327554e6f90afc67b94db9e2c85ab0345910",
+  "plan_fingerprint": "6bf846c8aba63dbbdecf068eb3c24caf80adb39184a8477f815f1c155601d463",
+  "plan_slug": "one-ids-seam",
+  "plan_version": 4,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T184955233453-plan-review-of-one-ids-seam",
+  "reviewed_blob_sha": "cb29484173ed9c8561ae2b6af132d7731f355104",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the flux-function-sign href resolves as flux-function-sign.html, tests/test_flux_function_sign.py and its named node exist with a strict xfail at line 142, f-ddc-006 exists and records the same paired sites, cut-cell-current-attribution exists and is superseded, and every module and packages/ path the changed units name exists.",
+    "done_when": "a finding \u2014 \u00a71's done-when enumerates its row sources as one row per module under nova/imas, one per mast_*/diiid_*/machine_* module elsewhere, and one per module importing one of them, which leaves the convention-conversion class with no row source outside nova/imas; every other changed section names a negative control that can go red.",
+    "evidence_paths": "pass \u2014 the census record is a committed docs/research page and \u00a77's evidence is a committed fragment under docs/evidence; no session scratchpad or /tmp path is named.",
+    "naming": "pass \u2014 the changed units name no plan label, stage name or ticket number for a new symbol, and the file names they carry already exist in the tree.",
+    "reasoning": "a finding \u2014 \u00a75's endpoint \"nova holds one convention: COCOS 17 on DDv4\" is not reachable through the work it names, because nova's default writer still emits a DD3 (COCOS 11) entry after the algebra is replaced by literals.",
+    "single_goal": "pass \u2014 \u00a73's retirement inventory is the same MAST move, \u00a74's is the same DIII-D move, \u00a75's three clauses are one endpoint, and \u00a77's paired sites are one deliverable.",
+    "wiring": "pass \u2014 every depends-on in the snapshot resolves to a node that exists (s2/s3/s4\u2190s1, s5\u2190s3,s4, s7\u2190s5, s6\u2190s5,s7), and s6's wait on s7 is justified because the equilibrium \u00a76 writes carries the flux functions \u00a77 re-signs."
+  },
+  "section_digests": {
+    "_document": "a72509674351b1f6c6da6c018f610d8a4b6d279fba4f1c6c3983c4984eaa69d0",
+    "s1": "5ddd7cbda6b206f4303f8612667f2b34f6e5e69ed044b969968ec5412f27d098",
+    "s2": "ac3c831e8e3eb29f1c887227a9908231f5cf74e6e3e7f08dec963678fed26c90",
+    "s3": "7a8863c3597b21f5d7818ddb1b676a0845a1ddcd70262330939be14f55c253ff",
+    "s4": "4e7c9afbff46d47d2d199ce6001bb7a3900c9b1841434faccd2ae76cc7b1ebb7",
+    "s5": "4e5b1a473f64fa85283e175a6e631ef8cefec3a143e98a3a62c0aefb3a01ad17",
+    "s6": "e8683fc2c1f7e0c827c6e7825b90a3907be409c0ebb99a64c29d956ee77e81d3",
+    "s7": "953227931f58fcac68dba80d7a089238e98ad7483629eed3a39e52c94effb2fa"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T19:06:29.560797+00:00",
+  "total": null
+}

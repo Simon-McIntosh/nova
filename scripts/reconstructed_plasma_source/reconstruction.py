@@ -177,7 +177,10 @@ def measure(scratch: Path) -> dict:
         "reconstruction_label": reconstruction.label,
         "generic_boundary": generic.prescribe(0).boundary_source,
         "reconstruction_boundary": reconstruction.prescribe(0).boundary_source,
-        "coil_rows": [int(reconstruction.coils.time.size), int(generic.coils.time.size)],
+        "coil_rows": [
+            int(reconstruction.coils.time.size),
+            int(generic.coils.time.size),
+        ],
         "section_plasma_flux": {
             key: value for key, value in sections.items() if key != "relative"
         },
@@ -185,7 +188,9 @@ def measure(scratch: Path) -> dict:
             key: value for key, value in modes.items() if key != "relative"
         },
         "plasma_times_equal": bool(
-            np.array_equal(generic_plant.plasma_times, reconstruction_plant.plasma_times)
+            np.array_equal(
+                generic_plant.plasma_times, reconstruction_plant.plasma_times
+            )
         ),
         "figure": str(FIGURE),
         "plot": {
@@ -212,9 +217,7 @@ def draw(report: dict, path: Path = FIGURE) -> None:
         axis.set_yscale("log")
         axis.set_xlabel(label + " index")
         axis.set_ylabel("relative flux difference")
-        axis.axhline(
-            report["tolerance"], color="#666666", linewidth=1.2, linestyle=":"
-        )
+        axis.axhline(report["tolerance"], color="#666666", linewidth=1.2, linestyle=":")
         axis.text(0, report["tolerance"], "1e-3 bound", color="#666666")
         axis.spines[["top", "right"]].set_visible(False)
         axis.grid(False)
@@ -233,9 +236,7 @@ def _polygon_area(polygon: np.ndarray) -> float:
 
 def _redistribution(generic, presented) -> dict:
     """How much of the prescribed current the two boundaries move."""
-    density_difference = np.abs(
-        presented.current_density - generic.current_density
-    )
+    density_difference = np.abs(presented.current_density - generic.current_density)
     cell_difference = np.abs(presented.cell_current - generic.cell_current)
     return {
         "boundary_source": [generic.boundary_source, presented.boundary_source],
@@ -295,14 +296,11 @@ def localise(scratch: Path) -> dict:
     )
     arms = {
         "generic": generic,
-        "coil_plasma_clock_only": replace(generic, coils=presented.coils
-                                          ),
+        "coil_plasma_clock_only": replace(generic, coils=presented.coils),
         "last_closed_surface_only": replace(generic, slices=presented.slices),
         "both": presented,
     }
-    machine = load_sectioned_machine(
-        CACHE / "sectioned-conductor-set" / SECTIONED_KEY
-    )
+    machine = load_sectioned_machine(CACHE / "sectioned-conductor-set" / SECTIONED_KEY)
     baseline = coupled_plant(machine, generic, cache_dir=scratch / "arm-generic")
     table = {}
     for name, source in arms.items():
@@ -315,9 +313,7 @@ def localise(scratch: Path) -> dict:
             "section": _relative_error(
                 baseline.section_plasma_flux, plant.section_plasma_flux
             ),
-            "mode": _relative_error(
-                baseline.mode_plasma_flux, plant.mode_plasma_flux
-            ),
+            "mode": _relative_error(baseline.mode_plasma_flux, plant.mode_plasma_flux),
         }
         table[name]["section"].pop("relative", None)
         table[name]["mode"].pop("relative", None)
@@ -327,9 +323,9 @@ def localise(scratch: Path) -> dict:
         "n_modes": int(baseline.n_modes),
         "redistribution": _redistribution(generic.prescribe(0), presented.prescribe(0)),
         "arms": table,
-        "violating_modes": _violating_modes(baseline, coupled_plant(
-            machine, presented, cache_dir=scratch / "arm-both"
-        )),
+        "violating_modes": _violating_modes(
+            baseline, coupled_plant(machine, presented, cache_dir=scratch / "arm-both")
+        ),
         "tolerance": TOLERANCE,
     }
 
@@ -342,11 +338,16 @@ def main() -> None:
     scratch = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("scratch")
     if "--localise" in sys.argv[2:]:
         report = localise(scratch)
-        print("LOCALISE " + json.dumps(_printable(report), sort_keys=True, default=float))
+        print(
+            "LOCALISE " + json.dumps(_printable(report), sort_keys=True, default=float)
+        )
         return
     report = measure(scratch)
     draw(report)
-    print("RECONSTRUCTION " + json.dumps(_printable(report), sort_keys=True, default=float))
+    print(
+        "RECONSTRUCTION "
+        + json.dumps(_printable(report), sort_keys=True, default=float)
+    )
     if (
         report["section_plasma_flux"]["violations"]
         or report["mode_plasma_flux"]["violations"]

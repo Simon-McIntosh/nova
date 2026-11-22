@@ -16,6 +16,10 @@ from scripts.reconstructed_plasma_source.measure import (
     mast_source,
     measure_linkage,
 )
+from scripts.reconstructed_plasma_source.reconstruction import (
+    corsica_source,
+    reconstruction_style,
+)
 
 
 def test_coil_current_clock_is_independent_and_bounded():
@@ -186,3 +190,28 @@ def test_from_imas_prescribes_corsica_130506_6():
     assert prescribed.plasma_current == pytest.approx(
         float(equilibrium.time_slice[0].global_quantities.ip)
     )
+
+
+@pytest.mark.slow
+def test_reconstruction_presentation_resolves_the_last_closed_surface():
+    """Dropping the separatrix and x-point resolves the stored last closed surface.
+
+    The generic CORSICA slice offers its stored separatrix and closes on it
+    through the x-point; the reconstruction presentation offers neither, so the
+    boundary resolver falls through to the stored last closed flux surface.
+    Both presentations prescribe the same plasma current in COCOS 17.
+    """
+
+    if not CONFORMING_CORSICA.is_dir():
+        pytest.skip("imasdb pulse not present")
+    generic = corsica_source()
+    presentation = reconstruction_style(generic)
+
+    assert generic.prescribe(0).boundary_source == "separatrix_x_point"
+    assert presentation.prescribe(0).boundary_source == "boundary_outline"
+    assert presentation.slices[0].x_points == ()
+    assert presentation.slices[0].outline.shape == (0, 2)
+    assert presentation.prescribe(0).plasma_current == pytest.approx(
+        generic.prescribe(0).plasma_current
+    )
+    assert presentation.coils.time.size < generic.coils.time.size

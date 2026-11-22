@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/efit_reproduction_gate.py:360",
+    "benchmarks/label_seed_residual_field.py:74",
+    "benchmarks/coil_edit_latency.py:147",
+    "benchmarks/mast_response_carrier_warm.py:607"
+  ],
+  "completed_at": "2026-11-22T04:22:26.315Z",
+  "dispatched_at": "2026-11-22T04:02:43Z",
+  "findings": [
+    {
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": "82",
+      "severity": "non-blocking",
+      "text": "non-blocking: the env-var store redirection added at benchmarks/mast_response_carrier_warm.py:31 (NOVA_MAST_RESPONSE_CARRIER_STORE) is asserted by no test; deleting the os.environ.get leaves the scoped lane green and only the negative control would notice, at run time rather than at the gate."
+    },
+    {
+      "file": "benchmarks/mast_response_carrier_warm.py",
+      "line": "241",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fallback grid name is the literal \"stored-axis-stride\" where CONSUMER_CARRIER_GRID is the constant the module already owns at line 105; the refusal message goes stale when that constant moves to the full grid."
+    },
+    {
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "line": "92",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert str(absent) in message` compares the refusal text against the same path the test handed load_carrier; that clause holds whatever the code does with the same variable, and the independent guard is the pytest.raises(MissingResponseCarrier) at line 91 plus the \"build --grid\" clause at line 94."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/mast-known-state-carriers-rebuilt.html",
+      "line": "28",
+      "severity": "non-blocking",
+      "text": "non-blocking: done_when clause 2 states the recovery test runs to a verdict at main, and the recorded verdict is at worktree revision 1158b3a04 (SLURM 1336006); the merge-time run is this node's separate test node and is not in this record."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/mast-known-state-carriers-rebuilt.html",
+      "line": "49",
+      "severity": "non-blocking",
+      "text": "non-blocking: the armed suite pair reaches no pytest summary line at either revision (exit 134, base 2290fbb8b and head 74f14703), so added_failure_count 0 records that neither log names a failing test id rather than a measured green delta; the worker recorded the same fact under outside_scope."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass - three benchmark call sites plus the module's own CLI dispatch reach the changed loader.",
+    "diff": "pass - two code commits and three evidence commits, +287 -2 across four paths.",
+    "done_when": "pass with a recorded gap - all three clauses carry logs on disk, and the before/after suite pair is unreadable at both revisions.",
+    "goal": "pass - the landed change is the named missing-carrier refusal and the per-carrier grid-contract resolution that let the lost carrier store be rebuilt and the MAST 22086 known state be measured again.",
+    "manifest": "pass - the manifest names commits, the gate command and its logs, and records the unreadable suite pair honestly.",
+    "write_paths": "pass - all four changed paths lie inside the declared write paths."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_magnetics_fit.py:82 fails if the named refusal is reverted and :97 fails if check() returns to the consumer defaults, but no assertion exercises the NOVA_MAST_RESPONSE_CARRIER_STORE override at benchmarks/mast_response_carrier_warm.py:31.",
+    "evidence": "the done_when's measures are each backed by a log under the run directory (logs/mast-known-state-test.log EXIT=0, logs/carrier-check.log EXIT=0, logs/mast-fit-iteration.log EXIT=0), yet the before/after suite pair at manifest lines 21-22 reaches no summary line at either revision.",
+    "fit": "benchmarks/mast_response_carrier_warm.py:234 follows the module's existing guard idiom and introduces no plan label or version suffix, with one literal at :241 that should name the existing constant.",
+    "goal_fidelity": "benchmarks/mast_response_carrier_warm.py:234 establishes the named refusal and the store override and :534 resolves each carrier's pinned contract, and the fragment records the rebuild, the recovery verdict and the fit row the done_when names.",
+    "reuse": "the change reuses the pre-existing grid_for_carrier owner at benchmarks/mast_response_carrier_warm.py:197 rather than resolving a grid itself, and a capability search found no owner for a missing-carrier refusal.",
+    "scope_discipline": "the diff at benchmarks/mast_response_carrier_warm.py, tests/test_equilibrium_magnetics_fit.py, docs/evidence/fragments/... and docs/figures/.../mast-known-state.svg holds every changed path inside the declared set, and scripts/prototypes/fit_inside_iteration is untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to rebuild the frozen MAST response carriers, run the MAST 22086 known-state recovery to a verdict, and measure the fit-inside-the-iteration row; the landed change at benchmarks/mast_response_carrier_warm.py:234 adds the named missing-carrier refusal and the store override, and at :534 makes check() resolve the pinned contract from the carrier name.\nVERDICT done_when: read all three clauses against the manifest and logs - clause (1) via logs/build-carriers.log and logs/receipts/*.json (one batch job, check direct_builders=0), clause (2) via logs/mast-known-state-test.log (1 passed in 2346.60s, EXIT=0), clause (3) via logs/mast-fit-iteration.log (MAST row bands met on titan job 1335968); the suite pair aborts at both revisions and is recorded under outside_scope.\nVERDICT write_paths: read the five declared paths against the four-path diff; benchmarks/mast_response_carrier_warm.py, tests/test_equilibrium_magnetics_fit.py, the evidence fragment and docs/figures/inverse-equilibrium-baseline/mast-known-state-carriers-rebuilt/mast-known-state.svg are all inside them, and scripts/prototypes/fit_inside_iteration was not touched.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T205405910971-mast-known-state-carriers-rebuilt/manifest.md; it states status complete with commits 003e19f7e..3b8a16a5b and its cited logs match on disk (scoped lane 46 passed/EXIT=0, recovery 1 passed/EXIT=0, negative control 1 failed/EXIT=1), while baseline_suite and after_suite both exit 134 with completed false.\nVERDICT diff: read commit by commit from 2290fbb8b to 3b8a16a5b - 003e19f7e adds the MissingResponseCarrier refusal and NOVA_MAST_RESPONSE_CARRIER_STORE, 1158b3a04 makes check() resolve the grid contract, and 98d3c0977/74f147039/3b8a16a5b add the fragment and figure; 4 paths, +287 -2.\nCALL_SITES: benchmarks/efit_reproduction_gate.py:360, benchmarks/label_seed_residual_field.py:74, benchmarks/coil_edit_latency.py:147, benchmarks/mast_response_carrier_warm.py:607\n",
+  "review_run_id": "r-20261122T040130264759-review-of-mast-known-state-carriers-rebuilt-3b8a16a5bf34",
+  "reviewed_base_sha": "2290fbb8bc0e548d35d18eebdb6047a5672fb8c7",
+  "reviewed_head_sha": "3b8a16a5bf34205aeb3711a8b09ff6d51fe131b2",
+  "reviewed_run_id": "r-20261121T205405910971-mast-known-state-carriers-rebuilt",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T04:24:54.447399+00:00",
+  "total": 103
+}

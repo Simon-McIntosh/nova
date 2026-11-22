@@ -25,8 +25,8 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="89">
-<meta name="plan-modified" content="2026-11-21">
+<meta name="plan-version" content="90">
+<meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
   <main class="plan-doc">
@@ -408,6 +408,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261120T080021687060-fit-iteration-converges-known-states" data-who="reckon-build" data-when="2026-11-21T08:21:44Z">
     <div class="r-comment-body"><p>The held-map pass now fits the coefficients the held map's rows name and lays one whole cycle of them down, Anderson-mixing that map walk over the steps already taken, with the base step at half a cycle because the mixture extrapolates to at least twice the step and the rejection fence is one span. On the Solov'ev known state, which enters 1.76 spans from its answer, the walk contracts by about three quarters a pass on average — the applied update falls on 72 of the walk's 79 passes and rises locally on seven (passes 8, 10, 12, 31, 33, 34 and 36), each rise at most a factor of 1.29 and never carrying the update back above 0.032 of the span — reaching a flux error of 4.137e-10 of the span (band 1e-6) and a whitened residual of 1.890e-10 (band 1e-8) in 79 passes, recovering the generating amplitudes to ten significant figures; the ITER 135013 known state converges in one pass to a flux error of 6.948e-16 and a residual of 2.833e-16 in the same allocation. The predecessor's ladder on the same start stopped at pass 3 with 0.9164 of the span and a residual of 0.3266. The default pass budget rose from 64 to 96 because the mixed walk contracts by about three quarters a pass. Contract: `test_a_far_start_recovers_the_state_the_rows_came_from` in `tests/test_flux_iteration.py` asserts the default rule reaches the generating amplitudes and flux, and asserts the `cycle` ladder on the same start does not converge and stays above 1e-6.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261122T040130264759-review-of-mast-known-state-carriers-rebuilt-3b8a16a5bf34" data-who="reckon-build" data-when="2026-11-22T04:22:26.315Z">
+    <div class="r-comment-body"><p>independent review of r-20261121T205405910971-mast-known-state-carriers-rebuilt read at base 2290fbb8bc0e548d35d18eebdb6047a5672fb8c7 and head 3b8a16a5bf34205aeb3711a8b09ff6d51fe131b2, status parsed, scores goal_fidelity 18, evidence 16, scope_discipline 19, durability 15, fit 17, reuse 18 (total 103), five non-blocking findings and no blocking finding, added_failure_count 0 with no added failure ids</p></div>
 </div>
 </section>
 </main>

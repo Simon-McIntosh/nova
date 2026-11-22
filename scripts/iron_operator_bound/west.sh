@@ -6,13 +6,13 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=200G
 #SBATCH --time=07:00:00
-#SBATCH --output=/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/operator-bound/west-serial-job.log
+#SBATCH --output=/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/operator-bound/west-serial-job.log
 set -u
 export TMPDIR=/tmp
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 TREE=$(cd "$(dirname "$0")/../.." && pwd -P)
 PYTHON=${PYTHON:-/home/ITER/mcintos/Code/nova/.venv/bin/python}
-OUT=/work/projects/imas_gpu/sophelio/evidence/iron-core-magnetisation/operator-bound
+OUT=/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/operator-bound
 mkdir -p "$OUT"
 cd "$TREE" || exit 2
 echo "# tree $TREE"

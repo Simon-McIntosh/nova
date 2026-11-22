@@ -2074,3 +2074,350 @@ def test_reloaded_coilset_accepts_the_iron_frame(tmp_path):
     contribution = with_iron - air
     assert np.max(np.abs(contribution - direct)) <= 1e-12 * np.max(np.abs(direct))
     assert np.max(np.abs(contribution)) > 1e-6 * np.max(np.abs(air))
+@pytest.mark.parametrize("fill", [1.0, 0.2])
+@pytest.mark.parametrize("damping", [0.0, 0.01])
+def test_split_linear_factor_preserves_differential_system(fill, damping):
+    cells = iron._mesh(shapely.box(1, 0, 2, 1), 0.5)
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    owners = geometry["owners"]
+    project = np.einsum(
+        "qij,qj,q->qi",
+        np.linalg.inv(geometry["gram"])[owners],
+        geometry["basis"],
+        geometry["weights"],
+    )
+    count = 6 * len(cells.polygons)
+    rng = np.random.default_rng(123)
+    operator = rng.normal(size=(count, count)) * 1e-10
+    external = rng.normal(size=count) * 0.05
+    operands = tuple(
+        map(
+            jnp.asarray,
+            (
+                operator,
+                external,
+                *iron._fit_law([0, 0.2, 1], [2, 4, 2]),
+                geometry["basis"],
+                project,
+                owners,
+            ),
+        )
+    )
+    if fill != 1:
+        operands += (
+            jnp.full(len(cells.polygons), fill),
+            jnp.full((2, len(cells.polygons)), (1 - fill) / fill),
+        )
+    state = jnp.arange(count, dtype=jnp.float64) * 10
+    expected = iron._linear_factor(state, operands, jnp.asarray(damping))
+    actual = iron._linear_split_factor(state, operands, jnp.asarray(damping))
+    rhs = jnp.asarray(rng.normal(size=count))
+    np.testing.assert_allclose(
+        iron.jla.lu_solve(actual, rhs),
+        iron.jla.lu_solve(expected, rhs),
+        rtol=1e-12,
+        atol=1e-14,
+    )
+    differential = jax.jacfwd(iron._linear_residual)(state, operands)
+    differential += damping * jnp.eye(count)
+    np.testing.assert_allclose(
+        differential @ iron.jla.lu_solve(actual, rhs), rhs, rtol=1e-12, atol=1e-14
+    )
+    np.testing.assert_array_equal(operands[0], operator)
+
+
+def test_split_linear_solve_preserves_nonlinear_probe_fields(monkeypatch):
+    region = shapely.box(1, 0, 2, 1)
+    cells = iron._mesh(region, 0.5)
+    matrix = np.eye(6 * len(cells.polygons)) * iron._MU0 * 0.3
+    interaction = iron.MagnetisationInteraction(
+        matrix, iron._geometry_digest(cells, "linear"), "linear"
+    )
+    monkeypatch.setattr(
+        iron, "_galerkin_interaction", lambda *a, **k: pytest.fail("assembly")
+    )
+
+    def external(points):
+        return np.column_stack((0.02 * points[:, 0], 0.03 + 0.01 * points[:, 1]))
+
+    results = [
+        iron.solve_magnetisation(
+            region,
+            external,
+            [0, 0.2, 1],
+            [2, 4, 2],
+            cell_size=0.5,
+            basis="linear",
+            interaction=interaction,
+            linear_factorisation=route,
+            tolerance=1e-10,
+        )
+        for route in ("combined", "split")
+    ]
+    assert all(result.converged for result in results)
+    assert results[0].iterations >= 2
+    probes = np.array([[3.0, 0.0], [4.0, 1.0], [6.0, 0.0]])
+    np.testing.assert_allclose(
+        results[1].field(probes), results[0].field(probes), rtol=1e-12, atol=1e-20
+    )
+    np.testing.assert_array_equal(interaction.matrix, matrix)
+
+
+def test_linear_factorisation_refuses_unknown_route_and_constant_basis():
+    for arguments in (
+        {"linear_factorisation": "other"},
+        {"linear_factorisation": "split"},
+    ):
+        with pytest.raises(ValueError, match="factorisation"):
+            iron.solve_magnetisation(
+                shapely.box(1, 0, 2, 1),
+                lambda points: np.zeros_like(points),
+                [0, 1],
+                [10, 10],
+                cell_size=1,
+                **arguments,
+            )
+
+
+def test_west_route_comparison_detects_perturbed_interaction():
+    from scripts.west_iron_linear.measure import interaction_agreement, probe_agreement
+
+    reference = np.diag([1.0, 2.0, 3.0])
+    assert interaction_agreement(reference, reference.copy())["entries"] == 9
+    altered = reference.copy()
+    altered[1, 0] = 1e-4
+    with pytest.raises(AssertionError):
+        interaction_agreement(reference, altered)
+    probes = np.arange(1, 7, dtype=float).reshape(3, 2)
+    assert probe_agreement(probes, probes.copy()) == [0.0, 0.0, 0.0]
+    with pytest.raises(AssertionError):
+        probe_agreement(probes, probes * 1.00001)
+
+
+@pytest.mark.parametrize(
+    "change, status",
+    [
+        (0.0099, "complete"),
+        (0.01, "blocked"),
+        (0.0101, "blocked"),
+        (-0.0101, "blocked"),
+    ],
+)
+def test_west_refinement_blocks_at_one_percent(change, status):
+    from scripts.west_iron_linear.measure import refinement_verdict
+
+    reference = np.ones(3)
+    candidate = reference.copy()
+    candidate[2] += change
+    assert refinement_verdict(reference, candidate)["status"] == status
+
+
+@pytest.mark.parametrize("fill", [1.0, 0.2])
+@pytest.mark.parametrize("damping", [0.0, 0.01])
+def test_metric_cholesky_step_matches_original_differential(fill, damping):
+    from scipy.linalg import block_diag
+
+    cells = iron._mesh(shapely.box(1, 0, 2, 1), 0.5)
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    owners = geometry["owners"]
+    project = np.einsum(
+        "qij,qj,q->qi",
+        np.linalg.inv(geometry["gram"])[owners],
+        geometry["basis"],
+        geometry["weights"],
+    )
+    metric = np.zeros((len(cells.polygons), 6, 6))
+    metric[:, :3, :3] = metric[:, 3:, 3:] = geometry["gram"]
+    full_metric = block_diag(*geometry["gram"], *geometry["gram"])
+    values, vectors = np.linalg.eigh(full_metric)
+    half = (vectors * np.sqrt(values)) @ vectors.T
+    inverse_half = (vectors / np.sqrt(values)) @ vectors.T
+    rng = np.random.default_rng(426)
+    symmetric = rng.normal(size=full_metric.shape)
+    symmetric = symmetric @ symmetric.T
+    symmetric *= 0.3 * iron._MU0 / np.linalg.norm(symmetric, 2)
+    gram = inverse_half @ symmetric @ half
+    operands = tuple(
+        map(
+            jnp.asarray,
+            (
+                gram,
+                rng.normal(size=len(gram)) * 0.05,
+                *iron._fit_law([0, 0.2, 1], [2, 4, 2]),
+                geometry["basis"],
+                project,
+                owners,
+            ),
+        )
+    )
+    if fill != 1:
+        operands += (
+            jnp.full(len(metric), fill),
+            jnp.full((2, len(metric)), (1 - fill) / fill * 0.5),
+        )
+    state = jnp.arange(len(gram), dtype=jnp.float64) * 10
+    factor = iron._linear_cholesky_factor(
+        state, operands, jnp.asarray(metric), jnp.asarray(damping)
+    )
+    update = iron._linear_cholesky_programs(state.device)[3]
+    actual, _ = update(state, operands, factor, jnp.asarray(1.0))
+    expected, _ = iron._linear_update(
+        state,
+        operands,
+        iron._linear_factor(state, operands, jnp.asarray(damping)),
+        jnp.asarray(1.0),
+    )
+    np.testing.assert_allclose(actual, expected, rtol=1e-12, atol=1e-12)
+    jacobian = jax.jacfwd(iron._linear_residual)(state, operands)
+    differential = jacobian + damping * jnp.eye(len(gram))
+    error = differential @ (actual - state) + iron._linear_residual(state, operands)
+    assert (
+        np.linalg.norm(error) / np.linalg.norm(iron._linear_residual(state, operands))
+        < 1e-12
+    )
+    np.testing.assert_array_equal(operands[0], gram)
+
+
+def test_metric_cholesky_rows_cover_components_and_partial_tile():
+    rng = np.random.default_rng(47)
+    count = 67
+    dimension = 6 * count
+    gram = rng.normal(size=(dimension, dimension))
+    root = rng.normal(size=(count, 6, 6))
+    transform = rng.normal(size=(count, 6, 6))
+    gain = rng.uniform(size=(2, count))
+    full_root = np.zeros((dimension, dimension))
+    full_transform = np.zeros_like(full_root)
+    for cell in range(count):
+        index = np.r_[3 * cell + np.arange(3), 3 * (count + cell) + np.arange(3)]
+        full_root[np.ix_(index, index)] = root[cell]
+        full_transform[np.ix_(index, index)] = transform[cell]
+    expected = (
+        1.01 * np.eye(dimension)
+        - full_root @ (gram + np.diag(np.repeat(gain.reshape(-1), 3))) @ full_transform
+    )
+    column, write, _, _ = iron._linear_cholesky_programs(jax.devices()[0])
+    buffer = jax.jit(lambda: jnp.zeros((dimension, dimension)), out_shardings=column)()
+    for first in range(0, count, 64):
+        buffer = write(
+            buffer,
+            jnp.asarray(gram),
+            jnp.asarray(root),
+            jnp.asarray(transform),
+            jnp.asarray(gain),
+            jnp.asarray(1.01),
+            jnp.asarray(first),
+            min(64, count - first),
+        )
+    np.testing.assert_allclose(buffer, expected, rtol=1e-12, atol=1e-12)
+
+
+def test_metric_cholesky_nonlinear_solution_and_probe_agreement(monkeypatch):
+    region = shapely.box(1, 0, 2, 1)
+    cells = iron._mesh(region, 0.5)
+    matrix = np.eye(6 * len(cells.polygons)) * iron._MU0 * 0.3
+    interaction = iron.MagnetisationInteraction(
+        matrix, iron._geometry_digest(cells, "linear"), "linear"
+    )
+
+    def external(points):
+        return np.column_stack((0.02 * points[:, 0], 0.03 + 0.01 * points[:, 1]))
+
+    results = [
+        iron.solve_magnetisation(
+            region,
+            external,
+            [0, 0.2, 1],
+            [2, 4, 2],
+            cell_size=0.5,
+            basis="linear",
+            interaction=interaction,
+            linear_factorisation=route,
+            tolerance=1e-12,
+        )
+        for route in ("combined", "cholesky")
+    ]
+    assert all(result.converged for result in results)
+    assert results[0].iterations >= 2
+    expected, actual = (result.linear_coefficients for result in results)
+    assert np.linalg.norm(actual - expected) / np.linalg.norm(expected) < 1e-12
+    probes = np.array([[3.0, 0.0], [4.0, 1.0], [6.0, 0.0]])
+    expected, actual = (result.field(probes) for result in results)
+    assert np.linalg.norm(actual - expected) / np.linalg.norm(expected) < 1e-12
+
+
+@pytest.mark.parametrize("scale, indefinite", [(0.3, False), (1.6, True)])
+def test_metric_cholesky_refuses_a_matrix_with_a_negative_eigenvalue(scale, indefinite):
+    """The in-place Cholesky route refuses an indefinite Newton matrix.
+
+    The symmetric system is B = I - R G W, with the spectrum of the
+    metric-weighted interaction G in [0, mu0] and the material differential
+    bounded by mu0, so B is positive definite. The unrepaired graded operator
+    broke that bound: its quotient was 1.0259, B carried one negative
+    eigenvalue, and no Cholesky factor exists. A failed factorisation must
+    raise rather than return a buffer left holding non-finite entries. The
+    same operands at a bounded quotient must still factor, so the refusal is
+    the indefiniteness and not the route.
+    """
+    from scipy.linalg import block_diag
+
+    cells = iron._mesh(shapely.box(1, 0, 2, 1), 0.5)
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    owners = geometry["owners"]
+    project = np.einsum(
+        "qij,qj,q->qi",
+        np.linalg.inv(geometry["gram"])[owners],
+        geometry["basis"],
+        geometry["weights"],
+    )
+    metric = np.zeros((len(cells.polygons), 6, 6))
+    metric[:, :3, :3] = metric[:, 3:, 3:] = geometry["gram"]
+    full_metric = block_diag(*geometry["gram"], *geometry["gram"])
+    values, vectors = np.linalg.eigh(full_metric)
+    half = (vectors * np.sqrt(values)) @ vectors.T
+    inverse_half = (vectors / np.sqrt(values)) @ vectors.T
+    rng = np.random.default_rng(426)
+    symmetric = rng.normal(size=full_metric.shape)
+    symmetric = symmetric @ symmetric.T
+    interaction = symmetric * scale * iron._MU0 / np.linalg.norm(symmetric, 2)
+    gram = inverse_half @ interaction @ half
+    operands = tuple(
+        map(
+            jnp.asarray,
+            (
+                gram,
+                rng.normal(size=len(gram)) * 0.05,
+                *iron._fit_law([0, 0.2, 1], [2, 4, 2]),
+                geometry["basis"],
+                project,
+                owners,
+            ),
+        )
+    )
+    state = jnp.arange(len(gram), dtype=jnp.float64) * 10
+    local, root, transform, eigenvalues = iron._linear_cholesky_local(
+        state, operands, jnp.asarray(metric)
+    )
+    count = len(cells.polygons)
+    dimension = 6 * count
+    full_root = np.zeros((dimension, dimension))
+    full_transform = np.zeros_like(full_root)
+    for cell in range(count):
+        index = np.r_[3 * cell + np.arange(3), 3 * (count + cell) + np.arange(3)]
+        full_root[np.ix_(index, index)] = np.asarray(root)[cell]
+        full_transform[np.ix_(index, index)] = np.asarray(transform)[cell]
+    system = np.eye(dimension) - full_root @ np.asarray(gram) @ full_transform
+    system = (system + system.T) / 2
+    spectrum = np.linalg.eigh(system)[0]
+    assert np.asarray(eigenvalues).min() > 0
+    assert int(np.sum(spectrum < 0)) == (1 if indefinite else 0)
+    if indefinite:
+        with pytest.raises(ValueError, match="not positive definite"):
+            iron._linear_cholesky_factor(
+                state, operands, jnp.asarray(metric), jnp.asarray(0.0)
+            )
+    else:
+        triangle, *_ = iron._linear_cholesky_factor(
+            state, operands, jnp.asarray(metric), jnp.asarray(0.0)
+        )
+        assert np.isfinite(np.asarray(triangle)).all()

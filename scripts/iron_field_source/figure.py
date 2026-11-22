@@ -31,7 +31,7 @@ COLORS = ("#3366cc", "#cc7722", "#009988")
 # The three planes converge in the far field, so each iron curve takes its own
 # dash pattern and a fixed draw order: a reader sees all three where they
 # coincide rather than only the last one drawn.
-IRON_DASHES = ((None, None), (6.0, 1.6), (1.5, 1.4))
+IRON_STYLES = ("-", (0, (7.0, 3.0)), (3.5, (7.0, 3.0)))
 
 
 def draw(axes, data):
@@ -52,7 +52,7 @@ def draw(axes, data):
             air[index] * 1e3,
             color=style.contour_color,
             linewidth=0.8,
-            linestyle=(0, (4.0, 2.0)) if index == 0 else (0, (1.0, 2.0)),
+            linestyle=(0, (4.0, 2.0)),
             zorder=2,
             label="air-core (all three planes)" if index == 0 else "_air",
         )
@@ -63,7 +63,7 @@ def draw(axes, data):
             iron[index] * 1e3,
             color=COLORS[index],
             linewidth=style.trace_linewidth,
-            dashes=IRON_DASHES[index],
+            linestyle=IRON_STYLES[index],
             zorder=4,
             label=name,
         )
@@ -92,21 +92,28 @@ def draw(axes, data):
             share[index],
             color=COLORS[index],
             linewidth=style.trace_linewidth,
-            dashes=IRON_DASHES[index],
+            linestyle=IRON_STYLES[index],
             zorder=3,
         )
     middle.set_yscale("symlog", linthresh=1.0)
     middle.set_xscale("symlog", linthresh=0.1)
     peak = float(np.max(share))
+    # The annotation is tied to the peak by an arrow: a bare label at the panel
+    # edge reads as a caption with no referent.
     middle.annotate(
         f"peak {peak:+.0f} %",
         xy=(float(distance[int(np.argmax(share))]), peak),
-        xytext=(6.0, peak),
+        xytext=(0.60, 0.62),
+        textcoords="axes fraction",
         fontsize=style.label_fontsize - 1,
         color="#444444",
         va="center",
+        arrowprops={"arrowstyle": "-", "color": "#888888", "linewidth": 0.8},
     )
-    middle.set_ylim(-1.0e3, 1.0e4)
+    middle.set_ylim(-1.0e3, 3.0e4)
+    # Eight auto decades in a one-unit-tall panel overlap their labels, so the
+    # ticks are chosen to carry the outlier and the plateau and nothing else.
+    middle.set_yticks([-1.0e2, 0.0, 1.0e2, 1.0e4])
     middle.set_xlim(0, float(distance[-1]))
     middle.set_ylabel("iron share of $|B|$ [%] (symlog)", fontsize=style.label_fontsize)
     middle.set_xlabel(
@@ -126,7 +133,7 @@ def draw(axes, data):
         color=style.contour_color,
         markersize=style.trace_markersize,
     )
-    lower.semilogy(
+    (contribution_handle,) = lower.semilogy(
         probes[:, 0],
         contribution,
         "o",
@@ -134,22 +141,25 @@ def draw(axes, data):
         markersize=style.trace_markersize,
     )
     lower.set_xlabel("probe $R$ [m]", fontsize=style.label_fontsize)
-    lower.set_ylabel(
-        r"$|\Delta B|$ (circles) and $|B_{\mathrm{air}}|$ (dashes) [mT]",
-        fontsize=style.label_fontsize,
-    )
+    lower.set_ylabel(r"$|B|$ [mT]", fontsize=style.label_fontsize)
 
     figure = upper.figure
-    handles = iron_handles + [air_handle]
-    labels = names + ["air-core (all three planes)"]
+    engine = figure.get_layout_engine()
+    if engine is not None:
+        engine.set(h_pad=0.08)
+    handles = iron_handles + [air_handle, contribution_handle, air_marks]
+    labels = names + [
+        "air-core (all three planes)",
+        r"$|\Delta B|$ iron (circles)",
+        r"$|B_{\mathrm{air}}|$ (dashes)",
+    ]
     figure.legend(
         handles,
         labels,
         fontsize=style.label_fontsize,
         frameon=False,
-        loc="lower center",
-        bbox_to_anchor=(0.5, 1.0),
-        ncol=2,
+        loc="outside upper center",
+        ncol=3,
     )
     return style
 
@@ -160,7 +170,7 @@ def main():
     output.parent.mkdir(parents=True, exist_ok=True)
     data = np.load(field)
     figure, axes = plt.subplots(
-        3, 1, figsize=(6.4, 7.2), height_ratios=(2.0, 1.0, 1.2), constrained_layout=True
+        3, 1, figsize=(6.4, 7.2), height_ratios=(2.0, 1.3, 1.2), constrained_layout=True
     )
     draw(axes, data)
     figure.savefig(output, dpi=DEFAULT_INK.figure_dpi)

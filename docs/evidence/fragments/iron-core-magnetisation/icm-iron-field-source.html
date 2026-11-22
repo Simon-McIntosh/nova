@@ -463,4 +463,27 @@ where the table says so.</p>
 <li><code>.../coil-response/9d2194829695172c.npz</code> (the persisted coil field)</li>
 <li><code>.../linear-magnetisation/west-h200/uniform-0.04.json</code> (the 40 mm H200 solve this node's 80 mm state disagrees with)</li>
 </ul>
+
+<h2 id="icm-iron-field-source-polish">The arm receipts read as JSON, and the figure reads as one</h2>
+<p>Two non-blocking defects in the runner and the figure are closed without
+touching a measured number. The arm runner wrote its <code>commands.json</code>
+through printf formats carrying a doubled backslash, so the file was one line
+of literal <code>\n</code>, which <code>json.load</code> refused. It now writes
+one key per line and <code>json.load</code> reads a freshly written copy. It also
+names each arm's own log: an arm records the path beside itself, so a run split
+into a baseline job and an after job names the log each job wrote rather than
+one derived from the writing job's id. The runner guard additionally asserts the
+target-list assignments are quoted, because an unquoted list reaches pytest
+word-split.</p>
+<p>The stray-field figure now carries one figure-level legend above the panels
+instead of one per panel. The three iron curves take distinct dash patterns at
+offset phases, so a reader sees all three where they coincide in the far field.
+The horizontal axis is symmetric log, which gives the near-edge structure real
+width instead of a sliver. The lower panel's air-core marks are named as the
+dashes they are drawn as, at all three planes, and the marker vocabulary of both
+lower series lives in the legend. A mechanical check over the drawn figure
+reports no text overlapping text or plotted data: 44 text artists, no overlap.</p>
+<p>The gate is the node's own test file at the base revision and at the head,
+<i>9 passed</i> in both arms on the CPU lane, and the figure was rendered on the
+same partition and inspected.</p>
 </main></body></html>

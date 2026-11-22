@@ -229,7 +229,8 @@ def main() -> None:
     scratch = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("scratch")
     report = measure(scratch)
     draw(report)
-    print("RECONSTRUCTION " + json.dumps(report, sort_keys=True, default=float))
+    printable = {key: value for key, value in report.items() if key != "plot"}
+    print("RECONSTRUCTION " + json.dumps(printable, sort_keys=True, default=float))
     if (
         report["section_plasma_flux"]["violations"]
         or report["mode_plasma_flux"]["violations"]

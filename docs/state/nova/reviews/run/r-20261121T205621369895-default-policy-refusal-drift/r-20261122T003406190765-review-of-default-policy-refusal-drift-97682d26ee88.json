@@ -1,0 +1,98 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "answered": "Read each of the six checklist items against the artefacts rather than the manifest's account: the goal and done_when from prompt.txt/node.json, the declared write paths, the manifest, the eight-commit diff, and the production call sites. Verified every headline number against the recorded arm JSON and the comparison run copy: tcv-record-seed 0.030442406985959472/reason 12/axis (0.835450348938297,-0.02818492733569579) with within_factor_three true, iter-record-seed reason 3 NoQualifiedAxisError, tcv-input-stored 5.2411575147855504e-4/reason 8, iter-input-stored 0.12310610396516597/reason 12, the seed drifts 0.2192866579892296 and 0.47438231713687756, and the record's own receipt carrying reason 12, 20 attempted/8 accepted promotions and a 2995-node terminal flux. Verified the nova/-identical claim with a positive control on the same git diff form, and the b7d5484bb zero-vs-three _fitted_current_binding count.",
+  "call_sites": [],
+  "completed_at": "2026-11-22T00:42:14.222Z",
+  "dispatched_at": "2026-11-22T00:34:29Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html",
+      "id": "f1a2b3c4d01",
+      "line": 38,
+      "severity": "blocking",
+      "text": "The record tabulates six terminal forward-solve states and neither draws nor publishes a single poloidal flux-contour panel, so a reader cannot see the states whose residual, reason and axis the section reports. AGENTS.md binds every forward-solve evidence record to a line-contour panel per terminal state with both null sets and the wall, and this node declared docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift as a write path and left it unused."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html",
+      "id": "f2b3c4d5e02",
+      "line": 60,
+      "severity": "non-blocking",
+      "text": "The median relative difference (4.94 percent, line 60) and the L2 difference (8586.08 A, 7.82 percent of 109820.01 A, line 63) are reported as measured, but no committed script and no recorded artifact computes them: `_current_drift` at scripts/prototypes/stored_state_refusals/attribute_input_drift.py:114 returns only the identical count, the maximum absolute and the maximum relative difference, and the stored conductor vector it compares against is written into no arm record. These two figures therefore cannot be re-derived from the tree or the receipts."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html",
+      "id": "f3c4d5e6f03",
+      "line": 125,
+      "severity": "non-blocking",
+      "text": "The seed scale is stated as 1.000314066 in the prose (line 125) and in the table (line 130), but the scale actually applied and recorded in input-drift/measurement/measurement.json is 1.000314155094935, which is also the exact ratio of the two spans the same sentence cites (0.19099370558229956 / 0.19093372278049314). The quoted value is wrong in the sixth significant digit and disagrees with the record's own arithmetic."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html",
+      "id": "f4d5e6f7a04",
+      "line": 101,
+      "severity": "non-blocking",
+      "text": "The record says that with today's seed and the same currents the arm gives 0.004253522137685281 (line 101), while the seed-sensitivity pair's nominal arm at the identical nominal conditions records 0.0042525413742888945 (line 129) from the same fixtures on the same device. The two differ by 2.3e-4 relative, comparable to the 3.1e-4 nudge whose refusal-class flip the section's substitution-not-search argument rests on, and the difference is not stated. It does not overturn the class flip, but the determinism framing is looser than the record implies."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/attribute_input_drift.py",
+      "id": "f5e6f7a8b05",
+      "line": 235,
+      "severity": "non-blocking",
+      "text": "`within_factor_three` and `same_reason_code` are computed and written to each arm record but never asserted or used to set an exit status, so a substitution that landed outside the done_when's factor-of-three band would still exit zero and the positive control would pass silently. The fragment is the only place those flags are read."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/record_seed_rerun.py",
+      "id": "f6f7a8b9c06",
+      "line": 44,
+      "severity": "non-blocking",
+      "text": "`_difference` re-implements the gauge-free RMS that benchmarks/diiid_flux_space_adjudication.py:68 already owns as `gauge_free_rms`, and `_seed_offset` at scripts/prototypes/stored_state_refusals/iter_record_seed_rerun.py:60 repeats the same `difference - difference.mean()` computation a third time, so the definition of the report's headline seed-drift number now exists in three places that can diverge."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/attribute_input_drift.py",
+      "id": "f7a8b9c0d07",
+      "line": 164,
+      "severity": "non-blocking",
+      "text": "`_failure_trajectory` re-opens the refused arm's rejected-history pickle that scripts/prototypes/stored_state_refusals/records.py already owns through `residual_fields`, whose module docstring states the rejected-history reader 'lives here once'; the new function repeats the pickle load and type resolution (and imports pickle inside the function at :178) rather than extending the owner to return the extra residual arrays it needs."
+    },
+    {
+      "file": "manifest.md",
+      "id": "f8b9c0d1e08",
+      "line": 7,
+      "severity": "non-blocking",
+      "text": "The manifest's `tests` field is a prose sentence wrapping the pytest command, so promotion, which fills its gate receipt from this line, cannot re-run it; the manifest also records no `baseline_suite`/`after_suite` block, so the added-failure pair can only be read from input-drift/suite-arms.log rather than from the two declared fields."
+    }
+  ],
+  "justifications": {
+    "durability": "The node adds no test file, and input-drift/suite-arms.log runs three files byte-identical at both revisions, so no assertion fails if the attribution logic regresses; the only guards are the environment asserts at scripts/prototypes/stored_state_refusals/attribute_input_drift.py:285.",
+    "evidence": "input-drift/record-seed/tcv-record-seed.json records residual 0.030442406985959472, reason 12 and within_factor_three true, but scripts/prototypes/stored_state_refusals/attribute_input_drift.py:235 only writes that flag and never asserts it, and the median and L2 current figures at docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html:60 and :63 are produced by no committed script.",
+    "fit": "Names and docstrings follow the prototype package, but the current-rebinding block at scripts/prototypes/stored_state_refusals/seed_sensitivity.py:44 and scripts/prototypes/stored_state_refusals/record_seed_rerun.py:80 repeats what scripts/prototypes/stored_state_refusals/attribute_input_drift.py:255 already does, and scripts/prototypes/stored_state_refusals/attribute_input_drift.py:164 reopens a rejected history that records.py already reads.",
+    "goal_fidelity": "docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html:18 names the fitted currents and the stored seed as the two differing inputs, and scripts/prototypes/stored_state_refusals/record_seed_rerun.py:56 substitutes the record-era state to land 0.030442406985959472 against the recorded 0.030364200526436996.",
+    "reuse": "`_difference` at scripts/prototypes/stored_state_refusals/record_seed_rerun.py:44 and `_seed_offset` at scripts/prototypes/stored_state_refusals/iter_record_seed_rerun.py:60 re-implement the gauge-free RMS owned by benchmarks/diiid_flux_space_adjudication.py:68, and `_failure_trajectory` at scripts/prototypes/stored_state_refusals/attribute_input_drift.py:164 duplicates the rejected-history read at scripts/prototypes/stored_state_refusals/records.py (residual_fields).",
+    "scope_discipline": "Every path in d70c3598da3df64ee1cebb424bbfe2c1d498e0f9..97682d26ee88687638188b5a9f03e51ab38bfdfe lies inside the declared scripts directory or the one declared fragment, and nothing outside is touched, though the declared docs/figures path is unused."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261122T003406190765-review-of-default-policy-refusal-drift-97682d26ee88",
+  "reviewed_base_sha": "d70c3598da3df64ee1cebb424bbfe2c1d498e0f9",
+  "reviewed_head_sha": "97682d26ee88687638188b5a9f03e51ab38bfdfe",
+  "reviewed_run_id": "r-20261121T205621369895-default-policy-refusal-drift",
+  "scores": {
+    "durability": 3,
+    "evidence": 13,
+    "fit": 14,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T00:41:16Z",
+  "total": 70,
+  "verdicts": {
+    "diff": "Read all eight commits d70c3598da3df64ee1cebb424bbfe2c1d498e0f9..97682d26ee88687638188b5a9f03e51ab38bfdfe commit by commit: four new prototype runners (916 lines added) and one evidence fragment, with no product code and no test file changed.",
+    "done_when": "The done_when has three clauses: name the differing input or revision, a positive control within 3x reproducing the reason code, and one standing-cases table. scripts/prototypes/stored_state_refusals/attribute_input_drift.py:114 measures the current toggle, input-drift/record-seed/tcv-record-seed.json records residual 0.030442406985959472 against the recorded 0.030364200526436996 (factor 1.0026, reason 12, within_factor_three true), and the table at docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html:141 names the standing arms.",
+    "goal": "The dispatched goal (prompt.txt:38) is to explain why today's default-policy solve stops elsewhere than the comparison record on the TCV and ITER stored states; docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html:18 attributes it to two inputs the harness reads from the stored case, the fitted conductor-current vector and the stored seed flux, and scripts/prototypes/stored_state_refusals/record_seed_rerun.py:56 plus scripts/prototypes/stored_state_refusals/iter_record_seed_rerun.py:100 substitute the record-era values to reproduce both recorded outcomes.",
+    "manifest": "Read the reviewed manifest.md; its landing/artifacts/evidence_inputs fields recount the two-input attribution and name the job directories, and its tests line reports 16 passed in both arms, which input-drift/suite-arms.log confirms with EXIT=0 twice. It states no baseline_suite/after_suite block, and its tests field is prose wrapped around the command rather than the literal command.",
+    "write_paths": "Declared scripts/prototypes/stored_state_refusals, docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html and docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift. All five diff paths lie inside the scripts directory or the one fragment; the declared figures directory is unused."
+  }
+}

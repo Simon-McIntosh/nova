@@ -25,7 +25,7 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
@@ -181,13 +181,13 @@ execute makes the comparison in (1) fail and name it.</p>
     <p class="r-dec-rat">Git keeps the driver at the revision the evidence ran at, so
 nothing is lost; a driver a live gate or test still runs is kept.</p>
     </div>
-<div class="r-dec" data-key="hot-path-guard" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="hot-path-guard" data-choice="document-only" data-by="Simon McIntosh" data-when="2026-11-22">
     <p class="r-dec-q">After §6, should a test fail when the public forward solve executes a module outside the documented route?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="guard-test">Add the guard test</button>
-      <button class="r-opt" data-value="document-only">Document only</button>
+      <button class="r-opt chosen" data-value="document-only">Document only</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">§6 writes the measured route into nova/equilibrium/AGENTS.md with no enforcing test; S28 is still reshaping those files, and a guard would make every collapse edit the document in the same commit.</p>
     </div>
 </section>
 

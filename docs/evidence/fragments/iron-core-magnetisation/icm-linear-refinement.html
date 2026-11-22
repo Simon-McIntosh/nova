@@ -233,4 +233,63 @@ refinement receipts for this attempt belong to the nova evidence root
 <code>/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/linear-magnetisation/west-h200/refinement/</code>;
 the earlier sophelio root named above is the record of the previous attempt and
 is left as written.</p>
+
+<h4>Refined-mesh attempt on the repaired operator: both clauses not met</h4>
+<p>H200 job <code>1335154</code> ran on revision
+<code>fb94984c1d34eb40cb32df2be2b7d59282fdda05</code> with measure blob
+<code>eab28438ea2018bb34f200c710e0d5dd32ebd128</code>, submitted by session
+<code>5b10be66-c69b-456f-9a85-3840909f1723</code> from a detached tree. The two
+coarse meshes assembled and solved through the existing split LU route. Neither
+clause is met, and no interaction value was changed.</p>
+<table><thead><tr><th>assembly</th><th>cells</th><th>unknowns</th><th>operator [B]</th><th>assembly [s]</th><th>peak host RSS [B]</th></tr></thead><tbody>
+<tr><td>graded 16/80</td><td>5 864</td><td>35 184</td><td>9 903 310 848</td><td>6 783.664305163547</td><td>32 015 618 048</td></tr>
+<tr><td>uniform 40 mm</td><td>6 632</td><td>39 792</td><td>12 667 226 112</td><td>9 080.974399590865</td><td>40 870 260 736</td></tr>
+<tr><td>graded 8/40</td><td>11 708</td><td>70 248</td><td>39 478 252 032</td><td>not run</td><td>not run</td></tr>
+</tbody></table>
+<p>The graded 8/40 assembly did not run. Its receipt records
+<code>completed=false</code> and the skip clause <code>compiled factor and
+interaction exceed card capacity with 10% reserve</code>, with a split live
+figure of 118 486 807 672 B against an allocator budget of 67 551 363 072 B.
+It carries no operator path and no geometry digest.</p>
+<p>Clause (1), the 8/40 full-drive solve and the midplane fields at +1, +2 and
++4 m, is not met: nothing was measured. The step depended on the persisted
+operator, and the resume step stopped with
+<code>KeyError: 'geometry_digest'</code> at the geometry check. No refinement
+change at any probe is reported.</p>
+
+<h4>Clause (2), route agreement</h4>
+<p>Clause (2) is not met on either mesh. On graded 16/80 the Cholesky route
+stopped at its first Newton matrix with <code>ValueError: metric-symmetric
+Newton matrix is not positive definite</code>, so that mesh has no route
+comparison; the split LU route solved it in eight corrections with terminal
+residual 8.277010577125872e-16. On uniform 40 mm both routes ran in one process
+and converged in seven corrections, with terminal residuals 5.7248459249497865e-15
+for LU and 5.708953379418131e-15 for Cholesky. The probe fields agree, but the
+coefficients do not reach the 1e-12 bar:
+<code>{'frobenius_relative': 1.2124631660758958e-12,
+'maximum_entry_relative': 2.2886958599729787e-12}</code>. Probe agreement on
+that mesh is 3.83698941840443e-14 relative in Frobenius norm and
+3.903098655277538e-14 in the maximum entry, computed from the two receipts'
+recorded <code>field_T</code> arrays because the coefficient assertion stopped
+the write before those differences were saved.</p>
+<p>The compiled Cholesky staging and factor phases peak at 39 643 942 144 B on
+graded 16/80 and 50 704 687 360 B on uniform 40 mm, both below the allocator
+limit of 67 551 363 072 B. XLA reported the schedule anyway: <code>The byte
+size of input/output arguments (79005182544) exceeds the base limit
+(67551363072). This indicates an error in the calculation!</code></p>
+
+<h4>Suite arms</h4>
+<p>The baseline arm, at <code>d9263e2539fafc9149a5532bb311f477f9e11257</code>,
+completed with 8 failed and 91 passed in 14 094.88 s. The head arm, at
+<code>fb94984c1d34eb40cb32df2be2b7d59282fdda05</code>, completed with 9 failed
+and 109 passed in 14 188.79 s. The eight baseline failure ids recur at the
+head: five control-receipt tests, two six-limb-reference tests and the
+linear-volume-rule bound test, all reading receipts deleted with the shared
+storage of 2026-11-19. The single added id is
+<code>test_graded_shell_reaches_half_percent_where_its_doubled_arm_misses</code>,
+which fails with <code>Failed: Timeout (&gt;7200.0s) from pytest-timeout</code>
+inside the doubled arm's tile materialisation; it passed in the baseline arm
+on the same partition, and its code path is unchanged by this revision. It is
+a timing-bound failure, not a numerical result. The nineteen extra passing
+tests at the head are the merged Cholesky and split-route tests.</p>
 </section>

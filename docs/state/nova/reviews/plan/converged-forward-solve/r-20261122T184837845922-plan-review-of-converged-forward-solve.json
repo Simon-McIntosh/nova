@@ -89,6 +89,16 @@
       "note": "Section 10 clause 3 now also requires the batched labeller's and the reduced-Newton route's recorded receipts to reproduce within their recorded tolerances at the head.",
       "reason": "",
       "when": "2026-11-22T19:14:30.245120+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "906c06ae-8766-4281-8a78-e20c226c00f5",
+      "commit": "3b6a43658414973157f6beb4a01a92d06e376472",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 7 clause 1 now applies map fidelity on the analytic certificate rows only, never on the centroid-constrained rows, matching sections 4 and 6.",
+      "reason": "",
+      "when": "2026-11-22T19:15:06.091828+00:00"
     }
   ],
   "responses": {
@@ -109,6 +119,15 @@
       "note": "Section 10 clause 3 now also requires the batched labeller's and the reduced-Newton route's recorded receipts to reproduce within their recorded tolerances at the head.",
       "reason": "",
       "when": "2026-11-22T19:14:30.245120+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "906c06ae-8766-4281-8a78-e20c226c00f5",
+      "commit": "3b6a43658414973157f6beb4a01a92d06e376472",
+      "commit_basis": "edit",
+      "note": "Section 7 clause 1 now applies map fidelity on the analytic certificate rows only, never on the centroid-constrained rows, matching sections 4 and 6.",
+      "reason": "",
+      "when": "2026-11-22T19:15:06.091828+00:00"
     },
     "wiring-1": {
       "action": "acted",

@@ -1,0 +1,53 @@
+<section id="icm-cholesky-route-onto-main-state">
+<h3>In-place Cholesky route carried onto the iron field-source tree</h3>
+<p>The in-place symmetric Cholesky Newton route and its definiteness guard now
+live on the tree that already carries the passive iron <code>CoilSet</code>
+frame and its cached coil response. The merge brought <code>64090647d</code>
+onto the field-source line. Both sides survive unchanged in behaviour: the
+field source keeps its passive frame, cached response and linear coefficients,
+and the refinement line keeps its symmetric Galerkin solve. The only source
+conflict was an import block, resolved to the union
+(<code>dataclass</code> <code>replace</code>, <code>cached_property</code>,
+<code>lru_cache</code>, <code>partial</code>); the test conflict was two
+independent appends at one point with no shared test id, so both blocks are
+kept.</p>
+
+<h4>Route equivalence on the persisted uniform 80&nbsp;mm WEST operator</h4>
+<p>One process loads the persisted
+<code>uniform-0.08-operator.npy</code> interaction (geometry digest
+<code>9d219482…</code>, 10&nbsp;170 unknowns) and solves the same state by the
+existing combined LU route and by the in-place Cholesky route. Both converge to
+the round-off floor in six iterations, so the comparison is of two converged
+fixed points and not of one unfinished solve.</p>
+<table><thead><tr><th>quantity (relative)</th><th>measurement</th></tr></thead><tbody>
+<tr><td>combined LU, terminal residual</td><td>2.094494&times;10<sup>−13</sup></td></tr>
+<tr><td>in-place Cholesky, terminal residual</td><td>2.094488&times;10<sup>−13</sup></td></tr>
+<tr><td>probe fields, per probe (1, 2, 4&nbsp;m)</td><td>2.328&times;10<sup>−14</sup>, 2.663&times;10<sup>−14</sup>, 1.508&times;10<sup>−14</sup></td></tr>
+<tr><td>linear coefficients, Frobenius</td><td>8.530&times;10<sup>−13</sup></td></tr>
+<tr><td>linear coefficients, worst single entry</td><td>1.668&times;10<sup>−12</sup></td></tr>
+</tbody></table>
+<p>The probe fields, which are the physical output, agree three decades under
+the 10<sup>−12</sup> bar. The coefficient vector agrees to
+8.5&times;10<sup>−13</sup> in the relative Frobenius norm, inside the bar. Its
+worst single entry sits at 1.67&times;10<sup>−12</sup>, a factor 1.7 over: the
+mutual difference is the round-off floor of two different dense eliminations
+(LU on the full differential Jacobian, Cholesky on the metric-symmetric
+Galerkin matrix), and it does not shrink with a tighter convergence tolerance.
+Tightening both routes to a 10<sup>−14</sup> stop moved the Frobenius figure
+only to 1.01&times;10<sup>−12</sup> and the worst entry to
+2.37&times;10<sup>−12</sup>, so the floor is arithmetic, not a stopping rule.
+The route changes no value: no interaction entry, quadrature order or tolerance
+was altered.</p>
+<p>The same comparison on the CPU lane measured 1.79&times;10<sup>−12</sup>
+Frobenius and probes inside 10<sup>−12</sup>; the P100 lane, the device the
+uniform 0.08&nbsp;mm operator was measured on, carries the tighter x64
+reductions reported above.</p>
+
+<h4>Definiteness guard</h4>
+<p>The in-place factor refuses an indefinite Newton matrix rather than returning
+a buffer of non-finite entries. With the positive-definiteness raise removed in
+a scratch copy of the committed tree, the guard test fails
+(<code>DID NOT RAISE ValueError</code>) and the bounded operand still factors,
+so the refusal is the indefiniteness and not the route. At the committed head
+the same test passes.</p>
+</section>

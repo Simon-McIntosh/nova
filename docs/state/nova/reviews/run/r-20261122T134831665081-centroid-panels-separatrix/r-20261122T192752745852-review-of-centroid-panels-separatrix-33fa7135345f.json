@@ -7,6 +7,15 @@
   "call_sites": [],
   "completed_at": "2026-11-22T20:13:16.888Z",
   "dispatched_at": "2026-11-22T19:29:24Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-22T21:42:13.602623+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T134831665081-centroid-panels-separatrix",
+      "section": "\u00a76"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_mast_centroid_panel_states.py",

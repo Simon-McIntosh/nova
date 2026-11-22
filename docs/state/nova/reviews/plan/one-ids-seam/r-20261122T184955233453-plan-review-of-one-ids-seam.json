@@ -35,9 +35,28 @@
       "note": "\u00a75 now removes the DD3 write path as well as the read path: every nova writer, sample and pulse-design included, writes DDv4, COCOS 17 only; a DD3 entry for a consumer is written by the member from nova's DDv4 entry; the DD3 write-sign test moves to the member or goes with the path. \u00a75 effort 5 h to 6 h.",
       "reason": "",
       "when": "2026-11-22T19:12:07.265353+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "dd5d327554e6f90afc67b94db9e2c85ab0345910",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a71's first clause adds a row source: every module in the scanned trees that imports nova_cocos or converts between DD versions, so nova/io/sourcemap.py, nova/equilibrium/convention.py and the like are classified.",
+      "reason": "",
+      "when": "2026-11-22T19:12:22.302780+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "dd5d327554e6f90afc67b94db9e2c85ab0345910",
+      "commit_basis": "edit",
+      "note": "\u00a71's first clause adds a row source: every module in the scanned trees that imports nova_cocos or converts between DD versions, so nova/io/sourcemap.py, nova/equilibrium/convention.py and the like are classified.",
+      "reason": "",
+      "when": "2026-11-22T19:12:22.302780+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",

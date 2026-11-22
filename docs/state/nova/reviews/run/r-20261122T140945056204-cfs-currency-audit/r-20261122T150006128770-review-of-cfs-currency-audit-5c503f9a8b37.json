@@ -1,0 +1,45 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run is a read-only audit that ran no suite, so there is no base/head arm pair to difference; the count is recorded as 0 with an empty list because the reviewed run carries no suite-delta waiver, and it measures no gate.",
+  "claim_summary": {
+    "detail": "The report's summary line states 'The two decisive currency findings: s2 and s4 are close to closed, s5 and s6 are not; and the s6 compile bounds are superseded by the 2026-11-18 kernel-compile-barrier ruling'. The table beneath gives s2 7 met / 1 partly of 8, s4 5 met / 2 partly of 7, s5 0 met / 1 partly / 3 not met / 1 superseded of 5, and s6 0 met / 4 not met of 4; the summary's qualitative figures match the table row-for-row, and C1 records the compile-bounds supersession. It agrees.",
+    "verdict": "agrees"
+  },
+  "claims": [
+    {
+      "detail": "S2-1 met: from the reviewed worktree at 5c503f9a8, tests/test_read_ten_thousand_cells.py:29 asserts norm(result.axis - analytic) <= pitch and, for the diverted case, exactly one X-point within pitch, parametrised over (limited, diverted) x (550, 2000, 5000, 10000); fragment docs/evidence/fragments/converged-forward-solve/cfs-read-ten-thousand.html:33 (anchor cfs-read-ten-thousand-diverted-growth) states 'At 10,000 cells the axis and admitted X-point errors are 2.63e-13 and 7.44e-14 pitches' -- the axis 2.63e-13 and X-point 7.44e-14 figures the report quotes, reproduced exactly.",
+      "rank": "1",
+      "verdict": "reproduced"
+    },
+    {
+      "detail": "S5-1 not met: from the reviewed worktree at 5c503f9a8, grep finds fixed_point.newton_krylov called at nova/equilibrium/forward.py:2113 and :2123 (also :2277); grep 'solve.fixed_point' finds seven test callers in tests/test_equilibrium_solve.py and exactly one prototype caller (scripts/prototypes/batched_factor/measure.py:662) and none under nova/; solve.fixed_point is dense chord-Newton (_cold/_chord) at nova/equilibrium/solve.py:229-247 and SolveResult carries only state, residual, converged, corrections, factor (:47-61). The report's 'production still solves with fixed_point.newton_krylov; solve.fixed_point has only test and prototype callers; implemented solver is dense chord-Newton' reproduces.",
+      "rank": "2",
+      "verdict": "reproduced"
+    },
+    {
+      "detail": "C1 / S5-4 superseded: from the reviewed worktree at 5c503f9a8, docs/plans/kernel-compile-barrier.html carries the 2026-11-18 ruling the report quotes -- 'For this plan those cold-compile bounds are superseded by the lead's ruling of 2026-11-18: the cold compile is recorded and carries no bound, and the 60 s and 64 GB apply to the first call of a program served from the pinned pre-warm cache ... The acceptance table of converged-forward-solve still reads as a cold-compile clause, and restating it is that plan's edit'; docs/plans/converged-forward-solve.html:81-82 still states '<= 60 s on the H200, warm cache excluded' and '<= 64 GB resident on the host'. The supersession finding reproduces.",
+      "rank": "3",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-11-22T15:09:35.367Z",
+  "dispatched_at": "2026-11-22T15:00:42Z",
+  "findings": [
+    {
+      "file": ".config/reckon/crew/reports/nova/cfs-currency-audit/report.md",
+      "line": "78",
+      "severity": "nit",
+      "text": "Minor citation imprecision, not material to the finding: S5-1 writes 'imports at :129', but nova/equilibrium/forward.py:129 imports reduced_newton while fixed_point is imported at :97; the production-call claim the citation supports is nonetheless correct."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261122T150006128770-review-of-cfs-currency-audit-5c503f9a8b37",
+  "reviewed_base_sha": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "reviewed_head_sha": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "reviewed_run_id": "r-20261122T140945056204-cfs-currency-audit",
+  "rubric": "claims",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T15:09:46.779019+00:00"
+}

@@ -24,7 +24,7 @@
 <meta name="plan-sprint" content="S30">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s3&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s4&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s5&quot;:[&quot;one-ids-seam#s3&quot;,&quot;one-ids-seam#s4&quot;],&quot;s6&quot;:[&quot;one-ids-seam#s5&quot;]}">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 <meta name="plan-modified" content="2026-11-22">
 </head>
 <body>
@@ -106,7 +106,7 @@
 <li>Negative control: nova's reader, handed the unconverted DD3 entry, refuses it by name. The nova suite adds no failures against base.</li>
 </ul>
 
-<h2 id="s6">§6 — The solves read and write only through the generic layer</h2>
+<h2 id="s6">§6 — The solves pass only through the generic IMAS layer</h2>
 <section data-reckon="section" data-id="s6" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="one-ids-seam#s5"></section>
 <p>The forward and inverse solves take machine data only through the generic readers and write their equilibria only through <code>nova/imas/dataset.py</code>. imas-efit reads the result back, and that is the independent check that the written IDS means what nova meant.</p>
 <p>Done when:</p>

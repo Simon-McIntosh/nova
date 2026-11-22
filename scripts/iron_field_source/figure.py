@@ -69,7 +69,9 @@ def draw(axes, data):
         )
         iron_handles.append(line_iron)
     upper.set_ylabel(r"$|B|$ [mT]", fontsize=style.label_fontsize)
-    upper.set_xlabel(r"$R - R_{\mathrm{edge}}$ [m] (symlog)", fontsize=style.label_fontsize)
+    upper.set_xlabel(
+        r"$R - R_{\mathrm{edge}}$ [m] (symlog)", fontsize=style.label_fontsize
+    )
     # A symmetric log x axis gives the near-edge spike at 0.4 m real width
     # instead of the sliver a linear axis leaves it.
     upper.set_xscale("symlog", linthresh=0.1)
@@ -107,7 +109,9 @@ def draw(axes, data):
     middle.set_ylim(-1.0e3, 1.0e4)
     middle.set_xlim(0, float(distance[-1]))
     middle.set_ylabel("iron share of $|B|$ [%] (symlog)", fontsize=style.label_fontsize)
-    middle.set_xlabel(r"$R - R_{\mathrm{edge}}$ [m] (symlog)", fontsize=style.label_fontsize)
+    middle.set_xlabel(
+        r"$R - R_{\mathrm{edge}}$ [m] (symlog)", fontsize=style.label_fontsize
+    )
 
     lower = axes[2]
     trace_axes(lower)

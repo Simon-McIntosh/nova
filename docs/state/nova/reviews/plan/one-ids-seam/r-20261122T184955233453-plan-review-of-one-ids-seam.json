@@ -25,7 +25,30 @@
   "plan_slug": "one-ids-seam",
   "plan_version": 4,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "dd5d327554e6f90afc67b94db9e2c85ab0345910",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a75 now removes the DD3 write path as well as the read path: every nova writer, sample and pulse-design included, writes DDv4, COCOS 17 only; a DD3 entry for a consumer is written by the member from nova's DDv4 entry; the DD3 write-sign test moves to the member or goes with the path. \u00a75 effort 5 h to 6 h.",
+      "reason": "",
+      "when": "2026-11-22T19:12:07.265353+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "dd5d327554e6f90afc67b94db9e2c85ab0345910",
+      "commit_basis": "edit",
+      "note": "\u00a75 now removes the DD3 write path as well as the read path: every nova writer, sample and pulse-design included, writes DDv4, COCOS 17 only; a DD3 entry for a consumer is written by the member from nova's DDv4 entry; the DD3 write-sign test moves to the member or goes with the path. \u00a75 effort 5 h to 6 h.",
+      "reason": "",
+      "when": "2026-11-22T19:12:07.265353+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/one-ids-seam/r-20261122T184955233453-plan-review-of-one-ids-seam.json",
   "review_run_id": "r-20261122T184955233453-plan-review-of-one-ids-seam",
   "reviewed_blob_sha": "cb29484173ed9c8561ae2b6af132d7731f355104",
   "rubric": "content",

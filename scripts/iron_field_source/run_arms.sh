@@ -61,6 +61,10 @@ run_arm() {
     # One log per job and arm: a cancelled rerun must not overwrite the log a manifest
     # cites for a job that completed.
     log=$out/$name-arm-${SLURM_JOB_ID:-manual}.log
+    # The arm that ran writes its own log path, so when the arms are two jobs
+    # commands.json names the log a job actually wrote rather than one derived
+    # from the writing job's id.
+    printf '%s\n' "$log" >"$out/$name-arm.logpath"
     started=$(date +%s)
     set +e
     (cd "$directory" && PYTHONPATH=. JAX_PLATFORMS=cpu "$python" -m pytest \
@@ -91,14 +95,19 @@ case "$arm" in
         ;;
 esac
 
+log_path() {
+    if [ -s "$out/$1-arm.logpath" ]; then
+        cat "$out/$1-arm.logpath"
+    fi
+}
 {
-    printf '{\\n'
-    printf '  "baseline_command": "%s",\\n' "$(command_for "$base_tests")"
-    printf '  "after_command": "%s",\\n' "$(command_for "$tests")"
-    printf '  "base_sha": "%s",\\n' "$base"
-    printf '  "head_sha": "%s",\\n' "$(git -C "$root" rev-parse HEAD)"
-    printf '  "baseline_log": "%s",\\n' "$out/baseline-arm-${SLURM_JOB_ID:-manual}.log"
-    printf '  "after_log": "%s"\\n' "$out/after-arm-${SLURM_JOB_ID:-manual}.log"
-    printf '}\\n'
+    printf '{\n'
+    printf '  "baseline_command": "%s",\n' "$(command_for "$base_tests")"
+    printf '  "after_command": "%s",\n' "$(command_for "$tests")"
+    printf '  "base_sha": "%s",\n' "$base"
+    printf '  "head_sha": "%s",\n' "$(git -C "$root" rev-parse HEAD)"
+    printf '  "baseline_log": "%s",\n' "$(log_path baseline)"
+    printf '  "after_log": "%s"\n' "$(log_path after)"
+    printf '}\n'
 } >"$out/commands.json"
-echo "ARMS-COMPLETE $(cat "$out/summary.tsv" | tr '\\t' ' ')"
+echo "ARMS-COMPLETE $(cat "$out/summary.tsv" | tr '\t' ' ')"

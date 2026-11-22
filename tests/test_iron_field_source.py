@@ -221,3 +221,28 @@ def test_the_arms_runner_keeps_its_scratch_off_the_evidence_root():
     mktemp = next(index for index, line in code if "mktemp" in line)
     export = next(index for index, line in code if line.startswith("export TMPDIR="))
     assert export < mktemp
+
+
+def test_the_arms_runner_quotes_its_target_list_assignments():
+    """An unquoted target list word-splits into one bare filename per test file.
+
+    The assignments are handed to `pytest ... $list`, so a list written without
+    quotes still runs, and the failure surfaces only on a runner whose job has no
+    shell word-splitting guarantee. The quotes are the contract, and an
+    unquoted assignment is the defect.
+    """
+    script = (ROOT / "scripts/iron_field_source/run_arms.sh").read_text()
+    code = [
+        line.strip()
+        for line in script.splitlines()
+        if not line.lstrip().startswith("#")
+    ]
+    assignments = [
+        line for line in code if line.startswith(("tests=", "base_tests="))
+    ]
+    assert assignments, "the runner must assign its target lists"
+    for line in assignments:
+        value = line.split("=", 1)[1]
+        assert value.startswith('"') and value.endswith('"'), (
+            f"target-list assignment is not quoted: {line}"
+        )

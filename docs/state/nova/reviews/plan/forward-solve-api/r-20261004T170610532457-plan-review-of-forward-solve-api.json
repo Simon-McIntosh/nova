@@ -54,6 +54,16 @@
       "note": "Still true at main b62734cd (solve_request.py:317 default_forward_compilation_cache_root and NOVA_FORWARD_COMPILATION_CACHE_ROOT beside nova/jax/config.py:103). Folded into new section s6, 'One default path and one compile-cache root': the forward solve resolves its cache only through the persistent-cache owner and its one variable, and the second resolver is deleted.",
       "reason": "",
       "when": "2026-11-22T14:20:23.521669+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "906c06ae-8766-4281-8a78-e20c226c00f5",
+      "commit": "352365dcee1259b56485638e31bfa36d16f6cf9a",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "Still true at main: ForwardProfile.solve keeps the solve-keyword path and _resolve_solve_defaults (forward.py:2420) beside the request seam. Folded into new section s6: the request is the only input, the keyword default path is deleted with every caller migrated, and the default-wiring test refuses a solver-control keyword.",
+      "reason": "",
+      "when": "2026-11-22T14:20:33.130071+00:00"
     }
   ],
   "responses": {
@@ -74,6 +84,15 @@
       "note": "Still true at main b62734cd (solve_request.py:317 default_forward_compilation_cache_root and NOVA_FORWARD_COMPILATION_CACHE_ROOT beside nova/jax/config.py:103). Folded into new section s6, 'One default path and one compile-cache root': the forward solve resolves its cache only through the persistent-cache owner and its one variable, and the second resolver is deleted.",
       "reason": "",
       "when": "2026-11-22T14:20:14.410816+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "906c06ae-8766-4281-8a78-e20c226c00f5",
+      "commit": "352365dcee1259b56485638e31bfa36d16f6cf9a",
+      "commit_basis": "edit",
+      "note": "Still true at main: ForwardProfile.solve keeps the solve-keyword path and _resolve_solve_defaults (forward.py:2420) beside the request seam. Folded into new section s6: the request is the only input, the keyword default path is deleted with every caller migrated, and the default-wiring test refuses a solver-control keyword.",
+      "reason": "",
+      "when": "2026-11-22T14:20:33.130071+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-api/r-20261004T170610532457-plan-review-of-forward-solve-api.json",

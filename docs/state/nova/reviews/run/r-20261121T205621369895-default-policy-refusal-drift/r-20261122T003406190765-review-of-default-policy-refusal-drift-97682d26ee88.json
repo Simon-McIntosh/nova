@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-22T00:42:14.222Z",
   "dispatched_at": "2026-11-22T00:34:29Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "default-policy-refusal-drift",
+      "recorded_at": "2026-11-22T20:44:43.960129+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html",

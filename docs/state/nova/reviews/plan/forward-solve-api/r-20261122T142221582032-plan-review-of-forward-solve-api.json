@@ -1,0 +1,70 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T14:37:10.986Z",
+  "dispatched_at": "2026-11-22T14:22:52Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-api/r-20261122T142221582032-plan-review-of-forward-solve-api/plan.html:55",
+      "id": "reasoning-1",
+      "reason": "the wrong root cause points at recompilation while the recorded barrier is per-trip solve cost, so the section's own lever and its done-when would be aimed a full mechanism off.",
+      "text": "\u00a75 states that \"the per-edit recompile that follows from `external_current` being a trace constant is the thing this section removes\", but the plan's own 2026-11-03 comment (line 396) records that node fsa-traced-coil-edit already passes the currents as traced arguments with an HLO guard finding no current constant, and that each warm edit still cost 4.6 to 9.5 s (median 6.1 s) over 6 to 9 trips, the ~1 s Newton trip, which `sub-millisecond-forward-path` \u00a74 removes; the section therefore names a cause its own evidence has already removed, and a worker dispatched on it will optimise a mechanism that no longer exists",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-api/r-20261122T142221582032-plan-review-of-forward-solve-api/plan.html:55",
+      "id": "wiring-1",
+      "reason": "the queue and the DAG order only what the plan declares, so without the edge a \u00a75 node is dispatched before its enabling section lands and its gate cannot pass; with it the node is stored awaiting-upstream and released when the enabling section passes.",
+      "text": "\u00a75's done-when (\"tens of milliseconds per edit\") is unreachable on the current route and depends on `sub-millisecond-forward-path` \u00a74 (declared `implementable`, unlanded), but that dependency exists only in a comment (line 396) and in no plan metadata: `plan-depends-on` is empty and \u00a75's `data-links` is `forward-solve-api#s1`",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-api/r-20261122T142221582032-plan-review-of-forward-solve-api/plan.html:48",
+      "id": "done_when-1",
+      "reason": "as written the clause holds \u00a73 open indefinitely on work no nova node may write, so either the clause moves to a declared cross-repo edge with the landing SHA named as its hand-off, or it is restated as the nova-side obligation (the receipt carries the route) the node can actually prove.",
+      "text": "\u00a73's third clause requires that \"the imas-ambix consumer reads the transport route from the receipt rather than from its own configuration\", which is a change in another repository; the plan's own open followup f-20260909T210712175233 (line 110) states plainly that this part \"is imas-ambix work against this landing SHA\", so no node working in nova can measure or close it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-api/r-20261122T142221582032-plan-review-of-forward-solve-api/plan.html:55",
+      "id": "single_goal-1",
+      "reason": "one verdict cannot close three deliverables that land on different evidence (a traced-argument HLO guard, a sweep convergence table, a receipt field set), which is exactly how a section stays open across five runs as this one has.",
+      "text": "\u00a75 delivers three distinct deliverables in one node \u2014 (1) coil currents, profile tables and target current as traced arguments, (2) a warm-start policy measured over a bounded sweep, (3) the complete labelled flux map carried in the receipt \u2014 and its own record (line 657) confirms a run \"addressed the traced coil-edit part only\" while \"remaining work stays implementable\", with the import census and eager-reader migrations also folded in",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "1f931664f4a01f653a56223ebdb8b841c554eba9",
+  "plan_fingerprint": "2d0d4385d76d5bb127e8ee107ba1a6b8298013b6cf6fa5cbef3c53fc624a9905",
+  "plan_slug": "forward-solve-api",
+  "plan_version": 163,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T142221582032-plan-review-of-forward-solve-api",
+  "reviewed_blob_sha": "b0889c222abe1a72591ee17972d9aafbce8eb225",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited module, JSON, benchmark and archive anchor resolves (`nova/transport/{forward,torax_geometry,current_diffusion,evolved_state,ensemble}.py`, `pyproject.toml` `transport = [\"torax>=1.4.3\"]` at line 108, archive anchors `seam-guidance`, `coil-edit-latency-traced-rerun`, `coil-edit-nonconvergence`, `request-and-receipt`), and the `plan-blocks` target `imas-ambix:physics-carried-playable-plasma` resolves at `imas-ambix/docs/physics-carried-playable-plasma.html`.",
+    "done_when": "a finding \u2014 \u00a73's done-when requires an imas-ambix change the plan's own open followup assigns to imas-ambix, so no nova node can close \u00a73 on that clause; \u00a72 and \u00a73 also name no declared negative control (only \u00a76 does).",
+    "evidence_paths": "pass \u2014 gates and receipts land under `docs/figures/forward-solve-api/` and `docs/evidence/archive/`, all of which exist in the tree and outlive the run.",
+    "naming": "pass \u2014 the plan names no symbol carrying a stage label, ticket number or version tag; the one new name it fixes (`NOVA_FORWARD_COMPILATION_CACHE_ROOT`, to be deleted) is mechanism-named.",
+    "reasoning": "a finding \u2014 \u00a75's stated root cause (the per-edit recompile that follows from `external_current` being a trace constant) is superseded by the plan's own recorded measurement, which finds the constant gone and the gap in the Newton trip.",
+    "single_goal": "a finding \u2014 \u00a75 is one section with three separate deliverables plus folded-in extras, and its own record shows a run that delivered part of it while the rest stayed open.",
+    "wiring": "a finding \u2014 \u00a75's done-when target is gated on `sub-millisecond-forward-path` \u00a74, recorded only in a comment, while `plan-depends-on` is empty and \u00a75's `data-links` names only itself."
+  },
+  "section_digests": {
+    "_document": "2f844e26460d297a22e1a7c4eb30cef1f3a06f21173d585be30248b38ed70c17",
+    "s1": "15b140d9bfa92a8c1b5a9f2958b79468405f9375f2c62195a350a8f0378045d1",
+    "s2": "5ee351f40278f0a5290dd1ca86ce1e55e3fb9bc04310a1d343bd193207f00742",
+    "s3": "b1ff02f5ca8699b8f88270fc10b62ffcb3ee8e9772de4c4adcfead2bc4ec48b3",
+    "s4": "83822b14a2b02467715017811a9cc6eb6124f709c56b71467fd19a407f9a67c4",
+    "s5": "828c3198cd7bde5fe019c028f4b179b9ab382430aaddc29bd9c8e9687c6fcc9d",
+    "s6": "716994f254e6e95b3e35fd9228389d7ed937d6a0d5a855a37d25b105030f1385"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T14:37:14.472515+00:00",
+  "total": null
+}

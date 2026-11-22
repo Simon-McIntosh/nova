@@ -26,6 +26,10 @@ LEVEL_FRACTIONS = (0.2, 0.4, 0.6, 0.8)
 #: The declared control's switch: pin the assembler to the 256 slots the fine
 #: display grid overflowed, so the well_formed guard must fail.
 SLOT_CONTROL_ENV = "NOVA_PANEL_256_SLOT_CONTROL"
+#: The current-perturbation control's switch: the copy handed to the redraw
+#: keeps the stored current, so the 1 % edit never reaches the draw and the
+#: contour-movement guard must fail.
+STATIC_CURRENT_CONTROL_ENV = "NOVA_PANEL_STATIC_CURRENT_CONTROL"
 
 if os.environ.get(SLOT_CONTROL_ENV) == "1":
     import nova.equilibrium.display_flux as _display_flux
@@ -84,7 +88,8 @@ def _perturbed_state(state_path: Path, target: Path) -> Path:
         payload = {name: np.asarray(data[name]) for name in data.files}
     current = np.asarray(payload["conductor_current"], dtype=float).copy()
     moved = int(np.argmax(np.abs(current)))
-    current[moved] *= CURRENT_PERTURBATION
+    if os.environ.get(STATIC_CURRENT_CONTROL_ENV) != "1":
+        current[moved] *= CURRENT_PERTURBATION
     payload["conductor_current"] = current
     target.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(target, **payload)

@@ -41,7 +41,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 93,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "commit": "898e5527a3858244579ddf1462d8ce3f31da9408",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "section 5 rewritten at 898e5527a: locked keep-scored stated, each reconstruction scored as an IMAS equilibrium with the conversion named as this section's work, measured band verdicts, a perturbed-copy negative control through each conversion, and a named fragment and receipt path",
+      "reason": "",
+      "when": "2026-11-22T18:47:06.822986+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "commit": "898e5527a3858244579ddf1462d8ce3f31da9408",
+      "commit_basis": "edit",
+      "note": "section 5 rewritten at 898e5527a: locked keep-scored stated, each reconstruction scored as an IMAS equilibrium with the conversion named as this section's work, measured band verdicts, a perturbed-copy negative control through each conversion, and a named fragment and receipt path",
+      "reason": "",
+      "when": "2026-11-22T18:47:06.822986+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261122T142131601200-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261122T142131601200-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "f588985567ddfd2e219617c6bd83fcc6907385dc",
   "rubric": "content",

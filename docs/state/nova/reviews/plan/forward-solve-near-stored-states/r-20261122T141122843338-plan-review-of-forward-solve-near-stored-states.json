@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-22T14:25:45.119Z",
+  "dispatched_at": "2026-11-22T14:11:48Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:108",
+      "id": "wiring-1",
+      "reason": "the cost node's done-when must drop to the widths \u00a74 now delivers (and the \"widths 16 and 64 cannot be timed\" sentence beside it), or \u00a74 must still deliver 64; as it stands the two sections state contradictory requirements and the downstream node is dispatched on a measurement its upstream rules out.",
+      "text": "narrowing \u00a74's delivered batch widths from 16 and 64 to 16 and 32 leaves the section it explicitly feeds requiring width 64: inverse-equilibrium-baseline \u00a74 \"Cost on the H200\" declares its wait on forward-solve-near-stored-states#s4 and its done-when times batch widths 1, 16 and 64, so the node that wait dispatches can never complete, because the plan it waits on states 64 copies cannot fit the device",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-near-stored-states.html:108",
+      "id": "reasoning-1",
+      "reason": "the width is fixed by the lead's 2026-11-22 ruling recorded in the same sentence, so correcting or deleting the rationale leaves both the required widths and every gated measurement unchanged; it matters only to a reader reconciling the figure against the card.",
+      "text": "the new parenthetical fixes the width from two numbers that neither this plan nor any repository evidence record carries: \"1.95 GiB per batch member\" appears in no plan, fragment or receipt, and \"the 104.9 GiB device\" is some 26 GiB below the H200 NVL the repository documents at 141 GB (~131 GiB), so the stated reason for capping at 32 asserts a device capacity the hardware does not have unless 104.9 is free-memory rather than capacity",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "05358e1b4fbb40f54f44b114b774b89aa2901afc",
+  "plan_fingerprint": "5794cf3f4dc494947273e11e34b0cf3a3889272fc25a184c8500666d0c797e01",
+  "plan_slug": "forward-solve-near-stored-states",
+  "plan_version": 28,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T141122843338-plan-review-of-forward-solve-near-stored-states",
+  "reviewed_blob_sha": "3bee5e1a6a1c363a75e44284e3748ba3e2604619",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 docs/evidence/fragments/inverse-equilibrium-baseline/efit-on-nova-rows.html exists, both cited receipts exist, and inverse-equilibrium-baseline#s8 resolves to \"imas-efit on rows written by nova\", the row-exchange section \u00a74 names, at data-status done.",
+    "done_when": "pass \u2014 \u00a74(1) gates on widths 16 and 32 with a solo positive control that must qualify first, and \u00a74(3) is a negative control keyed to the traced-array conversion the receipts record at the base revision, so the gate can fail.",
+    "evidence_paths": "pass \u2014 both route-inventory receipts are cited by absolute path under /home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/ and both exist, and the record lands in the landed efit-on-nova-rows fragment path.",
+    "naming": "pass \u2014 \u00a74's text carries no plan labels, stage names or ticket numbers; the two dates are lead-ruling dates in plan prose, which the plan already uses.",
+    "reasoning": "a finding \u2014 \u00a74's root cause and endpoint are supported by the receipts read (picard and anderson batched 0.0322, newton_krylov batched TracerArrayConversionError, newton_krylov host 4.82e-5), but the width rationale added with the change rests on two figures no evidence record holds.",
+    "single_goal": "pass \u2014 \u00a74 carries one deliverable, the public solve running under a batch, with the displaced-copy count reported rather than gated.",
+    "wiring": "a finding \u2014 \u00a74's delivered width set (16 and 32) no longer matches what its declared dependent asks for: inverse-equilibrium-baseline \u00a74 \"Cost on the H200\" waits on forward-solve-near-stored-states#s4 and requires batch widths 1, 16 and 64."
+  },
+  "section_digests": {
+    "_document": "5eaec87b2f497b8b435123ea3e8e5b8d1c88bab5cda6853f1bb3ef3ea38b75de",
+    "s0": "c27d7fc92213572cc4b6dbeef33d26de213b835e03bd023faf0dd32aac6c4dab",
+    "s1": "4ede3937f9044bed180ea84429cd1a270d8adb5a56c41f6c9ad3b6588c575fd7",
+    "s2": "23d36c677399451b02820b5f23183136034878d95232b403afb78911f36d823a",
+    "s3": "c1164314d236e8fd566ce929a4f43e519d3b76ca3978d08d77b3c0ba13e6055c",
+    "s4": "47096f2b25422955851f7004288304eb3f3bc8b7641c215c5e06a1c0453af7ac"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T14:25:52.287184+00:00",
+  "total": null
+}

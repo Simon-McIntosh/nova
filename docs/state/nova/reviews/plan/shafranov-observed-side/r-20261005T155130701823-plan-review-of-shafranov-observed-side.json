@@ -24,7 +24,30 @@
   "plan_slug": "shafranov-observed-side",
   "plan_version": 9,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "commit": "e7210fc727895ca27b83f6cc76dc9490a6f0afd8",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "section 4 prose and the f-sos-diamagnetic-input body now name nova/imas/io_magnetics.py as the one reader and forbid a parallel one (3a7d30571, e7210fc72); the s4 node brief extends that reader into the store",
+      "reason": "",
+      "when": "2026-11-22T18:51:12.106329+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "d05cb1ec-4ff4-4522-a11b-c1ba0f43b533",
+      "commit": "e7210fc727895ca27b83f6cc76dc9490a6f0afd8",
+      "commit_basis": "edit",
+      "note": "section 4 prose and the f-sos-diamagnetic-input body now name nova/imas/io_magnetics.py as the one reader and forbid a parallel one (3a7d30571, e7210fc72); the s4 node brief extends that reader into the store",
+      "reason": "",
+      "when": "2026-11-22T18:51:12.106329+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/shafranov-observed-side/r-20261005T155130701823-plan-review-of-shafranov-observed-side.json",
   "review_run_id": "r-20261005T155130701823-plan-review-of-shafranov-observed-side",
   "reviewed_blob_sha": "fd69e04347dbb54d3a91f25553db4564526e9f6a",
   "rubric": "design",

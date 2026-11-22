@@ -1,0 +1,68 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-22T20:13:16.888Z",
+  "dispatched_at": "2026-11-22T19:29:24Z",
+  "findings": [
+    {
+      "file": "tests/test_mast_centroid_panel_states.py",
+      "line": "198",
+      "severity": "non-blocking",
+      "text": "non-blocking: the well_formed equality compares two values already asserted true at lines 177 and 190 and so cannot fail, reading as a drift guard while adding no protection."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/centroid-panels-separatrix.html",
+      "line": "47",
+      "severity": "non-blocking",
+      "text": "non-blocking: the stripped-receipt reproduction rests on logs/assembler-block-reproduction.log, four lines with no revision, command or EXIT= line, so the claim that the earlier guard passed a stripped receipt cannot be re-run or dated from the record."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/centroid-panels-separatrix.html",
+      "line": "17",
+      "severity": "non-blocking",
+      "text": "non-blocking: done_when (3) requires every rendered PNG inspected with zero clipped and zero overlapping labels, but the record embeds the figure with no inspection log or receipt, so that clause rests on the manifest's claim alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from 5c503f9a8; 2926ea0be adds the committed assembler assertions, ebd7b8381 the NOVA_PANEL_STATIC_CURRENT_CONTROL switch, 86de32499 the per-lane display memoization and the 2400 s bounds, and d4b0e792a through 33fa71353 build the evidence fragment, and no production module is touched.",
+    "done_when": "done_when (1) asks the test to redraw without a solve, keep the one-percent control failing, and assert each receipt's boundary_assembler block; tests/test_mast_centroid_panel_states.py:172-178 adds that block assertion, the switch at line 91 makes the control re-runnable, and the head arm records 11 of 11 passing.",
+    "goal": "the node goal is to redraw the four MAST centroid panels so each draws its assembled separatrix and to close the landed findings where the redraw touches them; the diff at 33fa7135345f adds the committed-receipt assertion, the re-runnable current-perturbation control and the evidence fragment, while the four panels and their receipts under docs/figures/mast-centroid-capability/ were already redrawn at base 5c503f9a8 and are unchanged here.",
+    "manifest": "read; it records the head arm at 86de324993329 as 11 of 11 passing with per-lane logs, the base arm at 5c503f9a8 as 4 passed in 2759.04 s with the per-test bound lifted, and the static-current negative control as 3 failed, EXIT=1.",
+    "write_paths": "the declared paths are the benchmark, the panel-state test, the evidence fragment and three figure directories; both paths in the diff, docs/evidence/fragments/separatrix-spline-extraction/centroid-panels-separatrix.html and tests/test_mast_centroid_panel_states.py, are inside them."
+  },
+  "justifications": {
+    "durability": "the committed-receipt assertion at tests/test_mast_centroid_panel_states.py:172 fails on a receipt with the boundary_assembler block removed, as logs/assembler-block-reproduction.log records, and the segment-count equality at line 200 fails on redraw drift.",
+    "evidence": "the head arm (logs/head-arm-cpu.log header revision 86de32499, 4 passed, EXIT=0) and the control at logs/negative-control-static-current.log (3 failed, EXIT=1) are captured and the receipts they assert were confirmed independently, but the PNG inspection in done_when (3) has no recorded artefact and the gate revision precedes the delivered head by three documentation-only commits.",
+    "fit": "the new switch at tests/test_mast_centroid_panel_states.py:32 follows the existing SLOT_CONTROL_ENV idiom at line 28, and the names _memoized_state_display and _BUILD_DISPLAY carry no plan or version label.",
+    "goal_fidelity": "the panels and their receipts under docs/figures/mast-centroid-capability/ were already drawn at base 5c503f9a8, so tests/test_mast_centroid_panel_states.py:172-178 verifies the goal rather than performing the redraw the brief names.",
+    "reuse": "the memoization at tests/test_mast_centroid_panel_states.py:105-115 wraps the producer's own entry point benchmarks/mast_centroid_solve_panels.py:1158 rather than forking a second display-map path, and the search found no display-map cache owner in nova/equilibrium/display_flux.py.",
+    "scope_discipline": "both changed paths in the diff sit inside the declared write paths, and the memoization at tests/test_mast_centroid_panel_states.py:99-115 is the change the done_when's gate needed to fit one allocation."
+  },
+  "node": "review-of-centroid-panels-separatrix-33fa7135345f",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to redraw the four MAST centroid panels so each draws its assembled separatrix and to close the landed findings where the redraw touches them; the diff at 33fa7135345f adds the committed-receipt assertion, the re-runnable current-perturbation control and the evidence fragment, while the four panels and their receipts under docs/figures/mast-centroid-capability/ were already redrawn at base 5c503f9a8 and are unchanged here.\nVERDICT done_when: done_when (1) asks the test to redraw without a solve, keep the one-percent control failing, and assert each receipt's boundary_assembler block; tests/test_mast_centroid_panel_states.py:172-178 adds that block assertion, the switch at line 91 makes the control re-runnable, and the head arm records 11 of 11 passing.\nVERDICT write_paths: the declared paths are the benchmark, the panel-state test, the evidence fragment and three figure directories; both paths in the diff, docs/evidence/fragments/separatrix-spline-extraction/centroid-panels-separatrix.html and tests/test_mast_centroid_panel_states.py, are inside them.\nVERDICT manifest: read; it records the head arm at 86de324993329 as 11 of 11 passing with per-lane logs, the base arm at 5c503f9a8 as 4 passed in 2759.04 s with the per-test bound lifted, and the static-current negative control as 3 failed, EXIT=1.\nVERDICT diff: read commit by commit from 5c503f9a8; 2926ea0be adds the committed assembler assertions, ebd7b8381 the NOVA_PANEL_STATIC_CURRENT_CONTROL switch, 86de32499 the per-lane display memoization and the 2400 s bounds, and d4b0e792a through 33fa71353 build the evidence fragment, and no production module is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the panels and their receipts under docs/figures/mast-centroid-capability/ were already drawn at base 5c503f9a8, so tests/test_mast_centroid_panel_states.py:172-178 verifies the goal rather than performing the redraw the brief names.\nSCORE evidence: 15\nJUSTIFICATION evidence: the head arm (logs/head-arm-cpu.log header revision 86de32499, 4 passed, EXIT=0) and the control at logs/negative-control-static-current.log (3 failed, EXIT=1) are captured and the receipts they assert were confirmed independently, but the PNG inspection in done_when (3) has no recorded artefact and the gate revision precedes the delivered head by three documentation-only commits.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: both changed paths in the diff sit inside the declared write paths, and the memoization at tests/test_mast_centroid_panel_states.py:99-115 is the change the done_when's gate needed to fit one allocation.\nSCORE durability: 18\nJUSTIFICATION durability: the committed-receipt assertion at tests/test_mast_centroid_panel_states.py:172 fails on a receipt with the boundary_assembler block removed, as logs/assembler-block-reproduction.log records, and the segment-count equality at line 200 fails on redraw drift.\nSCORE fit: 18\nJUSTIFICATION fit: the new switch at tests/test_mast_centroid_panel_states.py:32 follows the existing SLOT_CONTROL_ENV idiom at line 28, and the names _memoized_state_display and _BUILD_DISPLAY carry no plan or version label.\nSCORE reuse: 18\nJUSTIFICATION reuse: the memoization at tests/test_mast_centroid_panel_states.py:105-115 wraps the producer's own entry point benchmarks/mast_centroid_solve_panels.py:1158 rather than forking a second display-map path, and the search found no display-map cache owner in nova/equilibrium/display_flux.py.\nFINDING tests/test_mast_centroid_panel_states.py:198 non-blocking: the well_formed equality compares two values already asserted true at lines 177 and 190 and so cannot fail, reading as a drift guard while adding no protection.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/centroid-panels-separatrix.html:47 non-blocking: the stripped-receipt reproduction rests on logs/assembler-block-reproduction.log, four lines with no revision, command or EXIT= line, so the claim that the earlier guard passed a stripped receipt cannot be re-run or dated from the record.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/centroid-panels-separatrix.html:17 non-blocking: done_when (3) requires every rendered PNG inspected with zero clipped and zero overlapping labels, but the record embeds the figure with no inspection log or receipt, so that clause rests on the manifest's claim alone.",
+  "review_run_id": "r-20261122T192752745852-review-of-centroid-panels-separatrix-33fa7135345f",
+  "reviewed_base_sha": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "reviewed_commit": "33fa7135345f62f385492264ce008d488a8edc70",
+  "reviewed_head_sha": "33fa7135345f62f385492264ce008d488a8edc70",
+  "reviewed_run_id": "r-20261122T134831665081-centroid-panels-separatrix",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d05cb1ec-4ff4-4522-a11b-c1ba0f43b533/centroid-panels-separatrix",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T20:00:00+00:00",
+  "total": 105
+}

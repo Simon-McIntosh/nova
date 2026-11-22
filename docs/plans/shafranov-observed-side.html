@@ -24,10 +24,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-11-22">
 <meta name="plan-blocks" content="">
 <meta name="plan-standalone" content="The plan it unblocked, constraint-augmented-newton-krylov, is superseded; no open plan waits on the Shafranov observed side and it waits on none.">
+<meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;shafranov-observed-side#s1&quot;,&quot;shafranov-observed-side#s2&quot;,&quot;shafranov-observed-side#s4&quot;]}">
 </head>
 <body>
   <main class="plan-doc">
@@ -115,9 +116,10 @@
     <p>The assembled functional W = -2 μ<sub>0</sub> S<sub>v</sub> - 6 μ<sub>0</sub> P - Z carries the volume
     integrals P = ∫ p dV and Z = ∫ B<sub>φ</sub><sup>2</sup> dV, so β<sub>p</sub> + l<sub>i</sub>/2 is not a
     functional of the boundary field alone; the integral node's derivation shows a single virial field cannot
-    remove both. Until the lead rules, Z is the solved state's own integral and every receipt says so. The
-    alternative is a diamagnetic-loop measurement where the machine carries one, which makes the observed side
-    fully external at the cost of a new input. The diamagnetic flux enters through the magnetics reader the
+    remove both. The lead ruled on 2026-10-01 (decision <code>toroidal-volume-term</code> below): Z comes from a
+    diamagnetic-loop measurement where the machine carries one, which makes the observed side fully external at
+    the cost of a new input, and from the solved state's own integral only where no loop exists; every receipt
+    names which source each row used. The diamagnetic flux enters through the magnetics reader the
     tree already carries, <code>nova/imas/io_magnetics.py</code>, whose diagnostic table names the
     <code>diamagnetic_internal</code>, <code>diamagnetic_external</code>, <code>diamagnetic_compensation</code>
     and <code>diamagnetic_differential</code> flux-loop channels; the store row is sourced through that reader,
@@ -152,7 +154,7 @@
     </article>
 <article class="r-fu" data-id="f-sos-diamagnetic-input" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build shafranov-observed-side" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Read the MAST diamagnetic flux through the store as the source of the volume term Z</h4>
-    <div class="r-fu-body"><p>Decision <code>toroidal-volume-term</code> is locked to <code>diamagnetic-loop</code>. Ingest the MAST diamagnetic signal through <code>nova.io</code> into the standard-name store, using the DD 4 paths <code>magnetics.diamagnetic_flux(:).data</code> and <code>.time</code>. When the value is carried into a reconstruction, write it as <code>equilibrium.time_slice.constraints.diamagnetic_flux.measured</code>, which DD 4 declares <code>b0_like</code>, so its sign follows the toroidal field under COCOS 17. Derive Z from it in §3 with the calibration and sign stated.</p><p><strong>Done when:</strong> the store row carries the source, units (Wb), COCOS and calibration as attributes; a MAST shot's diamagnetic flux reproduces the archived EFIT constraint value within its stated error; the §3 receipt's provenance field names <code>diamagnetic-loop</code> or <code>solved-state</code> per row; and a sign-flip negative control (B0 reversed without flipping the flux) is refused by the convention check.</p></div>
+    <div class="r-fu-body"><p>Decision <code>toroidal-volume-term</code> is locked to <code>diamagnetic-loop</code>. Ingest the MAST diamagnetic signal through the magnetics reader the tree already carries, <code>nova/imas/io_magnetics.py</code> (its diagnostic table names the four diamagnetic flux-loop channels), never a parallel reader, into the standard-name store, using the DD 4 paths <code>magnetics.diamagnetic_flux(:).data</code> and <code>.time</code>. When the value is carried into a reconstruction, write it as <code>equilibrium.time_slice.constraints.diamagnetic_flux.measured</code>, which DD 4 declares <code>b0_like</code>, so its sign follows the toroidal field under COCOS 17. Derive Z from it in §3 with the calibration and sign stated.</p><p><strong>Done when:</strong> the store row carries the source, units (Wb), COCOS and calibration as attributes; a MAST shot's diamagnetic flux reproduces the archived EFIT constraint value within its stated error; the §3 receipt's provenance field names <code>diamagnetic-loop</code> or <code>solved-state</code> per row; and a sign-flip negative control (B0 reversed without flipping the flux) is refused by the convention check.</p></div>
     <pre class="r-fu-prompt">/reckon-build shafranov-observed-side</pre>
     </article>
 </section>

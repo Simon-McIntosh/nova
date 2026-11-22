@@ -138,19 +138,16 @@ def sensor_geometry() -> dict:
     return dict(loop=loop, probe=probe, angle=angle, b0=b0, axis=axis, r0=r0)
 
 
-def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
-    """Solve the generating state and evaluate its noise-free rows.
+def geometry_case(cells: int = 500) -> dict:
+    """Construct the generating state's problem, sensors and fitted row basis.
 
-    ``reuse_rows`` loads the rows a previous build of the same state and the
-    same sensor set persisted, which skips the two Biot-Savart row evaluations
-    (about half an hour at 500 cells on four cores) on a card that needs the
-    fits, not the rows.  The state itself is still solved: the fit needs the
-    generating flux as its seed.
+    No state is solved and no row is evaluated: a shard of the sequence fit
+    reuses the generating flux, the noise-free rows and the reference a prepare
+    pass persisted, so it pays the machine load and the sensor geometry only.
     """
     import importlib
 
     from nova.equilibrium.measurement import Magnetics
-    from nova.equilibrium.solve_request import ExplicitSolveSeed
 
     sys.path.insert(0, str(REPO))
     tm = importlib.import_module("tests.test_equilibrium_magnetics_fit")
@@ -171,17 +168,6 @@ def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
         profile, request, coordinate, wall, sections, known = tm._physical_problem(
             "iter"
         )
-    generated = profile.solve(request)
-    if not generated.qualified or not generated.terminal_state.fixed_point.converged:
-        raise RuntimeError("generating state failed to qualify")
-    print(
-        "GENERATING residual=%.3e axis=%s"
-        % (
-            float(generated.terminal_state.fixed_point.residual),
-            np.round(np.asarray(generated.terminal_state.topology.axis), 6).tolist(),
-        ),
-        flush=True,
-    )
 
     geometry = sensor_geometry()
     # The pulse carries the machine's ``poloidal_angle`` unchanged; the row is
@@ -201,7 +187,62 @@ def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
         flux_loop=np.r_[np.ones(24, bool), np.zeros(48, bool)],
     )
     magnetic_source = tm._PlasmaDiagnosticSource(sections)
-    known_field = tm._known_field_reader(known, magnetic_source)
+    raw = np.r_[
+        request.source_profile.core.p_prime.coefficients,
+        request.source_profile.core.ff_prime.coefficients,
+    ]
+    pressure = request.source_profile.core.p_prime.coefficients.size
+    basis = np.zeros((raw.size, 2))
+    basis[:pressure, 0] = raw[:pressure]
+    basis[pressure:, 1] = raw[pressure:]
+    return dict(
+        profile=profile,
+        request=request,
+        coordinate=np.asarray(coordinate),
+        wall=np.asarray(wall),
+        sections=sections,
+        sensors=sensors,
+        prior_sensors=prior_sensors,
+        magnetic_source=magnetic_source,
+        basis=basis,
+        geometry=geometry,
+        known=known,
+        cells=cells,
+        module=tm,
+    )
+
+
+def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
+    """Solve the generating state and evaluate its noise-free rows.
+
+    ``reuse_rows`` loads the rows a previous build of the same state and the
+    same sensor set persisted, which skips the two Biot-Savart row evaluations
+    (about half an hour at 500 cells on four cores) on a card that needs the
+    fits, not the rows.  The state itself is still solved: the fit needs the
+    generating flux as its seed.
+    """
+    from nova.equilibrium.solve_request import ExplicitSolveSeed
+
+    case = geometry_case(cells)
+    tm = case["module"]
+    profile = case["profile"]
+    request = case["request"]
+    sensors = case["sensors"]
+    magnetic_source = case["magnetic_source"]
+    known_field = tm._known_field_reader(case["known"], magnetic_source)
+
+    generated = profile.solve(request)
+    if not generated.qualified or not generated.terminal_state.fixed_point.converged:
+        raise RuntimeError("generating state failed to qualify")
+    print(
+        "GENERATING residual=%.3e axis=%s"
+        % (
+            float(generated.terminal_state.fixed_point.residual),
+            np.round(np.asarray(generated.terminal_state.topology.axis), 6).tolist(),
+        ),
+        flush=True,
+    )
+
     stored = STUDY / "rows.npz"
     if reuse_rows and stored.exists():
         cached = np.load(stored)
@@ -211,26 +252,19 @@ def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
         plasma = np.asarray(cached["plasma"], dtype=float)
         print("ROWS-REUSED " + str(stored), flush=True)
     else:
-        total, vacuum, plasma, scales = tm._total_observations(
+        total, vacuum, plasma, _scales = tm._total_observations(
             magnetic_source, generated, sensors, known_field
         )
         total_prior = tm._total_observations(
-            magnetic_source, generated, prior_sensors, known_field
+            magnetic_source,
+            generated,
+            case["prior_sensors"],
+            known_field,
         )[0]
     loops = np.asarray(sensors.flux_loop, dtype=bool)
     sigma_loop = float(np.sqrt(np.mean(plasma[loops] ** 2)))
     sigma_probe = float(np.sqrt(np.mean(plasma[~loops] ** 2)))
     plasma_current = float(np.sum(generated.terminal_state.cell_current))
-    del scales
-
-    raw = np.r_[
-        request.source_profile.core.p_prime.coefficients,
-        request.source_profile.core.ff_prime.coefficients,
-    ]
-    pressure = request.source_profile.core.p_prime.coefficients.size
-    basis = np.zeros((raw.size, 2))
-    basis[:pressure, 0] = raw[:pressure]
-    basis[pressure:, 1] = raw[pressure:]
 
     topology = generated.terminal_state.topology
     reference = dict(
@@ -241,36 +275,26 @@ def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
         plasma_current=plasma_current,
         sigma_loop=sigma_loop,
         sigma_probe=sigma_probe,
-        b0=float(geometry["b0"]),
-        r0=float(geometry["r0"]),
+        b0=float(case["geometry"]["b0"]),
+        r0=float(case["geometry"]["r0"]),
         generating_residual=float(generated.terminal_state.fixed_point.residual),
-        coordinates=int(coordinate.shape[0]),
+        coordinates=int(case["coordinate"].shape[0]),
     )
     reference["cells"] = cells
-    return dict(
-        profile=profile,
-        request=request,
+    case.update(
         initial=replace(
             request, seed_policy=ExplicitSolveSeed(generated.terminal_state.flux)
         ),
         generated=generated,
-        coordinate=np.asarray(coordinate),
-        wall=np.asarray(wall),
-        sections=sections,
-        sensors=sensors,
-        magnetic_source=magnetic_source,
         total=total,
         total_prior=total_prior,
         vacuum=vacuum,
         plasma=plasma,
         sigma_loop=sigma_loop,
         sigma_probe=sigma_probe,
-        basis=basis,
-        geometry=geometry,
         reference=reference,
-        cells=cells,
-        module=tm,
     )
+    return case
 
 
 def write_prepare(case: dict) -> None:
@@ -942,11 +966,19 @@ def run_efit(args) -> None:
     totals = totals + noise
     current = reference["plasma_current"] + sigma_ip * rng.standard_normal(args.slices)
     times = SLICE_TIME + np.arange(args.slices, dtype=float)
+    # "loops" writes the 24 flux loops alone: the probe rows are dropped from
+    # the pulse rather than zeroed, which is what the row-convention comparison
+    # needs, since a written zero is a row the fit must satisfy.
+    field = (
+        np.zeros((args.slices, 0))
+        if probe_rows == "loops"
+        else totals[:, 24:]
+    )
     write_pulse(
         pulse,
         times,
         totals[:, :24],
-        totals[:, 24:],
+        field,
         current,
         sigma_loop * args.factor,
         sigma_probe * args.factor,
@@ -1094,7 +1126,9 @@ def main(argv=None) -> int:
     efit.add_argument("--factor", type=float, default=REFERENCE_FACTOR)
     efit.add_argument("--tag", default="")
     efit.add_argument(
-        "--probe-rows", choices=("corrected", "prior"), default="corrected"
+        "--probe-rows",
+        choices=("corrected", "prior", "loops"),
+        default="corrected",
     )
     efit.add_argument("--sequence", default="white")
     efit.add_argument("--seed", type=int, default=20261118)

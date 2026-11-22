@@ -1,0 +1,25 @@
+<section id="drift-sequences-fit-iteration-record">
+<h2>The held-map iteration run inside the fit loop over 200 slices of both drift sequences</h2>
+<p>This node fits the held-map pass of the equilibrium iteration — <code>FluxIterationFit</code>, the column the plan's lead ruling names for this study — over 200 slices of the white and of the 1/f reference sequence, on the same rows, the same noise draws and the same generating state the earlier imas-efit arms were measured on, and reports per-slice and 50-slice-mean error of the axis position, the boundary flux and q95 beside the lag-one controls.</p>
+<p>The generating state is the section-1 ITER fixture at 500 cells. The state, the noise model and the pulse writer are <code>probe_rows/study.py</code>'s; the held-map driver is <code>probe_rows/iteration.py</code>; every measure is <code>probe_rows/analyse.py</code>'s reduction, and the imas-efit column is the same study's own arms.</p>
+<table id="drift-sequences-fit-jobs">
+<tr><th>job</th><th>rung</th><th>work</th><th>outcome</th></tr>
+<tr><td>1337642</td><td>betelgeuse, one H200</td><td>the payload, requested at one card and four cores</td><td>pended on Priority while all eight cards on the node were allocated; cancelled by id before the payload ran anywhere</td></tr>
+<tr><td>1337654</td><td>titan, five P100 cards, 10 cores, 120 G</td><td>prepare, then five shards of held-map fits over both sequences, then imas-efit on both sequences</td><td>the run this record states</td></tr>
+</table>
+</section>
+
+<section id="drift-sequences-fit-state"><h3>The generating state and the rows</h3>
+<p>The 500-cell forward solve qualified, and the sensor rows were written from it before any noise was added:</p>
+<pre id="drift-sequences-fit-generating">GENERATING residual=1.492e-15 axis=[6.288633, 0.498205]</pre>
+<table id="drift-sequences-fit-state-table">
+<tr><th>quantity</th><th>value</th></tr>
+<tr><td>axis (R, Z)</td><td>6.288633, 0.498205</td></tr>
+<tr><td>axis flux, boundary flux, span</td><td>-73.8925, 2.81128, 76.7038 Wb</td></tr>
+<tr><td>plasma current</td><td>-13.705 MA</td></tr>
+<tr><td>q95, one flux-map calculator</td><td>2.95575</td></tr>
+<tr><td>reference sigma, 24 flux loops</td><td>83.969 Wb</td></tr>
+<tr><td>reference sigma, 48 poloidal probes</td><td>0.64941 T</td></tr>
+</table>
+<p>The rows themselves are the study's 72-row magnetics set, and they were checked against the set the earlier arms were written from rather than assumed equal to it. The 24 flux loops agree to <code>4.8&times;10<sup>-8</sup></code> Wb, which is the two solves' own terminal difference (relative <code>1.1&times;10<sup>-9</sup></code>). The 48 poloidal probes do not: their mean absolute difference is 0.947 T on a row scale of 0.629 T. That is the row convention the earlier record already measured, and it is why the imas-efit column here is the 24-flux-loop arm: a probe row that means a different quantity to the two readers cannot be compared, so the code comparison is stated on the loops the two readers do agree on, while the held-map fit reads its full row set as the reconstruction would in service.</p>
+</section>

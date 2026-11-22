@@ -854,9 +854,7 @@ def _strict_json(document: Any) -> str:
     remaining edits are still sound, so it is persisted as null rather than
     aborting the run on a strict dump.
     """
-    return json.dumps(
-        _finite_tree(document), indent=2, sort_keys=True, allow_nan=False
-    )
+    return json.dumps(_finite_tree(document), indent=2, sort_keys=True, allow_nan=False)
 
 
 def _achieved_class(profile: Any, state: Any) -> dict[str, Any]:

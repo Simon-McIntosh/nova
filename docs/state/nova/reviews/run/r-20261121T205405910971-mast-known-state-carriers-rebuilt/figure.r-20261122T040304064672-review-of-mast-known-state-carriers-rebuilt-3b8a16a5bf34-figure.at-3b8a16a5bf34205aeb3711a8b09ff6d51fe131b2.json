@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-22T04:29:51.753Z",
+  "dispatched_at": "2026-11-22T04:03:42Z",
+  "figures_reviewed": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T040304064672-review-of-mast-known-state-carriers-rebuilt-3b8a16a5bf34-figure/image-0.png",
+    "docs/figures/inverse-equilibrium-baseline/mast-known-state-carriers-rebuilt/mast-known-state.svg"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/mast-known-state-carriers-rebuilt/mast-known-state.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The equal-aspect poloidal panel uses 268 of the figure's 1399-px width (x 568-836, y 98-671), so about 81% of the published canvas is blank margin. That follows from the repository's fixed 14-in canvas meeting a tall, narrow machine at equal aspect, so the canvas itself is not the fault; the cost is that each contour renders as a ~2 px blue stroke flanked by ~2 px of grey, and the recovered-on-generating agreement - the figure's whole subject - is readable only at close range. The width the panel cannot use is available for a second panel (a zoom on the outer contours and the X-point region, or the signed difference), which would show the agreement at the size the reader is actually given."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/mast-known-state-carriers-rebuilt/mast-known-state.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two maps coincide to within one stroke width over the whole domain: 11561 of 14333 grey pixels lie within 2 px of a blue pixel, and only 426 grey pixels sit more than 3 px from any blue. That is the correct result at a 2.6e-12 flux error, but it means the legend sets up a comparison the picture cannot resolve at any point - a reader is told the two agree, not where the recovery is weakest or by how much. A companion panel showing the signed difference (generating minus recovered) on its own scale would carry the residual the caption quotes."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/mast-known-state-carriers-rebuilt/mast-known-state.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "More contour ink is spent on the reference than on the recovered map: each generating contour is drawn about 2 px wider on each side than the blue recovered stroke (12173 grey pixels against 9660 blue), so at the rendered size the grey band, not the blue line, carries the visual weight of every contour. The repository style draws the raw or reference series beneath and thinner so the subject reads along its whole length; drawing the generating map narrower under a wider recovered stroke would give the subject the weight while keeping the reference visible at every point."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261122T040304064672-review-of-mast-known-state-carriers-rebuilt-3b8a16a5bf34-figure",
+  "reviewed_base_sha": "2290fbb8bc0e548d35d18eebdb6047a5672fb8c7",
+  "reviewed_head_sha": "3b8a16a5bf34205aeb3711a8b09ff6d51fe131b2",
+  "reviewed_run_id": "r-20261121T205405910971-mast-known-state-carriers-rebuilt",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Text and marks clear their background: the legend glyphs are near-black (#3f3f3f) on white (about 10:1) at roughly 14 pt, the blue contours read well above 3:1, and the generating reference grey #929292 sits at about 3:1 on white, the level the repository style sanctions for a reference series.",
+    "data_ink": "Data carry the panel: 12173 grey and 9660 grey-level contour pixels plus the black wall are the only ink inside the panel, on an otherwise white field, and nothing competes with the contours. The weighting is inverted relative to the subject, though: each generating contour is drawn about 2 px wider on each side than the blue recovered stroke it sits under, so the reference carries more ink than the recovered map the figure exists to show.",
+    "decoration": "No decoration: no gradient, colour fill, shading, grid, frame, drop shadow or in-figure title. The only non-data ink is the black first-wall outline and the two legend entries, both required to read the plot; the legend is frameless and sits in clear space above the drawing.",
+    "label_collision": "No collision and nothing clipped: the only text is the two legend entries, 'generating' at x 580-682 and 'recovered' at x 780-873, 98 px apart on row band y 18-35, clear of the topmost drawing ink at y 18 and of the wall which begins at y 98, and no text sits over plotted data.",
+    "legibility": "Legible at the size rendered: the stepped MAST vessel reads as one closed black outline, the contour bands read as nested closed loops plus the divertor legs top and bottom, the magnetic axis (solid triangle) and the X-point (filled cross) are unmistakable, and the two legend entries name the series. The one limitation is scale: the equal-aspect poloidal panel occupies only 268 of 1399 px of canvas width (x 568-836), so the recovered-on-generating agreement resolves only at close range, and the width the panel cannot use is left blank (image-0.png).",
+    "table_form": "Not a table: the content is the spatial coincidence of two flux-contour sets inside a machine cross-section, with the null points and the vessel as the scale. No information that is naturally tabular is depicted as an image."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T04:30:15.009629+00:00",
+  "total": null
+}

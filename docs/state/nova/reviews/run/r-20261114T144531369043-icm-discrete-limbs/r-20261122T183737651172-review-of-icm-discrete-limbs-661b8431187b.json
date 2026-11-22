@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arm logs on disk: gate-baseline.log records '7 failed, 1 passed, 93 deselected' EXIT=1 at b62734cd and gate-after.log records the same seven ids at 138a0c8b, so the set difference is empty (0). Caveat recorded as a finding: gate-after.log is byte-identical to gate-baseline.log apart from its '# revision:' header (its md5 equals gate-tests.log), so the after arm was a copy rather than an independent run; the count is right in substance because the diff touches no test and no module the selection imports.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-22T18:54:51.756Z",
+  "dispatched_at": "2026-11-22T18:38:21Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-discrete-limbs.html",
+      "line": "142",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence states the discrete limbs are '7.1 % weaker ... at z = 0 and 13.6 % weaker at z = 0.6' at 8.11 m, but 7.1 % and 13.6 % are the vertical ratios at R = 6.672 m (0.9294 and 0.8636 in summary.json at discrete-limbs-011); at 8.11 m the deficits are 2.18 % and 6.74 %, which is what the table above correctly reports. The sentence is the one place the record states how much the criterion misses by at its near edge, so a reader is told the wrong margin for the wrong radius."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-discrete-limbs.html",
+      "line": "124",
+      "severity": "non-blocking",
+      "text": "non-blocking: the 'median vertical difference' column (0.37 % and 2.02 %) is the median over all 53 sampled radii from 6.67 m, while the same row's 'median vertical ratio' (0.9973/0.9836) and 'radii within 2 %' (44 of 45, 26 of 45) are over the 45-radius criterion window, whose medians are 0.27 % and 1.64 %. Two cells of one row are computed over different sets, so the row cannot be read as one window statistic."
+    },
+    {
+      "file": "gate-after.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the after-suite log carries a revision header for 138a0c8b but is byte-identical to gate-baseline.log apart from that header line (diff shows only line 1 differing; its md5 equals gate-tests.log), including the identical 'in 4.08s' timing, so it is a copy of the base run with the revision rewritten rather than a run at the after revision. The result is very likely unchanged because the diff touches neither tests/test_magnetisation.py nor any module that selection imports, but the arm is claimed rather than recorded."
+    },
+    {
+      "file": "scripts/iron_discrete_limbs/measure.py",
+      "line": "61",
+      "severity": "non-blocking",
+      "text": "non-blocking: the atomic .pending saver re-declared here and at representations.py:25 is already defined at scripts/iron_limb_production/outline.py:51, and both new modules import from that module, so the helper could have been imported rather than copied."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-discrete-limbs.html",
+      "line": "94",
+      "severity": "non-blocking",
+      "text": "non-blocking: no figure was produced although the node declared a docs/figures/iron-core-magnetisation/icm-discrete-limbs directory; the behind-versus-between profile and the average-against-axisymmetric decay are spatial relationships that a line-contour figure carries better than the present tables."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the landed change is two standalone measurement scripts under scripts/iron_discrete_limbs plus an evidence fragment; a grep of nova/ and tests/ for 'iron_discrete_limbs' returns nothing, so no production module imports or executes it.",
+    "diff": "read b62734cdf482fa9bf8963412ef0bd5505f84b668..661b8431187b0844a9fca7cb6f1867cf52a9286f commit by commit; three added files (fragment +236, measure.py +511, representations.py +112), no test file, and all 13 commits touch one of those three paths.",
+    "done_when": "the done_when asks for (1) phi-resolved midplane |B| behind and between limbs from the coil edge to 6 m, (2) a toroidal average within 2 % of the axisymmetric result beyond 2 m from the legs, and (3) the decision's limb dimensions plus a smear control that must read round-off zero; the fragment reports all three, but the gate the worker ran (tests/test_magnetisation.py -k control_receipt/compare_only/in_vessel_fill) asserts none of them.",
+    "goal": "the node goal is to magnetise six discrete limbs of their real section in the axisymmetric field and report |B| behind and between them with its toroidal average; measure.py:181-380 builds the sector, solves once, and reports exactly those quantities, so the goal is met on (1) and (3) and reported short of the stated 2 % on (2).",
+    "manifest": "read; status complete, names jobs 1337418 and 1337533 and both arm logs, and its numbers reconcile with summary.json at discrete-limbs-011 and -010 except the two prose and table inconsistencies named in the findings.",
+    "write_paths": "the declared paths are the fragment html and an icm-discrete-limbs figure directory; the diff also adds scripts/iron_discrete_limbs/measure.py and representations.py, which lie outside the declared paths though they are the machinery the goal implies."
+  },
+  "justifications": {
+    "durability": "no test covers scripts/iron_discrete_limbs/measure.py or representations.py, and the only gate is an unrelated selection in tests/test_magnetisation.py that imports neither module, so nothing reddens if the measurement regresses.",
+    "evidence": "the quantitative record is present and I reproduced the headline values from summary.json at discrete-limbs-011 (beyond_max_*vertical_relative 0.0218/0.0674, median ratio 0.9973/0.9836, 44 and 26 of 45 radii within 2 %, smear 0.0 against 1.2456e-3 T), but the gate asserts none of them and gate-after.log:1 is a copy of the base arm.",
+    "fit": "measure.py:181-380 follows the repo script idiom (argparse defaults, atomic .pending JSON record, nova.biot imports) and adds no plan label or banned name; the one blemish is an evidence misstatement in the fragment rather than a style defect.",
+    "goal_fidelity": "measure.py:181-380 reports all three done-when quantities, and the fragment records the 2 % criterion met at 44 of 45 radii at z = 0 and only from 11.5 m at z = 0.6 rather than claiming success.",
+    "reuse": "the change reuses the owners of its capabilities, reaching average_toroidal_field at nova/biot/toroidalaverage.py and response at scripts/prototypes/iron_limb_fill/bricks.py:130, and duplicates only the 4-line saver already owned at scripts/iron_limb_production/outline.py:51.",
+    "scope_discipline": "two of the three diff paths (measure.py, representations.py, 623 lines) lie outside the declared write paths though the goal implies them, and no unrelated file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to magnetise six discrete limbs of their real section and report |B| behind and between them with its toroidal average; measure.py:181-380 builds the sector, solves once, and reports all three quantities, so the goal is met on the phi-resolved field and the smear control and reported short of the stated 2 % on the average.\nVERDICT done_when: done_when asks for phi-resolved |B| from the coil edge to 6 m, a toroidal average within 2 % beyond 2 m, and the decision's dimensions plus a round-off-zero smear control; the fragment reports all three, but the gate the worker ran (tests/test_magnetisation.py -k control_receipt/compare_only/in_vessel_fill) asserts none of them.\nVERDICT write_paths: declared paths are docs/evidence/fragments/iron-core-magnetisation/icm-discrete-limbs.html and docs/figures/iron-core-magnetisation/icm-discrete-limbs; the diff also adds scripts/iron_discrete_limbs/measure.py and representations.py, outside the declared paths but implied by the goal, and adds no figure.\nVERDICT manifest: read; status complete, names jobs 1337418 and 1337533 and the arm logs, and its numbers reconcile with summary.json; a present and green claim does not stand in for the arm logs, which the findings address.\nVERDICT diff: read b62734cdf482fa9bf8963412ef0bd5505f84b668..661b8431187b0844a9fca7cb6f1867cf52a9286f commit by commit; three added files, no test, every commit inside the three paths.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: measure.py:181-380 reports all three done-when quantities, and the fragment records the 2 % criterion met at 2 % or better on 44 of 45 window radii at z = 0 and only from 11.5 m at z = 0.6.\nSCORE evidence: 13\nJUSTIFICATION evidence: I reproduced the headline values from summary.json at discrete-limbs-011, but the gate asserts none of the measures and gate-after.log:1 is a copy of the base arm rather than an independent run.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: two of three diff paths (measure.py, representations.py, 623 lines) lie outside the declared write paths though the goal implies them, and no unrelated file is touched.\nSCORE durability: 4\nJUSTIFICATION durability: nothing imports or tests scripts/iron_discrete_limbs/measure.py, so no test fails if the measurement regresses; the only gate is an unrelated selection in tests/test_magnetisation.py.\nSCORE fit: 17\nJUSTIFICATION fit: measure.py:181-380 follows the repo script idiom and adds no banned name; the one blemish is an evidence misstatement in the fragment, not a style defect.\nSCORE reuse: 16\nJUSTIFICATION reuse: the change reuses nova/biot/toroidalaverage.py average_toroidal_field and scripts/prototypes/iron_limb_fill/bricks.py:130, and only duplicates the 4-line saver at measure.py:61 that scripts/iron_limb_production/outline.py:51 already owns.",
+  "review_node": "review-of-icm-discrete-limbs-661b8431187b",
+  "review_run_id": "r-20261122T183737651172-review-of-icm-discrete-limbs-661b8431187b",
+  "reviewed_base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+  "reviewed_head_sha": "661b8431187b0844a9fca7cb6f1867cf52a9286f",
+  "reviewed_run_id": "r-20261114T144531369043-icm-discrete-limbs",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261122T183737651172-review-of-icm-discrete-limbs-661b8431187b"
+  },
+  "scores": {
+    "durability": 4,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 16,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T18:55:42.740250+00:00",
+  "total": 80
+}

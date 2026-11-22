@@ -33,7 +33,30 @@
   "plan_slug": "converged-forward-solve",
   "plan_version": 632,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "be5ee98f736dcc20393153f8bb6e7bf163ef873e",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a710 no longer migrates or re-verifies the reduced-Newton route: \u00a76 deletes it and \u00a76 already waits on \u00a710. \u00a710 migrates the batched labeller onto topology.read and current.book (solve.fixed_point under vmap per the 2026-10-05 ruling) and deletes the legacy read.",
+      "reason": "",
+      "when": "2026-11-22T20:38:17.522422+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "be5ee98f736dcc20393153f8bb6e7bf163ef873e",
+      "commit_basis": "edit",
+      "note": "\u00a710 no longer migrates or re-verifies the reduced-Newton route: \u00a76 deletes it and \u00a76 already waits on \u00a710. \u00a710 migrates the batched labeller onto topology.read and current.book (solve.fixed_point under vmap per the 2026-10-05 ruling) and deletes the legacy read.",
+      "reason": "",
+      "when": "2026-11-22T20:38:17.522422+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/converged-forward-solve/r-20261122T192621557075-plan-review-of-converged-forward-solve.json",
   "review_run_id": "r-20261122T192621557075-plan-review-of-converged-forward-solve",
   "reviewed_blob_sha": "774cc3ae45058bd382c84a868eb6c776f7cfc0da",
   "rubric": "content",

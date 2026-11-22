@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="code-reuse-and-hot-path">
+<meta name="plan-title" content="Code Reuse and the Hot Path: one measured route, duplicates removed">
+<meta name="plan-summary" content="Measure what the forward and inverse solves execute, then delete unreached benchmarks, scripts and modules and register hot-path duplicates for S28">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-effort-hours" content="24.0">
+<meta name="plan-sprint" content="S33">
+<meta name="plan-tags" content="reuse,equilibrium,profiling,infrastructure">
+<meta name="plan-informs" content="sub-millisecond-forward-path,inverse-equilibrium-baseline">
+<meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;code-reuse-and-hot-path#s2&quot;],&quot;s4&quot;:[&quot;code-reuse-and-hot-path#s1&quot;],&quot;s5&quot;:[&quot;code-reuse-and-hot-path#s1&quot;],&quot;s6&quot;:[&quot;code-reuse-and-hot-path#s5&quot;]}">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="general">
+<meta name="plan-capability-reasoning" content="standard">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="moderate">
+<meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+<title>Code Reuse and the Hot Path | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-22">
+</head>
+<body>
+<main class="plan-doc">
+
+<h2 id="s0">§0 — Why this plan exists</h2>
+<p>The lead consolidated nova on 2026-11-21 into four focused sprints and
+asked on 2026-11-22 for a fifth on reuse, because the tree carries many
+thousands of lines that duplicate one another and the route a production
+solve takes is not readable from the code. Measured on main at 2026-11-22:</p>
+<table>
+<thead><tr><th>tree</th><th>Python lines</th><th>files</th></tr></thead>
+<tbody>
+<tr><td><code>nova/</code></td><td>208k</td><td>about 520</td></tr>
+<tr><td><code>benchmarks/</code></td><td>291k</td><td>378</td></tr>
+<tr><td><code>scripts/</code></td><td>249k</td><td>—</td></tr>
+<tr><td><code>tests/</code></td><td>202k</td><td>—</td></tr>
+</tbody>
+</table>
+<p>Since 2026-08-01, <code>nova/</code> gained 175k lines and lost 36k. Of
+<code>nova/equilibrium</code>'s 66k lines, the forward route is spread across
+<code>fixed_point.py</code> (5.9k), <code>forward_operator.py</code> (4.2k),
+<code>topology.py</code> (4.1k), <code>reduced_newton.py</code> (3.6k),
+<code>forward.py</code> (3.3k) and <code>support_read.py</code> (3.0k), and no
+document says which of them a production solve executes. The 2026-11-13 H200
+profile counted about 12,500 kernel launches per slice; a route nobody can
+name is a route nobody can shorten.</p>
+<p><strong>Ownership.</strong> This plan deletes and records; it does not
+rewrite the hot path. Sprint S28 owns the forward solve and is changing those
+files now, so §5 hands it a register of duplicates and S28 decides and lands
+each collapse. Sprint S30 owns <code>nova/imas</code>, which is out of scope
+here. Code that a plan in held sprint S32 owns is kept: the lead ruled on
+2026-11-21 that held work is parked, never discarded.</p>
+
+<h2 id="s1">§1 — The measured hot path</h2>
+<section data-reckon="section" data-id="s1" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>A stored record names every module and function the two production routes
+execute, measured rather than read:</p>
+<ul>
+<li>the public forward solve, under the H200 slice-profile fixture that S28
+re-runs, executed here on CPU on <code>all_debug</code>;</li>
+<li>the inverse fit inside the equilibrium iteration, under the MAST
+known-state recovery test.</li>
+</ul>
+<p>Done when:</p>
+<ol>
+<li>The record lists, for every module under <code>nova/</code>, the lines
+executed by each route against its total, and the union; a machine-readable
+copy sits beside the evidence fragment
+<code>docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html</code>.</li>
+<li>A negative control passes: a module the run cannot reach, imported by
+nothing on either route, reads zero executed lines, and a module both routes
+must reach (the public solve entry) reads nonzero.</li>
+<li>The record states the revision measured, and the measurement ran on
+<code>all_debug</code> as one job.</li>
+</ol>
+
+<h2 id="s2">§2 — Census of benchmarks and scripts</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>Every Python file under <code>benchmarks/</code> and <code>scripts/</code>
+receives one verdict, stored in one record:</p>
+<ul>
+<li><strong>keep</strong>: imported by kept code or tests, run by a live gate,
+lane or test, or owned by a plan in S28–S32;</li>
+<li><strong>delete</strong>: reached by none of those, whether uncited or cited
+only by an evidence record;</li>
+<li><strong>merge</strong>: one of several drivers doing the same measurement,
+naming the driver it folds into.</li>
+</ul>
+<p>Done when:</p>
+<ol>
+<li>The census covers every file, and the sum of lines per verdict equals the
+measured total of both trees.</li>
+<li>Each delete verdict names every evidence record that cites the file and
+the revision that record ran at, and that revision resolves
+(<code>git cat-file -e &lt;rev&gt;:&lt;path&gt;</code>).</li>
+<li>A negative control passes: a driver a live test imports is classified
+keep, and the census refuses to mark it delete.</li>
+</ol>
+
+<h2 id="s3">§3 — Delete and merge benchmarks and scripts</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>Apply the §2 verdicts in batches small enough to review, each batch one
+node. Done when, for each batch:</p>
+<ol>
+<li>Every deleted path is absent at the head, and no file at the head imports
+or names it (grep every deleted path, including tests and AGENTS.md).</li>
+<li>The suite delta against the batch base adds no failures, run on
+<code>all_debug</code>.</li>
+<li>The batch record states the lines removed, and the running total across
+batches.</li>
+</ol>
+
+<h2 id="s4">§4 — Delete unreached library modules</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<p>Modules under <code>nova/</code> that §1 shows unreached by either
+route, outside <code>nova/imas</code>, not imported by kept tests, and not
+owned by a live or held plan, are deleted. Done when:</p>
+<ol>
+<li>Each deleted module was unreached in §1 and no kept file imports it; a
+module a live run's worktree imports is held back and named.</li>
+<li>The suite delta adds no failures, on <code>all_debug</code>.</li>
+<li>The record states lines removed per package.</li>
+</ol>
+
+<h2 id="s5">§5 — Register of duplicates on the hot path</h2>
+<section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>A record, not a code change. It lists every place where two or more
+implementations on or beside the §1 route compute the same quantity (a read,
+a factorisation, a topology query, an operator assembly). Done when:</p>
+<ol>
+<li>Each entry names the implementations, which one each route executes per
+§1, and their agreement on a stated input within a stated tolerance, or the
+measured disagreement.</li>
+<li>Each entry proposes the one to keep and the lines removable, and S28's
+coordinator has answered it: accepted for an S28 node, or declined with a
+reason.</li>
+</ol>
+
+<h2 id="s6">§6 — The hot path, written down</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p><code>nova/equilibrium/AGENTS.md</code> names the one public forward
+route and the inverse route, module by module, as measured after the §5
+collapses S28 accepted have landed. Done when:</p>
+<ol>
+<li>The section lists the modules each route executes and matches a fresh §1
+measurement at the head.</li>
+<li>Every module the section names exists at the head.</li>
+</ol>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="cited-driver-deletion" data-choice="delete-when-revision-resolves" data-by="Simon McIntosh" data-when="2026-11-22">
+    <p class="r-dec-q">May a benchmark or script that produced cited evidence be deleted from main?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="delete-when-revision-resolves">Delete when the citing record names a revision that resolves</button>
+      <button class="r-opt" data-value="keep-all-cited">Keep every cited driver</button>
+      </p>
+    <p class="r-dec-rat">Git keeps the driver at the revision the evidence ran at, so
+nothing is lost; a driver a live gate or test still runs is kept.</p>
+    </div>
+<div class="r-dec" data-key="hot-path-guard" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">After §6, should a test fail when the public forward solve executes a module outside the documented route?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="guard-test">Add the guard test</button>
+      <button class="r-opt" data-value="document-only">Document only</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-crh-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-22" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure the hot path and take the benchmarks and scripts census</h4>
+    <div class="r-fu-body"><p>§1 and §2 are independent and can run at once; §3 to §6 wait on them.</p></div>
+    <pre class="r-fu-prompt">/reckon-build code-reuse-and-hot-path</pre>
+    </article>
+</section>
+
+</main>
+</body>
+</html>

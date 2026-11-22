@@ -812,39 +812,45 @@ PANEL_STATES = (
 )
 
 # The persisted states carry the terms their own solved field produces, read at
-# that field's admitted saddle.  Thirteen of the twenty close: each draws
-# exactly one closed candidate, well formed, whose segment count is pinned
-# below.  The closing states span 56 to 78 closed segments and carry either no
-# open branch or two, so a change to the tracker or to the saddle bracket moves
-# one of these counts.
+# that field's admitted saddle.  Fifteen of the twenty close: each draws exactly
+# one closed candidate, well formed, whose segment count is pinned below.  The
+# closing states span 56 to 78 closed segments and carry either no open branch
+# or two, so a change to the tracker or to the saddle bracket moves one of these
+# counts.
 #
-# The other seven are pinned by what they do produce instead.  Six trace no
+# The displaced-level control is pinned per state, at the smallest level
+# displacement this field needs to stop admitting a closed candidate.  A state
+# whose lobe survives the common one-millimetre displacement carries its own
+# wider value, because the control has to open that lobe rather than assume
+# every lobe is equally shallow.
+#
+# The other five are pinned by what they do produce instead.  Four trace no
 # cycle at all, so they record no closed and no open candidate.  State 0 traces
 # a cycle that encloses the axis but admits no closed candidate, so the cycle is
 # drawn as the lobe and the panel names it open.  The two are told apart by the
-# cycle count, and a reader who sees a panel marked open needs to know which
-# one it was.
+# cycle count, and a reader who sees a panel marked open needs to know which one
+# it was.
 PERSISTED_STATE_TERMS = {
-    1: {"closes": True, "closed_segment_count": 78, "open_branch_count": 0},
-    4: {"closes": True, "closed_segment_count": 56, "open_branch_count": 0},
+    1: {"closes": True, "closed_segment_count": 78, "open_branch_count": 0, "control_displacement": 1.0e-2},
+    4: {"closes": True, "closed_segment_count": 56, "open_branch_count": 0, "control_displacement": 5.0e-2},
     5: {"closes": True, "closed_segment_count": 75, "open_branch_count": 2},
-    6: {"closes": True, "closed_segment_count": 74, "open_branch_count": 0},
+    6: {"closes": True, "closed_segment_count": 74, "open_branch_count": 0, "control_displacement": 5.0e-3},
+    9: {"closes": True, "closed_segment_count": 71, "open_branch_count": 2},
     10: {"closes": True, "closed_segment_count": 71, "open_branch_count": 2},
     11: {"closes": True, "closed_segment_count": 66, "open_branch_count": 0},
     12: {"closes": True, "closed_segment_count": 69, "open_branch_count": 2},
     13: {"closes": True, "closed_segment_count": 65, "open_branch_count": 2},
-    14: {"closes": True, "closed_segment_count": 64, "open_branch_count": 0},
-    15: {"closes": True, "closed_segment_count": 64, "open_branch_count": 0},
-    17: {"closes": True, "closed_segment_count": 65, "open_branch_count": 0},
+    14: {"closes": True, "closed_segment_count": 64, "open_branch_count": 0, "control_displacement": 5.0e-3},
+    15: {"closes": True, "closed_segment_count": 64, "open_branch_count": 0, "control_displacement": 5.0e-3},
+    16: {"closes": True, "closed_segment_count": 65, "open_branch_count": 2},
+    17: {"closes": True, "closed_segment_count": 64, "open_branch_count": 0, "control_displacement": 5.0e-3},
     18: {"closes": True, "closed_segment_count": 65, "open_branch_count": 2},
     19: {"closes": True, "closed_segment_count": 65, "open_branch_count": 2},
     0: {"closes": False, "cycle_component_count": 1},
     2: {"closes": False, "cycle_component_count": 0},
     3: {"closes": False, "cycle_component_count": 0},
     7: {"closes": False, "cycle_component_count": 0},
-    8: {"closes": False, "cycle_component_count": 0},
-    9: {"closes": False, "cycle_component_count": 0},
-    16: {"closes": False, "cycle_component_count": 0},
+    8: {"closes": False, "cycle_component_count": 1},
 }
 
 

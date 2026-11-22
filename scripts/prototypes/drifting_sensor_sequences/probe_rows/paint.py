@@ -95,6 +95,10 @@ def draw(axes, data, codes=("nova", "efit")):
     axes.set_ylim(wall_z.min() - 0.35, wall_z.max() + 0.35)
     axes.set_aspect("equal")
     axes.set_axis_off()
+    # An axis turned off still carries its tick label artists, and the
+    # checked save reads every text artist whether it is drawn or not.
+    axes.set_xticks([])
+    axes.set_yticks([])
     labels = {"nova": "nova", "efit": "imas-efit"}
     return [
         lines.Line2D(
@@ -138,3 +142,6 @@ def main() -> int:
     names = save_checked(figure, str(output), png=args.png or None)
     print("%s labels=%d" % (output, len(names)))
     return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())

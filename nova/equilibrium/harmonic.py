@@ -667,3 +667,174 @@ def annulus_penalty_rows(
 
     row_weight = float(weight) / uncertainty * huber_weights(residual, robust_clip)
     return row_weight[:, np.newaxis] * design, row_weight * residual
+
+
+def harmonic_equilibrium(
+    inversion: HarmonicInversion,
+    grid_r: np.ndarray,
+    grid_z: np.ndarray,
+    inside_limiter: np.ndarray,
+    *,
+    vacuum_flux: np.ndarray,
+    limiter_r: np.ndarray,
+    limiter_z: np.ndarray,
+    plasma_current: float,
+    vacuum_b0: float,
+    reference_radius: float,
+    time: float = 0.0,
+    dd_version: str = "4.1.0",
+):
+    """Return the IMAS equilibrium one harmonic inversion is read as.
+
+    The inversion supplies the plasma-produced flux in the vacuum annulus only,
+    so the equilibrium is read as the *total* poloidal flux: the known-conductor
+    flux is added and the boundary read runs on that sum, seeded at the fit's
+    own pole. The expansion has no representation of the plasma interior, and the
+    read reports no sub-grid extremum there, so the state carries no magnetic
+    axis of its own: the axis position written here is the centroid of the
+    read's traced ring, and the interior extreme is the read's ``psi_axis`` at
+    the pole. That makes this conversion a faithful transcription of what the
+    reconstruction supplies and nothing more: a traced ring that does not enclose
+    an axis is reported as the read found it rather than repaired.
+
+    The harmonic fit carries no toroidal-field function, so the stored profile
+    carries the vacuum closure ``F dF/dpsi = 0``; the safety factor is read with
+    the field held at its boundary value.
+    """
+
+    import imas
+    from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
+    from types import SimpleNamespace
+
+    from nova.equilibrium.connectivity_boundary import LCFS_ANGLES, host_boundary_read
+
+    grid_r = np.asarray(grid_r, dtype=float)
+    grid_z = np.asarray(grid_z, dtype=float)
+    inside = np.asarray(inside_limiter, dtype=bool)
+    total = inversion.flux_on_grid(grid_r, grid_z) + np.asarray(
+        vacuum_flux, dtype=float
+    )
+    # The expansion is source-free in the annulus and diverges toward the focal
+    # ring, so the read is seeded at the fit's pole, which is this module's own
+    # axis seed; the interior it never represented is left exactly as the
+    # expansion produced it rather than replaced by an invented field.
+    seed = (float(inversion.config.pole_r), float(inversion.config.pole_z))
+    read = host_boundary_read(
+        total,
+        SimpleNamespace(
+            rg=grid_r,
+            zg=grid_z,
+            inside_limiter=inside,
+            limiter_r=np.asarray(limiter_r, dtype=float),
+            limiter_z=np.asarray(limiter_z, dtype=float),
+        ),
+        seed,
+        lcfs_norm=1.0,
+    )
+    if not read.found:
+        raise ValueError("the harmonic flux carries no closed boundary inside the wall")
+    angle = np.asarray(LCFS_ANGLES, dtype=float)
+    radii = np.asarray(read.radii, dtype=float)
+    ring = np.column_stack(
+        [seed[0] + radii * np.cos(angle), seed[1] + radii * np.sin(angle)]
+    )
+    if not np.allclose(ring[0], ring[-1]):
+        ring = np.vstack([ring, ring[0]])
+    # The expansion carries no interior extremum for the read to polish, so no
+    # magnetic axis is fitted; the ring's own centroid is written instead. That
+    # is a property of the traced field, and it is reported as such: the state
+    # must not look like an axis the reconstruction located.
+    axis = tuple(float(value) for value in np.mean(ring[:-1], axis=0))
+    # A field with no elliptic stationary point admits no flux-surface read, so
+    # the stored map is withheld rather than published as an unreadable one;
+    # the safety factor then reads as not supplied, exactly as for any state
+    # carrying no map.
+    stored_map = total if np.isfinite(read.axis_psi) else None
+    return _state_equilibrium(
+        flux=stored_map,
+        ring=ring,
+        axis=axis,
+        flux_axis=float(read.psi_axis),
+        flux_boundary=float(read.psi_bnd),
+        plasma_current=float(plasma_current),
+        grid_r=grid_r,
+        grid_z=grid_z,
+        vacuum_b0=float(vacuum_b0),
+        reference_radius=float(reference_radius),
+        time=float(time),
+        ids_module=imas,
+        time_mode=IDS_TIME_MODE_HOMOGENEOUS,
+    )
+
+
+def _state_equilibrium(
+    *,
+    flux,
+    ring,
+    axis,
+    flux_axis,
+    flux_boundary,
+    plasma_current,
+    grid_r,
+    grid_z,
+    vacuum_b0,
+    reference_radius,
+    time,
+    ids_module,
+    time_mode,
+):
+    """Write one reconstructed state's fields into an equilibrium IDS."""
+
+    equilibrium = ids_module.IDSFactory().equilibrium()
+    equilibrium.ids_properties.homogeneous_time = time_mode
+    equilibrium.time = np.array([float(time)])
+    equilibrium.time_slice.resize(1)
+    frame = equilibrium.time_slice[0]
+    frame.boundary.outline.r = np.asarray(ring)[:, 0]
+    frame.boundary.outline.z = np.asarray(ring)[:, 1]
+    frame.boundary.type = 1
+    quantities = frame.global_quantities
+    quantities.magnetic_axis.r = float(axis[0])
+    quantities.magnetic_axis.z = float(axis[1])
+    quantities.psi_axis = float(flux_axis)
+    quantities.psi_boundary = float(flux_boundary)
+    quantities.ip = float(plasma_current)
+    span = float(flux_boundary) - float(flux_axis)
+    norm = np.linspace(0.0, 1.0, int(np.asarray(grid_r).size))
+    frame.profiles_1d.psi = float(flux_axis) + span * norm
+    frame.profiles_1d.f_df_dpsi = np.zeros_like(norm)
+    if flux is not None:
+        frame.profiles_2d.resize(1)
+        stored = frame.profiles_2d[0]
+        stored.grid.dim1 = np.asarray(grid_r, dtype=float)
+        stored.grid.dim2 = np.asarray(grid_z, dtype=float)
+        stored.grid_type.index = 1
+        stored.psi = np.asarray(flux, dtype=float).T
+    equilibrium.vacuum_toroidal_field.b0 = np.array([-abs(float(vacuum_b0))])
+    equilibrium.vacuum_toroidal_field.r0 = float(reference_radius)
+    return equilibrium
+
+
+def write_harmonic_equilibrium(
+    path,
+    inversion: HarmonicInversion,
+    grid_r: np.ndarray,
+    grid_z: np.ndarray,
+    inside_limiter: np.ndarray,
+    **kwargs,
+):
+    """Write one harmonic inversion as an IMAS equilibrium and return the path."""
+
+    import imas
+    from pathlib import Path
+
+    out = Path(path)
+    out.mkdir(parents=True, exist_ok=True)
+    dd_version = str(kwargs.pop("dd_version", "4.1.0"))
+    equilibrium = harmonic_equilibrium(
+        inversion, grid_r, grid_z, inside_limiter, **kwargs
+    )
+    writer = imas.DBEntry(f"imas:hdf5?path={out.resolve()}", "w", dd_version=dd_version)
+    writer.put(equilibrium)
+    writer.close()
+    return out

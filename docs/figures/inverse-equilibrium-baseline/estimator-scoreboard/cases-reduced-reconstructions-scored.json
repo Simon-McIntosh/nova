@@ -1,0 +1,57 @@
+{
+ "cases": [
+  {
+   "id": "iter-row-exchange-nominal",
+   "machine": "ITER",
+   "vacuum_b0": 5.3,
+   "reference": {
+    "out": "reference",
+    "from_record": {
+     "record": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/efit-on-nova-rows-case/record-10.json",
+     "map": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/efit-on-nova-rows-case/generating-map.npz",
+     "section": "generating",
+     "reference_radius": 6.2,
+     "amplitude": 0.0
+    },
+    "q95": -3.0550243513325954,
+    "note": "the generating state of the row-exchange case, the same reference the section 3 table reads"
+   },
+   "wall": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/efit-on-nova-rows-case/generating-map.npz",
+   "estimators": [
+    {
+     "name": "moment-reconstruction",
+     "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/moment",
+     "note": "the cell-current moment reconstruction of the same rows, written by nova.equilibrium.moment.write_moment_equilibrium"
+    },
+    {
+     "name": "harmonic-reconstruction",
+     "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/harmonic",
+     "note": "the source-free toroidal-harmonic reconstruction of the same rows, written by nova.equilibrium.harmonic.write_harmonic_equilibrium"
+    },
+    {
+     "name": "profile-reconstruction",
+     "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/profile",
+     "note": "the coupled profile reconstruction of the same rows, written by nova.equilibrium.profile.write_profile_equilibrium"
+    },
+    {
+     "name": "moment-perturbed",
+     "out": "moment-perturbed",
+     "perturbed_of": "moment-reconstruction",
+     "note": "negative control: the section 3 perturbation of the moment column, written as its own IMAS dataset"
+    },
+    {
+     "name": "harmonic-perturbed",
+     "out": "harmonic-perturbed",
+     "perturbed_of": "harmonic-reconstruction",
+     "note": "negative control: the section 3 perturbation of the harmonic column, written as its own IMAS dataset"
+    },
+    {
+     "name": "profile-perturbed",
+     "out": "profile-perturbed",
+     "perturbed_of": "profile-reconstruction",
+     "note": "negative control: the section 3 perturbation of the profile column, written as its own IMAS dataset"
+    }
+   ]
+  }
+ ]
+}

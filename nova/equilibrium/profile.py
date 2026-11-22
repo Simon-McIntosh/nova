@@ -725,3 +725,115 @@ __all__ = [
     "ProfileResult",
     "ReconstructProfile",
 ]
+
+
+def profile_equilibrium(
+    result: ProfileResult,
+    grid_r: np.ndarray,
+    grid_z: np.ndarray,
+    inside_limiter: np.ndarray,
+    *,
+    limiter_r: np.ndarray,
+    limiter_z: np.ndarray,
+    vacuum_b0: float,
+    reference_radius: float,
+    time: float = 0.0,
+):
+    """Return the IMAS equilibrium one profile reconstruction is read as.
+
+    The reconstruction's solved flux map is written as the total poloidal flux,
+    together with the flux extremes and magnetic axis of the boundary read the
+    profile iteration itself uses. The boundary ring is that read at the
+    separatrix, and the plasma current is the total of the solved cell currents.
+
+    The solved state carries the pressure and diamagnetic profile families, but
+    the split between them (the ``mu_0`` normalisation) is not exposed on the
+    result, so the stored profile carries the vacuum closure
+    ``F dF/dpsi = 0``; the safety factor is read with the field held at its
+    boundary value, identically for every reconstruction column.
+    """
+
+    import imas
+    from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
+    from types import SimpleNamespace
+
+    from nova.equilibrium.connectivity_boundary import LCFS_ANGLES, host_boundary_read
+
+    grid_r = np.asarray(grid_r, dtype=float)
+    grid_z = np.asarray(grid_z, dtype=float)
+    inside = np.asarray(inside_limiter, dtype=bool)
+    # The result's flux is flat over the solve's own (vertical, radial) ordering;
+    # the boundary read and the stored map both take that 2-D form.
+    flux = np.asarray(result.flux, dtype=float).reshape(grid_z.size, grid_r.size)
+    axis = tuple(float(value) for value in np.asarray(result.axis, dtype=float))
+    read = host_boundary_read(
+        flux,
+        SimpleNamespace(
+            rg=grid_r,
+            zg=grid_z,
+            inside_limiter=inside,
+            limiter_r=np.asarray(limiter_r, dtype=float),
+            limiter_z=np.asarray(limiter_z, dtype=float),
+        ),
+        axis,
+        lcfs_norm=1.0,
+    )
+    if not read.found:
+        raise ValueError("the profile flux carries no closed boundary inside the wall")
+    angle = np.asarray(LCFS_ANGLES, dtype=float)
+    radii = np.asarray(read.radii, dtype=float)
+    ring = np.column_stack(
+        [axis[0] + radii * np.cos(angle), axis[1] + radii * np.sin(angle)]
+    )
+    if not np.allclose(ring[0], ring[-1]):
+        ring = np.vstack([ring, ring[0]])
+    equilibrium = imas.IDSFactory().equilibrium()
+    equilibrium.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
+    equilibrium.time = np.array([float(time)])
+    equilibrium.time_slice.resize(1)
+    frame = equilibrium.time_slice[0]
+    frame.boundary.outline.r = ring[:, 0]
+    frame.boundary.outline.z = ring[:, 1]
+    frame.boundary.type = 1
+    quantities = frame.global_quantities
+    quantities.magnetic_axis.r = float(axis[0])
+    quantities.magnetic_axis.z = float(axis[1])
+    quantities.psi_axis = float(read.axis_psi)
+    quantities.psi_boundary = float(read.psi_bnd)
+    quantities.ip = float(np.sum(np.asarray(result.cell_current, dtype=float)))
+    span = float(read.psi_bnd) - float(read.axis_psi)
+    norm = np.linspace(0.0, 1.0, grid_r.size)
+    frame.profiles_1d.psi = float(read.axis_psi) + span * norm
+    frame.profiles_1d.f_df_dpsi = np.zeros_like(norm)
+    frame.profiles_2d.resize(1)
+    stored = frame.profiles_2d[0]
+    stored.grid.dim1 = grid_r
+    stored.grid.dim2 = grid_z
+    stored.grid_type.index = 1
+    stored.psi = flux.T
+    equilibrium.vacuum_toroidal_field.b0 = np.array([-abs(float(vacuum_b0))])
+    equilibrium.vacuum_toroidal_field.r0 = float(reference_radius)
+    return equilibrium
+
+
+def write_profile_equilibrium(
+    path,
+    result: ProfileResult,
+    grid_r: np.ndarray,
+    grid_z: np.ndarray,
+    inside_limiter: np.ndarray,
+    **kwargs,
+):
+    """Write one profile reconstruction as an IMAS equilibrium and return the path."""
+
+    import imas
+    from pathlib import Path
+
+    out = Path(path)
+    out.mkdir(parents=True, exist_ok=True)
+    dd_version = str(kwargs.pop("dd_version", "4.1.0"))
+    equilibrium = profile_equilibrium(result, grid_r, grid_z, inside_limiter, **kwargs)
+    writer = imas.DBEntry(f"imas:hdf5?path={out.resolve()}", "w", dd_version=dd_version)
+    writer.put(equilibrium)
+    writer.close()
+    return out

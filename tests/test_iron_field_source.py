@@ -186,14 +186,17 @@ def test_the_share_panel_keeps_the_plateau_clear_of_the_legend():
     figure_module.draw(axes, _field_data())
     middle = axes[1]
     assert middle.get_yscale() == "symlog"
+    # One figure-level legend in clear space above the panels, so no panel
+    # legend can sit on the plateau the curves fill.
+    assert middle.get_legend() is None
+    legend = middle.figure.legends[0]
     plotting = middle.figure.canvas.get_renderer()
-    plateau = middle.transData.transform((1.0, -96.0))[1]
-    legend = middle.get_legend()
     box = legend.get_window_extent(plotting)
-    assert not (box.y0 - 2.0 <= plateau <= box.y1 + 2.0), (
-        f"the legend spans rows {box.y0:.0f} to {box.y1:.0f} "
-        f"and the plateau is at row {plateau:.0f}"
+    top = middle.get_window_extent(plotting).y1
+    assert box.y0 >= top - 1.0, (
+        f"the figure legend starts at row {box.y0:.0f}, below the panel top {top:.0f}"
     )
+    plateau = middle.transData.transform((1.0, -96.0))[1]
     assert plateau < middle.transData.transform((1.0, 0.0))[1] - 20.0
     plt.close("all")
 

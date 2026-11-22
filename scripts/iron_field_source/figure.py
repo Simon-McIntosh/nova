@@ -28,6 +28,10 @@ DEFAULT_FIELD = Path(
     "field-source/west-62751-uniform-0.08-field.npz"
 )
 COLORS = ("#3366cc", "#cc7722", "#009988")
+# The three planes converge in the far field, so each iron curve takes its own
+# dash pattern and a fixed draw order: a reader sees all three where they
+# coincide rather than only the last one drawn.
+IRON_DASHES = ((None, None), (6.0, 1.6), (1.5, 1.4))
 
 
 def draw(axes, data):
@@ -38,41 +42,38 @@ def draw(axes, data):
     names = [str(name) for name in data["line_names"]]
     air = data["bmag_air"]
     iron = data["bmag_iron"]
+    iron_handles = []
+    air_handle = None
     upper = axes[0]
     trace_axes(upper, style)
     for index, name in enumerate(names):
-        upper.semilogy(
+        (line_air,) = upper.semilogy(
             distance,
             air[index] * 1e3,
             color=style.contour_color,
             linewidth=0.8,
-            linestyle="--",
-            label="_air",
+            linestyle=(0, (4.0, 2.0)) if index == 0 else (0, (1.0, 2.0)),
+            zorder=2,
+            label="air-core (all three planes)" if index == 0 else "_air",
         )
-        upper.semilogy(
+        if air_handle is None:
+            air_handle = line_air
+        (line_iron,) = upper.semilogy(
             distance,
             iron[index] * 1e3,
             color=COLORS[index],
             linewidth=style.trace_linewidth,
+            dashes=IRON_DASHES[index],
+            zorder=4,
             label=name,
         )
+        iron_handles.append(line_iron)
     upper.set_ylabel(r"$|B|$ [mT]", fontsize=style.label_fontsize)
-    upper.set_xlabel(r"$R - R_{\mathrm{edge}}$ [m]", fontsize=style.label_fontsize)
+    upper.set_xlabel(r"$R - R_{\mathrm{edge}}$ [m] (symlog)", fontsize=style.label_fontsize)
+    # A symmetric log x axis gives the near-edge spike at 0.4 m real width
+    # instead of the sliver a linear axis leaves it.
+    upper.set_xscale("symlog", linthresh=0.1)
     upper.set_xlim(0, float(distance[-1]))
-    upper.legend(fontsize=style.label_fontsize, frameon=False, loc="upper right")
-    upper.text(
-        0.01,
-        0.04,
-        "dashed grey: air-core   solid: iron frame",
-        transform=upper.transAxes,
-        fontsize=style.label_fontsize - 1,
-        color="#444444",
-    )
-    upper.set_title(
-        "WEST 62751 outboard stray field, uniform-80 mm iron",
-        fontsize=style.label_fontsize + 1,
-        loc="left",
-    )
 
     middle = axes[1]
     trace_axes(middle)
@@ -83,16 +84,17 @@ def draw(axes, data):
     # A symmetric log axis keeps both the outlier and the plateau legible, and the
     # zero rule is drawn under the curves so it cannot hide them.
     middle.axhline(0.0, color="#888888", linewidth=0.6, zorder=0)
-    for index, name in enumerate(names):
+    for index in range(len(names)):
         middle.plot(
             distance,
             share[index],
             color=COLORS[index],
             linewidth=style.trace_linewidth,
-            label=name,
+            dashes=IRON_DASHES[index],
             zorder=3,
         )
     middle.set_yscale("symlog", linthresh=1.0)
+    middle.set_xscale("symlog", linthresh=0.1)
     peak = float(np.max(share))
     middle.annotate(
         f"peak {peak:+.0f} %",
@@ -105,12 +107,7 @@ def draw(axes, data):
     middle.set_ylim(-1.0e3, 1.0e4)
     middle.set_xlim(0, float(distance[-1]))
     middle.set_ylabel("iron share of $|B|$ [%] (symlog)", fontsize=style.label_fontsize)
-    middle.set_xlabel(r"$R - R_{\mathrm{edge}}$ [m]", fontsize=style.label_fontsize)
-    # The three planes coincide on the plateau, which fills the bottom of the
-    # panel, so a legend there lies on the data it is naming. The upper right is
-    # empty: the spike and its annotation sit at the left edge, above the
-    # plateau's rise.
-    middle.legend(fontsize=style.label_fontsize, frameon=False, loc="upper right")
+    middle.set_xlabel(r"$R - R_{\mathrm{edge}}$ [m] (symlog)", fontsize=style.label_fontsize)
 
     lower = axes[2]
     trace_axes(lower)
@@ -118,6 +115,13 @@ def draw(axes, data):
     contribution = np.hypot(*data["frame_probe"].T) * 1e3
     air_probe = np.hypot(*data["direct_probe"].T) * 1e3
     limits = np.maximum(air_probe, 1e-12)
+    (air_marks,) = lower.semilogy(
+        probes[:, 0],
+        limits,
+        "_",
+        color=style.contour_color,
+        markersize=style.trace_markersize,
+    )
     lower.semilogy(
         probes[:, 0],
         contribution,
@@ -125,27 +129,32 @@ def draw(axes, data):
         color=COLORS[0],
         markersize=style.trace_markersize,
     )
-    lower.semilogy(
-        probes[:, 0],
-        limits,
-        "_",
-        color=style.contour_color,
-        markersize=style.trace_markersize,
-    )
     lower.set_xlabel("probe $R$ [m]", fontsize=style.label_fontsize)
     lower.set_ylabel(
-        r"$|\Delta B|$ (circles) and $|B_{\mathrm{air}}|$ (bars) [mT]",
+        r"$|\Delta B|$ (circles) and $|B_{\mathrm{air}}|$ (dashes) [mT]",
         fontsize=style.label_fontsize,
+    )
+
+    figure = upper.figure
+    handles = iron_handles + [air_handle]
+    labels = names + ["air-core (all three planes)"]
+    figure.legend(
+        handles,
+        labels,
+        fontsize=style.label_fontsize,
+        frameon=False,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 1.0),
+        ncol=2,
     )
     return style
 
 
 def main():
     output = Path(sys.argv[1])
-    global FIELD
-    FIELD = Path(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_FIELD
+    field = Path(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_FIELD
     output.parent.mkdir(parents=True, exist_ok=True)
-    data = np.load(FIELD)
+    data = np.load(field)
     figure, axes = plt.subplots(
         3, 1, figsize=(6.4, 7.2), height_ratios=(2.0, 1.0, 1.2), constrained_layout=True
     )

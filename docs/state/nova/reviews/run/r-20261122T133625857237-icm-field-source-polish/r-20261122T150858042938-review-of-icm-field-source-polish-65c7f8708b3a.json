@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/iron_field_source/run_cpu.sh:41",
+    "scripts/iron_field_source/run_cpu.sh:46"
+  ],
+  "completed_at": "2026-11-22T15:18:53.608Z",
+  "dispatched_at": "2026-11-22T15:09:19Z",
+  "findings": [
+    {
+      "file": "scripts/iron_field_source/run_arms.sh",
+      "line": "109",
+      "severity": "non-blocking",
+      "text": "The commands.json JSON-validity fix and the per-arm log-path fix have no regression assertion: the added test at tests/test_iron_field_source.py:229 guards only that the target lists are quoted, so reinstating the doubled-backslash printf formats would leave the suite green and the receipt unreadable again."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Read commit by commit against b62734cd; four commits over six files (+140 -57), all inside the declared paths, no measured number or physics code changed.",
+    "done_when": "The done_when asks that commands.json parse as JSON, that each arm's own log be recorded, that the guard test fail at d65d3dfcd and pass at head, and that the redrawn figure carry one legend with no text over data; baseline_suite (8 passed) and after_suite (9 passed, EXIT=0) plus arms-proof.log (PROOF-OK) and figure-render.log (CHECK-OK over 44 text artists) assert exactly these.",
+    "goal": "The source brief's goal is to close four non-blocking findings on the arm runner (valid commands.json, each arm's own log) and the stray-field figure; scripts/iron_field_source/run_arms.sh:98-112, tests/test_iron_field_source.py:229 and scripts/iron_field_source/figure.py:28-176 each address one item.",
+    "manifest": "Read; status complete, commits b747686b7..65c7f8708 named, baseline_suite 8 passed and after_suite 9 passed both EXIT=0, negative control 1 failed EXIT=1, arms proof and render proof both recorded.",
+    "write_paths": "The manifest declares six paths; the diff b62734cdf..65c7f8708 touches exactly those six, including the docs/figures/west-stray-field copy the brief names."
+  },
+  "justifications": {
+    "durability": "tests/test_iron_field_source.py:229 fails at d65d3dfcd (negative-control.log records the unquoted assignment) and passes at head, but the JSON-validity and per-arm-log fixes of run_arms.sh:98-112 have no regression assertion.",
+    "evidence": "baseline_suite-1795358077141044239.log:9 records 8 passed at b62734cd and after_suite-1795358119882990097.log:9 records 9 passed at 65c7f8708, the +1 being the new quoting test collected only at the head.",
+    "fit": "scripts/iron_field_source/figure.py:151-176 follows the established figure.legend(... loc=\"outside upper center\", frameon=False) idiom used at scripts/accuracy_cost_ladder/measure.py:828, and every new symbol and comment names a mechanism, not a plan or ticket id.",
+    "goal_fidelity": "scripts/iron_field_source/figure.py:44-72,151-176 draws one figure legend above the panels and three phase-offset dash styles, and the rendered PNG at docs/figures/iron-core-magnetisation/icm-iron-field-source/west-62751-iron-stray-field.png shows all three iron curves and no text over data.",
+    "reuse": "The added IRON_STYLES constant and log_path helper have no existing owner in nova/media or scripts; the figure-level legend extends the existing script idiom rather than duplicating it.",
+    "scope_discipline": "Every one of the six changed paths in the diff is a declared path, and the two PNG copies are byte-identical (md5 e8a2527adc9c1231e476b9f926db592f)."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261122T150858042938-review-of-icm-field-source-polish-65c7f8708b3a",
+  "reviewed_base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+  "reviewed_head_sha": "65c7f8708b3a49540f614a9e3091274c2e0b4c96",
+  "reviewed_run_id": "r-20261122T133625857237-icm-field-source-polish",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-22T15:19:08.833036+00:00",
+  "total": 106,
+  "verdict_lines": [
+    "VERDICT goal: the source brief's goal is to close four non-blocking findings on the arm runner (valid commands.json, each arm's own log) and the stray-field figure; scripts/iron_field_source/run_arms.sh:98-112, tests/test_iron_field_source.py:229 and scripts/iron_field_source/figure.py:28-176 each address one item.",
+    "VERDICT done_when: the done_when asks for a JSON-parseable commands.json, each arm's own log, a guard that fails at d65d3dfcd and passes at head, and one legend with no text over data; baseline_suite (8 passed) and after_suite (9 passed, EXIT=0), arms-proof.log (PROOF-OK) and figure-render.log (CHECK-OK over 44 text artists) assert exactly these.",
+    "VERDICT write_paths: the manifest declares six paths and the diff b62734cdf..65c7f8708 touches exactly those six, including the docs/figures/west-stray-field copy the brief names.",
+    "VERDICT manifest: read; status complete, commits b747686b7..65c7f8708 named, baseline_suite 8 passed and after_suite 9 passed both EXIT=0, negative control 1 failed EXIT=1, arms and render proofs recorded.",
+    "VERDICT diff: read commit by commit against b62734cd; four commits over six files (+140 -57), all inside the declared paths, no measured number or physics code changed.",
+    "CALL_SITES: scripts/iron_field_source/run_cpu.sh:41, scripts/iron_field_source/run_cpu.sh:46"
+  ]
+}

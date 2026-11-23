@@ -1,0 +1,88 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T19:16:10.765Z",
+  "dispatched_at": "2026-11-23T18:42:32Z",
+  "finding_dispositions": {
+    "1": {
+      "kind": "folded",
+      "node": "coil-edit-panels-per-figure",
+      "recorded_at": "2026-11-23T19:10:00+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "coil-edit-panels-per-figure",
+      "recorded_at": "2026-11-23T19:10:00+00:00"
+    },
+    "3": {
+      "kind": "folded",
+      "node": "coil-edit-panels-per-figure",
+      "recorded_at": "2026-11-23T19:10:00+00:00"
+    },
+    "4": {
+      "kind": "folded",
+      "node": "coil-edit-panels-per-figure",
+      "recorded_at": "2026-11-23T19:10:00+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The PNG draws edit 5 (-8% of the P4-upper circuit 8 current, converged, 5.366e-09 Wb, five active-set iterations) beside edit 4 (-10%, not converged, 4.339e-02 Wb, four), and its own page (docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:187) captions exactly that pair. The live evidence fragment that embeds this same file, docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-on-solve-currents.html:6, still captions it with a superseded draw: 46 promoted nodes on the converged panel with the nearest 56.218 mm from the polished X-point and the explicit verdict that the current field 'cannot certify near-X geometry', and 25 promoted / 2.451193 m on the non-converged panel; the metrics table at :12-16 repeats those values for all five published sets with the verdict 'Converged panel uncertified within two cells'. The figure's own panel-receipt.json records the opposite - 27 promoted nodes with the nearest 2.571 m, outside the 0.121 m two-cell band so the converged near-X geometry IS certified, and 3 promoted with the nearest 0.087 m - and the same receipt records both solved sets of this figure as 'unassembled, crossings drawn unconnected', where the caption says 'Orange contours show each solved separatrix as a solid lobe and two dashed legs'. The dated resolve note at :8 gives the current numbers but withdraws neither the caption nor the table, so the page states a promoted-node count and a near-X verdict the picture does not carry, and this figure cannot be read against its own page."
+    },
+    {
+      "file": "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The reference separatrix is drawn as a chain of about a hundred small unconnected blue plus marks (the assembler's crossing marks - the figure's own receipt caption says 'blue set: unassembled, crossings drawn unconnected'), and neither the legend nor any caption names them. They trace the outermost grey reference contour, so at page width they read as part of the reference contour rather than as a separate, unassembled representation, and they continue through the vacuum below and outside the first wall where no flux is contoured. The caption of the page that embeds this file (docs/evidence/fragments/separatrix-spline-extraction/coil-edit-fine-panels.html:71) is otherwise correct - edit 19 (+20%, 1.972e-09 Wb, five iterations) beside edit 2 (-14%, 9.879e-03 Wb, seven), with 1.836e-02 and 6.951e-02 Wb matching the receipt - but it does not say the blue set is unassembled, which the drawing code's own rule (_branch_style_note, benchmarks/coil_edit_latency.py:2351) says a caption must state because the two drawings are otherwise indistinguishable on the panel."
+    },
+    {
+      "file": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "This copy is byte-identical to the mast-centroid PNG (sha256 e4e699ca6f5d791d0d0d9312b5c4d43d16413e9ef20cabae50ea258d4e877f36) and carries the same unlabelled blue crossing chain on both panels, running through the vacuum outside the wall. No live page embeds this path, so a reader meets the picture with only its panel receipt beside it; neither the image nor the legend identifies the crossings, and a reader copying this PNG out of the regeneration row has no statement anywhere that the reference set is drawn unassembled. The drawing is otherwise correct (edit 19 / edit 2, same residuals as the mast figure)."
+    },
+    {
+      "file": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Both branch sets are drawn as unconnected crossing marks here - the figure's receipt caption reads 'blue set: unassembled, crossings drawn unconnected' and 'solved sets orange: unassembled, crossings drawn unconnected' - so the panels carry two crossing chains in blue and orange (on the order of two hundred small marks) and the legend names neither family. The spray is the dominant mark outside the plasma and runs through the vacuum left of the vertical wall segment and below the lower wall, so a reader cannot tell from the picture whether the separatrix is an assembled boundary or a scatter of crossings, and no caption that embeds this path states which drawing is shown. The titles and residuals are correct: edit 15 (+12%, converged, 4.526e-09 Wb, three iterations) beside edit 3 (-12%, not converged, 7.112e-03 Wb, four)."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Byte-identical to the cpu-compile-abort titan PNG (sha256 e7af0c5b92f7b4a82a37a6be650a94ea8e8bd92c5612b91589a79e172d42af2b), so it carries the same two unlabelled crossing families and the same vacuum-region spray. Its live caption, docs/evidence/archive/single-grid-solver-cutover-landed.html:66, also still gives the converged residual as 4.13e-09 Wb and the non-converged one as 6.51e-03 Wb after sixteen trips, where the figure draws 4.526e-09 Wb after three active-set iterations and 7.112e-03 Wb after four. That archive is outside this node's declared write paths and the evidence fragment that tracks the redraw states the same discrepancy, so the finding is recorded rather than answered here."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T184147030856-review-of-coil-edit-panels-per-figure-81ba155c8d2a-figure",
+  "reviewed_base_sha": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "reviewed_brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T134834058462-coil-edit-panels-per-figure/brief.md",
+  "reviewed_figures": [
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
+    "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+    "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png"
+  ],
+  "reviewed_head_sha": "81ba155c8d2a65ef400a364b6386d6b0a4e364eb",
+  "reviewed_note": "Read-only figure review. Every verdict below is formed from the rendered PNGs named here; no SVG, and no image other than those PNGs, was opened. Where a caption or a panel receipt is cited it is cited as evidence about the picture a reader is given, never as the basis of a visual verdict.",
+  "reviewed_plan": "nova:separatrix-spline-extraction \u00a77",
+  "reviewed_run_id": "r-20261122T134834058462-coil-edit-panels-per-figure",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Pass on all five. Titles, legend entries and null markers read as near-black or as saturated blue/orange on white; the grey reference contours are deliberately recessive data rather than text, and no text sits on a coloured fill because there is no fill.",
+    "data_ink": "Pass on all five. Roughly 90 percent of each 1400x720 canvas is empty white, and the ink is the reference contour family (grey, 1.2 pt), the solved contour family (orange, 1.2 pt), the dashed saddle legs, the oversized hollow reference nulls, the filled solved nulls and the black first-wall outline. In three figures (forward-solve-api and the two titan figures) the unconnected crossing marks add a spray running through the vacuum outside the wall, which is ink where nothing is contoured (finding 2); the contour families still carry the weight, so this is recorded rather than failing the item.",
+    "decoration": "Pass on all five. No gradient, no background fill, no shading, no gridline, no frame and no axis furniture; the poloidal axes are off and scale is carried by the machine outline, which is the house rule for these panels. Titles and the legend are the only text, and the legend separates its entries by line style and marker shape rather than by decoration.",
+    "label_collision": "Pass on all five. No title is clipped at a canvas edge, the two panel titles occupy separate white bands above their own panels and do not meet, the single figure-level legend is clear of the plotted data, and no direct label sits over a line. The crossing and null markers do not touch any text. The only text this review found wrong is in page captions rather than on the image (findings 1 and 5).",
+    "legibility": "Pass on all five, with one defect recorded as finding 2. Each figure is a two-panel poloidal map whose panels carry a two-line title naming the edit index, the circuit-current fraction and the terminal residual, so the converged and non-converged states are told apart without a caption: 'edit 19 ... +20% of the seed converged / residual 1.972e-09 Wb 5 active-set iterations' beside 'edit 2 ... -14% ... not converged / residual 9.879e-03 Wb 7 active-set iterations', and the same shape for edits 15/3 and 5/4. The frameless two-row legend under the panels names the contour families, the dashed saddle legs and both null sets at 13 pt, and every label reads at page width. The defect: two mark families on the panels (the blue crossing marks in all five figures and the orange crossing marks in three) have no legend entry and no caption statement, so their meaning is not available from the picture alone.",
+    "table_form": "Pass on all five. Each is a spatial artifact - a poloidal flux field with the reference and solved level sets on one shared level array - and none depicts information that is naturally a table: residuals, iteration counts and promoted-node distances are printed as text in the titles and in the prose beside the figures, not drawn as bars or boxes."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T19:24:28.850139+00:00",
+  "total": null
+}

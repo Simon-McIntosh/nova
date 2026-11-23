@@ -20,8 +20,10 @@ state to leading order, so its distance predicts the converged coefficient
 difference only to that order. The converged coefficient gap between the two
 routes is measured directly and reported above; each route's converged
 coefficient distance from a reference converged in extended precision is not
-measured (see the limits below). Probe fields from the two converged solutions
-are compared in the same run.</p>
+measured (see the limits below). The two routes' probe-field gap is reported
+only by the pending measurement named in the control below; no probe-field
+figure is quoted here, and the two routes' probe fields were not compared in the
+run these numbers come from.</p>
 <p>Neither route was compared entry by entry against the reference in the
 converged state, and no interaction value, solve or bar was changed by this
 measurement.</p>
@@ -49,16 +51,39 @@ tested figure, so the comparison resolves the gap.</p>
 </tbody></table>
 
 <h4>Control: a real route defect is refused</h4>
-<p>The comparison was tested against a genuine route fault rather than a
-scaled copy of the reference. The Newton matrix is multiplied by
-<code>1 + 1e-10</code> before its own LU factorisation and solve, and that
-perturbed route is fed to the same distance comparison and the same verdict
-classifier. It reads Frobenius <code>9.9998e-10</code> / maximum-entry
-<code>9.9990e-10</code> from the refined reference, about 3&nbsp;000 times (3.5 decades) the
-nearest unperturbed route distance, and the
-classifier returns <code>defect</code> rather than <code>rounding</code>. The
-detector therefore fires on a route fault the instrument can see, and the
-rounding verdict on the two real routes is not a blind spot of the comparison.</p>
+<p>The comparison was tested against a genuine route fault rather than a scaled
+copy of the reference. The Newton matrix is multiplied by <code>1 + 1e-10</code>
+before its own LU factorisation and solve, and that perturbed route is fed to the
+same distance comparison and the same verdict classifier. Scaling the matrix by
+<code>1 + 1e-10</code> scales its solution by <code>1 / (1 + 1e-10)</code>, so a
+comparison working as intended must place the perturbed route about
+<code>1e-10</code> from the reference, whatever the route's own arithmetic
+contributes.</p>
+
+<p>Measured at revision <code>383f60581e9001d533178904b64fff789428ca80</code> on
+the <code>gate_shell</code> region at 0.08&nbsp;m (a synthetic interaction table,
+not the persisted operator), the perturbed route reads <code>9.9998e-11</code>
+Frobenius / <code>9.9990e-11</code> maximum entry from that mesh's
+extended-precision reference, against <code>7.97e-15</code> and
+<code>1.46e-14</code> for the mesh's own two routes. It therefore sits
+12&nbsp;500&times; (4.1 decades) farther than the <em>nearest</em> unperturbed
+route and 6&nbsp;900&times; farther than the largest, and the classifier returns
+<code>defect</code> rather than <code>rounding</code> on it. A fault of this size
+is a hundred times the <code>1e-12</code> route-comparison bar and ten times the
+<code>1e-11</code> bar proposed below, so the detector refuses it under either
+bar. The smoke's log is <code>logs/defect-smoke.log</code> in this node's run
+directory, headed by its revision and exact command.</p>
+
+<p><strong>Not yet re-measured on the persisted operator.</strong> The same
+control and the two routes' probe-field gap are computed by the repaired
+measurement in H200 job <code>1338337</code> (betelgeuse, reservation
+<code>gpu_0003_grpA</code>, one GPU, 4 CPUs, 200&nbsp;G, 3&nbsp;h, submitted for
+real). That job is queued behind two other single-card jobs with all eight cards
+on <code>98dci4-gpu-0003</code> allocated, and had not started when this fragment
+was written. The route distances in the table come from the earlier completed
+receipt (job <code>1338206</code>, revision <code>6f916061f</code>), whose
+arithmetic the repair does not change; no control or probe-field number on the
+persisted operator is quoted above.</p>
 
 <h4>Verdict</h4>
 <p>Rounding. Both route distances are more than four decades below
@@ -75,8 +100,9 @@ the routes themselves differ by 2.2e-12 at their largest entry at tolerance
 within 1.09e-12 of a reference that is three decades more accurate. The bar is
 proposed reset to 1e-11 for the route-to-route coefficient comparison, or
 stated as ten times <code>kappa*eps</code> (2.26e-7) at the measured condition
-number, which admits this rounding-level gap while still refusing the planted
-1e-10 route defect. No code, test or interaction value was changed.</p>
+number, which admits this rounding-level gap while still refusing the
+<code>1e-10</code> factor defect measured in the control above. No code, test or
+interaction value was changed.</p>
 
 <h4>Suite arms</h4>
 <p>The focused subset of <code>tests/test_magnetisation.py</code> that exercises
@@ -97,8 +123,9 @@ A nonlinear reference converged in extended precision would require the
 material residual and the 39&nbsp;792-unknown Jacobian to be formed in extended
 precision on every Newton step, which the current route cannot do within this
 measurement; each route's converged coefficient distance from such a reference
-is therefore not reported. The converged coefficient gap between the routes,
-and their probe-field gap, are reported directly.</p>
+is therefore not reported. The converged coefficient gap between the routes is
+reported directly above; the probe-field gap between them is computed by the
+pending measurement and is not reported here.</p>
 <p>Follow-up work: the measurement rebuilds the affine Newton operands in
 <code>scripts/west_iron_linear/measure.py</code>, duplicating the assembly that
 <code>nova/biot/magnetisation.py</code> performs inside the solve. A later node

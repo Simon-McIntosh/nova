@@ -46,18 +46,73 @@
       <tr><td>1</td><td>54</td><td>29789</td><td>29789</td></tr>
       <tr><td>2</td><td>54</td><td>29105</td><td>58894</td></tr>
           <tr><td>3</td><td>42</td><td>29924</td><td>88818</td></tr>
-          <tr><td>4</td><td>113</td><td>29926</td><td>118744</td></tr>
-          <tr><td>5</td><td>197</td><td>29946</td><td>148690</td></tr>
-          <tr><td>6</td><td>148</td><td>29685</td><td>178375</td></tr>
-          <tr><td>7</td><td>8</td><td>7032</td><td>185407</td></tr>
+      <tr><td>4</td><td>113</td><td>29926</td><td>118744</td></tr>
+      <tr><td>5</td><td>197</td><td>29946</td><td>148690</td></tr>
+      <tr><td>6</td><td>148</td><td>29685</td><td>178375</td></tr>
+      <tr><td>7</td><td>8</td><td>7032</td><td>185407</td></tr>
+      <tr><td>restored after verification</td><td>2</td><td>-442</td><td>184965</td></tr>
+      <tr><td>net at head</td><td>614</td><td>184989</td><td>184989</td></tr>
     </table>
 
     <h3 id="bench-scripts-delete-withheld">Withheld paths</h3>
-    <p>The 102 withheld paths are named by 95 shell or <code>sbatch</code>
-    driver edges, 32 kept-Python edges, six test docstrings and five product
-    docstrings. They are reported on the node&rsquo;s manifest rather than
-    edited here, because repairing a shell driver or a product docstring is a
-    separate decision from applying the census.</p>
+    <p>The 102 withheld paths are named by 112 kept files across 138
+    references: 76 shell or <code>sbatch</code> drivers, 28 other kept
+    <code>Python</code> modules, four test modules and four product modules
+    under <code>nova/</code>. By area, 82 sit under
+    <code>scripts/prototypes</code>, 14 under <code>benchmarks</code>, and the
+    remaining six in six other script directories. They are reported on the
+    node&rsquo;s manifest rather than edited here, because repairing a shell
+    driver or a product docstring is a separate decision from applying the
+    census.</p>
+
+    <p>The same non-cascade defect reaches one step further. Two withheld
+    files are reached only through another kept file&rsquo;s bare sibling
+    import: <code>measure_branches.py</code> imports
+    <code>terminal_class.py</code> by its bare name after putting its own
+    directory on <code>sys.path</code>, and
+    <code>test_terminal_panel_geometry.py</code> imports
+    <code>render_terminal_panels.py</code> the same way. Both siblings were
+    deleted in the batches and both are restored here, because deleting them
+    broke test collection with <code>ModuleNotFoundError</code>. The reference
+    scan that keeps a path is a path-string scan, so it sees neither a bare
+    module name nor the directory that resolves it.</p>
+
+    <h3 id="bench-scripts-delete-verification">Verification</h3>
+    <p>No test or source file changed between the batch base
+    <code>348ed92c</code> and the head: the diff over <code>tests/</code>,
+    <code>nova/</code>, <code>pyproject.toml</code> and <code>uv.lock</code> is
+    empty. Every deleted path is absent at the head, and the whole-tree scan
+    finds no kept code, test or <code>AGENTS.md</code> reference to any of
+    them; the remaining references are historical records under
+    <code>docs/</code> that carry the revision they ran at.</p>
+    <table id="bench-scripts-delete-verification-table">
+      <tr><th>measure</th><th>result</th></tr>
+      <tr><td>absence check, 614 paths</td><td>0 code/test/AGENTS references</td></tr>
+      <tr><td>reachable gate at head (worktree)</td><td>49 passed, 5 failed, 4 xfailed</td></tr>
+      <tr><td>scratch-tree arm at base</td><td>35 passed, 11 failed, 8 errors</td></tr>
+      <tr><td>scratch-tree arm at head</td><td>35 passed, 11 failed, 8 errors</td></tr>
+      <tr><td>added failures, base to head</td><td>0</td></tr>
+      <tr><td>broad fast lane collection</td><td>10939 items, 0 collection errors</td></tr>
+    </table>
+    <p>The two scratch-tree arms carry identical failure and error ids: they
+    run the same instrument against the base and the head from a clean
+    extraction, so the identical results are the delta measurement, and the
+    base and head differ by zero added failures. That instrument lacks a
+    <code>.git</code>, which the census tests read through
+    <code>git ls-files</code>, so it reports six more failures and eight setup
+    errors than the worktree arm; those are scaffolding, present identically
+    in both arms.</p>
+    <p>The worktree arm's five failures are pre-existing. Two are retired
+    evidence: the census receipt test cites
+    <code>docs/figures/millisecond-converged-solve/program-shapes/program-shape-buckets.svg</code>,
+    which an ancestor of the batch base retired, and the census machinery
+    itself names a crew home literal at
+    <code>benchmarks/scripts_census.py:389</code>, a line the batches do not
+    touch. Two are git-hook tests whose scratch repositories fail on
+    <code>.git/index: Not a directory</code> before any code under test runs.
+    The fifth reads that same retired SVG file, so it fails for the same
+    reason. The broad fast lane collects the whole fast suite with no import
+    error, which is the check the two restored siblings repair.</p>
   </main>
 </body>
 </html>

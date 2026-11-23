@@ -21,11 +21,11 @@
 <meta name="plan-capability-reasoning" content="standard">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="moderate">
-<meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -86,7 +86,7 @@ executed lines in the same measurement, so a map that marks everything
 reached fails.</p>
 
 <h2 id="s2">§2 — Census of benchmarks and scripts</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>Every Python file under <code>benchmarks/</code> and <code>scripts/</code>
 receives one verdict, stored in one record at
 <code>docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.html</code>:</p>
@@ -155,7 +155,7 @@ refused by the check in (1) and named; so is a module §1 shows unreached
 whose only importer is imas-ambix.</p>
 
 <h2 id="s5">§5 — Register of duplicates on the hot path</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>A record at
 <code>docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html</code>,
 not a code change. It lists every place where two or more
@@ -241,6 +241,18 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 <div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="coordinator" data-when="2026-11-23">
     <div class="r-comment-body">§1 landed from run r-20261122T202531438845-hot-path-map (head 8e9ae53b4) after one review round; see the landed record anchor s1-hot-path-map.</div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261123T092757665687-review-of-bench-scripts-census-aa3e594fb4a3" data-who="reckon-build" data-when="2026-11-23T09:40:12.753Z">
+    <div class="r-comment-body"><p>the census of benchmarks/ and scripts/ is reviewed at aa3e594fb4a363c1db9746b0b1158ec582026e5b and scores goal_fidelity 15, evidence 18, scope_discipline 16, durability 16, fit 16, reuse 19, with one blocking finding: the plan-ownership pass reads plan HTML only and never a plan's live crew runs, so scripts/prototypes/h200_levers is classified delete while a queued sub-millisecond-forward-path node declares it a write path.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261123T104621037022-review-of-bench-scripts-census-34f6c3a36182" data-who="reckon-build" data-when="2026-11-23T10:57:34.142Z">
+    <div class="r-comment-body"><p>reviewed r-20261122T202601421489-bench-scripts-census at head 34f6c3a36182656b526df83381905c606c5d834f against base f26e4620e17fd7ec8a9b63b8751772e2ade4de4a: goal met (1574 files, keep=856 delete=715 merge=3, reconciled); scored goal_fidelity 19, evidence 16, scope_discipline 14, durability 15, fit 18, reuse 18; four non-blocking findings on the stale record revision label (2653ef0c9 vs landed 34f6c3a3), the record-derived owning-sprint test input, the delete-citation test reading the census's own resolves field, and two files landing outside the declared write paths.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261122T202601421489-bench-scripts-census" data-who="reckon-build" data-when="2026-11-23T10:40:40Z">
+    <div class="r-comment-body"><p>benchmarks/ and scripts/ carry a one-verdict census over 1574 tracked files (856 keep, 715 delete, 3 merge) whose owning sprint window is a required command-line input rather than a constant in source; a focused plan's live crew runs hold the write paths they declare so a queued node keeps its drivers, every delete names every record that cites it with a revision that resolves, a bare sibling import by a kept file keeps its neighbour, a plan-named driver directory keeps the files under it while a container directory confers nothing, and forcing a live-test driver, a sibling import or a plan-owned directory file to delete is refused for its own reason.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="coordinator" data-when="2026-11-23">
+    <div class="r-comment-body">§2 landed from run r-20261122T202601421489-bench-scripts-census (head 34f6c3a36) after three audit rounds and two reviews; see landed record anchor s2-bench-scripts-census.</div>
+</div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261123T091608198628-review-of-hot-path-duplicate-register-c62046c999c4" data-who="reckon-build" data-when="2026-11-23T09:25:29.164Z">
     <div class="r-comment-body"><p>review of r-20261122T202607457728-hot-path-duplicate-register at base 7505cdfbc551ac367c977575d4a3d74a9f1bddd2 and head c62046c999c4fe117a8501c33bf882354105cad2 scores goal_fidelity 17, evidence 16, scope_discipline 12, durability 7, fit 17, reuse 17, with seven non-blocking findings and a parsed record stored under the reviewed run's review-records directory.</p></div>
 </div>
@@ -251,16 +263,13 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
     <div class="r-comment-body"><p>review of r-20261122T202607457728-hot-path-duplicate-register at head c2a3f014f (base 7505cdf): scores goal_fidelity 18, evidence 17, scope_discipline 14, durability 9, fit 17, reuse 15; four non-blocking findings (plot-columns label names PolyPlotChildren not discovered; four flagged candidate pairs lack per-entry decision records; receipt.json carries no revision; eight of eleven delivered paths outside declared scope); no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261123T111356058924-review-of-hot-path-duplicate-register-1ac5d08b0b1c" data-who="reckon-build" data-when="2026-11-23T11:23:44.106Z">
-    <div class="r-comment-body"><p>review of r-20261122T202607457728-hot-path-duplicate-register at base 7505cdfbc551ac367c977575d4a3d74a9f1bddd2 and head 1ac5d08b0b1cdc88b98e670cef897a09c3e5d0f1 scores goal_fidelity 18, evidence 16, scope_discipline 13, durability 10, fit 17, reuse 16, with three non-blocking findings and a parsed record stored under the reviewed run&#x27;s review-records directory.</p></div>
+    <div class="r-comment-body"><p>review of r-20261122T202607457728-hot-path-duplicate-register at base 7505cdfbc551ac367c977575d4a3d74a9f1bddd2 and head 1ac5d08b0b1cdc88b98e670cef897a09c3e5d0f1 scores goal_fidelity 18, evidence 16, scope_discipline 13, durability 10, fit 17, reuse 16, with three non-blocking findings and a parsed record stored under the reviewed run's review-records directory.</p></div>
 </div>
-<div class="r-comment" data-section="s2" data-id="c-run-r-20261123T092757665687-review-of-bench-scripts-census-aa3e594fb4a3" data-who="reckon-build" data-when="2026-11-23T09:40:12.753Z">
-    <div class="r-comment-body"><p>the census of benchmarks/ and scripts/ is reviewed at aa3e594fb4a363c1db9746b0b1158ec582026e5b and scores goal_fidelity 15, evidence 18, scope_discipline 16, durability 16, fit 16, reuse 19, with one blocking finding: the plan-ownership pass reads plan HTML only and never a plan's live crew runs, so scripts/prototypes/h200_levers is classified delete while a queued sub-millisecond-forward-path node declares it a write path.</p></div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261122T202607457728-hot-path-duplicate-register" data-who="reckon-build" data-when="2026-11-23T11:08:00Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html registers seven entries on or beside the measured hot path: five duplicate pairs compared implementation against implementation on one stated input within a stated tolerance, one route resolution, and one group of four candidate pairs the scan flagged and this run measured. Every entry names the implementation to keep and the lines removable. The driver discovers function names with scripts/iron_operator_bound/reuse_check.py's definitions() for all 210 route modules and exits nonzero if its own body walk disagrees. The plot-columns entry's implementation label is now built from the classes that entry found, so it can name only an indexer it ran; the receipt states the revision its numbers were measured at; and the four candidate pairs carry decision ids, their question, their two options and a recommendation in the same receipt, so a coordinator can answer them without reconstructing the case. The delivered-paths section enumerates all eleven delivered paths, records that the dispatch declared two, and states that the eight beyond it are merge-safe records beside the declared fragment whose coverage is the coordinator promotion the manifest requests; this round added no path of its own. Evidence at revision 717375353ef1b3fd886dcfb7eb770c56555a1169 in job 1339064 where the gate reports "7 entries passed, 0 failed, 3 negative controls fired", with the receipt committed at f5ef86601 and the record at 1ac5d08b0.</p></div>
 </div>
-<div class="r-comment" data-section="s2" data-id="c-run-r-20261123T104621037022-review-of-bench-scripts-census-34f6c3a36182" data-who="reckon-build" data-when="2026-11-23T10:57:34.142Z">
-    <div class="r-comment-body"><p>reviewed r-20261122T202601421489-bench-scripts-census at head 34f6c3a36182656b526df83381905c606c5d834f against base f26e4620e17fd7ec8a9b63b8751772e2ade4de4a: goal met (1574 files, keep=856 delete=715 merge=3, reconciled); scored goal_fidelity 19, evidence 16, scope_discipline 14, durability 15, fit 18, reuse 18; four non-blocking findings on the stale record revision label (2653ef0c9 vs landed 34f6c3a3), the record-derived owning-sprint test input, the delete-citation test reading the census's own resolves field, and two files landing outside the declared write paths.</p></div>
-</div>
-<div class="r-comment" data-section="s2" data-id="c-run-r-20261122T202601421489-bench-scripts-census" data-who="reckon-build" data-when="2026-11-23T10:40:40Z">
-    <div class="r-comment-body"><p>benchmarks/ and scripts/ carry a one-verdict census over 1574 tracked files (856 keep, 715 delete, 3 merge) whose owning sprint window is a required command-line input rather than a constant in source; a focused plan's live crew runs hold the write paths they declare so a queued node keeps its drivers, every delete names every record that cites it with a revision that resolves, a bare sibling import by a kept file keeps its neighbour, a plan-named driver directory keeps the files under it while a container directory confers nothing, and forcing a live-test driver, a sibling import or a plan-owned directory file to delete is refused for its own reason.</p></div>
+<div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="coordinator" data-when="2026-11-23">
+    <div class="r-comment-body">§5 landed from run r-20261122T202607457728-hot-path-duplicate-register (head 1ac5d08b0) after four reviews; the ten entries are raised to S28 as reckon decisions; see landed record anchor s5-hot-path-duplicates.</div>
 </div>
 </section>
 </main>

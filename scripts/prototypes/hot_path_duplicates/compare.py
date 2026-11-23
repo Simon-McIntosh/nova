@@ -515,11 +515,200 @@ def _function_bodies(tree, modules):
                     module=relative,
                     function=node.name,
                     statements=len(body),
+                    asynchronous=isinstance(node, ast.AsyncFunctionDef),
                     source=source,
                     digest=hashlib.sha256(source.encode()).hexdigest()[:12],
                 )
             )
     return rows
+
+
+def entry_candidate_agreements(receipt):
+    """Measure the four candidates the scan flags but no entry covered.
+
+    Each pair runs on one stated input in one process, and each carries the
+    keeper and the removal the register records.
+    """
+    import types
+
+    pairs = []
+
+    from nova.equilibrium.flux_surface_extraction import (
+        _tensor_bernstein as extraction_bernstein,
+    )
+    from nova.linalg.tensor_spline import _tensor_bernstein as spline_bernstein
+
+    coefficient = jnp.asarray(np.cos(np.arange(16, dtype=float)).reshape(4, 4))
+    radial = jnp.asarray(np.linspace(0.0, 1.0, 5))
+    vertical = jnp.asarray(np.linspace(1.0, 0.0, 5))
+    first = np.asarray(extraction_bernstein(coefficient, radial, vertical, 3, 3))
+    second = np.asarray(spline_bernstein(coefficient, radial, vertical, 3, 3))
+    gap = (
+        float(np.max(np.abs(first - second)))
+        if first.shape == second.shape
+        else float("inf")
+    )
+    pairs.append(
+        dict(
+            candidate="tensor-bernstein",
+            implementation_a="nova.equilibrium.flux_surface_extraction._tensor_bernstein",
+            implementation_b="nova.linalg.tensor_spline._tensor_bernstein",
+            input="one 4x4 coefficient block at five paired coordinates, order 3",
+            tolerance=0.0,
+            max_abs_gap=gap,
+            agrees=gap == 0.0,
+            keeper="nova.linalg.tensor_spline._tensor_bernstein",
+            lines_removable=4,
+        )
+    )
+
+    from nova.biot.cylinder import Cylinder
+    from nova.biot.polysection import PolySection
+
+    class _Stub:
+        Psi = np.arange(1.0, 9.0).reshape(4, 2)
+        mu_0 = 4.0e-7 * np.pi
+
+        def target(self, key):
+            assert key == "r"
+            return np.asarray([[0.0, 0.5], [1.0, 1.5], [2.0, 2.5], [3.0, 3.5]])
+
+    first = np.asarray(Cylinder.__dict__["Aphi"].func(_Stub()))
+    second = np.asarray(PolySection.__dict__["Aphi"].func(_Stub()))
+    gap = float(np.max(np.abs(first - second)))
+    pairs.append(
+        dict(
+            candidate="aphi-axis-zero",
+            implementation_a="nova.biot.cylinder.Cylinder.Aphi",
+            implementation_b="nova.biot.polysection.PolySection.Aphi",
+            input="one 4x2 target grid with a zero-radius cell, mu_0 = 4 pi 1e-7",
+            tolerance=0.0,
+            max_abs_gap=gap,
+            agrees=gap == 0.0,
+            keeper="one copy in the shared Matrix base",
+            lines_removable=9,
+        )
+    )
+
+    from nova.biot.polygonanalytic import _Vertex as AnalyticVertex
+    from nova.biot.polygonarc import _Vertex as ArcVertex
+
+    class _Corner:
+        xp = np
+        radius = np.asarray([0.4, 0.7, 1.1])
+        level = np.asarray([0.05, 0.2, 0.05])
+        offset = np.asarray([0.0, 0.0, 0.0])
+        radius_sum = np.asarray([1.1, 1.4, 1.8])
+        panels = ((0.0, 0.5 * np.pi), (0.5 * np.pi, np.pi))
+
+    first = np.asarray(ArcVertex._first_residual(_Corner(), 8))
+    second = np.asarray(AnalyticVertex._first_residual(_Corner(), 8))
+    gap = (
+        float(np.max(np.abs(first - second)))
+        if first.shape == second.shape
+        else float("inf")
+    )
+    pairs.append(
+        dict(
+            candidate="first-residual",
+            implementation_a="nova.biot.polygonarc._Vertex._first_residual",
+            implementation_b="nova.biot.polygonanalytic._first_residual",
+            input="one three-row corner at eight graded nodes",
+            tolerance=0.0,
+            max_abs_gap=gap,
+            agrees=gap == 0.0,
+            keeper="the polygonanalytic form (a superset: optional weight)",
+            lines_removable=1,
+        )
+    )
+
+    from nova.transport.ensemble import EnsembleTransportReceipt
+    from nova.transport.window_batch import WindowBatchReceipt
+
+    members = tuple(
+        types.SimpleNamespace(member_id=name, transport=name)
+        for name in ("alpha", "beta", "gamma")
+    )
+    ensemble = types.SimpleNamespace(members=members)
+    window = types.SimpleNamespace(members=members)
+
+    def identity(value):
+        return getattr(value, "member_id", value)
+
+    selected_a = identity(EnsembleTransportReceipt.for_member(ensemble, "beta"))
+    selected_b = identity(WindowBatchReceipt.for_member(window, "beta"))
+    missing = []
+    for implementation, host in (
+        (EnsembleTransportReceipt.for_member, ensemble),
+        (WindowBatchReceipt.for_member, window),
+    ):
+        try:
+            implementation(host, "absent")
+        except KeyError:
+            missing.append(True)
+        else:
+            missing.append(False)
+    pairs.append(
+        dict(
+            candidate="for-member",
+            implementation_a="nova.transport.ensemble.EnsembleTransportReceipt.for_member",
+            implementation_b="nova.transport.window_batch.WindowBatchReceipt.for_member",
+            input="one three-member list addressed by identity, present and absent",
+            tolerance="same member selected, KeyError for an absent identity",
+            selected_same_member=selected_a == selected_b == "beta",
+            keyerror_both=all(missing),
+            agrees=selected_a == selected_b == "beta" and all(missing),
+            keeper="one loop with a per-class receipt accessor",
+            lines_removable=7,
+        )
+    )
+    return dict(
+        entry="candidate-agreements",
+        pairs=pairs,
+        tolerance="each pair states its own; the record agrees when every pair does",
+        agrees=all(pair["agrees"] for pair in pairs),
+    )
+
+
+def _reuse_check(tree):
+    """Load the existing reuse scanner from the tree being scanned."""
+    import importlib.util
+
+    path = tree / "scripts/iron_operator_bound/reuse_check.py"
+    spec = importlib.util.spec_from_file_location("reuse_check", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def definitions_cross_check(tree, modules, rows):
+    """Discover function names with the existing scanner, and require the walk
+    to have seen exactly the same names in every route module."""
+    reuse = _reuse_check(tree)
+    mismatches = []
+    for relative in modules:
+        path = tree / relative
+        if not path.exists():
+            continue
+        discovered = reuse.definitions(path)
+        walked = {
+            row["function"]
+            for row in rows
+            if row["module"] == relative and not row["asynchronous"]
+        }
+        if discovered != walked:
+            mismatches.append(
+                dict(
+                    module=relative,
+                    missing=sorted(discovered - walked),
+                    unexpected=sorted(walked - discovered),
+                )
+            )
+    return dict(
+        source="scripts/iron_operator_bound/reuse_check.py:definitions",
+        agrees=not mismatches,
+        mismatches=mismatches,
+    )
 
 
 def ast_scan(tree, map_path):
@@ -592,6 +781,7 @@ def ast_scan(tree, map_path):
     return dict(
         line_map=str(map_path),
         line_map_revision=line_map.get("revision"),
+        definitions=definitions_cross_check(tree, modules, rows),
         route_modules=modules,
         route_module_count=len(modules),
         shared_names=shared,
@@ -624,7 +814,11 @@ def write_ast_scan(path, tree, revision):
         shared_name_count=scan["shared_name_count"],
         identical_groups=len(scan["identical_bodies"]),
         near_identity_pairs=len(scan["near_identity"]),
+        definitions_agree=scan["definitions"]["agrees"],
     )
+    if not scan["definitions"]["agrees"]:
+        emit("DEFINITIONS_DISAGREE", mismatches=scan["definitions"]["mismatches"])
+        raise SystemExit(1)
 
 
 def compare(receipt_path):
@@ -636,6 +830,7 @@ def compare(receipt_path):
         entry_level_polish,
         entry_route_resolution,
         entry_plot_columns,
+        entry_candidate_agreements,
     ):
         emit("ENTRY_START", entry=function.__name__)
         try:

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import json
+import re
 from typing import Any
 
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
@@ -29,6 +30,7 @@ from PIL import Image
 
 from benchmarks.coil_edit_latency import (
     DEFAULT_DISPLAY_SPACING,
+    _branch_style_note,
     _panel_display_map,
     _panel_load,
     _render_panel,
@@ -1074,3 +1076,220 @@ def test_each_published_panel_redraws_from_its_own_state_file(
         f"in place (largest displacement {displacement:.3e} m), so the redraw "
         "does not read the stored current"
     )
+
+
+#: The record that publishes, per figure, what a figure's own display map
+#: measured and how each of its three separatrix sets was drawn.
+PANEL_DRAWING_RECORD = Path(
+    "docs/evidence/fragments/separatrix-spline-extraction/"
+    "coil-edit-panels-per-figure.html"
+)
+
+#: The documents that show a published figure, so each has to say how that
+#: figure draws its separatrix sets.  A figure without a page of its own is
+#: covered by the record above, which carries a row for every figure.
+PANEL_FIGURE_DOCUMENTS = {
+    "forward-solve-api": (
+        Path(
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/"
+            "coil-edit-nonconvergence.html"
+        ),
+        PANEL_DRAWING_RECORD,
+    ),
+    "mast-centroid-capability": (
+        Path(
+            "docs/evidence/fragments/separatrix-spline-extraction/"
+            "coil-edit-fine-panels.html"
+        ),
+    ),
+    "cpu-compile-abort": (PANEL_DRAWING_RECORD,),
+    "cpu-compile-abort-titan": (PANEL_DRAWING_RECORD,),
+    "single-grid-solver-cutover": (PANEL_DRAWING_RECORD,),
+}
+
+
+def _flat_text(document: str) -> str:
+    """Return a document's visible words, markup removed and runs collapsed."""
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", document))
+
+
+def _drawing_style_order(record: dict[str, Any]) -> str:
+    """Return the three set styles a caption reports, in the caption's order.
+
+    A set the assembler rejected is drawn from its own scan-order crossings,
+    which reads on the panel like an assembled boundary, so a page that shows
+    the figure states which of the two drawings each set carries.
+    """
+    block = record["assembly_drawn"]
+    return "blue reference %s; orange converged %s; orange failed %s" % (
+        _branch_style_note(block["reference"]["drawn"]),
+        _branch_style_note(block["converged"]["drawn"]),
+        _branch_style_note(block["non_converged"]["drawn"]),
+    )
+
+
+def _caption_states_the_drawing(
+    caption: str, block: dict[str, Any], seen_in: str
+) -> None:
+    """Require a caption to name the drawing it describes.
+
+    Each of the three sets gets its own clause, because the two solved panels
+    need not draw the same way and one clause covering both would be false for
+    whichever one it did not measure.
+    """
+    notes = {
+        "reference": "blue set: %s," % _branch_style_note(block["reference"]["drawn"]),
+        "converged": "in the converged panel: %s, admitted"
+        % _branch_style_note(block["converged"]["drawn"]),
+        "non_converged": "in the failed panel: %s, admitted"
+        % _branch_style_note(block["non_converged"]["drawn"]),
+    }
+    for name, note in notes.items():
+        assert note in caption, (
+            f"{seen_in}: the caption does not say how the {name} set is drawn"
+        )
+
+
+def test_the_panel_subcommand_writes_how_each_branch_set_was_drawn(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """A receipt the panel path writes says how each set was drawn, and why.
+
+    The caption is not enough on its own: a set the assembler rejected is drawn
+    from its own crossings, and only the drawn tallies beside the assembler's
+    verdict let a reader hold the caption against the drawing.
+    """
+    import sys
+    from types import SimpleNamespace
+
+    import benchmarks.coil_edit_latency as renderer
+
+    archive = PANEL_ARCHIVE
+    loaded = _panel_load(archive)
+
+    def stand_in(_profile: Any, _context: Any, panel: Any, **_kwargs: Any) -> Any:
+        return SimpleNamespace(
+            radius=loaded["radius"],
+            height=loaded["height"],
+            flux=np.asarray(panel["psi"], dtype=float).T,
+            branches=panel["branches"],
+            saddle_converged=False,
+            saddle_index=panel["saddle_index"],
+            saddle_rz=None,
+            spacing_m=DEFAULT_DISPLAY_SPACING,
+            reproduction_relative_error=0.0,
+            max_node_mismatch_wb=1.0e-09,
+            max_solved_node_mismatch_wb=1.0e-09,
+            promoted_node_count=3,
+            nearest_promoted_to_xpoint_m=0.2,
+        )
+
+    monkeypatch.setattr(renderer, "_require_measurement_host", lambda: None)
+    monkeypatch.setattr(renderer, "_panel_display_map", stand_in)
+    monkeypatch.setattr(
+        renderer,
+        "_prepare_case",
+        lambda _carrier: (
+            object(),
+            {"circuit_context": {}, "target_current": None},
+            None,
+        ),
+    )
+    receipt = tmp_path / "panel-receipt.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "coil_edit_latency.py",
+            "panel",
+            "--display-map",
+            "--panel-data",
+            str(archive),
+            "--panel-figure",
+            str(tmp_path / "panel.png"),
+            "--receipt",
+            str(receipt),
+        ],
+    )
+    renderer.main()
+    written = json.loads(receipt.read_text())
+
+    block = written["assembly_drawn"]
+    assert set(block) == {"reference", "converged", "non_converged"}
+    for name, entry in block.items():
+        assert {"closed_drawn", "open_drawn", "unassembled"} <= set(entry["drawn"]), (
+            name
+        )
+        assert entry["assembled"] is not None, (
+            f"{name}: the drawn tallies must travel beside the assembler verdict"
+        )
+    _caption_states_the_drawing(written["caption"], block, "the written receipt")
+
+
+@pytest.mark.parametrize(
+    ("label", "tag", "archive", "receipt"),
+    COIL_EDIT_PANEL_SETS,
+    ids=[entry[0] for entry in COIL_EDIT_PANEL_SETS],
+)
+def test_each_published_figure_states_how_its_branches_are_drawn(
+    label: str, tag: str, archive: Path, receipt: Path
+):
+    """A published figure's receipt and every page showing it agree.
+
+    A set the assembler rejected is drawn from its own scan-order crossings as
+    separate marks, which reads on the panel like an assembled boundary.  A
+    receipt that leaves a reader guessing which drawing it faces describes a
+    figure other than the one it carries, so each page states the same three
+    styles the receipt measured, beside the numbers the display map gave.
+    """
+    del tag, archive
+    record = json.loads(receipt.read_text(encoding="utf-8"))
+    block = record["assembly_drawn"]
+    assert set(block) == {"reference", "converged", "non_converged"}, label
+    for name, entry in block.items():
+        assert {"closed_drawn", "open_drawn", "unassembled"} <= set(entry["drawn"]), (
+            name
+        )
+        assert entry["assembled"] is not None, name
+    _caption_states_the_drawing(record["caption"], block, label)
+
+    styles = _drawing_style_order(record)
+    raw_record = PANEL_DRAWING_RECORD.read_text(encoding="utf-8")
+    row = None
+    for candidate in re.findall(r"<tr[^>]*>.*?</tr>", raw_record, flags=re.S):
+        if 'data-branches="%s"' % record["set"] in candidate:
+            row = _flat_text(candidate)
+            break
+    assert row is not None, (
+        f"{label}: the drawing record carries no row for {record['set']}"
+    )
+    assert styles in row
+    for measured in (
+        record["display_map"]["panels"]["converged"],
+        record["display_map"]["panels"]["failed"],
+    ):
+        assert "%d promoted" % measured["promoted_node_count"] in row
+        assert "%.3f m" % measured["nearest_promoted_to_xpoint_m"] in row
+
+    for document in PANEL_FIGURE_DOCUMENTS[record["set"]]:
+        text = _flat_text(document.read_text(encoding="utf-8"))
+        assert styles in text, f"{label}: {document} states no drawing for this figure"
+
+
+def test_the_shared_forward_solve_caption_withdraws_the_superseded_draw() -> None:
+    """No measurement of the superseded draw survives beside the caption.
+
+    The caption on the fragment was written from an earlier draw, and the
+    values it carried read as current until they were withdrawn, so the page
+    that replaces them must not still show them.
+    """
+    document = Path(
+        "docs/evidence/fragments/separatrix-spline-extraction/"
+        "coil-edit-panels-on-solve-currents.html"
+    )
+    text = _flat_text(document.read_text(encoding="utf-8"))
+    for stale in ("56.218", "2.451193", "7.4683", "6.4321e-4"):
+        assert stale not in text, (
+            f"{document} still carries the superseded draw's {stale}"
+        )
+    assert "superseded" in text

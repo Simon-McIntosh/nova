@@ -2311,6 +2311,32 @@ def _branch_terms(branches: dict[str, Any] | None) -> dict[str, Any] | None:
     }
 
 
+def _assembly_drawn(loaded: dict[str, Any]) -> dict[str, Any]:
+    """Return how each of the three branch sets was drawn, and why.
+
+    A set the assembler rejects carries zero geometry, so it is drawn from its
+    own scan-order crossings as separate marks, which reads on the panel like
+    an assembled boundary unless the record says otherwise.  The drawn counts
+    and the assembler's verdict terms therefore travel together, so a reader
+    can hold the caption against what the figure was actually drawn from.
+    """
+
+    def entry(panel: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "drawn": dict(panel.get("branches_drawn") or {}),
+            "assembled": _branch_terms(panel.get("branches")),
+        }
+
+    return {
+        "reference": {
+            "drawn": dict(loaded.get("reference_branches_drawn") or {}),
+            "assembled": _branch_terms(loaded.get("reference_branches")),
+        },
+        "converged": entry(loaded["converged"]),
+        "non_converged": entry(loaded["failed"]),
+    }
+
+
 def _panel_summary(panel: dict[str, Any]) -> dict[str, Any]:
     """Return the json-safe scalars the panel caption reports."""
     return {
@@ -2744,8 +2770,8 @@ def _render_panel(
         "flux (%.4f to %.4f Wb)  |  every solved state imposes the "
         "vertical current-centre row %s  |  reference is the unedited "
         "equilibrium, its admitted saddle %s (blue set: %s, admitted %s)  |  "
-        "solved sets orange: %s, admitted %s %s in the converged panel "
-        "and %s %s in the failed panel  |  the reference nulls are drawn "
+        "solved sets orange in the converged panel: %s, admitted %s %s; in the "
+        "failed panel: %s, admitted %s %s  |  the reference nulls are drawn "
         "larger and beneath the solved ones, so a coincident axis or saddle "
         "reads as both  |  other qualified nulls hollow in both sets  |  "
         "wall drawn"
@@ -2760,9 +2786,10 @@ def _render_panel(
             ),
             _branch_style_note(loaded.get("reference_branches_drawn", {})),
             reference_note,
-            _branch_style_note(loaded["failed"].get("branches_drawn", {})),
+            _branch_style_note(loaded["converged"].get("branches_drawn", {})),
             solved_notes[0],
             solved_orderings[0],
+            _branch_style_note(loaded["failed"].get("branches_drawn", {})),
             solved_notes[1],
             solved_orderings[1],
         )
@@ -2789,6 +2816,7 @@ def _render_panel(
         },
         "reference_branches": _branch_terms(loaded["reference_branches"]),
         "reference_branches_drawn": dict(loaded.get("reference_branches_drawn", {})),
+        "assembly_drawn": _assembly_drawn(loaded),
         "vertical_centroid": loaded.get("vertical_centroid"),
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
@@ -3940,6 +3968,7 @@ def main() -> None:
                 },
                 "display_map": panel["display_map"],
                 "near_x_geometry": panel["near_x_geometry"],
+                "assembly_drawn": panel["assembly_drawn"],
                 "state_archive": _declared_path(arguments.panel_data),
                 "state_archive_md5": _sha256(arguments.panel_data),
             }

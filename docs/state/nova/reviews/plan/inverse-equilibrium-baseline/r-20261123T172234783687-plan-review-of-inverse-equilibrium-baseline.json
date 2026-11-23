@@ -73,7 +73,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 124,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "21ad4345423b3013e276581d0884b45e27b29d6e",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a710 control now fires on the Solov'ev known state (which converges) and on every converged stored case whose unscaled current is inside the band; a converged case already outside the band (MAST-U 2.28 % in \u00a79) is reported as a band failure with the shift stated. Unconverged cases pass to the new \u00a712.",
+      "reason": "",
+      "when": "2026-11-23T19:15:03.942711+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "21ad4345423b3013e276581d0884b45e27b29d6e",
+      "commit_basis": "edit",
+      "note": "\u00a710 control now fires on the Solov'ev known state (which converges) and on every converged stored case whose unscaled current is inside the band; a converged case already outside the band (MAST-U 2.28 % in \u00a79) is reported as a band failure with the shift stated. Unconverged cases pass to the new \u00a712.",
+      "reason": "",
+      "when": "2026-11-23T19:15:03.942711+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261123T172234783687-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261123T172234783687-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "c69d2613b7c9e0d9daba6989d3236ce87fb82979",
   "rubric": "content",

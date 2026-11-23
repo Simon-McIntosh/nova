@@ -9,6 +9,7 @@ panel that a driver stopped drawing cannot pass review unnoticed.
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 import xml.etree.ElementTree as ElementTree
@@ -114,6 +115,38 @@ def test_drift_fragment_cites_every_published_panel():
     cited = set(CITED.findall(FRAGMENT.read_text()))
     published = {path.name for path in DRIFT.glob("*.svg")}
     assert cited == published
+
+
+def test_drift_driver_draws_through_the_shared_path(monkeypatch, tmp_path):
+    """The drift driver composes no panel of its own; it calls the one drawing path.
+
+    Two drivers drawing the same six panels drifted apart once already: one
+    resolved an npz terminal flux and the other learned only the receipt it was
+    written beside. The stub makes the delegation the thing asserted, so a driver
+    that grows its own drawing loop again fails here rather than in a panel.
+    """
+    import drift_policy_panels
+
+    called = {}
+
+    def stub(run, arms, destination_root=None):
+        called.update(run=run, arms=arms)
+        return [dict(label="a", axis_matches=True)]
+
+    monkeypatch.setattr(drift_policy_panels.redraw_panels, "draw_arms", stub)
+    monkeypatch.setattr(drift_policy_panels, "arm_specs", lambda run: ("spec",))
+    run = tmp_path / "run"
+    run.mkdir()
+    figures = tmp_path / "figures"
+    scratch = tmp_path / "scratch"
+    monkeypatch.setattr(
+        sys, "argv", ["drift_policy_panels.py", str(run), str(figures), str(scratch)]
+    )
+    drift_policy_panels.main()
+    assert called["run"] == run
+    assert called["arms"] == ("spec",)
+    written = json.loads((run / "panel-redraw.json").read_text())
+    assert written["panels"] == [dict(label="a", axis_matches=True)]
 
 
 def test_published_previews_draw_the_blue_series():

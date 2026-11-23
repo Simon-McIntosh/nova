@@ -67,15 +67,18 @@ intermediate revisions; this node did not run it, and the record says so rather
 than attributing the shift to whichever subject line reads closest.</p>
 
 <figure id="coil-edit-fine-panels-figure">
-  <img src="/nova/figures/mast-centroid-capability/converged-vs-nonconverged.png" alt="Two MAST poloidal panels at 10 mm display spacing: the converged edit 12 state and the non-converged edit 9 state, each with the vessel, its separatrix branches, and its own magnetic axis and admitted saddle markers." />
-  <figcaption>The panel each coil-edit figure set draws: the converged 12th
-  edit beside the non-converged 9th, both evaluated on a 10 mm display map. The
-  right-hand panel is not a converged state, so it draws the flux of the
-  terminal currents rather than a solved boundary; its largest node mismatch
-  against the state it is drawn from is <code>5.6e-2 Wb</code> against
-  <code>4.6e-3 Wb</code> on the left, and both maps reproduce their operator to
-  about <code>7e-12</code> relative.</figcaption>
+  <img src="/nova/figures/mast-centroid-capability/converged-vs-nonconverged.png" alt="Two MAST poloidal panels at 10 mm display spacing: the converged edit 19 state and the non-converged edit 2 state, each with the vessel, its separatrix branches, and its own magnetic axis and admitted saddle markers." />
+  <figcaption>The panel each coil-edit figure set draws: the converged 19th
+  edit (+20&#37; of the seed, terminal residual 1.972e-09 Wb, five active-set
+  iterations) beside the non-converged 2nd (&minus;14&#37;, 9.879e-03 Wb,
+  seven), both evaluated on a 10 mm display map. The right-hand panel is not a
+  converged state, so it draws the flux of the terminal currents rather than a
+  solved boundary; its largest node mismatch against the state it is drawn from
+  is <code>6.951e-02 Wb</code> against <code>1.836e-02 Wb</code> on the left,
+  and both maps reproduce their operator to about <code>7e-12</code>
+  relative.</figcaption>
 </figure>
+<p id="coil-edit-fine-panels-resolve-note">2026-11-23 &mdash; the embedded figure was re-solved per figure by the coil-edit-panels-per-figure node, which redrew it from the mast figure's own state archive and rewrote the caption above from that figure's receipt, so the panel now draws edits 19 and 2 rather than the pair this node recorded. Each figure's own measurement and its near-X verdict are in <a href="/nova/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-per-figure">each coil-edit panel is drawn from its own re-solved state</a>. The measurements elsewhere in this fragment are as this node recorded them and are not restated.</p>
 
 <p id="coil-edit-fine-panels-map">The display builder reproduces the wrong
 reference. The map the solve iterates is the trip boundary of the constrained

@@ -102,11 +102,11 @@ mask &Delta; is 0 promotes nothing, which is what ends the loop.</p>
 (job <code>1275764</code> at revision <code>15b3aa2f8</code>), in which each edit is warm-started from
 the preceding edit's terminal state and edit 12 settles at <code>active_set_settled</code> with
 residual 5.2669e-03&nbsp;Wb. The panel above is drawn from the re-solved state archive
-(<code>panel-states.npz</code>, md5 <code>da0da1ec0d5515befa0bbd9e614e7fb0</code>), where edit 12
-converges at 5.730e-09&nbsp;Wb and edit 9 at 6.612e-03&nbsp;Wb; the caption names the same
+(<code>panel-states.npz</code>, md5 <code>c5c0c89ddf9f8c682229d896ca2b686089fa0cb79de9f3f41e8642f4240cb355</code>), where edit 5
+converges at 5.366e-09&nbsp;Wb and edit 4 at 4.339e-02&nbsp;Wb; the caption names the same
 termination counts. Reading the two as one answer for one edit is the mistake they invite: the
-table's row 12 and the panel's converged panel are the same edit under two different solves, so the
-row that reconciles them is the archive, not the sweep.</p>
+table's row for an edit and the panel's drawing for that edit are that edit under two different
+solves, so the row that reconciles them is the archive, not the sweep.</p>
 
 <h2 id="groups">Grouping the non-converged sixteen</h2>
 <p>Almost all of the sixteen non-converged edits terminate with the same word, so the table groups them by
@@ -184,7 +184,7 @@ out.</p>
 <h2 id="panel">A converged edit beside a non-converged one</h2>
 <figure>
 <img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets">
-<figcaption>Left: edit 12 (P4-upper circuit 8 current +6&#37; of the seed), converged, terminal residual 5.730e-09 Wb, three active-set iterations. Right: edit 9 (+0&#37;), not converged, terminal residual 6.612e-03 Wb, three active-set iterations. The percentage is the fraction by which the edit scales that circuit's current, and an <em>active-set iteration</em> is one active-set trip the driver took; the two panels are the two largest-residual points of their respective sets. The converged panel draws the field of its terminal currents on a 10 mm map (largest node mismatch 2.621e-02 Wb, solved-node mismatch 7.468e-09 Wb, 46 promoted nodes, nearest promoted node 0.056 m from its polished X-point); the non-converged panel draws its own (1.303e-02 Wb, 6.432e-04 Wb, 25 promoted nodes, nearest 2.451 m). Reference contours are grey and solved contours orange, both at 1.2&nbsp;pt on one shared level array;
+<figcaption>Left: edit 5 (P4-upper circuit 8 current &minus;8&#37; of the seed), converged, terminal residual 5.366e-09 Wb, five active-set iterations. Right: edit 4 (&minus;10&#37;), not converged, terminal residual 4.339e-02 Wb, four active-set iterations. The percentage is the fraction by which the edit scales that circuit's current, and an <em>active-set iteration</em> is one active-set trip the driver took; the two panels are the two largest-residual points of their respective sets. The converged panel draws the field of its terminal currents on a 10 mm map (largest node mismatch 1.311e-05 Wb, solved-node mismatch 6.345e-09 Wb, 27 promoted nodes, nearest promoted node 2.571 m from its polished X-point, outside the two-lattice-cell band of 0.121 m within which a promotion would leave the near-X geometry uncertified); the non-converged panel draws its own (1.947e-02 Wb, 8.043e-03 Wb, 3 promoted nodes, nearest 0.087 m, inside that band). Reference contours are grey and solved contours orange, both at 1.2&nbsp;pt on one shared level array;
 the reference nulls are drawn larger and beneath the solved ones, so a coincident axis or saddle reads
 as both, and other qualified nulls are hollow in both sets over the MAST first wall. A frameless legend
 names the contour series, the dashed saddle legs and the two null sets.</figcaption>

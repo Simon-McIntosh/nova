@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/west_iron_linear/measure.py:861"
+  ],
+  "completed_at": "2026-11-23T05:09:32.659Z",
+  "dispatched_at": "2026-11-23T04:46:06Z",
+  "findings": [
+    {
+      "file": "scripts/west_iron_linear/measure.py",
+      "line": 362,
+      "severity": "non-blocking",
+      "text": "The negative control is self-referential: planted = step[\"reference\"] * (1 + 1e-10) and its distance from the reference is 1e-10 by construction, so `detected` can never be false and proves nothing about detecting a route defect; the manifest's negative_control_note describes a planted factor perturbation the code never performs."
+    },
+    {
+      "file": "scripts/west_iron_linear/measure.py",
+      "line": 111,
+      "severity": "non-blocking",
+      "text": "_linear_problem re-implements the affine Newton operand assembly owned by nova/biot/magnetisation.py:1052-1116 rather than reusing an exported builder, so the refined reference can silently diverge from production if that construction changes; the brief forbade touching nova/, so a follow-up node should export a builder and have measure.py call it."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-route-refined-reference.html",
+      "line": 31,
+      "severity": "non-blocking",
+      "text": "The fragment quotes the nearest route distance as 2.40e-13 while the resolvability check at measure.py:324 uses the minimum of each route's maximum of the two measures, which is 3.29e-13; both sit about three decades below the reference error so the verdict is unaffected, but the quoted number is not the one the code tested."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all three commits against base 6db36fee4: 1e9274459 adds the refinement comparison, 6f916061f adds --operator, 22315ca42 adds the fragment, and no nova/ product code changes.",
+    "done_when": "the done_when asserts a reference residual and condition estimate, both routes' distances with the reference error at least a decade below, and a stated verdict; the H200 receipt uniform-0.04.json records residual 4.34e-16, condition estimate 1.02e8, LU distances 7.77e-13 frobenius / 1.09e-12 max-entry and Cholesky 2.40e-13 / 3.29e-13, with outcome rounding and a reference error of 2.39e-16.",
+    "goal": "the source goal is an iteratively refined reference solve on the persisted uniform 40 mm WEST operator with both routes' Frobenius and maximum-entry distances and a rounding-or-defect verdict; scripts/west_iron_linear/measure.py:261 route_refinement delivers exactly that.",
+    "manifest": "the manifest reports status complete with H200 job 1338206 logged at /home/ITER/mcintos/.cache/nova-icm-route/refine-route-1338206.log; the log records revision 6f916061f, EXIT=0, and the same receipt numbers the fragment quotes.",
+    "write_paths": "the declared paths are scripts/west_iron_linear, the evidence fragment and a figures directory; the two-path diff is measure.py and the fragment, both inside the declared scope, and the figures path was not used."
+  },
+  "justifications": {
+    "durability": "no test is added and the only guard, scripts/west_iron_linear/measure.py:362, is self-referential, so nothing durably fails if the verdict logic regresses.",
+    "evidence": "/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/route-refined-reference/uniform-0.04.json and the H200 job log /home/ITER/mcintos/.cache/nova-icm-route/refine-route-1338206.log record every number the fragment quotes, with EXIT=0.",
+    "fit": "the added functions follow the module's numpy/jnp style and mechanism names with no plan or ticket label, though scripts/west_iron_linear/measure.py:111 reaches into several underscore-private nova functions.",
+    "goal_fidelity": "scripts/west_iron_linear/measure.py:261 route_refinement reports the reference residual, condition estimate, both routes' Frobenius and maximum-entry distances and the verdict the goal names.",
+    "reuse": "scripts/west_iron_linear/measure.py:111 re-implements the affine Newton operand assembly owned by nova/biot/magnetisation.py:1052-1116 instead of extending an exported builder.",
+    "scope_discipline": "the diff touches only scripts/west_iron_linear/measure.py and docs/evidence/fragments/iron-core-magnetisation/icm-route-refined-reference.html, both inside the declared write paths, and changes no product code."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal is an iteratively refined reference solve on the persisted uniform 40 mm WEST operator reported with both routes' Frobenius and maximum-entry distances and a rounding-or-defect verdict; scripts/west_iron_linear/measure.py:261 route_refinement delivers exactly that.\nVERDICT done_when: the done_when asserts a reference residual and condition estimate, both routes' distances with the reference error at least a decade below, and a stated verdict; the H200 receipt uniform-0.04.json records residual 4.34e-16, condition estimate 1.02e8, LU distances 7.77e-13 frobenius / 1.09e-12 max-entry and Cholesky 2.40e-13 / 3.29e-13, with outcome rounding and a reference error of 2.39e-16.\nVERDICT write_paths: the declared paths are scripts/west_iron_linear, the evidence fragment and a figures directory; the two-path diff is measure.py and the fragment, both inside the declared scope, and the figures path was not used.\nVERDICT manifest: the manifest reports status complete with H200 job 1338206 logged at /home/ITER/mcintos/.cache/nova-icm-route/refine-route-1338206.log; the log records revision 6f916061f, EXIT=0, and the same receipt numbers the fragment quotes.\nVERDICT diff: read all three commits against base 6db36fee4: 1e9274459 adds the refinement comparison, 6f916061f adds --operator, 22315ca42 adds the fragment, and no nova/ product code changes.\nCALL_SITES: scripts/west_iron_linear/measure.py:861\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/west_iron_linear/measure.py:261 route_refinement reports the reference residual, condition estimate, both routes' two measures and the verdict the goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/route-refined-reference/uniform-0.04.json and the job log it was written from record every number the fragment quotes, with EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only scripts/west_iron_linear/measure.py and docs/evidence/fragments/iron-core-magnetisation/icm-route-refined-reference.html, both inside the declared write paths, and changes no product code.\nSCORE durability: 6\nJUSTIFICATION durability: no test is added and the only guard, scripts/west_iron_linear/measure.py:362, is self-referential, so nothing durably fails if the verdict logic regresses.\nSCORE fit: 17\nJUSTIFICATION fit: the added functions follow the module's numpy/jnp style and mechanism names with no plan or ticket label, though scripts/west_iron_linear/measure.py:111 reaches into several underscore-private nova functions.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/west_iron_linear/measure.py:111 re-implements the affine Newton operand assembly owned by nova/biot/magnetisation.py:1052-1116 instead of extending an exported builder.\nFINDING scripts/west_iron_linear/measure.py:362 non-blocking: The negative control is self-referential: planted = step[\"reference\"] * (1 + 1e-10) and its distance from the reference is 1e-10 by construction, so detected can never be false and proves nothing about detecting a route defect; the manifest's negative_control_note describes a planted factor perturbation the code never performs.\nFINDING scripts/west_iron_linear/measure.py:111 non-blocking: _linear_problem re-implements the affine Newton operand assembly owned by nova/biot/magnetisation.py:1052-1116 rather than reusing an exported builder, so the refined reference can silently diverge from production if that construction changes; the brief forbade touching nova/, so a follow-up node should export a builder and have measure.py call it.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-route-refined-reference.html:31 non-blocking: The fragment quotes the nearest route distance as 2.40e-13 while the resolvability check at measure.py:324 uses the minimum of each route's maximum of the two measures, which is 3.29e-13; both sit about three decades below the reference error so the verdict is unaffected, but the quoted number is not the one the code tested.",
+  "review_run_id": "r-20261123T044524780410-review-of-icm-route-refined-reference-22315ca42184",
+  "reviewed_base_sha": "6db36fee4fb17a4c05996dda9bf298ec0a5b02a2",
+  "reviewed_head_sha": "22315ca421844d8f9fa19b1aa94c9f901a7ddcb4",
+  "reviewed_run_id": "r-20261122T142048659544-icm-route-refined-reference",
+  "rubric": "code-review",
+  "scores": {
+    "durability": 6,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T05:09:59.989948+00:00",
+  "total": 84
+}

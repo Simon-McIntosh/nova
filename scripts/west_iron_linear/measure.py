@@ -249,13 +249,58 @@ def _linear_step_routes(operands, metric):
         correction_history=corrections,
     )
     del jacobian_host
+    perturbed_relative = 1e-10
+    del factor
+    perturbed_matrix = jacobian * (1.0 + perturbed_relative)
+    perturbed = jla.lu_solve(jla.lu_factor(perturbed_matrix), right)
+    perturbed_distance = relative_distance(np.asarray(reference), np.asarray(perturbed))
+    del perturbed_matrix, perturbed
     return dict(
         reference=np.asarray(reference),
         lu=np.asarray(lu_direction),
         cholesky=np.asarray(cholesky_direction),
         condition=condition,
         reference_error=reference_error,
+        perturbed_relative=perturbed_relative,
+        perturbed_distance=perturbed_distance,
     )
+
+
+def _route_verdict(sizes, condition_estimate, reference_error):
+    """Classify each route's distance from the refined reference.
+
+    ``sizes`` maps a route name to its larger of the two distance measures. The
+    reference fixes the resolvability floor, ``kappa * eps_float64`` fixes the
+    rounding ceiling, and the ratio of the farther route to the nearer one must
+    stay near unity for the pair to be read as rounding rather than as one route
+    being systematically wrong.
+    """
+    floor = condition_estimate * np.finfo(np.float64).eps
+    nearest = min(sizes.values())
+    resolvable = bool(nearest > 10 * reference_error["forward_error_estimate"])
+    ratio = max(sizes.values()) / max(nearest, 1e-300)
+    rounding = (
+        resolvable
+        and all(value <= 10 * floor for value in sizes.values())
+        and ratio <= 100
+    )
+    if not resolvable:
+        outcome = "indeterminate"
+    elif rounding:
+        outcome = "rounding"
+    else:
+        outcome = "defect"
+    verdict = dict(
+        machine_epsilon=float(np.finfo(np.float64).eps),
+        extended_epsilon=float(np.finfo(np.longdouble).eps),
+        rounding_scale=floor,
+        resolvable=resolvable,
+        nearest_distance=nearest,
+        distance_ratio=ratio,
+        farther_route=max(sizes, key=sizes.get),
+        outcome=outcome,
+    )
+    return verdict
 
 
 def route_refinement(inputs, size, interaction, *, tolerance, max_iterations):
@@ -320,31 +365,12 @@ def route_refinement(inputs, size, interaction, *, tolerance, max_iterations):
     sizes = {name: max(value.values()) for name, value in distances.items()}
     condition = step["condition"]
     reference_error = step["reference_error"]
-    floor = condition["condition_estimate"] * np.finfo(np.float64).eps
-    nearest = min(sizes.values())
-    resolvable = bool(nearest > 10 * reference_error["forward_error_estimate"])
-    ratio = max(sizes.values()) / max(min(sizes.values()), 1e-300)
-    rounding = (
-        resolvable
-        and all(value <= 10 * floor for value in sizes.values())
-        and ratio <= 100
+    resolvable = bool(
+        min(sizes.values()) > 10 * reference_error["forward_error_estimate"]
     )
-    farther = max(sizes, key=sizes.get)
-    if not resolvable:
-        outcome = "indeterminate"
-    elif rounding:
-        outcome = "rounding"
-    else:
-        outcome = "defect"
-    verdict = dict(
-        machine_epsilon=float(np.finfo(np.float64).eps),
-        extended_epsilon=float(np.finfo(np.longdouble).eps),
-        rounding_scale=floor,
-        distance_ratio=ratio,
-        farther_route=farther,
-        outcome=outcome,
-    )
-    if outcome == "defect":
+    verdict = _route_verdict(sizes, condition["condition_estimate"], reference_error)
+    farther = verdict["farther_route"]
+    if verdict["outcome"] == "defect":
         deviation = np.abs(step["lu"] - step["reference"])
         if farther == "cholesky":
             deviation = np.abs(step["cholesky"] - step["reference"])
@@ -359,14 +385,41 @@ def route_refinement(inputs, size, interaction, *, tolerance, max_iterations):
             )
             for i in order
         ]
-    planted = step["reference"] * (1 + 1e-10)
-    planted_distance = relative_distance(
-        reference_coefficients, planted.reshape(2, -1, 3)
+    probes = np.asarray(inputs["probes"], dtype=np.float64)
+    lu_field = np.asarray(lu.field(probes))
+    cholesky_field = np.asarray(cholesky.field(probes))
+    probe_difference = lu_field - cholesky_field
+    probe_scale = np.linalg.norm(cholesky_field, axis=1)
+    probe_gap = dict(
+        probes_m=probes.tolist(),
+        lu_field=lu_field.tolist(),
+        cholesky_field=cholesky_field.tolist(),
+        per_probe_relative=(
+            np.linalg.norm(probe_difference, axis=1) / probe_scale
+        ).tolist(),
+        maximum_entry_relative=float(
+            np.abs(probe_difference).max()
+            / max(float(np.abs(cholesky_field).max()), 1e-300)
+        ),
     )
-    negative_control = dict(
-        planted_relative=1e-10,
-        planted_distance=planted_distance,
-        detected=bool(max(planted_distance.values()) > 1e-11),
+    nearest_unperturbed = min(sizes.values())
+    perturbed_sizes = dict(sizes)
+    perturbed_sizes["lu"] = max(step["perturbed_distance"].values())
+    perturbed_verdict = _route_verdict(
+        perturbed_sizes, condition["condition_estimate"], reference_error
+    )
+    defect_control = dict(
+        perturbed_route="lu",
+        perturbed_relative=step["perturbed_relative"],
+        perturbed_distance=step["perturbed_distance"],
+        ratio_to_nearest_unperturbed=float(
+            max(step["perturbed_distance"].values()) / max(nearest_unperturbed, 1e-300)
+        ),
+        at_least_a_decade_farther=bool(
+            min(step["perturbed_distance"].values()) > 10 * nearest_unperturbed
+        ),
+        verdict=perturbed_verdict,
+        rejected=bool(perturbed_verdict["outcome"] != "rounding"),
     )
     return dict(
         routes=routes,
@@ -378,7 +431,8 @@ def route_refinement(inputs, size, interaction, *, tolerance, max_iterations):
         ),
         condition=condition,
         distances=distances,
-        negative_control=negative_control,
+        probe_gap=probe_gap,
+        defect_control=defect_control,
         verdict=verdict,
     )
 

@@ -6,7 +6,9 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import os
+from pathlib import Path
 import re
+from unittest.mock import patch
 
 import jax
 import jax.numpy as jnp
@@ -93,22 +95,39 @@ def _targets(kind):
 
 
 def _sixth_difference(points, geometry, steps, coordinate):
+    # The weighted field rows cancel large endpoint primitives. Evaluate their
+    # existing contour expression with extra mantissa bits before differencing.
+    # The separate flux-only SciPy area evaluator accepts double precision only;
+    # those discarded rows have no role in this field reference.
+    assert np.finfo(np.longdouble).nmant > np.finfo(float).nmant
+    points = points.astype(np.longdouble)
+    steps = steps.astype(np.longdouble)
+    geometry = tuple(value.astype(np.longdouble) for value in geometry[:-1]) + (
+        geometry[-1],
+    )
     direction = np.eye(2)[coordinate]
     estimates = []
-    for factor in (1.0, 0.5, 0.25):
-        shift = (steps * factor)[:, None] * direction
-        estimates.append(
-            (
-                _rows(points + shift, geometry)[3:9]
-                - _rows(points - shift, geometry)[3:9]
+    with patch.object(
+        kernel,
+        "_conditioned_flux_moments",
+        lambda xp, *arguments: (xp.zeros_like(arguments[0]),) * 3,
+    ):
+        for factor in (1.0, 0.5, 0.25):
+            shift = (steps * factor)[:, None] * direction
+            estimates.append(
+                (
+                    _rows(points + shift, geometry)[3:9]
+                    - _rows(points - shift, geometry)[3:9]
+                )
+                / (2 * steps * factor)
             )
-            / (2 * steps * factor)
-        )
     return (64 * estimates[2] - 20 * estimates[1] + estimates[0]) / 45
 
 
 @pytest.fixture(scope="module", params=("generic", "corner_height"))
 def agreement(request):
+    print(f"MEASUREMENT_MODULE={Path(kernel.__file__).resolve()}")
+    print(f"MEASUREMENT_CWD={Path.cwd().resolve()}")
     polygons, points, pitches = _targets(request.param)
     geometry = _inputs(polygons, expansion_offset=(0.07, -0.04))
     rows = _rows(points, geometry, derivatives=True)
@@ -125,8 +144,18 @@ def agreement(request):
             for index, (point, polygon) in enumerate(zip(points, polygons, strict=True))
         ]
     ).T
-    radial = _sixth_difference(points, geometry, 0.012 * pitches, 0)
-    vertical = _sixth_difference(points, geometry, 0.012 * pitches, 1)
+    inside_count = int(np.count_nonzero(current[0]))
+    assert (
+        0 < inside_count < len(points)
+        if request.param == "generic"
+        else inside_count == 0
+    )
+    print(
+        f"FIELD_TARGETS cohort={request.param} interior={inside_count} "
+        f"total={len(points)}"
+    )
+    radial = _sixth_difference(points, geometry, 0.006 * pitches, 0)
+    vertical = _sixth_difference(points, geometry, 0.006 * pitches, 1)
     actual = np.stack(
         (
             rows[9:12],
@@ -136,6 +165,20 @@ def agreement(request):
         )
     )
     reference = np.stack((radial[:3], vertical[:3], radial[3:], vertical[3:]))
+    # A second sixth-order stencil verifies the reference's convergence rather
+    # than assuming a small step is accurate.
+    radial_check = _sixth_difference(points, geometry, 0.012 * pitches, 0)
+    vertical_check = _sixth_difference(points, geometry, 0.012 * pitches, 1)
+    check = np.stack(
+        (radial_check[:3], vertical_check[:3], radial_check[3:], vertical_check[3:])
+    )
+    delta = float(np.max(abs(check - reference) / np.max(abs(reference), axis=0)))
+    print(
+        f"FIELD_REFERENCE cohort={request.param} "
+        f"mantissa_bits={np.finfo(np.longdouble).nmant} "
+        f"step_halving_relative={delta:.17g}"
+    )
+    assert delta < 1e-8
     return request.param, actual, reference
 
 
@@ -157,6 +200,20 @@ def test_field_derivative_agreement(agreement, component):
         f"component={component} maximum_relative={maximum:.17g} bound={tolerance}"
     )
     assert maximum <= tolerance
+
+
+def test_compiled_field_derivative_outputs():
+    polygons, points, _ = _targets("generic")
+    geometry = tuple(map(jnp.asarray, _inputs(polygons[:4])))
+    points = points[:4].copy()
+    points[0, 0] *= -1.0
+    evaluate = jax.jit(lambda p, g: _rows(p, g, derivatives=True, xp=jnp))
+    actual = np.asarray(evaluate(jnp.asarray(points), geometry))
+    expected = _rows(points, tuple(map(np.asarray, geometry)), derivatives=True)
+    assert np.isfinite(actual).all()
+    relative = np.max(abs(actual - expected) / np.max(abs(expected), axis=1)[:, None])
+    print(f"FIELD_COMPILED targets=4 maximum_relative={relative:.17g}")
+    assert relative < 1e-10
 
 
 def test_packed_field_derivative_lowering_bound():

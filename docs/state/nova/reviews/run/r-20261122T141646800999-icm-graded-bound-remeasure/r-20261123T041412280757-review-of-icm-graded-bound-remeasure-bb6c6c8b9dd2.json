@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T04:28:48.887Z",
+  "dispatched_at": "2026-11-23T04:14:57Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html",
+      "line": 187,
+      "severity": "non-blocking",
+      "summary": "The sentence pairs the four shares 0.21, 0.20, 0.18, 0.17 with cells 2412, 2411, 2410, 2413, but witness-graded-16-80.json records those shares for 2412, 5343, 5344 and 2411, so the inner lobe reads as carrying 0.76 of the numerator when it carries 0.46."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html",
+      "line": 84,
+      "severity": "non-blocking",
+      "summary": "The prose says each receipt names the operator's own digest, but the three bound receipts and the control receipt all read geometry_digest \"synthetic\", so the headline readings carry no recorded proof that the operator matched the rebuilt mesh."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T141646800999-icm-graded-bound-remeasure/manifest.md",
+      "line": 105,
+      "severity": "non-blocking",
+      "summary": "test_logs cites check-1337279.log, which ends in KeyError 'path' with no EXIT line, while the passing check row the fragment cites was printed by witness-1338104.log, which the manifest does not name."
+    },
+    {
+      "file": "scripts/iron_operator_bound/persisted.py",
+      "line": 575,
+      "severity": "non-blocking",
+      "summary": "localise() re-implements the top-cell and top-cell-pair split of a witness that scripts/iron_operator_bound/localise.py:141 already owns."
+    },
+    {
+      "file": "scripts/iron_operator_bound/persisted.py",
+      "line": 358,
+      "severity": "non-blocking",
+      "summary": "generalised_spectrum() builds the dense generalised block eigenproblem independently of the owner nova/biot/magnetisation.py:370 galerkin_block_spectrum."
+    },
+    {
+      "file": "scripts/iron_operator_bound/persisted.py",
+      "line": 640,
+      "severity": "non-blocking",
+      "summary": "--mode check is described as the instrument's own gate but no calibration identity raises on mismatch, so a regression would print a larger error and still exit zero."
+    },
+    {
+      "file": "scripts/iron_operator_bound/persisted.py",
+      "line": 698,
+      "severity": "non-blocking",
+      "summary": "skew_norm's relative residual divides by an eigenvalue at the round-off floor, so the residual 0.76 it reports measures nothing; the fragment cites the skew norm without it."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html",
+      "line": 195,
+      "severity": "non-blocking",
+      "summary": "The top-direction readings exist only in an uncited scratch log from an uncommitted script, not in any receipt the fragment names."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T141646800999-icm-graded-bound-remeasure/manifest.md",
+      "line": 73,
+      "severity": "non-blocking",
+      "summary": "The commits list stops at f2afbe069 and omits ea42512d2, which changes the instrument, and bb6c6c8b9, which writes the evidence fragment at the reviewed head."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to measure whether the persisted graded 16/80 WEST operator breaks the demagnetisation energy bound; docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html:13-27 reports the three quotients with residuals and answers that it does (1.0255).\nVERDICT done_when: the done_when requires a quotient with eigen-residual for each of the three operators, the graded Newton witness attributed and localised to cells, and a perturbed operator reading above the bound; /work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/operator-bound-graded/bound-{uniform-0.04,uniform-0.08,graded-16-80}.json carry the quotients and residuals, witness-graded-16-80.json carries the attribution and localisation, and control-uniform-0.08.json carries the lift.\nVERDICT write_paths: read the manifest's declared paths (scripts/iron_operator_bound, the fragment, the figure directory); all five paths in c06ff41..bb6c6c8 are inside them and no commit reaches nova/, tests/ or pyproject.toml.\nVERDICT manifest: read; it states the instrument gate is scripts/iron_operator_bound/persisted.py --mode check and records a base suite arm of 6 failed / 99 passed and a head arm declared incomplete, but its test_logs names check-1337279.log, which is a KeyError traceback rather than the log of the passing check.\nVERDICT diff: read commit by commit against the base; sixteen commits over five paths, adding scripts/iron_operator_bound/persisted.py (+959) and figure.py (+257), the evidence fragment (+293) and the rendered PNG/SVG, with no change to any product module.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html:13-27 answers the goal for all three operators, though its localisation sentence at line 187 mispairs shares with cells.\nSCORE evidence: 12\nJUSTIFICATION evidence: the readings and residuals are recorded in bound-*.json and witness-graded-16-80.json, but the manifest's cited gate log /home/ITER/mcintos/.cache/nova-icm-bound/check-1337279.log is a traceback and the four bound/control receipts still read geometry_digest \"synthetic\" at bound-uniform-0.08.json:8.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff c06ff41..bb6c6c8 is inside the declared write paths, and no commit touches nova/, tests/ or pyproject.toml.\nSCORE durability: 7\nJUSTIFICATION durability: scripts/iron_operator_bound/persisted.py:640 check() computes relative_difference, newton_identity_error and seed_relation_error but asserts none of them, so no test or gate fails if the instrument regresses; only record_control at line 927 raises.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/iron_operator_bound/persisted.py:1-55 follows the tree's module-docstring and configure_dtypes idiom, and the new names (signed_root, generalised_spectrum, localise) carry no plan or ticket label.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/iron_operator_bound/persisted.py:575 localise() re-implements scripts/iron_operator_bound/localise.py:141 and line 358 generalised_spectrum() re-implements nova/biot/magnetisation.py:370 galerkin_block_spectrum, neither extending the owner.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html:187 non-blocking: the sentence pairs the four shares 0.21, 0.20, 0.18, 0.17 with cells 2412, 2411, 2410, 2413, but witness-graded-16-80.json records those shares for 2412, 5343, 5344 and 2411, so the inner lobe reads as carrying 0.76 of the numerator when it carries 0.46.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html:84 non-blocking: the prose says each receipt names the operator's own digest, but bound-uniform-0.08.json, bound-graded-16-80.json, bound-uniform-0.04.json and control-uniform-0.08.json all read geometry_digest \"synthetic\", so the headline readings carry no recorded proof that the operator matched the rebuilt mesh.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T141646800999-icm-graded-bound-remeasure/manifest.md:105 non-blocking: test_logs cites check-1337279.log, which ends in KeyError 'path' with no EXIT line, while the passing check row the fragment cites (lanczos 0.9999989577610167 against owner 0.9999999577610174) was printed by witness-1338104.log, which the manifest does not name.\nFINDING scripts/iron_operator_bound/persisted.py:575 non-blocking: localise() re-implements the top-cell and top-cell-pair split of a witness that scripts/iron_operator_bound/localise.py:141 already owns, adding a second implementation the tree's own reuse_check.py does not cover.\nFINDING scripts/iron_operator_bound/persisted.py:358 non-blocking: generalised_spectrum() builds the dense generalised block eigenproblem independently of the owner nova/biot/magnetisation.py:370 galerkin_block_spectrum, which is documented as the one owner of the block metric and its normalisation.\nFINDING scripts/iron_operator_bound/persisted.py:640 non-blocking: --mode check is described as the instrument's own gate but no calibration identity raises on mismatch, so a regression in the quotient or the Newton action would print a larger error and still exit zero.\nFINDING scripts/iron_operator_bound/persisted.py:698 non-blocking: skew_norm's relative residual divides by an eigenvalue at the round-off floor (|value| about 1e-30), so the residual 0.76 it reports measures nothing, and the fragment cites the skew norm at line 137 without that residual.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html:195 non-blocking: the top-direction readings +0.061765 and -0.021339 exist only in /home/ITER/mcintos/.cache/nova-icm-bound/attribution-1338113.log from an uncommitted scratch script, and neither that log nor the script is cited in the fragment's receipts.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T141646800999-icm-graded-bound-remeasure/manifest.md:73 non-blocking: the commits list stops at f2afbe069 and omits ea42512d2, which changes the instrument, and bb6c6c8b9, which writes the evidence fragment at the reviewed head.",
+  "review_run_id": "r-20261123T041412280757-review-of-icm-graded-bound-remeasure-bb6c6c8b9dd2",
+  "reviewed_base_sha": "c06ff41029a84805c3be8ee6e9ca9f6b8f0ca35d",
+  "reviewed_head_sha": "bb6c6c8b9dd2c0b5e606004f18a068b9f349831c",
+  "reviewed_run_id": "r-20261122T141646800999-icm-graded-bound-remeasure",
+  "scores": {
+    "durability": 7,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T04:28:59.593183+00:00",
+  "total": 78
+}

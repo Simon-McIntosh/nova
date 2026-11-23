@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T07:46:57.866Z",
+  "dispatched_at": "2026-11-23T07:33:36Z",
+  "findings": [
+    {
+      "anchor": "plan.html:94",
+      "id": "reasoning-1",
+      "reason": "without an evidence-backed residual demand, the fixed allocation either kills the head arm (blocking the section's closing measure and, through \u00a74, the cached read the plan calls met) or the size must be re-derived from the census, so the node cannot run the clause as written.",
+      "text": "clause (2) requires \"the head arm completes both\" the 24-cell and 132-cell cold compiles in one sirius job at `--mem=120G`, while the census the section cites for its \"84 percent of the 132-cell read is that call\" (job 1338238) records the read's pre-optimization traced value demand as 876.49 GiB at 24 cells and 3,183.55 GiB at 132 cells and places 84% of the module at `polygonanalytic.py:3605`; removing that entire block leaves about 140 GiB at 24 cells and about 509 GiB at 132 cells, four times the job's memory at 24 cells and four times at 132 \u2014 and the section records no residual figure for the assembled read",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "cccabf8c66c32e56e6c8d4207b9a5e64c6ef95f1",
+  "plan_fingerprint": "8529ede2531010c3b0fc6df87b6f6a0d631761455f7187c498b488148300ba8c",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 141,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T073308346266-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "8da6acaa87cb876377ee5af6c19891bd1b34330a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 jobs 1338281 (sirius, OUT_OF_MEMORY at 120G), 1337904 (betelgeuse, OUT_OF_MEMORY at 64G) and 1338238 (sirius, COMPLETED) all resolve in sacct, the 450 GB census kill resolves in `docs/research/compile-cost-evidence.html` \u00a7\"KERNEL-COMPILE-CENSUS\", and the \u00a70 ruling of 2026-11-18 is stated at `plan.html:48`.",
+    "done_when": "pass \u2014 clause (2) is a measurable completion under a fixed allocation and clause (3) is a declared negative control (restoring forward-mode differentiation must fail the instance-count test by test id).",
+    "evidence_paths": "pass \u2014 the record is `docs/evidence/fragments/kernel-compile-barrier/kcb-assembled-read-hessian.html` with receipts larger than a few MB under the GPFS evidence root, not a temporary path.",
+    "naming": "pass \u2014 the section names no code symbol and carries no ticket or stage label into source; `kcb-` in the fragment filename matches the existing fragment family and is an artifact path.",
+    "reasoning": "a finding \u2014 clause (2) fixes a 120 GB job for the head arm even though the section's own cited census puts the read's residual demand several times that at both sizes, so the endpoint is not shown to be reachable.",
+    "single_goal": "pass \u2014 the section delivers one thing, the read's Hessian assembled from the kernel's field-derivative outputs, and the compile measure is the same change's verdict.",
+    "wiring": "pass \u2014 s9's depends-on is {s8} (`plan-section-depends-on` s9: kernel-compile-barrier#s8), its data-links name s8 and s4, and s4's depends-on names s9, so s9\u2192s4 is an informs declared as a link rather than a dependency, with no cycle."
+  },
+  "section_digests": {
+    "_document": "8aa2f4e5145f569b0e6cbd810ea4816ca4580ad9e1a7491aebefa7b76a7da11c",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "c0050e9c77ebe6780135151c511e8850c91e7dc99d0cb4fe32c9d032665dd522",
+    "s4": "4b8bf6686dd7741ef6ed148a144b3f512eff3f8ad043c934f568a9feb50f76f8",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea",
+    "s7": "6dfe0a01ad8470c02d38d7e3fa33263ff325b87943f260375c61e09e0cfe5db8",
+    "s8": "a4627c2611f0af4743802be210abf766114de0c5c5157b517d571a34443c1377",
+    "s9": "fb9363265c3a0cbb17240e7418e44c198a2c87f49fcbda6103a90ac6dde8ac80"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:47:05.830417+00:00",
+  "total": null
+}

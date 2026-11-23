@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T07:58:23.862Z",
+  "dispatched_at": "2026-11-23T07:51:24Z",
+  "findings": [
+    {
+      "anchor": "plan.html:94",
+      "id": "anchors_resolve-1",
+      "reason": "a worker dispatched to \u00a79 following that sentence would look for a \u00a74 mechanism that does not exist, then have nothing to hand the remainder to.",
+      "text": "\u00a79 cites \"the census method of \u00a74's second diagnosis\" and \"\u00a74's source blocking to bound\" the remaining value family; a whole-plan grep finds \"diagnosis\" only on this line, and \u00a74 (plan.html:70-74) contains no source blocking and no diagnosis of a value family \u2014 its clauses are the compile-clause measure, retaining `test_kernel_compile_growth`'s strict xfail, and enabling the cache in the `kernel_compile_budget` fixture",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:23",
+      "id": "wiring-1",
+      "reason": "either the source blocking must move into \u00a79 (or a section that lands before \u00a74), or \u00a79 drops the hand-off; as written the plan commits the read to an unreachable two-step.",
+      "text": "\u00a74 declares plan-section-depends-on s4: [s2, s3, s9], so \u00a74 is dispatched only after \u00a79 passes its gate, while \u00a79 clause (2) (plan.html:94) says the 132-cell remainder \"is \u00a74's source blocking to bound, so the two changes together carry the read inside the allocation\"; a dependency gated behind this section cannot make this section's own compile fit",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:94",
+      "id": "reasoning-1",
+      "reason": "the clause's measure cannot fail on the property it states, so a node could close this section with the barrier intact, and the fallback only becomes a pass if another section actually blocks the remainder, which \u00a74 does not.",
+      "text": "clause (2) states its requirement as \"The read compiles where the differentiated form is killed\", lists the 132-cell read among those kill sites, and then satisfies the clause by \"records completion, or the kill with its peak and the largest remaining value family\" \u2014 so a run that reproduces the 64 GB, 96 GB or 450 GB kill passes the clause while the read still does not compile at 132 cells",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "594f160b99f45c9778e53404a9eb3a744677243c",
+  "plan_fingerprint": "cdfe74e847a2c654be16eeee2464ca41b5bd7064efb7a32782f613859361eacb",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 142,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T075039502872-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "79e331518a90298489da52b104016666bb6607b3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \"the census method of \u00a74's second diagnosis\" names a diagnosis that appears nowhere in the plan, and \"\u00a74's source blocking\" names a block-reduction mechanism \u00a74 does not contain; \u00a74's clauses (1)\u2013(3) and nodes (a)\u2013(b) measure and cache the read, and none reduces memory by blocking sources.",
+    "done_when": "a finding \u2014 \u00a79 clause (2) opens \"The read compiles where the differentiated form is killed\" and then closes on \"records completion, or the kill\", so the clause passes when the 132-cell read is killed, which is the failure it states it must remove.",
+    "evidence_paths": "pass \u2014 the record docs/evidence/fragments/kernel-compile-barrier/kcb-assembled-read-hessian.html is a durable repository path; no receipt goes to a session scratchpad or a node-local temporary.",
+    "naming": "pass \u2014 \u00a79's text introduces no plan labels, stage names or ticket identifiers, and the mechanism is stated (the Hessian assembled from the kernel's field derivatives via the two Maxwell relations) rather than a code path; the matrix written out is the definition of the assembled quantity, not a step sequence.",
+    "reasoning": "a finding \u2014 the path by which the 132-cell read comes inside the 120 GB allocation (\"\u00a74's source blocking to bound\") is owned by no section, so the endpoint clause (2) declares is not reachable from the plan as written.",
+    "single_goal": "pass \u2014 \u00a79 carries one deliverable, the read's flux Hessian assembled from \u00a78's outputs, with its own record.",
+    "wiring": "a finding \u2014 \u00a79 clause (2) rests on \"\u00a74's source blocking to bound\" the 132-cell remainder, while \u00a74 is declared downstream of \u00a79 (plan.html:23, s4 depends on s9), so the dependency points the wrong way and \u00a74 could not bound what \u00a79 still owes."
+  },
+  "section_digests": {
+    "_document": "8aa2f4e5145f569b0e6cbd810ea4816ca4580ad9e1a7491aebefa7b76a7da11c",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "c0050e9c77ebe6780135151c511e8850c91e7dc99d0cb4fe32c9d032665dd522",
+    "s4": "4b8bf6686dd7741ef6ed148a144b3f512eff3f8ad043c934f568a9feb50f76f8",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea",
+    "s7": "6dfe0a01ad8470c02d38d7e3fa33263ff325b87943f260375c61e09e0cfe5db8",
+    "s8": "a4627c2611f0af4743802be210abf766114de0c5c5157b517d571a34443c1377",
+    "s9": "b1c64a86a5d90f1d4b2120dd3d2b734b13f5a766d21510a960750166f4c4a807"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:58:29.451080+00:00",
+  "total": null
+}

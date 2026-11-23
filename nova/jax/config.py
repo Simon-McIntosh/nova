@@ -46,6 +46,7 @@ __all__ = [
     "configure_persistent_compilation_cache",
     "default_persistent_compilation_cache_root",
     "release_compilation_caches",
+    "release_compilation_caches_when_mapped",
     "resolve_precision",
 ]
 
@@ -263,6 +264,44 @@ def release_compilation_caches() -> CompilationRelease:
     """
 
     return _release_compilation_caches(_live_executable_count())
+
+
+_DEFAULT_MAPPING_RELEASE_THRESHOLD = 20_000
+
+
+def _mapped_region_count() -> int:
+    """Return this process's mapped-region count, or zero where unavailable."""
+    try:
+        with open("/proc/self/maps", "rb") as maps:
+            return sum(1 for _ in maps)
+    except OSError:
+        return 0
+
+
+def release_compilation_caches_when_mapped(
+    threshold_mappings: int = _DEFAULT_MAPPING_RELEASE_THRESHOLD,
+) -> CompilationRelease | None:
+    """Release finished problems' executables once mapped regions accumulate.
+
+    The kernel bounds mapped regions per process (``vm.max_map_count``), not
+    loaded executables, so a count-based ceiling never fires for a process that
+    compiles a few large programs and maps tens of thousands of regions for
+    each.  One converged CPU free-boundary solve maps about 28,500 regions;
+    from the few thousand a release leaves, one more problem stays well below
+    the bound, and a third can reach it -- where the failure appears as an
+    allocation error inside LLVM or as ``Failed to materialize symbols``
+    rather than as the abort, depending on which allocation is refused first.
+
+    Call this before starting a problem that compiles, in a process that has
+    already run another.  The trigger is the measured mapping count, so a
+    second program compiled from an already-built problem is covered as well
+    as a second problem.
+    """
+    if threshold_mappings < 1:
+        raise ValueError("mappings threshold must be positive")
+    if _mapped_region_count() < threshold_mappings:
+        return None
+    return release_compilation_caches()
 
 
 def bound_compilation_retention(

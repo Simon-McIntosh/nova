@@ -13,6 +13,7 @@ from nova.jax.config import (
     Precision,
     bound_compilation_retention,
     configure_dtypes,
+    release_compilation_caches_when_mapped,
     resolve_precision,
 )
 
@@ -105,16 +106,53 @@ def test_compilation_retention_is_released_after_crossing_the_ceiling(monkeypatc
 def test_release_between_problems_drops_loaded_compilations(monkeypatch):
     """A process releases a finished problem's executables before the next one."""
     clear_calls = []
+    counts = iter((3, 0))
     monkeypatch.setattr(config, "_compilation_releases", [])
-    monkeypatch.setattr(config, "_live_executable_count", lambda: 3)
+    monkeypatch.setattr(config, "_live_executable_count", lambda: next(counts))
     monkeypatch.setattr(config.gc, "collect", lambda: 11)
     monkeypatch.setattr(jax, "clear_caches", lambda: clear_calls.append(True))
 
     release = config.release_compilation_caches()
 
     assert clear_calls == [True]
-    assert release == CompilationRelease(before=3, after=3, collected_objects=11)
+    assert release == CompilationRelease(before=3, after=0, collected_objects=11)
     assert config.compilation_release_history() == (release,)
+
+
+def test_mapping_threshold_stays_quiet_below_the_bound(monkeypatch):
+    """A process below the mapping threshold keeps its compilations hot."""
+    clear_calls = []
+    monkeypatch.setattr(config, "_compilation_releases", [])
+    monkeypatch.setattr(config, "_mapped_region_count", lambda: 19_999)
+    monkeypatch.setattr(jax, "clear_caches", lambda: clear_calls.append(True))
+
+    release = release_compilation_caches_when_mapped(20_000)
+
+    assert release is None
+    assert clear_calls == []
+    assert config.compilation_release_history() == ()
+
+
+def test_mapping_threshold_releases_at_the_bound(monkeypatch):
+    """Accumulated mappings trigger a release that drops loaded executables."""
+    clear_calls = []
+    counts = iter((3, 0))
+    monkeypatch.setattr(config, "_compilation_releases", [])
+    monkeypatch.setattr(config, "_mapped_region_count", lambda: 20_000)
+    monkeypatch.setattr(config, "_live_executable_count", lambda: next(counts))
+    monkeypatch.setattr(config.gc, "collect", lambda: 5)
+    monkeypatch.setattr(jax, "clear_caches", lambda: clear_calls.append(True))
+
+    release = release_compilation_caches_when_mapped(20_000)
+
+    assert clear_calls == [True]
+    assert release == CompilationRelease(before=3, after=0, collected_objects=5)
+    assert config.compilation_release_history() == (release,)
+
+
+def test_mapping_threshold_rejects_non_positive_bound():
+    with pytest.raises(ValueError, match="must be positive"):
+        release_compilation_caches_when_mapped(0)
 
 
 @pytest.mark.parametrize("ceiling", (0, -1))

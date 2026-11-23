@@ -25,7 +25,7 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="34">
+<meta name="plan-version" content="35">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -122,8 +122,13 @@ Done when, for each batch:</p>
 <ol>
 <li>Every deleted path is absent at the head, and no file at the head imports
 or names it (grep every deleted path, including tests and AGENTS.md).</li>
-<li>The suite delta against the batch base adds no failures, run on
-<code>all_debug</code>.</li>
+<li>The deletion gate holds at the batch head, in one <code>all_debug</code>
+job: every remaining module under <code>nova/</code> imports in a fresh
+interpreter with no failure absent at the batch base;
+<code>pytest --collect-only</code> over <code>tests/</code> reports no new
+collection error; and the focused set, every test file that imports, names
+or launches a path the batch deletes or restores, shows the same failure ids
+at the base and the head.</li>
 <li>The batch record states the lines removed, and the running total across
 batches.</li>
 </ol>
@@ -147,7 +152,13 @@ importer of it in <code>nova/</code>, <code>tests/</code>,
 <code>apps/</code>, kept scripts and benchmarks, or imas-ambix, and no
 package <code>__init__</code> exports it; a module a live run's worktree
 imports is held back and named.</li>
-<li>The suite delta adds no failures, on <code>all_debug</code>.</li>
+<li>The deletion gate holds at the head, in one <code>all_debug</code> job:
+every remaining module under <code>nova/</code> imports in a fresh
+interpreter with no failure absent at the base;
+<code>pytest --collect-only</code> over <code>tests/</code> reports no new
+collection error; and the focused set, every test file that imports or
+names a deleted module, shows the same failure ids at the base and the
+head.</li>
 <li>The record states lines removed per package.</li>
 </ol>
 <p>Negative control: a module §1 shows reached, offered for deletion, is
@@ -269,7 +280,7 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
     <div class="r-comment-body"><p>no plan edit; the review is delivered as a stored record on run r-20261122T202605453490-unreached-module-delete at head dc3a174a7 with scores goal_fidelity 19, evidence 14, scope_discipline 18, durability 5, fit 18, reuse 17 and four non-blocking findings.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261123T172704820192-review-of-unreached-module-delete-6d308dee032d" data-who="reckon-build" data-when="2026-11-23T17:48:01.545Z">
-    <div class="r-comment-body"><p>review of r-20261122T202605453490-unreached-module-delete at base 348ed92c7ab08a9592a7f997d62bfec41ae687d4 and head 6d308dee032d2c72c7077ed066c21bc163696024: goal_fidelity 19, evidence 14, scope_discipline 16, durability 7, fit 18, reuse 16, added_failure_count 0, three non-blocking findings and no blocking finding, stored as a parsed record under the reviewed run&#x27;s review-records directory</p></div>
+    <div class="r-comment-body"><p>review of r-20261122T202605453490-unreached-module-delete at base 348ed92c7ab08a9592a7f997d62bfec41ae687d4 and head 6d308dee032d2c72c7077ed066c21bc163696024: goal_fidelity 19, evidence 14, scope_discipline 16, durability 7, fit 18, reuse 16, added_failure_count 0, three non-blocking findings and no blocking finding, stored as a parsed record under the reviewed run's review-records directory</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261123T091608198628-review-of-hot-path-duplicate-register-c62046c999c4" data-who="reckon-build" data-when="2026-11-23T09:25:29.164Z">
     <div class="r-comment-body"><p>review of r-20261122T202607457728-hot-path-duplicate-register at base 7505cdfbc551ac367c977575d4a3d74a9f1bddd2 and head c62046c999c4fe117a8501c33bf882354105cad2 scores goal_fidelity 17, evidence 16, scope_discipline 12, durability 7, fit 17, reuse 17, with seven non-blocking findings and a parsed record stored under the reviewed run's review-records directory.</p></div>

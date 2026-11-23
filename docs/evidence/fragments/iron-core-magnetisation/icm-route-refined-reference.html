@@ -1,0 +1,138 @@
+<section id="icm-route-refined-reference-verdict">
+<h3>WEST uniform 40&nbsp;mm: the route gap is rounding at a Newton-matrix condition number near 1e8</h3>
+<p>The in-place Cholesky Newton route and the existing LU route differ on the
+persisted uniform 40&nbsp;mm WEST operator (6&nbsp;632 cells, 39&nbsp;792 affine
+unknowns) by <code>frobenius_relative 1.2517e-12</code> and
+<code>maximum_entry_relative 3.0736e-12</code> over the converged coefficient
+vector, both routes at tolerance 1e-12 in one process. Two earlier runs of the
+same measurement gave <code>1.1953e-12 / 2.2044e-12</code> (job 1338206) and
+<code>1.2125e-12 / 2.2887e-12</code> (job 1335154), so the maximum-entry figure
+itself moves by nearly forty per cent between runs at this condition number,
+which is the size of the quantity the bar is being asked to judge. Both routes
+were then solved against an iteratively refined reference and each lies within
+1.1e-12 of it, so the gap is double-precision rounding at this condition
+number, not a defect in either route.</p>
+
+<h4>What was compared, and what was not</h4>
+<p>The reference is the solution of the first Newton linear system
+<code>J(0) d = -F(0)</code> on the persisted operator, refined by iterative
+refinement whose float64 residuals are accumulated in <code>longdouble</code>
+until the correction stalls. It is a reference for the first Newton
+<em>direction</em>, not for the converged state: the first step carries the
+state to leading order, so its distance predicts the converged coefficient
+difference only to that order. The converged coefficient gap between the two
+routes is measured directly and reported above; each route's converged
+coefficient distance from a reference converged in extended precision is not
+measured (see the limits below). The two routes' probe fields at the three
+graded probes are compared in the same run, and they differ by at most
+<code>1.5536e-15</code> relative (<code>1.5618e-15</code>,
+<code>1.2323e-15</code> and <code>3.1e-17</code> at the individual probes), so
+the coefficient-level gap does not appear in the fields.</p>
+<p>Neither route was compared entry by entry against the reference in the
+converged state, and no interaction value, solve or bar was changed by this
+measurement.</p>
+
+<h4>Measurement</h4>
+<p>The Newton matrix condition number is a Hager one-norm estimate at the same
+step (<code>||J||_1 = 11.58</code>, <code>||J^-1||_1 = 8.80e6</code>). The
+resolvability check tests the <em>nearest</em> route distance, which is the
+smaller over routes of each route's larger of its two measures:
+<code>2.9007e-13</code> (the Cholesky route's maximum-entry distance; the LU
+route's maximum-entry distance is <code>1.0241e-12</code>). The reference's own
+forward error, <code>2.3410e-16</code>, sits 3.1 decades below that tested
+figure, so the comparison resolves the gap.</p>
+<table><thead><tr><th>quantity</th><th>measurement</th></tr></thead><tbody>
+<tr><td>LU route, Frobenius distance from reference</td><td>8.0837e-13</td></tr>
+<tr><td>LU route, maximum-entry distance from reference</td><td>1.0241e-12</td></tr>
+<tr><td>Cholesky route, Frobenius distance from reference</td><td>2.3931e-13</td></tr>
+<tr><td>Cholesky route, maximum-entry distance from reference</td><td>2.9007e-13</td></tr>
+<tr><td>resolvability figure (nearest route measure)</td><td>2.9007e-13</td></tr>
+<tr><td>LU vs Cholesky coefficient gap (Frobenius / max entry)</td><td>1.2517e-12 / 3.0736e-12</td></tr>
+<tr><td>LU vs Cholesky direction gap (Frobenius / max entry)</td><td>8.4862e-13 / 1.0344e-12</td></tr>
+<tr><td>LU vs Cholesky probe-field gap (largest relative)</td><td>1.5536e-15</td></tr>
+<tr><td>reference relative residual (extended precision)</td><td>4.4657e-16</td></tr>
+<tr><td>reference forward-error estimate</td><td>2.3410e-16</td></tr>
+<tr><td>Newton-matrix one-norm condition estimate</td><td>1.0186e8</td></tr>
+<tr><td>condition scale <code>kappa*eps</code></td><td>2.2616e-8</td></tr>
+</tbody></table>
+
+<h4>Control: a real route defect is refused</h4>
+<p>The comparison was tested against a genuine route fault rather than a scaled
+copy of the reference. The Newton matrix is multiplied by <code>1 + 1e-10</code>
+before its own LU factorisation and solve, and that perturbed route is fed to the
+same distance comparison and the same verdict classifier. Scaling the matrix by
+<code>1 + 1e-10</code> scales its solution by <code>1 / (1 + 1e-10)</code>, so a
+comparison working as intended must place the perturbed route about
+<code>1e-10</code> from the reference, whatever the route's own arithmetic
+contributes.</p>
+<p>On the persisted operator the perturbed route reads <code>1.0000e-10</code>
+Frobenius / <code>9.9836e-11</code> maximum entry from the refined reference,
+against <code>2.9007e-13</code> for the nearest unperturbed route and
+<code>1.0241e-12</code> for the largest. It therefore sits 345&times;
+(2.5&nbsp;decades) farther than the <em>nearest</em> unperturbed route and
+98&times; (2.0&nbsp;decades) farther than the largest, and the same classifier
+returns <code>defect</code> rather than <code>rounding</code> on it. A fault of
+this size is a hundred times the <code>1e-12</code> route-comparison bar and ten
+times the <code>1e-11</code> bar proposed below, so the detector refuses it under
+either bar. Log: <code>refine-route-1338337.log</code>, revision
+<code>0aac2aaa</code>.</p>
+
+<p>The same control on the smaller <code>gate_shell</code> 0.08&nbsp;m mesh (a
+synthetic interaction table) reads <code>9.9998e-11</code> against unperturbed
+routes at <code>7.97e-15</code> and <code>1.46e-14</code>, 4.1&nbsp;decades above
+the nearest, and is likewise classified <code>defect</code>
+(<code>logs/defect-smoke.log</code> in the run directory, revision
+<code>383f60581</code>).</p>
+
+<h4>Verdict</h4>
+<p>Rounding, and both measured checks support it. The two routes' distances are
+4.3&nbsp;decades below <code>kappa*eps = 2.26e-8</code>, the worst-case bound that
+rounding at condition number 1.02e8 allows, and the farther route exceeds the
+nearer by only 3.4&times; in Frobenius (3.5&times; in the maximum entry). The
+probe fields the two routes produce differ by <code>1.5536e-15</code> relative,
+640&times; below the existing bar, so the coefficient-level gap leaves no trace
+in a quantity the solver hands downstream. The LU route is the farther of the
+two, consistent with the Cholesky route carrying two built-in refinement passes
+in the same differential system while the LU route does not; neither route is
+systematically wrong.</p>
+
+<h4>Bar proposal</h4>
+<p>The 1e-12 route-comparison bar is below the rounding band of this operator:
+the routes differ by 3.07e-12 at their largest entry at tolerance 1e-12 while
+each lies within 1.02e-12 of a reference that is three decades more accurate, and
+that largest-entry figure varied between 2.20e-12 and 3.07e-12 across three runs
+of the same measurement. The bar is proposed reset to 1e-11 for the
+route-to-route coefficient comparison, or stated as ten times
+<code>kappa*eps</code> (2.26e-7) at the measured condition number, which admits
+this rounding-level gap while still refusing the <code>1e-10</code> factor defect
+measured in the control above. No code, test or interaction value was
+changed.</p>
+
+<h4>Suite arms</h4>
+<p>The focused subset of <code>tests/test_magnetisation.py</code> that exercises
+the assembly, materials, operand arguments and receipt this measurement uses ran
+at base revision <code>6db36fee4fb17a4c05996dda9bf298ec0a5b02a2</code>
+(<code>1 failed, 12 passed in 50.17s</code>) and at revision
+<code>930d9566ad3fb18f96932e36f6342c08f47b25b7</code>
+(<code>1 failed, 12 passed in 47.28s</code>), with the same single failure
+(<code>test_control_receipt_refuses_a_revision_it_was_not_told_to_expect</code>,
+a missing evidence file under <code>/work</code>), so the change adds no failure.
+The full test file was attempted at both revisions and was still running when its
+budget expired; those cut-short logs carry no summary and are reported rather
+than cited.</p>
+
+<h4>Limits and follow-up</h4>
+<p>The extended-precision reference covers the first Newton linear system only.
+A nonlinear reference converged in extended precision would require the material
+residual and the 39&nbsp;792-unknown Jacobian to be formed in extended precision
+on every Newton step, which the current route cannot do within this measurement;
+each route's converged coefficient distance from such a reference is therefore
+not reported. The converged coefficient gap between the routes, and their
+probe-field gap, are reported directly above.</p>
+<p>Follow-up work: the measurement rebuilds the affine Newton operands in
+<code>scripts/west_iron_linear/measure.py</code>, duplicating the assembly that
+<code>nova/biot/magnetisation.py</code> performs inside the solve. A later node
+should export that builder from the module and have the script call it, so the
+two cannot drift; this node deliberately changed nothing under
+<code>nova/</code>.</p>
+</section>

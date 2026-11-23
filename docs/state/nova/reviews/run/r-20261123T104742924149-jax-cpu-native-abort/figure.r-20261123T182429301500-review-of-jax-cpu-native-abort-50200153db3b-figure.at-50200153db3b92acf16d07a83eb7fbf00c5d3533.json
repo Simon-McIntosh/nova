@@ -1,0 +1,41 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T18:36:00.941Z",
+  "dispatched_at": "2026-11-23T18:25:25Z",
+  "findings": [
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The limit reference is the faintest ink in a figure whose subject is that limit. The dotted vm.max_map_count line measures ~#c8c8c8 (drawn from the rendered PNG, ~1.7:1 against white) and its 'vm.max_map_count / 65,530' label ~#929292 (~3.1:1 at its darkest pixels), both materially lighter than every other element (axis title ~#111, value labels ~#333). A reader scanning for the threshold the caption says the process dies against finds the least visible mark on the page; darkening the line and its label toward the existing body-text greys would fix it without changing any data."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The plot shows only the release run, so no bar approaches the limit, and the top bar is a still-climbing truncated value drawn as complete. The final bar 'MAST solving, run stopped' at 31,476 is, per its own caption and the adjacent table, a reading taken when the driver was stopped while the count was climbing - yet it is drawn at a fixed length indistinguishable from the settled bars (e.g. 'Solov'ev solved' 28,552). More importantly, the no-release run's 40,883 and the earlier 65,271-at-limit readings that motivate the whole figure are not plotted, so the picture shows headroom (max bar ~48% of the 65,530 line) where the caption describes a process that exhausts the limit. The caption and table carry the missing numbers, so a careful reader recovers them and this does not block; but rendering the truncated bar as an unfinished bar (or plotting the no-release run beside it) would let the figure show the danger it argues."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T182429301500-review-of-jax-cpu-native-abort-50200153db3b-figure",
+  "reviewed_base_sha": "e28db604eee205382f5c7874129eebfe4339cd92",
+  "reviewed_figures": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T182429301500-review-of-jax-cpu-native-abort-50200153db3b-figure/image-0.png"
+  ],
+  "reviewed_head_sha": "50200153db3b92acf16d07a83eb7fbf00c5d3533",
+  "reviewed_run_id": "r-20261123T104742924149-jax-cpu-native-abort",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Defect, non-blocking. Axis title (~#111 dark), tick labels (~#4e) and the bar value labels (~#333) all clear white strongly (8:1 to 19:1). But the reference annotation 'vm.max_map_count / 65,530' is rendered at ~#929292: measured 3.11:1 at its darkest glyph pixels and ~2.24:1 at the anti-aliased median on white. It is the palest text in the figure and it names the limit that is the figure's subject.",
+    "data_ink": "Pass, with one reservation raised as a finding. The grey bars carry almost all the ink and there is no gradient, fill band or shadow. The reservation: the reference the whole figure is about - the dotted limit line and its label - is the lightest ink on the page (line ~#c8c8c8 at ~1.7:1 on white; label ~#929292 at ~3.1:1), so the threshold the chart is meant to be read against is the hardest element to see.",
+    "decoration": "Pass. No gradient, background fill, shading, drop shadow or themed styling. The single green bar on 'cache cleared' is a highlight of the release rather than decoration, and it is redundant with the bar's own label so colour is not the only carrier of that meaning.",
+    "label_collision": "Pass. No label is clipped and none overlaps another or the data. The dotted reference line sits at x=1270 and the reference label's rightmost glyph reaches x=1257, a 13 px clear gap; all stage labels fit inside the canvas ('MAST solving, run stopped' wraps cleanly to two lines); the axis title and tick labels are clear of the plot.",
+    "legibility": "Pass. At a glance the rendered PNG reads as five horizontally labelled bars, each value direct-labelled at its bar end (6,809; 28,552; 3,031; 6,695; 31,476), over an x axis titled 'mapped regions [thousands]' with ticks 0-70, plus one dotted vertical reference line labelled 'vm.max_map_count 65,530'. The stage names are legible and the sequence reads top to bottom: Solov'ev built, Solov'ev solved, cache cleared, MAST built, MAST solving (run stopped). A reader can follow the accumulation and the drop to 3,031.",
+    "table_form": "Borderline pass. The six numbers are categorical measurements that the evidence table beside the figure already tabulates, so the bars partly duplicate tabular data; what the chart adds that a table cannot show at a glance is the visual comparison of the bars against the dotted limit line. On that ground the plot is justified and is not merely a picture of a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T18:37:41.784493+00:00",
+  "total": null
+}

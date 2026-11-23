@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:main panel subcommand -> _render_panel -> _near_x_geometry",
+    "benchmarks/coil_edit_latency.py:main panel subcommand -> _solve_block, _merge_receipt, _strict_json",
+    "benchmarks/coil_edit_latency.py:run -> _strict_json (landing and receipt writes)",
+    "benchmarks/coil_edit_latency.py:_write_diagnostics -> _strict_json"
+  ],
+  "completed_at": "2026-11-23T14:12:05.196Z",
+  "dispatched_at": "2026-11-23T13:52:39Z",
+  "findings": [
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "line": "3941",
+      "severity": "blocking",
+      "text": "the record written to --receipt omits \"near_x_geometry\", which _render_panel computes at :2795 and only prints to stdout, so no committed path writes the block all five committed receipts carry; those came from the out-of-tree recompute_near_x.py in the run directory, and _merge_receipt at :2539 preserves a key absent from the record, so a re-render keeps a stale block rather than recomputing it, and the evidence fragment's sentence 'The producer now writes it' is false."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "line": "2563",
+      "severity": "non-blocking",
+      "text": "_solve_block reads scheduler.job_id from the sweep receipt, which records 1337191 for the titan regeneration solve, while the committed receipt carries 1337259 with a superseded_job_id key _solve_block never emits; because :2550 now treats 'solve' as a replaced block, a re-render reverts the corrected provenance and drops the superseded value."
+    },
+    {
+      "file": "tests/test_flux_surface_connectivity.py",
+      "line": "827",
+      "severity": "non-blocking",
+      "text": "the comment says 'Four trace no cycle at all' while PERSISTED_STATE_TERMS pins three states (2, 3, 7) at cycle_component_count 0 and two (0, 8) at 1, and the docstring at :885 says 'eight trace a cycle ... and one admits no cycle either', so both counts contradict the table beside them and a reader cannot tell which mechanism each open state exhibits."
+    },
+    {
+      "file": "tests/test_flux_surface_connectivity.py",
+      "line": "879",
+      "severity": "non-blocking",
+      "text": "the docstring says 'State 19 carries its own wider control displacement', but state 19 has no control_displacement entry and runs at the 1.0e-3 default; the wider values belong to state 4 (5.0e-2) and state 1 (1.0e-2) at :834-835, so the sentence names the wrong state for the one pin a reader would use to understand the table."
+    },
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "812",
+      "severity": "non-blocking",
+      "text": "_near_x_geometry_agrees re-derives two_cell_threshold_m with the identical expression the producer uses at benchmarks/coil_edit_latency.py:2405, so the assertion holds whatever the threshold rule does; it can catch a block copied from a figure with different display distances but cannot fail on a regression in the rule it appears to guard, and part of the durability score rests on it."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "line": "839",
+      "severity": "non-blocking",
+      "text": "_finite_tree/_strict_json duplicate a capability the repository already owns rather than extending an owner: benchmarks/plasma_cell_production_ladder.py:45 strict_json has the same non-finite-to-null semantics, and benchmarks/fieldnull_candidate_audit.py:103 and benchmarks/diiid_forward_gs_match.py:3265 carry the same helper plus a writer, so this is a fifth copy."
+    }
+  ],
+  "head_log_revision": "26ec4c85a5d52eac38d15199525d5b9157ea1505",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "examined the four benchmark modules that import coil_edit_latency (mast_centroid_solve_panels.py, traced_current_bitwise.py, coil_edit_interactive.py, raster_flux_target_receipt.py) and confirmed each uses only untouched symbols; the changed code is reached through the module's own main() panel subcommand and run().",
+    "diff": "read commit by commit from 5c503f9a to b989b783; the code change is confined to benchmarks/coil_edit_latency.py (strict-JSON serialiser, near-X geometry block, solve provenance block, extent parameter, solve-block replacement in _merge_receipt) and the two test files, with the other 21 paths being regenerated figures, receipts and the evidence fragment.",
+    "done_when": "done_when (1) is asserted by tests/test_coil_edit_panel_render.py:846 (archive present, solve command naming its own /solve/<tag>/ path, partition in {betelgeuse,titan}, device, source_revision, spacing_m <= 0.010), (2) by tests/test_coil_edit_panel_render.py:948 (redraw from the archive alone plus a 1% current perturbation needing > 1e-4 m contour displacement), and (3) by the connectivity pins at tests/test_flux_surface_connectivity.py:834-853; the manifest records the two-file gate at 64 passed EXIT=0 (job 1339240, one P100).",
+    "goal": "the node's goal is that each of the five coil-edit panel figures is redrawn from its own re-solved state; the five receipts under docs/figures/*/panel-receipt.json each carry a solve block naming their own /solve/<tag>/ command, lane and device, and each panel-states.npz carries its own current_*, moment_* and state_* keys for the edits it draws, though the mast and regeneration-row pair reproduce one another to 8.9e-16 and the single-grid and titan pair are byte-identical because each pair is the same MAST case re-solved on the same device, as the evidence fragment discloses.",
+    "manifest": "read; status complete, 28 commits, tests naming the two-file command at base 3413.13 s (1 failed) and head 4440.46 s (64 passed), baseline_suite exit 1 with the single failure test_committed_converged_panel_uses_its_terminal_currents and after_suite exit 0 with none; I opened both cited logs (baseline_suite-1795385810790869365.log, logs/after-arm-head3-p100.log) and each carries a '# revision:' header, its summary line and a bare EXIT= line.",
+    "write_paths": "read the manifest's declared paths; git diff --stat 5c503f9a..b989b783 touches 24 paths and every one lies inside a declared write path: benchmarks/coil_edit_latency.py, tests/test_coil_edit_panel_render.py, tests/test_flux_surface_connectivity.py, the evidence fragment and the five figure directories."
+  },
+  "justifications": {
+    "durability": "tests/test_coil_edit_panel_render.py:948 fails if a figure's archive stops reproducing its receipt (promoted_node_count and max_solved_node_mismatch are recomputed), but the near-x block and the solve block have no test that reddens when the producer regresses, and the threshold assertion at :812 re-derives with the producer's own formula.",
+    "evidence": "logs/after-arm-head3-p100.log (revision 26ec4c85a) ends '64 passed, 1 warning in 4440.46s' with EXIT=0 and baseline_suite-1795385810790869365.log ends '1 failed, 53 passed in 3413.13s' with EXIT=1 naming its one timeout failure, so the gate measures the done_when's two-file population and its result is recorded rather than claimed.",
+    "fit": "the added code follows the module's private-helper idiom and carries no plan or ticket identifier, but two docstrings at tests/test_flux_surface_connectivity.py:827 and :879 state counts and a state assignment that the pinned table beside them contradicts.",
+    "goal_fidelity": "docs/figures/mast-centroid-capability/panel-receipt.json carries its own solve block (job 1337244, betelgeuse, NVIDIA H200 NVL) beside its own panel-states.npz, and the forward-solve figure differs in its drawn edits and fields, so each figure now cites its own state rather than a shared regenerated archive.",
+    "reuse": "benchmarks/coil_edit_latency.py:839 _finite_tree/_strict_json re-implement the non-finite-to-null JSON rule already owned by benchmarks/plasma_cell_production_ladder.py:45 strict_json and benchmarks/fieldnull_candidate_audit.py:103 _strict_json rather than extending either.",
+    "scope_discipline": "git diff --stat 5c503f9a..b989b783 lists only benchmarks/coil_edit_latency.py, the two test files, the evidence fragment and figure artefacts under the declared figure directories."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that each of the five coil-edit panel figures is redrawn from its own re-solved state; the five receipts under docs/figures/*/panel-receipt.json each carry a solve block naming their own /solve/<tag>/ command, lane and device, and each panel-states.npz carries its own current_*, moment_* and state_* keys for the edits it draws, though the mast and regeneration-row pair reproduce one another to 8.9e-16 and the single-grid and titan pair are byte-identical because each pair is the same MAST case re-solved on the same device, as the evidence fragment discloses.\nVERDICT done_when: done_when (1) is asserted by tests/test_coil_edit_panel_render.py:846 (archive present, solve command naming its own /solve/<tag>/ path, partition in {betelgeuse,titan}, device, source_revision, spacing_m <= 0.010), (2) by tests/test_coil_edit_panel_render.py:948 (redraw from the archive alone plus a 1% current perturbation needing > 1e-4 m contour displacement), and (3) by the connectivity pins at tests/test_flux_surface_connectivity.py:834-853; the manifest records the two-file gate at 64 passed EXIT=0 (job 1339240, one P100).\nVERDICT write_paths: read the manifest's declared paths; git diff --stat 5c503f9a..b989b783 touches 24 paths and every one lies inside a declared write path: benchmarks/coil_edit_latency.py, tests/test_coil_edit_panel_render.py, tests/test_flux_surface_connectivity.py, the evidence fragment and the five figure directories.\nVERDICT manifest: read; status complete, 28 commits, tests naming the two-file command at base 3413.13 s (1 failed) and head 4440.46 s (64 passed), baseline_suite exit 1 with the single failure test_committed_converged_panel_uses_its_terminal_currents and after_suite exit 0 with none; I opened both cited logs (baseline_suite-1795385810790869365.log, logs/after-arm-head3-p100.log) and each carries a '# revision:' header, its summary line and a bare EXIT= line.\nVERDICT diff: read commit by commit from 5c503f9a to b989b783; the code change is confined to benchmarks/coil_edit_latency.py (strict-JSON serialiser, near-X geometry block, solve provenance block, extent parameter, solve-block replacement in _merge_receipt) and the two test files, with the other 21 paths being regenerated figures, receipts and the evidence fragment.\nCALL_SITES: benchmarks/coil_edit_latency.py:main panel subcommand -> _render_panel -> _near_x_geometry, benchmarks/coil_edit_latency.py:main panel subcommand -> _solve_block, _merge_receipt, _strict_json, benchmarks/coil_edit_latency.py:run -> _strict_json (landing and receipt writes), benchmarks/coil_edit_latency.py:_write_diagnostics -> _strict_json\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/figures/mast-centroid-capability/panel-receipt.json carries its own solve block (job 1337244, betelgeuse, NVIDIA H200 NVL) beside its own panel-states.npz, and the forward-solve figure differs in its drawn edits and fields, so each figure now cites its own state rather than a shared regenerated archive.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/after-arm-head3-p100.log (revision 26ec4c85a) ends '64 passed, 1 warning in 4440.46s' with EXIT=0 and baseline_suite-1795385810790869365.log ends '1 failed, 53 passed in 3413.13s' with EXIT=1 naming its one timeout failure, so the gate measures the done_when's two-file population and its result is recorded rather than claimed.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: git diff --stat 5c503f9a..b989b783 lists only benchmarks/coil_edit_latency.py, the two test files, the evidence fragment and figure artefacts under the declared figure directories.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:948 fails if a figure's archive stops reproducing its receipt (promoted_node_count and max_solved_node_mismatch are recomputed), but the near-x block and the solve block have no test that reddens when the producer regresses, and the threshold assertion at :812 re-derives with the producer's own formula.\nSCORE fit: 14\nJUSTIFICATION fit: the added code follows the module's private-helper idiom and carries no plan or ticket identifier, but two docstrings at tests/test_flux_surface_connectivity.py:827 and :879 state counts and a state assignment that the pinned table beside them contradicts.\nSCORE reuse: 4\nJUSTIFICATION reuse: benchmarks/coil_edit_latency.py:839 _finite_tree/_strict_json re-implement the non-finite-to-null JSON rule already owned by benchmarks/plasma_cell_production_ladder.py:45 strict_json and benchmarks/fieldnull_candidate_audit.py:103 _strict_json rather than extending either.\nFINDING benchmarks/coil_edit_latency.py:3941 blocking: the record written to --receipt omits \"near_x_geometry\", which _render_panel computes at :2795 and only prints to stdout, so no committed path writes the block all five committed receipts carry; those came from the out-of-tree recompute_near_x.py in the run directory, and _merge_receipt at :2539 preserves a key absent from the record, so a re-render keeps a stale block rather than recomputing it, and the evidence fragment's sentence 'The producer now writes it' is false.\nFINDING benchmarks/coil_edit_latency.py:2563 non-blocking: _solve_block reads scheduler.job_id from the sweep receipt, which records 1337191 for the titan regeneration solve, while the committed receipt carries 1337259 with a superseded_job_id key _solve_block never emits; because :2550 now treats 'solve' as a replaced block, a re-render reverts the corrected provenance and drops the superseded value.\nFINDING tests/test_flux_surface_connectivity.py:827 non-blocking: the comment says 'Four trace no cycle at all' while PERSISTED_STATE_TERMS pins three states (2, 3, 7) at cycle_component_count 0 and two (0, 8) at 1, and the docstring at :885 says 'eight trace a cycle ... and one admits no cycle either', so both counts contradict the table beside them and a reader cannot tell which mechanism each open state exhibits.\nFINDING tests/test_flux_surface_connectivity.py:879 non-blocking: the docstring says 'State 19 carries its own wider control displacement', but state 19 has no control_displacement entry and runs at the 1.0e-3 default; the wider values belong to state 4 (5.0e-2) and state 1 (1.0e-2) at :834-835, so the sentence names the wrong state for the one pin a reader would use to understand the table.\nFINDING tests/test_coil_edit_panel_render.py:812 non-blocking: _near_x_geometry_agrees re-derives two_cell_threshold_m with the identical expression the producer uses at benchmarks/coil_edit_latency.py:2405, so the assertion holds whatever the threshold rule does; it can catch a block copied from a figure with different display distances but cannot fail on a regression in the rule it appears to guard, and part of the durability score rests on it.\nFINDING benchmarks/coil_edit_latency.py:839 non-blocking: _finite_tree/_strict_json duplicate a capability the repository already owns rather than extending an owner: benchmarks/plasma_cell_production_ladder.py:45 strict_json has the same non-finite-to-null semantics, and benchmarks/fieldnull_candidate_audit.py:103 and benchmarks/diiid_forward_gs_match.py:3265 carry the same helper plus a writer, so this is a fifth copy.",
+  "review_run_id": "r-20261123T135127693535-review-of-coil-edit-panels-per-figure-b989b7831722",
+  "reviewed_base_sha": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "reviewed_head_sha": "b989b7831722b6abdb9468d92ba168f70af31c41",
+  "reviewed_run_id": "r-20261122T134834058462-coil-edit-panels-per-figure",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261123T135127693535-review-of-coil-edit-panels-per-figure-b989b7831722"
+  },
+  "reviewer_run_id": "r-20261123T135127693535-review-of-coil-edit-panels-per-figure-b989b7831722",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 14,
+    "goal_fidelity": 15,
+    "reuse": 4,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T14:13:02.968887+00:00",
+  "total": 79
+}

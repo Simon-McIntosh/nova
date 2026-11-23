@@ -1,5 +1,5 @@
 {
- "revision": "ff088fd7edc58038a0c0ceae798f0aa842657771",
+ "revision": "09ef90e40148bf724669e8fc2c7c3a823134f5b8",
  "tree": ".",
  "routes": {
   "forward": "nova.equilibrium.forward.ForwardProfile.solve on a stored MAST case",
@@ -77,6 +77,10 @@
    "reason": "device trace attributes kernels to bank_program, and no route executed a line of its body"
   }
  ],
+ "assertions": {
+  "passed": true,
+  "failures": []
+ },
  "modules": [
   {
    "module": "nova/__init__.py",

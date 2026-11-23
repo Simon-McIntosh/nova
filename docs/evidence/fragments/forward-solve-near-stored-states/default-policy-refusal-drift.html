@@ -163,7 +163,22 @@ the stored state's null markers and blue contours only.</p>
 <figure id="default-policy-refusal-drift-panel-iter-record-seed"><img src="/nova/figures/forward-solve-near-stored-states/default-policy-refusal-drift/iter-record-seed.svg" width="100%" alt="iter-record-seed: imas-efit stored state over [-89.37, 87.14] and the nova terminal iterate over [25, 164.4] Wb/rad, both contoured on one shared level array spanning [-79.22, 154.2] Wb/rad at 24 levels; 8 imas-efit and 13 nova levels carried a contour; the nova solved-null read refused NoQualifiedAxisError, so no blue null marker is drawn and the blue series is contours only; terminal residual unavailable, reason 3, qualified no. The plotted iterate is the state the solve read when it refused."><figcaption>iter-record-seed: imas-efit stored state over [-89.37, 87.14] and the nova terminal iterate over [25, 164.4] Wb/rad, both contoured on one shared level array spanning [-79.22, 154.2] Wb/rad at 24 levels; 8 imas-efit and 13 nova levels carried a contour; the nova solved-null read refused <code>NoQualifiedAxisError</code>, so no blue null marker is drawn and the blue series is contours only; terminal residual unavailable, reason 3, qualified no. The plotted iterate is the state the solve read when it refused.</figcaption></figure>
 <p>Nothing was re-solved for these panels: each was redrawn from the flux its arm
 stored, in one CPU job, by
-<code>scripts/prototypes/stored_state_refusals/drift_policy_panels.py</code>.</p>
+<code>scripts/prototypes/stored_state_refusals/drift_policy_panels.py</code>,
+which names only the arms and calls the same
+<code>redraw_panels.draw_arms</code> path every other published panel goes
+through. That path resolves an arm's terminal flux from either shape an arm
+stores it in, an npz array or the pickled state of a receipt or a rejected
+history, so the refusal panel is drawn by the same loop as the five receipts.</p>
+<p>Both published panel directories are guarded by
+<code>test_panel_visibility.py</code>: every SVG must carry a drawn contour from
+each series, a copy of a published panel with its solved paths emptied must be
+rejected, and the six files cited here must be exactly the six files this record
+publishes under
+<code>docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/</code>.
+The guard did not cover this directory before, so a driver that stopped drawing
+picked up the change silently. There is no committed PNG beside these panels,
+because the repository serves one SVG per figure; the previews the drawing
+writes are rendered into the run directory and were inspected there.</p>
 </section>
 
 <section id="default-policy-refusal-drift-standing-cases">
@@ -211,12 +226,17 @@ the ITER record-seed arm as 1336198. Every arm receipt and failure record those
 jobs wrote is under the run directory's <code>input-drift/</code>, beside the two
 suite-arm logs and the claim verifier's log.</p>
 <p>The six panels were redrawn from those receipts and pickles without
-re-solving, by job 1337115 on the <code>rigel</code> CPU partition; the panel
-records and the axis re-read each drawing compared against the arm record are in
-<code>input-drift/panel-redraw.json</code>. The current-drift figures and the
-positive and negative controls are recomputed from the records and the two
-current maps by job 1337116, whose log ends in <code>EXIT=0</code> only when
-every claim in this record holds.</p>
+re-solving, by job 1338012 on the refactored drawing path, on the
+<code>rigel</code> CPU partition; the panel records and the axis re-read each
+drawing compared against the arm record are in
+<code>input-drift/panel-redraw.json</code>. That redraw draws each panel through
+the same <code>redraw_panels.draw_arms</code> entry point the other published
+panels use, and its six SVGs carry every range, level count and null tally the
+committed panels carry; only matplotlib's generated element ids and the render
+timestamp differ. The current-drift figures and the positive and negative
+controls are recomputed from the records and the two current maps by job
+1338013, whose log ends in <code>EXIT=0</code> only when every claim in this
+record holds.</p>
 <p>The suite arms ran in trees exported from the base revision
 <code>d70c3598da3df64ee1cebb424bbfe2c1d498e0f9</code> and from the head
 <code>15f1720ad9680787fb8307aa4596309f8365b8e1</code> as it stood once the scripts

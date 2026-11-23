@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 7,
+  "call_sites": [
+    "nova/equilibrium/moment.py:1073",
+    "nova/equilibrium/moment.py:1104",
+    "nova/equilibrium/harmonic.py:752",
+    "nova/equilibrium/harmonic.py:783",
+    "nova/equilibrium/profile.py:801",
+    "nova/equilibrium/profile.py:830",
+    "docs/figures/inverse-equilibrium-baseline/reduced-reconstructions-scored/emit_states.py:78"
+  ],
+  "completed_at": "2026-11-23T07:26:20.500Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-23T06:57:27Z",
+  "findings": [
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/reduced-reconstructions-scored/emit_states.py",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "the profile module is imported as profile_module and never referenced; the profile write functions are imported directly later, so this is a dead import silenced with noqa."
+    },
+    {
+      "file": "nova/equilibrium/reconstruction_state.py",
+      "line": "97",
+      "severity": "non-blocking",
+      "text": "the file ends without a trailing newline."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "seven production call sites reach the change: the conversions call equilibrium_from_state and write_equilibrium (moment.py:1073/1104, harmonic.py:752/783, profile.py:801/830), and the committed driver emit_states.py:78 (also 98, 156, 248/258/272) calls each write_*_equilibrium.",
+    "diff": "read commit by commit since the prior review at 661a622c0: dd33f071f extracts the shared writer nova/equilibrium/reconstruction_state.py and deletes the three private _state_equilibrium copies; dd8111fc2 adds four guards to tests/test_reduced_reconstruction_columns.py; a593e3b9f commits case.py and emit_states.py and regenerates the scoreboard; a3aa729f1 records the evidence fragment. Eleven paths, all inside the declared write paths.",
+    "done_when": "the three clauses are each met: table-reduced-reconstructions-scored.html carries one column group per reconstruction plus each control with digest and the three reference-free checks; the fragment's band-verdict table states every band with its limit and margin; and the control table shows every scoreable band failing.",
+    "goal": "the repair delta routes the moment, harmonic and profile conversions through one shared writer nova/equilibrium/reconstruction_state.py:equilibrium_from_state, keeping all three scored as their own columns on receipt-reduced-reconstructions-scored.json.",
+    "manifest": "read; it records status complete, four commits, both suite arms (baseline exit 4 collecting nothing at 06d7280, after 7 passed exit 0 at a593e3b9f) with log paths, the negative-control log, and per-column results with margins.",
+    "write_paths": "the eleven delivered paths are all inside the declared write paths (nova/equilibrium moment.py, harmonic.py, profile.py, reconstruction_state.py; tests/test_reduced_reconstruction_columns.py; docs/evidence/fragments/inverse-equilibrium-baseline/reduced-reconstructions-scored.html; docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/; docs/figures/inverse-equilibrium-baseline/reduced-reconstructions-scored/)."
+  },
+  "justifications": {
+    "durability": "tests/test_reduced_reconstruction_columns.py:149 asserts the stored map equals flux_field()+vacuum (reddens if harmonic.py:714 drops the conductor term), and negative-control-repair.log reinstates dd33f071f and shows the level and one-writer guards failing.",
+    "evidence": "the manifest's baseline_suite/after_suite name tests/test_reduced_reconstruction_columns.py with the after arm 7 passed EXIT=0 at a593e3b9f, and negative-control-repair.log shows a genuine red run; but the baseline arm at 06d7280 collects nothing because the module is new, so the added-failure delta is trivially zero.",
+    "fit": "nova/equilibrium/reconstruction_state.py follows the module-docstring and local-import idiom of moment.py and harmonic.py; two nits are recorded as findings.",
+    "goal_fidelity": "nova/equilibrium/reconstruction_state.py:30 equilibrium_from_state is called by moment.py:1073, harmonic.py:752 and profile.py:801, so every column assembles its state through one writer while table-reduced-reconstructions-scored.html keeps all three scored as their own column groups.",
+    "reuse": "nova/equilibrium/reconstruction_state.py now owns the reconstruction-to-IDS capability and the three conversions extend it; benchmarks/estimator_scoreboard.py:state_from_record and nova/imas/pulsedesign.py:equilibrium_ids were read and are distinct input domains rather than the same capability.",
+    "scope_discipline": "every one of the eleven delivered paths is inside the declared write paths, including the new module nova/equilibrium/reconstruction_state.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the repair delta (661a622c0..a3aa729f1) routes the moment, harmonic and profile conversions through one shared writer nova/equilibrium/reconstruction_state.py:equilibrium_from_state, keeping all three scored as their own columns on receipt-reduced-reconstructions-scored.json.\nVERDICT done_when: the three clauses are each met -- table-reduced-reconstructions-scored.html carries one column group per reconstruction plus each control with digest and the three reference-free checks; the fragment's band-verdict table states every band with its limit and margin; and the control table shows every scoreable band failing.\nVERDICT write_paths: read the declared paths; all eleven delivered paths lie inside them (nova/equilibrium moment.py, harmonic.py, profile.py and reconstruction_state.py; tests/test_reduced_reconstruction_columns.py; docs/evidence/fragments/inverse-equilibrium-baseline/reduced-reconstructions-scored.html; docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/; docs/figures/inverse-equilibrium-baseline/reduced-reconstructions-scored/).\nVERDICT manifest: read; it records status complete, four commits, both suite arms (baseline exit 4 collecting nothing at 06d7280, after 7 passed exit 0 at a593e3b9f) with log paths, the negative-control log, and per-column results with margins.\nVERDICT diff: read commit by commit since the prior review at 661a622c0 -- dd33f071f extracts the shared writer and deletes the three private assemblies, dd8111fc2 adds four guards, a593e3b9f commits case.py and emit_states.py and regenerates the scoreboard, a3aa729f1 records the evidence; nothing outside the declared scope.\nCALL_SITES: nova/equilibrium/moment.py:1073, nova/equilibrium/moment.py:1104, nova/equilibrium/harmonic.py:752, nova/equilibrium/harmonic.py:783, nova/equilibrium/profile.py:801, nova/equilibrium/profile.py:830, docs/figures/inverse-equilibrium-baseline/reduced-reconstructions-scored/emit_states.py:78\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/equilibrium/reconstruction_state.py:30 equilibrium_from_state is called by moment.py:1073, harmonic.py:752 and profile.py:801, so every column assembles its state through one writer while table-reduced-reconstructions-scored.html keeps all three scored as their own column groups.\nSCORE evidence: 17\nJUSTIFICATION evidence: the manifest's baseline_suite/after_suite name tests/test_reduced_reconstruction_columns.py with the after arm 7 passed EXIT=0 at a593e3b9f, and negative-control-repair.log shows a genuine red run; but the baseline arm at 06d7280 collects nothing because the module is new, so the added-failure delta is trivially zero.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every one of the eleven delivered paths is inside the declared write paths, including the new module nova/equilibrium/reconstruction_state.py.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_reduced_reconstruction_columns.py:149 asserts the stored map equals flux_field()+vacuum (reddens if harmonic.py:714 drops the conductor term), and negative-control-repair.log reinstates dd33f071f and shows the level and one-writer guards failing.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/reconstruction_state.py follows the module-docstring and local-import idiom of moment.py and harmonic.py; two nits are recorded as findings.\nSCORE reuse: 18\nJUSTIFICATION reuse: nova/equilibrium/reconstruction_state.py now owns the reconstruction-to-IDS capability and the three conversions extend it; benchmarks/estimator_scoreboard.py:state_from_record and nova/imas/pulsedesign.py:equilibrium_ids were read and are distinct input domains rather than the same capability.\nFINDING docs/figures/inverse-equilibrium-baseline/reduced-reconstructions-scored/emit_states.py:42 non-blocking: the profile module is imported as profile_module and never referenced, a dead import silenced with noqa.\nFINDING nova/equilibrium/reconstruction_state.py:97 non-blocking: the file ends without a trailing newline.\n",
+  "review_run_id": "r-20261123T065434829604-review-of-reduced-reconstructions-scored-a3aa729f1aa7",
+  "reviewed_base_sha": "661a622c07a008bd82757e448053dbdd69f5ec4a",
+  "reviewed_head_sha": "a3aa729f1aa77e5dc1ad1ef2a14aa4e00be2459e",
+  "reviewed_run_id": "r-20261122T185014477588-reduced-reconstructions-scored",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:26:48.657637+00:00",
+  "total": 107
+}

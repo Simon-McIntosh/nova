@@ -1,0 +1,107 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": {
+    "added": [],
+    "note": "The node adds no assertion: it is prose and a table. The guard for the repair it merges is tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_terms] (and the truncated control), which this run demonstrates reddening on the main arm at main.log:270-271 and passing on the merged arm."
+  },
+  "call_site_note": "The node's authored change is HTML evidence with no runtime path; the merge it carries repairs nova/biot/polygonanalytic.py:_small_corner_arsinh, reached by edge.terms()/vertex.arsinh_terms() through packed_arc_greens and polygon_arc_greens in nova/biot/polygonarc.py.",
+  "call_sites": [
+    "nova/biot/polygonarc.py:packed_arc_greens",
+    "nova/biot/polygonarc.py:polygon_arc_greens"
+  ],
+  "completed_at": "2026-11-23T09:18:39.736Z",
+  "dispatched_at": "2026-11-23T09:07:23Z",
+  "failure_id_comparison": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "exit": "EXIT=1",
+      "failure_count": 8,
+      "failure_ids": [
+        "test_tangent_compiles_within_bound[edge_integrands]",
+        "test_tangent_compiles_within_bound[flux_line_moments]",
+        "test_tangent_compiles_within_bound[flux_and_moment_terms]",
+        "test_tangent_compiles_within_bound[edge_terms]",
+        "test_tangent_compiles_within_three_primals[vertex]",
+        "test_tangent_compiles_within_three_primals[arsinh_terms]",
+        "test_tangent_compiles_within_three_primals[flux_moment_residuals]",
+        "test_tangent_compiles_within_three_primals[horizontal_flux_line_moments]"
+      ],
+      "job": "1338302",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T045423967221-edge-term-merged-gate/merged.log",
+      "revision": "4e4bbaeb345fc99ebf1d7c80b4f8d836c550df30"
+    },
+    "baseline_suite": {
+      "exit": "EXIT=1",
+      "failure_count": 10,
+      "failure_ids": [
+        "test_tangent_matches_base_jvp[edge_terms]",
+        "test_truncated_tangent_fails_identity[edge_terms]",
+        "test_tangent_compiles_within_bound[edge_integrands]",
+        "test_tangent_compiles_within_bound[flux_line_moments]",
+        "test_tangent_compiles_within_bound[flux_and_moment_terms]",
+        "test_tangent_compiles_within_bound[edge_terms]",
+        "test_tangent_compiles_within_three_primals[vertex]",
+        "test_tangent_compiles_within_three_primals[arsinh_terms]",
+        "test_tangent_compiles_within_three_primals[flux_moment_residuals]",
+        "test_tangent_compiles_within_three_primals[horizontal_flux_line_moments]"
+      ],
+      "job": "1338302",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T045423967221-edge-term-merged-gate/main.log",
+      "revision": "03b10519204fa44ab0084cb4fbf2839d19426606"
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html",
+      "line": "34",
+      "severity": "non-blocking",
+      "text": "'Both arms fail exactly the compile rows' overstates the main arm, which main.log:270-275 shows fails six ids (four compile timeouts plus test_tangent_matches_base_jvp[edge_terms] and test_truncated_tangent_fails_identity[edge_terms]); only the ids common to both arms are the compile rows."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html",
+      "line": "48",
+      "severity": "non-blocking",
+      "text": "the claim that 'the older unloaded H200 arm passed the same identifiers inside 300 s' cites no log path, so a reader cannot check the prior measurement the device-qualification argument leans on."
+    }
+  ],
+  "increment_reviewed": "03b10519204fa44ab0084cb4fbf2839d19426606..4e4bbaeb345fc99ebf1d7c80b4f8d836c550df30",
+  "item_verdicts": {
+    "diff": "547295e9b is the two-parent merge of main and reviewed head 013763668; 4e4bbaeb3 is the node's only authored change, the single declared fragment.",
+    "done_when": "All three clauses verified: two-parent --no-ff merge; sbatch carries betelgeuse/reservation/gpu:1/cpus 4/mem 96G/time 04:00:00 with job-local cache and EXIT trap; both logs open with revision+command and end EXIT=1 and reconcile with the fragment counts.",
+    "goal": "Merged-head H200 gate: fragment records merge 547295e9b onto main 03b105192, job 1338302 with merged and main arms, zero added ids, four target rows pass.",
+    "manifest": "Read; merge/main shas, job id, per-file counts, zero added ids and log paths all reconcile with the logs.",
+    "write_paths": "Only the declared fragment was authored (4e4bbaeb3, +79); the 24 other paths are reviewed-head content brought by the required merge 547295e9b."
+  },
+  "justifications": {
+    "durability": "Main arm fails the two edge_terms target rows (main.log:270-271) while merged passes them, a real negative control; the node adds only prose.",
+    "evidence": "Fragment counts quote merged.log:207,410 and main.log:276,479 exactly; :34 overstates the main arm.",
+    "fit": "Follows the sibling fragment section/h4/table idiom with a unique id; only :34 is imprecise.",
+    "goal_fidelity": "Fragment :3-36 records every clause; merge 547295e9b has parents 03b105192/013763668 and job 1338302 exists.",
+    "reuse": "Adds no code or definition; reuses reviewed-head tests and the plan's device-qualified comparison.",
+    "scope_discipline": "Commit 4e4bbaeb3 touches only the declared fragment path."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is a merged-head H200 gate for the edge-term tangent rows; docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html records merge 547295e9b merging the reviewed head, one H200 job 1338302 with a merged arm and a main arm, zero added failure ids, and the four target rows passing at the reviewed fragment edge-term-tangent-rows.html:266-272.\nVERDICT done_when: Read the three done-when clauses and verified each: 547295e9b has parents 03b105192 and 013763668, a real --no-ff merge; run_gate.sbatch carries betelgeuse, reservation gpu_0003_grpA, --gres=gpu:1, --cpus-per-task=4, --mem=96G, --time=04:00:00 with a job-local /tmp cache and an EXIT trap; merged.log and main.log each open with '# revision'/'# command:' and end 'EXIT=1'; and the fragment's per-file counts reconcile exactly with the logs (merged edge 4F/22P @2112.98s, vertex 4F/18P @1892.36s; main edge 6F/20P @1825.96s, vertex 4F/18P @1620.07s).\nVERDICT write_paths: Declared path docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html; the node's only authored commit 4e4bbaeb3 changes exactly that file (+79), while the 24 other delivered paths are the reviewed head 013763668 brought in by the required merge 547295e9b.\nVERDICT manifest: Read; it records merge 547295e9b, main 03b105192, job 1338302, merged 4F/22P and 4F/18P, main 6F/20P and 4F/18P, added failure ids none, and both log paths, all of which reconcile with the logs.\nVERDICT diff: Reviewed commit by commit from base 03b105192: 547295e9b is the two-parent merge of 03b105192 and 013763668 (24 files, all reviewed-head content), and 4e4bbaeb3 is the node's only authored change, adding the single declared fragment.\nCALL_SITES: nova/biot/polygonarc.py:packed_arc_greens, nova/biot/polygonarc.py:polygon_arc_greens\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:3-36 records every done-when clause, and its merge 547295e9b (parents 03b105192/013763668) and job 1338302 are in the history and slurm log.\nSCORE evidence: 18\nJUSTIFICATION evidence: the fragment's four per-file counts quote merged.log:207,410 and main.log:276,479 exactly, but the sentence at :34 overstates the main arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the node's only authored commit 4e4bbaeb3 touches only the declared fragment.\nSCORE durability: 18\nJUSTIFICATION durability: the merged repair is guarded by this run's own negative control, main.log:270-271 failing test_tangent_matches_base_jvp[edge_terms] and test_truncated_tangent_fails_identity[edge_terms] while the merged arm passes them; the node itself adds only prose.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment at docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html follows the sibling fragment's section/h4/table idiom with a unique id, marred only by the imprecise sentence at :34.\nSCORE reuse: 20\nJUSTIFICATION reuse: the node adds no function, class or module; it reuses the reviewed head's tests and the plan's device-qualified comparison with no forked capability.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:34 non-blocking: 'Both arms fail exactly the compile rows' overstates the main arm, which main.log:270-275 shows fails six ids (four compile timeouts plus test_tangent_matches_base_jvp[edge_terms] and test_truncated_tangent_fails_identity[edge_terms]); only the ids common to both arms are the compile rows, so an evidence record should say that.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:48 non-blocking: the claim that 'the older unloaded H200 arm passed the same identifiers inside 300 s' cites no log path, so a reader cannot check the prior measurement the device-qualification argument leans on.",
+  "review_method": "Read the plan s6 goal and done_when (docs/plans/kernel-compile-barrier.html:83), the run brief, the manifest, the two node commits (547295e9b merge, 4e4bbaeb3 fragment) and the logs they cite (merged.log, main.log, slurm-1338302.out). No suite rerun, no mutation.",
+  "review_run_id": "r-20261123T090644289886-review-of-edge-term-merged-gate-4e4bbaeb345f",
+  "reviewed_base_sha": "03b10519204fa44ab0084cb4fbf2839d19426606",
+  "reviewed_head_sha": "4e4bbaeb345fc99ebf1d7c80b4f8d836c550df30",
+  "reviewed_run_id": "r-20261123T045423967221-edge-term-merged-gate",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "source_commits": [
+    "547295e9b78f3251b05c876861a71500849d7319",
+    "4e4bbaeb345fc99ebf1d7c80b4f8d836c550df30"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T09:18:45.747871+00:00",
+  "total": 112
+}

@@ -5,7 +5,10 @@ WORKTREE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python
 DRIVER="$WORKTREE/scripts/prototypes/hot_path_map"
 OUT="${1:-$HOME/.cache/nova-s33/hot-path-map}"
-REV="$(git -C "$WORKTREE" rev-parse HEAD)"
+REV="$("$PY" "$DRIVER/stamp.py" "$WORKTREE")" || {
+  echo "EXIT=2"
+  exit 2
+}
 NEGATIVE_CONTROL="nova/utilities/ANSYS.py"
 export PYTHONPATH="$WORKTREE"
 export JAX_PLATFORMS=cpu
@@ -39,6 +42,13 @@ echo "INVERSE_EXIT=$INVERSE_STATUS"
 "$PY" -m coverage json --rcfile="$RC" \
   --data-file="$OUT/inverse.coverage" -o "$OUT/inverse.json"
 echo "INVERSE_JSON_EXIT=$?"
+# The map is composed by the driver in this tree, so a commit landing mid-job
+# would leave the record naming a revision that did not compose it.
+"$PY" "$DRIVER/stamp.py" "$WORKTREE" --expect "$REV" || {
+  echo "MAP_EXIT=4"
+  echo "EXIT=4"
+  exit 4
+}
 "$PY" "$DRIVER/map.py" \
   --forward "$OUT/forward.json" --inverse "$OUT/inverse.json" \
   --root "$WORKTREE" --revision "$REV" --tree "$WORKTREE" \

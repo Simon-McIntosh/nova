@@ -88,6 +88,11 @@ def main():
     parser.add_argument("--negative-control", required=True)
     parser.add_argument("--output-json", type=Path, required=True)
     parser.add_argument(
+        "--public-entry",
+        default="nova/equilibrium/forward.py",
+        help="module holding the public solve entry both routes must reach",
+    )
+    parser.add_argument(
         "--strip-lines",
         action="store_true",
         help="omit per-module line numbers, keeping the counts and percentages",
@@ -149,6 +154,17 @@ def main():
 
     entries = []
     for name, function in TRACE_ENTRIES:
+        if not (root / name).exists():
+            entries.append(
+                dict(
+                    module=name,
+                    function=function,
+                    executed=0,
+                    body_lines=0,
+                    reason=f"{name} absent from the tree",
+                )
+            )
+            continue
         source = (root / name).read_text()
         span = body_lines(source, function)
         row = next((item for item in modules if item["module"] == name), None)
@@ -193,6 +209,40 @@ def main():
         )
     contradictions.extend(item for item in entries if item["reason"])
 
+    failures = []
+    if control is None or not control["measured"]:
+        failures.append(
+            f"negative control {args.negative_control} carries no coverage entry, "
+            f"so its zero is an absence rather than a measurement"
+        )
+    else:
+        for key in ("forward", "inverse"):
+            cell_value = control[key]
+            if cell_value is None:
+                failures.append(
+                    f"negative control {args.negative_control} was not measured "
+                    f"by the {key} route"
+                )
+            elif cell_value["executed"]:
+                failures.append(
+                    f"negative control {args.negative_control} read "
+                    f"{cell_value['executed']} lines on the {key} route; a module "
+                    f"no route imports must read zero"
+                )
+    public_row = next(
+        (row for row in modules if row["module"] == args.public_entry), None
+    )
+    for key in ("forward", "inverse"):
+        if public_row is None or not public_row[key]:
+            failures.append(
+                f"public entry {args.public_entry} was not measured by the {key} route"
+            )
+        elif not public_row[key]["executed"]:
+            failures.append(
+                f"public entry {args.public_entry} read no executed line on the "
+                f"{key} route"
+            )
+
     payload = dict(
         revision=args.revision,
         tree=args.tree,
@@ -213,6 +263,7 @@ def main():
         },
         device_trace_entries=entries,
         device_trace_contradictions=contradictions,
+        assertions=dict(passed=not failures, failures=failures),
         modules=modules,
     )
     if args.strip_lines:
@@ -237,6 +288,13 @@ def main():
         ),
         flush=True,
     )
+    print(
+        "ASSERT",
+        json.dumps(dict(passed=not failures, failures=failures)),
+        flush=True,
+    )
+    if failures:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

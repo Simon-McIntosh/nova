@@ -132,13 +132,27 @@ def main():
     control_row = next(
         (row for row in modules if row["module"] == control["module"]), None
     )
+    control_clean = bool(
+        control_row
+        and control_row["measured"]
+        and control_row["forward"]
+        and control_row["inverse"]
+        and not control_row["forward"]["executed"]
+        and not control_row["inverse"]["executed"]
+    )
     parts.append(
         f'<h3 id="{NODE}-negative-control">Negative control</h3><p>'
         f"<code>{control['module']}</code> is imported by neither route and "
         f"reads {plain(control_row, 'forward')} on the forward route and "
-        f"{plain(control_row, 'inverse')} on the inverse route: measured, and "
-        f"zero. A map that marked every module reached would show it nonzero "
-        f"here.</p>"
+        f"{plain(control_row, 'inverse')} on the inverse route"
+        + (
+            ", which is the zero the map asserts: a map that marked every "
+            "module reached would show a nonzero count here and map.py refuses "
+            "to write one.</p>"
+            if control_clean
+            else ", which is not a clean zero, so the negative control failed "
+            "and this record does not stand.</p>"
+        )
     )
     parts.append(
         f'<h3 id="{NODE}-device-trace">Relation to the device trace</h3>'
@@ -208,8 +222,6 @@ def main():
             f"<code>{html.escape(args.driver_revision)}</code>: "
             f"<code>{html.escape(command)}</code> prints nothing.</p>"
         )
-    parts.append("</section>")
-    parts.extend(["  </main>", "</body>", "</html>"])
     if args.log:
         for line in Path(args.log).read_text().splitlines():
             if " passed in " in line and line.split()[0].isdigit():
@@ -225,7 +237,15 @@ def main():
             f"<code>{html.escape(args.line_copy)}</code>, beside the run's "
             f"other receipts.</p>"
         )
+    parts.append("</section>")
+    parts.extend(["  </main>", "</body>", "</html>"])
     text, unmapped = relativize_worktree_paths("\n".join(parts) + "\n")
+    closing = text.rstrip().endswith("</html>")
+    if not closing or text.count("</html>") != 1:
+        raise SystemExit(
+            f"{args.output}: the fragment does not close once at </html>; "
+            f"content would sit outside the body"
+        )
     args.output.write_text(text)
     if unmapped:
         print("UNMAPPED", json.dumps(unmapped[:5]), flush=True)

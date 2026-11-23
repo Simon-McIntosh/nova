@@ -210,6 +210,14 @@ def main():
         )
     parts.append("</section>")
     parts.extend(["  </main>", "</body>", "</html>"])
+    if args.log:
+        for line in Path(args.log).read_text().splitlines():
+            if " passed in " in line and line.split()[0].isdigit():
+                parts.append(
+                    f"<p>Gate result, quoted from the log's runner line: "
+                    f"<code>{html.escape(line.strip())}</code></p>"
+                )
+                break
     if args.line_copy:
         parts.append(
             f"<p>The machine-readable copy beside this fragment carries every "

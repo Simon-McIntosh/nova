@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "scripts/render_shafranov_integral_certificate.py:main; no production module calls shafranov_contour_integrals or beta_p_plus_half_internal_inductance (nova/equilibrium/__init__.py:39 exports other diagnostics symbols, not these).",
+  "completed_at": "",
+  "dispatched_at": "2026-11-23T06:15:21Z",
+  "findings": [
+    {
+      "file": "scripts/render_shafranov_integral_certificate.py",
+      "id": "fa1dbe40cdd",
+      "line": 66,
+      "severity": "non-blocking",
+      "summary": "_check_artists re-implements the clipped/overlapping-text figure audit that scripts/edge_sheet/figure.py:52-68 already implements, making a third script-local copy of a check the plotting rules say belongs in the style module; promote it to nova.media.ink instead of copying; otherwise a later figure's saved audit drifts from this one."
+    },
+    {
+      "file": "docs/evidence/fragments/shafranov-observed-side/sos-grid-route-current-rule.html",
+      "id": "f10f00c51d5",
+      "line": 87,
+      "severity": "non-blocking",
+      "summary": "The prose timing numbers (7.157 s, 6.267e-05 s, ratio 114199, 76 kernel calls) still trace to no receipt, and the printed ratio does not follow from the printed operands (7.157/6.267e-05 = 114201); the figure-audit followup asked for them to be emitted into a receipt, so this prose is still unverifiable."
+    },
+    {
+      "file": "docs/evidence/archive/constraint-augmented-newton-krylov-landed.html",
+      "id": "f4832fc313c",
+      "line": 897,
+      "severity": "non-blocking",
+      "summary": "The landed deletion of field-response-timing.png and .svg leaves this cumulative archive record's image and its linked SVG at lines 897 and 901 pointing at files that no longer exist; the archive is outside the node's write scope, so the repair belongs to a coordinator."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified the only runtime caller of the new ladder helpers is scripts/render_shafranov_integral_certificate.py:main; nova/equilibrium/__init__.py:39 exports diagnostics symbols but not shafranov_contour_integrals or beta_p_plus_half_internal_inductance, and no production module imports either.",
+    "diff": "Read the four commits 062298ce..f0e895842 commit by commit: a test/evidence commit, a documentation commit, a figure-tick repair commit and two docs-only commits that touch only the evidence fragment.",
+    "done_when": "The done_when's three clauses are each asserted: receipt order/mechanism, identity rungs 321/641/1281 inside the 5.0e-4 bound with the order fitted and asserted at tests/test_equilibrium_diagnostics.py:538, and the certificate redrawn from the receipt with every drawn number a receipt key.",
+    "goal": "goal is 'State and assert the analytic grid route's fitted order with its mechanism at the current fourth-order contour rule'; the receipt and evidence fragment carry order 2.03 with its X-point corner and cancellation mechanism.",
+    "manifest": "Read; it records status complete, both suite arms at 64 passed, the scoped gate log and the negative-control.log with its module.__file__ inside the mutated scratch tree.",
+    "write_paths": "Read the manifest's declared paths and compared them to the delivered diff; all nine delivered paths are inside nova/equilibrium/diagnostics.py, tests/test_equilibrium_diagnostics.py, the fragment, the two figure directories and the render script."
+  },
+  "justifications": {
+    "durability": "tests/test_equilibrium_diagnostics.py:538 fails when the contour tangent is reverted to leading-vertex sampling (logs/negative-control.log: order 0.353, 2 failed), but no test ties the tracked receipt.json to a fresh measurement, so that receipt can go stale again silently.",
+    "evidence": "tests/test_equilibrium_diagnostics.py:538 asserts the identity residual's predicted first order and the two arms recorded at baseline_suite-1795381916033444263.log and after_suite-1795382024344104245.log are each 64 passed with EXIT=0, though the prose timing numbers in the evidence fragment trace to no receipt.",
+    "fit": "scripts/render_shafranov_integral_certificate.py:1-34 uses nova.media.ink and the repository's plotting rules, and the changed files pass ruff check.",
+    "goal_fidelity": "docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json states quadrature_order 2.0296855 with the plateau's cancellation mechanism, which is the goal's stated order plus mechanism at the current fourth-order contour rule.",
+    "reuse": "scripts/render_shafranov_integral_certificate.py:66 re-implements the clipped/overlapping-text figure audit already carried by scripts/edge_sheet/figure.py:52-68 without extending a shared owner.",
+    "scope_discipline": "Every one of the nine delivered paths, including scripts/render_shafranov_integral_certificate.py and the deleted field-response-timing images, falls inside the six declared write paths."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T060011363220-review-of-sos-grid-route-current-rule-f0e895842237",
+  "reviewed_base_sha": "062298ce691bf2dd318801efe27c5b457fa4e2b7",
+  "reviewed_head_sha": "f0e895842237a1a4d4b9a2766819a08fa1ebf091",
+  "reviewed_run_id": "r-20261122T135237120281-sos-grid-route-current-rule",
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T06:43:53.514327+00:00",
+  "total": 103
+}

@@ -1,0 +1,70 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachments_judged": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d05cb1ec-4ff4-4522-a11b-c1ba0f43b533/sos-grid-route-current-rule/docs/figures/constraint-augmented-newton-krylov/shafranov-integral/shafranov-integral-certificate.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T060050735520-review-of-sos-grid-route-current-rule-f0e895842237-figure/image-1.png"
+  ],
+  "completed_at": "2026-11-23T06:43:42.799Z",
+  "dispatched_at": "2026-11-23T06:15:21Z",
+  "figures": {
+    "docs/figures/constraint-augmented-newton-krylov/shafranov-integral/shafranov-integral-certificate.png": {
+      "contrast": "pass - text 5.37:1 (blue) to 21.0:1 (black), plateau label 7.00:1, dotted rule 3.95:1.",
+      "data_ink": "pass - two thin traces, markers and direct labels; 1.35 percent non-white pixels on the 2800x1440 canvas.",
+      "decoration": "pass - no gradient, no fill, no gridline; the dotted plateau rule is a labelled receipt value.",
+      "label_collision": "pass - zero ink in the 4 px edge ring, minimum margin 31 px, no label-on-label or label-on-data overlap.",
+      "legibility": "pass with one noted notation caveat - see rubric_items.legibility; the right panel's y-axis label prints 'beta_p + l_i/2' as plain text (literal underscore, lowercase l as a bare stroke).",
+      "table_form": "pass - both panels show convergence relationships (slope and approach) that a table would not convey."
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/render_shafranov_integral_certificate.py",
+      "line": 236,
+      "severity": "non-blocking",
+      "summary": "The right panel - the panel the figure exists for - labels its y-axis 'relative error of beta_p + l_i/2' as plain text, so the subscript is a literal underscore rather than a typeset subscript and the lowercase l renders in this font as a bare vertical stroke. In the render the quantity reads at a glance as 'beta_p + |_i|/2', which a reader can take for an absolute value of i. The evidence fragment's caption and prose typeset the same quantity as l<sub>i</sub>, so the reader is not lost, the axis is still identifiable, and no number is obscured; that is why this does not hold the node. A typeset form (mathtext or a subscript) would remove the ambiguity."
+    },
+    {
+      "file": "scripts/render_shafranov_integral_certificate.py",
+      "line": 198,
+      "severity": "non-blocking",
+      "summary": "The left panel carries a title, 'grid ladder: gap at most 2.84e-06', that restates the caption's first clause ('Left: the grid ladder - ... at most 2.84e-06'), and the house plot style puts identity in the caption and file name rather than in a title. The right panel has no title at all, so the pair is also asymmetric. It costs a line of ink above one panel and repeats what the caption already says; nothing about reading the data depends on it."
+    },
+    {
+      "file": "scripts/render_shafranov_integral_certificate.py",
+      "line": 218,
+      "severity": "non-blocking",
+      "summary": "The dotted 'plateau 2.230e-01' rule is drawn at limit, and the receipt sets limit to errors[-1], the last sampled error (0.22299324161640777), so the rule passes exactly through the final marker rather than sitting at 8001's y-value by coincidence. The render shows the marker centred on the dotted line. A reader can read 'the ladder settles onto the plateau' as convergence to an independently measured asymptote, where the plateau is in fact the endpoint of the same ladder; the evidence prose explains the plateau's cause, but the panel alone cannot show the difference. The 2.03 order is drawn from the departure-from-limit series, so the fitted number is not tautological - only the reference line's meaning is."
+    },
+    {
+      "file": "scripts/render_shafranov_integral_certificate.py",
+      "line": 232,
+      "severity": "non-blocking",
+      "summary": "The contour panel's y-axis is logarithmic but is given three ticks read from the receipt, 0.22, 0.24 and 0.27, which are data extremes rounded to two decimals rather than a round step. On a log axis the pixel spacing is logarithmic while the label gaps read as linear (0.24 minus 0.22 = 0.02, then 0.27 minus 0.24 = 0.03), and the top tick 0.27 is a rounding of the highest datum 0.2666 and sits above every plotted point, so no data reaches it. The panel stays readable because each plotted point carries its exact value in a direct label and the plateau rule is labelled, so this does not hold the node; round ticks or a linear axis would remove the ambiguity."
+    }
+  ],
+  "notes": "Read-only figure review of the two attachments named by the dispatch. Both are the same rendering - the served 2800x1440 PNG and a 1400x720 copy of it (98.4 percent of pixels within 8 grey levels after resampling the larger one down, so the difference is resampling, not content) - and both were opened and judged; the six verdicts above apply to both. CROPS DERIVED FROM THE NAMED PNGS WERE INSPECTED at 3-4x to read the small type; no SVG and no other image was opened, read, listed, searched, rendered or shown, and no file in the reviewed tree was edited, created, moved, deleted, redrawn, relabelled or reformatted. The drawing script and the evidence fragment were read as text only to establish which label string and which receipt key each painted element comes from - a defect must not be reported from markup the render may not show. Every number the figure paints was checked against receipt.json and is present there: title 2.84e-06 = grid_gap_max, the three gaps 2.84/2.02/6.87e-06 = grid_gap, ticks 1e-06/2e-06 = grid_tick_values, ticks 0.22/0.24/0.27 = contour_tick_values, plateau 2.230e-01 = limit, order 2.03 = quadrature_order over quadrature_order_range 501-2001, samplings 501/1001/2001/8001 = contour_samplings. The caption does not merely repeat the title: it names the left and right panels, the plateau value and the fitted order, and points to the receipt, so no caption finding is recorded. The field-response two-bar timing panel the earlier figure audit flagged as belonging in prose is absent from the figure, which matches the fragment's 'removed field-response timing panel' section. No suite ran for this figure review; added_failure_count is 0 by construction.",
+  "project": "nova",
+  "review_run_id": "r-20261123T060050735520-review-of-sos-grid-route-current-rule-f0e895842237-figure",
+  "reviewed_base_sha": "062298ce691bf2dd318801efe27c5b457fa4e2b7",
+  "reviewed_head_sha": "f0e895842237a1a4d4b9a2766819a08fa1ebf091",
+  "reviewed_run_id": "r-20261122T135237120281-sos-grid-route-current-rule",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash",
+    "reviewed_at": "2026-11-23T06:29:04Z",
+    "reviewer_run_id": "r-20261123T060050735520-review-of-sos-grid-route-current-rule-f0e895842237-figure"
+  },
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass - measured from the rendered pixels against white: black text and axes 21.0:1, the blue series and its direct labels (#3366cc) 5.37:1, the grey plateau label (#595959) 7.00:1, the dotted plateau rule (#808080) 3.95:1. Every text colour clears 4.5:1 and the one non-text rule 3:1.",
+    "data_ink": "pass - the data carry the visual weight and nothing else does: two thin blue traces (#3366cc, 2.6 pt) with small round markers, direct labels at each plotted point, and three tick labels per axis. Measured over the 2800x1440 canvas, only 1.35 percent of pixels are non-white, and the black ink present is the spines, ticks, tick labels and two axis labels.",
+    "decoration": "pass - no gradient, no background fill, no gridline, no frame beyond the two left/bottom spines the ink style keeps, and no shading band. The one non-series line is the dotted grey plateau rule in the right panel, which marks a receipt value (limit 2.230e-01) and is named by the direct label 'plateau 2.230e-01', so it is data rather than decoration.",
+    "label_collision": "pass - no label is clipped, overlapping another label, or overlapping the data. Measured on both attachments, the outermost 4 pixel ring of the canvas carries zero ink and the minimum text-free margin is 31 px at 2800x1440 (15 px at 1400x720), so nothing is cut by the canvas edge; visually every direct label sits in clear space beside its marker, 'plateau 2.230e-01' clears the dotted rule above it, and 'contour route' sits above the rule and to the right of the last marker without touching the trace.",
+    "legibility": "pass with one noted notation caveat - at both attached sizes (2800x1440 and 1400x720) every title, axis label, tick label and direct label is legible: the left title 'grid ladder: gap at most 2.84e-06', the direct labels '21: 2.84e-06' / '41: 2.02e-06' / '81: 6.87e-07' beside their markers, 'contour order 2.03 over 501-2001' and 'contour route' in the right panel, and 501/1001/2001/8001 on its x-axis. The single caveat is the right panel's y-axis label, which prints 'relative error of beta_p + l_i/2' as plain text so the subscript arrives as a literal underscore and the lowercase l renders as a bare vertical stroke; recorded as a non-blocking finding.",
+    "table_form": "pass - the image is not a table in disguise. The left panel's three points are a convergence ladder whose information is the slope on the log axis, and the right panel's four points show an approach to a plateau whose information is the fitted order 2.03; both are relationships a table of the same numbers would not show. The numbers themselves are also carried as prose in the evidence fragment, so the figure adds the shape rather than repeating the table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T06:43:58.438922+00:00",
+  "total": null
+}

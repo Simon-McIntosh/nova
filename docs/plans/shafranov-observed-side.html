@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-11-23">
 <meta name="plan-blocks" content="">
 <meta name="plan-standalone" content="The plan it unblocked, constraint-augmented-newton-krylov, is superseded; no open plan waits on the Shafranov observed side and it waits on none.">
@@ -168,11 +168,14 @@
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260919T111700847506-sos-grid-route-order" data-who="reckon-ship" data-when="2026-09-19T11:47:43.637Z">
     <div class="r-comment-body"><p>Contour quadrature made second order (fitted 2.064) and the grid route order persisted; the fix exposes three volume-side identity tests hidden by a 5e-4 bound whose sources are named for the next node; review 89/100</p></div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261123T060050735520-review-of-sos-grid-route-current-rule-f0e895842237-figure" data-who="reckon-build" data-when="2026-11-23T06:43:42.799Z">
+    <div class="r-comment-body"><p>Figure review of r-20261122T135237120281-sos-grid-route-current-rule at head f0e895842237a1a4d4b9a2766819a08fa1ebf091: parsed, all 6 rubric items answered; 4 non-blocking findings and no blocking finding; no suite (figure review).</p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-s4-mast-solved-state-ruling" data-who="reckon-build" data-when="2026-11-23T05:40:00Z">
     <div class="r-comment-body"><p><strong>Lead ruling 2026-11-22.</strong> MAST carries no usable calibrated diamagnetic loop, so it falls to the toroidal-volume-term decision's 'elsewhere' branch: on MAST rows Z comes from the solved state, with provenance <code>solved-state</code>. The evidence: a 200-shot census of the MAST level1 store found the EFIT diamagnetic channel all zeros or NaN and never rated usable, and the raw <code>xma</code> loop signals uncalibrated amplifier outputs on a ±10 V rail with no loop area, turns or integrator gain published. The reader now stores calibrated loops with verified sign and source (run <code>sos-diamagnetic-source</code>, demonstrated on WEST 57410), so a machine that publishes a calibrated loop takes Z from it. Done-when (2) is therefore met by the census, not by a MAST reproduction.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261123T045858001331-review-of-sos-diamagnetic-source-7185961a45ae" data-who="reckon-build" data-when="2026-11-23T05:54:20.523Z">
-    <div class="r-comment-body"><p>Independent review of r-20261122T135238314086-sos-diamagnetic-source at base 06d728006cba140ec3cf0670927100f31f8cfce0 / head 7185961a45ae3e0f755ea6d3204b02624cbed3e9: six dimensions scored (goal_fidelity 16, evidence 13, scope_discipline 19, durability 15, fit 16, reuse 14), call sites none, six non-blocking findings and no blocking finding; added_failure_count 0 with empty added_failure_ids because the reviewed node&#x27;s suite arms were never armed.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261122T135238314086-sos-diamagnetic-source at base 06d728006cba140ec3cf0670927100f31f8cfce0 / head 7185961a45ae3e0f755ea6d3204b02624cbed3e9: six dimensions scored (goal_fidelity 16, evidence 13, scope_discipline 19, durability 15, fit 16, reuse 14), call sites none, six non-blocking findings and no blocking finding; added_failure_count 0 with empty added_failure_ids because the reviewed node's suite arms were never armed.</p></div>
 </div>
 </section>
 </main>

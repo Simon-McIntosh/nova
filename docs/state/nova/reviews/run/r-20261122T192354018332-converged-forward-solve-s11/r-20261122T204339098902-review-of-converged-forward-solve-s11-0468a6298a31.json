@@ -1,0 +1,39 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T00:22:56.134Z",
+  "dispatched_at": "2026-11-22T23:59:22Z",
+  "findings": [
+    {
+      "file": "tests/test_forward_solve_acceptance_bound.py",
+      "line": 215,
+      "severity": "non-blocking",
+      "text": "The recorded negative-control log was not produced against the delivered module: the traceback it prints cites lines 161, 203, 225, 245 and 252, whereas every corresponding statement in the committed file sits at 156, 194, 216, 236 and 243, so the red run was taken while the file was still uncommitted and its layout differed, and it does not demonstrate a red run of what landed. The delivered module nevertheless carries permanent negative controls (test_a_changed_bound_fails_with_both_values_printed at line 272 and test_a_corrupted_coefficient_fails_with_both_values_printed at line 283) that exercise the same refusal paths against the real plan and design documents and pass at the head, which is a stronger forward guarantee than the stale log."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit against base be5ee98f; the single commit 0468a6298 adds only tests/test_forward_solve_acceptance_bound.py (+289 -0), inside the declared scope.",
+    "done_when": "the done_when names three measures; test_acceptance_clause_table_matches_the_plan_bound (:215) asserts all nine clauses against the plan's own table, test_design_budget_coefficients_match_the_design_document (:242) asserts all six design pairs against the document's data attributes and printed text, and the negative-control tests at :272 and :283 show the refusal with both values printed.",
+    "goal": "the node's goal is one versioned test module binding each \u00a76 acceptance clause to its stated bound plus the design document's budget coefficients and a negative control; tests/test_forward_solve_acceptance_bound.py:40-112 declares all nine \u00a76 clauses and six coefficient/order pairs, and tests at :215 and :242 assert them against the documents.",
+    "manifest": "read; it records the committed head 0468a6298, the gate command, gate-acceptance-bound.log ending EXIT=0 with 10 passed, and negative-control-acceptance-bound.log ending EXIT=1 with 3 failed ids, and its landing line describes the module accurately.",
+    "write_paths": "read the manifest's declared paths; the single delivered path tests/test_forward_solve_acceptance_bound.py is inside them, and the declared evidence-fragment and figure paths were not written, which the done_when does not require."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is one versioned test module binding each \u00a76 acceptance clause to its stated bound plus the design document's budget coefficients and a negative control; tests/test_forward_solve_acceptance_bound.py:40-112 declares all nine \u00a76 clauses and six coefficient/order pairs and tests at :215 and :242 assert them against the documents.\nVERDICT done_when: the done_when names three measures; test_acceptance_clause_table_matches_the_plan_bound (tests/test_forward_solve_acceptance_bound.py:215) asserts the nine clauses against the plan's own table, test_design_budget_coefficients_match_the_design_document (:242) asserts six design pairs against the document's data attributes and printed text, and the negative control is exercised at :272 and :283, each printing both values.\nVERDICT write_paths: read the manifest's declared paths; the only delivered path tests/test_forward_solve_acceptance_bound.py is inside them, and the declared evidence-fragment and figure directories were not written, which the done_when does not require.\nVERDICT manifest: read; it records 10 passed at gate-acceptance-bound.log EXIT=0 and 3 failed ids at negative-control-acceptance-bound.log EXIT=1, and its landing line describes the module accurately.\nVERDICT diff: read commit by commit against base be5ee98f; the single commit 0468a6298 adds only tests/test_forward_solve_acceptance_bound.py (+289 -0), inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/test_forward_solve_acceptance_bound.py:40-112 declares every \u00a76 clause and design coefficient and tests/test_forward_solve_acceptance_bound.py:215 binds the clause table to the plan.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate-acceptance-bound.log ends EXIT=0 with 10 passed and reproduces at the reviewed head, but negative-control-acceptance-bound.log cites line numbers (161, 203, 225, 245, 252) that do not exist at the corresponding delivered statements (156, 194, 216, 236, 243), so it was taken at a different revision of the module.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff of be5ee98f..0468a6298 touches only tests/test_forward_solve_acceptance_bound.py, which the manifest declares.\nSCORE durability: 19\nJUSTIFICATION durability: mutating ACCEPTANCE_CLAUSES[0] to 1e-10 reddens test_acceptance_clause_table_matches_the_plan_bound (tests/test_forward_solve_acceptance_bound.py:215) because it compares the declaration to the plan rows at :156, and :236 binds the production DEFAULT_TOLERANCE to the same clause.\nSCORE fit: 18\nJUSTIFICATION fit: the module follows the surrounding nova test style (frozen dataclass at tests/test_forward_solve_acceptance_bound.py:29, tuple/list generics, plain asserts) and names symbols by mechanism.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search over nova/tests and nova/nova for an existing plan-clause or budget-table binding found none; the nearest helper at tests/test_evidence_tooling_paths.py:53 reads a file rather than parsing HTML, so the new helpers own a capability the repository lacked.\nFINDING tests/test_forward_solve_acceptance_bound.py:215 non-blocking: the recorded negative-control log was taken while the file was uncommitted and its traceback line numbers (161, 203, 225, 245, 252) do not match the delivered statements (156, 194, 216, 236, 243), so it does not evidence a red run of the landed module; the committed in-module negative controls at :272 and :283 supply the forward guarantee.",
+  "review_run_id": "r-20261122T204339098902-review-of-converged-forward-solve-s11-0468a6298a31",
+  "reviewed_base_sha": "be5ee98f736dcc20393153f8bb6e7bf163ef873e",
+  "reviewed_head_sha": "0468a6298a312e1aacc39beaf0c027b6c6013502",
+  "reviewed_run_id": "r-20261122T192354018332-converged-forward-solve-s11",
+  "scores": {
+    "durability": 19,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T00:27:13.244913+00:00",
+  "total": 111
+}

@@ -97,6 +97,8 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--compile-instruction-limit", type=int, default=20000)
     parser.add_argument("--lower-only", action="store_true")
+    parser.add_argument("--eager", action="store_true")
+    parser.add_argument("--adaptive-eager", action="store_true")
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument(
         "--mode", choices=("derivative", "curvature", "batch"), default="derivative"
@@ -134,6 +136,48 @@ def main():
         "fixture": info,
         "backend": str(jax.devices()[0]),
     }
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    if args.eager:
+        # Disable every jit wrapper, including the coupling's own wrappers.
+        # Primitive dispatch still compiles small operations independently.
+        indices = list(range(250))
+        values = []
+        start = time.monotonic()
+        with jax.disable_jit():
+            for slot in range(250):
+                if slot >= len(indices):
+                    break
+                point = targets[indices[slot]]
+                values.append(
+                    np.asarray(function(point, field.coupling, field.moments))
+                )
+                if args.adaptive_eager and slot == 2:
+                    estimate = (time.monotonic() - start) / 3 * 250
+                    row["estimated_full_eager_seconds"] = estimate
+                    if estimate > 1200:
+                        indices = list(range(40)) + list(range(200, 220))
+                used = indices[: len(values)]
+                row.update(
+                    phase="eager-partial",
+                    completed_targets=len(values),
+                    generic_targets=sum(index < 200 for index in used),
+                    corner_targets=sum(index >= 200 for index in used),
+                    target_indices=used,
+                    eager_seconds=time.monotonic() - start,
+                    peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+                )
+                np.savez(
+                    args.output.with_suffix(".npz"),
+                    targets=np.asarray(targets)[used],
+                    values=np.stack(values),
+                    indices=np.asarray(used),
+                )
+                write(args.output, row)
+        row["phase"] = "eager-complete"
+        row["finite_values"] = int(np.isfinite(np.stack(values)).sum())
+        row["total_values"] = int(np.stack(values).size)
+        write(args.output, row)
+        return
     start = time.monotonic()
     lowered = jax.jit(function).lower(*operands)
     row["lower_seconds"] = time.monotonic() - start

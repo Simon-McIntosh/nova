@@ -2,6 +2,7 @@
 set -u
 census_tree=$1
 census_run=$2
+census_rows=${3:-rows}
 export TMPDIR=/tmp
 export PYTHONPATH="$census_tree"
 export JAX_PLATFORMS=cpu
@@ -15,9 +16,9 @@ export JAX_COMPILATION_CACHE_DIR="$census_scratch/compile-cache"
 cd "$census_tree" || exit 1
 census_revision=$(git rev-parse HEAD)
 printf 'revision=%s tree=%s command=' "$census_revision" "$census_tree"
-printf '%q ' /home/ITER/mcintos/Code/nova/.venv/bin/python "$census_tree/scripts/prototypes/derivative_order_census/run.py" --output "$census_run/rows"
+printf '%q ' /home/ITER/mcintos/Code/nova/.venv/bin/python "$census_tree/scripts/prototypes/derivative_order_census/run.py" --output "$census_run/$census_rows"
 printf '\n'
-/home/ITER/mcintos/Code/nova/.venv/bin/python "$census_tree/scripts/prototypes/derivative_order_census/run.py" --output "$census_run/rows"
+/home/ITER/mcintos/Code/nova/.venv/bin/python "$census_tree/scripts/prototypes/derivative_order_census/run.py" --output "$census_run/$census_rows"
 census_exit=$?
 echo "EXIT=$census_exit"
 exit "$census_exit"

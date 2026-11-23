@@ -127,6 +127,12 @@
   instrument reproduces the operator owner's own dense answer on the shell that
   owner solves densely, to machine precision. The closed-form row is new and
   exists because the seed relation is what attributes the Newton witness.</p>
+  <p>Each identity carries a stated tolerance, and <code>--mode check</code>
+  exits nonzero naming the identity that misses it rather than printing a fresh
+  reading, so a regression fails a gate instead of being read as a measurement.
+  The guard is exercised rather than asserted: with one identity displaced by a
+  thousand tolerances the mode exits nonzero naming that identity, and the log
+  sits beside the clean run in the receipts.</p>
 
   <h3 id="icm-graded-bound-remeasure-control">The negative control</h3>
   <p>A rank-one term <code>G' = G + mu0 PLANT p (Qp)<sup>T</sup></code> adds
@@ -360,8 +366,11 @@
   <code>bound-{uniform-0.04,uniform-0.08,graded-16-80}.json</code> and
   <code>control-uniform-0.08.json</code> (the quotient arms),
   <code>witness-graded-16-80.json</code> (the Newton witness, its localisation
-  and the susceptibility band), <code>check.json</code> (the gate-shell and
-  identity calibration), the GPU-path receipts
+  and the susceptibility band), <code>region-graded-16-80.json</code> (the
+  carrying cells' size, neighbour and spacing geometry),
+  <code>operator-digests.json</code> (each operator's digest from its persisting
+  sidecar, with what every receipt reads), <code>check.json</code> (the
+  gate-shell and identity calibration), the GPU-path receipts
   <code>bound-uniform-0.08.gpu.json</code>, <code>control-uniform-0.08.gpu.json</code>
   and <code>check.gpu.json</code> kept beside them for the cross-check, and the
   witness vectors <code>witness-graded-16-80.npy</code>,

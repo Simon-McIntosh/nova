@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="17">
-<meta name="plan-modified" content="2026-11-22">
+<meta name="plan-version" content="18">
+<meta name="plan-modified" content="2026-11-23">
 <meta name="plan-blocks" content="">
 <meta name="plan-standalone" content="The plan it unblocked, constraint-augmented-newton-krylov, is superseded; no open plan waits on the Shafranov observed side and it waits on none.">
 <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;shafranov-observed-side#s1&quot;,&quot;shafranov-observed-side#s2&quot;,&quot;shafranov-observed-side#s4&quot;]}">
@@ -167,6 +167,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260919T111700847506-sos-grid-route-order" data-who="reckon-ship" data-when="2026-09-19T11:47:43.637Z">
     <div class="r-comment-body"><p>Contour quadrature made second order (fitted 2.064) and the grid route order persisted; the fix exposes three volume-side identity tests hidden by a 5e-4 bound whose sources are named for the next node; review 89/100</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s4-mast-solved-state-ruling" data-who="reckon-build" data-when="2026-11-23T05:40:00Z">
+    <div class="r-comment-body"><p><strong>Lead ruling 2026-11-22.</strong> MAST carries no usable calibrated diamagnetic loop, so it falls to the toroidal-volume-term decision's 'elsewhere' branch: on MAST rows Z comes from the solved state, with provenance <code>solved-state</code>. The evidence: a 200-shot census of the MAST level1 store found the EFIT diamagnetic channel all zeros or NaN and never rated usable, and the raw <code>xma</code> loop signals uncalibrated amplifier outputs on a ±10 V rail with no loop area, turns or integrator gain published. The reader now stores calibrated loops with verified sign and source (run <code>sos-diamagnetic-source</code>, demonstrated on WEST 57410), so a machine that publishes a calibrated loop takes Z from it. Done-when (2) is therefore met by the census, not by a MAST reproduction.</p></div>
 </div>
 </section>
 </main>

@@ -1,156 +1,4 @@
 {
-  "artifact_repair": {
-    "baseline_mismatch_reproduced_wb": 3.6850168015254323,
-    "cause": "sensitivity solve overwrote the baseline archive at the same frame tag",
-    "expected_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
-    "immutable_operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
-    "job_id": "1306557",
-    "observed_digest": "a173cc65293f52c296fd51a4428006214afd518bf7f2ae870a2c21ba2c84ec72",
-    "original_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179.npz",
-    "source_revision": "4055f7e96a1d334acbbbb6cdb00a016cecf94c02"
-  },
-  "bank_run": {
-    "completed_frame_records": 5,
-    "elapsed_seconds": 2406,
-    "job_id": "1306484",
-    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T172208538923-diiid-panels-on-solve-currents/bank-continuation.log",
-    "node": "98dci4-gpu-0003",
-    "partition": "betelgeuse",
-    "restored_frame_records": 3,
-    "rung": "h200",
-    "source_revision": "38ed1755ca3209c3f084d705fff51e5f74d66022"
-  },
-  "branch_capacity_replay": {
-    "job_id": "1306557",
-    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261105T172208538923-diiid-panels-on-solve-currents/operand-repair.log",
-    "map_spacing_m": 0.01,
-    "probe_branch_capacity": 1024,
-    "probe_geometry_published": false,
-    "production_branch_capacity": 256,
-    "rows": [
-      {
-        "axis_enclosing_component_count": 1,
-        "branch_overflow": true,
-        "capacity": 256,
-        "closed_candidate_count": 1,
-        "closed_segment_count": 0,
-        "contour_well_formed": true,
-        "cycle_component_count": 1,
-        "frame": 179,
-        "graph_well_formed": true,
-        "open_branch_count": 0,
-        "open_slot_overflow": false,
-        "seconds": 122.45287234708667,
-        "well_formed": false
-      },
-      {
-        "axis_enclosing_component_count": 1,
-        "branch_overflow": false,
-        "capacity": 1024,
-        "closed_candidate_count": 1,
-        "closed_segment_count": 627,
-        "contour_well_formed": true,
-        "cycle_component_count": 1,
-        "frame": 179,
-        "graph_well_formed": true,
-        "open_branch_count": 2,
-        "open_slot_overflow": false,
-        "seconds": 122.28909315541387,
-        "well_formed": true
-      },
-      {
-        "axis_enclosing_component_count": 1,
-        "branch_overflow": true,
-        "capacity": 256,
-        "closed_candidate_count": 1,
-        "closed_segment_count": 0,
-        "contour_well_formed": true,
-        "cycle_component_count": 1,
-        "frame": 44,
-        "graph_well_formed": true,
-        "open_branch_count": 0,
-        "open_slot_overflow": false,
-        "seconds": 118.62446847558022,
-        "well_formed": false
-      },
-      {
-        "axis_enclosing_component_count": 1,
-        "branch_overflow": false,
-        "capacity": 1024,
-        "closed_candidate_count": 1,
-        "closed_segment_count": 465,
-        "contour_well_formed": true,
-        "cycle_component_count": 1,
-        "frame": 44,
-        "graph_well_formed": true,
-        "open_branch_count": 2,
-        "open_slot_overflow": false,
-        "seconds": 118.43807591497898,
-        "well_formed": true
-      },
-      {
-        "axis_enclosing_component_count": 1,
-        "branch_overflow": true,
-        "capacity": 256,
-        "closed_candidate_count": 0,
-        "closed_segment_count": 0,
-        "contour_well_formed": true,
-        "cycle_component_count": 1,
-        "frame": 146,
-        "graph_well_formed": true,
-        "open_branch_count": 0,
-        "open_slot_overflow": false,
-        "seconds": 118.43393255770206,
-        "well_formed": false
-      },
-      {
-        "axis_enclosing_component_count": 1,
-        "branch_overflow": false,
-        "capacity": 1024,
-        "closed_candidate_count": 0,
-        "closed_segment_count": 0,
-        "contour_well_formed": true,
-        "cycle_component_count": 1,
-        "frame": 146,
-        "graph_well_formed": true,
-        "open_branch_count": 0,
-        "open_slot_overflow": false,
-        "seconds": 118.51568326354027,
-        "well_formed": false
-      },
-      {
-        "axis_enclosing_component_count": 1,
-        "branch_overflow": true,
-        "capacity": 256,
-        "closed_candidate_count": 1,
-        "closed_segment_count": 0,
-        "contour_well_formed": true,
-        "cycle_component_count": 1,
-        "frame": 137,
-        "graph_well_formed": true,
-        "open_branch_count": 0,
-        "open_slot_overflow": false,
-        "seconds": 118.68676690943539,
-        "well_formed": false
-      },
-      {
-        "axis_enclosing_component_count": 1,
-        "branch_overflow": false,
-        "capacity": 1024,
-        "closed_candidate_count": 1,
-        "closed_segment_count": 537,
-        "contour_well_formed": true,
-        "cycle_component_count": 1,
-        "frame": 137,
-        "graph_well_formed": true,
-        "open_branch_count": 2,
-        "open_slot_overflow": false,
-        "seconds": 118.70550996437669,
-        "well_formed": true
-      }
-    ],
-    "source_revision": "4055f7e96a1d334acbbbb6cdb00a016cecf94c02"
-  },
   "execution_authority": {
     "basin_entry": "ForwardProfile.cold_seed_portfolio plus select_forward_branch",
     "cohort_expansion": "five frames replace the historical three-frame minimum without loosening the score bar",
@@ -281,34 +129,16 @@
       "publication_path": "/nova/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json"
     }
   },
-  "rendering": {
-    "benchmark_sha256": "794bb4e1401e220c4a1295ca547f1cb04d4c2fe9c0da1386db461f2376062be6",
-    "clipped_labels": 0,
-    "from_verified_persisted_operands": true,
-    "inspected_pngs": 3,
-    "overlapping_labels": 0,
-    "pngs": {
-      "cohort_match_summary.png": "a9c7f3dd2864c5fa3bad187a8ee55abc94142a6f6ea3656b0db8be1a4c8337f1",
-      "displacement_decomposition.png": "7c04a650606473dc2832d73813c14728c507930424910ff2184fd357436c78a2",
-      "frame_flux_comparison.png": "b4be9988efa2656d0256ec1ac3be75883f04b70e0aee90173ea60c8c0dda5657"
-    },
-    "source_revision": "9a568b9eec4b9a108662d66c3101e450feb4314f",
-    "text_check": "passed"
-  },
   "result": {
     "coefficients_fitted": 0,
     "convergence": {
       "all_converged": false,
-      "converged_frames": 0,
+      "converged_frames": 1,
       "criterion": "finite receipt AND margin-derived diverted topology AND fixed-point relative residual <= 1e-05 AND target-current relative error <= 1e-10 AND cold seed is not label identity",
       "nonconverged_frames": [
         {
           "frame": 179,
           "shot": "d3d_shot_00000c4a7b.parquet"
-        },
-        {
-          "frame": 44,
-          "shot": "d3d_shot_0003ff34e7.parquet"
         },
         {
           "frame": 144,
@@ -326,38 +156,38 @@
     },
     "displacement_decomposition": {
       "available_frame_count": 4,
-      "axis_dominantly_vertical_frame_count": 4,
+      "axis_dominantly_vertical_frame_count": 0,
       "axis_offsets_m": [
         {
           "frame": 179,
-          "radial_offset_m": -0.012957817266584959,
+          "radial_offset_m": 0.007185713312021669,
           "shot": "d3d_shot_00000c4a7b.parquet",
-          "vertical_offset_m": -0.23315813732404472
+          "vertical_offset_m": -0.005601373821031284
         },
         {
           "frame": 44,
-          "radial_offset_m": 0.001780919167506223,
+          "radial_offset_m": 0.04268772122707509,
           "shot": "d3d_shot_0003ff34e7.parquet",
-          "vertical_offset_m": -0.09088763658066124
+          "vertical_offset_m": 0.01838513520749393
         },
         {
           "frame": 146,
-          "radial_offset_m": -0.4844868043568362,
+          "radial_offset_m": -0.006162832659913908,
           "shot": "d3d_shot_002495e835.parquet",
-          "vertical_offset_m": 1.5643640717392766
+          "vertical_offset_m": 0.00359122790826332
         },
         {
           "frame": 137,
-          "radial_offset_m": -0.06783213550723999,
+          "radial_offset_m": -0.003642990285397163,
           "shot": "d3d_shot_0040ca9bdc.parquet",
-          "vertical_offset_m": -0.4441554404553724
+          "vertical_offset_m": 0.001648183440669798
         }
       ],
       "boundary_centroid_definition": "area centroid of the closed terminal-boundary polygon in the R,Z plane",
       "classification_counts": {
         "rigid_shift": 0,
-        "shape_change": 0,
-        "tilt": 4
+        "shape_change": 1,
+        "tilt": 3
       },
       "classification_rule": {
         "agreement_fraction_of_absolute_mean_vertical_offset": 0.25,
@@ -377,101 +207,83 @@
     "fine_map_separatrix": {
       "conductor_response": [
         {
-          "build_seconds": 0.0,
-          "digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
-          "loaded_from_cache": true,
-          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "build_seconds": 1081.57298492454,
+          "digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
+          "loaded_from_cache": false,
+          "path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "processes": 10,
           "shape": [
-            55980,
+            55979,
             24
           ]
         },
         {
           "build_seconds": 0.0,
-          "digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
+          "digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
           "loaded_from_cache": true,
-          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "processes": 10,
           "shape": [
-            55980,
+            55979,
             24
           ]
         },
         {
           "build_seconds": 0.0,
-          "digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
+          "digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
           "loaded_from_cache": true,
-          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "processes": 10,
           "shape": [
-            55980,
+            55979,
             24
           ]
         },
         {
           "build_seconds": 0.0,
-          "digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
+          "digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
           "loaded_from_cache": true,
-          "path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "processes": 10,
           "shape": [
-            55980,
+            55979,
             24
           ]
         }
       ],
       "frames_drawn": 4,
-      "frames_with_separatrix": 3,
+      "frames_with_separatrix": 4,
       "max_node_mismatch_wb": {
-        "maximum": 11.167432179393675,
-        "mean": 5.679636265488114,
-        "median": 5.352781397665694,
-        "minimum": 0.8455500872273891
-      },
-      "per_frame": {
-        "137": {
-          "symmetric_rms_distance_m": 0.15994413533416596,
-          "symmetric_sup_distance_m": 0.6794105349966816
-        },
-        "146": {
-          "symmetric_rms_distance_m": null,
-          "symmetric_sup_distance_m": null
-        },
-        "179": {
-          "symmetric_rms_distance_m": 0.1598967387077574,
-          "symmetric_sup_distance_m": 0.5921968877517164
-        },
-        "44": {
-          "symmetric_rms_distance_m": 0.17252067808376556,
-          "symmetric_sup_distance_m": 0.8169173175512713
-        }
+        "maximum": 0.01592089864929136,
+        "mean": 0.01379990132213929,
+        "median": 0.01413577447802461,
+        "minimum": 0.011007157683216584
       },
       "reproduction_relative_error": {
-        "maximum": 4.702771970109923e-14,
-        "mean": 3.7304005658846664e-14,
-        "median": 3.8427739571634704e-14,
-        "minimum": 2.533282379101802e-14
+        "maximum": 0.00615179664796552,
+        "mean": 0.0039070933089064,
+        "median": 0.0035566814500941333,
+        "minimum": 0.0023632136874718133
       },
       "saddle_offset_mm": {
-        "maximum": 514.3032347692298,
-        "mean": 257.76756920850124,
-        "median": 238.2224217883185,
-        "minimum": 40.32219848813813
+        "maximum": 5.681665143661119,
+        "mean": 2.5115341047181614,
+        "median": 2.1539970640601576,
+        "minimum": 0.05647714709121086
       },
       "separation_definition": "symmetric nearest-point sup and RMS distance between the fine-map closed separatrix and the labelled EFIT LCFS",
       "source": "nova.equilibrium.display_flux.build_display_flux_map on the state's own currents, separatrix assembled at the map's own polished saddle value",
       "symmetric_rms_distance_m": {
-        "maximum": 0.17252067808376556,
-        "mean": 0.16412051737522962,
-        "median": 0.15994413533416596,
-        "minimum": 0.1598967387077574
+        "maximum": 0.19176684088370527,
+        "mean": 0.05452951963678365,
+        "median": 0.008974632456745828,
+        "minimum": 0.008401972749937661
       },
       "symmetric_sup_distance_m": {
-        "maximum": 0.8169173175512713,
-        "mean": 0.696174913433223,
-        "median": 0.6794105349966816,
-        "minimum": 0.5921968877517164
+        "maximum": 0.5209451534190607,
+        "mean": 0.14561837075210185,
+        "median": 0.021631311242148774,
+        "minimum": 0.018265707105049152
       }
     },
     "frame_records": [
@@ -484,25 +296,25 @@
         ],
         "active_set_iterations": 2,
         "active_set_mask_differences": [
-          13,
+          183,
           0
         ],
         "active_set_residuals": [
-          0.41809606346245703,
-          0.41809606346245703
+          0.00015265370036428796,
+          0.00015265370036428796
         ],
         "banked_read": {
-          "nova_axis_flux_wb": 0.03650156569037563,
+          "nova_axis_flux_wb": 0.31288224806196063,
           "nova_axis_rz_m": [
-            1.7606860340136274,
-            -0.26408384149033787
+            1.780829564592234,
+            -0.03652707798732443
           ],
           "nova_x_point_rz_m": [
-            1.4231192697567516,
-            -1.0952213561144473
+            1.294329240686725,
+            1.0906352405654347
           ],
-          "o_candidate_count": 5,
-          "o_second_best_flux_margin_wb": 1.5692268031080376,
+          "o_candidate_count": 4,
+          "o_second_best_flux_margin_wb": 1.4209225654410884,
           "read_exception_text": null,
           "read_status": "qualified_axis",
           "reference_axis_rz_m": [
@@ -515,8 +327,8 @@
               1.0984303951263428
             ]
           ],
-          "x_candidate_count": 4,
-          "x_second_best_flux_margin_wb": 0.022472230515775404
+          "x_candidate_count": 2,
+          "x_second_best_flux_margin_wb": 0.2049894694375638
         },
         "branch_selection": {
           "branches": {
@@ -526,7 +338,7 @@
               "finite": true,
               "iterations": 2,
               "requested_class": "diverted",
-              "residual": 0.41809606346245703,
+              "residual": 0.00015265370036428796,
               "topology_consistent": true
             },
             "limited": {
@@ -535,7 +347,7 @@
               "finite": true,
               "iterations": 2,
               "requested_class": "limited",
-              "residual": 0.02726176083303048,
+              "residual": 0.00028774907579739707,
               "topology_consistent": false
             }
           },
@@ -558,8 +370,8 @@
           },
           "reason": "direct diverted receipt is not qualification-valid",
           "residuals": {
-            "diverted": 0.41809606346245703,
-            "limited": 0.02726176083303048
+            "diverted": 0.00015265370036428796,
+            "limited": 0.00028774907579739707
           },
           "selected_class": null
         },
@@ -970,6 +782,44 @@
               "E89UP",
               "E89DN"
             ],
+            "sample": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 1156,
+              "target_shape": [
+                1156
+              ]
+            },
+            "sample_rows": 1156,
             "shipped_count": 19,
             "wall": {
               "coils": [
@@ -1062,18 +912,18 @@
         "converged": false,
         "convergence_criterion": "finite receipt AND margin-derived diverted topology AND fixed-point relative residual <= 1e-05 AND target-current relative error <= 1e-10 AND cold seed is not label identity",
         "displacement_decomposition": {
-          "classification": "tilt",
+          "classification": "shape_change",
           "magnetic_axis": {
             "efit_rz_m": [
               1.7736438512802124,
               -0.030925704166293144
             ],
             "nova_rz_m": [
-              1.7606860340136274,
-              -0.26408384149033787
+              1.780829564592234,
+              -0.03652707798732443
             ],
-            "radial_offset_m": -0.012957817266584959,
-            "vertical_offset_m": -0.23315813732404472
+            "radial_offset_m": 0.007185713312021669,
+            "vertical_offset_m": -0.005601373821031284
           },
           "terminal_boundary_centroid": {
             "efit_rz_m": [
@@ -1081,11 +931,11 @@
               0.010418564434722435
             ],
             "nova_rz_m": [
-              1.6398555972445705,
-              -0.17766730778979495
+              1.6369035479478973,
+              0.07593962768281172
             ],
-            "radial_offset_m": -0.02482362210007527,
-            "vertical_offset_m": -0.1880858722245174
+            "radial_offset_m": -0.027775671396748525,
+            "vertical_offset_m": 0.06552106324808929
           },
           "x_point": {
             "efit_rz_m": [
@@ -1093,33 +943,33 @@
               1.0984303951263428
             ],
             "nova_rz_m": [
-              1.4231192697567516,
-              -1.0952213561144473
+              1.294329240686725,
+              1.0906352405654347
             ],
-            "radial_offset_m": 0.14028760090299186,
-            "vertical_offset_m": -2.19365175124079
+            "radial_offset_m": 0.011497571832965292,
+            "vertical_offset_m": -0.007795154560908069
           }
         },
         "display_map": {
-          "build_seconds": 207.77923438325524,
-          "conductor_response_build_seconds": 0.0,
-          "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
-          "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "build_seconds": 1317.3073890972883,
+          "conductor_response_build_seconds": 1081.57298492454,
+          "conductor_response_digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
+          "conductor_response_loaded_from_cache": false,
+          "conductor_response_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
-            55980,
+            55979,
             24
           ],
           "lattice_saddle_rz_m": [
-            1.4231192697567516,
-            -1.0952213561144473
+            1.294329240686725,
+            1.0906352405654347
           ],
-          "max_node_mismatch_wb": 3.6850168015254323,
-          "max_solved_node_mismatch_wb": 3.6850168015254323,
+          "max_node_mismatch_wb": 0.011007157683216584,
+          "max_solved_node_mismatch_wb": 0.011007157683216584,
           "nearest_promoted_to_xpoint_m": null,
-          "operand_bytes": 1507140,
-          "operand_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
+          "operand_bytes": 1621494,
+          "operand_digest": "573b7e2dc12ce059fd1dcf37a472c9eefabc0fb9cc5310d74e1b9e67eeda616f",
           "operand_fields": [
             "branch_closed_candidate_count",
             "branch_closed_controls_rz",
@@ -1167,22 +1017,22 @@
             "spacing_m",
             "state"
           ],
-          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
+          "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-573b7e2dc12ce059fd1dcf37a472c9eefabc0fb9cc5310d74e1b9e67eeda616f.npz",
           "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 4.702771970109923e-14,
+          "reproduction_relative_error": 0.0023632136874718133,
           "saddle_converged": true,
-          "saddle_flux_wb": -1.4530754717846848,
-          "saddle_offset_mm": 314.8718058621365,
+          "saddle_flux_wb": -1.4745053325115334,
+          "saddle_offset_mm": 4.207115862969607,
           "saddle_rz_m": [
-            1.2377603494471048,
-            -1.3497529352721718
+            1.2932087018159832,
+            1.0865800936477994
           ],
           "separatrix_assembly": {
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
             "closed_candidate_count": 1,
-            "closed_segment_count": 627,
+            "closed_segment_count": 637,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
@@ -1191,40 +1041,95 @@
             "overflow": null,
             "well_formed": true
           },
-          "separatrix_closed_points": 5017,
-          "separatrix_saddle_to_label_x_m": 2.448598179178082,
-          "separatrix_symmetric_rms_distance_m": 0.1598967387077574,
-          "separatrix_symmetric_sup_distance_m": 0.5921968877517164,
+          "separatrix_closed_points": 5097,
+          "separatrix_saddle_to_label_x_m": 0.01575158589575792,
+          "separatrix_symmetric_rms_distance_m": 0.008965894712955912,
+          "separatrix_symmetric_sup_distance_m": 0.018265707105049152,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "finite": true,
-        "fixed_point_relative_residual": 0.41809606346245703,
+        "fixed_point_relative_residual": 0.00015265370036428796,
         "frame": 179,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
         "iterations": 2,
         "metrics": {
-          "additive_gauge_wb": 0.2899960003575251,
+          "additive_gauge_wb": 0.023582209329588818,
           "boundary_comparison_failures": [],
-          "closed_boundary_symmetric_rms_distance_m": 0.2077071168475467,
-          "closed_boundary_symmetric_sup_distance_m": 0.693844098416828,
-          "interior_fractional_rms": 0.7432820960386425,
-          "interior_r_squared": 0.4475317257084024,
+          "closed_boundary_symmetric_rms_distance_m": 0.008932295297471016,
+          "closed_boundary_symmetric_sup_distance_m": 0.01805925655915338,
+          "interior_fractional_rms": 0.0456077967918378,
+          "interior_r_squared": 0.9979199288717945,
           "labelled_q95_nova": -3.184129238128662,
-          "magnetic_axis_displacement_mm": 233.5179265682451,
-          "polished_saddle_to_nearest_efit_x_m": 2.19813298430484,
-          "predicted_q95_nova": 2.3405737246830975,
-          "signed_relative_q95_error": 1.7350749764348985,
+          "magnetic_axis_displacement_mm": 9.110974947035032,
+          "polished_saddle_to_nearest_efit_x_m": 0.013890953627546337,
+          "predicted_q95_nova": 3.169944870146949,
+          "signed_relative_q95_error": 1.9955452913745269,
           "topology_class_agreement": true
         },
-        "operand_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
-        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
+        "operand_digest": "573b7e2dc12ce059fd1dcf37a472c9eefabc0fb9cc5310d74e1b9e67eeda616f",
+        "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-573b7e2dc12ce059fd1dcf37a472c9eefabc0fb9cc5310d74e1b9e67eeda616f.npz",
         "operand_unavailable_reason": null,
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          0.4180960634624572
+          0.00015265370036418358,
+          0.03756370653607329,
+          0.16833088881821365,
+          0.0972386863056941,
+          0.028729215469085297,
+          0.010464276150684649,
+          0.007719312162746448,
+          0.04488588949007917,
+          0.16694141372464807,
+          0.09412142847984045,
+          0.09412142847984045,
+          0.040113644531273286,
+          0.040113644531273286,
+          0.0300004170354544,
+          0.0300004170354544,
+          0.024627227061169894,
+          0.024627227061169894,
+          0.02319643788118619,
+          0.02319643788118619,
+          0.020183097903298513,
+          0.020183097903298513,
+          0.019136919707391984,
+          0.019136919707391984,
+          0.01764570852079968,
+          0.01764570852079968,
+          0.011002674315054821,
+          0.011002674315054821,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805,
+          0.010636570496568805
         ],
         "residual_tolerance": 1e-05,
         "resolved_defaults": {
@@ -1277,32 +1182,32 @@
       },
       {
         "achieved_current_a": 1182769.0064013004,
-        "achieved_topology_class": "limited",
+        "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
           0,
           0
         ],
         "active_set_iterations": 2,
         "active_set_mask_differences": [
-          75,
+          103,
           0
         ],
         "active_set_residuals": [
-          4.275695785485873,
-          4.275695785485873
+          1.7393998684696041e-10,
+          8.465386334067015e-11
         ],
         "banked_read": {
-          "nova_axis_flux_wb": 1.5380564576810145,
+          "nova_axis_flux_wb": 2.3242770453522796,
           "nova_axis_rz_m": [
-            1.7197394886941786,
-            -0.1411962142970118
+            1.7606462907537475,
+            -0.03192344250885663
           ],
           "nova_x_point_rz_m": [
-            1.5752974999992693,
-            -1.1513129555353323
+            1.1048295267313497,
+            1.5620796761214555
           ],
-          "o_candidate_count": 2,
-          "o_second_best_flux_margin_wb": 1.6351618595811415,
+          "o_candidate_count": 5,
+          "o_second_best_flux_margin_wb": 1.8025241180252118,
           "read_exception_text": null,
           "read_status": "qualified_axis",
           "reference_axis_rz_m": [
@@ -1315,27 +1220,27 @@
               1.138399600982666
             ]
           ],
-          "x_candidate_count": 1,
-          "x_second_best_flux_margin_wb": null
+          "x_candidate_count": 3,
+          "x_second_best_flux_margin_wb": 0.46075929849426633
         },
         "branch_selection": {
           "branches": {
             "diverted": {
-              "achieved_class": "limited",
-              "converged": false,
+              "achieved_class": "diverted",
+              "converged": true,
               "finite": true,
               "iterations": 2,
               "requested_class": "diverted",
-              "residual": 4.275695785485873,
-              "topology_consistent": false
+              "residual": 8.465386334067015e-11,
+              "topology_consistent": true
             },
             "limited": {
               "achieved_class": "diverted",
-              "converged": false,
+              "converged": true,
               "finite": true,
-              "iterations": 2,
+              "iterations": 1,
               "requested_class": "limited",
-              "residual": 0.19700278756964593,
+              "residual": 7.245712937096698e-14,
               "topology_consistent": false
             }
           },
@@ -1356,12 +1261,12 @@
             "cold_start_class": "diverted",
             "persistence_threshold": 3
           },
-          "reason": "direct diverted receipt is not qualification-valid",
+          "reason": "direct diverted receipt is qualification-valid",
           "residuals": {
-            "diverted": 4.275695785485873,
-            "limited": 0.19700278756964593
+            "diverted": 8.465386334067015e-11,
+            "limited": 7.245712937096698e-14
           },
-          "selected_class": null
+          "selected_class": "diverted"
         },
         "conductor_current_receipt": {
           "authority": "24-conductor inference input from shipped_current_at plus circuit_current_map fixed wiring",
@@ -1770,6 +1675,44 @@
               "E89UP",
               "E89DN"
             ],
+            "sample": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 1156,
+              "target_shape": [
+                1156
+              ]
+            },
+            "sample_rows": 1156,
             "shipped_count": 19,
             "wall": {
               "coils": [
@@ -1859,7 +1802,7 @@
           },
           "unknown_parameter_count": 0
         },
-        "converged": false,
+        "converged": true,
         "convergence_criterion": "finite receipt AND margin-derived diverted topology AND fixed-point relative residual <= 1e-05 AND target-current relative error <= 1e-10 AND cold seed is not label identity",
         "displacement_decomposition": {
           "classification": "tilt",
@@ -1869,11 +1812,11 @@
               -0.050308577716350555
             ],
             "nova_rz_m": [
-              1.7197394886941786,
-              -0.1411962142970118
+              1.7606462907537475,
+              -0.03192344250885663
             ],
-            "radial_offset_m": 0.001780919167506223,
-            "vertical_offset_m": -0.09088763658066124
+            "radial_offset_m": 0.04268772122707509,
+            "vertical_offset_m": 0.01838513520749393
           },
           "terminal_boundary_centroid": {
             "efit_rz_m": [
@@ -1881,11 +1824,11 @@
               -0.013660959964702343
             ],
             "nova_rz_m": [
-              1.5531949984942104,
-              -0.18079339371382716
+              1.6666150080558573,
+              0.12957245497485542
             ],
-            "radial_offset_m": -0.093210271987618,
-            "vertical_offset_m": -0.16713243374912481
+            "radial_offset_m": 0.020209737574028885,
+            "vertical_offset_m": 0.14323341493955777
           },
           "x_point": {
             "efit_rz_m": [
@@ -1893,33 +1836,33 @@
               1.138399600982666
             ],
             "nova_rz_m": [
-              1.5752974999992693,
-              -1.1513129555353323
+              1.1048295267313497,
+              1.5620796761214555
             ],
-            "radial_offset_m": 0.2803254378883684,
-            "vertical_offset_m": -2.2897125565179985
+            "radial_offset_m": -0.19014253537955117,
+            "vertical_offset_m": 0.42368007513878947
           }
         },
         "display_map": {
-          "build_seconds": 207.00828145444393,
+          "build_seconds": 273.4468417279422,
           "conductor_response_build_seconds": 0.0,
-          "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
+          "conductor_response_digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
-            55980,
+            55979,
             24
           ],
           "lattice_saddle_rz_m": [
-            1.5752974999992693,
-            -1.1513129555353323
+            1.1048295267313497,
+            1.5620796761214555
           ],
-          "max_node_mismatch_wb": 11.167432179393675,
-          "max_solved_node_mismatch_wb": 11.167432179393675,
+          "max_node_mismatch_wb": 0.014247824642382056,
+          "max_solved_node_mismatch_wb": 0.014247824642382056,
           "nearest_promoted_to_xpoint_m": null,
-          "operand_bytes": 1513736,
-          "operand_digest": "97d26d360da23f377b39754f82182a0f48615a06f8c1145cc6c4891f865c9589",
+          "operand_bytes": 1606070,
+          "operand_digest": "b2d564b7173f6f3d3a142b802ad94d0b65fde46c1c5791cda8d6bf13b42767f8",
           "operand_fields": [
             "branch_closed_candidate_count",
             "branch_closed_controls_rz",
@@ -1967,22 +1910,22 @@
             "spacing_m",
             "state"
           ],
-          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44.npz",
+          "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44-b2d564b7173f6f3d3a142b802ad94d0b65fde46c1c5791cda8d6bf13b42767f8.npz",
           "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 3.5701118020966594e-14,
+          "reproduction_relative_error": 0.00615179664796552,
           "saddle_converged": true,
-          "saddle_flux_wb": 0.29524895514506183,
-          "saddle_offset_mm": 161.57303771450054,
+          "saddle_flux_wb": 0.5020389702073614,
+          "saddle_offset_mm": 5.681665143661119,
           "saddle_rz_m": [
-            1.4219928230844485,
-            -1.1002882306234443
+            1.1004089457743729,
+            1.558510392887036
           ],
           "separatrix_assembly": {
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
             "closed_candidate_count": 1,
-            "closed_segment_count": 465,
+            "closed_segment_count": 498,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
@@ -1991,42 +1934,50 @@
             "overflow": null,
             "well_formed": true
           },
-          "separatrix_closed_points": 3721,
-          "separatrix_saddle_to_label_x_m": 2.2422884473456057,
-          "separatrix_symmetric_rms_distance_m": 0.17252067808376556,
-          "separatrix_symmetric_sup_distance_m": 0.8169173175512713,
+          "separatrix_closed_points": 3985,
+          "separatrix_saddle_to_label_x_m": 0.46297719567285195,
+          "separatrix_symmetric_rms_distance_m": 0.19176684088370527,
+          "separatrix_symmetric_sup_distance_m": 0.5209451534190607,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "finite": true,
-        "fixed_point_relative_residual": 4.275695785485873,
+        "fixed_point_relative_residual": 8.465386334067015e-11,
         "frame": 44,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
         "iterations": 2,
         "metrics": {
-          "additive_gauge_wb": 0.6001113319216712,
+          "additive_gauge_wb": -0.01689885859718715,
           "boundary_comparison_failures": [
             "missing_predicted_closed_boundary"
           ],
           "closed_boundary_symmetric_rms_distance_m": null,
           "closed_boundary_symmetric_sup_distance_m": null,
-          "interior_fractional_rms": 1.3621565459019591,
-          "interior_r_squared": -0.8554704555435559,
+          "interior_fractional_rms": 0.4399671301673602,
+          "interior_r_squared": 0.8064289243722971,
           "labelled_q95_nova": -4.6921916007995605,
-          "magnetic_axis_displacement_mm": 90.90508322585454,
-          "polished_saddle_to_nearest_efit_x_m": 2.306808605542188,
-          "predicted_q95_nova": -3.1895671982620404,
-          "signed_relative_q95_error": 0.32023935303099504,
-          "topology_class_agreement": false
+          "magnetic_axis_displacement_mm": 46.478540641443445,
+          "polished_saddle_to_nearest_efit_x_m": 0.4643909881018086,
+          "predicted_q95_nova": -2.203163386125866,
+          "signed_relative_q95_error": 0.5304617599693837,
+          "topology_class_agreement": true
         },
-        "operand_digest": "97d26d360da23f377b39754f82182a0f48615a06f8c1145cc6c4891f865c9589",
-        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44.npz",
+        "operand_digest": "b2d564b7173f6f3d3a142b802ad94d0b65fde46c1c5791cda8d6bf13b42767f8",
+        "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44-b2d564b7173f6f3d3a142b802ad94d0b65fde46c1c5791cda8d6bf13b42767f8.npz",
         "operand_unavailable_reason": null,
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          4.2756957854858735
+          1.7394006582837837e-10,
+          1.1696358178010467e-10,
+          8.822571898485371e-11,
+          8.465386334067015e-11,
+          9.018516898018618e-11,
+          9.558299602337455e-11,
+          1.0106841345893612e-10,
+          1.0685609278071758e-10,
+          1.1306971888913585e-10
         ],
         "residual_tolerance": 1e-05,
         "resolved_defaults": {
@@ -2073,7 +2024,7 @@
         "seed_identity_detected": false,
         "shot": "d3d_shot_0003ff34e7.parquet",
         "solve_exception_class": null,
-        "solver_termination": "public branch selector found no convergence-qualified diverted root",
+        "solver_termination": "public branch selector accepted the converged diverted root",
         "target_current_a": 1182769.0064013004,
         "time_ms": 1080.0
       },
@@ -2185,41 +2136,32 @@
       },
       {
         "achieved_current_a": 1623563.1957054138,
-        "achieved_topology_class": "limited",
+        "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
-          0,
-          0,
-          0,
           0,
           0
         ],
-        "active_set_iterations": 5,
+        "active_set_iterations": 2,
         "active_set_mask_differences": [
-          27,
-          40,
-          1,
-          0,
+          18,
           0
         ],
         "active_set_residuals": [
-          0.12818170822460778,
-          0.22201860587138092,
-          0.0651490274069113,
-          0.054961955890201634,
-          0.054961955890201634
+          0.0002471010342651418,
+          0.0002471010342651418
         ],
         "banked_read": {
-          "nova_axis_flux_wb": 6.467856850112755,
+          "nova_axis_flux_wb": 2.390926163137002,
           "nova_axis_rz_m": [
-            1.2335368534419309,
-            1.5630368860805386
+            1.7118608251388532,
+            0.0022640422495253027
           ],
           "nova_x_point_rz_m": [
-            0.9659008781467892,
-            -0.21651800644067484
+            1.2996992399998293,
+            -1.1674196471588767
           ],
           "o_candidate_count": 5,
-          "o_second_best_flux_margin_wb": 6.691748812109509,
+          "o_second_best_flux_margin_wb": 2.006790393809964,
           "read_exception_text": null,
           "read_status": "qualified_axis",
           "reference_axis_rz_m": [
@@ -2233,26 +2175,26 @@
             ]
           ],
           "x_candidate_count": 2,
-          "x_second_best_flux_margin_wb": 1.6335646656249212
+          "x_second_best_flux_margin_wb": 0.2283218741338577
         },
         "branch_selection": {
           "branches": {
             "diverted": {
-              "achieved_class": "limited",
+              "achieved_class": "diverted",
               "converged": false,
               "finite": true,
-              "iterations": 5,
+              "iterations": 2,
               "requested_class": "diverted",
-              "residual": 0.054961955890201634,
-              "topology_consistent": false
+              "residual": 0.0002471010342651418,
+              "topology_consistent": true
             },
             "limited": {
               "achieved_class": "diverted",
               "converged": false,
               "finite": true,
-              "iterations": 2,
+              "iterations": 5,
               "requested_class": "limited",
-              "residual": 0.06349959302492349,
+              "residual": 0.0002587952442897973,
               "topology_consistent": false
             }
           },
@@ -2275,8 +2217,8 @@
           },
           "reason": "direct diverted receipt is not qualification-valid",
           "residuals": {
-            "diverted": 0.054961955890201634,
-            "limited": 0.06349959302492349
+            "diverted": 0.0002471010342651418,
+            "limited": 0.0002587952442897973
           },
           "selected_class": null
         },
@@ -2687,6 +2629,44 @@
               "E89UP",
               "E89DN"
             ],
+            "sample": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 1156,
+              "target_shape": [
+                1156
+              ]
+            },
+            "sample_rows": 1156,
             "shipped_count": 19,
             "wall": {
               "coils": [
@@ -2786,11 +2766,11 @@
               -0.001327185658738017
             ],
             "nova_rz_m": [
-              1.2335368534419309,
-              1.5630368860805386
+              1.7118608251388532,
+              0.0022640422495253027
             ],
-            "radial_offset_m": -0.4844868043568362,
-            "vertical_offset_m": 1.5643640717392766
+            "radial_offset_m": -0.006162832659913908,
+            "vertical_offset_m": 0.00359122790826332
           },
           "terminal_boundary_centroid": {
             "efit_rz_m": [
@@ -2798,11 +2778,11 @@
               -0.03797591200860915
             ],
             "nova_rz_m": [
-              1.2477531697945408,
-              1.5153827043285486
+              1.5754868349480333,
+              -0.04816859479611561
             ],
-            "radial_offset_m": -0.3688868089676649,
-            "vertical_offset_m": 1.5533586163371578
+            "radial_offset_m": -0.041153143814172344,
+            "vertical_offset_m": -0.010192682787506464
           },
           "x_point": {
             "efit_rz_m": [
@@ -2810,33 +2790,33 @@
               -1.1911089420318604
             ],
             "nova_rz_m": [
-              0.9659008781467892,
-              -0.21651800644067484
+              1.2996992399998293,
+              -1.1674196471588767
             ],
-            "radial_offset_m": -0.32709445552478067,
-            "vertical_offset_m": 0.9745909355911855
+            "radial_offset_m": 0.006703906328259457,
+            "vertical_offset_m": 0.023689294872983657
           }
         },
         "display_map": {
-          "build_seconds": 206.87864548526704,
+          "build_seconds": 346.92581767216325,
           "conductor_response_build_seconds": 0.0,
-          "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
+          "conductor_response_digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
-            55980,
+            55979,
             24
           ],
           "lattice_saddle_rz_m": [
-            0.9659008781467892,
-            -0.21651800644067484
+            1.2996992399998293,
+            -1.1674196471588767
           ],
-          "max_node_mismatch_wb": 7.020545993805956,
-          "max_solved_node_mismatch_wb": 7.020545993805956,
+          "max_node_mismatch_wb": 0.01592089864929136,
+          "max_solved_node_mismatch_wb": 0.01592089864929136,
           "nearest_promoted_to_xpoint_m": null,
-          "operand_bytes": 1509918,
-          "operand_digest": "0e1b0c942049e98c4ffd1c8ecf442c35f980505506c0ff0c37ba575a056a3169",
+          "operand_bytes": 1634975,
+          "operand_digest": "792edc19c30ef480e6d40fbe6857f92beed075c7e211fc623279781c47bd3340",
           "operand_fields": [
             "branch_closed_candidate_count",
             "branch_closed_controls_rz",
@@ -2884,67 +2864,85 @@
             "spacing_m",
             "state"
           ],
-          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146.npz",
+          "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146-792edc19c30ef480e6d40fbe6857f92beed075c7e211fc623279781c47bd3340.npz",
           "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 2.533282379101802e-14,
+          "reproduction_relative_error": 0.00373583356235177,
           "saddle_converged": true,
-          "saddle_flux_wb": -1.914254388757502,
-          "saddle_offset_mm": 514.3032347692298,
+          "saddle_flux_wb": -0.011279999360379676,
+          "saddle_offset_mm": 0.05647714709121086,
           "saddle_rz_m": [
-            1.0058727405738537,
-            0.2962295606020224
+            1.2997311005557652,
+            -1.167466279477273
           ],
           "separatrix_assembly": {
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
-            "closed_candidate_count": 0,
-            "closed_segment_count": 0,
+            "closed_candidate_count": 1,
+            "closed_segment_count": 661,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
-            "open_branch_count": 0,
+            "open_branch_count": 2,
             "open_slot_overflow": null,
             "overflow": null,
-            "well_formed": false
+            "well_formed": true
           },
-          "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 1.5147987341176243,
-          "separatrix_symmetric_rms_distance_m": null,
-          "separatrix_symmetric_sup_distance_m": null,
+          "separatrix_closed_points": 5289,
+          "separatrix_saddle_to_label_x_m": 0.024583450697335207,
+          "separatrix_symmetric_rms_distance_m": 0.008983370200535745,
+          "separatrix_symmetric_sup_distance_m": 0.02449861575164323,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "finite": true,
-        "fixed_point_relative_residual": 0.054961955890201634,
+        "fixed_point_relative_residual": 0.0002471010342651418,
         "frame": 146,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
-        "iterations": 5,
+        "iterations": 2,
         "metrics": {
-          "additive_gauge_wb": 3.1163674950347175,
-          "boundary_comparison_failures": [
-            "missing_predicted_closed_boundary"
-          ],
-          "closed_boundary_symmetric_rms_distance_m": null,
-          "closed_boundary_symmetric_sup_distance_m": null,
-          "interior_fractional_rms": 1.721628768783898,
-          "interior_r_squared": -1.9640056175043603,
+          "additive_gauge_wb": 0.04011330244725023,
+          "boundary_comparison_failures": [],
+          "closed_boundary_symmetric_rms_distance_m": 0.008643875295477771,
+          "closed_boundary_symmetric_sup_distance_m": 0.02453496610631165,
+          "interior_fractional_rms": 0.032153990050669906,
+          "interior_r_squared": 0.9989661209238214,
           "labelled_q95_nova": -3.4771714210510254,
-          "magnetic_axis_displacement_mm": 1637.6698118193995,
-          "polished_saddle_to_nearest_efit_x_m": 1.0280166703762907,
-          "predicted_q95_nova": null,
-          "signed_relative_q95_error": null,
-          "topology_class_agreement": false
+          "magnetic_axis_displacement_mm": 7.1328412489828255,
+          "polished_saddle_to_nearest_efit_x_m": 0.02461960705692207,
+          "predicted_q95_nova": -3.415254338142383,
+          "signed_relative_q95_error": 0.01780673869967764,
+          "topology_class_agreement": true
         },
-        "operand_digest": "0e1b0c942049e98c4ffd1c8ecf442c35f980505506c0ff0c37ba575a056a3169",
-        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146.npz",
+        "operand_digest": "792edc19c30ef480e6d40fbe6857f92beed075c7e211fc623279781c47bd3340",
+        "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146-792edc19c30ef480e6d40fbe6857f92beed075c7e211fc623279781c47bd3340.npz",
         "operand_unavailable_reason": null,
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          0.05496195589020165,
-          1.1542857662368544
+          0.0002471010342651418,
+          0.0010365137789937057,
+          0.0007667059504133511,
+          0.0008110563895752888,
+          0.0005601008527656344,
+          0.0003419502418733607,
+          0.0010205924879035729,
+          0.0007358230129985612,
+          0.0007848340354005042,
+          0.0007358388863009804,
+          0.0007358388863009804,
+          0.0007128629230935433,
+          0.0007128629230935433,
+          0.0006893615732373106,
+          0.0006893615732373106,
+          0.0006879250839678863,
+          0.0006879250839674085,
+          0.0006871040452529239,
+          0.0006871040452529239,
+          0.0006869262551078776,
+          0.0006869262551078776,
+          0.0006869262551078776
         ],
         "residual_tolerance": 1e-05,
         "resolved_defaults": {
@@ -2996,42 +2994,54 @@
         "time_ms": 3180.0
       },
       {
-        "achieved_current_a": 1629095.3674316406,
+        "achieved_current_a": 1629095.3674316402,
         "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
           0,
           0,
           0,
           0,
+          0,
+          0,
+          0,
+          0,
           0
         ],
-        "active_set_iterations": 5,
+        "active_set_iterations": 9,
         "active_set_mask_differences": [
-          24,
-          20,
-          9,
-          9,
+          16,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           0
         ],
         "active_set_residuals": [
-          0.12985789283698176,
-          0.1113965026973562,
-          0.06700522958710774,
-          0.06236882877710906,
-          0.06236882877710906
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886
         ],
         "banked_read": {
-          "nova_axis_flux_wb": 2.49250454794471,
+          "nova_axis_flux_wb": 2.4229071771840927,
           "nova_axis_rz_m": [
-            1.6552979714187244,
-            -0.44246485284443476
+            1.7194871166405672,
+            0.003338771051607453
           ],
           "nova_x_point_rz_m": [
-            1.2651583546996057,
-            -1.3362867934446665
+            1.295959574732346,
+            -1.1704329384602836
           ],
           "o_candidate_count": 5,
-          "o_second_best_flux_margin_wb": 1.8641972520459318,
+          "o_second_best_flux_margin_wb": 1.8959415377921696,
           "read_exception_text": null,
           "read_status": "qualified_axis",
           "reference_axis_rz_m": [
@@ -3045,7 +3055,7 @@
             ]
           ],
           "x_candidate_count": 2,
-          "x_second_best_flux_margin_wb": 1.1923929101588442
+          "x_second_best_flux_margin_wb": 0.2487487965248894
         },
         "branch_selection": {
           "branches": {
@@ -3053,9 +3063,9 @@
               "achieved_class": "diverted",
               "converged": false,
               "finite": true,
-              "iterations": 5,
+              "iterations": 9,
               "requested_class": "diverted",
-              "residual": 0.06236882877710906,
+              "residual": 0.0004298867763992886,
               "topology_consistent": true
             },
             "limited": {
@@ -3064,7 +3074,7 @@
               "finite": true,
               "iterations": 2,
               "requested_class": "limited",
-              "residual": 0.05683004764453356,
+              "residual": 0.0005281317574471641,
               "topology_consistent": false
             }
           },
@@ -3087,8 +3097,8 @@
           },
           "reason": "direct diverted receipt is not qualification-valid",
           "residuals": {
-            "diverted": 0.06236882877710906,
-            "limited": 0.05683004764453356
+            "diverted": 0.0004298867763992886,
+            "limited": 0.0005281317574471641
           },
           "selected_class": null
         },
@@ -3499,6 +3509,44 @@
               "E89UP",
               "E89DN"
             ],
+            "sample": {
+              "coils": [
+                {
+                  "coil": "ECOILB",
+                  "elements": 48,
+                  "signed_turn_sum": 48.0
+                },
+                {
+                  "coil": "E567UP",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E567DN",
+                  "elements": 6,
+                  "signed_turn_sum": 6.0
+                },
+                {
+                  "coil": "E89UP",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                },
+                {
+                  "coil": "E89DN",
+                  "elements": 7,
+                  "signed_turn_sum": 7.0
+                }
+              ],
+              "dd_version": "3.41.0",
+              "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+              "flux_unit": "Wb per A",
+              "kernel": "nova.biot.polygon.polygon_greens",
+              "target_points": 1156,
+              "target_shape": [
+                1156
+              ]
+            },
+            "sample_rows": 1156,
             "shipped_count": 19,
             "wall": {
               "coils": [
@@ -3598,11 +3646,11 @@
               0.001690587610937655
             ],
             "nova_rz_m": [
-              1.6552979714187244,
-              -0.44246485284443476
+              1.7194871166405672,
+              0.003338771051607453
             ],
-            "radial_offset_m": -0.06783213550723999,
-            "vertical_offset_m": -0.4441554404553724
+            "radial_offset_m": -0.003642990285397163,
+            "vertical_offset_m": 0.001648183440669798
           },
           "terminal_boundary_centroid": {
             "efit_rz_m": [
@@ -3610,11 +3658,11 @@
               -0.03388594494120285
             ],
             "nova_rz_m": [
-              1.5779897444133861,
-              -0.526728950734223
+              1.5815382670859646,
+              -0.062391883455494505
             ],
-            "radial_offset_m": -0.03687574843742136,
-            "vertical_offset_m": -0.49284300579302015
+            "radial_offset_m": -0.03332722576484293,
+            "vertical_offset_m": -0.028505938514291652
           },
           "x_point": {
             "efit_rz_m": [
@@ -3622,33 +3670,33 @@
               -1.1884135007858276
             ],
             "nova_rz_m": [
-              1.2651583546996057,
-              -1.3362867934446665
+              1.295959574732346,
+              -1.1704329384602836
             ],
-            "radial_offset_m": -0.024632752478128683,
-            "vertical_offset_m": -0.14787329265883886
+            "radial_offset_m": 0.006168467554611645,
+            "vertical_offset_m": 0.017980562325544014
           }
         },
         "display_map": {
-          "build_seconds": 207.4288696590811,
+          "build_seconds": 273.55457416176796,
           "conductor_response_build_seconds": 0.0,
-          "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
+          "conductor_response_digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
-            55980,
+            55979,
             24
           ],
           "lattice_saddle_rz_m": [
-            1.2651583546996057,
-            -1.3362867934446665
+            1.295959574732346,
+            -1.1704329384602836
           ],
-          "max_node_mismatch_wb": 0.8455500872273891,
-          "max_solved_node_mismatch_wb": 0.8455500872273891,
+          "max_node_mismatch_wb": 0.014023724313667163,
+          "max_solved_node_mismatch_wb": 0.014023724313667163,
           "nearest_promoted_to_xpoint_m": null,
-          "operand_bytes": 1516550,
-          "operand_digest": "9df49643caeeedec34c62e7d439745300fede76b6a7cc7ff3295845073058d99",
+          "operand_bytes": 1635841,
+          "operand_digest": "b5bba6036a684680452872340f1a0e756623bf6958608a30eec61db60d3f1b49",
           "operand_fields": [
             "branch_closed_candidate_count",
             "branch_closed_controls_rz",
@@ -3696,22 +3744,22 @@
             "spacing_m",
             "state"
           ],
-          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137.npz",
+          "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137-b5bba6036a684680452872340f1a0e756623bf6958608a30eec61db60d3f1b49.npz",
           "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 4.1154361122302815e-14,
+          "reproduction_relative_error": 0.003377529337836497,
           "saddle_converged": true,
-          "saddle_flux_wb": 0.7464005477516623,
-          "saddle_offset_mm": 40.32219848813813,
+          "saddle_flux_wb": 0.13740231913931,
+          "saddle_offset_mm": 0.10087826515070872,
           "saddle_rz_m": [
-            1.293778368421335,
-            -1.3646905696986231
+            1.296010093745717,
+            -1.1705202554326763
           ],
           "separatrix_assembly": {
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
             "closed_candidate_count": 1,
-            "closed_segment_count": 537,
+            "closed_segment_count": 665,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
@@ -3720,45 +3768,89 @@
             "overflow": null,
             "well_formed": true
           },
-          "separatrix_closed_points": 4297,
-          "separatrix_saddle_to_label_x_m": 0.17632215764534862,
-          "separatrix_symmetric_rms_distance_m": 0.15994413533416596,
-          "separatrix_symmetric_sup_distance_m": 0.6794105349966816,
+          "separatrix_closed_points": 5321,
+          "separatrix_saddle_to_label_x_m": 0.018943178804013316,
+          "separatrix_symmetric_rms_distance_m": 0.008401972749937661,
+          "separatrix_symmetric_sup_distance_m": 0.018764006732654312,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "finite": true,
-        "fixed_point_relative_residual": 0.06236882877710906,
+        "fixed_point_relative_residual": 0.0004298867763992886,
         "frame": 137,
         "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
-        "iterations": 5,
+        "iterations": 9,
         "metrics": {
-          "additive_gauge_wb": 0.12278649559352099,
-          "boundary_comparison_failures": [],
-          "closed_boundary_symmetric_rms_distance_m": 0.2393249424423598,
-          "closed_boundary_symmetric_sup_distance_m": 0.6135435266045284,
-          "interior_fractional_rms": 1.2024622713754458,
-          "interior_r_squared": -0.4459155140813966,
+          "additive_gauge_wb": 0.03411339207024069,
+          "boundary_comparison_failures": [
+            "missing_predicted_closed_boundary"
+          ],
+          "closed_boundary_symmetric_rms_distance_m": null,
+          "closed_boundary_symmetric_sup_distance_m": null,
+          "interior_fractional_rms": 0.019056289050632908,
+          "interior_r_squared": 0.9996368578476187,
           "labelled_q95_nova": -3.5147154331207275,
-          "magnetic_axis_displacement_mm": 449.30530143052886,
-          "polished_saddle_to_nearest_efit_x_m": 0.14991091746906016,
-          "predicted_q95_nova": -2.416535757261011,
-          "signed_relative_q95_error": 0.31245194575671215,
+          "magnetic_axis_displacement_mm": 3.998485572513203,
+          "polished_saddle_to_nearest_efit_x_m": 0.01900922443223472,
+          "predicted_q95_nova": -3.3647683824315564,
+          "signed_relative_q95_error": 0.04266264326157201,
           "topology_class_agreement": true
         },
-        "operand_digest": "9df49643caeeedec34c62e7d439745300fede76b6a7cc7ff3295845073058d99",
-        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137.npz",
+        "operand_digest": "b5bba6036a684680452872340f1a0e756623bf6958608a30eec61db60d3f1b49",
+        "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137-b5bba6036a684680452872340f1a0e756623bf6958608a30eec61db60d3f1b49.npz",
         "operand_unavailable_reason": null,
         "pseudo_wall_expansion": 0.02,
         "pseudo_wall_statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent",
         "reliable_flux_surfaces": 19,
         "residual_history": [
-          0.06236882877710906,
-          0.06459431851433813,
-          0.5605864890508286,
-          0.29376310827446445,
-          0.3244772877096619,
-          0.10004390422435598
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162,
+          0.0005758817087164162
         ],
         "residual_tolerance": 1e-05,
         "resolved_defaults": {
@@ -3817,46 +3909,46 @@
     },
     "metrics": {
       "closed_boundary_symmetric_rms_distance_m": {
-        "maximum": 0.2393249424423598,
-        "mean": 0.22351602964495326,
-        "median": 0.22351602964495326,
-        "minimum": 0.2077071168475467
+        "maximum": 0.008932295297471016,
+        "mean": 0.008788085296474395,
+        "median": 0.008788085296474395,
+        "minimum": 0.008643875295477771
       },
       "closed_boundary_symmetric_sup_distance_m": {
-        "maximum": 0.693844098416828,
-        "mean": 0.6536938125106782,
-        "median": 0.6536938125106782,
-        "minimum": 0.6135435266045284
+        "maximum": 0.02453496610631165,
+        "mean": 0.021297111332732516,
+        "median": 0.021297111332732516,
+        "minimum": 0.01805925655915338
       },
       "interior_fractional_rms": {
-        "maximum": 1.721628768783898,
-        "mean": 1.2573824205249862,
-        "median": 1.2823094086387026,
-        "minimum": 0.7432820960386425
+        "maximum": 0.4399671301673602,
+        "mean": 0.1341963015151252,
+        "median": 0.03888089342125385,
+        "minimum": 0.019056289050632908
       },
       "interior_r_squared": {
-        "maximum": 0.4475317257084024,
-        "mean": -0.7044649653552275,
-        "median": -0.6506929848124763,
-        "minimum": -1.9640056175043603
+        "maximum": 0.9996368578476187,
+        "mean": 0.9507379580038828,
+        "median": 0.998443024897808,
+        "minimum": 0.8064289243722971
       },
       "magnetic_axis_displacement_mm": {
-        "maximum": 1637.6698118193995,
-        "mean": 602.849530761007,
-        "median": 341.411613999387,
-        "minimum": 90.90508322585454
+        "maximum": 46.478540641443445,
+        "mean": 16.680210602493627,
+        "median": 8.121908098008928,
+        "minimum": 3.998485572513203
       },
       "polished_saddle_to_nearest_efit_x_m": {
-        "maximum": 2.306808605542188,
-        "mean": 1.4207172944230948,
-        "median": 1.6130748273405655,
-        "minimum": 0.14991091746906016
+        "maximum": 0.4643909881018086,
+        "mean": 0.13047769330462794,
+        "median": 0.021814415744578396,
+        "minimum": 0.013890953627546337
       },
       "signed_relative_q95_error": {
-        "maximum": 1.7350749764348985,
-        "mean": 0.789255425074202,
-        "median": 0.32023935303099504,
-        "minimum": 0.31245194575671215
+        "maximum": 1.9955452913745269,
+        "mean": 0.64661910832629,
+        "median": 0.28656220161547785,
+        "minimum": 0.01780673869967764
       }
     },
     "passed": false,
@@ -3869,35 +3961,35 @@
         ],
         "active_set_iterations": 2,
         "active_set_mask_differences": [
-          13,
+          183,
           0
         ],
         "active_set_residuals": [
-          0.41809606346245703,
-          0.41809606346245703
+          0.00015265370036428796,
+          0.00015265370036428796
         ],
         "boundary_comparison_failures": [],
         "converged": false,
         "fine_map": {
-          "build_seconds": 207.77923438325524,
-          "conductor_response_build_seconds": 0.0,
-          "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
-          "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "build_seconds": 1317.3073890972883,
+          "conductor_response_build_seconds": 1081.57298492454,
+          "conductor_response_digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
+          "conductor_response_loaded_from_cache": false,
+          "conductor_response_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
-            55980,
+            55979,
             24
           ],
           "lattice_saddle_rz_m": [
-            1.4231192697567516,
-            -1.0952213561144473
+            1.294329240686725,
+            1.0906352405654347
           ],
-          "max_node_mismatch_wb": 3.6850168015254323,
-          "max_solved_node_mismatch_wb": 3.6850168015254323,
+          "max_node_mismatch_wb": 0.011007157683216584,
+          "max_solved_node_mismatch_wb": 0.011007157683216584,
           "nearest_promoted_to_xpoint_m": null,
-          "operand_bytes": 1507140,
-          "operand_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
+          "operand_bytes": 1621494,
+          "operand_digest": "573b7e2dc12ce059fd1dcf37a472c9eefabc0fb9cc5310d74e1b9e67eeda616f",
           "operand_fields": [
             "branch_closed_candidate_count",
             "branch_closed_controls_rz",
@@ -3945,42 +4037,42 @@
             "spacing_m",
             "state"
           ],
-          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
+          "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-573b7e2dc12ce059fd1dcf37a472c9eefabc0fb9cc5310d74e1b9e67eeda616f.npz",
           "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 4.702771970109923e-14,
+          "reproduction_relative_error": 0.0023632136874718133,
           "saddle_converged": true,
-          "saddle_flux_wb": -1.4530754717846848,
-          "saddle_offset_mm": 314.8718058621365,
+          "saddle_flux_wb": -1.4745053325115334,
+          "saddle_offset_mm": 4.207115862969607,
           "saddle_rz_m": [
-            1.2377603494471048,
-            -1.3497529352721718
+            1.2932087018159832,
+            1.0865800936477994
           ],
           "separatrix_assembly": {
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
             "closed_candidate_count": 1,
-            "closed_segment_count": 0,
+            "closed_segment_count": 637,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
-            "open_branch_count": 0,
+            "open_branch_count": 2,
             "open_slot_overflow": null,
             "overflow": null,
-            "well_formed": false
+            "well_formed": true
           },
-          "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 2.448598179178082,
-          "separatrix_symmetric_rms_distance_m": null,
-          "separatrix_symmetric_sup_distance_m": null,
+          "separatrix_closed_points": 5097,
+          "separatrix_saddle_to_label_x_m": 0.01575158589575792,
+          "separatrix_symmetric_rms_distance_m": 0.008965894712955912,
+          "separatrix_symmetric_sup_distance_m": 0.018265707105049152,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "frame": 179,
-        "interior_r_squared": 0.4475317257084024,
+        "interior_r_squared": 0.9979199288717945,
         "iterations": 2,
-        "operand_digest": "f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc",
-        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-f96698473f9a4343e609c60414498dedd57a934a0c76d4ae596fa69c6778f1fc.npz",
+        "operand_digest": "573b7e2dc12ce059fd1dcf37a472c9eefabc0fb9cc5310d74e1b9e67eeda616f",
+        "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_00000c4a7b-parquet-179-573b7e2dc12ce059fd1dcf37a472c9eefabc0fb9cc5310d74e1b9e67eeda616f.npz",
         "operand_unavailable_reason": null,
         "shot": "d3d_shot_00000c4a7b.parquet",
         "solve_exception_class": null,
@@ -3989,44 +4081,44 @@
         "verdict": "FAIL"
       },
       {
-        "achieved_topology_class": "limited",
+        "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
           0,
           0
         ],
         "active_set_iterations": 2,
         "active_set_mask_differences": [
-          75,
+          103,
           0
         ],
         "active_set_residuals": [
-          4.275695785485873,
-          4.275695785485873
+          1.7393998684696041e-10,
+          8.465386334067015e-11
         ],
         "boundary_comparison_failures": [
           "missing_predicted_closed_boundary"
         ],
-        "converged": false,
+        "converged": true,
         "fine_map": {
-          "build_seconds": 207.00828145444393,
+          "build_seconds": 273.4468417279422,
           "conductor_response_build_seconds": 0.0,
-          "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
+          "conductor_response_digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
-            55980,
+            55979,
             24
           ],
           "lattice_saddle_rz_m": [
-            1.5752974999992693,
-            -1.1513129555353323
+            1.1048295267313497,
+            1.5620796761214555
           ],
-          "max_node_mismatch_wb": 11.167432179393675,
-          "max_solved_node_mismatch_wb": 11.167432179393675,
+          "max_node_mismatch_wb": 0.014247824642382056,
+          "max_solved_node_mismatch_wb": 0.014247824642382056,
           "nearest_promoted_to_xpoint_m": null,
-          "operand_bytes": 1513736,
-          "operand_digest": "97d26d360da23f377b39754f82182a0f48615a06f8c1145cc6c4891f865c9589",
+          "operand_bytes": 1606070,
+          "operand_digest": "b2d564b7173f6f3d3a142b802ad94d0b65fde46c1c5791cda8d6bf13b42767f8",
           "operand_fields": [
             "branch_closed_candidate_count",
             "branch_closed_controls_rz",
@@ -4074,47 +4166,47 @@
             "spacing_m",
             "state"
           ],
-          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44.npz",
+          "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44-b2d564b7173f6f3d3a142b802ad94d0b65fde46c1c5791cda8d6bf13b42767f8.npz",
           "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 3.5701118020966594e-14,
+          "reproduction_relative_error": 0.00615179664796552,
           "saddle_converged": true,
-          "saddle_flux_wb": 0.29524895514506183,
-          "saddle_offset_mm": 161.57303771450054,
+          "saddle_flux_wb": 0.5020389702073614,
+          "saddle_offset_mm": 5.681665143661119,
           "saddle_rz_m": [
-            1.4219928230844485,
-            -1.1002882306234443
+            1.1004089457743729,
+            1.558510392887036
           ],
           "separatrix_assembly": {
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
             "closed_candidate_count": 1,
-            "closed_segment_count": 0,
+            "closed_segment_count": 498,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
-            "open_branch_count": 0,
+            "open_branch_count": 2,
             "open_slot_overflow": null,
             "overflow": null,
-            "well_formed": false
+            "well_formed": true
           },
-          "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 2.2422884473456057,
-          "separatrix_symmetric_rms_distance_m": null,
-          "separatrix_symmetric_sup_distance_m": null,
+          "separatrix_closed_points": 3985,
+          "separatrix_saddle_to_label_x_m": 0.46297719567285195,
+          "separatrix_symmetric_rms_distance_m": 0.19176684088370527,
+          "separatrix_symmetric_sup_distance_m": 0.5209451534190607,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "frame": 44,
-        "interior_r_squared": -0.8554704555435559,
+        "interior_r_squared": 0.8064289243722971,
         "iterations": 2,
-        "operand_digest": "97d26d360da23f377b39754f82182a0f48615a06f8c1145cc6c4891f865c9589",
-        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44.npz",
+        "operand_digest": "b2d564b7173f6f3d3a142b802ad94d0b65fde46c1c5791cda8d6bf13b42767f8",
+        "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0003ff34e7-parquet-44-b2d564b7173f6f3d3a142b802ad94d0b65fde46c1c5791cda8d6bf13b42767f8.npz",
         "operand_unavailable_reason": null,
         "shot": "d3d_shot_0003ff34e7.parquet",
         "solve_exception_class": null,
-        "solver_termination": "public branch selector found no convergence-qualified diverted root",
-        "topology_class_agreement": false,
+        "solver_termination": "public branch selector accepted the converged diverted root",
+        "topology_class_agreement": true,
         "verdict": "FAIL"
       },
       {
@@ -4141,53 +4233,42 @@
         "verdict": "FAIL"
       },
       {
-        "achieved_topology_class": "limited",
+        "achieved_topology_class": "diverted",
         "active_set_cycle_damping_activations": [
-          0,
-          0,
-          0,
           0,
           0
         ],
-        "active_set_iterations": 5,
+        "active_set_iterations": 2,
         "active_set_mask_differences": [
-          27,
-          40,
-          1,
-          0,
+          18,
           0
         ],
         "active_set_residuals": [
-          0.12818170822460778,
-          0.22201860587138092,
-          0.0651490274069113,
-          0.054961955890201634,
-          0.054961955890201634
+          0.0002471010342651418,
+          0.0002471010342651418
         ],
-        "boundary_comparison_failures": [
-          "missing_predicted_closed_boundary"
-        ],
+        "boundary_comparison_failures": [],
         "converged": false,
         "fine_map": {
-          "build_seconds": 206.87864548526704,
+          "build_seconds": 346.92581767216325,
           "conductor_response_build_seconds": 0.0,
-          "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
+          "conductor_response_digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
-            55980,
+            55979,
             24
           ],
           "lattice_saddle_rz_m": [
-            0.9659008781467892,
-            -0.21651800644067484
+            1.2996992399998293,
+            -1.1674196471588767
           ],
-          "max_node_mismatch_wb": 7.020545993805956,
-          "max_solved_node_mismatch_wb": 7.020545993805956,
+          "max_node_mismatch_wb": 0.01592089864929136,
+          "max_solved_node_mismatch_wb": 0.01592089864929136,
           "nearest_promoted_to_xpoint_m": null,
-          "operand_bytes": 1509918,
-          "operand_digest": "0e1b0c942049e98c4ffd1c8ecf442c35f980505506c0ff0c37ba575a056a3169",
+          "operand_bytes": 1634975,
+          "operand_digest": "792edc19c30ef480e6d40fbe6857f92beed075c7e211fc623279781c47bd3340",
           "operand_fields": [
             "branch_closed_candidate_count",
             "branch_closed_controls_rz",
@@ -4235,47 +4316,47 @@
             "spacing_m",
             "state"
           ],
-          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146.npz",
+          "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146-792edc19c30ef480e6d40fbe6857f92beed075c7e211fc623279781c47bd3340.npz",
           "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 2.533282379101802e-14,
+          "reproduction_relative_error": 0.00373583356235177,
           "saddle_converged": true,
-          "saddle_flux_wb": -1.914254388757502,
-          "saddle_offset_mm": 514.3032347692298,
+          "saddle_flux_wb": -0.011279999360379676,
+          "saddle_offset_mm": 0.05647714709121086,
           "saddle_rz_m": [
-            1.0058727405738537,
-            0.2962295606020224
+            1.2997311005557652,
+            -1.167466279477273
           ],
           "separatrix_assembly": {
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
-            "closed_candidate_count": 0,
-            "closed_segment_count": 0,
+            "closed_candidate_count": 1,
+            "closed_segment_count": 661,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
-            "open_branch_count": 0,
+            "open_branch_count": 2,
             "open_slot_overflow": null,
             "overflow": null,
-            "well_formed": false
+            "well_formed": true
           },
-          "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 1.5147987341176243,
-          "separatrix_symmetric_rms_distance_m": null,
-          "separatrix_symmetric_sup_distance_m": null,
+          "separatrix_closed_points": 5289,
+          "separatrix_saddle_to_label_x_m": 0.024583450697335207,
+          "separatrix_symmetric_rms_distance_m": 0.008983370200535745,
+          "separatrix_symmetric_sup_distance_m": 0.02449861575164323,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "frame": 146,
-        "interior_r_squared": -1.9640056175043603,
-        "iterations": 5,
-        "operand_digest": "0e1b0c942049e98c4ffd1c8ecf442c35f980505506c0ff0c37ba575a056a3169",
-        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146.npz",
+        "interior_r_squared": 0.9989661209238214,
+        "iterations": 2,
+        "operand_digest": "792edc19c30ef480e6d40fbe6857f92beed075c7e211fc623279781c47bd3340",
+        "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_002495e835-parquet-146-792edc19c30ef480e6d40fbe6857f92beed075c7e211fc623279781c47bd3340.npz",
         "operand_unavailable_reason": null,
         "shot": "d3d_shot_002495e835.parquet",
         "solve_exception_class": null,
         "solver_termination": "public branch selector found no convergence-qualified diverted root",
-        "topology_class_agreement": false,
+        "topology_class_agreement": true,
         "verdict": "FAIL"
       },
       {
@@ -4285,45 +4366,59 @@
           0,
           0,
           0,
+          0,
+          0,
+          0,
+          0,
           0
         ],
-        "active_set_iterations": 5,
+        "active_set_iterations": 9,
         "active_set_mask_differences": [
-          24,
-          20,
-          9,
-          9,
+          16,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           0
         ],
         "active_set_residuals": [
-          0.12985789283698176,
-          0.1113965026973562,
-          0.06700522958710774,
-          0.06236882877710906,
-          0.06236882877710906
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886,
+          0.0004298867763992886
         ],
-        "boundary_comparison_failures": [],
+        "boundary_comparison_failures": [
+          "missing_predicted_closed_boundary"
+        ],
         "converged": false,
         "fine_map": {
-          "build_seconds": 207.4288696590811,
+          "build_seconds": 273.55457416176796,
           "conductor_response_build_seconds": 0.0,
-          "conductor_response_digest": "c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc",
+          "conductor_response_digest": "d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13",
           "conductor_response_loaded_from_cache": true,
-          "conductor_response_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/c8075ff7c3885c0d056e1ff207639c65a31e8d4846791d25f20898412a7636cc/response.npy",
+          "conductor_response_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/conductor-response-store/sha256/d40761cbd5130641376b529a44af62383efec60b9bd1bd1b2f9571fbf7e12b13/response.npy",
           "conductor_response_processes": 10,
           "conductor_response_shape": [
-            55980,
+            55979,
             24
           ],
           "lattice_saddle_rz_m": [
-            1.2651583546996057,
-            -1.3362867934446665
+            1.295959574732346,
+            -1.1704329384602836
           ],
-          "max_node_mismatch_wb": 0.8455500872273891,
-          "max_solved_node_mismatch_wb": 0.8455500872273891,
+          "max_node_mismatch_wb": 0.014023724313667163,
+          "max_solved_node_mismatch_wb": 0.014023724313667163,
           "nearest_promoted_to_xpoint_m": null,
-          "operand_bytes": 1516550,
-          "operand_digest": "9df49643caeeedec34c62e7d439745300fede76b6a7cc7ff3295845073058d99",
+          "operand_bytes": 1635841,
+          "operand_digest": "b5bba6036a684680452872340f1a0e756623bf6958608a30eec61db60d3f1b49",
           "operand_fields": [
             "branch_closed_candidate_count",
             "branch_closed_controls_rz",
@@ -4371,42 +4466,42 @@
             "spacing_m",
             "state"
           ],
-          "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137.npz",
+          "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137-b5bba6036a684680452872340f1a0e756623bf6958608a30eec61db60d3f1b49.npz",
           "promoted_node_count": 0,
           "radial_points": 171,
-          "reproduction_relative_error": 4.1154361122302815e-14,
+          "reproduction_relative_error": 0.003377529337836497,
           "saddle_converged": true,
-          "saddle_flux_wb": 0.7464005477516623,
-          "saddle_offset_mm": 40.32219848813813,
+          "saddle_flux_wb": 0.13740231913931,
+          "saddle_offset_mm": 0.10087826515070872,
           "saddle_rz_m": [
-            1.293778368421335,
-            -1.3646905696986231
+            1.296010093745717,
+            -1.1705202554326763
           ],
           "separatrix_assembly": {
             "axis_enclosing_component_count": null,
             "branch_overflow": null,
             "closed_candidate_count": 1,
-            "closed_segment_count": 0,
+            "closed_segment_count": 665,
             "contour_well_formed": null,
             "cycle_component_count": null,
             "graph_well_formed": null,
-            "open_branch_count": 0,
+            "open_branch_count": 2,
             "open_slot_overflow": null,
             "overflow": null,
-            "well_formed": false
+            "well_formed": true
           },
-          "separatrix_closed_points": 0,
-          "separatrix_saddle_to_label_x_m": 0.17632215764534862,
-          "separatrix_symmetric_rms_distance_m": null,
-          "separatrix_symmetric_sup_distance_m": null,
+          "separatrix_closed_points": 5321,
+          "separatrix_saddle_to_label_x_m": 0.018943178804013316,
+          "separatrix_symmetric_rms_distance_m": 0.008401972749937661,
+          "separatrix_symmetric_sup_distance_m": 0.018764006732654312,
           "spacing_m": 0.01,
           "vertical_points": 321
         },
         "frame": 137,
-        "interior_r_squared": -0.4459155140813966,
-        "iterations": 5,
-        "operand_digest": "9df49643caeeedec34c62e7d439745300fede76b6a7cc7ff3295845073058d99",
-        "operand_path": "/work/projects/imas_gpu/sophelio/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137.npz",
+        "interior_r_squared": 0.9996368578476187,
+        "iterations": 9,
+        "operand_digest": "b5bba6036a684680452872340f1a0e756623bf6958608a30eec61db60d3f1b49",
+        "operand_path": "/work/projects/imas_gpu/nova/evidence/operands/diiid-forward-gs/frame-display-d3d_shot_0040ca9bdc-parquet-137-b5bba6036a684680452872340f1a0e756623bf6958608a30eec61db60d3f1b49.npz",
         "operand_unavailable_reason": null,
         "shot": "d3d_shot_0040ca9bdc.parquet",
         "solve_exception_class": null,
@@ -4417,7 +4512,7 @@
     ],
     "preregistration_sha256": "bf3d1cb3ef29d60ddb632454bfdda8914f397421a2a46e2fc16310653c1457f5",
     "pseudo_wall": {
-      "maximum_absolute_r_squared_move": 4.431730101211694,
+      "maximum_absolute_r_squared_move": 9.748960521971384e-06,
       "sensitivity": [
         {
           "active_set_cycle_damping_activations": [
@@ -4426,16 +4521,16 @@
           ],
           "active_set_iterations": 2,
           "active_set_mask_differences": [
-            13,
+            183,
             0
           ],
           "active_set_residuals": [
-            0.41809606346245703,
-            0.41809606346245703
+            0.00015265370036428796,
+            0.00015265370036428796
           ],
           "converged": false,
-          "fixed_point_relative_residual": 0.41809606346245703,
-          "interior_r_squared": 0.4475317257084024,
+          "fixed_point_relative_residual": 0.00015265370036428796,
+          "interior_r_squared": 0.9979199288717945,
           "pseudo_wall_expansion": 0.02,
           "r_squared_change_from_baseline": 0.0
         },
@@ -4447,20 +4542,20 @@
           ],
           "active_set_iterations": 3,
           "active_set_mask_differences": [
-            60,
-            110,
+            179,
+            0,
             0
           ],
           "active_set_residuals": [
-            0.4709910403018093,
-            0.07852715398908883,
-            0.07852715398908883
+            0.0001684311531801786,
+            0.0001684311531801786,
+            0.0001684311531801786
           ],
           "converged": false,
-          "fixed_point_relative_residual": 0.07852715398908883,
-          "interior_r_squared": -3.9841983755032917,
+          "fixed_point_relative_residual": 0.0001684311531801786,
+          "interior_r_squared": 0.9979296778323165,
           "pseudo_wall_expansion": 0.05,
-          "r_squared_change_from_baseline": -4.431730101211694
+          "r_squared_change_from_baseline": 9.748960521971384e-06
         }
       ],
       "statement": "explicit pseudo-wall fallback derived from the competition row's efit_grid extent"
@@ -4468,8 +4563,8 @@
     "registered_median_interior_r_squared_bar": 0.90155
   },
   "tree_stamp": {
-    "benchmark_sha256": "9c3214a108e0cd8c2d0055491633f9b6d516a581bc7b4f4b6c19221db18a98ad",
-    "git_head": "38ed1755ca3209c3f084d705fff51e5f74d66022",
+    "benchmark_sha256": "079543983ce1c3c8b93dc30a5d3b58cc7fef92f3e1bb3565c22eb8099a2039be",
+    "git_head": "0205c75abae050d29681fdd69808045fa20d0e05",
     "worktree_status": []
   }
 }

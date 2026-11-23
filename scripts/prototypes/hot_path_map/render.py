@@ -53,7 +53,19 @@ def main():
     public = next(
         row for row in modules if row["module"] == "nova/equilibrium/forward.py"
     )
-    parts = []
+    parts = [
+        "<!doctype html>",
+        '<html lang="en">',
+        "<head>",
+        '  <meta charset="utf-8">',
+        '  <meta name="docs-project" content="nova">',
+        '  <meta name="plan-slug" content="code-reuse-and-hot-path">',
+        "  <title>Measured line map of the forward and inverse hot paths"
+        " | nova</title>",
+        "</head>",
+        "<body>",
+        '  <main class="plan-doc">',
+    ]
     parts.append(
         f'<section id="{NODE}-landing">'
         f"<h2>Line map of the forward and inverse hot paths</h2>"
@@ -88,9 +100,8 @@ def main():
     parts.append(
         f'<h3 id="{NODE}-public-entry">The public solve entry</h3><p>'
         f"<code>nova/equilibrium/forward.py</code> reads "
-        f"{plain(public, 'forward')}"
-        f"on the forward route and {plain(public, 'inverse')}"
-        f"on the inverse route"
+        f"{plain(public, 'forward')} on the forward route and "
+        f"{plain(public, 'inverse')} on the inverse route"
         + (
             ", so the entry both routes must reach is nonzero on each.</p>"
             if len(entry_reached) == 2
@@ -177,6 +188,7 @@ def main():
             f"<code>{html.escape(command)}</code> prints nothing.</p>"
         )
     parts.append("</section>")
+    parts.extend(["  </main>", "</body>", "</html>"])
     args.output.write_text("\n".join(parts) + "\n")
     print(f"WROTE {args.output} {len(modules)} modules", flush=True)
 

@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T17:48:01.545Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "unreached-module-delete",
+      "recorded_at": "2026-11-23T17:50:04.961310+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-23T17:27:47Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+      "line": "158",
+      "severity": "non-blocking",
+      "text": "non-blocking: done_when clause 2 asks for a suite delta adding no failures on all_debug; the shipped gate is an import sweep plus collect-only parity and the full not-slow suite was never executed (its two attempted arms stopped at 0 and 4 percent), so the clause is unmet as worded and the record states that rather than claiming it. The plan decision 'deletion-gate' at docs/plans/code-reuse-and-hot-path.html:203, dated after the run, now authorises exactly this substitution, which is why this does not block."
+    },
+    {
+      "file": "benchmarks/scripts_census.py",
+      "line": "124",
+      "severity": "non-blocking",
+      "text": "non-blocking: the importer scan embedded in the record's appendix re-implements the AST import-resolution capability this file already owns (imports_of, imports_of_walk, sys_path_roots) rather than extending it; the record argues the owner serves the script census and not the package-module graph, but the overlapping import forms are the same capability, and because the driver is embedded in a document rather than committed as a module the 178 refusals and both controls are re-derived from the record's appendix, not from an importable scanner."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T202605453490-unreached-module-delete/manifest.md",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest's tests field names the five-file command including tests/test_clip_mode_has_no_process_global.py, whose log focused-head.log ends EXIT=1 on the pre-existing benchmarks/outboard_census_exact_total.py reference; the passing run at job 1339385 is the four-file command recorded in the evidence record and cited as focused-pass.log, so a promotion reading the tests field's first log sees a red gate even though a green one exists beside it."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit against 348ed92c: 104c8b673 removes 24 files with 3029 deletions and zero insertions, and the six later commits touch only unreached-module-delete.html and its JSON twin; no file carries an insertion.",
+    "done_when": "clause 1 is met: independent greps over the head tree for nova/, tests/, apps/, benchmarks/, scripts/ and imas-ambix find no importer and no __init__ re-export of any deleted module, and the hot-path map carries all 24 as measured with union executed 0; clause 3 is met by the per-package table at unreached-module-delete.html:96-105, re-summed from the diff to 3029; clause 2's suite delta was not executed and the record says so at line 158.",
+    "goal": "plan section 4 at docs/plans/code-reuse-and-hot-path.html:133 asks that unreached, unimported modules under nova/ be deleted with a record; commit 104c8b67 deletes exactly the 24 modules listed at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:91, 3029 lines, and holds nova/utilities/ANSYS.py back by name at line 119.",
+    "manifest": "read; it records the substituted gate, the arm jobs 1339201 and 1339213 with matching revisions, the focused logs with their exit codes, and the suite shortfall under outside_scope; its tests field names the five-file command whose first log ends EXIT=1.",
+    "write_paths": "the manifest declares only docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html and docs/figures/code-reuse-and-hot-path/unreached-module-delete, so the 24 nova source deletions and the JSON twin lie outside them, although every one is implied by section 4 and listed in changed_paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: plan section 4 at docs/plans/code-reuse-and-hot-path.html:133 asks that unreached, unimported modules under nova/ be deleted with a record; commit 104c8b67 deletes exactly the 24 modules listed at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:91, 3029 lines, and holds nova/utilities/ANSYS.py back by name at line 119.\nVERDICT done_when: clause 1 is met (independent greps over nova/, tests/, apps/, benchmarks/, scripts/ and imas-ambix at head find no importer and no __init__ re-export, and the hot-path map carries all 24 as measured with union executed 0); clause 3 is met by the per-package table at unreached-module-delete.html:96-105, re-summed from the diff to 3029; clause 2's suite delta was not executed and the record states so at line 158.\nVERDICT write_paths: the manifest declares only the two evidence paths, so the 24 nova source deletions and the JSON twin lie outside them, although every one is implied by section 4 and listed in changed_paths.\nVERDICT manifest: read; it records the substituted gate, arm jobs 1339201 and 1339213 with matching revisions, both focused logs and their exit codes, and the suite shortfall under outside_scope; its tests field names the five-file command whose first log ends EXIT=1.\nVERDICT diff: read commit by commit against 348ed92c; 104c8b673 removes 24 files with 3029 deletions and zero insertions, and the six later commits touch only unreached-module-delete.html and its JSON twin.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every deleted path at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:91 is unreached on both routes in docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.json (union executed 0, measured true) and carries no importer at head.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate-base.json and gate-head.json record 23 versus 14 import failures whose set difference is exactly the nine deleted modules and zero added, and the collection ids differ by the six thermal-hydraulic parametrisations, but the plan's suite delta was never executed, as stated at unreached-module-delete.html:158.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: the landed diff contains only deletions under nova/ plus the evidence pair under docs/evidence/fragments/code-reuse-and-hot-path/, with no incidental edits, but 25 of its 26 paths lie outside the two declared write paths.\nSCORE durability: 7\nJUSTIFICATION durability: the change adds no committed test, so nothing under tests/ fails if a kept module regains an import of one of the 24 deleted paths; the import sweep in gate-head.json is a one-off receipt, and tests/test_thermalhydralic.py's parametrisation is a package walk that lost the deleted modules rather than guarding their absence.\nSCORE fit: 18\nJUSTIFICATION fit: the deletions remove files and add no symbol, and the record at unreached-module-delete.html follows the sibling fragments' idiom, so no repository naming rule is engaged.\nSCORE reuse: 16\nJUSTIFICATION reuse: the diff removes capability rather than forking it, though the importer scan embedded at unreached-module-delete.html:242-254 re-implements the import-resolution capability owned by benchmarks/scripts_census.py:124.\nFINDING docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:158 non-blocking: clause 2 of the done_when asks for a suite delta adding no failures on all_debug, but the gate shipped is an import sweep plus collect-only parity and the not-slow suite stopped at 0 and 4 percent, so the clause is unmet as worded; the plan decision 'deletion-gate' at docs/plans/code-reuse-and-hot-path.html:203 now authorises the substitution.\nFINDING benchmarks/scripts_census.py:124 non-blocking: the importer scan embedded in the record re-implements this file's imports_of/imports_of_walk/sys_path_roots capability instead of extending it, and because the driver is embedded in a document rather than committed as a module the 178 refusals and both controls are re-derived from the record's appendix rather than from an importable scanner.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T202605453490-unreached-module-delete/manifest.md:12 non-blocking: the tests field names the five-file command whose log focused-head.log ends EXIT=1 on the pre-existing benchmark reference, while the passing four-file run is recorded only in the evidence record and cited as focused-pass.log, so a promotion reading the first log sees a red gate.\n",
+  "review_run_id": "r-20261123T172704820192-review-of-unreached-module-delete-6d308dee032d",
+  "reviewed_base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+  "reviewed_head_sha": "6d308dee032d2c72c7077ed066c21bc163696024",
+  "reviewed_run_id": "r-20261122T202605453490-unreached-module-delete",
+  "scores": {
+    "durability": 7,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T17:51:17.964678+00:00",
+  "total": 90
+}

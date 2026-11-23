@@ -11,7 +11,7 @@ a metre.  ``--probe-rows prior`` writes the prior convention from the same
 state and the same noise, which is the negative control.
 
 The generating state and the sensor set are the section-1 reference machine
-read through :mod:`tests.test_equilibrium_magnetics_fit`: a converged 500-cell
+read through :mod:`tests.magnetics_fit_harness`
 ITER forward solve, 24 flux loops and 48 poloidal probes at the machine's own
 geometry.  A sequence holds that state fixed and adds, on every sensor and
 every slice, noise from one of two models of the same marginal size:
@@ -153,7 +153,7 @@ def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
     from nova.equilibrium.solve_request import ExplicitSolveSeed
 
     sys.path.insert(0, str(REPO))
-    tm = importlib.import_module("tests.test_equilibrium_magnetics_fit")
+    tm = importlib.import_module("tests.magnetics_fit_harness")
     lane = importlib.import_module("tests.test_equilibrium_forward_reference")
 
     if cells != 500:

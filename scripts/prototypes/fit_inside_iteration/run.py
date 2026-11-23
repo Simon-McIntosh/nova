@@ -71,9 +71,12 @@ class _CellRows:
 
 
 def _known_case(name, factory):
-    from tests import test_equilibrium_magnetics_fit as study
+    from tests.magnetics_fit_harness import (
+        _physical_sensor_rows,
+        physical_case_table,
+    )
 
-    case = study.physical_cases.__wrapped__(factory)(name)
+    case = physical_case_table(factory)(name)
     initial = case["initial"]
     seed_policy = initial.seed_policy
     if not hasattr(seed_policy, "state"):
@@ -82,7 +85,7 @@ def _known_case(name, factory):
         )
     flux = np.asarray(seed_policy.state, dtype=np.float64)
     profile = case["profile"]._with_source(initial.source_profile)
-    rows = _CellRows(case["source"].biot, case["sensors"], study._physical_sensor_rows)
+    rows = _CellRows(case["source"].biot, case["sensors"], _physical_sensor_rows)
     return dict(
         name=name,
         profile=profile,
@@ -106,7 +109,7 @@ def _known_case(name, factory):
 def _stored_case(name):
     import pytest
     from tests import test_magnetics_fit_efit_comparison as study
-    from tests.test_equilibrium_magnetics_fit import (
+    from tests.magnetics_fit_harness import (
         _PlasmaDiagnosticSource,
         _physical_sensor_rows,
     )
@@ -210,7 +213,7 @@ def _progress(name):
 
 def _run_known(case, args):
     from nova.equilibrium.flux_iteration import FluxIterationFit
-    from tests import test_equilibrium_magnetics_fit as study
+    from tests.magnetics_fit_harness import _draw_recovery_panels
 
     fitter = FluxIterationFit(
         case["profile"],
@@ -262,7 +265,7 @@ def _run_known(case, args):
     )
     panel_error = None
     try:
-        study._draw_recovery_panels(case["name"], case["figure"], shim)
+        _draw_recovery_panels(case["name"], case["figure"], shim)
     except Exception as refusal:  # the row outlives a painter's refusal
         panel_error = f"{type(refusal).__name__}: {refusal}"
     row = dict(

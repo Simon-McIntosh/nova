@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>IMAS seam census</title>
+<style>
+body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+       max-width: 92em; margin: 2em auto; padding: 0 1em; color: #1b1b1b;
+       line-height: 1.45; }
+h1 { font-size: 1.6em; margin-bottom: 0.2em; }
+h2 { font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.06em;
+     color: #4b4b4b; margin-top: 2.2em; border-bottom: 1px solid #d8d8d8;
+     padding-bottom: 0.3em; }
+p.lead { color: #3b3b3b; max-width: 62em; }
+table.census { border-collapse: collapse; width: 100%; font-size: 0.78em;
+               font-variant-numeric: tabular-nums; }
+table.census th { text-align: left; font-weight: 600; color: #3b3b3b;
+                  border-bottom: 1px solid #b9b9b9; padding: 0.35em 0.5em;
+                  vertical-align: bottom; }
+table.census td { border-bottom: 1px solid #ececec; padding: 0.3em 0.5em;
+                  vertical-align: top; }
+table.census tr:hover td { background: #f6f8fa; }
+td.path, td.path code { font-family: "SFMono-Regular", Menlo, monospace;
+                        font-size: 0.95em; color: #1b1b1b; }
+td.cls { white-space: nowrap; color: #6a3d00; }
+dl.controls { display: grid; grid-template-columns: 18em 1fr; gap: 0.3em 1em; }
+dl.controls dt { font-family: "SFMono-Regular", Menlo, monospace;
+                 font-size: 0.82em; color: #1b1b1b; }
+dl.controls dd { margin: 0; font-size: 0.85em; }
+</style>
+</head>
+<body>
+<h1>IMAS seam census</h1>
+<p class="lead">Recomputed from the tree by <code>scripts/imas_seam_census.py</code>. The scan read <strong>3498</strong> Python modules across nova, scripts, benchmarks, apps, tests, ambix. It emitted <strong>94</strong> module rows covering <strong>94</strong> files, <strong>388</strong> importer rows and <strong>35</strong> convention rows: <strong>517</strong> rows against <strong>3498</strong> files read. <strong>0</strong> censused files carry no row, so the row set is complete over the scan. Regenerate with the command at the foot of this page.</p>
+<h2>Classes</h2>
+<table class="census">
+<thead><tr><th>class</th><th>modules</th><th>what the class means</th><th>destination</th></tr></thead>
+<tbody>
+<tr><td>generic reader</td><td class="num">33</td><td>reads Data Dictionary IDSs, authors nothing</td><td>stays</td></tr>
+<tr><td>machine analysis</td><td class="num">30</td><td>adjudicates, screens or compares machine data</td><td>generalised by §3 or §4</td></tr>
+<tr><td>machine authoring or publication</td><td class="num">15</td><td>builds or publishes a machine description</td><td>moves to the ingest member</td></tr>
+<tr><td>unreached</td><td class="num">9</td><td>no module in the scanned trees imports it</td><td>deleted by §2</td></tr>
+<tr><td>convention conversion</td><td class="num">5</td><td>maps between COCOS conventions or DD versions</td><td>moves under §5</td></tr>
+<tr><td>generic writer</td><td class="num">2</td><td>writes Data Dictionary IDSs, authors no machine data</td><td>stays</td></tr>
+</tbody>
+</table>
+<h2>Machine and IMAS modules</h2>
+<table class="census">
+<thead><tr><th>module</th><th>class</th><th>section</th><th>destination</th><th>basis</th><th>importers</th><th>solver importers</th><th>duplicate implementations</th><th>upstream machine map</th></tr></thead>
+<tbody>
+<tr><td class="path">nova/catalog/mast_geometry.py</td><td class="cls">machine authoring or publication</td><td>§3</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>44</td><td class="path">—</td><td class="path">nova/imas/mast_geometry.py:60</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/__init__.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>22</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/autocomplete.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>1</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/callstate.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>1</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/coil.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>5</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/coils_non_axisymmetric.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>6</td><td class="path">nova.biot.overlap:300</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/connect.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>1</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/contour_tree.py</td><td class="cls">unreached</td><td>§2</td><td>deleted by §2</td><td>no importer in the scanned trees</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/contour_tree_layout.py</td><td class="cls">unreached</td><td>§2</td><td>deleted by §2</td><td>no importer in the scanned trees</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/current.py</td><td class="cls">unreached</td><td>§2</td><td>deleted by §2</td><td>no importer in the scanned trees</td><td>0</td><td class="path">—</td><td class="path">nova/imas/diiid_current.py:82</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/database.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>22</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/dataset.py</td><td class="cls">generic writer</td><td>—</td><td>stays</td><td>writes IDSs through the generic layer</td><td>38</td><td class="path">nova.equilibrium.inverse:25, nova.equilibrium.steering_frames:147</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/datasource.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>2</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/decimate.py</td><td class="cls">unreached</td><td>§2</td><td>deleted by §2</td><td>no importer in the scanned trees</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/diiid_current.py</td><td class="cls">machine analysis</td><td>§4</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>20</td><td class="path">—</td><td class="path">nova/imas/current.py:17</td><td class="path">imas_ambix/data/machine_maps/diii-d.json</td></tr>
+<tr><td class="path">nova/imas/diiid_description.py</td><td class="cls">machine authoring or publication</td><td>§4</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>44</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/diii-d.json</td></tr>
+<tr><td class="path">nova/imas/diiid_machine_ids.py</td><td class="cls">machine authoring or publication</td><td>§4</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>9</td><td class="path">—</td><td class="path">nova/imas/mast_geometry.py:146, nova/imas/mast_geometry.py:152, nova/imas/mast_geometry.py:188, nova/imas/mast_geometry.py:235</td><td class="path">imas_ambix/data/machine_maps/diii-d.json</td></tr>
+<tr><td class="path">nova/imas/diiid_passive.py</td><td class="cls">machine authoring or publication</td><td>§4</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>3</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/diii-d.json</td></tr>
+<tr><td class="path">nova/imas/edge_consistency.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>4</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/ensemble.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>1</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/equilibrium.py</td><td class="cls">convention conversion</td><td>§5</td><td>moves under §5</td><td>derives a convention through nova.io.sourcemap</td><td>15</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/extrapolate.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>2</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/flux.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/fuse.py</td><td class="cls">unreached</td><td>§2</td><td>deleted by §2</td><td>no importer in the scanned trees</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/getslice.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>8</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/ids_entry.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>8</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/ids_index.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>8</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/io_magnetics.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>3</td><td class="path">—</td><td class="path">nova/imas/machine.py:1948, nova/imas/magnetic_diagnostics.py:13, nova/imas/magnetics.py:50</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/machine.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>50</td><td class="path">—</td><td class="path">nova/imas/io_magnetics.py:14, nova/imas/magnetic_diagnostics.py:13, nova/imas/magnetics.py:50</td><td class="path">imas_ambix/data/machine_maps/diii-d.json, imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/machine_artifact.py</td><td class="cls">machine authoring or publication</td><td>§3</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>28</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/diii-d.json, imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/machine_drive.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>8</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/diii-d.json, imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/machine_evidence.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>20</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/diii-d.json, imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/magnetic_diagnostics.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>0</td><td class="path">—</td><td class="path">nova/imas/io_magnetics.py:14, nova/imas/machine.py:1948, nova/imas/magnetics.py:50</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/magnetics.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>1</td><td class="path">—</td><td class="path">nova/imas/io_magnetics.py:14, nova/imas/machine.py:1948, nova/imas/magnetic_diagnostics.py:13</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/mast_acquisition_scale.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>5</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_array_amplitude.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>2</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_block_scale.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>14</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_calibration_cohort.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>4</td><td class="path">—</td><td class="path">nova/imas/mast_probe_calibration.py:123</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_chain_factory.py</td><td class="cls">machine authoring or publication</td><td>§3</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>13</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_channel_drive.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>4</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_corrections.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>3</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_efit_referee.py</td><td class="cls">machine authoring or publication</td><td>§3</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>22</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_error_field_screen.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>5</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_fitted_parameters.py</td><td class="cls">machine authoring or publication</td><td>§3</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>10</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_flux_loop_adjudication.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>4</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_geometry.py</td><td class="cls">machine authoring or publication</td><td>§3</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>11</td><td class="path">—</td><td class="path">nova/catalog/mast_geometry.py:169, nova/imas/diiid_machine_ids.py:286, nova/imas/diiid_machine_ids.py:551, nova/imas/diiid_machine_ids.py:596, nova/imas/diiid_machine_ids.py:643, nova/imas/mast_solve_input_ids.py:242</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_misfit_harmonics.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>3</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_parity_chain.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>8</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_parity_gate.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>3</td><td class="path">—</td><td class="path">nova/scripts/diiid_machine_artifact.py:485</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_passive_decay_modes.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>13</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_passive_inductance.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>6</td><td class="path">nova.circuit.linkage:36</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_passive_response.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>10</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_probe_calibration.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>3</td><td class="path">—</td><td class="path">nova/imas/mast_calibration_cohort.py:84</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_probe_discriminant.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>3</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_seed_parameters.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>11</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_sensor_noise.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>3</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_solve_input_ids.py</td><td class="cls">machine authoring or publication</td><td>§3</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>3</td><td class="path">—</td><td class="path">nova/imas/mast_geometry.py:636</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_solve_inputs.py</td><td class="cls">convention conversion</td><td>§5</td><td>moves under §5</td><td>imports the COCOS algebra for a transform</td><td>82</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_vacuum_cohort.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>58</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_vacuum_response.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>28</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/mast_winding_lattice.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>2</td><td class="path">—</td><td class="path">nova/scripts/mast_winding_lattice.py:68</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/imas/matrix.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>1</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/metadata.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>5</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/operate.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>3</td><td class="path">nova.biot.boundary:13</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/parity_tolerances.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>18</td><td class="path">nova.transport.parity_flux_ledger:24</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/pf_active.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>4</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/pf_passive.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>2</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/plasma_source.py</td><td class="cls">convention conversion</td><td>§5</td><td>moves under §5</td><td>derives a convention through nova.io.sourcemap</td><td>13</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/prescribed_plasma.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>7</td><td class="path">nova.circuit.coupled_plant:44</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/profiles.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>10</td><td class="path">nova.equilibrium.inverse:26</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/pulsedesign.py</td><td class="cls">convention conversion</td><td>§5</td><td>moves under §5</td><td>imports the COCOS algebra for a transform</td><td>6</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/pulseprofile.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>1</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/pulseschedule.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>1</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/sample.py</td><td class="cls">convention conversion</td><td>§5</td><td>moves under §5</td><td>imports the COCOS algebra for a transform</td><td>6</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/scenario.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>7</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/scripts.py</td><td class="cls">unreached</td><td>§2</td><td>deleted by §2</td><td>no importer in the scanned trees</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/test_ssh.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/test_utilities.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>14</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/toroidal_field_coil.py</td><td class="cls">unreached</td><td>§2</td><td>deleted by §2</td><td>no importer in the scanned trees</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/transient.py</td><td class="cls">unreached</td><td>§2</td><td>deleted by §2</td><td>no importer in the scanned trees</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/uri.py</td><td class="cls">generic reader</td><td>—</td><td>stays</td><td>reads IDSs through the generic layer</td><td>1</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/validator_case.py</td><td class="cls">generic writer</td><td>—</td><td>stays</td><td>writes IDSs through the generic layer</td><td>5</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/imas/waveform.py</td><td class="cls">unreached</td><td>§2</td><td>deleted by §2</td><td>no importer in the scanned trees</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">none</td></tr>
+<tr><td class="path">nova/media/sources/diiid_efit.py</td><td class="cls">machine authoring or publication</td><td>§4</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>1</td><td class="path">—</td><td class="path">nova/media/sources/mast_efit.py:116, nova/media/sources/mast_efit.py:50, nova/media/sources/mast_efit.py:73, nova/media/sources/mast_efit.py:84</td><td class="path">imas_ambix/data/machine_maps/diii-d.json</td></tr>
+<tr><td class="path">nova/media/sources/mast_efit.py</td><td class="cls">machine authoring or publication</td><td>§3</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>10</td><td class="path">—</td><td class="path">nova/media/sources/diiid_efit.py:100, nova/media/sources/diiid_efit.py:140, nova/media/sources/diiid_efit.py:41, nova/media/sources/diiid_efit.py:78</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/media/sources/mast_thomson.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>8</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/scripts/diiid_machine_artifact.py</td><td class="cls">machine authoring or publication</td><td>§4</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>3</td><td class="path">—</td><td class="path">nova/imas/mast_parity_gate.py:1212, nova/scripts/mast_machine_artifact.py:50</td><td class="path">imas_ambix/data/machine_maps/diii-d.json</td></tr>
+<tr><td class="path">nova/scripts/mast_acquisition_sweep.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>1</td><td class="path">—</td><td class="path">nova/scripts/mast_passive_calibration.py:102, nova/scripts/mast_winding_lattice.py:497</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/scripts/mast_calibration_experiments.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>1</td><td class="path">—</td><td class="path">nova/scripts/mast_passive_calibration.py:736, nova/scripts/mast_vacuum_refinement.py:478, nova/scripts/mast_vacuum_refinement.py:87</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/scripts/mast_catalog_geometry.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>0</td><td class="path">—</td><td class="path">—</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/scripts/mast_machine_artifact.py</td><td class="cls">machine authoring or publication</td><td>§3</td><td>moves to the ingest member</td><td>imports the publication or ingest path</td><td>0</td><td class="path">—</td><td class="path">nova/scripts/diiid_machine_artifact.py:47</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/scripts/mast_passive_calibration.py</td><td class="cls">machine authoring or publication</td><td>§3</td><td>moves to the ingest member</td><td>defines an authoring or publication function</td><td>1</td><td class="path">—</td><td class="path">nova/scripts/mast_acquisition_sweep.py:144, nova/scripts/mast_calibration_experiments.py:605, nova/scripts/mast_vacuum_refinement.py:478</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/scripts/mast_vacuum_refinement.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>0</td><td class="path">—</td><td class="path">nova/scripts/mast_calibration_experiments.py:57, nova/scripts/mast_calibration_experiments.py:605, nova/scripts/mast_passive_calibration.py:736</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+<tr><td class="path">nova/scripts/mast_winding_lattice.py</td><td class="cls">machine analysis</td><td>§3</td><td>generalised by §3 or §4</td><td>machine-named with no authoring capability</td><td>0</td><td class="path">—</td><td class="path">nova/imas/mast_winding_lattice.py:158, nova/scripts/mast_acquisition_sweep.py:824</td><td class="path">imas_ambix/data/machine_maps/mast.json</td></tr>
+</tbody>
+</table>
+<h2>Importers of a censused module</h2>
+<p>One row per module in the scanned trees that imports a module named above. A module whose import set reaches a censused module is listed once with every censused module it imports.</p>
+<table class="census">
+<thead><tr><th>importer</th><th>imports</th><th>class of importer</th><th>destination</th></tr></thead>
+<tbody>
+<tr><td class="path">apps/playable/machines.py</td><td class="path">nova.imas.machine_artifact</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">apps/pulsedesign/config.py</td><td class="path">nova.imas, nova.imas.database</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">apps/pulsedesign/simulator.py</td><td class="path">nova.imas.equilibrium, nova.imas.pulsedesign, nova.imas.sample</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/axis_configuration_attribution.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/axis_seed_census.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/backend_divergence_forensics.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/bank_efit_overlay.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/bank_revision_reproduction.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/centroid_radius_attribution.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/centroid_radius_validation.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/circuit_projection_arm.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/class_coreachability.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/coil_edit_latency.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/contour_tree_brute_force.py</td><td class="path">nova.imas.mast_vacuum_cohort, nova.media.sources.mast_efit</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/contraction_discriminator.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/cpu_solve_discriminator.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/diiid_boundary_current_recovery.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_circuit_driven_forward_validation.py</td><td class="path">nova.imas.diiid_current, nova.imas.diiid_description, nova.imas.diiid_passive</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_circuit_driven_vacuum.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_coil_wiring.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_constrained_cold_start.py</td><td class="path">nova.imas.diiid_current, nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_current_pinned_forward.py</td><td class="path">nova.imas.diiid_current, nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_current_polarity_audit.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_diverted_root_full_currents.py</td><td class="path">nova.imas.diiid_current, nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_diverted_solve_overlay.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_five_column_residual_adjudication.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_flux_space_adjudication.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_forward_gs_match.py</td><td class="path">nova.imas.diiid_current, nova.imas.diiid_description, nova.imas.machine_artifact</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">benchmarks/diiid_grid_residual_current_regression.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_ids_machine_description.py</td><td class="path">nova.imas.diiid_machine_ids, nova.imas.machine, nova.imas.machine_artifact</td><td>convention conversion</td><td>moves under §5</td></tr>
+<tr><td class="path">benchmarks/diiid_machine_description.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_negative_tail_attribution.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_plasma_subtraction_gate.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_poloidal_figures.py</td><td class="path">nova.imas.diiid_description</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">benchmarks/diiid_recovered_current_sign_control.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_repaired_solve_remeasure.py</td><td class="path">nova.imas.diiid_current, nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_residual_decomposition.py</td><td class="path">nova.imas.diiid_description</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">benchmarks/diiid_root_convention_sweep.py</td><td class="path">nova.imas.diiid_description</td><td>convention conversion</td><td>moves under §5</td></tr>
+<tr><td class="path">benchmarks/diiid_root_existence.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_solenoid_inclusion_ladder.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_state_of_play_figures.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_unclaimed_current_origin.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_unclaimed_current_patches.py</td><td class="path">nova.imas.diiid_description</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">benchmarks/diiid_vacuum_against_exact_tare.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_vacuum_composition_audit.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_vacuum_from_description.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_vacuum_gate.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_vacuum_quiescent_gate.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diiid_vacuum_sensitivity_sweep.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/diverted_basin_probe.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_affine_extraction.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_centroid_offset_attribution.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_current_sign_census.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_filament_truncation_contribution.py</td><td class="path">nova.imas.mast_chain_factory, nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_flux_decomposition.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_chain_factory, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_response</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_forward_parity_slice.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_passive_response, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_response, nova.imas.parity_tolerances</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_lcfs_outward_offset.py</td><td class="path">nova.imas.mast_chain_factory, nova.imas.mast_vacuum_cohort, nova.imas.parity_tolerances</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_metric_parity_comparison.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_native_grid_decomposition.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_response</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_operator_consistency_order.py</td><td class="path">nova.imas.mast_chain_factory, nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_parity_boundary_volume.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_parity_criterion_provenance.py</td><td class="path">nova.imas.parity_tolerances</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_parity_field_instrument.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_parity_fixed_boundary_seed.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_parity_inductance_partition.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_parity_root_geometry.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_parity_tared_external_field.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_parity_warm_neighbour.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_reproduction_gate.py</td><td class="path">nova.imas.mast_efit_referee</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_roundtrip_identity.py</td><td class="path">nova.imas.mast_chain_factory, nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_roundtrip_linear_moments.py</td><td class="path">nova.imas.mast_chain_factory, nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_third_term_separation.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_topology_boundary_score.py</td><td class="path">nova.imas.machine_artifact, nova.imas.mast_vacuum_cohort, nova.imas.parity_tolerances</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/efit_xpoint_fit_state.py</td><td class="path">nova.imas.mast_chain_factory, nova.imas.mast_vacuum_cohort</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/estimator_scoreboard.py</td><td class="path">nova.imas.mast_efit_referee, nova.imas.parity_tolerances</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/forward_labeller_throughput.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/forward_resolution_default.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/inner_solve_accuracy.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/io_ingest.py</td><td class="path">nova.imas.ids_entry, nova.imas.ids_index</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/jitted_eager_parity_gate.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/label_seed_residual_field.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/mast_catalog_input_manifest.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/mast_centroid_solve_panels.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_solve_inputs</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/mast_description_equivalence.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_flux_loop_adjudication, nova.imas.mast_solve_inputs</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">benchmarks/mast_passive_held_out.py</td><td class="path">nova.imas.mast_passive_decay_modes, nova.imas.mast_vacuum_cohort</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/mast_response_carrier_warm.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/mast_response_kernel_backends.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_solve_inputs</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/mast_saddle_admission.py</td><td class="path">nova.imas, nova.imas.io_magnetics, nova.imas.machine_artifact, nova.imas.mast_misfit_harmonics, nova.imas.mast_vacuum_cohort</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">benchmarks/mast_saddle_voltage_reach.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/mast_saddle_voltage_units.py</td><td class="path">nova.imas.machine_artifact, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">benchmarks/mast_tf_average.py</td><td class="path">nova.imas.mast_calibration_cohort, nova.imas.mast_error_field_screen, nova.imas.mast_vacuum_cohort</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/mast_toroidal_probe_orientation.py</td><td class="path">nova.imas.mast_calibration_cohort, nova.imas.mast_vacuum_cohort</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">benchmarks/newton_cycle_mask_switch.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/null_census_device_benchmark.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/out_of_vessel_saddle_selection.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/parity_divergence_attribution.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/pinned_branch_contrast.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/playable_keyframe_receipt.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/playable_shape_inverse_receipt.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/playable_shape_response_comparison.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/raster_flux_target_receipt.py</td><td class="path">nova.imas.mast_geometry, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_response</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/real_slice_convergence.py</td><td class="path">nova.imas.mast_chain_factory, nova.imas.mast_parity_chain, nova.imas.mast_solve_inputs, nova.imas.parity_tolerances</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/receipt_raster_check.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/receipt_topology_check.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/reduced_newton_constrained_rows.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/reduced_newton_rows.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/seed_alignment_ranking.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/settled_mask_stall.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/solenoid_span_attribution.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_vacuum_response</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/stagnation_mechanism_probe.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/strict_exit_incidence.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/topology_disagreement.py</td><td class="path">nova.imas.mast_chain_factory, nova.imas.mast_efit_referee, nova.imas.mast_parity_chain, nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/traced_current_bitwise.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/traced_vector_identity_receipt.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/trip_quantum_width_one.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/vertical_force_decomposition.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_channel_drive, nova.imas.mast_passive_response, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">benchmarks/wall_resolution_ladder.py</td><td class="path">nova.imas.mast_geometry, nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">imas_ambix/gs/artifact_geometry.py</td><td class="path">nova.imas.machine_artifact</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">imas_ambix/gs/artifact_resolution.py</td><td class="path">nova.imas.machine_artifact, nova.imas.mast_geometry</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">imas_ambix/gs/description_artifact.py</td><td class="path">nova.imas.machine_artifact, nova.imas.machine_drive, nova.imas.machine_evidence</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">imas_ambix/gs/machine_identity.py</td><td class="path">nova.catalog.mast_geometry</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">imas_ambix/latent/data.py</td><td class="path">nova.imas.mast_block_scale</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">imas_ambix/worldmodel/label_cartoon_video.py</td><td class="path">nova.media.sources.mast_thomson</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/biot/boundary.py</td><td class="path">nova.imas.operate</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/biot/overlap.py</td><td class="path">nova.imas.coils_non_axisymmetric</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/calibrate/sweep.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">nova/catalog/__init__.py</td><td class="path">nova.catalog.mast_geometry</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/catalog/mast_geometry.py</td><td class="path">nova.imas.machine_evidence</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/circuit/coupled_plant.py</td><td class="path">nova.imas.prescribed_plasma</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/circuit/linkage.py</td><td class="path">nova.imas.mast_passive_inductance</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/datachain/ccfe_uda.py</td><td class="path">nova.imas.dataset</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/datachain/magnetic_signals.py</td><td class="path">nova.imas.magnetics</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/equilibrium/inverse.py</td><td class="path">nova.imas.dataset, nova.imas.profiles</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/equilibrium/steering_frames.py</td><td class="path">nova.imas.dataset</td><td>convention statement</td><td>rewired in place by §5</td></tr>
+<tr><td class="path">nova/field/elm_3d_field.py</td><td class="path">nova.imas.coils_non_axisymmetric</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/field/elm_inductance.py</td><td class="path">nova.imas.coils_non_axisymmetric</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/field/errorfield.py</td><td class="path">nova.imas.database, nova.imas.metadata</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">nova/field/gpec_benchmark.py</td><td class="path">nova.imas.coils_non_axisymmetric</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/geometry/centerline.py</td><td class="path">nova.imas.coil, nova.imas.database, nova.imas.datasource, nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/geometry/plasmapoints.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/geometry/strike.py</td><td class="path">nova.imas.dataset, nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/graphics/bokeh.py</td><td class="path">nova.imas.autocomplete, nova.imas.database</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/__init__.py</td><td class="path">nova.imas, nova.imas.database, nova.imas.dataset, nova.imas.diiid_current</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/autocomplete.py</td><td class="path">nova.imas.dataset</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/coil.py</td><td class="path">nova.imas.dataset</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/coils_non_axisymmetric.py</td><td class="path">nova.imas.coil, nova.imas.dataset, nova.imas.machine, nova.imas.scenario</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/connect.py</td><td class="path">nova.imas.database</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/contour_tree.py</td><td class="path">nova.imas.equilibrium</td><td>unreached</td><td>deleted by §2</td></tr>
+<tr><td class="path">nova/imas/current.py</td><td class="path">nova.imas.database, nova.imas.pf_active, nova.imas.pf_passive</td><td>unreached</td><td>deleted by §2</td></tr>
+<tr><td class="path">nova/imas/database.py</td><td class="path">nova.imas.dataset</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/datasource.py</td><td class="path">nova.imas.database, nova.imas.dataset, nova.imas.metadata</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/decimate.py</td><td class="path">nova.imas.ensemble</td><td>unreached</td><td>deleted by §2</td></tr>
+<tr><td class="path">nova/imas/diiid_current.py</td><td class="path">nova.imas.diiid_description</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/diiid_description.py</td><td class="path">nova.imas.dataset, nova.imas.machine</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/imas/diiid_machine_ids.py</td><td class="path">nova.imas.dataset, nova.imas.machine</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/imas/ensemble.py</td><td class="path">nova.imas.connect, nova.imas.equilibrium</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/equilibrium.py</td><td class="path">nova.imas.getslice, nova.imas.machine, nova.imas.scenario</td><td>convention conversion</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/imas/extrapolate.py</td><td class="path">nova.imas.dataset, nova.imas.ids_index, nova.imas.operate</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/flux.py</td><td class="path">nova.imas.equilibrium, nova.imas.profiles</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/fuse.py</td><td class="path">nova.imas.dataset, nova.imas.machine</td><td>unreached</td><td>deleted by §2</td></tr>
+<tr><td class="path">nova/imas/ids_entry.py</td><td class="path">nova.imas.database, nova.imas.dataset, nova.imas.ids_index</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/ids_index.py</td><td class="path">nova.imas.dataset</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/io_magnetics.py</td><td class="path">nova.imas.database</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/machine.py</td><td class="path">nova.imas.database, nova.imas.dataset, nova.imas.ids_index</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/machine_artifact.py</td><td class="path">nova.imas.machine_drive, nova.imas.machine_evidence</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/imas/machine_drive.py</td><td class="path">nova.imas.machine_evidence</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/magnetics.py</td><td class="path">nova.imas.database, nova.imas.scenario</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/mast_array_amplitude.py</td><td class="path">nova.imas.mast_acquisition_scale</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_block_scale.py</td><td class="path">nova.imas.mast_corrections</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_calibration_cohort.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_chain_factory.py</td><td class="path">nova.imas.mast_parity_chain, nova.imas.mast_solve_input_ids, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_cohort</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/imas/mast_channel_drive.py</td><td class="path">nova.imas.machine_drive, nova.imas.machine_evidence, nova.imas.mast_fitted_parameters, nova.imas.mast_passive_response, nova.imas.mast_seed_parameters, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_efit_referee.py</td><td class="path">nova.imas.mast_parity_chain, nova.imas.mast_vacuum_cohort, nova.imas.parity_tolerances</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/imas/mast_error_field_screen.py</td><td class="path">nova.imas.mast_block_scale, nova.imas.mast_vacuum_cohort</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_fitted_parameters.py</td><td class="path">nova.imas.machine_evidence, nova.imas.mast_corrections, nova.imas.mast_seed_parameters</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/imas/mast_flux_loop_adjudication.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_geometry.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.dataset, nova.imas.machine, nova.imas.machine_artifact, nova.imas.machine_drive, nova.imas.machine_evidence, nova.imas.mast_channel_drive, nova.imas.mast_fitted_parameters, nova.imas.mast_seed_parameters</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/imas/mast_parity_chain.py</td><td class="path">nova.imas.edge_consistency, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_cohort, nova.imas.parity_tolerances</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_parity_gate.py</td><td class="path">nova.imas.mast_chain_factory, nova.imas.mast_efit_referee, nova.imas.mast_parity_chain, nova.imas.mast_solve_inputs, nova.imas.parity_tolerances</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_passive_decay_modes.py</td><td class="path">nova.imas.mast_block_scale, nova.imas.mast_passive_inductance, nova.imas.mast_passive_response, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_passive_inductance.py</td><td class="path">nova.imas.mast_passive_response, nova.imas.mast_seed_parameters, nova.imas.mast_vacuum_response</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_passive_response.py</td><td class="path">nova.imas.mast_seed_parameters, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_probe_calibration.py</td><td class="path">nova.imas.mast_probe_discriminant, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_seed_parameters.py</td><td class="path">nova.imas.machine_evidence</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_solve_input_ids.py</td><td class="path">nova.imas.dataset, nova.imas.machine_artifact, nova.imas.mast_solve_inputs</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/imas/mast_solve_inputs.py</td><td class="path">nova.imas.machine_drive, nova.imas.machine_evidence, nova.imas.mast_block_scale, nova.imas.mast_vacuum_cohort</td><td>convention conversion</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/imas/mast_vacuum_cohort.py</td><td class="path">nova.imas.mast_block_scale</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_vacuum_response.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/mast_winding_lattice.py</td><td class="path">nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/imas/matrix.py</td><td class="path">nova.imas.database, nova.imas.dataset, nova.imas.operate, nova.imas.profiles</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/metadata.py</td><td class="path">nova.imas.dataset</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/operate.py</td><td class="path">nova.imas.dataset, nova.imas.machine, nova.imas.profiles</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/pf_active.py</td><td class="path">nova.imas.coil, nova.imas.scenario</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/pf_passive.py</td><td class="path">nova.imas.scenario</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/plasma_source.py</td><td class="path">nova.imas.getslice, nova.imas.profiles</td><td>convention conversion</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/imas/prescribed_plasma.py</td><td class="path">nova.imas.profiles</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/profiles.py</td><td class="path">nova.imas.database, nova.imas.dataset, nova.imas.equilibrium, nova.imas.getslice, nova.imas.pf_active, nova.imas.pf_passive</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/pulsedesign.py</td><td class="path">nova.imas.database, nova.imas.dataset, nova.imas.equilibrium, nova.imas.ids_entry, nova.imas.machine, nova.imas.metadata, nova.imas.pf_active, nova.imas.sample</td><td>convention conversion</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/imas/pulseprofile.py</td><td class="path">nova.imas.pulseschedule</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/pulseschedule.py</td><td class="path">nova.imas.machine, nova.imas.scenario</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/sample.py</td><td class="path">nova.imas.database, nova.imas.dataset, nova.imas.equilibrium, nova.imas.ids_entry, nova.imas.metadata</td><td>convention conversion</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/imas/scenario.py</td><td class="path">nova.imas.database, nova.imas.getslice, nova.imas.ids_index</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/test_utilities.py</td><td class="path">nova.imas.database</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/toroidal_field_coil.py</td><td class="path">nova.imas.coil, nova.imas.coils_non_axisymmetric, nova.imas.machine, nova.imas.scenario</td><td>unreached</td><td>deleted by §2</td></tr>
+<tr><td class="path">nova/imas/transient.py</td><td class="path">nova.imas.dataset, nova.imas.machine</td><td>unreached</td><td>deleted by §2</td></tr>
+<tr><td class="path">nova/imas/validator_case.py</td><td class="path">nova.imas.dataset</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/waveform.py</td><td class="path">nova.imas.dataset, nova.imas.machine, nova.imas.pulseprofile</td><td>unreached</td><td>deleted by §2</td></tr>
+<tr><td class="path">nova/io/egress.py</td><td class="path">nova.imas.dataset, nova.imas.ids_entry</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">nova/io/ingest.py</td><td class="path">nova.imas.ids_index</td><td>convention conversion</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/io/sourcemap.py</td><td class="path">nova.imas.machine_evidence</td><td>convention conversion</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/linalg/regression.py</td><td class="path">nova.imas.equilibrium</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/media/sources/__init__.py</td><td class="path">nova.media.sources.mast_thomson</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">nova/media/sources/diiid_efit.py</td><td class="path">nova.imas.dataset</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/media/sources/mast_efit.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_vacuum_cohort</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/media/sources/mast_thomson.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/scripts/diiid_machine_artifact.py</td><td class="path">nova.imas.dataset, nova.imas.diiid_machine_ids, nova.imas.machine_artifact</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/scripts/mast_acquisition_sweep.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_acquisition_scale, nova.imas.mast_array_amplitude, nova.imas.mast_block_scale, nova.imas.mast_channel_drive, nova.imas.mast_error_field_screen, nova.imas.mast_fitted_parameters, nova.imas.mast_probe_calibration, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/scripts/mast_calibration_experiments.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_calibration_cohort, nova.imas.mast_sensor_noise, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/scripts/mast_catalog_geometry.py</td><td class="path">nova.catalog.mast_geometry</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/scripts/mast_machine_artifact.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.machine_artifact, nova.imas.machine_evidence, nova.imas.mast_geometry</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/scripts/mast_passive_calibration.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_error_field_screen, nova.imas.mast_fitted_parameters, nova.imas.mast_passive_decay_modes, nova.imas.mast_passive_inductance, nova.imas.mast_seed_parameters, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine authoring or publication</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/scripts/mast_vacuum_refinement.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_fitted_parameters, nova.imas.mast_passive_response, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/scripts/mast_winding_lattice.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response, nova.imas.mast_winding_lattice</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">nova/transport/parity_flux_ledger.py</td><td class="path">nova.imas.parity_tolerances</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/edge_consistency_table.py</td><td class="path">nova.imas.edge_consistency, nova.imas.plasma_source, nova.media.sources.mast_efit</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/flux_function_sign/measure.py</td><td class="path">nova.imas.validator_case</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/iron_field_source/measure.py</td><td class="path">nova.imas.machine, nova.imas.plasma_source</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/iron_graded_refinement/measure.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/iron_limb_production/outline.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/iter_prescribed_plasma/measure.py</td><td class="path">nova.imas.machine, nova.imas.prescribed_plasma, nova.imas.profiles</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/iter_sectioned_conductor_set/build.py</td><td class="path">nova.imas.pulsedesign</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">scripts/iter_vessel_evolution/evolve.py</td><td class="path">nova.imas.machine</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">scripts/iter_vessel_evolution/measure.py</td><td class="path">nova.imas.machine, nova.imas.prescribed_plasma</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/magnetisation_law/figure.py</td><td class="path">nova.imas.machine</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">scripts/mast_reference_evidence/contours.py</td><td class="path">nova.catalog.mast_geometry</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/media/efit_nova_overlay.py</td><td class="path">nova.imas.mast_vacuum_cohort, nova.media.sources.mast_efit</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/media/efit_pulse_gif.py</td><td class="path">nova.media.sources.diiid_efit, nova.media.sources.mast_efit</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/media/emit_boundary_contact.py</td><td class="path">nova.media.sources.mast_efit</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/media/mast_pulse_forward.py</td><td class="path">nova.catalog.mast_geometry</td><td>machine analysis</td><td>generalised by §3 or §4</td></tr>
+<tr><td class="path">scripts/media/nova_thomson_gif.py</td><td class="path">nova.media.sources.mast_efit, nova.media.sources.mast_thomson</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/moment_prediction_confidence/measure.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/diiid_adapter_current_refusal/probe.py</td><td class="path">nova.imas, nova.imas.diiid_current</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/diiid_adapter_current_refusal/refusal_arms.py</td><td class="path">nova.imas, nova.imas.diiid_current</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/diiid_external_current_propagation/measure.py</td><td class="path">nova.imas.diiid_current, nova.imas.diiid_description</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/diiid_finite_edge_booking/seam_check.py</td><td class="path">nova.imas, nova.imas.diiid_current, nova.imas.diiid_description</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/diiid_xpoint_attribution/attribute.py</td><td class="path">nova.imas.diiid_current, nova.imas.diiid_description</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/diiid_xpoint_coil_correction/measure.py</td><td class="path">nova.imas.diiid_current</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/diiid_xpoint_coil_correction/test_conductor_correction.py</td><td class="path">nova.imas.diiid_current</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/drifting_sensor_sequences/probe_rows/panel.py</td><td class="path">nova.imas.mast_efit_referee</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/drifting_sensor_sequences/probe_rows/resume_read.py</td><td class="path">nova.imas.mast_efit_referee</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py</td><td class="path">nova.imas.mast_efit_referee</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py</td><td class="path">nova.imas.mast_efit_referee</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/fit_inside_iteration/run.py</td><td class="path">nova.imas.mast_efit_referee</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/iron_limb_fill/axisymmetric.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/iron_magnetisation/west.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/iter_bank/measure.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/prototypes/polygon_near_band/measure.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.diiid_current</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/reconstructed_plasma_source/baseline_sign.py</td><td class="path">nova.imas.plasma_source, nova.imas.profiles, nova.media.sources.mast_efit</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/reconstructed_plasma_source/measure.py</td><td class="path">nova.imas.mast_vacuum_cohort, nova.imas.plasma_source, nova.imas.prescribed_plasma, nova.media.sources.mast_efit</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/reconstructed_plasma_source/reconstruction.py</td><td class="path">nova.imas.plasma_source</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/sheet_tile_census/measure.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/west_iron_galerkin/measure.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/west_iron_galerkin_pair/measure.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/west_iron_inputs/pin.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/west_iron_solve/diagnose.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/west_iron_solve/diagnostic_figure.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/west_iron_solve/measure.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/west_iron_solve/probe.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/west_picard_control/measure.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">scripts/west_root_branch/measure.py</td><td class="path">nova.imas.machine</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">scripts/west_stray_field/solve.py</td><td class="path">nova.imas.machine, nova.imas.plasma_source</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/calibrate/test_noise.py</td><td class="path">nova.imas, nova.imas.mast_sensor_noise</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/calibrate/test_promotion_route.py</td><td class="path">nova.imas.mast_block_scale, nova.scripts.mast_acquisition_sweep</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/calibrate/test_read_path_equivalence.py</td><td class="path">nova.imas.mast_block_scale, nova.imas.mast_corrections</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/calibrate/test_scale_step.py</td><td class="path">nova.imas, nova.imas.mast_acquisition_scale, nova.imas.mast_block_scale</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/calibrate/test_sensor_door_guard.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/gs/test_artifact_resolution.py</td><td class="path">nova.imas.machine_artifact, nova.imas.mast_geometry</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/gs/test_description_artifact.py</td><td class="path">nova.imas.machine_artifact</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/imas/test_diiid_current.py</td><td class="path">nova.imas, nova.imas.diiid_current, nova.imas.diiid_description</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/imas/test_diiid_current_pinned_forward.py</td><td class="path">nova.imas.diiid_description</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/imas/test_diiid_description.py</td><td class="path">nova.imas, nova.imas.diiid_description</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/imas/test_diiid_machine_description.py</td><td class="path">nova.imas, nova.imas.diiid_description, nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/imas/test_diiid_machine_ids.py</td><td class="path">nova.imas.diiid_machine_ids, nova.scripts.diiid_machine_artifact</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/imas/test_diiid_passive.py</td><td class="path">nova.imas, nova.imas.diiid_passive</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/imas/test_diiid_repaired_machine_artifact.py</td><td class="path">nova.imas.diiid_machine_ids, nova.imas.machine_artifact, nova.scripts.diiid_machine_artifact</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/imas/test_diiid_solenoid_inclusion_ladder.py</td><td class="path">nova.imas.diiid_description</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/imas/test_mast_chain_factory_axis_centre.py</td><td class="path">nova.imas, nova.imas.mast_chain_factory</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/latent/test_acquisition_scale_read.py</td><td class="path">nova.imas.mast_block_scale</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_bokeh.py</td><td class="path">nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_bound_classification.py</td><td class="path">nova.imas.machine_artifact</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_callstate.py</td><td class="path">nova.imas.callstate</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_chain_factory.py</td><td class="path">nova.imas.mast_chain_factory</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_coil.py</td><td class="path">nova.imas.coil</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_coupled_plant.py</td><td class="path">nova.imas.plasma_source, nova.imas.prescribed_plasma, nova.imas.profiles</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_current_centroid_radius.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_database.py</td><td class="path">nova.imas.database, nova.imas.dataset, nova.imas.equilibrium, nova.imas.machine, nova.imas.pf_active, nova.imas.test_utilities</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_datasource.py</td><td class="path">nova.imas.datasource</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_dd_translator.py</td><td class="path">nova.imas.validator_case</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_dd_version_identity.py</td><td class="path">nova.imas.machine, nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_diiid_artifact_publication.py</td><td class="path">nova.imas.diiid_machine_ids, nova.imas.machine_artifact, nova.scripts.diiid_machine_artifact</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_diiid_pf_active_circuits.py</td><td class="path">nova.imas.diiid_description, nova.imas.diiid_machine_ids, nova.imas.diiid_passive</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_edge_consistency.py</td><td class="path">nova.imas.edge_consistency</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_edge_consistency_ids_route.py</td><td class="path">nova.imas.edge_consistency, nova.imas.plasma_source</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_efit_parity_criterion_provenance.py</td><td class="path">nova.imas.parity_tolerances</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_efit_referee.py</td><td class="path">nova.imas.mast_efit_referee, nova.imas.mast_parity_chain, nova.imas.parity_tolerances</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_equilibrium_forward_reference.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_equilibrium_magnetics_fit.py</td><td class="path">nova.imas, nova.imas.mast_efit_referee, nova.imas.mast_solve_inputs</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_equilibrium_reader_cocos.py</td><td class="path">nova.imas.dataset, nova.imas.equilibrium, nova.imas.getslice</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_equilibrium_source.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_equilibrium_wall_dd_version.py</td><td class="path">nova.imas.equilibrium</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_estimator_scoreboard.py</td><td class="path">nova.imas.mast_efit_referee, nova.imas.parity_tolerances</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_extrapolate.py</td><td class="path">nova.imas.database, nova.imas.equilibrium, nova.imas.extrapolate, nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_forward_profile_analytic_smoke.py</td><td class="path">nova.imas, nova.imas.validator_case</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_forward_profile_corsica.py</td><td class="path">nova.imas, nova.imas.machine, nova.imas.validator_case</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_getslice.py</td><td class="path">nova.imas.getslice</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_idsindex.py</td><td class="path">nova.imas.dataset, nova.imas.ids_index, nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_imas.py</td><td class="path">nova.imas.database, nova.imas.dataset, nova.imas.test_utilities</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_imas_iron_read.py</td><td class="path">nova.imas.machine</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_imas_opener.py</td><td class="path">nova.imas.dataset</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_imas_position_reads.py</td><td class="path">nova.imas, nova.imas.diiid_machine_ids, nova.imas.machine, nova.imas.mast_chain_factory, nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_internal_cocos_sites.py</td><td class="path">nova.imas, nova.imas.extrapolate</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_internal_convention_owner.py</td><td class="path">nova.imas, nova.imas.equilibrium, nova.imas.getslice</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_io_magnetics.py</td><td class="path">nova.imas.io_magnetics, nova.imas.machine_artifact</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_io_roundtrip.py</td><td class="path">nova.imas.ids_entry, nova.imas.ids_index</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_io_sourcemap.py</td><td class="path">nova.imas.machine_evidence</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_iter_sectioned_conductor_set.py</td><td class="path">nova.imas.machine, nova.imas.pulsedesign</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_jax_topology.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_machine.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.machine, nova.imas.mast_geometry, nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_machine_artifact.py</td><td class="path">nova.imas.machine_artifact</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_machine_artifact_concurrency.py</td><td class="path">nova.imas.machine_artifact, nova.imas.mast_parity_gate</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_magnetics_fit_efit_comparison.py</td><td class="path">nova.imas.dataset, nova.imas.mast_efit_referee</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_magnetisation.py</td><td class="path">nova.imas.machine</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_acquisition_scale.py</td><td class="path">nova.imas.mast_acquisition_scale</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_array_amplitude.py</td><td class="path">nova.imas.mast_array_amplitude</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_artifact.py</td><td class="path">nova.imas.machine_artifact, nova.imas.machine_drive, nova.imas.machine_evidence</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_block_scale.py</td><td class="path">nova.imas.mast_acquisition_scale, nova.imas.mast_block_scale</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_block_scale_read_path.py</td><td class="path">nova.imas.mast_block_scale, nova.imas.mast_error_field_screen, nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_calibration_cohort.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_calibration_cohort, nova.imas.mast_fitted_parameters, nova.imas.mast_sensor_noise, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response, nova.scripts.mast_calibration_experiments</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_catalog_geometry.py</td><td class="path">nova.catalog.mast_geometry</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_channel_drive.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.machine_drive, nova.imas.machine_evidence, nova.imas.mast_channel_drive, nova.imas.mast_fitted_parameters, nova.imas.mast_geometry, nova.imas.mast_passive_response, nova.imas.mast_seed_parameters, nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_error_field_screen.py</td><td class="path">nova.imas.mast_error_field_screen</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_evidence.py</td><td class="path">nova.imas.machine_evidence</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_flux_loop_adjudication.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_flux_loop_adjudication, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_response</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_flux_loop_gains.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_fitted_parameters, nova.imas.mast_flux_loop_adjudication, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_flux_loop_positions.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_flux_loop_adjudication, nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_misfit_harmonics.py</td><td class="path">nova.imas, nova.imas.mast_misfit_harmonics</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_misfit_harmonics_saddle.py</td><td class="path">nova.imas, nova.imas.io_magnetics, nova.imas.mast_misfit_harmonics</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_passive_calibration.py</td><td class="path">nova.imas.mast_passive_decay_modes, nova.scripts.mast_passive_calibration</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_passive_decay_modes.py</td><td class="path">nova.imas.mast_passive_decay_modes, nova.imas.mast_passive_inductance, nova.imas.mast_passive_response, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_passive_inductance.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_passive_inductance, nova.imas.mast_passive_response, nova.imas.mast_seed_parameters, nova.imas.mast_vacuum_response</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_probe_calibration.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_fitted_parameters, nova.imas.mast_probe_calibration, nova.imas.mast_probe_discriminant, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_probe_discriminant.py</td><td class="path">nova.imas.mast_probe_discriminant</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_provisional_ids.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.machine_artifact, nova.imas.machine_evidence, nova.imas.mast_geometry, nova.imas.mast_seed_parameters, nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_registry_reproduction.py</td><td class="path">nova.catalog.mast_geometry</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_saddle_voltage_reach.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_saddle_voltage_units.py</td><td class="path">nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_seed_parameters.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.machine_evidence, nova.imas.mast_seed_parameters</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_solve_inputs.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.machine_drive, nova.imas.machine_evidence, nova.imas.mast_block_scale, nova.imas.mast_geometry, nova.imas.mast_solve_input_ids, nova.imas.mast_solve_inputs, nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_vacuum_refinement.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.machine_evidence, nova.imas.mast_fitted_parameters, nova.imas.mast_geometry, nova.imas.mast_passive_response, nova.imas.mast_seed_parameters, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_winding_lattice.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_vacuum_cohort, nova.imas.mast_vacuum_response, nova.imas.mast_winding_lattice</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_matrix.py</td><td class="path">nova.imas.matrix</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_media.py</td><td class="path">nova.media.sources.mast_efit, nova.media.sources.mast_thomson</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_metadata.py</td><td class="path">nova.imas.metadata</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_moment_seed.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_parallel_components.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_parity_chain.py</td><td class="path">nova.imas.mast_parity_chain, nova.imas.mast_solve_inputs, nova.imas.parity_tolerances</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_parity_gate.py</td><td class="path">nova.imas.mast_efit_referee, nova.imas.mast_parity_gate, nova.imas.parity_tolerances</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_parity_tolerances.py</td><td class="path">nova.imas.parity_tolerances</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_plasma_source.py</td><td class="path">nova.imas.plasma_source, nova.imas.prescribed_plasma</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_pointconstraint.py</td><td class="path">nova.imas.getslice, nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_polyline.py</td><td class="path">nova.imas.coils_non_axisymmetric, nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_prescribed_plasma.py</td><td class="path">nova.imas.plasma_source, nova.imas.prescribed_plasma, nova.imas.profiles</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_pulse_forward_trace.py</td><td class="path">nova.media.sources.mast_thomson</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_pulsedesign.py</td><td class="path">nova.imas.database, nova.imas.equilibrium, nova.imas.ids_entry, nova.imas.pulsedesign, nova.imas.sample, nova.imas.test_utilities</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_pulsedesign_write_convention.py</td><td class="path">nova.imas.ids_entry, nova.imas.pulsedesign, nova.imas.sample</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_raster_flux_receipt.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_real_slice_convergence.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_sample_write_convention.py</td><td class="path">nova.imas.sample</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_section_quadrature.py</td><td class="path">nova.imas.mast_passive_inductance</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_session_wall_reference.py</td><td class="path">nova.imas.mast_solve_input_ids</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_shared_primitives.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.machine_evidence</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_signalstore_convention_key.py</td><td class="path">nova.imas.ids_entry</td><td>generic writer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_solve_receipt_topology.py</td><td class="path">nova.imas.mast_solve_inputs</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_strike.py</td><td class="path">nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_transport_geometry_reference.py</td><td class="path">nova.catalog.mast_geometry, nova.imas.mast_efit_referee, nova.imas.mast_vacuum_cohort</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_unseen_source_full_plant.py</td><td class="path">nova.imas.plasma_source</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_uri.py</td><td class="path">nova.imas.dataset, nova.imas.uri</td><td>generic reader</td><td>stays</td></tr>
+<tr><td class="path">tests/test_wall_units.py</td><td class="path">nova.imas.diiid_machine_ids, nova.imas.mast_geometry, nova.imas.test_utilities</td><td>generic reader</td><td>stays</td></tr>
+</tbody>
+</table>
+<h2>Convention algebra and DD-version conversion</h2>
+<p>Every module that imports the COCOS algebra, derives a convention from a Data Dictionary version through a convention helper, or states nova's internal convention as a module-level assignment.</p>
+<table class="census">
+<thead><tr><th>module</th><th>class</th><th>basis</th><th>destination</th></tr></thead>
+<tbody>
+<tr><td class="path">benchmarks/cocos_ip_like_adjudication.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
+<tr><td class="path">benchmarks/diiid_corpus_conventions.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
+<tr><td class="path">benchmarks/diiid_ids_machine_description.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
+<tr><td class="path">benchmarks/diiid_root_convention_sweep.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
+<tr><td class="path">imas_ambix/challenge/convention.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">imas_ambix/data/cocos_convention.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/equilibrium/contour_tree.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">nova/equilibrium/convention.py</td><td>convention statement</td><td>module-level COCOS assignment</td><td>rewired in place by §5</td></tr>
+<tr><td class="path">nova/equilibrium/steering_frames.py</td><td>convention statement</td><td>module-level COCOS assignment</td><td>rewired in place by §5</td></tr>
+<tr><td class="path">nova/equilibrium/topology.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/equilibrium.py</td><td>convention conversion</td><td>derives a convention through nova.io.sourcemap</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/imas/extrapolate.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/mast_solve_inputs.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/imas/plasma_source.py</td><td>convention conversion</td><td>derives a convention through nova.io.sourcemap</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/imas/pulsedesign.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/imas/sample.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/io/ingest.py</td><td>convention conversion</td><td>derives a convention through nova.io.sourcemap</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/io/signalstore.py</td><td>convention conversion</td><td>derives a convention through nova.io.sourcemap</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/io/sourcemap.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
+<tr><td class="path">nova/scripts/identify_source_cocos.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/data/test_cocos_convention.py</td><td>generic writer</td><td>writes IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_contour_tree_conventions.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_dd_translator.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_equilibrium_reader_cocos.py</td><td>generic writer</td><td>writes IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_flux_function_sign.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_internal_cocos_sites.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_io_cocos.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_io_sourcemap.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mast_solve_inputs.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_mastcocos.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_media.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_pointconstraint.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_pulsedesign_write_convention.py</td><td>generic writer</td><td>writes IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_sample_write_convention.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/test_transport_cocos.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+</tbody>
+</table>
+<h2>Controls</h2>
+<p>The importer scan run over <code>nova.imas.dataset</code> reports 38 known importers, so a zero elsewhere means absent rather than missed. The convention scan reports these control sites:</p>
+<dl class="controls">
+<dt>nova/equilibrium/convention.py</dt><dd>convention statement</dd>
+<dt>nova/io/ingest.py</dt><dd>convention conversion</dd>
+<dt>nova/io/signalstore.py</dt><dd>convention conversion</dd>
+</dl>
+<h2>Reference shots</h2>
+<p>The shot per machine whose IDSs the machine-analysis sections compare.</p>
+<table class="census">
+<thead><tr><th>machine</th><th>shot</th><th>source</th></tr>
+</thead>
+<tbody>
+<tr><td>MAST</td><td class="path">21978</td><td>tests/data-manifest.json mast_efm_geometry_reference and tests/test_forward_parity_constrained_arm.py</td></tr>
+<tr><td>DIII-D</td><td class="path">d3d_shot_00000c4a7b</td><td>(&#x27;docs/plans/diiid-forward-onboarding.html, representative forward frame 102&#x27;,)</td></tr>
+</tbody>
+</table>
+<h2>Regenerating this record</h2><p>From the repository root:</p><pre>uv run python scripts/imas_seam_census.py</pre><p>The scan resolves imports through the abstract syntax tree, so it reports what the code imports rather than what its names suggest. <code>--check</code> exits nonzero when a censused module carries no row.</p>
+</body>
+</html>

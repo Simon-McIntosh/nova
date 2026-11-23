@@ -11,8 +11,8 @@ stay inside this module. Fields and magnetisations use component order
 from __future__ import annotations
 
 from collections.abc import Callable
-from functools import cached_property
 from dataclasses import dataclass, field, replace
+from functools import cached_property, lru_cache, partial
 import hashlib
 import json
 from pathlib import Path
@@ -649,7 +649,7 @@ def _linear_residual(state, operands):
 
 
 @jax.jit
-def _linear_factor(state, operands, regularisation=0.0):
+def _linear_jacobian(state, operands, regularisation=0.0):
     """Contract local quadrature tangents before applying the dense B map."""
     gram, external, knots, coefficients, ends, basis, project, owners = operands[:8]
     count = state.size // 6
@@ -678,7 +678,24 @@ def _linear_factor(state, operands, regularisation=0.0):
         state.size, state.size
     )
     jacobian += (1 + regularisation) * jnp.eye(state.size, dtype=state.dtype)
+    return jacobian
+
+
+@jax.jit
+def _linear_factor(state, operands, regularisation=0.0):
+    return jla.lu_factor(_linear_jacobian(state, operands, regularisation))
+
+
+@partial(jax.jit, donate_argnums=(0,))
+def _donated_lu(jacobian):
+    """Reuse the disposable Jacobian buffer for the dense LU factors."""
     return jla.lu_factor(jacobian)
+
+
+def _linear_split_factor(state, operands, regularisation=0.0):
+    """Separate contraction and LU so their dense temporaries cannot overlap."""
+    jacobian = _linear_jacobian(state, operands, regularisation)
+    return _donated_lu(jacobian)
 
 
 @jax.jit
@@ -686,6 +703,182 @@ def _linear_update(state, operands, factor, scale):
     direction = jla.lu_solve(factor, -_linear_residual(state, operands))
     candidate = state + scale * direction
     return candidate, _linear_residual(candidate, operands)
+
+
+def _cell_vectors(vector):
+    return vector.reshape(2, -1, 3).transpose(1, 0, 2).reshape(-1, 6)
+
+
+def _component_vector(cells):
+    return cells.reshape(-1, 2, 3).transpose(1, 0, 2).reshape(-1)
+
+
+def _local_apply(blocks, vector):
+    return _component_vector(jnp.einsum("cij,cj->ci", blocks, _cell_vectors(vector)))
+
+
+def _linear_response(vector, operands):
+    result = operands[0] @ vector
+    if len(operands) == 10:
+        result += jnp.repeat(_MU0 * operands[9].reshape(-1), 3) * vector
+    return result
+
+
+@jax.jit
+def _linear_cholesky_local(state, operands, metric):
+    """Return the local differential and its metric-symmetric square root.
+
+    Q is the volume Gram matrix, A the local material differential and
+    D = Q A. D is symmetric nonnegative. With R = sqrt(D), W = inv(Q) R,
+    the Newton matrix is a I - W R G. Its symmetric system is
+    B = a I - R G W because Q G is symmetric. The Woodbury form
+    p = (b + W B^-1 R G b) / a avoids inverting a possibly singular R.
+    """
+    _, external, knots, coefficients, ends, basis, project, owners = operands[:8]
+    total = (external + _linear_response(state, operands)).reshape(2, -1, 3)
+    values = jnp.einsum("cqi,qi->qc", total[:, owners], basis)
+
+    def material(value):
+        squared = jnp.sum(value**2)
+        magnitude = jnp.where(
+            squared > 0, jnp.sqrt(jnp.where(squared > 0, squared, 1.0)), 0.0
+        )
+        return value * _coefficient(magnitude, knots, coefficients, ends)
+
+    tangent = jax.vmap(jax.jacfwd(material))(values)
+    if len(operands) == 10:
+        tangent *= operands[8][owners, None, None]
+    integrand = jnp.einsum("qi,qab,qj->qaibj", project, tangent, basis)
+    local = jnp.zeros((metric.shape[0], 2, 3, 2, 3), dtype=state.dtype)
+    local = local.at[owners].add(integrand).reshape(-1, 6, 6)
+    differential = metric @ local
+    eigenvalues, eigenvectors = jnp.linalg.eigh((differential + differential.mT) / 2)
+    root = (
+        eigenvectors * jnp.sqrt(jnp.maximum(eigenvalues, 0))[:, None, :]
+    ) @ eigenvectors.mT
+    transform = jnp.linalg.solve(metric, root)
+    return local, root, transform, eigenvalues
+
+
+def _linear_cholesky_rows(buffer, gram, root, transform, gain, shift, start, count):
+    """Write bounded row blocks of the symmetric Newton system into one buffer."""
+    cells = gram.shape[0] // 6
+    width = 3 * count
+    radial = jax.lax.dynamic_slice(gram, (3 * start, 0), (width, gram.shape[1]))
+    vertical = jax.lax.dynamic_slice(
+        gram, (3 * (cells + start), 0), (width, gram.shape[1])
+    )
+    rows = jnp.stack((radial, vertical))
+    diagonal = 3 * start + jnp.arange(width)
+    rows = rows.at[0, jnp.arange(width), diagonal].add(
+        jnp.repeat(jax.lax.dynamic_slice(gain[0], (start,), (count,)), 3)
+    )
+    rows = rows.at[1, jnp.arange(width), 3 * cells + diagonal].add(
+        jnp.repeat(jax.lax.dynamic_slice(gain[1], (start,), (count,)), 3)
+    )
+    rows = rows.reshape(2, count, 3, 2, cells, 3).transpose(1, 0, 2, 4, 3, 5)
+    rows = rows.reshape(count, 6, cells, 6)
+    selected = jax.lax.dynamic_slice(root, (start, 0, 0), (count, 6, 6))
+    rows = -jnp.einsum("tij,tjsk,skl->tisl", selected, rows, transform)
+    rows = rows.reshape(count, 2, 3, cells, 2, 3).transpose(1, 0, 2, 4, 3, 5)
+    rows = rows.reshape(2, width, 6 * cells)
+    rows = rows.at[0, jnp.arange(width), diagonal].add(shift)
+    rows = rows.at[1, jnp.arange(width), 3 * cells + diagonal].add(shift)
+    buffer = jax.lax.dynamic_update_slice(buffer, rows[0], (3 * start, 0))
+    return jax.lax.dynamic_update_slice(buffer, rows[1], (3 * (cells + start), 0))
+
+
+def _linear_cholesky_update(state, operands, factor, scale):
+    triangle, local, root, transform, shift = factor
+
+    def correction(rhs):
+        projected = _local_apply(root, _linear_response(rhs, operands))
+        solved = jla.cho_solve((triangle, True), projected)
+        return (rhs + _local_apply(transform, solved)) / shift
+
+    residual = _linear_residual(state, operands)
+    direction = correction(-residual)
+    # Refine in the original differential system, retaining all float64 arithmetic.
+    for _ in range(2):
+        defect = -residual - (
+            shift * direction
+            - _local_apply(local, _linear_response(direction, operands))
+        )
+        direction += correction(defect)
+    candidate = state + scale * direction
+    return candidate, _linear_residual(candidate, operands)
+
+
+@lru_cache
+def _linear_cholesky_programs(device):
+    """Keep column-major factor storage through construction, potrf and trsm."""
+    from jax.experimental.layout import Format, Layout
+
+    sharding = jax.sharding.SingleDeviceSharding(device)
+    column = Format(Layout((1, 0)), sharding)
+    row = Format(Layout((0, 1)), sharding)
+    write = jax.jit(
+        _linear_cholesky_rows,
+        donate_argnums=(0,),
+        static_argnums=(7,),
+        in_shardings=(column, row, None, None, None, None, None),
+        out_shardings=column,
+    )
+    factor = jax.jit(
+        lambda matrix: jax.lax.linalg.cholesky(matrix, symmetrize_input=False),
+        donate_argnums=(0,),
+        in_shardings=column,
+        out_shardings=column,
+    )
+    update = jax.jit(
+        _linear_cholesky_update,
+        in_shardings=(None, None, (column, None, None, None, None), None),
+    )
+    return column, write, factor, update
+
+
+def _linear_cholesky_factor(state, operands, metric, regularisation):
+    local, root, transform, eigenvalues = _linear_cholesky_local(
+        state, operands, metric
+    )
+    tolerance = 64 * np.finfo(np.float64).eps * jnp.max(jnp.abs(eigenvalues), axis=1)
+    if bool(jnp.any(jnp.min(eigenvalues, axis=1) < -tolerance)):
+        raise ValueError("Cholesky requires nonnegative differential magnetisation")
+    column, write, factor, _ = _linear_cholesky_programs(state.device)
+    dimension = state.size
+    buffer = jax.jit(
+        lambda: jnp.zeros((dimension, dimension), dtype=state.dtype),
+        out_shardings=column,
+    )()
+    gain = (
+        operands[9] * _MU0 if len(operands) == 10 else jnp.zeros((2, metric.shape[0]))
+    )
+    shift = 1 + regularisation
+    for start in range(0, metric.shape[0], 64):
+        buffer = write(
+            buffer,
+            operands[0],
+            root,
+            transform,
+            gain,
+            shift,
+            jnp.asarray(start),
+            min(64, metric.shape[0] - start),
+        )
+    before = buffer.unsafe_buffer_pointer()
+    triangle = factor(buffer)
+    if triangle.unsafe_buffer_pointer() != before:
+        raise RuntimeError("Cholesky did not reuse its donated matrix buffer")
+    if not bool(jnp.all(jnp.isfinite(jnp.diag(triangle)))):
+        raise ValueError("metric-symmetric Newton matrix is not positive definite")
+    return triangle, local, root, transform, shift
+
+
+def _stage_linear_interaction(matrix):
+    """Transfer the host interaction once and finish staging before factoring."""
+    result = jax.device_put(np.asarray(matrix, dtype=np.float64))
+    result.block_until_ready()
+    return result
 
 
 @dataclass(frozen=True)
@@ -797,6 +990,7 @@ def solve_magnetisation(
     cross_field_factor=0.0,
     basis: str = "constant",
     interaction: MagnetisationInteraction | None = None,
+    linear_factorisation: str = "combined",
 ) -> MagnetisationSolution:
     """Mesh iron and solve M = c(|B|) B for B = B_external + G M.
 
@@ -814,6 +1008,11 @@ def solve_magnetisation(
     multiply coordinates divided by the square root of each cell area.
     ``interaction`` accepts a persisted response loaded for this mesh and basis;
     its geometry digest is checked before any source evaluation or assembly.
+    ``linear_factorisation="split"`` separates Jacobian construction from a
+    buffer-donating LU call to reduce peak device storage.
+    ``"cholesky"`` uses the symmetric Galerkin Newton system with a donated
+    float64 Cholesky factor and refinement in the original differential system.
+    The default is ``"combined"``.
 
     ``fill_fraction`` is the toroidal iron fraction f in (0, 1], supplied as a
     scalar, a (cells,) array, or a callback of (cells, 2) centroids [m].
@@ -844,6 +1043,10 @@ def solve_magnetisation(
     law = _fit_law(b_field, permeability_relative)
     if basis not in {"constant", "linear"}:
         raise ValueError("basis must be constant or linear")
+    if linear_factorisation not in {"combined", "split", "cholesky"}:
+        raise ValueError("linear_factorisation must be combined, split or cholesky")
+    if basis != "linear" and linear_factorisation != "combined":
+        raise ValueError("alternative factorisation requires the linear basis")
     cells = _mesh(region, cell_size)
     if interaction is not None:
         interaction.validate(cells, basis)
@@ -891,24 +1094,35 @@ def solve_magnetisation(
     )
     if not np.all(np.isfinite(gram)):
         raise ValueError("the sheet interaction contains nonfinite entries")
-    operands = tuple(
-        jnp.asarray(value, dtype=jnp.float64)
-        for value in (gram, external.T.reshape(-1), *law)
-    )
     residual_function, factor_function, update_function = _residual, _factor, _update
     if basis == "linear":
         operands = (
-            jnp.asarray(gram),
+            _stage_linear_interaction(gram),
             jnp.asarray(external_coefficients.reshape(-1)),
-            *operands[2:],
+            *(jnp.asarray(value, dtype=jnp.float64) for value in law),
             jnp.asarray(geometry["basis"]),
             jnp.asarray(project),
             jnp.asarray(owners),
         )
         residual_function, factor_function, update_function = (
             _linear_residual,
-            _linear_factor,
+            _linear_split_factor if linear_factorisation == "split" else _linear_factor,
             _linear_update,
+        )
+        if linear_factorisation == "cholesky":
+            metric = np.zeros((len(cells.polygons), 6, 6))
+            metric[:, :3, :3] = geometry["gram"]
+            metric[:, 3:, 3:] = geometry["gram"]
+            metric = jnp.asarray(metric)
+
+            def factor_function(state, operands, regularisation):
+                return _linear_cholesky_factor(state, operands, metric, regularisation)
+
+            update_function = _linear_cholesky_programs(jax.devices()[0])[3]
+    else:
+        operands = tuple(
+            jnp.asarray(value, dtype=jnp.float64)
+            for value in (gram, external.T.reshape(-1), *law)
         )
     if np.any(fill != 1):
         gain = ((1 - fill) / fill)[None, :] * (1 - cross.T)
@@ -946,6 +1160,8 @@ def solve_magnetisation(
             candidate, trial = update_function(
                 state, operands, factor, jnp.asarray(1.0)
             )
+            # The next factorisation must not retain the preceding dense LU.
+            del factor
             defect = trial + damping * (candidate - state)
             ratio = 1 - (float(jnp.linalg.norm(defect)) / norm) ** 2
             if ratio > 0.25 and bool(jnp.any(candidate != state)):

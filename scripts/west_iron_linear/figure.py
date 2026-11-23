@@ -29,7 +29,11 @@ def main():
         row = json.loads(path.read_text())
         if path.stem == row.get("mesh"):
             rows.append(row)
-    rows = [r for r in rows if "constant" in r and "mesh" in r]
+    rows = [
+        r
+        for r in rows
+        if "constant" in r and "mesh" in r and not r["constant"].get("missing")
+    ]
     assert sum(bool(r.get("completed")) for r in rows) >= 3, (
         "the three required WEST meshes must complete"
     )

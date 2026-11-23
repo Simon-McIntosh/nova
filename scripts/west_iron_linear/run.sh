@@ -23,6 +23,10 @@ mkdir -p "$scratch/tree" "$out"
 git -C "$source_tree" archive "$revision" | tar -x -C "$scratch/tree"
 export PYTHONPATH="$scratch/tree" TMPDIR="$scratch" MPLCONFIGDIR="$scratch/matplotlib"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false OPENBLAS_NUM_THREADS=4 OMP_NUM_THREADS=4
+if [ "${IRON_REFINEMENT:-0}" = 1 ] || [ "${IRON_CHOLESKY:-0}" = 1 ] || [ "${IRON_CHOLESKY_DIAGNOSTIC:-0}" = 1 ]; then
+    # The split factor uses more than the allocator's default card fraction.
+    export XLA_PYTHON_CLIENT_MEM_FRACTION=0.90
+fi
 export XLA_FLAGS=--xla_gpu_autotune_level=0
 export JAX_PLATFORMS=cuda
 export NOVA_COMPILATION_CACHE_ROOT="$scratch/compile-cache"
@@ -36,6 +40,47 @@ prepare(Path(tree), revision, Path(source))
 subprocess.run(['git', '-C', tree, 'update-ref', 'HEAD', revision], check=True)
 PY
 cd "$scratch/tree"
+if [ "${IRON_CHOLESKY_DIAGNOSTIC:-0}" = 1 ]; then
+    diagnostic=scripts/west_iron_linear/diagnose.py
+    diagnostic_blob=$(git -C "$source_tree" rev-parse "$revision:$diagnostic")
+    /home/ITER/mcintos/Code/nova/.venv/bin/python "$diagnostic" \
+        --revision "$revision" --blob "$diagnostic_blob" --output "$out"
+    echo EXIT=0
+    exit 0
+fi
+if [ "${IRON_CHOLESKY:-0}" = 1 ]; then
+    control=scripts/west_iron_linear/constant_control.py
+    control_blob=$(git -C "$source_tree" rev-parse "$revision:$control")
+    /home/ITER/mcintos/Code/nova/.venv/bin/python "$control" \
+        --revision "$revision" --blob "$control_blob" --reference-revision "$2" \
+        --output "$out/constant-bit-identity.json"
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -s \
+        tests/test_magnetisation.py -k test_linear_shell_operator_pin > "$out/h200-cholesky-operator-pin.log" 2>&1
+    for mesh in graded-16-80 uniform-0.04; do
+        /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
+            --revision "$revision" --blob "$blob" --output "$out" \
+            --mesh "$mesh" --compare-routes --cholesky
+    done
+    /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
+        --revision "$revision" --blob "$blob" --output "$out" \
+        --mesh graded-8-40 --refinement --resume-refinement --cholesky
+    echo EXIT=0
+    exit 0
+fi
+if [ "${IRON_REFINEMENT:-0}" = 1 ]; then
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -s \
+        tests/test_magnetisation.py -k test_linear_shell_operator_pin > "$out/h200-operator-pin.log" 2>&1
+    /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
+        --revision "$revision" --blob "$blob" --output "$out" \
+        --mesh graded-8-40 --refinement ${IRON_REFINEMENT_RESUME:+--resume-refinement}
+    for mesh in graded-16-80 uniform-0.04; do
+        /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
+            --revision "$revision" --blob "$blob" --output "$out" \
+            --mesh "$mesh" --compare-routes
+    done
+    echo EXIT=0
+    exit 0
+fi
 if [ "${IRON_HALF_DRIVE_ONLY:-0}" = 1 ]; then
     /home/ITER/mcintos/Code/nova/.venv/bin/python "$script" \
         --revision "$revision" --blob "$blob" --output "$out" \

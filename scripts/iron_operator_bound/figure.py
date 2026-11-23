@@ -18,6 +18,7 @@ from pathlib import Path
 
 import numpy as np
 import matplotlib
+import matplotlib.text
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -33,6 +34,8 @@ from nova.biot import magnetisation as iron  # noqa: E402
 BOUND = 1.0
 SUBJECT = "#3b6ea5"
 LIMIT = "#c62828"
+POPULATION = "#929292"
+SHARE = 0.01
 LABELS = (
     ("uniform-0.08", "uniform 80"),
     ("graded-16-80", "graded 16/80"),
@@ -135,10 +138,13 @@ def bound_panel(axis, output):
 
 
 def witness_panel(axis, output, inputs):
-    """Draw the graded witness's share over the iron cross-section.
+    """Draw the cells that carry the graded witness over the cross-section.
 
-    The share is signed, so the map is diverging about zero: a cell either adds
-    to the numerator the bound constrains or subtracts from it.
+    The share is per cell, and the direction's energy sits in a handful of
+    them, so every cell is drawn as the population in one neutral and the cells
+    at or above ``SHARE`` are drawn over them in the subject colour.  A filled
+    colour map would spend ink on cells the witness does not touch and would
+    put a scale beside a quantity the page states in numbers.
     """
     shares = np.load(output / "shares-graded-16-80.npy")
     from scripts.iron_operator_bound.persisted import cell_size
@@ -146,28 +152,82 @@ def witness_panel(axis, output, inputs):
     field = cell_size("graded-16-80", inputs)
     mesh = iron._mesh(inputs["region"], field)
     polygons = [np.asarray(polygon) for polygon in mesh.polygons]
-    magnitude = float(np.max(np.abs(shares)))
-    collection = PolyCollection(
-        polygons,
-        array=shares,
-        cmap="RdBu_r",
-        clim=(-magnitude, magnitude),
-        edgecolors="none",
-        linewidths=0.0,
+    axis.add_collection(
+        PolyCollection(
+            polygons,
+            facecolors=POPULATION,
+            edgecolors="none",
+            linewidths=0.0,
+            zorder=1,
+            label="iron",
+        )
     )
-    axis.add_collection(collection)
+    carrying = np.flatnonzero(np.abs(shares) >= SHARE)
+    axis.add_collection(
+        PolyCollection(
+            [polygons[index] for index in carrying],
+            facecolors=SUBJECT,
+            edgecolors="none",
+            linewidths=0.0,
+            zorder=2,
+            label="carries the witness",
+        )
+    )
     region = inputs["region"]
     parts = [region] if region.geom_type == "Polygon" else list(region.geoms)
     for part in parts:
         for ring in [part.exterior, *part.interiors]:
             coordinates = np.asarray(ring.coords)
             axis.plot(
-                coordinates[:, 0], coordinates[:, 1], color="#1d1d1d", linewidth=1.2
+                coordinates[:, 0],
+                coordinates[:, 1],
+                color="#1d1d1d",
+                linewidth=1.2,
+                zorder=3,
             )
     axis.autoscale_view()
     axis.set_aspect("equal")
     axis.set_axis_off()
-    return collection
+    axis.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.2),
+        ncol=2,
+        frameon=False,
+        fontsize=14,
+    )
+    return len(carrying)
+
+
+def check_labels(figure):
+    """Refuse to write a figure whose text leaves the canvas or overlaps.
+
+    A figure is an artifact: a clipped axis unit or two labels on top of each
+    other is a defect in the deliverable, not a cosmetic preference.  The check
+    names the offending text so the placement can be fixed rather than the
+    check suppressed.
+    """
+    figure.canvas.draw()
+    renderer = figure.canvas.get_renderer()
+    canvas = figure.canvas.get_window_extent()
+    boxes = []
+    for text in figure.findobj(matplotlib.text.Text):
+        if not text.get_visible() or not text.get_text().strip():
+            continue
+        extent = text.get_window_extent(renderer)
+        if extent.width == 0.0 or extent.height == 0.0:
+            continue
+        if (
+            extent.x0 < canvas.x0
+            or extent.x1 > canvas.x1
+            or extent.y0 < canvas.y0
+            or extent.y1 > canvas.y1
+        ):
+            raise SystemExit(f"text runs off the canvas: {text.get_text()!r}")
+        boxes.append((text.get_text(), extent))
+    for position, (first, one) in enumerate(boxes):
+        for second, other in boxes[position + 1 :]:
+            if one.overlaps(other):
+                raise SystemExit(f"text overlaps: {first!r} and {second!r}")
 
 
 def main():
@@ -181,13 +241,10 @@ def main():
     inputs = west_inputs()
     figure, (left, right) = plt.subplots(1, 2, figsize=(14, 7.2))
     bound_panel(left, args.output)
-    collection = witness_panel(right, args.output, inputs)
-    bar = figure.colorbar(
-        collection, ax=right, orientation="horizontal", shrink=0.55, pad=0.02
-    )
-    bar.set_label("cell share of $w^{T}QGw$")
-    bar.outline.set_visible(False)
+    carrying = witness_panel(right, args.output, inputs)
+    print(f"{carrying} cells carry at least {SHARE:.0%} of the witness")
     figure.tight_layout()
+    check_labels(figure)
     args.figure.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(args.figure, dpi=100)
     figure.savefig(args.figure.with_suffix(".svg"))

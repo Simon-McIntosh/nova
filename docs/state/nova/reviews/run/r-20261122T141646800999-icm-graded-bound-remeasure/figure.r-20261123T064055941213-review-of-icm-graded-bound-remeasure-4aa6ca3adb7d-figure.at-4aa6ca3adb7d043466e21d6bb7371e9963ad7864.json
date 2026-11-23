@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachments": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T064055941213-review-of-icm-graded-bound-remeasure-4aa6ca3adb7d-figure/image-0.png"
+  ],
+  "completed_at": "2026-11-23T07:07:20.809Z",
+  "dispatched_at": "2026-11-23T06:45:08Z",
+  "evidence": {
+    "axis_scale_note": "The '0' tick is legitimate: the panel is symlog with zero at the bound",
+    "axis_ticks_observed": [
+      "0",
+      "10^-6",
+      "10^-4",
+      "10^-2"
+    ],
+    "caption_check": "Figcaption read at docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html lines 66-75; it names the axis, the three marker meanings, the 1 percent share threshold, the size encoding and both lobe coordinates.",
+    "data_check": "Each mark's x position was checked against its printed excess on the measured axis (10^-6 at x=330 px, 10^-4 at x=513.5 px, 91.75 px per decade): uniform 80 -> x=542 (predicted 539), graded -> x=731 (predicted 734), uniform 40 -> x=441 (predicted 438), control x=761 (predicted 761). Positions and labels agree.",
+    "marker_blue": "witness markers sit at 1.70:1 on the grey iron",
+    "measured_contrast": {
+      "axis_text_on_white": 7.94,
+      "grey_excess_label_#929292_on_white": 3.11,
+      "near_black_control_label_on_white": 16.86,
+      "red_excess_label_#c62828_on_white": 4.52,
+      "red_excess_label_measured_#c62828": 5.62,
+      "witness_blue_#3b6ea5_on_iron_grey_#929292": 1.7
+    },
+    "red_excess_label_note": "5.62:1 measured from the darkest rendered pixel of '+2.55e-02'",
+    "rendered_size": "1400x720 PNG at 100 dpi (14x7.2 in canvas), read directly",
+    "witness_marker_sizes_px": [
+      41,
+      13,
+      14,
+      43
+    ]
+  },
+  "findings": [
+    {
+      "disposition": "folded: a later figure node in this section should draw the excess labels in near-black and keep #929292 for the marks only, or lift the label grey to about #6b6b6b.",
+      "file": "scripts/iron_operator_bound/figure.py",
+      "line": 140,
+      "severity": "non-blocking",
+      "summary": "The two uniform excess labels are drawn in POPULATION (#929292) at 13 pt, which measures 3.11:1 against the white page at the rendered size (glyph height 13 px). AA needs 4.5:1 for text that size, so the values a reader is meant to compare with the graded reading are the lowest-contrast text on the panel; at the ~900 px reckon column width they shrink further. The marks themselves in the same neutral read fine as data, but the same colour is doing duty as text."
+    },
+    {
+      "disposition": "exempted: the caption states that the markers are sized by the share and names the two dominant lobes with coordinates, so the encoding is documented in the place the house style puts explanation; the two minor cells are secondary to the argument.",
+      "file": "scripts/iron_operator_bound/figure.py",
+      "line": 179,
+      "severity": "non-blocking",
+      "summary": "The witness markers are sized s = 60 + 900*share/max, which renders as two 42-44 px white-ringed circles and two plain 13 px dots at 1.70:1 against the grey iron they sit on. The single legend swatch shows one blue circle, so the two small cells read as a different symbol rather than as a smaller share, and the share scale itself appears only in the caption prose ('their markers sized by the share each carries') with no magnitude. A reader can see that the witness sits in two lobes (which the caption states) but cannot read what the two minor cells carry."
+    },
+    {
+      "disposition": "folded: a later figure node in this section should draw the graded series in the subject hue on both panels and reserve #c62828 for a mark at or past a stated threshold.",
+      "file": "scripts/iron_operator_bound/figure.py",
+      "line": 117,
+      "severity": "non-blocking",
+      "summary": "The graded operator takes LIMIT (#c62828) as the subject colour on the left panel while the same figure draws the section's subject on the right panel in SUBJECT (#3b6ea5). Two hues for one subject in one figure means a reader who learns 'red is the graded operator' from the left panel carries the wrong colour into the cross-section, and red is the repo's limit-broken colour even though the largest excess on the panel is the near-black planted control (+5.02e-02)."
+    }
+  ],
+  "project": "nova",
+  "review_run": "r-20261123T064055941213-review-of-icm-graded-bound-remeasure-4aa6ca3adb7d-figure",
+  "review_run_id": "r-20261123T064055941213-review-of-icm-graded-bound-remeasure-4aa6ca3adb7d-figure",
+  "reviewed_base_sha": "c06ff41029a84805c3be8ee6e9ca9f6b8f0ca35d",
+  "reviewed_figures": [
+    "docs/figures/iron-core-magnetisation/icm-graded-bound-remeasure/operator-bound.svg"
+  ],
+  "reviewed_head_sha": "4aa6ca3adb7d043466e21d6bb7371e9963ad7864",
+  "reviewed_run_id": "r-20261122T141646800999-icm-graded-bound-remeasure",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Defect recorded, non-blocking. The two uniform excess labels are drawn in the population grey #929292 at 13 pt and measure 3.11:1 against white (glyph height 13 px), below 4.5:1 for text that size. The red (5.62:1), near-black (5.02e-02 label, 16.86:1) and axis text (7.94:1) clear. In the right panel the blue witness fill #3b6ea5 measures 1.70:1 against the grey iron fill #929292 it is drawn on.",
+    "data_ink": "Pass. The left panel is four marks, their printed excesses and one axis; the right panel is a flat neutral-grey iron fill with four blue witness markers over it and a near-black outline. No gradient, colour map or filled scalar map spends ink where the witness does not sit. The iron fill's cell boundaries show as a fine grid, which is the discretisation the shares are read over rather than decoration.",
+    "decoration": "Pass. No gridlines, no background fill, no gradient, no in-figure title or suptitle; the cross-section is drawn axis-off and the legend is frameless. Only tick labels and two spines remain on the left panel.",
+    "label_collision": "Pass. Nothing is clipped by the canvas edge and no label overlaps another or the data: each excess label sits clear above its mark, the long axis title fits inside the canvas, the '0' tick at the symlog origin is fully drawn, and both legend entries are clear of every mark. The script's check_labels guard (figure.py:211-240) refuses a write on clipping or overlap and the figure was written, so the guard was satisfied.",
+    "legibility": "Pass with two recorded defects. The 1400x720 rendered canvas shows a four-row dot plot on the left and an axis-off WEST cross-section on the right. Every mark is readable: each row is named ('uniform 80', 'graded 16/80', 'uniform 40', 'planted control'), each mark carries its excess printed clear above it, and the two-entry legend ('iron', 'carries the witness') sits above the cross-section. The defects: the subject is drawn red on the left panel and blue on the right, so no single colour means 'the graded operator'; and the right panel's marker size is the only cue to each cell's witness share, keyed in the caption prose and not in the figure.",
+    "table_form": "Pass. The left panel plots four scalars the fragment also tabulates, so it is near the table boundary; what the plot adds is the span, where the graded excess sits about 1700 times the 40 mm excess (2.55e-2 against 1.51e-5), visible at a glance."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:08:19.184378+00:00",
+  "total": null
+}

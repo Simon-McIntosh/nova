@@ -25,7 +25,7 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="156">
+<meta name="plan-version" content="157">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -699,6 +699,9 @@ number is reported for either ratio.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-s11-superseded-runs" data-who="reckon-build" data-when="2026-11-23T06:40:00Z">
     <div class="r-comment-body"><p>Two §5b runs are discarded as superseded. Both stopped <em>blocked</em> correctly, and nothing is lost: <code>r-20261117T223040695957-icm-linear-refinement</code> (head <code>58087a975</code>) and <code>r-20261121T073530470113-icm-west-8-40-refinement</code> (head <code>64090647d</code>). Both heads are on main through the integration <code>r-20261122T141951224815-icm-cholesky-route-onto-main</code>, hand-merged at <code>2b4b66679</code>. That merge carries the in-place Cholesky route and its definiteness guard; its rigel gate showed the same 12 failures at main and head and none added. Their two open questions are owned by new nodes:</p><ul><li>The graded 16/80 Newton matrix is indefinite. <code>r-20261122T141646800999-icm-graded-bound-remeasure</code> measured why: every persisted operator breaks the energy bound, graded 16/80 most of all (quotient 1.0255), so the indefiniteness is the operator's excess passed through the material.</li><li>The 1.2e-12 route gap. <code>r-20261122T142048659544-icm-route-refined-reference</code> found it consistent with rounding at κ≈1e8; a repair round is in progress before that verdict is recorded.</li></ul></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261123T064055941213-review-of-icm-graded-bound-remeasure-4aa6ca3adb7d-figure" data-who="reckon-build" data-when="2026-11-23T07:07:20.809Z">
+    <div class="r-comment-body"><p>Figure review of r-20261122T141646800999-icm-graded-bound-remeasure at head 4aa6ca3b is parsed with all six rubric items answered; no blocking finding — the operator-bound figure is readable as delivered, with three non-blocking findings (grey value-label contrast 3.11:1, witness markers 3.2x apart in width with no in-figure size key, and red on the left panel against blue on the right for the same subject).</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T222130291065-review-of-icm-strip-error-sweep-43dc514d920c-figure" data-who="reckon-build" data-when="2026-11-06T22:32:39.513Z">
     <div class="r-comment-body"><p>Figure review of run r-20261106T212311176377-icm-strip-error-sweep at head 43dc514d9 is parsed with no blocking finding: the strip-error curve figure renders clean (zero ink in the outer 8 px frame, ink bbox x 35..1365 y 86..690, one frameless legend row, the 1e-10 direct label in clear space), and one non-blocking finding records that the two lightest curve stops measure 2.61:1 and 1.93:1 against white, below the 3:1 a plotted line is required to hold, so the coincident right-hand branch is drawn in the palest trace.</p></div>

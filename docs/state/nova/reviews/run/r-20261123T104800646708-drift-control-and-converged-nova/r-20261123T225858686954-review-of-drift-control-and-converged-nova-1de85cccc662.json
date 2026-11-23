@@ -11,6 +11,15 @@
   ],
   "completed_at": "2026-11-23T23:15:51.137Z",
   "dispatched_at": "2026-11-23T22:59:28Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T23:43:59.112639+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261123T104800646708-drift-control-and-converged-nova",
+      "section": "\u00a77"
+    }
+  },
   "findings": [
     {
       "correction": "Add an assertion that exercises the call site under a mutated DECLARED_ROWS (drive figures.arm_rows(..., 'loops') or analyse.main's row_matched, not declared_stem directly), so re-appending the suffix at the call site reddens a test.",

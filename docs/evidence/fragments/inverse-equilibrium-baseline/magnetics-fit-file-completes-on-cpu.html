@@ -17,7 +17,7 @@
 <tr><td>known state, Solov'ev alone</td><td><code>test_known_state_recovery[solovev]</code></td><td>1</td><td>3245.69 s</td><td>1 passed (empty cache)</td></tr>
 <tr><td>known state, MAST alone</td><td><code>test_known_state_recovery[mast]</code></td><td>1</td><td>2346.60 s</td><td>1 passed</td></tr>
 </table>
-<p>The three single-case rows are the previous node's measurements, read from its own logs; the two unit-level rows were measured at <code>fd56bd24a</code> with the command the landing lane runs.</p>
+<p>The three single-case rows are the previous node's measurements, read from their own logs; the two unit-level rows were measured at <code>fd56bd24a</code> with the command the landing lane runs, which logged <code>44 passed in 6.46s</code> serially and <code>44 passed in 10.32s</code> under <code>-n 8</code>.</p>
 <p>Each earlier figure is quoted against the revision its own log names. At <code>40161a8c2</code> the same command logged <code>44 passed in 6.91s</code> serially and <code>44 passed in 12.49s</code> under <code>-n 8</code>. At <code>b4a9a31ff</code> the scoped run logged <code>44 passed in 4.68s</code> and the committed after arm <code>44 passed in 4.75s</code>. The earlier baseline arm over the same command at <code>be5ee98f</code> was cancelled at its ten-minute step limit without reaching a summary line, and so was a wide arm naming both this module and the known-state module at <code>05881adda</code>: that selection collects all 48 tests, so naming the heavy module in a measurement brings the heavy cases back. A measurement of this file names this file only.</p>
 
 <h3 id="magnetics-fit-file-completes-on-cpu-control">The negative control</h3>

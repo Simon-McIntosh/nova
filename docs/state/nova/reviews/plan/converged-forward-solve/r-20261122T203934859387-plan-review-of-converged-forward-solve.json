@@ -25,7 +25,30 @@
   "plan_slug": "converged-forward-solve",
   "plan_version": 633,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f555704f54dff53df5f3f0c5f57653daa2f62d0b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a710 clause 2 now deletes the thin wrappers Topology.read and read_with_connectivity and proves by test that Topology.read_qualification and ForwardFluxOperator._fixed_design_read have no caller left but reduced_newton.py; \u00a76's retirement now names the fixed-design read (read_qualification, _fixed_design_read, _FixedDesignNull2D) for deletion with reduced_newton.py, its last caller.",
+      "reason": "",
+      "when": "2026-11-23T00:16:39.047158+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f555704f54dff53df5f3f0c5f57653daa2f62d0b",
+      "commit_basis": "edit",
+      "note": "\u00a710 clause 2 now deletes the thin wrappers Topology.read and read_with_connectivity and proves by test that Topology.read_qualification and ForwardFluxOperator._fixed_design_read have no caller left but reduced_newton.py; \u00a76's retirement now names the fixed-design read (read_qualification, _fixed_design_read, _FixedDesignNull2D) for deletion with reduced_newton.py, its last caller.",
+      "reason": "",
+      "when": "2026-11-23T00:16:39.047158+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/converged-forward-solve/r-20261122T203934859387-plan-review-of-converged-forward-solve.json",
   "review_run_id": "r-20261122T203934859387-plan-review-of-converged-forward-solve",
   "reviewed_blob_sha": "2dbf867a8b8658973adce6720305416b43cbb9fe",
   "rubric": "content",

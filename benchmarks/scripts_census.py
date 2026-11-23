@@ -41,6 +41,9 @@ from nova.database.filepath import compute_provenance, repository_relative
 ROOT = Path(__file__).resolve().parents[1]
 TREES = ("benchmarks", "scripts")
 SELF = "benchmarks/scripts_census.py"
+# The record this census writes; excluded from the evidence scan so the census
+# never treats its own inventory as a citation of a run.
+RECORD_SELF = "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census"
 
 # A driver that is tracked and imported by tests/test_recovery_ladder_census.py:
 # the positive control on enumeration and the subject of the negative control.
@@ -358,6 +361,11 @@ def census(force=None):
         if not p.startswith(("docs/evidence/", "docs/figures/")):
             continue
         if not p.endswith((".html", ".md", ".json", ".txt", ".svg")):
+            continue
+        # This census's own record lists every driver by name. It is an
+        # inventory, not a record that a driver ran, so counting it as evidence
+        # would let the census cite itself and change its own verdicts.
+        if p.startswith(RECORD_SELF):
             continue
         try:
             text = (ROOT / p).read_text(errors="replace")

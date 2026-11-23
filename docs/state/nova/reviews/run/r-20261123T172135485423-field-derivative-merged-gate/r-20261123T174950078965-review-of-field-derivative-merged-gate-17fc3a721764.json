@@ -1,0 +1,51 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "nova/equilibrium/fixed_points.py:327",
+    "nova/equilibrium/topology.py:2514",
+    "nova/biot/tiledassembly.py:1383"
+  ],
+  "completed_at": "2026-11-23T18:01:04.312Z",
+  "dispatched_at": "2026-11-23T17:50:39Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/field-derivative-merged-gate.html",
+      "line": 13,
+      "severity": "blocking",
+      "summary": "the record claims both agreement figures lie inside the sixth-order reference's own step-halving budget, but the corner-height agreement 2.0643076666778661e-9 exceeds that budget's corner-height value 1.0377804968078152e-9 by about two; only the generic figure 2.1738626871940731e-11 is inside its 1.518378368161929e-10. The quoted numbers are correct; the containment inference is not, and a reader takes it as proof the reference resolves both cohorts."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/biot/test_field_derivative_outputs.py:158 compares the kernel against an independent sixth-order finite-difference reference and its sign flip fails test_field_derivative_agreement[generic-d_r_Br] by id, so a regressed derivative reddens it; the merge-gate node itself adds no test.",
+    "evidence": "merged.log and main.log each open with their revision and command and close with a bare EXIT=0, giving 75 vs 65 collected and zero failures on either arm, so the ten added tests are the delta.",
+    "fit": "nova/biot/polygonanalytic.py:3229 adds _field_line_integral and _field_line_moments in the module's existing range_function/scaled/product/total idiom and threads field_derivatives=True through the existing keyword-only path.",
+    "goal_fidelity": "docs/evidence/fragments/kernel-compile-barrier/field-derivative-merged-gate.html:23-26 states the merge sha, main sha, per-arm counts, zero added failure ids and the ten passing tests, which is the goal; line 13 overstates one inference.",
+    "reuse": "The field gradient is a neighbouring capability to fixed_points.py:351's flux gradient built from rows[3:9], and no analytic target-gradient owner exists in nova/biot, so the new primal rows create the owner rather than fork a duplicate.",
+    "scope_discipline": "git show --stat on 972222597 and 17fc3a721 shows only the declared docs/evidence/fragments/kernel-compile-barrier/field-derivative-merged-gate.html; the two source paths enter through the merge the brief requires."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T174950078965-review-of-field-derivative-merged-gate-17fc3a721764",
+  "reviewed_base_sha": "5b7d4d06072edb5b5004d090556404459d5bc21f",
+  "reviewed_head_sha": "17fc3a721764bb92ac97a6fdcd8d65b50558a695",
+  "reviewed_run_id": "r-20261123T172135485423-field-derivative-merged-gate",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T18:07:30.849221+00:00",
+  "total": 106,
+  "verdicts": {
+    "diff": "Read commit by commit 5b7d4d060..17fc3a721: 348d70eba is the --no-ff merge (+198/-3 in polygonanalytic.py, +255 test file), 972222597 adds the 32-line evidence record, 17fc3a721 renames the log paths in it.",
+    "done_when": "done_when names the clean merge, one all_debug job with one pytest call per arm and a committed record; merged.log and main.log record 66 passed/9 skipped/EXIT=0 and 56 passed/9 skipped/EXIT=0.",
+    "goal": "The node goal is a merged-head gate for the field-derivative outputs; the merged and evidence commits at HEAD deliver the clean merge, the one-job two-arm gate and the committed record.",
+    "manifest": "The manifest reports status complete, the merge sha 348d70eba, both arm counts and job 1340320 on all_debug; each claim holds against the logs on disk.",
+    "write_paths": "The node's own commits touch only docs/evidence/fragments/kernel-compile-barrier/field-derivative-merged-gate.html; nova/biot/polygonanalytic.py and tests/biot/test_field_derivative_outputs.py arrive through the authorised merge of dd5aa7cd5."
+  }
+}

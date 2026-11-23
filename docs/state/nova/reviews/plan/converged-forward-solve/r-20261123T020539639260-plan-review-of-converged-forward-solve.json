@@ -25,7 +25,30 @@
   "plan_slug": "converged-forward-solve",
   "plan_version": 645,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "cacfd7bd0b689a815f304bae4c87ea698cf31587",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a710 clause 2 now deletes the wrappers together with their own bindings, naming them (tests/test_hex_flood_sn_secondary.py, tests/test_hex_flood_coil_nulls.py, benchmarks/axis_seed_census.py), and the ownership sentence carves those out: every other test, script and benchmark caller is \u00a76's.",
+      "reason": "",
+      "when": "2026-11-23T02:58:55.567467+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "cacfd7bd0b689a815f304bae4c87ea698cf31587",
+      "commit_basis": "edit",
+      "note": "\u00a710 clause 2 now deletes the wrappers together with their own bindings, naming them (tests/test_hex_flood_sn_secondary.py, tests/test_hex_flood_coil_nulls.py, benchmarks/axis_seed_census.py), and the ownership sentence carves those out: every other test, script and benchmark caller is \u00a76's.",
+      "reason": "",
+      "when": "2026-11-23T02:58:55.567467+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/converged-forward-solve/r-20261123T020539639260-plan-review-of-converged-forward-solve.json",
   "review_run_id": "r-20261123T020539639260-plan-review-of-converged-forward-solve",
   "reviewed_blob_sha": "65764932ad7fbce2ab58599c1f02284c11e18338",
   "rubric": "content",

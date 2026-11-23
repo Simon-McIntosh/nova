@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="98">
+<meta name="plan-version" content="99">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -433,6 +433,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261122T190644382930-stored-case-build-stall-diagnosis" data-who="reckon-build" data-when="2026-11-23T01:05:39Z">
     <div class="r-comment-body"><p>The cold stored-case build spends its pre-fit window in per-element conductor insertion at both revisions, 92 percent of a 900 s watchdog inside MultiPoint.sort_link to Index.get_loc, and no commit between them changes any file on that stack; the fit is quadratic in the accumulated row count, measured over 634 calls above half a second across both arms (326 and 308 arm by arm, least squares exponent 2.085, 2.049 and 2.136 separately), with 825.8 s over 1907 calls at a largest frame of 11756 of about 30000 rows and about 4.0 h extrapolated over 1200 inserts; 77283793bc lies within 1.3 percent (814.8 s, 1906 calls, same 11756 rows). It does not establish that the recorded stored-case run spends its three hours in this phase, because that log stamps only CASE_INPUT and the cancel and its plasmagrid bar cannot be placed in wall time.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261123T045522439514-review-of-multipoint-link-linear-build-c7fb9f6eece8" data-who="reckon-build" data-when="2026-11-23T05:20:16.107Z">
+    <div class="r-comment-body"><p>Independent review of multipoint-link-linear-build stored as parsed at base bba8365c9 / head c7fb9f6ee: the link sort now resolves in one pass and the two cost guards are proven by a negative control, with non-blocking findings on build()&#x27;s prefix docstring, the lookup duplicating Index.get_indexer, one misattributed row count in the evidence fragment, and the host-dependent timing guard.</p></div>
 </div>
 </section>
 </main>

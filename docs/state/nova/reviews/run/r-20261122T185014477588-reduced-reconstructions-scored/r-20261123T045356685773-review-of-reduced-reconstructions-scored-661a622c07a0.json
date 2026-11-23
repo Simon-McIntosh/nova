@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-23T05:30:30.489Z",
+  "dispatched_at": "2026-11-23T04:54:59Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/harmonic.py",
+      "line": "770",
+      "severity": "non-blocking",
+      "text": "_state_equilibrium is a copy of the helper defined at nova/equilibrium/moment.py:1092 and inlined a third time at nova/equilibrium/profile.py:790, while benchmarks/estimator_scoreboard.py:280 (state_from_record) and nova/imas/pulsedesign.py:540 (equilibrium_ids) already own the same equilibrium-IDS assembly; the three copies already diverge in how boundary.type is set, so a change to the IDS convention must now be made in three places. Fold into a follow-up node that extracts one shared reconstruction-to-IMAS writer."
+    },
+    {
+      "file": "nova/equilibrium/profile.py",
+      "line": "769",
+      "severity": "non-blocking",
+      "text": "profile_equilibrium re-reads the boundary with host_boundary_read(..., lcfs_norm=1.0) and writes read.psi_axis/read.psi_bnd, discarding ProfileResult.boundary_flux (profile.py:555, from the solve's own traced_smooth_boundary_read at profile.py:416); the docstring claims the boundary read the profile iteration itself uses, which is a different function at a different level, so the column's axis- and boundary-flux margins are not the reconstruction's own stored extrema. Fix by writing result.boundary_flux (and the result's axis) or by using the same read the iteration uses, and correct the docstring."
+    },
+    {
+      "file": "tests/test_reduced_reconstruction_columns.py",
+      "line": "131",
+      "severity": "non-blocking",
+      "text": "the harmonic test passes vacuum_flux=np.zeros_like(flux_field()), so the conversion's only non-trivial operation, total = inversion.flux_on_grid(...) + vacuum_flux at harmonic.py:714, is unguarded: deleting the added vacuum term leaves every assertion true; and the map-withheld branch stored_map = ... if np.isfinite(read.axis_psi) else None at harmonic.py:752, which produces the published 'q95 not supplied', is untested. A regression in either changes the harmonic column and no test reddens."
+    },
+    {
+      "file": "nova/equilibrium/profile.py",
+      "line": "722",
+      "severity": "non-blocking",
+      "text": "__all__ is declared at line 722 and the diff appends profile_equilibrium and write_profile_equilibrium after it without adding them, so the module's declared public API omits its new conversions and 'from nova.equilibrium.profile import *' cannot reach them."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/cases-reduced-reconstructions-scored.json",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "the three reconstruction columns name pre-materialised state directories under ~/.cache, and the driver that ran the reconstructions and wrote those states (with acceptance_control.py) is not committed, so the states behind the receipt's digests cannot be regenerated from the repository; fold the driver into a committed benchmark or script in a follow-up node."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/cases-reduced-reconstructions-scored.json",
+      "line": "39",
+      "severity": "non-blocking",
+      "text": "the three control columns use perturbed_of, which emit_perturbed_states (benchmarks/estimator_scoreboard.py:340) resolves by copying the already-written equilibrium through perturb_state (estimator_scoreboard.py:93); the perturbed state therefore never enters through each new column's conversion as the plan's clause (3) words it, so the control shows the scoreboard rejects a perturbed state but does not exercise the conversions' own boundary read and ring construction."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production caller exists at the reviewed head; git grep for the three write_*_equilibrium names returns only their definitions at harmonic.py:818, moment.py:1140 and profile.py:819, and the driver that did call them is uncommitted scratch.",
+    "diff": "read commit by commit: 6e66c5882 adds the three conversions and the test file, aeda56d56 and 661a622c0 add the evidence fragment and its suite-arm record; nothing outside the declared scope.",
+    "done_when": "the done_when's three clauses are each addressed: the table at table-reduced-reconstructions-scored.html carries digest and all three reference-free checks per column, the margins table states every band with its limit and measured value, and the negative control at cases-reduced-reconstructions-scored.json:39-52 fails every scoreable band.",
+    "goal": "the node goal is to score the harmonic, moment and profile reconstructions as their own columns on the section 3 scoreboard, and docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/receipt-reduced-reconstructions-scored.json:22 scores all three plus three controls on the row-exchange case.",
+    "manifest": "the reviewed manifest records status complete, three commits, both suite arms with revisions and EXIT=0, the negative-control log and per-column results with margins.",
+    "write_paths": "the eight delivered paths are all inside the declared write paths, with nova/equilibrium/profile.py covered by the manifest's scope_note."
+  },
+  "justifications": {
+    "durability": "tests/test_reduced_reconstruction_columns.py:131-140 pins the harmonic map but passes vacuum_flux=np.zeros_like(flux_field()), so harmonic.py:714's added vacuum flux and harmonic.py:752's withheld-map branch are both unguarded.",
+    "evidence": "the manifest's baseline_suite and after_suite record 48->51 passed at revisions 06d7280/aeda56d5 with EXIT=0 in both logs, and the negative-control log exits 1 failing all three controls, but the driver that wrote the three reconstruction states is uncommitted (cases-reduced-reconstructions-scored.json:22-32 names only cache paths).",
+    "fit": "nova/equilibrium/profile.py:722 declares __all__ and the diff appends the new public conversions after it without listing them, so the module's declared API omits its own additions.",
+    "goal_fidelity": "docs/evidence/fragments/inverse-equilibrium-baseline/reduced-reconstructions-scored.html scores all three reconstructions as their own column groups on the iter-row-exchange-nominal case with digest, the state source and all three reference-free checks, and states every failing band with its margin.",
+    "reuse": "nova/equilibrium/harmonic.py:770 duplicates one IDS-assembly helper already defined at nova/equilibrium/moment.py:1092 and inlined a third time at nova/equilibrium/profile.py:790, while benchmarks/estimator_scoreboard.py:280 owns the same capability.",
+    "scope_discipline": "every path in the diff is one of the coordinator's declared paths, and the one path in the diff outside the node record's orientation list (nova/equilibrium/profile.py) carries the required scope_note in the manifest."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to score the harmonic, moment and profile reconstructions as their own columns on the section 3 scoreboard; receipt-reduced-reconstructions-scored.json:22 records all three plus three controls on the iter-row-exchange-nominal case, and table-reduced-reconstructions-scored.html shows one column group per estimator with digest and the three reference-free checks.\nVERDICT done_when: the done_when's three clauses are all addressed in the committed evidence: per-column digest plus reference-free checks in table-reduced-reconstructions-scored.html, every band verdict with its limit and margin in the fragment's 'Band verdicts as measured' table, and a control table whose every scoreable band fails.\nVERDICT write_paths: all eight delivered paths are inside the coordinator's declared write paths; the one path outside the node record's orientation list, nova/equilibrium/profile.py, is declared by the reviewer brief and carries the manifest's scope_note.\nVERDICT manifest: read; it records status complete; both suite arms (baseline 48 passed at 06d7280, after 51 passed at aeda56d5) with EXIT=0 and log paths, the negative-control log, and per-column results with margins.\nVERDICT diff: read commit by commit against base 06d7280: 6e66c5882 adds three conversions and tests, aeda56d56 and 661a622c0 add the evidence fragment and its suite-arm section; nothing outside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: receipt-reduced-reconstructions-scored.json:22 scores all three reconstructions as their own columns on the section 3 row-exchange case with digest, source and three reference-free checks, and states each failing band with its margin.\nSCORE evidence: 15\nJUSTIFICATION evidence: the manifest's baseline_suite and after_suite record 48->51 passed at two revisions with EXIT=0, and negative-control.log exits 1 failing all three controls, but cases-reduced-reconstructions-scored.json:22-32 names only cache paths so the states are not regenerable from the tree.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every delivered path is inside the declared write paths, with nova/equilibrium/profile.py's addition documented in the manifest's scope_note.\nSCORE durability: 11\nJUSTIFICATION durability: tests/test_reduced_reconstruction_columns.py:131 passes vacuum_flux=zeros so harmonic.py:714's added vacuum flux and harmonic.py:752's withheld-map branch are unguarded.\nSCORE fit: 14\nJUSTIFICATION fit: nova/equilibrium/profile.py:722 declares __all__ yet the appended conversions at profile.py:730 and profile.py:819 are absent from it.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/equilibrium/harmonic.py:770 duplicates nova/equilibrium/moment.py:1092 and profile.py:790 re-implements it a third time, a capability benchmarks/estimator_scoreboard.py:280 already owns, with no extension of that owner.\nFINDING nova/equilibrium/harmonic.py:770 non-blocking: _state_equilibrium duplicates moment.py:1092 and a third inline copy at profile.py:790, while benchmarks/estimator_scoreboard.py:280 and nova/imas/pulsedesign.py:540 already own the equilibrium-IDS assembly; fold one shared writer in a follow-up node.\nFINDING nova/equilibrium/profile.py:769 non-blocking: profile_equilibrium re-reads the boundary with host_boundary_read at lcfs_norm=1.0 and discards ProfileResult.boundary_flux, contradicting its docstring's claim of the iteration's own read, so its flux margins are not the reconstruction's stored extrema.\nFINDING tests/test_reduced_reconstruction_columns.py:131 non-blocking: vacuum_flux is zeros, leaving harmonic.py:714's added conductor flux and harmonic.py:752's withheld-map branch untested, so a regression there would not redden any assertion.\nFINDING nova/equilibrium/profile.py:722 non-blocking: __all__ omits profile_equilibrium and write_profile_equilibrium, so the module's declared API excludes its new conversions.\nFINDING docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/cases-reduced-reconstructions-scored.json:22 non-blocking: the reconstruction states are named only by cache directories and the driver that wrote them is uncommitted, so the receipt's rows cannot be regenerated from the repository.\nFINDING docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/cases-reduced-reconstructions-scored.json:39 non-blocking: the controls perturb the written equilibrium via perturb_state rather than entering a perturbed input through the conversions, so the conversion's boundary read and ring construction are not exercised by the control.\n",
+  "review_run_id": "r-20261123T045356685773-review-of-reduced-reconstructions-scored-661a622c07a0",
+  "reviewed_base_sha": "06d728006cba140ec3cf0670927100f31f8cfce0",
+  "reviewed_head_sha": "661a622c07a008bd82757e448053dbdd69f5ec4a",
+  "reviewed_run_id": "r-20261122T185014477588-reduced-reconstructions-scored",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 14,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T05:30:51.785058+00:00",
+  "total": 80
+}

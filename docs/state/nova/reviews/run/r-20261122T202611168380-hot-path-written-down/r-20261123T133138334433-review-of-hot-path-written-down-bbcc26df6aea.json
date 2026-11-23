@@ -10,6 +10,15 @@
   "completed_at": "2026-11-23T13:46:38.991Z",
   "dimension_dispositions": {},
   "dispatched_at": "2026-11-23T13:32:16Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T17:21:28.150676+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T202611168380-hot-path-written-down",
+      "section": "\u00a76"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down.html",

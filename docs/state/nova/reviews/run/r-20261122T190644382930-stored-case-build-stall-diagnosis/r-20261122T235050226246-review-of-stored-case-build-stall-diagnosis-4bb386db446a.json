@@ -4,6 +4,13 @@
   "call_sites": [],
   "completed_at": "2026-11-23T00:32:11.726Z",
   "dispatched_at": "2026-11-22T23:51:47Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-stored-case-build-stall-diagnosis-4bb386db446a",
+      "recorded_at": "2026-11-23T00:42:40.801495+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/inverse-equilibrium-baseline/stored-case-build-stall-diagnosis.html",

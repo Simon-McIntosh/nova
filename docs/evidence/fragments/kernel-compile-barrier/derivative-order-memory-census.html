@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="derivative-order-memory-census">
+  <meta name="plan-title" content="Derivative-order memory census: Hessian compile exceeds 120G">
+  <meta name="plan-summary" content="Eight local derivative rows complete; the first Hessian compile exhausts the CPU allocation, leaving rule attribution incomplete">
+  <meta name="plan-evidence-for" content="kernel-compile-barrier">
+  <meta name="plan-verifies" content="kernel-compile-barrier#s4">
+  <meta name="plan-commits" content="c94aee717923d9b5bad5c4d7723d1bd773c96def,aa7fb2274b463d1303658c5ee1446771014799d3">
+  <meta name="plan-recorded-at" content="2026-11-23">
+  <meta name="plan-verdict" content="blocked">
+  <meta name="plan-environment" content="CPU x64; sirius; four CPUs; 120G; compilation cache disabled">
+  <title>Derivative-order memory census | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<header>
+  <p class="eyebrow">Partial execution evidence</p>
+  <h1>A single-point Hessian compile exhausts the 120G CPU allocation</h1>
+  <p><strong>The requested census is incomplete.</strong> Job <code>1338281</code> completed orders 0 and 1 for four rule variants, then was OOM-killed compiling the current-rule Hessian. Its saved lowering contains 121,842 HLO instructions, against 19,624 for the gradient, with source geometry and target batch size unchanged. This reproduces host compile-memory exhaustion without a large wall-event target batch. It does not reproduce the earlier 1.07 TiB device allocation, establish the full read's memory share, or identify which custom rule dominates.</p>
+</header>
+<section id="measurement">
+<h2>Fixture, instrument and terminal result</h2>
+<p>The measurement ran at <code>c94aee717923d9b5bad5c4d7723d1bd773c96def</code>, whose product source matches base <code>3c3bcfa5a67887b317ea2a3e237bfcbb880860fb</code>. It imports the test builders <code>_analytic_inputs</code>, <code>_realised_hex_geometry</code> and <code>_kernel_backed_field</code> from <code>tests/equilibrium/test_topology_read.py:426</code>, <code>:467</code> and <code>:2174</code>. The diverted fixture realizes exactly 24 source cells, 16 padded polygon edges, 121 wall vertices, 168 cell-fit samples and 145 contour samples. The read itself is never executed or compiled. Only the booked plasma coupling is measured, preventing the fixture's analytic exterior minus reference image from cancelling it.</p>
+<p>Each derivative is evaluated at one runtime target with geometry and current moments supplied as operands. Order 0 selects <code>value_gradient(...)[0]</code>; order 1 selects its analytic gradient; order 2 selects <code>evaluate(...).hessian</code>; orders 3 and 4 are configured as one and two <code>jacfwd</code> transforms of that Hessian, matching the generic curvature path. Orders 3 and 4 never ran. CPU x64 is configured before fixture arrays are constructed, and the driver asserts CPU placement and the x64 flag.</p>
+<p>The HLO count is the number of instruction definitions in <code>lowered.compiler_ir("hlo").as_hlo_module().to_string()</code>, before native optimization. StableHLO byte counts include debug metadata. These are neither optimized executable counts nor expanded dynamic loop counts. A probe-local wrapper gives each traced invocation of <code>_packed_analytic_moments_primal</code> a <code>packed_instance_*</code> metadata scope. The instrument counts instructions whose own metadata retains that scope, and distinct scope names among them. Outlined callees can carry their own metadata; the attributed-op count is not a transitive census of all descendants. Repeated calls to one outlined body and loop trips do not become distinct scope names. The known-present control asserts that the attributed count and scope set are nonempty; it passes on every saved lowering.</p>
+<p>The Hessian has four traced primal calls but only three retained scope names in the saved HLO. An unused primal output can disappear during lowering. Thus the scope count describes retained traced bodies, not six Richardson samples or all inlined instances after XLA optimization.</p>
+<p>The allocation requested <code>--partition=sirius --cpus-per-task=4 --mem=120G --time=05:30:00</code>. It ended after 13 min 29 s with scheduler state <code>OUT_OF_MEMORY</code>; the batch step reports <code>MaxRSS=123122352K</code>. The raw job log says <q>Detected 1 oom_kill event in StepId=1338281.batch. Some of the step tasks have been OOM Killed.</q> The row child records <code>EXIT=-9</code>, the shell records <code>EXIT=247</code>, and scheduler accounting records <code>0:125</code>. These are different layers of the same termination. No successful <code>memory_analysis()</code> result exists for the Hessian. Host RSS is not device temporary memory.</p>
+</section>
+<section id="cost">
+<h2>Cost by order and rule</h2>
+<p>“Unreached” means no measurement; it never means zero. Temporary bytes are the CPU executable's <code>compiled.memory_analysis().temp_size_in_bytes</code>. The initially configured admission limit of 140,000 lowered instructions admitted the 121,842-instruction Hessian and failed to protect the allocation. Instruction count alone is not a fitted memory predictor.</p>
+<table>
+<thead><tr><th>Order</th><th>Rule variant</th><th>StableHLO bytes</th><th>HLO instructions</th><th>Attributed packed ops</th><th>Retained packed scopes</th><th>CPU temp bytes</th><th>Outcome</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>Current</td><td>387,001</td><td>2,099</td><td>56</td><td>1</td><td>70,908,560</td><td>Complete</td></tr>
+<tr><td>0</td><td>Plain autodiff</td><td>384,841</td><td>2,095</td><td>56</td><td>1</td><td>70,908,560</td><td>Complete</td></tr>
+<tr><td>0</td><td>Without samples</td><td>387,001</td><td>2,099</td><td>56</td><td>1</td><td>70,908,560</td><td>Complete</td></tr>
+<tr><td>0</td><td>Masked samples</td><td>387,001</td><td>2,099</td><td>56</td><td>1</td><td>70,908,560</td><td>Complete</td></tr>
+<tr><td>1</td><td>Current</td><td>2,872,030</td><td>19,624</td><td>12,020</td><td>1</td><td>27,724,040</td><td>Complete</td></tr>
+<tr><td>1</td><td>Plain autodiff</td><td>2,723,734</td><td>19,624</td><td>12,020</td><td>1</td><td>27,724,040</td><td>Complete</td></tr>
+<tr><td>1</td><td>Without samples</td><td>2,872,030</td><td>19,624</td><td>12,020</td><td>1</td><td>27,724,040</td><td>Complete</td></tr>
+<tr><td>1</td><td>Masked samples</td><td>2,872,030</td><td>19,624</td><td>12,020</td><td>1</td><td>27,724,040</td><td>Complete</td></tr>
+<tr><td>2</td><td>Current</td><td>10,633,089</td><td>121,842</td><td>62,935</td><td>3</td><td>Unavailable</td><td>Lowered; compile OOM</td></tr>
+<tr><td>2</td><td>Plain autodiff</td><td colspan="6">Unreached</td></tr>
+<tr><td>2</td><td>Without samples</td><td colspan="6">Unreached</td></tr>
+<tr><td>2</td><td>Masked samples</td><td colspan="6">Unreached</td></tr>
+<tr><td>3</td><td>Current</td><td colspan="6">Unreached</td></tr>
+<tr><td>3</td><td>Plain autodiff</td><td colspan="6">Unreached</td></tr>
+<tr><td>3</td><td>Without samples</td><td colspan="6">Unreached</td></tr>
+<tr><td>3</td><td>Masked samples</td><td colspan="6">Unreached</td></tr>
+<tr><td>4</td><td>Current</td><td colspan="6">Unreached</td></tr>
+<tr><td>4</td><td>Plain autodiff</td><td colspan="6">Unreached</td></tr>
+<tr><td>4</td><td>Without samples</td><td colspan="6">Unreached</td></tr>
+<tr><td>4</td><td>Masked samples</td><td colspan="6">Unreached</td></tr>
+</tbody>
+</table>
+<p>The byte entries are checked against individual saved receipts by <code>check_record.py</code>; debug metadata and wrapper structure can move text size without changing arithmetic. Lowered instruction growth from gradient to Hessian is approximately 6.21 times before optimization. Attributed instructions account for 62,935 of 121,842 definitions in the Hessian module; that approximately 51.7% metadata share is not a measured share of compile RSS or runtime allocation. The value executable needs more temporary bytes than the gradient executable despite its smaller lowered instruction count, another reason not to equate graph count with executable memory.</p>
+</section>
+<section id="rules">
+<h2>Rule variants and precision</h2>
+<p><strong>Current:</strong> unchanged height and pole-product JVPs. <strong>Plain:</strong> replace <code>_packed_moments_with_stable_height</code> with its primal, and unwrap <code>_pole_product_traced</code>; other lower-level custom rules remain. <strong>Without samples:</strong> keep the stable-pole tangent expression but return its ordinary JVP, omitting Richardson samples and the height-held direction. <strong>Masked samples:</strong> keep the current ordinary and height-held directions, map serially over source cells with <code>lax.map</code>, and place the six Richardson samples behind each cell's scalar <code>lax.cond(nearest &lt;= 1e-7, ...)</code>. A single target is measured; this avoids a target <code>vmap</code> converting that condition to a select. The masked branch and its derivatives have not been numerically exercised, because the job stopped before that Hessian row.</p>
+<p>Targets use seed 719: 200 generic points inside the fixture's rectangular bounds, with height more than 2e-7 from every packed corner height, and 50 points whose heights are within 9e-8 of a corner height. This is a corner-height test, not a requirement that the target be close to the corner in both coordinates. All variants use identical saved targets, SHA256 <code>d15e1f018ea282c5f2c6023b180ccc5421c938dd22e983fa5740189fb88861f3</code>. Each completed executable is called serially on the 250 points. Relative difference is <code>max(abs(candidate-reference)/max(abs(reference),1e-300))</code>, with any nonfinite operand reported as unavailable.</p>
+<table>
+<thead><tr><th>Order</th><th>Rule variant</th><th>Maximum relative difference, 200 generic points</th><th>Maximum relative difference, 50 corner-height points</th><th>Finite scalar entries</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>Current</td><td>0</td><td>0</td><td>250 / 250</td></tr>
+<tr><td>0</td><td>Plain autodiff</td><td>0</td><td>0</td><td>250 / 250</td></tr>
+<tr><td>0</td><td>Without samples</td><td>0</td><td>0</td><td>250 / 250</td></tr>
+<tr><td>0</td><td>Masked samples</td><td>0</td><td>0</td><td>250 / 250</td></tr>
+<tr><td>1</td><td>Current</td><td>0</td><td>0</td><td>500 / 500</td></tr>
+<tr><td>1</td><td>Plain autodiff</td><td>0</td><td>0</td><td>500 / 500</td></tr>
+<tr><td>1</td><td>Without samples</td><td>0</td><td>0</td><td>500 / 500</td></tr>
+<tr><td>1</td><td>Masked samples</td><td>0</td><td>0</td><td>500 / 500</td></tr>
+<tr><td>2</td><td>All four variants</td><td colspan="3">Unmeasured; no current-rule reference array survived the compile</td></tr>
+<tr><td>3</td><td>All four variants</td><td colspan="3">Unreached</td></tr>
+<tr><td>4</td><td>All four variants</td><td colspan="3">Unreached</td></tr>
+</tbody>
+</table>
+<p>Every completed comparison is bit-identical. This uniform result is expected: order 1 selects an analytic gradient returned by the primal and does not differentiate through the packed custom rule. It establishes no precision benefit or safety of removing a rule. The comparison instrument's positive control changes the largest-magnitude reference entry by 1%; it reports 0.010000000000000047 for order 0 and 0.009999999999999993 for order 1. Target identity, shapes, finite counts and array digests are checked before reporting zero. No Hessian, third- or fourth-order precision claim is available.</p>
+</section>
+<section id="inventory">
+<h2>What the read requests, at this revision</h2>
+<p>The following inventory is source inspection bound to product revision <code>3c3bcfa5a67887b317ea2a3e237bfcbb880860fb</code>, not an executed topology trace. Dynamic counts such as admitted nulls and saddles remain unknown. The fixture's total field has two coupling images, booked plasma plus exterior analytic field minus its reference coupling (<code>tests/equilibrium/test_topology_read.py:2158</code> and <code>:2245</code>); the point census isolates one coupling image. The counts below are total-field target visits before those two images.</p>
+<table>
+<thead><tr><th>Call site</th><th>Field order</th><th>Points or visits on the 24-cell fixture</th><th>Path and source binding</th></tr></thead>
+<tbody>
+<tr><td>Cell-fit and contour sampling</td><td>0</td><td>168 + 145 = 313 targets; padded to batches of 8</td><td><code>_sampled_flux</code>, <code>nova/equilibrium/topology.py:2839</code>; <code>_point_values</code>, <code>:2819</code>; called by <code>read</code>, <code>:3380</code></td></tr>
+<tr><td>Null polishing</td><td>0, 1, 2</td><td>16 capacity slots, only slots below the dynamic required count run; 13 point-jet visits per active slot, at most 208</td><td><code>_null_census</code>, <code>:2896</code> and <code>:2917</code>; <code>_stationary_position_primal</code>, <code>:1573</code>, jet at <code>:1580</code></td></tr>
+<tr><td>Axis and selected saddle values/jets</td><td>0, 1, 2 already held</td><td>One selected axis and one selected saddle index; no extra field evaluation for selection</td><td><code>_read_at_nulls</code>, <code>:3491</code>–<code>:3502</code> and <code>:3586</code>; selection reuses <code>nulls.jet</code></td></tr>
+<tr><td>Wall tangency polishing</td><td>0, 1, 2</td><td>121 edges × 9 seeds × 13 visits = 14,157 point jets; 1,089 concurrent targets in the nested wall <code>vmap</code> at this base</td><td><code>_wall_events</code>, <code>:2953</code>, <code>:2961</code>, <code>:2983</code> and <code>:3004</code></td></tr>
+<tr><td>Wall endpoint values</td><td>0</td><td>2 × 121 = 242 target evaluations, including shared vertices more than once</td><td><code>_wall_events</code>, <code>:2997</code>–<code>:3002</code></td></tr>
+<tr><td>Saddle curvature, kernel-backed TotalField</td><td>2, with differences supplying effective orders 3 and 4</td><td>Nine Hessians per normal form; compact branch evaluates a fallback plus each saddle, 9(1 + S) Hessians, at most 36; overflow branch evaluates all 16 slots, 144 Hessians</td><td><code>_curvature_derivatives</code>, <code>:3312</code>–<code>:3348</code>; normal-form caller <code>:3500</code>; compact/full dispatch <code>:3545</code>–<code>:3576</code></td></tr>
+<tr><td>Curvature of a generic non-TotalField</td><td>3 and 4 through nested forward mode</td><td>One target per normal form; tensor widths 8 and 16 scalar entries</td><td><code>_curvature_derivatives</code>, <code>:3305</code>–<code>:3310</code>; one and two <code>jacfwd</code> transforms of the Hessian</td></tr>
+<tr><td>Bank-backed BellField curvature</td><td>Polynomial orders 3 and 4</td><td>One point, 8 + 16 polynomial derivative entries; no polygon-kernel differentiation on this branch</td><td><code>_curvature_derivatives</code>, <code>:3297</code>–<code>:3304</code></td></tr>
+<tr><td>Refresh with carried stationary points</td><td>2 at nine offsets; wall order 0–2 for a limited contact</td><td>Nine Hessians at one selected saddle; limited contact revisits wall events, while diverted contact can reuse the selected point</td><td><code>refresh_at_stationary_points</code>, <code>:3978</code>–<code>:4009</code></td></tr>
+<tr><td>Differentiating the stationary solve itself</td><td>Gradient JVP plus full-jet JVP; differentiating a Hessian adds an order</td><td>One polished point per stationary solve, separate from primal <code>read</code>; higher outer derivative order depends on the caller</td><td><code>_implicit_stationary_position_jvp</code>, <code>:1604</code>–<code>:1622</code>; field and position tangents, not finite-difference curvature</td></tr>
+</tbody>
+</table>
+<p>In the coupling, <code>value_gradient</code> calls the packed primal once (<code>nova/equilibrium/topology.py:2511</code>), and <code>evaluate</code> differentiates its gradient with <code>jacfwd</code> once (<code>:2534</code>–<code>:2542</code>). Thus the kernel-backed primal read reaches the packed custom JVP at the Hessian, but its curvature correction does not nest through third and fourth kernel derivatives. The measured wall source is the unbatched base in this worktree; the brief's later wall-batching commit <code>ba58f0d69</code> is context and is not incorporated here.</p>
+</section>
+<section id="mechanism">
+<h2>Attribution and the smallest candidate change</h2>
+<p>Source inspection of <code>nova/biot/polygonanalytic.py:3486</code>–<code>:3591</code> shows two stable tangent directions in a <code>scan(unroll=2)</code>, an independent unchanged value expression, and six shifted stable-pole primal evaluations in one mapped height-sample body. The six shifts are ±1e-3, ±5e-4 and ±2.5e-4 m (±1, ±0.5 and ±0.25 mm). Richardson coefficients are 64, −20 and 1, divided by 45. The samples are calculated for all source-target entries; <code>jnp.where</code> chooses their result only for packed field channels at index 3 and above when the nearest corner height is within 1e-7 m (0.1 µm). This is selection after evaluation, not conditional sample execution.</p>
+<p>The pole-product rule at <code>nova/biot/polygonanalytic.py:1107</code>–<code>:1123</code> computes <code>jax.jvp</code> of the joint expression in full, then selects a finite slope at exactly zero root with <code>jnp.where</code>. The stable-pole tangent expression calls this rule through <code>_regular_pole_contraction</code> at <code>:1161</code>. Nested forward mode therefore differentiates both ordinary expressions and sample expressions before the selected field tangent is assembled. This is a mechanism to quantify, not proof that the finite-slope branch or Richardson branch owns a particular memory share.</p>
+<p><strong>Measured attribution:</strong> with fixed 24-cell source arrays and a single target, requesting a Hessian grows the lowered instruction count from 19,624 to 121,842 and causes compilation to exceed the 120G host allocation. A large wall batch is consequently unnecessary for this host-memory failure. The saved point program cannot allocate the full read's 1.07 TiB claim among derivative nesting, target batches and XLA optimization: no full-read comparison, batch-size sweep, completed Hessian executable or Hessian rule ablation exists. No percentage of that demand is attributed to either cause. The approximately 51.7% instruction-metadata share above cannot substitute for such a percentage.</p>
+<p><strong>Smallest candidate product change, named and not made:</strong> put the Richardson height-sample evaluation behind a scalar near-corner condition for each source-target entry, preserving the ordinary tangent for generic entries. The probe's masked rule sketches this using serial <code>lax.map</code> plus <code>lax.cond</code>. It could remove unnecessary execution and sample buffer demand away from corners, but conditional branches still exist in a compiled module, so neither compile-memory reduction nor unchanged higher derivatives follows without the missing measurements. Removing the Richardson rule altogether has no demonstrated precision justification. There is no evidence sufficient to name a change as removing the largest share yet.</p>
+</section>
+<section id="delivery">
+<h2>Durability, checks and remaining work</h2>
+<p>The raw job log, row index, nine saved receipts, nine HLO modules and eight derivative arrays remain under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T045219222369-derivative-order-memory-census/</code>. The job log is <code>census-1338281.log</code>; its <code>rows/index.json</code> ends at the OOM-killed row. <code>summary.json</code> stores comparisons and receipt/array SHA256 digests. The measurement command is the committed <code>scripts/prototypes/derivative_order_census/job.sh</code>, supplied the assigned tree and that run directory as runtime arguments. Each row log states its exact interpreter command, revision, imported module path and working directory, and ends with its own <code>EXIT=</code> line.</p>
+<p>Helper commit <code>aa7fb2274b463d1303658c5ee1446771014799d3</code> separates all lowering rows from the compile pass and changes the default compile cutoff to 20,000 instructions, retaining the 19,624-instruction observed fitting gradient while excluding the measured failing Hessian. This is conservative admission, not a fitted safe-memory guarantee. The repair has lint/format checks only; its JAX paths have not run. It also adds <code>summarise.py</code>, which compares saved arrays without importing JAX. The summary was produced from the saved arrays without a new allocation. <code>check_record.py</code> validates all nine measured cost rows and eight accuracy rows against it, checks the receipt and array digests, and confirms that the comparison control exceeds 0.009. It detected and refused a mistyped StableHLO byte entry in the draft before the table was corrected. No product source or tests changed, so no suite pair applies; the supplied suite template has an empty node-test-file set and was not expanded to an unrelated test suite.</p>
+<p>Remaining measurements are the other order-2 lowerings, all order-3/4 lowerings, their feasible native memory analyses and accuracy arrays, plus the finite-difference curvature row and any batch-size discriminator needed to apportion the full read. The one permitted allocation is terminal, and the resume instruction permits continuing bounded rows only while it is live. No replacement allocation was submitted. A coordinator must authorize a new allocation, preferably lowering all rows before compiling any, before the census can close. No figure is drawn: two measured orders coincide across variants and the remaining orders are missing; the tables express those observations without suggesting an unmeasured trend.</p>
+</section>
+</main></body></html>

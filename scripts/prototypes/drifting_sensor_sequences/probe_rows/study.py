@@ -277,6 +277,14 @@ def build_case(cells: int = 500, reuse_rows: bool = False) -> dict:
         sigma_probe=sigma_probe,
         b0=float(case["geometry"]["b0"]),
         r0=float(case["geometry"]["r0"]),
+        # The admitted null the solve found, so the persisted reference keeps
+        # the topology it was solved with rather than leaving the panel to
+        # recover the X-point from a resampled lattice.
+        x_points=(
+            np.asarray(topology.x_point, dtype=float).reshape(-1, 2).tolist()
+            if getattr(topology, "x_point", None) is not None
+            else []
+        ),
         generating_residual=float(generated.terminal_state.fixed_point.residual),
         coordinates=int(case["coordinate"].shape[0]),
     )

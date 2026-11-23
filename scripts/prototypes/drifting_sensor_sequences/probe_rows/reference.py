@@ -129,25 +129,34 @@ def main(argv=None) -> int:
         np.load(STUDY / "conf" / "machine-wall.npz")["wall"], dtype=float
     )
     wall_r, wall_z = ring[:, 0], ring[:, 1]
-    inside = inside_vessel(study.GRID_RADIUS, study.GRID_HEIGHT, wall_r, wall_z)
-    found = saddles(psi, study.GRID_RADIUS, study.GRID_HEIGHT, axis, inside)
-    # Only a saddle at or below the boundary flux bounds the plasma, so only
-    # those are the generating state's admitted nulls; a stationary point
-    # outside the boundary is a private-flux feature of the same field.
-    x_points = np.asarray(
-        [
-            point
-            for point in found
-            if float(
-                psi[
-                    int(np.argmin(np.abs(study.GRID_RADIUS - point[0]))),
-                    int(np.argmin(np.abs(study.GRID_HEIGHT - point[1]))),
-                ]
-            )
-            < float(reference["flux_boundary"])
-        ],
-        dtype=float,
-    ).reshape(-1, 2)
+    # The solve's own topology is the authority on the admitted null, and the
+    # persisted reference carries it.  The lattice scan below is only the
+    # fallback for a seed that predates that field: a resampled field cannot
+    # place a null to better than a lattice cell.
+    stored_points = np.asarray(reference.get("x_points") or [], dtype=float)
+    stored_points = stored_points.reshape(-1, 2)
+    if stored_points.size:
+        x_points = stored_points
+    else:
+        inside = inside_vessel(study.GRID_RADIUS, study.GRID_HEIGHT, wall_r, wall_z)
+        found = saddles(psi, study.GRID_RADIUS, study.GRID_HEIGHT, axis, inside)
+        # Only a saddle at or below the boundary flux bounds the plasma, so
+        # only those are admitted; a stationary point outside the boundary is
+        # a private-flux feature of the same field.
+        x_points = np.asarray(
+            [
+                point
+                for point in found
+                if float(
+                    psi[
+                        int(np.argmin(np.abs(study.GRID_RADIUS - point[0]))),
+                        int(np.argmin(np.abs(study.GRID_HEIGHT - point[1]))),
+                    ]
+                )
+                < float(reference["flux_boundary"])
+            ],
+            dtype=float,
+        ).reshape(-1, 2)
     # One additive constant settles the lattice interpolation's residual at the
     # axis, so the reference contours sit on the same gauge as the persisted
     # flux_axis the panels' level array is built from.

@@ -267,10 +267,20 @@ def arm_row_set(stem: str) -> str:
 
 
 def declared_stem(
-    code: str, sequence: str, slices: int = 200, factor: float = 0.01
+    code: str,
+    sequence: str,
+    slices: int = 200,
+    factor: float = 0.01,
+    rows: str | None = None,
 ) -> str:
-    """The arm stem this code's column states, by its declared row set."""
-    tag = DECLARED_ROWS[code]
+    """The arm stem this code's column states, by its row set.
+
+    ``rows`` names a row set other than the code's declared one (the
+    consecutive 24-loop arm beside nova's 72-row arm, for instance), so a
+    caller composes the stem once here rather than appending a suffix that
+    would double when a declared set is itself that row set.
+    """
+    tag = DECLARED_ROWS[code] if rows is None else rows
     return "%s-%s-%d-%.4f%s" % (
         code,
         sequence,
@@ -281,17 +291,22 @@ def declared_stem(
 
 
 def selected_rows(
-    code: str, sequence: str, slices: int = 200, factor: float = 0.01
+    code: str,
+    sequence: str,
+    slices: int = 200,
+    factor: float = 0.01,
+    rows: str | None = None,
 ) -> list[dict]:
     """The slices of this code's declared arm, or empty when it is absent.
 
     One arm-selection rule for the reduction, the gate and the figures: the arm
     whose stem this code declares is the one stated, and a run holding only
-    another row set is reported missing rather than silently reduced.
+    another row set is reported missing rather than silently reduced.  ``rows``
+    selects a named row set instead of the declared one.
     """
     pattern = "%s-%s-%d-%.4f*.jsonl" % (code, sequence, slices, factor)
     runs = grouped(sorted(STUDY.glob(pattern)))
-    return runs.get(declared_stem(code, sequence, slices, factor), [])
+    return runs.get(declared_stem(code, sequence, slices, factor, rows), [])
 
 
 def grouped(paths: list[Path]) -> dict[str, list[dict]]:
@@ -424,7 +439,7 @@ def main() -> int:
     # like-for-like with imas-efit.
     row_matched = {
         "nova": {
-            sequence: summary.get(declared_stem("nova", sequence) + "-loops")
+            sequence: summary.get(declared_stem("nova", sequence, rows="loops"))
             for sequence in ("white", "drift")
         },
         "efit": {sequence: pick("efit", sequence) for sequence in ("white", "drift")},

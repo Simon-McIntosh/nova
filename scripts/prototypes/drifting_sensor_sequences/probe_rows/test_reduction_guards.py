@@ -382,6 +382,21 @@ def test_arm_selection_names_each_code_row_set(tmp_path, monkeypatch):
     assert analyse.declared_stem("efit", "white") == "efit-white-200-0.0100-loops"
 
 
+def test_declared_stem_states_a_named_row_set_once(monkeypatch):
+    """A named row set composes the stem once, whatever the code declares.
+
+    Appending the suffix to the declared stem doubles it as soon as nova's
+    declared row set is itself the loops, so the row set is stated to
+    ``declared_stem`` rather than concatenated onto the finished stem.
+    """
+    monkeypatch.setitem(analyse.DECLARED_ROWS, "nova", "loops")
+    assert (
+        analyse.declared_stem("nova", "white", rows="loops")
+        == "nova-white-200-0.0100-loops"
+    )
+    assert analyse.declared_stem("nova", "white") == "nova-white-200-0.0100-loops"
+
+
 def test_arm_selection_reports_missing_rather_than_comparing_row_sets(
     tmp_path, monkeypatch
 ):

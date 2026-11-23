@@ -89,6 +89,25 @@
     "reason": "the admission landing pass advances the run's plan section in its landing beat, after this merge; the impl has not moved at the moment of completion",
     "verdict": "waived"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/converged-forward-solve-s11 JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/converged-forward-solve-s11/tests/test_forward_solve_acceptance_bound.py -q",
+    "integrated_revision": "cb5a7bd97fb0730bb9b6003edbdf6cf1c3e72093",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261122T192354018332-converged-forward-solve-s11/review-landing/gate-cb5a7bd97fb0730bb9b6003edbdf6cf1c3e72093.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'UV_PROJECT_ENVIRONMENT=./.venv PYTHONPATH=. JAX_PLATFORMS=cpu ./.venv/bin/python -m pytest -p no:cacheprovider ./tests/test_forward_solve_acceptance_bound.py -q'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/converged-forward-solve-s11",
+      "/home/ITER/mcintos/Code/nova"
+    ]
+  },
   "lane": "clive",
   "lane_advisory": {
     "backend": "clive",

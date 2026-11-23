@@ -5,6 +5,8 @@ import html
 import json
 from pathlib import Path
 
+from nova.database.filepath import relativize_worktree_paths
+
 NODE = "hot-path-map"
 
 
@@ -175,10 +177,11 @@ def main():
     parts.append("</tbody></table>")
     parts.append(
         f"<p>Gate log: <code>{html.escape(args.log)}</code>. "
-        f"Measurement revision <code>{data['revision']}</code>, "
-        f"tree <code>{html.escape(data['tree'])}</code>, "
-        f"job <code>{html.escape(args.job)}</code> on <code>all_debug</code>."
-        f"</p>"
+        f"Measurement revision <code>{data['revision']}</code>, a single "
+        f"<code>all_debug</code> job <code>{html.escape(args.job)}</code>. "
+        f"Module, driver and receipt paths here and in the machine-readable copy "
+        f"are repository-relative; the gate log stays in the worker's cache "
+        f"directory, outside the repository.</p>"
     )
     if args.driver_revision:
         command = f"git diff --stat {data['revision']} {args.driver_revision} -- nova"
@@ -189,7 +192,10 @@ def main():
         )
     parts.append("</section>")
     parts.extend(["  </main>", "</body>", "</html>"])
-    args.output.write_text("\n".join(parts) + "\n")
+    text, unmapped = relativize_worktree_paths("\n".join(parts) + "\n")
+    args.output.write_text(text)
+    if unmapped:
+        print("UNMAPPED", json.dumps(unmapped[:5]), flush=True)
     print(f"WROTE {args.output} {len(modules)} modules", flush=True)
 
 

@@ -10,6 +10,8 @@ import ast
 import json
 from pathlib import Path
 
+from nova.database.filepath import relativize_worktree_paths
+
 # Modules the bank-solve device trace attributes kernels to. Its compiled loop
 # is ``support_read.solve_batch`` plus the modules that entry imports.
 TRACE_MODULES = (
@@ -208,7 +210,10 @@ def main():
         device_trace_contradictions=contradictions,
         modules=modules,
     )
-    args.output_json.write_text(json.dumps(payload, indent=1))
+    text, unmapped = relativize_worktree_paths(json.dumps(payload, indent=1))
+    args.output_json.write_text(text)
+    if unmapped:
+        print("UNMAPPED", json.dumps(unmapped[:5]), flush=True)
     print(
         "MAP",
         json.dumps(

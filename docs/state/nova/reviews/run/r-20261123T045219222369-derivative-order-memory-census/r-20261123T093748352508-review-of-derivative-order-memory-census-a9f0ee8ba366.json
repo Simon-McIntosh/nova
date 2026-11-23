@@ -3,6 +3,14 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-23T09:46:14.289Z",
   "dispatched_at": "2026-11-23T09:38:36Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T09:50:24.007670+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261123T045219222369-derivative-order-memory-census"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/derivative_order_census/variants.py",

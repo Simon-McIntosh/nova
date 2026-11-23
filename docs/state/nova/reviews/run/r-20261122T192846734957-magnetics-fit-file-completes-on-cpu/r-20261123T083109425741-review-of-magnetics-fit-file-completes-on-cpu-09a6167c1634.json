@@ -16,6 +16,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T192846734957-magnetics-fit-file-completes-on-cpu",
       "section": "\u00a79"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T10:32:34.853691+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T192846734957-magnetics-fit-file-completes-on-cpu",
+      "section": "\u00a79"
     }
   },
   "findings": [

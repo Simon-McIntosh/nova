@@ -1,0 +1,47 @@
+<section id="jax-cpu-native-abort-record">
+<h2>The native abort when a second known-state machine compiles in one process: what accumulates, and the release that stops it</h2>
+
+<p><strong>Result.</strong> A finished machine's loaded executable is not owned by the object that built it. JAX's staging and dispatch caches hold it, so dropping the profile or the receipt frees nothing: the process keeps the machine's address-space mappings, and each CPU free-boundary solve maps about 28,500 of them. A second machine compiled on top of the first pushes the process toward the kernel's per-process mapping limit (<code>vm.max_map_count</code>, 65,530); when it runs out the process dies inside XLA's next allocation with <code>Fatal Python error: Aborted</code> and exit 134, and no Python-level handler can catch it. The known-states module now releases the finished machine's compilations before it builds the next one (<code>nova.jax.config.release_compilation_caches</code>), which drops the mapping count by 89&#37; and lets two machines run through one process where the same two abort without it.</p>
+
+<h3 id="jax-cpu-native-abort-reproduction">The reproduction: two cases, one process, exit 134</h3>
+<p>The unfixed tree was extracted at base <code>e28db604e</code> and run with the same command and interpreter as the fixed tree, on the same host, against the same per-host compilation cache:</p>
+<p><code>python -m pytest -q tests/test_equilibrium_magnetics_fit_known_states.py -k 'solovev or mast'</code></p>
+<p>Solov'ev passes (one dot), then the process dies compiling MAST: <code>Fatal Python error</code>, the shell reporting <code>6067 Aborted (core dumped)</code>, <code>EXIT=134</code>. Nothing in the log names a test failure, because the abort is native: it arrives between the first case's assertions and the second case's, which is exactly the boundary the module has to cross to run its cases in one process.</p>
+<p>The abort site moves between runs and revisions. The previous node's runs name <code>deserialize_executable</code> at one revision and <code>backend_compile_and_load</code> at another; under this node's instrumented runs the process survived until it was killed for memory, never reaching the mapping limit because the instrumented driver generates two machines with a single program each rather than the full fit and resolve. The site is whichever native allocation comes first, which is why a fix aimed at one function would not hold.</p>
+
+<h3 id="jax-cpu-native-abort-mechanism">What accumulates, measured</h3>
+<p>Mappings and resident size were sampled every two seconds from <code>/proc/self/maps</code> and <code>/proc/self/status</code> while one process generated the cases one after another. Resident size stays near 5.5&#8211;6.1&#8239;GB throughout; it is the mapping count that accumulates.</p>
+<table id="jax-cpu-native-abort-maps">
+<tr><th>run</th><th>stage</th><th>mappings</th><th>resident</th><th>virtual</th></tr>
+<tr><td>single machine</td><td>Solov'ev built</td><td>6,809</td><td>1.38 GB</td><td>&#8212;</td></tr>
+<tr><td>single machine</td><td>Solov'ev solved</td><td>28,545</td><td>5.48 GB</td><td>&#8212;</td></tr>
+<tr><td>no release</td><td>MAST built on top of Solov'ev</td><td>30,246</td><td>6.44 GB</td><td>&#8212;</td></tr>
+<tr><td>no release</td><td>MAST solving, on top of Solov'ev</td><td>40,883</td><td>6.1 GB</td><td>&#8212;</td></tr>
+<tr><td>release between cases</td><td>Solov'ev solved</td><td>28,552</td><td>5.49 GB</td><td>21.85 GB</td></tr>
+<tr><td>release between cases</td><td>immediately after <code>jax.clear_caches()</code> + <code>gc.collect()</code></td><td><strong>3,031</strong></td><td>5.40 GB</td><td>21.65 GB</td></tr>
+<tr><td>release between cases</td><td>MAST solving on the same process, when the driver was stopped</td><td>31,476 (climbing)</td><td>6.0 GB</td><td>&#8212;</td></tr>
+</table>
+<p>In the run without a release, the second machine's build started from the first machine's 28,544 mappings and added its own, reaching 30,246: nothing the first case finished with returned. Only the cache clear returned any of them. Clearing the caches removed 25,523 mappings in one call, 89&#37; of the total, for 89&#8239;MB of resident memory. The two readings together are the mechanism: what accumulates is mapped executable images, not heap, and only the cache clear releases them.</p>
+<p>The kernel limit is not theoretical. A previous node's sampler recorded 65,271 mappings against a limit of 65,530 while a worker was compiling, which is the same bound the abort lands on.</p>
+
+<h3 id="jax-cpu-native-abort-fix">The fix</h3>
+<p><code>nova.jax.config.release_compilation_caches()</code> clears every JAX staging and dispatch cache, collects, and records a <code>CompilationRelease</code> with the executable counts either side and the number of objects collected, so the release is measurable from the process rather than inferred. It is the same private release the threshold-driven <code>bound_compilation_retention</code> uses, now reachable unconditionally.</p>
+<p>The known-states module calls it from its case fixture, before building a machine it has not built yet:</p>
+<pre><code>def get(name):
+    if name not in built:
+        release_compilation_caches()
+        built.add(name)
+    return table(name)</code></pre>
+<p>The condition is deliberate. A case already built is returned without releasing, because releasing there would discard the compilation the test is about to use: <code>test_displaced_flux_loop_is_identified</code> runs on the Solov'ev case the recovery test already built, and must not recompile it.</p>
+<p>A count-based ceiling cannot do this work. One machine is a handful of executables against a ceiling of 1024, so the repository's existing retention hook never fires for a four-test module; the quantity that runs out is mappings, which no executable count reports.</p>
+
+<h3 id="jax-cpu-native-abort-after">The fixed tree in one process</h3>
+<p>With the fix, the same command over both cases that abort on the base tree runs them both in one process: two dots, no abort, where the base tree dies on the second. The full module was then run with the four slow cases selected. Under the module's own <code>@pytest.mark.timeout(3500)</code> guard, the third case (ITER) reached the guard: the fixed-tree arm logged two passes and then <code>Timeout</code>, and the guard's bound is the near neighbour of the first case's own measured cost (3,266.66&#8239;s at the previous node), so a cold per-host compilation cache pushes a case over it. That is a property of the guard rather than of the abort, and it is why the recorded full-module arm repeats the run with the guard disabled and the four cases unguarded; its outcome is recorded in the run's manifest beside the log it was read from.</p>
+
+<h3 id="jax-cpu-native-abort-limit">What this node could not measure</h3>
+<p>The worker's step is capped at 24&#8239;GiB (<code>memory.max</code> on its cgroup), and one CPU arm holds about 6&#8239;GB resident. Four heavy cases under <code>-n 8</code> need roughly four times that at once, so the <code>-n 8</code> arm cannot be measured in this step at all: the earlier attempt was killed by the step's own ceiling, and that kill is recorded as an out-of-memory of the approach rather than as evidence about the abort. A worker on this allocation should either run one arm at a time or ask for an allocation sized for the concurrency it intends to measure.</p>
+
+<h3 id="jax-cpu-native-abort-change">What changed</h3>
+<p><code>nova/jax/config.py</code> gains <code>release_compilation_caches</code> and the private <code>_release_compilation_caches</code> it shares with <code>bound_compilation_retention</code>, and lists the new function in <code>__all__</code>. <code>tests/test_equilibrium_magnetics_fit_known_states.py</code> imports it and releases before each new machine in its case fixture. <code>tests/test_jax_config.py</code> pins the release: one clear per call, the recorded counts, and the history the release appends to.</p>
+<p>No assertion was weakened and no case was removed. The measurement's cost is unchanged apart from the release itself, which is one cache clear per new machine.</p>
+</section>

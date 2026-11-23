@@ -53,22 +53,18 @@ def main():
     print("HEADER", json.dumps(record), flush=True)
     save()
 
-    # The first call traces and compiles; the second is the measured execution
-    # of the same public entry with a warm program.
-    warm = profile.solve(request)
+    # One call traces, compiles and executes the public entry; the line map
+    # needs the entry to have run, not a repeated timing.
     started = perf_counter()
     result = profile.solve(request)
-    wall_ms = 1000 * (perf_counter() - started)
     record.update(
-        warm_residual=float(np.asarray(warm.terminal_state.fixed_point.residual)),
-        warm_converged=bool(warm.terminal_state.fixed_point.converged),
         residual=float(np.asarray(result.terminal_state.fixed_point.residual)),
         converged=bool(result.terminal_state.fixed_point.converged),
         flux_entries=int(np.asarray(result.terminal_state.flux).size),
-        wall_ms=wall_ms,
+        wall_ms=1000 * (perf_counter() - started),
     )
     save()
-    assert record["converged"] and record["warm_converged"]
+    assert record["converged"]
     record["complete"] = True
     save()
     print("SUMMARY", json.dumps(record), flush=True)

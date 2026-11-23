@@ -1,0 +1,66 @@
+{
+  "added_failure_basis": "The reviewed manifest carries no baseline_suite or after_suite entry: its write paths hold no test file and its suite fence is unarmed, so no suite pair exists to difference. Its only machine-checked gate is the comparison driver recorded in gate-repair.log (job 1339005, revision 4b9f1c315cf723ad0141cf334f039ee87fa034e8), which reports '7 entries passed, 0 failed, 3 negative controls fired' with EXIT=0. Added failures against that base: none.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-23T10:58:11.247Z",
+  "dispatched_at": "2026-11-23T10:48:33Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/hot_path_duplicates/compare.py",
+      "line": 471,
+      "severity": "non-blocking: the plot-columns entry's implementation_a string names 'PolyPlot and PolyPlotChildren', but implementations_found in the committed receipt lists only nova.frame.polyplot.PolyPlot.update_columns, so the receipt asserts an implementation was compared that the discovery step did not find.",
+      "text": "plot-columns implementation_a label claims PolyPlotChildren was compared; the receipt's implementations_found shows only PolyPlot.update_columns."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html",
+      "line": 29,
+      "severity": "non-blocking: the seventh entry's four candidate pairs carry a keeper and removable lines inside receipt.json but no decision record under hot-path-duplicates/ and no statement of which route executes which, while plan \u00a75 done_when asks each entry be raised to S28's coordinator as one decision naming the entry; those four decisions will not reach the coordinator.",
+      "text": "the four flagged candidate pairs are measured but have no per-entry decision record, so no S28 decision names them."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates/receipt.json",
+      "line": 1,
+      "severity": "non-blocking: the receipt carries no revision field, so the revision the register cites for it (4b9f1c315) is provable only from the header of gate-repair.log rather than from the committed artifact.",
+      "text": "receipt.json lacks a revision stamp; its provenance rests on the gate log, not the artifact."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html",
+      "line": 42,
+      "severity": "non-blocking: eight of the eleven delivered paths (job.sh, receipt.json, and six decision records) lie outside the five declared write paths even after the first repair round; the register documents the gap and every path is inside the section's evidence/prototype area, but the declared scope does not cover what landed.",
+      "text": "delivery exceeds the declared write paths by eight files, documented but not covered by the declaration."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T104745522765-review-of-hot-path-duplicate-register-c2a3f014f829",
+  "reviewed_base_sha": "7505cdfbc551ac367c977575d4a3d74a9f1bddd2",
+  "reviewed_head_sha": "c2a3f014f829198e725e54237512eaa155b225e9",
+  "reviewed_run_id": "r-20261122T202607457728-hot-path-duplicate-register",
+  "rubric": {
+    "durability": "answered: no test fails if the register or driver regresses; the driver's enforced negative controls guard the comparison but are not wired into the suite.",
+    "evidence": "answered: the driver gate and three negative controls are recorded in gate-repair.log at revision 4b9f1c315 and reconcile with receipt.json.",
+    "fit": "answered: descriptive file and symbol names, no plan or stage labels in source; one label mismatch in a receipt string.",
+    "goal_fidelity": "answered: the register at hot-path-duplicates.html delivers the record plan \u00a75 asks for, with six compared entries plus four measured candidates.",
+    "reuse": "answered: the driver reuses scripts/iron_operator_bound/reuse_check.py definitions() and cross-checks it, authoring only the body-digest and near-identity grouping that no nova owner provides.",
+    "scope_discipline": "answered: eight of eleven delivered paths fall outside the declared set; all lie inside the section's evidence/prototype area and are enumerated in the register."
+  },
+  "scores": {
+    "durability": 9,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T11:05:34.085686+00:00",
+  "total": 90,
+  "verdicts": {
+    "diff": "VERDICT diff: read commit by commit against base 7505cdf; 19 commits land 11 files (one register HTML, one 900-line comparison driver, one job runner, eight JSON records), all under docs/evidence/fragments/code-reuse-and-hot-path/ or scripts/prototypes/hot_path_duplicates/.",
+    "done_when": "VERDICT done_when: the done_when asks each entry to name implementations, per-route execution, and agreement on a stated input within a stated tolerance, plus a proposed keeper and removable lines; scripts/prototypes/hot_path_duplicates/compare.py computes exactly those and its gate result ('7 entries passed, 0 failed, 3 negative controls fired') is recorded in gate-repair.log, though the four-candidate seventh entry carries no decision record.",
+    "goal": "VERDICT goal: the node goal is a register of duplicate hot-path implementations at docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html; that file exists at the head and its six-row table names each pair, the route that executes it, the measured agreement against a tolerance, and the keeper with removable lines.",
+    "manifest": "VERDICT manifest: read; it records the driver gate and its logs, names negative_control_log=revert-verification.log, cites the 4b9f1c315 gate run, and states the suite fence is unarmed.",
+    "write_paths": "VERDICT write_paths: read the manifest's declared paths (five for this round) against the eleven delivered paths; three intersect (hot-path-duplicates.html, ast-scan.json, compare.py) and eight sit outside them (job.sh, receipt.json, six decision records), which the register enumerates at hot-path-duplicates.html:40-55."
+  }
+}

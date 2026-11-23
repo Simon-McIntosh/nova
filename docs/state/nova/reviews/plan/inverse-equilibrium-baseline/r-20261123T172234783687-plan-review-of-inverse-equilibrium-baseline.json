@@ -133,6 +133,16 @@
       "note": "Split: \u00a711 diagnoses (contraction, slowest mode, candidates ruled in or out, wall per pass); new \u00a712 lands the one change with the before/after pass counts and walls.",
       "reason": "",
       "when": "2026-11-23T19:18:12.711419+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "21ad4345423b3013e276581d0884b45e27b29d6e",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a710 names fragments/inverse-equilibrium-baseline/stored-cases-500-passes.html (large histories on GPFS), \u00a711 fit-iteration-convergence-rate.html, \u00a712 fit-iteration-fewer-passes.html.",
+      "reason": "",
+      "when": "2026-11-23T19:18:49.532614+00:00"
     }
   ],
   "responses": {
@@ -153,6 +163,15 @@
       "note": "The repair is now \u00a712, whose clause (1) applies to every case that took more than one pass before (Solov'ev and each stored case converged in \u00a710) and requires MAST and ITER known states to stay at one pass.",
       "reason": "",
       "when": "2026-11-23T19:16:18.881633+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "21ad4345423b3013e276581d0884b45e27b29d6e",
+      "commit_basis": "edit",
+      "note": "\u00a710 names fragments/inverse-equilibrium-baseline/stored-cases-500-passes.html (large histories on GPFS), \u00a711 fit-iteration-convergence-rate.html, \u00a712 fit-iteration-fewer-passes.html.",
+      "reason": "",
+      "when": "2026-11-23T19:18:49.532614+00:00"
     },
     "reasoning-1": {
       "action": "acted",

@@ -25,8 +25,8 @@
   <title>Iron Core Magnetisation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="151">
-<meta name="plan-modified" content="2026-11-22">
+<meta name="plan-version" content="152">
+<meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
   <main class="plan-doc">
@@ -684,6 +684,9 @@ number is reported for either ratio.</p></div>
 </div>
 <div class="r-comment" data-section="s11" data-id="c-run-r-20261122T163026553113-review-of-icm-cholesky-route-onto-main-acc8b9dbb87b" data-who="reckon-build" data-when="2026-11-22T16:40:57.970Z">
     <div class="r-comment-body"><p>Review of run r-20261122T141951224815-icm-cholesky-route-onto-main at base ee7a8dbaf and head acc8b9dbb: parsed, all six dimensions scored (goal_fidelity 16, evidence 12, scope_discipline 16, durability 17, fit 17, reuse 13; total 91), added_failure_count 0, five non-blocking findings, no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-run-r-20261122T141951224815-icm-cholesky-route-onto-main" data-who="reckon-build" data-when="2026-11-22T16:30:17.134Z">
+    <div class="r-comment-body"><p>Merged 64090647d onto the iron field-source line: the in-place symmetric Cholesky Newton route and its definiteness guard now sit beside the passive CoilSet frame and cached coil response, both unchanged in behaviour. On the persisted uniform 80 mm WEST operator in one process the routes agree with probes at 2.66e-14 (worst probe) and the coefficient vector at 8.53e-13 relative Frobenius (worst single entry 1.67e-12, the round-off floor); the guard refuses an indefinite Newton matrix and its negative control fails with the guard removed.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261106T222130291065-review-of-icm-strip-error-sweep-43dc514d920c-figure" data-who="reckon-build" data-when="2026-11-06T22:32:39.513Z">
     <div class="r-comment-body"><p>Figure review of run r-20261106T212311176377-icm-strip-error-sweep at head 43dc514d9 is parsed with no blocking finding: the strip-error curve figure renders clean (zero ink in the outer 8 px frame, ink bbox x 35..1365 y 86..690, one frameless legend row, the 1e-10 direct label in clear space), and one non-blocking finding records that the two lightest curve stops measure 2.61:1 and 1.93:1 against white, below the 3:1 a plotted line is required to hold, so the coincident right-hand branch is drawn in the palest trace.</p></div>

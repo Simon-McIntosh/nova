@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "answered": "Read the six checklist items against the artefacts: the source goal from the run prompt, the done_when from node.json, the three declared write paths, the delivered manifest, and the eleven-commit diff 26ba1790..d90cdd78 restricted to the ten paths the goal names, and the production call sites. Re-ran the two head-only durability test files (test_record_claims.py, test_panel_visibility.py) in an exported tree at d90cdd78 under JAX_PLATFORMS=cpu: 14 passed. Confirmed the prior findings are answered: control_claim now recomputes the factor, the suite runner writes and reads a two-line header, exported trees use $TMPDIR, drift_policy_panels delegates to redraw_panels.draw_arms, suite_arms delegates to run_suite_arm.sh, the panel guard covers the drift directory, and the scatter is stated in the record.",
+  "call_sites": [
+    "scripts/prototypes/stored_state_refusals/drift_policy_panels.py:main (calls redraw_panels.draw_arms)",
+    "scripts/prototypes/stored_state_refusals/redraw_panels.sh (invokes redraw_panels)",
+    "scripts/prototypes/stored_state_refusals/suite_arms.py:main (invokes run_suite_arm.sh)",
+    "scripts/prototypes/stored_state_refusals/run_suite_arm.sh"
+  ],
+  "completed_at": "2026-11-23T03:06:16.062Z",
+  "dispatched_at": "2026-11-23T02:58:46Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/stored_state_refusals/run_suite_arm.sh",
+      "id": "fd10e2a1b01",
+      "line": 60,
+      "severity": "non-blocking",
+      "text": "The log's '# command:' line is composed as `PYTHONPATH=. JAX_PLATFORMS=cpu <python> -m pytest ...`, but the arm is executed at line 73 as `env PYTHONPATH=\"${tree}\" ...` after `cd \"${tree}\"`. The two agree only because the wrapper changes directory first, so a promotion harness that replays the recorded command from any other working directory imports a different tree than the arm did; the log does carry '# tree:' so a reader can recover, but the recorded command is not the one that ran."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/suite_arms.py",
+      "id": "fd11f3b2c02",
+      "line": 45,
+      "severity": "non-blocking",
+      "text": "`_export` writes a revision's tree with `git archive | tar` and `_run_arm` runs and logs the arm, which re-implements the snapshot-and-run-an-arm capability scripts/prototypes/bank_warm_predictor/suites.py:13-90 already owns (its `snapshot` and `run`). The gained refactor moves the run half onto run_suite_arm.sh but leaves the export forked, so a future change to how an arm's tree is materialised must be made in two prototype trees."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html",
+      "id": "fd12a4c3d03",
+      "line": 254,
+      "severity": "non-blocking",
+      "text": "The provenance paragraph cites job 1338142 as the claim verifier but names no revision, and the cited log input-drift/verify-input-drift-4.log carries `revision=ce4bf40077dc56999618770aa58e1dc9c1ad9719`, three commits before the reviewed head d90cdd78; verify_input_drift.py is unchanged across those commits, so the claims do apply to the head, but a reader comparing the provenance to the delivered head cannot see that from the record."
+    }
+  ],
+  "justifications": {
+    "durability": "scripts/prototypes/stored_state_refusals/test_panel_visibility.py:88-105 empties a published panel's blue paths and asserts the guard rejects it, :125-150 stubs draw_arms and asserts the drift driver delegates, and input-drift/negative-controls-final-1338153.log shows reverting 41aa310d7 and b3cb9d9dc reddens the corresponding tests, so each new assertion names the code change that reddens it.",
+    "evidence": "scripts/prototypes/stored_state_refusals/verify_input_drift.py:78-100 recomputes the factor of three from the arm residual and the published anchor and compares the recomputed band against the stored flag, so the control can now fail; the recorded run input-drift/verify-input-drift-4.log reports 22 CLAIM PASS and EXIT=0, though its header names revision ce4bf40077dc, three commits before the reviewed head.",
+    "fit": "scripts/prototypes/stored_state_refusals/redraw_panels.py:51-90 and records.py:160-184 follow the sibling prototype modules' module-docstring-and-plain-function idiom, and the naming checks find no plan, stage, ticket or version label in any added symbol, file or comment.",
+    "goal_fidelity": "docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html:143-158 now states the 1.19e-4/1.55e-3/2.31e-4 scatter that makes the two quoted nominal values one arm measured twice, closing the prior open finding, and the panels at :179-196 are drawn through the one shared path the record documents at :245-262.",
+    "reuse": "The gained commits consolidate two duplicated capabilities (drift_policy_panels.py:80-96 now calls redraw_panels.draw_arms; suite_arms.py:66-80 now calls run_suite_arm.sh), but suite_arms.py:45-56 still forks the snapshot-and-run-an-arm capability that scripts/prototypes/bank_warm_predictor/suites.py:13-90 already owns rather than extending it.",
+    "scope_discipline": "git diff --stat 26ba1790a7e9..d90cdd78 lists only the ten files whose roots were declared and touches no product module under nova/ or any test file outside scripts/prototypes/stored_state_refusals."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T025751298850-review-of-default-policy-refusal-drift-d90cdd78ac7e",
+  "reviewed_base_sha": "26ba1790a7e9b335cdd9053a1eca982dc4d9889c",
+  "reviewed_head_sha": "d90cdd78ac7e95af3794e07773df1b89fa443fb8",
+  "reviewed_run_id": "r-20261121T205621369895-default-policy-refusal-drift",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T04:10:00Z",
+  "total": 103,
+  "verdicts": {
+    "diff": "Read the eleven commits 26ba1790a7e9..d90cdd78a commit by commit (ten files, +1002/-322): records.suite_arm_log text-reader fix, run_suite_arm.sh two-line header plus tree/revision options, suite_arms delegating to that wrapper, drift_policy_panels delegating to redraw_panels.draw_arms, redraw_panels gaining terminal_flux/draw_arms, nominal_repeat.py, three test files, and the record's scatter and provenance paragraphs.",
+    "done_when": "The done_when's clause (2), the positive control within 3x with its reason code, is asserted independently by scripts/prototypes/stored_state_refusals/verify_input_drift.py:78-100 (control_claim recomputes the factor from the arm residual and the published record, not from the arm's own flag) and :180-201; clause (3)'s standing-cases table is at docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html:200-215, which the gained commits do not alter.",
+    "goal": "The node goal (prompt.txt) is to name the input or revision that accounts for the difference between the comparison record and the landed default-policy arms, reproduce the comparison's TCV residual within 3x with its reason code, and state the standing cases in one table; the eleven commits gained since 26ba1790 do not add a new explanation but make that record's claims checkable, adding the scatter remark at docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html:143 and the shared drawing path the panels are redrawn through at :245-262.",
+    "manifest": "Read r-20261121T205621369895-default-policy-refusal-drift/manifest.md; it records status complete, gives each arm's literal command with its own revision and log, and its baseline_suite/after_suite blocks carry revision, command, exit_status, log_path, completed, failure_count and failure_ids; I re-read input-drift/suite-repair-3/suite-base.log (16 passed, EXIT=0) and suite-head.log (26 passed, EXIT=0) and both agree with the blocks.",
+    "write_paths": "Declared scripts/prototypes/stored_state_refusals, docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html and docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift; git diff --stat 26ba1790a7e9b335cdd9053a1eca982dc4d9889c..d90cdd78ac7e95af3794e07773df1b89fa443fb8 lists exactly ten files, all inside those three roots."
+  }
+}

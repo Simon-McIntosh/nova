@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-23T02:59:51Z",
+  "figures_reviewed": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T025904766578-review-of-default-policy-refusal-drift-d90cdd78ac7e-figure/image-0.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T025904766578-review-of-default-policy-refusal-drift-d90cdd78ac7e-figure/image-1.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T025904766578-review-of-default-policy-refusal-drift-d90cdd78ac7e-figure/image-2.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T025904766578-review-of-default-policy-refusal-drift-d90cdd78ac7e-figure/image-3.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T025904766578-review-of-default-policy-refusal-drift-d90cdd78ac7e-figure/image-4.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T025904766578-review-of-default-policy-refusal-drift-d90cdd78ac7e-figure/image-5.png",
+    "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/iter-input-comparison.svg",
+    "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/iter-input-stored.svg",
+    "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/iter-record-seed.svg",
+    "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/tcv-input-comparison.svg",
+    "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/tcv-input-stored.svg",
+    "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/tcv-record-seed.svg"
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/iter-input-comparison.svg",
+      "id": "f166ef7aa89",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The cross-section uses a small fraction of the published canvas, so the comparison draws at about one fifth of the delivered width. The ITER drawing occupies roughly x 560-845 and the TCV box roughly x 600-800 of a 1399 px canvas, leaving 80 to 86 percent of the figure blank margin. The 14 x 7.2 in canvas is the repository's own, so the canvas is not the fault; the cost is that the thin blue subject contour renders about 2 px wide and the offset between the stored state and the terminal iterate is readable only on close inspection. The unused width could carry a second panel per figure (a zoom on the outer contours and X-point region, or the signed difference between the two fields) that would show the comparison at the size the reader is given."
+    },
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/tcv-input-stored.svg",
+      "id": "ff166723088",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The reference series is stroked heavier than the subject, inverting the repository's plot-style rule that the subject reads on top and the reference beneath is thinner and lighter. The stored imas-efit state is drawn at 2.6 pt and the solved terminal iterate at 1.0 pt, and the rendered pixels agree: grey 19188-20541 against blue 7576-14086 across the six panels, a 1.4 to 2.6 times excess for the reference. The eye is drawn to the stored state first and to the solved state the panel is about second. Drawing the reference near 1.2 pt and the solved series near 2.6 pt would keep both visible while giving the subject the weight."
+    },
+    {
+      "file": "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/iter-record-seed.svg",
+      "id": "fc635da5003",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The in-figure legend keys the two series as line styles only and does not key the marks that carry the result, and one key changes between panels. Every panel draws a solid triangle for an admitted magnetic axis and a filled cross for an admitted saddle in each series' colour, and that vocabulary appears in the caption but nowhere in the legend. The solved entry's marker is also inconsistent across the set: it carries a triangle on the five arms that admitted an axis and a line alone on this refusal panel, which a reader comparing panels can read as a change of series rather than as a change of outcome. A third legend entry naming the axis and saddle marks, drawn in the legend's own grey so it reads as a key, would close the gap without altering the data."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T025904766578-review-of-default-policy-refusal-drift-d90cdd78ac7e-figure",
+  "reviewed_base_sha": "d70c3598da3df64ee1cebb424bbfe2c1d498e0f9",
+  "reviewed_head_sha": "d90cdd78ac7e95af3794e07773df1b89fa443fb8",
+  "reviewed_run_id": "r-20261121T205621369895-default-policy-refusal-drift",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Passes. The only text is the two legend entries at the top of each panel, near-black on white at roughly 14 pt and well above body contrast. The blue solved contour and the mid-grey reference both clear their white background, and no text sits over a coloured or filled area.",
+    "data_ink": "Defect recorded, non-blocking: the reference series carries more ink than the subject the figure exists to show. Measured stroke pixels on the six rendered PNGs give grey 19188-20541 against blue 7576-14086, so the grey stored state outweighs the blue terminal iterate by 1.4 to 2.6 times in every panel, consistent with the reference stroked heavier than the solved series. Nothing but data is inked, so the panel is not cluttered; the weighting is otherwise inverted relative to the series the panel is about.",
+    "decoration": "Passes. No gradient, colour fill, shading, background panel, frame, drop shadow or in-figure title in any of the six panels. The only non-data ink is the black first-wall outline, the null markers the caption explains, and two frameless legend entries sitting in clear space above the drawing.",
+    "label_collision": "Passes for text; one mark-on-mark contact noted. The legend occupies the top band in clear space above the drawing and neither overlaps another label, the data, nor a canvas edge in any of the six panels. Labels are not clipped. The only mark contact is where the solved and stored magnetic-axis triangles nearly coincide (notably iter-input-comparison and the two TCV input panels): the blue triangle is drawn over the grey one and the two remain distinguishable by colour, but the grey marker is not separately readable there. Reported as a non-blocking finding rather than as a blocking collision, because no text is involved and the caption states both axes.",
+    "legibility": "Passes as a picture of two flux maps, with a stated scale limitation. At the rendered 1399x720 the black first wall reads as one closed outline in every panel, and the grey stored state and the blue terminal iterate read as two distinguishable contour sets, with the solid triangle (admitted axis) and filled cross (admitted saddle) unmistakable. The limitation is the drawing's size on the canvas: the ITER cross-section fills roughly x 560-845 and the TCV box roughly x 600-800 of a 1399 px canvas, so each thin blue contour renders about 2 px wide and the stored-versus-iterate offset resolves only on zoom. Legible as a picture, less so as a comparison at the delivered width.",
+    "table_form": "Passes. Each panel shows the spatial coincidence of two poloidal flux-contour sets inside a machine cross-section, with the wall and the null points providing the scale; nothing depicted is naturally tabular."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T03:04:46.013978+00:00",
+  "total": null
+}

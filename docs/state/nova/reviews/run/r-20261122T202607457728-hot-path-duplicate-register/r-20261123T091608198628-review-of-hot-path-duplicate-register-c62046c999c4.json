@@ -1,0 +1,77 @@
+{
+  "added_failure_basis": "The reviewed run's manifest carries baseline_suite: null and after_suite: null (suite gate unarmed, its write paths hold no test file), so no suite pair exists to difference. Its only gate is the comparison job recorded in compare.log, which reports '6 entries passed, 0 failed' and EXIT=0 at revision 1d30cd50b; the committed receipt.json is byte-identical to that run's receipt. Added failures: none.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T09:25:29.164Z",
+  "dispatched_at": "2026-11-23T09:16:36Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/hot_path_duplicates/compare.py",
+      "line": 202,
+      "severity": "non-blocking: the disagreeing branch of the extreme-selection entry computes max(abs(item[2] - item[3])) where both sides are Python lists (first.tolist()/second.tolist()), which raises TypeError instead of reporting the index gap; a real regression still fails the gate through the outer ENTRY_ERROR handler, but the receipt loses the measured disagreement and mislabels it an entry error.",
+      "text": "extreme-selection disagreement path subtracts two lists and cannot report the index gap it was added to measure."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_duplicates/compare.py",
+      "line": 463,
+      "severity": "non-blocking: compare() decides failed/exit status only from each entry's agrees flag and recorded errors; receipt['negative_controls'] is written but never consulted, so a perturbed comparison that stopped disagreeing would still print '6 entries passed, 0 failed' and exit 0. The done-when's negative control is measured here but not guarded.",
+      "text": "negative controls are recorded but not enforced by the gate exit status."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_duplicates/compare.py",
+      "line": 444,
+      "severity": "non-blocking: the plot-columns entry groups delegate call counts only for implementations it found; if one module's update_columns were renamed or moved, that module contributes no comparison and the entry still reports agrees: true, a vacuous pass. It should assert both implementations were discovered.",
+      "text": "plot-columns can pass vacuously when an implementation is not found."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates/ast-scan.json",
+      "line": 1,
+      "severity": "non-blocking: the AST scan artifact is not reproducible \u2014 no committed script generated it, and its identical_bodies block holds only the within-module against_arctan digest, not the choose / update_columns body matches the fragment's 'How further candidates were found paragraph reports. The fragment's claim that the scan reuses scripts/iron_operator_bound/reuse_check.py cannot be re-run from the delivered tree.",
+      "text": "committed AST scan omits the body-digest matches the fragment cites and ships no generator."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html",
+      "line": 1,
+      "severity": "non-blocking: the delivered fragment is hot-path-duplicates.html (the name plan \u00a75 states), but the dispatched write paths named hot-path-duplicate-register.html and a figures directory; all 11 delivered paths sit outside the declared set, and nine evidence files plus two prototype drivers were added beyond it. The rename to the plan's name is correct, but the run record's declared scope does not cover what landed.",
+      "text": "delivered paths all fall outside the run record's declared write paths; the record named a path the plan does not."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_duplicates/compare.py",
+      "line": 52,
+      "severity": "non-blocking: the topology-read entry reports axis_gap_m as the distance from the supplied-point reading to the analytic axis, not between the two implementations' readings; the receipt carries both axes so the inter-implementation gap (about 1.9e-05 m) is computable, but the stated agreement is not the pairwise quantity the done-when asks for.",
+      "text": "topology-read states an axis agreement against the analytic axis rather than between the two implementations."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html",
+      "line": 14,
+      "severity": "non-blocking: the reviewed manifest's negative_control_log is empty although three perturbed-input controls ran; the controls survive only inside the test log. The manifest should name the log that carries the declared negative control.",
+      "text": "negative_control_log is empty while three negative controls are recorded in compare.log."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T091608198628-review-of-hot-path-duplicate-register-c62046c999c4",
+  "reviewed_base_sha": "7505cdfbc551ac367c977575d4a3d74a9f1bddd2",
+  "reviewed_head_sha": "c62046c999c4fe117a8501c33bf882354105cad2",
+  "reviewed_run_id": "r-20261122T202607457728-hot-path-duplicate-register",
+  "rubric": "text",
+  "scores": {
+    "durability": 7,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T09:25:41.951867+00:00",
+  "total": 86,
+  "verdicts": {
+    "call_sites": "none",
+    "diff": "Read all nine commits 47eaf8b34..c62046c99 against base 7505cdf: 11 paths, +2879 lines \u2014 a comparison driver and job script, the fragment, six decision records, receipt.json and ast-scan.json; the last two commits correct the fragment name to the plan's hot-path-duplicates.html and remove the superseded path. compare.py is identical between the gate revision 1d30cd50b and head.",
+    "done_when": "The done-when asks each entry to name implementations, route execution per \u00a71, and agreement within a stated tolerance or the measured disagreement; receipt.json records all six with tolerances and agrees:true, and compare.log reports '6 entries passed, 0 failed' with EXIT=0 at revision 1d30cd50b. Three negative controls report disagreement beyond their tolerance.",
+    "goal": "The goal (as stated in r-20261122T202607457728-hot-path-duplicate-register/brief.md and plan code-reuse-and-hot-path \u00a75) is a register of places where two implementations compute one quantity; docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html delivers six entries (five duplicate pairs plus one route resolution), each with implementations, route execution, measured agreement and a keep/removable proposal.",
+    "manifest": "Read the manifest: status complete, tests 'bash scripts/prototypes/hot_path_duplicates/job.sh', test_logs the run's compare.log, changed_paths naming the fragment, its directory and the two prototype scripts; baseline_suite and after_suite are null (suite unarmed), negative_control_log is empty although the three controls ran, and the landing line names the six entries and the decision records.",
+    "write_paths": "The declared write paths are docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html and docs/figures/code-reuse-and-hot-path/hot-path-duplicate-register; the diff delivers hot-path-duplicates.html (the plan's name), nine files under hot-path-duplicates/, and scripts/prototypes/hot_path_duplicates/{compare.py,job.sh}, so none of the 11 paths lies inside the declared set while all lie inside the plan section's expected scope."
+  }
+}

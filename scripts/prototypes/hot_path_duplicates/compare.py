@@ -779,7 +779,7 @@ def ast_scan(tree, map_path):
                             )
     near.sort(key=lambda item: (-item["ratio"], item["function"]))
     return dict(
-        line_map=str(map_path),
+        line_map=str(map_path.relative_to(tree)),
         line_map_revision=line_map.get("revision"),
         definitions=definitions_cross_check(tree, modules, rows),
         route_modules=modules,

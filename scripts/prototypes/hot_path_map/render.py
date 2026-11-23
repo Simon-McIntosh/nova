@@ -96,7 +96,10 @@ def main():
     utilities = counted("nova/utilities/")
     parts.append(
         "<p>The two routes are the public forward solve "
-        "<code>ForwardProfile.solve</code> on a stored MAST case, and the "
+        "<code>ForwardProfile.solve</code> on a stored MAST case (the "
+        "slice-profile bank arm's input <code>common-streams.npz</code> is "
+        "absent from shared storage at this revision, so the public entry is "
+        "driven directly) and the "
         "known-state recovery test "
         "<code>test_known_state_recovery[mast]</code>, which drives the fit "
         "inside the equilibrium iteration and calls the same public entry. "

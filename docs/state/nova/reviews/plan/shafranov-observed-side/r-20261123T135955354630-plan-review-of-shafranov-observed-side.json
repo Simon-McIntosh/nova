@@ -1,0 +1,78 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T14:09:13.798Z",
+  "dispatched_at": "2026-11-23T14:00:25Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#f-fsa-figrepair-shafranov-integral",
+      "id": "anchors_resolve-1",
+      "reason": "the followup's file targets and receipt description must be corrected or the followup closed before dispatch, or the node spends a round on absent files and a stale receipt shape.",
+      "text": "the open followup lists docs/figures/constraint-augmented-newton-krylov/shafranov-integral/field-response-timing.png and .svg as files to repair, but both were deleted (commit d4bc41b1e) and are absent from the directory, so a node dispatched on this followup would hunt for files that cannot be opened; its certificate leg also cites a receipt key list the receipt has since outgrown",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#s3",
+      "id": "done_when-1",
+      "reason": "without a tolerance against an independent reference the \u00a73 node can complete without ever showing the integral is correct, which is the quantity the section exists to prove, and the followup's MAST-only fallback (solved-state) leaves the observed column unmeasured.",
+      "text": "\u00a73's done-when proves only that no formula remains, that the receipt states its visible form, and that a figure is regenerated; it states no tolerance and no independent reference value, so \"the constraint row carries no formula\" passes by grep while the contour integral could carry any value and the delivered observed column is never shown to reproduce the archived EFIT beta_p + l_i/2",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#s1",
+      "id": "done_when-2",
+      "reason": "an instrument that never fires satisfies a zero-on-second assertion, so the node's whole reuse measure would rest on a counter nothing in the gate shows to be live.",
+      "text": "\u00a71's gate (\"the two-solve test asserts zero kernel evaluations on the second\") passes vacuously if the committed counter reads zero always; the done-when does not require the build-side nonzero count (76 at build) as a live-instrument control, nor any defeated-reuse case that must record calls",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#s3",
+      "id": "reasoning-1",
+      "reason": "a mechanism fixed in plan text is a guess the worker must reconcile against the solved-state API, and a wrong guess (e.g. wire to the large-aspect-ratio helper) costs a review round the endpoint-only wording would have avoided.",
+      "text": "\u00a73 prescribes implementation: it names a function to call (beta_p_plus_half_internal_inductance), names shafranov_vertical_field and the constraint module, and instructs an edit sequence (\"delete the inline inverse of the identity from the constraint module rather than moving it\"), all of which are the reuse map that the plan rule places in the node brief",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#comments",
+      "id": "anchors_resolve-2",
+      "reason": "this is a historical review-comment citation with no node path, so an unresolvable base sha does not change what any node builds, though the record should not name a sha a reader cannot resolve.",
+      "text": "the review comment c-run-r-20261123T060011363220 records the reviewed range 062298ce691bf2db318801efe27c5b457fa4e2b7..f0e895842237a1a4d4b9a2766819a08fa1ebf091, and 062298ce is not present in this tree's object store (git cat-file -t reports no object; it may live on an unfetched base branch)",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "aa5c1e317cd473e852365616d177d7d71f24deb6",
+  "plan_fingerprint": "248c106370de6ed82f1170550a77669db3559283507b4ae102224d9f4f878aed",
+  "plan_slug": "shafranov-observed-side",
+  "plan_version": 24,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T135955354630-plan-review-of-shafranov-observed-side",
+  "reviewed_blob_sha": "600495500d7b48bff628ed2f71897088c396cbae",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 followup f-fsa-figrepair-shafranov-integral names two figure files that were deleted and no longer exist, and a review-comment commit sha does not resolve in this tree.",
+    "done_when": "a finding \u2014 \u00a73's done-when states no tolerance, no independent reference and no negative control for the regenerated observed column, and \u00a71's zero-on-second assertion cannot fail if the committed kernel counter reads zero always.",
+    "evidence_paths": "pass \u2014 the record is docs/evidence/archive/shafranov-observed-side-landed.html (exists), receipts under docs/figures/constraint-augmented-newton-krylov/shafranov-integral/ (in git), no session-scratch or temporary path is named.",
+    "naming": "pass \u2014 the plan names no plan label, stage name, ticket number or version tag for code; the symbols it cites (beta_p_plus_half_internal_inductance, shafranov_vertical_field) are already in the tree and are descriptive.",
+    "reasoning": "a finding \u2014 \u00a71 and \u00a72 root causes match their cited evidence, but \u00a73 prescribes implementation (a function to call, a named module/symbol, and an edit sequence) where only the endpoint belongs.",
+    "single_goal": "pass \u2014 \u00a71 couples the operator-build construction and the two-solve counter test, but both are the one goal \"field responses in production with measured reuse\"; \u00a73's wiring, formula removal and receipt/figure regeneration are the single verdict \"the observed side IS the contour integral\".",
+    "wiring": "pass \u2014 plan-section-depends-on declares s3 -> s1, s2, s4, all of which exist and resolve; s1 and s3 are the only implementable sections and s3 correctly waits on s1; plan-standalone states no open plan waits on this one, so the absent informs/gates relations are deliberate."
+  },
+  "section_digests": {
+    "_document": "bed068e052bd6353ddf47129e3245da7ac804b6801e0c33dd7e736e266afe7ea",
+    "s-contract": "61c7b0c442759ab5a82fd40553b706909db7709feb4d44f4c9ea07221e6c0c82",
+    "s0": "d88c6a2860e5b0c59b37aa9054e43e4eb03dfa63d26c9d615ff39140715c16ac",
+    "s1": "cc5b8c2ec683e593e614ec0df4316cd8a23972b3e6132a02cc8226bf1e6cdd5e",
+    "s2": "a65e4034bc865f895d045dd9a91dd94f5e1b38efe7a2abd7129d4a1347f2fe7d",
+    "s3": "c4931d9dc0bee67ee86e4e0bf0466385ebfe14007f6efa4017e45ca900293d90",
+    "s4": "3e5ccd5452d0e5f7e57476f3bbbc6fc837aad75ff5b90a19d02ef090f1e1edcd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T14:08:12.681105+00:00",
+  "total": null
+}

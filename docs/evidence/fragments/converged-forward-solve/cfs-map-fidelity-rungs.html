@@ -13,7 +13,7 @@ posed on the exact support, and bound the map's derivative against central diffe
 with a restored-clamp negative control">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s4">
-<meta name="plan-commits" content="edb2d8d09,b27e012a5,9e6024b21,74cf9614d,87b4fdbc9,8e42b4cbe,8f654e2de">
+<meta name="plan-commits" content="edb2d8d09,b27e012a5,9e6024b21,74cf9614d,87b4fdbc9,8e42b4cbe,8f654e2de,706722415,f5979377c,9dee2f8ce,2de405807">
 <meta name="plan-recorded-at" content="2026-11-22">
 <meta name="plan-verdict" content="complete">
 <meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) on the rigel and all_debug partitions; six per-rung allocations and one derivative allocation">
@@ -248,31 +248,41 @@ the control asserts.</p>
 
 <h2 id="cfs-map-fidelity-rungs-figures">The map image beside the analytic state</h2>
 
-<p>Each panel pair draws the map's image of the analytic state and the analytic
-state itself at the 10,000-cell rung, on one shared level array so a mismatch
-cannot hide behind two colour scales, with the first wall and both sets of
-nulls. Contours are unfilled lines; the panels carry no axes.</p>
+<p>Each panel pair draws one field at the 10,000-cell rung — the map's image of
+the analytic state in the left panel and the analytic state itself in the right —
+on one shared level array, so a mismatch cannot hide behind two colour scales.
+Every panel carries <em>both</em> null sets: the analytic set (solid triangle for
+the axis, filled cross for the admitted saddle) in the default null vocabulary,
+and the map image's set in a second hue (<code>#7a3ea8</code>), drawn larger and
+beneath the analytic set so that both stay visible where they coincide. A direct label on
+each panel names the field it draws, and one figure legend names the two null
+sets, because a solved null drawn alone on a non-converged state reads as the
+answer. The first wall is drawn on both panels. Contours are unfilled lines; the
+panels carry no axes.</p>
 
 <figure>
 <img src="/nova/figures/converged-forward-solve/cfs-map-fidelity-rungs/weak-rotation-reactor-static-map-fidelity-10000.svg"
      alt="The limited case at the 10,000-cell rung: the map image beside the analytic state">
-<figcaption>The limited case at the 10,000-cell rung (10,238 realised mesh cells): the map image on the left and the analytic state on the right, on one shared level array of fourteen lines spanning the analytic axis and the analytic zero level, with the first wall drawn on both and each panel carrying its own null set.</figcaption>
+<figcaption>The limited case at the 10,000-cell rung (10,238 realised mesh cells): the map image on the left and the analytic state on the right, on one shared level array of fourteen lines spanning the analytic axis and the analytic zero level, with the first wall drawn on both and every panel carrying both null sets: the analytic set in the default null colour and the map image's set in <code>#7a3ea8</code>, the map image's markers drawn larger and beneath so both stay visible where the sets coincide, named by a direct label on each panel and by one figure legend.</figcaption>
 </figure>
 <figure>
 <img src="/nova/figures/converged-forward-solve/cfs-map-fidelity-rungs/diverted-single-null-map-fidelity-10000.svg"
      alt="The single-null diverted case at the 10,000-cell rung: the map image beside the analytic state">
-<figcaption>The single-null diverted case at the 10,000-cell rung (10,229 realised mesh cells): the map image on the left and the analytic state on the right, on one shared level array of fourteen lines spanning the analytic axis and the analytic zero level, with the first wall drawn on both and each panel carrying its own null set.</figcaption>
+<figcaption>The single-null diverted case at the 10,000-cell rung (10,229 realised mesh cells): the map image on the left and the analytic state on the right, on one shared level array of fourteen lines spanning the analytic axis and the analytic zero level, with the first wall drawn on both and every panel carrying both null sets: the analytic set in the default null colour and the map image's set in <code>#7a3ea8</code>, the map image's markers drawn larger and beneath so both stay visible where the sets coincide, named by a direct label on each panel and by one figure legend.</figcaption>
 </figure>
 
 <h2 id="cfs-map-fidelity-rungs-reproduction">How the rows and the derivative are reproduced</h2>
 
-<p>The rows cost a carrier build each, so the driver at the foot of
-<code>tests/test_gs_map_fidelity.py</code> takes one case at one rung in a single case
-allocation and prints its row; the tests themselves read the row block above and
-never rebuild a carrier. The derivative arms are ordinary collected tests and
-carriers a 550-cell build each.</p>
+<p>The gate measures the 2,000-cell rung itself, on both cases, from the analytic
+state, so a regression in the map or in the exterior seam turns a collected test
+red. The 5,000- and 10,000-cell rungs each cost a carrier build far beyond a
+gate's budget, so their four rows are read from the JSON block above, which the
+driver at the foot of <code>tests/test_gs_map_fidelity.py</code> publishes; a
+missing or corrupted row fails rather than passing on a stale constant. The
+derivative arms are ordinary collected tests and carry a 550-cell build each.</p>
 
-<pre><code>python tests/test_gs_map_fidelity.py --case diverted-single-null --cells 5000
+<pre><code>python -m pytest tests/test_gs_map_fidelity.py -k reproduces -vv
+python tests/test_gs_map_fidelity.py --case diverted-single-null --cells 10000
 python -m pytest tests/test_gs_map_fidelity.py -k jvp -vv -s
 NOVA_DUMMY_SADDLE_CLAMP=1 python -m pytest tests/test_gs_map_fidelity.py \
     -k boundary_flux_jvp -vv -s</code></pre>
@@ -285,9 +295,9 @@ scale with the carrier: 27:24, 1:56:45 and 6:57:32 at 2,000, 5,000 and 10,000
 requested cells for the limited case, and 23:44, 1:54:31 and 6:45:10 for the
 diverted one, each a separate allocation.</p>
 
-<p>The gate logs were taken at <code>8f654e2ded2f58a81bb971b84ea734c19e11f82a</code>. <code>gate-rows.log</code> reports <code>6 passed, 2 deselected in 17.76s</code> and <code>gate-jvp.log</code> reports <code>2 passed, 6 deselected in 113.70s (0:01:53)</code>; <code>gate-negative-control.log</code> reports <code>1 failed, 7 deselected in 62.43s (0:01:02)</code>, and its failure names <code>test_map_boundary_flux_jvp_matches_central_difference</code>.</p>
+<p>The gate logs were taken at <code>9dee2f8cea678ac9c8234a7a9046864cc0301d53</code>. <code>gate-rows.log</code> reports <code>6 passed, 2 deselected in 3217.52s (0:53:37)</code> and <code>gate-jvp.log</code> reports <code>2 passed, 6 deselected in 121.81s (0:02:01)</code>; <code>gate-negative-control.log</code> reports <code>1 failed, 7 deselected in 60.26s (0:01:00)</code>, and its failure names <code>test_map_boundary_flux_jvp_matches_central_difference</code>.</p><p>The two 2,000-cell rows in the table were read from <code>gate-rows-2000.log</code>, the gate's own run at <code>2de4058071b7</code>, which reports <code>2 passed in 680.11s (0:11:20)</code>; the 5,000- and 10,000-cell rows are quoted from the ladder's row logs, whose builds are hours long and are not repeated by the gate.</p>
 
-<p>The suite arms, run on <code>rigel</code>: <code>baseline_suite</code> at <code>82a755fd6433</code> reports <code>3 passed in 39.87s</code> and <code>after_suite</code> at <code>7067224151b3</code> reports <code>11 passed in 146.23s (0:02:26)</code>.</p>
+<p>Both suite arms run on <code>rigel</code> against the files their own revision holds: the baseline arm at the base this record cites and the after arm at the head it cites. The manifest records each arm's command, revision and summary as the scheduler returned them.</p>
 
 </main>
 </body>

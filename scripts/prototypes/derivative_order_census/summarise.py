@@ -83,6 +83,12 @@ def comparison(reference_path, observed_path, variant, order):
         "candidate_mode": "eager"
         if observed_path.name.startswith("eager-")
         else "compiled",
+        "reference_phase": json.loads(
+            reference_path.with_suffix(".json").read_text()
+        ).get("phase"),
+        "candidate_phase": json.loads(
+            observed_path.with_suffix(".json").read_text()
+        ).get("phase"),
     }
 
 
@@ -101,11 +107,14 @@ def native_outcome(directory, variant, order):
     if not matches:
         return None
     result = dict(matches[-1])
+    result["index_path"] = str(path)
+    result["index_sha256"] = digest(path)
     timing = Path(result["time_log"])
     if timing.exists():
         text = timing.read_text()
         peak = re.search(r"Maximum resident set size \(kbytes\):\s*(\d+)", text)
         result["time_peak_rss_kib"] = int(peak[1]) if peak else None
+        result["time_sha256"] = digest(timing)
     return result
 
 

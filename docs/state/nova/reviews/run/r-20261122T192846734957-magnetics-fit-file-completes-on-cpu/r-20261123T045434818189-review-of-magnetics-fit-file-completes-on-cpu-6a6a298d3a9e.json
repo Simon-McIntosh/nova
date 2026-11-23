@@ -1,0 +1,72 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/fit_inside_iteration/run.py:76",
+    "scripts/prototypes/fit_inside_iteration/run.py:109",
+    "scripts/prototypes/fit_inside_iteration/run.py:265",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:156",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:165",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:204",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:214"
+  ],
+  "completed_at": "2026-11-23T05:36:13.664Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "magnetics-fit-file-completes-on-cpu",
+      "recorded_at": "2026-11-23T05:39:02.951459+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-23T04:55:14Z",
+  "findings": [
+    {
+      "file": "tests/test_equilibrium_magnetics_fit.py",
+      "id": "ff11ab0d53a",
+      "line": 22,
+      "severity": "blocking",
+      "text": "blocking: the re-export list carries only _persist_forward, _persist_forward_failure, _PlasmaDiagnosticSource and _physical_sensor_rows, so physical_cases, _physical_problem, _known_field_reader, _total_observations and _draw_recovery_panels are absent from the module that scripts/prototypes/fit_inside_iteration/run.py:76,265 and scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:165,171,204,214 import, and both scripts raise AttributeError at head."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/magnetics-fit-file-completes-on-cpu.html",
+      "id": "f3679b79efc",
+      "line": 20,
+      "severity": "non-blocking",
+      "text": "non-blocking: the table's 5.00 s and 10.47 s rows are attributed to b4a9a31ff while logs/fast-serial.log and logs/fast-n8.log record revision be5ee98f with a modified-files header line, so the cited figures do not reconcile with the revision named beside them, although the b4a9a31ff gate arms are correctly quoted on line 21."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "two runtime prototype scripts reach the moved helpers through tests.test_equilibrium_magnetics_fit, and five of the names they resolve are absent from that module at head.",
+    "diff": "read all three commits from be5ee98f; b4a9a31ff splits the module (+1001 -945) with the known-state bodies byte-identical, 40161a8c2 adds the fragment and 6a6a298d3 adds the revision-qualified paragraph.",
+    "done_when": "read all three clauses; clause (1) is answered in the fragment, clause (2) by logs/head-serial.log (44 passed in 6.91 s, EXIT=0) and logs/head-n8.log (44 passed in 12.49 s, EXIT=0) plus the after arm (44 passed in 4.75 s), and clause (3) holds because the move is byte-identical with every slow and timeout decorator preserved.",
+    "goal": "read the node goal against the head; it names the abort and makes tests/test_equilibrium_magnetics_fit.py complete at 44 passed in 6.91 s serial and 12.49 s at -n 8, but the split removes five helpers that two prototype scripts still import through that module.",
+    "manifest": "read the manifest; it names the three commits, the serial gate command and its logs, records baseline_suite completed=false (exit 3, step time limit) honestly, and records after_suite completed=true with 44 passed and zero failures.",
+    "write_paths": "read the five declared paths against the four-path diff; the two test modules, the harness module and the evidence fragment are all inside them, and nothing outside the declared set is touched."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion: tests/magnetics_fit_harness.py is a move and tests/test_equilibrium_magnetics_fit_known_states.py is byte-identical, and the broken re-exports at tests/test_equilibrium_magnetics_fit.py:22 show nothing covers the consumers.",
+    "evidence": "logs/head-serial.log and logs/head-n8.log record 44 passed with EXIT=0 at 40161a8c2, but docs/evidence/fragments/inverse-equilibrium-baseline/magnetics-fit-file-completes-on-cpu.html:20 attributes the 5.00 s and 10.47 s rows to b4a9a31ff while their logs name be5ee98f.",
+    "fit": "the new modules follow the surrounding test idiom with eager imports and a module docstring and carry no version or plan label, though tests/magnetics_fit_harness.py:142 ends with extra blank lines.",
+    "goal_fidelity": "tests/test_equilibrium_magnetics_fit.py at head collects 44 tests that pass in 6.91 s and 12.49 s, so the file goal is met, but scripts/prototypes/fit_inside_iteration/run.py:76 and scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:165 still resolve moved helpers through that module and now raise AttributeError.",
+    "reuse": "tests/magnetics_fit_harness.py consolidates helpers that were private to one test module, and a capability search over nova/ found no pre-existing receipt-persistence or diagnostic-source owner to extend or fork.",
+    "scope_discipline": "every path in the be5ee98f..6a6a298d3 diff lies inside the declared write paths, with the declared figures directory untouched and no library change."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the node goal against the head; it names the abort and makes tests/test_equilibrium_magnetics_fit.py complete at 44 passed in 6.91 s serial and 12.49 s at -n 8, but the split removes five helpers that two prototype scripts still import through that module.\nVERDICT done_when: read all three clauses; clause (1) is answered in the fragment, clause (2) by logs/head-serial.log (44 passed in 6.91 s, EXIT=0) and logs/head-n8.log (44 passed in 12.49 s, EXIT=0) plus the after arm (44 passed in 4.75 s), and clause (3) holds because the move is byte-identical with every slow and timeout decorator preserved.\nVERDICT write_paths: read the five declared paths against the four-path diff; the two test modules, the harness module and the evidence fragment are all inside them, and nothing outside the declared set is touched.\nVERDICT manifest: read the manifest; it names the three commits, the serial gate command and its logs, records baseline_suite completed=false (exit 3, step time limit) honestly, and records after_suite completed=true with 44 passed and zero failures.\nVERDICT diff: read all three commits from be5ee98f; b4a9a31ff splits the module (+1001 -945) with the known-state bodies byte-identical, 40161a8c2 adds the fragment and 6a6a298d3 adds the revision-qualified paragraph.\nVERDICT call_sites: two runtime prototype scripts reach the moved helpers through tests.test_equilibrium_magnetics_fit, and five of the names they resolve are absent from that module at head.\nCALL_SITES: scripts/prototypes/fit_inside_iteration/run.py:76, scripts/prototypes/fit_inside_iteration/run.py:109, scripts/prototypes/fit_inside_iteration/run.py:265, scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:156, scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:165, scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:204, scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:214\nSCORE goal_fidelity: 13\nSCORE evidence: 14\nSCORE scope_discipline: 19\nSCORE durability: 6\nSCORE fit: 16\nSCORE reuse: 18\nJUSTIFICATION goal_fidelity: tests/test_equilibrium_magnetics_fit.py at head collects 44 tests that pass in 6.91 s and 12.49 s, so the file goal is met, but scripts/prototypes/fit_inside_iteration/run.py:76 and scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:165 still resolve moved helpers through that module and now raise AttributeError.\nJUSTIFICATION evidence: logs/head-serial.log and logs/head-n8.log record 44 passed with EXIT=0 at 40161a8c2, but docs/evidence/fragments/inverse-equilibrium-baseline/magnetics-fit-file-completes-on-cpu.html:20 attributes the 5.00 s and 10.47 s rows to b4a9a31ff while their logs name be5ee98f.\nJUSTIFICATION scope_discipline: every path in the be5ee98f..6a6a298d3 diff lies inside the declared write paths, with the declared figures directory untouched and no library change.\nJUSTIFICATION durability: the diff adds no assertion: tests/magnetics_fit_harness.py is a move and tests/test_equilibrium_magnetics_fit_known_states.py is byte-identical, and the broken re-exports at tests/test_equilibrium_magnetics_fit.py:22 show nothing covers the consumers.\nJUSTIFICATION fit: the new modules follow the surrounding test idiom with eager imports and a module docstring and carry no version or plan label, though tests/magnetics_fit_harness.py:142 ends with extra blank lines.\nJUSTIFICATION reuse: tests/magnetics_fit_harness.py consolidates helpers that were private to one test module, and a capability search over nova/ found no pre-existing receipt-persistence or diagnostic-source owner to extend or fork.\nFINDING tests/test_equilibrium_magnetics_fit.py:22 blocking: the re-export list carries only _persist_forward, _persist_forward_failure, _PlasmaDiagnosticSource and _physical_sensor_rows, so physical_cases, _physical_problem, _known_field_reader, _total_observations and _draw_recovery_panels are absent from the module that scripts/prototypes/fit_inside_iteration/run.py:76,265 and scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:165,171,204,214 import, and both scripts raise AttributeError at head.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/magnetics-fit-file-completes-on-cpu.html:20 non-blocking: the table's 5.00 s and 10.47 s rows are attributed to b4a9a31ff while logs/fast-serial.log and logs/fast-n8.log record revision be5ee98f with a modified-files header line, so the cited figures do not reconcile with the revision named beside them, although the b4a9a31ff gate arms are correctly quoted on line 21.",
+  "review_run_id": "r-20261123T045434818189-review-of-magnetics-fit-file-completes-on-cpu-6a6a298d3a9e",
+  "reviewed_base_sha": "be5ee98f736dcc20393153f8bb6e7bf163ef873e",
+  "reviewed_head_sha": "6a6a298d3a9ee44c31fd679a47211d89db1e6e44",
+  "reviewed_run_id": "r-20261122T192846734957-magnetics-fit-file-completes-on-cpu",
+  "scores": {
+    "durability": 6,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T05:37:23.854536+00:00",
+  "total": 86
+}

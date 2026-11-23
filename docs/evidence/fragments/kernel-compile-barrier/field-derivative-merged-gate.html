@@ -1,0 +1,32 @@
+<article>
+<h2>The field-derivative outputs hold at main merged with their reviewed head</h2>
+<p><strong>The merge adds no failing test id and the new file's ten tests all pass.</strong> The reviewed head <code>dd5aa7cd55e3d536f53ac0518be85b1a043e14f0</code> of run <code>r-20261123T062912342648-kcb-field-derivative-outputs</code> merges onto main <code>5b7d4d06072edb5b5004d090556404459d5bc21f</code> with <code>git merge --no-ff --no-autostash</code> and no conflict, producing merge <code>348d70eba1c87827e684d5f3002060d9fce34129</code>. The merge changes two files, <code>nova/biot/polygonanalytic.py</code> (+198 lines) and the new <code>tests/biot/test_field_derivative_outputs.py</code> (+255 lines).</p>
+
+<section>
+<h3>The delivered change: two primal field derivatives from the same contour reduction</h3>
+<p>The packed polygon moment kernel takes <code>field_derivatives=True</code> and appends <code>d_r Br</code> at rows 9:12 and <code>d_z Br</code> at rows 12:15, in the same uniform, radial and vertical source-moment order as the nine field rows. They are ordinary boundary-reduction values, so nothing differentiates the kernel's custom derivative rule to obtain them. The two remaining field-gradient components are reconstructed by the Maxwell relations: <code>d_r Bz = d_z Br - mu0 J_phi</code> and <code>d_z Bz = -Br/r - d_r Br</code>, with <code>J_phi</code> the section's own current density inside a source and zero outside it.</p>
+<p>The tensor also stays exact at a target level with a corner: <code>d_r Br</code> and <code>d_z Br</code> are finite everywhere except at a section vertex, where the field gradient of a uniformly filled polygon diverges logarithmically.</p>
+</section>
+
+<section>
+<h3>The measured cost and agreement of the delivered change</h3>
+<p>On the 24-cell fixture the fifteen-row program lowers to <strong>31,719 instructions</strong> against the nine-row program's 21,605, a ratio of 1.46813238. The lowering bound this must satisfy is at most twice the nine-row count. The sixth-order field-difference agreement is <strong>2.1738626871940731e-11</strong> worst case at 200 generic targets and <strong>2.0643076666778661e-9</strong> at 50 targets within <code>1e-7</code> of a corner height and at least one cell pitch from any vertex. Each cohort is judged against its own step-halving budget of the sixth-order reference, which the delivered run recorded at <code>1.518378368161929e-10</code> generic and <code>1.0377804968078152e-9</code> corner-height. <strong>The generic agreement sits inside its budget by a factor of 7.0, so the reference resolves it.</strong> <strong>The corner-height agreement is 1.99 times its budget</strong> (<code>2.0643076666778661e-9</code> against <code>1.0377804968078152e-9</code>), so it is not evidence that the reference resolves that cohort: that figure is at the reference's own step-halving resolution, which bounds the corner-height measurement floor rather than proving the kernel's corner-height error is smaller. It still meets the 1e-6 relative bound this section requires, by a factor of about 480, and a tighter corner-height figure would need a reference of higher order or a finer reference step, not a tighter assertion on this one. Compiled through JAX the outputs agree with the NumPy path to <code>1.740605674390758e-12</code>.</p>
+<p>The negative control flips the sign of one output. Its log ends <code>EXIT=1</code> with the single failure <code>tests/biot/test_field_derivative_outputs.py::test_field_derivative_agreement[generic-d_r_Br]</code>, so the agreement test detects a wrong derivative by test id rather than passing on a scale-hiding tolerance.</p>
+<p>These are the delivered run's figures. Its receipts and logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T062912342648-kcb-field-derivative-outputs/</code>; the sign-flip log is <code>negative-control.log</code> and the scoped gate log records the lowering counts.</p>
+</section>
+
+<section>
+<h3>The merged-head gate</h3>
+<p>One <code>all_debug</code> job (<code>1340320</code>, 8 CPUs, 120G, 59-minute ceiling, <code>JAX_PLATFORMS=cpu</code>, a job-local compile cache under node-local <code>/tmp</code> removed by an <code>EXIT</code> trap) runs one pytest invocation per arm, each in its own <code>git archive</code> tree. Both archives are taken from the worktree's object store at the revision its header names.</p>
+<table>
+<thead><tr><th>Arm</th><th>Revision</th><th>Tests collected</th><th>Passed</th><th>Failed</th><th>Skipped</th><th>Wall</th><th>Exit</th></tr></thead>
+<tbody>
+<tr><td>merged</td><td><code>348d70eba1c87827e684d5f3002060d9fce34129</code></td><td>75</td><td>66</td><td>0</td><td>9</td><td>471.60 s</td><td>0</td></tr>
+<tr><td>main</td><td><code>5b7d4d06072edb5b5004d090556404459d5bc21f</code></td><td>65</td><td>56</td><td>0</td><td>9</td><td>297.86 s</td><td>0</td></tr>
+</tbody>
+</table>
+<p>The two arms differ by exactly ten collected tests, which is the new file: 75 minus 65. Neither arm has a failure, so every test the merged tree collects passed, and the ten added tests are precisely <code>tests/biot/test_field_derivative_outputs.py</code>'s eight parametrised agreement cases plus the compiled-output and lowering-bound cases. <strong>The failure ids added at the merge are none, and removed are none.</strong></p>
+<p>Nine tests skip in both arms: two GPU-only large identity gates in <code>tests/biot/test_moment_program_identity.py</code> and seven <code>tests/biot/test_polygon_stable_evaluator.py</code> cases that require the integrated 64-node plasma measurement. They skip identically on both arms, so they neither add nor hide a difference.</p>
+<p>The gate's logs are <code>merged.log</code> and <code>main.log</code> beneath <code>/home/ITER/mcintos/.cache/nova-kernel-compile-barrier/field-derivative-merged-gate/</code>, with the SLURM capture at <code>slurm-1340320.out</code> in the same directory, and copies of both arm logs, that capture and the job script sit beside this gate's run record at <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T172135485423-field-derivative-merged-gate/</code>. Each log opens with its revision, tree, command, <code>module.__file__</code> and resolved working directory, and ends with one bare <code>EXIT=0</code>.</p>
+</section>
+</article>

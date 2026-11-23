@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from nova.equilibrium import MagneticsFit
+from nova.jax.config import release_compilation_caches
 from tests.magnetics_fit_harness import (
     _draw_recovery_panels,
     _persist_forward,
@@ -139,8 +140,26 @@ def _recover_physical(case, displacement=0.0):
 
 @pytest.fixture(scope="module")
 def physical_cases(tmp_path_factory):
-    """Keep each carrier, compiled program and diagnostic table in one process."""
-    return physical_case_table(tmp_path_factory)
+    """Keep each carrier, compiled program and diagnostic table in one process.
+
+    A CPU process retains a finished machine's loaded executable until JAX's
+    dispatch caches are cleared, and one free-boundary solve maps tens of
+    thousands of address-space regions.  Compiling the next machine on top of
+    the last one's mappings reaches the kernel's per-process limit and aborts
+    the process, so each new case releases the previous machine first.  A case
+    already built is reused without releasing, because its own compilation is
+    still the one being served.
+    """
+    table = physical_case_table(tmp_path_factory)
+    built: set[str] = set()
+
+    def get(name):
+        if name not in built:
+            release_compilation_caches()
+            built.add(name)
+        return table(name)
+
+    return get
 
 
 @pytest.mark.slow

@@ -102,6 +102,21 @@ def test_compilation_retention_is_released_after_crossing_the_ceiling(monkeypatc
     assert clear_calls == [True]
 
 
+def test_release_between_problems_drops_loaded_compilations(monkeypatch):
+    """A process releases a finished problem's executables before the next one."""
+    clear_calls = []
+    monkeypatch.setattr(config, "_compilation_releases", [])
+    monkeypatch.setattr(config, "_live_executable_count", lambda: 3)
+    monkeypatch.setattr(config.gc, "collect", lambda: 11)
+    monkeypatch.setattr(jax, "clear_caches", lambda: clear_calls.append(True))
+
+    release = config.release_compilation_caches()
+
+    assert clear_calls == [True]
+    assert release == CompilationRelease(before=3, after=3, collected_objects=11)
+    assert config.compilation_release_history() == (release,)
+
+
 @pytest.mark.parametrize("ceiling", (0, -1))
 def test_compilation_retention_rejects_non_positive_ceiling(ceiling):
     with pytest.raises(ValueError, match="must be positive"):

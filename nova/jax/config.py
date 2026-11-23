@@ -45,6 +45,7 @@ __all__ = [
     "configure_dtypes",
     "configure_persistent_compilation_cache",
     "default_persistent_compilation_cache_root",
+    "release_compilation_caches",
     "resolve_precision",
 ]
 
@@ -229,6 +230,41 @@ def _live_executable_count() -> int:
     return len(xla_bridge.get_backend().live_executables())
 
 
+def _release_compilation_caches(before: int) -> CompilationRelease:
+    """Clear every JAX staging and dispatch cache, retaining the count seen."""
+
+    import jax
+
+    jax.clear_caches()
+    collected = gc.collect()
+    release = CompilationRelease(
+        before=before,
+        after=_live_executable_count(),
+        collected_objects=collected,
+    )
+    _compilation_releases.append(release)
+    return release
+
+
+def release_compilation_caches() -> CompilationRelease:
+    """Drop the loaded executables one finished problem leaves behind.
+
+    A loaded executable stays resident until JAX's staging and dispatch caches
+    are cleared: releasing the problem object that built it is not enough,
+    because those caches hold the executable, not the object.  On the CPU
+    backend one converged free-boundary solve maps tens of thousands of
+    address-space regions, so a process that compiles a second machine reaches
+    the kernel's per-process mapping limit (``vm.max_map_count``) and aborts
+    inside XLA's next allocation -- the abort site is whichever allocation
+    comes first, which is why it appears in the compile of one run and in the
+    cache write of another.  Call this between two problems a process solves
+    one after the other; a count-based ceiling does not fire here, because one
+    machine is a handful of executables and tens of thousands of mappings.
+    """
+
+    return _release_compilation_caches(_live_executable_count())
+
+
 def bound_compilation_retention(
     live_executable_ceiling: int,
 ) -> CompilationRelease | None:
@@ -246,17 +282,7 @@ def bound_compilation_retention(
     if before <= live_executable_ceiling:
         return None
 
-    import jax
-
-    jax.clear_caches()
-    collected = gc.collect()
-    release = CompilationRelease(
-        before=before,
-        after=_live_executable_count(),
-        collected_objects=collected,
-    )
-    _compilation_releases.append(release)
-    return release
+    return _release_compilation_caches(before)
 
 
 def configure_dtypes() -> None:

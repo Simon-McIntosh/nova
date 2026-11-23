@@ -12,6 +12,13 @@
     "scripts/edge_sheet/figure.py:save_checked"
   ],
   "completed_at": "2026-11-23T19:00:47.256Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "drift-control-and-converged-nova",
+      "recorded_at": "2026-11-23T19:07:15.187736+00:00"
+    }
+  },
   "dispatched_at": "2026-11-23T18:21:13Z",
   "findings": [
     {

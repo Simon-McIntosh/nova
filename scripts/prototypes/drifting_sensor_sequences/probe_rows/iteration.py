@@ -158,6 +158,12 @@ def fit_sequence(args) -> int:
         np.full(48, case["sigma_probe"]),
     ]
     sigma_ip = args.factor * abs(float(reference["plasma_current"]))
+    # The row set the fit reads. ``loops`` fits the 24 flux loops alone, which
+    # is the set imas-efit's arm reconstructs from, so the two codes are
+    # compared on one information set rather than two.
+    mask = np.ones(case["sensors"].number, bool)
+    if args.rows == "loops":
+        mask = np.asarray(case["sensors"].flux_loop, dtype=bool)
     fitter = FluxIterationFit(
         case["profile"],
         case["sensors"],
@@ -166,6 +172,7 @@ def fit_sequence(args) -> int:
         prescribed_current=getattr(case["request"], "prescribed_current", None),
     )
     suffix = "" if args.shards == 1 else "-shard%d" % args.shard
+    tag = "" if args.rows == "all" else "-" + args.rows
     slots = (
         range(args.shard, args.slices, args.shards)
         if args.shards > 1
@@ -180,7 +187,8 @@ def fit_sequence(args) -> int:
             args.slices
         )
         path = STUDY / (
-            "nova-%s-%d-%.4f%s.jsonl" % (sequence, args.slices, args.factor, suffix)
+            "nova-%s-%d-%.4f%s%s.jsonl"
+            % (sequence, args.slices, args.factor, tag, suffix)
         )
         grids: list[np.ndarray] = []
         indices: list[int] = []
@@ -188,7 +196,7 @@ def fit_sequence(args) -> int:
             for index in slots:
                 measured = case["total"] + noise[index]
                 measurement = study.fitted_measurement(
-                    case, measured, sigma, current[index]
+                    case, measured, sigma, current[index], mask=mask
                 )
                 function = study.guard("nova-%s-%.4f" % (sequence, args.factor), index)
                 with function:
@@ -202,6 +210,7 @@ def fit_sequence(args) -> int:
                     )
                     record = record_of(case, fitted, index)
                     record["plasma_current_measured"] = float(current[index])
+                    record["rows"] = args.rows
                     grids.append(
                         np.asarray(
                             study.nova_flux_map(case, fitted.terminal_state).flux,
@@ -217,8 +226,8 @@ def fit_sequence(args) -> int:
         np.savez(
             maps
             / (
-                "nova-%s-%d-%.4f%s.npz"
-                % (sequence, args.slices, args.factor, suffix)
+                "nova-%s-%d-%.4f%s%s.npz"
+                % (sequence, args.slices, args.factor, tag, suffix)
             ),
             radius=study.GRID_RADIUS,
             height=study.GRID_HEIGHT,
@@ -243,6 +252,7 @@ def main(argv=None) -> int:
     fit.add_argument("--sequences", default="white,drift")
     fit.add_argument("--seed", type=int, default=20261118)
     fit.add_argument("--cells", type=int, default=500)
+    fit.add_argument("--rows", default="all", choices=("all", "loops"))
     fit.add_argument("--shard", type=int, default=0)
     fit.add_argument("--shards", type=int, default=1)
     fit.add_argument("--max-passes", type=int, default=48)

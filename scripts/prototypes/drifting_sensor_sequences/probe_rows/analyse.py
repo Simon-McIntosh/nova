@@ -12,6 +12,11 @@ import numpy as np
 
 STUDY = Path(os.environ.get("DRIFT_STUDY", str(Path(__file__).resolve().parent)))
 BLOCK = 50
+# Both codes reconstruct from one row set, and this is the set every reader
+# selects: an arm's stem ends in the tag naming the rows it was fitted from, so
+# the reduction, the gate and the figures cannot state a comparison across
+# different information sets.
+SELECTED_ROWS = "loops"
 # One lag-one rule for the controls: the white draw and the index-0
 # colouring must sit within this of zero, and the drift sequence above its
 # complement.
@@ -206,19 +211,26 @@ def reduce_arm(rows: list[dict], truth: dict, block: int = BLOCK) -> dict:
     axis_mean = block_error(values["axis"], axis_truth, block)
     flux_mean = block_error(flux, flux_truth, block)
     q95_mean = block_error(values["q95"], q95_truth, block)
+
+    def ratio(mean, spread):
+        """A block-mean error as a fraction of the per-slice error."""
+        if not np.isfinite(spread) or spread == 0.0:
+            return float("nan")
+        return float(mean / spread)
+
     return dict(
         slices=len(rows),
         slices_with_boundary=int(np.sum(np.isfinite(values["q95"]))),
         converged=float(np.mean([bool(row.get("converged", True)) for row in rows])),
         axis_rms=axis_rms,
         axis_mean_50=axis_mean,
-        axis_mean_ratio=axis_mean / axis_rms,
+        axis_mean_ratio=ratio(axis_mean, axis_rms),
         flux_rms=flux_rms,
         flux_mean_50=flux_mean,
-        flux_mean_ratio=flux_mean / flux_rms,
+        flux_mean_ratio=ratio(flux_mean, flux_rms),
         q95_rms=q95_rms,
         q95_mean_50=q95_mean,
-        q95_mean_ratio=q95_mean / q95_rms,
+        q95_mean_ratio=ratio(q95_mean, q95_rms),
         axis_lag1=lag_one(values["axis"]),
         flux_lag1=lag_one(flux),
         q95_lag1=lag_one(values["q95"]),
@@ -242,6 +254,24 @@ def thresholds(table: tuple[dict, dict]) -> dict:
             and drift["q95_lag1"] > DRIFT_LAG_ONE_FLOOR
         ),
     )
+
+
+def selected_rows(
+    code: str, sequence: str, slices: int = 200, factor: float = 0.01
+) -> list[dict]:
+    """The slices of this code and sequence on the row set both codes share.
+
+    One arm-selection rule for the reduction, the gate and the figures: an arm
+    whose stem ends in ``SELECTED_ROWS`` is the one stated, and a run whose only
+    arm reconstructs from another row set is reported missing rather than
+    silently compared.
+    """
+    pattern = "%s-%s-%d-%.4f" % (code, sequence, slices, factor)
+    runs = grouped(sorted(STUDY.glob(pattern + "*.jsonl")))
+    wanted = [stem for stem in runs if stem.endswith("-" + SELECTED_ROWS)]
+    if not wanted:
+        return []
+    return runs[max(wanted, key=lambda stem: len(runs[stem]))]
 
 
 def grouped(paths: list[Path]) -> dict[str, list[dict]]:
@@ -302,18 +332,22 @@ def main() -> int:
     }
 
     def pick(code: str, sequence: str) -> dict | None:
-        """The series that reconstructs best for this code and sequence, then longest.
+        """The arm on the row set both codes share, then the longest.
 
-        Two reference configurations exist for the efit arms: every magnetics row,
-        and the 24 flux loops alone; the row set whose reconstruction is closest to
-        the generating state is the one the lag-one control is stated on.
+        The row set is the one ``SELECTED_ROWS`` names. A run holding only
+        another row set is absent rather than silently reduced: choosing the
+        arm by reconstruction quality made a code comparison across two
+        information sets, which is not the like-for-like comparison the study
+        states.
         """
         candidates = []
         for key in summary:
             match = re.match(r"%s-%s-([0-9]+)-0\.0100" % (code, sequence), key)
             if match:
-                value = summary[key]
-                candidates.append((value["axis_rms"], -int(match.group(1)), key))
+                tagged = key.endswith("-" + SELECTED_ROWS)
+                candidates.append(
+                    (0 if tagged else 1, -int(match.group(1)), key)
+                )
         return summary[min(candidates)[2]] if candidates else None
 
     control = {}

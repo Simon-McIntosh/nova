@@ -454,13 +454,25 @@ def nova_metrics(case: dict, fitted) -> dict:
     )
 
 
-def fitted_measurement(case: dict, measured, sigma_row: np.ndarray, current: float):
+def fitted_measurement(
+    case: dict, measured, sigma_row: np.ndarray, current: float, mask=None
+):
+    """One slice's measurement over the rows the fit reads.
+
+    ``mask`` selects the rows: omitting it reads every magnetics row, and a
+    loop-only mask restricts the fit to the 24 flux loops, which is the set the
+    imas-efit arm reconstructs from.
+    """
     from nova.equilibrium.measurement import SliceMeasurement
 
     return SliceMeasurement(
         measured=measured,
         vacuum=case["vacuum"],
-        mask=np.ones(case["sensors"].number, bool),
+        mask=(
+            np.ones(case["sensors"].number, bool)
+            if mask is None
+            else np.asarray(mask, dtype=bool)
+        ),
         scale=sigma_row,
         plasma_current=float(current),
     )

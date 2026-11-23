@@ -22,6 +22,10 @@
 <tr><td>release between cases</td><td>MAST solving on the same process, when the driver was stopped</td><td>31,476 (climbing)</td><td>6.0 GB</td><td>&#8212;</td></tr>
 </table>
 <p>In the run without a release, the second machine's build started from the first machine's 28,544 mappings and added its own, reaching 30,246: nothing the first case finished with returned. Only the cache clear returned any of them. Clearing the caches removed 25,523 mappings in one call, 89&#37; of the total, for 89&#8239;MB of resident memory. The two readings together are the mechanism: what accumulates is mapped executable images, not heap, and only the cache clear releases them.</p>
+<figure id="jax-cpu-native-abort-figure">
+<img src="/nova/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg" alt="Mapped regions at each stage of one process that solves Solov'ev and then starts MAST, with the release between the machines clearing 28,552 regions to 3,031.">
+<figcaption>Mapped regions sampled every two seconds from <code>/proc/self/maps</code> during one process that solved Solov'ev and then started MAST, with <code>jax.clear_caches()</code> and <code>gc.collect()</code> between the two machines. The cleared bar is the same process immediately after the release; the bars either side are its own stages. The dotted line is the kernel's per-process mapping limit, which the earlier node's sampler recorded at 65,271 while a worker was compiling.</figcaption>
+</figure>
 <p>The kernel limit is not theoretical. A previous node's sampler recorded 65,271 mappings against a limit of 65,530 while a worker was compiling, which is the same bound the abort lands on.</p>
 
 <h3 id="jax-cpu-native-abort-fix">The fix</h3>

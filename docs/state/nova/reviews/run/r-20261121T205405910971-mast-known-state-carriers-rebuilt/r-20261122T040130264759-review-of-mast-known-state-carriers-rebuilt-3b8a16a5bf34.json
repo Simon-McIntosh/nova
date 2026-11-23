@@ -9,6 +9,15 @@
   ],
   "completed_at": "2026-11-22T04:22:26.315Z",
   "dispatched_at": "2026-11-22T04:02:43Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T10:50:21.022275+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261121T205405910971-mast-known-state-carriers-rebuilt",
+      "section": "\u00a79"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_equilibrium_magnetics_fit.py",

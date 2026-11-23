@@ -1,0 +1,98 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T20:50:04.404Z",
+  "dispatched_at": "2026-11-23T20:19:36Z",
+  "figures": {
+    "docs/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/axis-position-efit.svg": {
+      "contrast": "pass \u2014 measured on the rendered PNG: green trace rgb(46,139,87) at 4.25:1 on white, grey control and dotted reference rgb(146,146,146) at 3.11:1, which clears the 3:1 data-mark floor, and the axis and tick text near-black at 21:1.",
+      "data_ink": "pass \u2014 two traces and one dotted reference line carry all the ink, the control drawn dashed over the subject so it stays distinguishable where the traces coincide; no fill, band or shading appears anywhere in the frame.",
+      "decoration": "pass \u2014 measured on the rendered PNG, 92.9 percent of pixels are pure white; the top and right spines are absent from both panels (the only long dark lines found are the two bottom spines at rows 301/302 and 636/637 and the left spine at columns 118/119), and no gridline row or column exists.",
+      "label_collision": "pass \u2014 the outer border of the PNG carries no ink (ink lies within rows 21-689 and columns 25-1323 of 1400x720), the legend sits in clear space above both panels, and no text is drawn on or beside a data mark. The dotted reference is drawn in clear space below the traces in both panels, measured as a full-width dotted row at y=263 (radial) and y=539 (vertical).",
+      "legibility": "pass \u2014 14 in canvas rendered at 1400x720 with 16 pt axis labels and 14 pt tick and legend text; the green 1/f trace and the dashed grey control both read across the 200 slices, and the y tick pairs (6.339/6.298 and 0.527/0.477) bracket each panel's data. The two-tick scale is sparse: the panel extends about a quarter of its height beyond each labelled value, so a reader can interpolate but cannot read an extreme from the axis.",
+      "table_form": "pass \u2014 an ordered 200-slice sequence drawn as two traces; the content is where the 1/f trace departs from the control over slice index, a spatial comparison a table cannot carry."
+    },
+    "docs/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/axis-position-nova.svg": {
+      "contrast": "pass \u2014 measured on the rendered PNG: blue trace rgb(31,95,168) at 6.44:1 on white, grey control and dotted reference rgb(146,146,146) at 3.11:1, axis and tick text near-black at 21:1.",
+      "data_ink": "pass \u2014 two traces plus one dotted reference line per panel and one shared two-entry legend; nothing else is drawn inside the frame, and the excursion that sets the vertical scale is measured data rather than a display artifact.",
+      "decoration": "pass \u2014 measured on the rendered PNG, 94.8 percent of pixels are pure white; the top and right spines are absent from both panels, and no gridline row or column exists.",
+      "label_collision": "pass \u2014 the outer border of the PNG carries no ink (ink within rows 21-689 and columns 25-1323), the legend sits above both panels in clear space, and no text touches a data mark.",
+      "legibility": "pass \u2014 same canvas and type sizes; the radial panel reads at a glance, with the blue 1/f trace and the dashed grey control interleaving over the full 200 slices. The vertical panel is the limit: its two ticks read 0.498 and 0.493 and the panel spans about 11 mm, while the scatter away from the single excursion near slice 40 is a few tenths of a millimetre, about five pixels, so that motion reads only as jaggedness (recorded as a non-blocking finding, not a legibility failure).",
+      "table_form": "pass \u2014 the figure exists to show where the two sequences' reconstructed axes part over slice index; that ordering and shape is spatial, not tabular."
+    },
+    "docs/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/slice-overlay-drift-101.svg": {
+      "contrast": "pass \u2014 measured on the rendered PNG: blue rgb(31,95,168) at 6.44:1, green rgb(46,139,87) at 4.25:1, the annotation and dashed generating state rgb(77,77,77) at 8.45:1, and the black limiter ring at 21:1 on white.",
+      "data_ink": "pass \u2014 twelve unfilled line contours per series on one shared level array, three null sets and the limiter ring; no colour map, fill, gradient or shading appears anywhere in the frame.",
+      "decoration": "pass \u2014 measured on the rendered PNG, 91.8 percent of pixels are pure white; the axis is off entirely (no spines, ticks or tick labels), so no gridline, frame or background fill is present.",
+      "label_collision": "pass \u2014 the outer border of the PNG carries no ink (ink within rows 34-1329 and columns 177-1292 of 1400x1400), the legend sits above the frame, and the annotation block starts at column 920 while the contours and wall end at column 811, so no text touches a data mark. The overlapping marks at the plasma centre are null markers, not labels; they are recorded as a non-blocking finding about marker vocabulary.",
+      "legibility": "pass \u2014 the poloidal contour panel occupies a 1400x1400 canvas; nova's heavier blue contours sit visibly off imas-efit's green ones and the generating state's grey dashed contours lie between them, the limiter ring is drawn as an unbroken black polyline, and the 12 pt annotation at the right states the two axis distances in millimetres in clear space because the marks themselves cannot separate them.",
+      "table_form": "pass \u2014 two reconstructions' poloidal flux shown in space against the state that generated the data; the relationship is geometric, which is exactly what a figure carries and a table cannot."
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+      "line": 142,
+      "severity": "non-blocking",
+      "summary": "In axis-position-nova.svg the vertical panel's scale is set by one slice, so the comparison the caption describes cannot be read from the panel. The excursion near slice 40 drops about 6 mm below the rest of the trace, so the panel spans roughly 11 mm with ticks only at 0.498 and 0.493, while the vertical scatter away from that slice is a few tenths of a millimetre \u2014 about five rendered pixels. Measured from the PNG: the blue trace occupies rows 460-592 of a 212-pixel panel, and more than half of that is the single excursion. A reader sees a flat jagged band and can neither read the size nor the memory of the vertical motion that the caption says the lag-one measures. The excursion is real measured data and the caption explains it, which is why this records rather than holds the node."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+      "line": 111,
+      "severity": "non-blocking",
+      "summary": "In axis-position-nova.svg the dotted generating-state line is invisible in the vertical panel, though the caption names it. The reference sits at Z 0.498205, which is inside the dense band both traces occupy, so it is drawn beneath them and covered; searching the panel's rows for the reference's four-pixel dotted period across the full width returns none, while the same detector finds the line in the radial panels (y=218 here, y=263 in the imas-efit figure) and in the imas-efit vertical panel (row 539). A reader is told to read the trace against a reference that is not on the page in that panel; the caption's value keeps it usable."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py",
+      "line": 87,
+      "severity": "non-blocking",
+      "summary": "In slice-overlay-drift-101.svg every null marker encodes its series rather than its null type, and no legend or caption defines the shapes. nova keeps the project vocabulary (filled triangle for the axis at line 118, filled plus for the saddle at line 130), but imas-efit's axis is an open square and its saddle an open diamond, and the generating state's axis an open circle and its saddle a cross, so a reader cannot tell, for imas-efit or the generating state, which mark is the axis and which the saddle. The three axis marks sit within about two millimetres at machine scale and overlap into one cluster at the plasma centre, which the caption's millimetre annotation compensates for but does not explain."
+    }
+  ],
+  "notes": "Read-only figure review: no file was edited, created or moved, and the record is the only deliverable. The three attached PNGs were opened with the Read tool and judged on their rendered pixels; no SVG was read, rendered, listed or shown, and no image other than the three named PNGs was opened. Measurements quoted here (white-pixel fractions, colour values and contrast ratios, ink bounding boxes, panel pixel geometry and the dotted-line row search) were computed from those same PNGs. The PNG-to-figure mapping comes from attachment order, the legend colour (green is imas-efit, blue is nova, which the overlay caption also states) and the caption text. The diagnoses for the first two findings are anchored to the drawing script lines the run's diff shows; both figures are unchanged in this head only in data, so the layout is the script's.",
+  "project": "nova",
+  "review_run_id": "r-20261123T200528923039-review-of-drift-control-and-converged-nova-1acf2fd5bf9c-figure",
+  "reviewed_base_sha": "e28db604eee205382f5c7874129eebfe4339cd92",
+  "reviewed_commits": [
+    "2f50118d9eeb490515561f0c159cdd6b090e9798",
+    "3b8c4650d7620f55db2eded13894e4c9659784f9",
+    "8c91953af57c5ff951ece957a53a81573e34df3d",
+    "2d9c176734eb41592d91c31c80d51e0bb672dec1",
+    "1acf2fd5bf9ce1bf81533003b0b2499981ceed16"
+  ],
+  "reviewed_figures": [
+    {
+      "drawing_script": "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T200528923039-review-of-drift-control-and-converged-nova-1acf2fd5bf9c-figure/image-0.png",
+      "pixels": "1400x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/axis-position-efit.svg"
+    },
+    {
+      "drawing_script": "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T200528923039-review-of-drift-control-and-converged-nova-1acf2fd5bf9c-figure/image-1.png",
+      "pixels": "1400x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/axis-position-nova.svg"
+    },
+    {
+      "drawing_script": "scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T200528923039-review-of-drift-control-and-converged-nova-1acf2fd5bf9c-figure/image-2.png",
+      "pixels": "1400x1400",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/slice-overlay-drift-101.svg"
+    }
+  ],
+  "reviewed_head_sha": "1acf2fd5bf9ce1bf81533003b0b2499981ceed16",
+  "reviewed_run_id": "r-20261123T104800646708-drift-control-and-converged-nova",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass on all three, measured on the rendered PNGs: blue rgb(31,95,168) 6.44:1, green rgb(46,139,87) 4.25:1, grey rgb(146,146,146) 3.11:1, the overlay's annotation and generating state rgb(77,77,77) 8.45:1, and axis, tick and legend glyph cores near-black at 21:1, all on white.",
+    "data_ink": "pass on all three. The axis figures draw two traces and one dotted reference each; the overlay draws three unfilled contour sets, three null marker sets and the limiter ring. No fills, bands, shading or colour maps appear in any of the three.",
+    "decoration": "pass on all three, measured on the PNGs: pure-white background covers 92.9, 94.8 and 91.8 percent of pixels respectively, the axis figures despine top and right and carry no gridline row or column, and the overlay turns its axis off entirely.",
+    "label_collision": "pass on all three. The outer border of every PNG carries no ink on any side, so nothing is clipped; both legends sit in clear space above their frames, the overlay's annotation sits in white space to the right of the plasma with a measured gap of about 110 px to the outermost contour, and no text is drawn over a data mark. The overlapping marks at the plasma centre in the overlay are null markers rather than labels, recorded separately.",
+    "legibility": "pass on all three. The two axis figures render at 1400x720 from a 14 in canvas with 16 pt axis labels and 14 pt tick and legend text, and their traces read at a glance; the contour overlay fills a 1400x1400 canvas with distinguishable contour sets, and its 12 pt annotation states the millimetre separations the marks cannot show. The one limit is the nova figure's vertical panel, whose scale is set by a single excursion (recorded non-blocking).",
+    "table_form": "pass on all three. Two ordered 200-slice trace figures and one poloidal contour overlay; each carries a spatial relationship the record states only numerically, so none depicts information that is naturally a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T20:41:40Z",
+  "total": null
+}

@@ -43,6 +43,16 @@
       "note": "\u00a79 now cites the census by its run and job (r-20261121T202518813620, job 1338238) instead of an unnamed '\u00a74 second diagnosis', and \u00a74's prose now states its own source-blocking work with its run and commit.",
       "reason": "",
       "when": "2026-11-23T07:59:59.743068+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "594f160b99f45c9778e53404a9eb3a744677243c",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a79 no longer hands anything to \u00a74: its 132-cell arm is a recorded measurement, not a requirement that \u00a74 must make fit; \u00a74, which runs after \u00a79, owns bounding the source-scaled remainder and the 132/300/550 fills.",
+      "reason": "",
+      "when": "2026-11-23T08:00:15.037034+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "\u00a79 now cites the census by its run and job (r-20261121T202518813620, job 1338238) instead of an unnamed '\u00a74 second diagnosis', and \u00a74's prose now states its own source-blocking work with its run and commit.",
       "reason": "",
       "when": "2026-11-23T07:59:59.743068+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "594f160b99f45c9778e53404a9eb3a744677243c",
+      "commit_basis": "edit",
+      "note": "\u00a79 no longer hands anything to \u00a74: its 132-cell arm is a recorded measurement, not a requirement that \u00a74 must make fit; \u00a74, which runs after \u00a79, owns bounding the source-scaled remainder and the 132/300/550 fills.",
+      "reason": "",
+      "when": "2026-11-23T08:00:15.037034+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261123T075039502872-plan-review-of-kernel-compile-barrier.json",

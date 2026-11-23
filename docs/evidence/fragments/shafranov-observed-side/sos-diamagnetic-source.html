@@ -1,0 +1,38 @@
+<section id="sos-diamagnetic-source">
+<h2>The magnetics reader publishes a verified sign and provenance; the MAST store carries no calibrated diamagnetic flux</h2>
+<p id="sos-diamagnetic-source-revision">Recorded at revision <code>aaf0f00d4017d810055cf9175f1fb3bb717a06ae</code>; the focused gate <code>tests/test_diamagnetic_shot_store.py</code> ran at that revision and its log ends <code>8 passed in 4.39s</code> with <code>EXIT=0</code>.
+<p id="sos-diamagnetic-source-outcome"><strong>landing:</strong> a diamagnetic loop can now be read and stored with its source, weber units, COCOS convention and calibration on the row, and a row whose excursion does not follow the toroidal field is refused. The measurement the toroidal volume term needs on MAST is not in that store, so no MAST row is written and no solved-state value is substituted.</p>
+
+<p><strong>Reader.</strong> <code>nova/imas/io_magnetics.py</code> reads <code>magnetics.diamagnetic_flux(:).data/.time</code> at whichever dictionary the entry was written in, and falls back to the <code>flux_*</code> loop types labelled <code>diamagnetic_internal</code>,
+<code>diamagnetic_external</code>, <code>diamagnetic_compensation</code> and <code>diamagnetic_differential</code> when an entry publishes the loop only through <code>flux_loop</code>. Each row carries its archive path, its units, the COCOS convention of the entry it was read at, and the calibration the reader applied, and
+<code>diamagnetic_flux_dataset</code> writes those to the store row. Every stored channel is checked against the toroidal field first: a b0_like quantity reverses with that field, so its largest excursion must carry the field's own sense.</p>
+
+<table>
+<caption>Reader exercised on archives that publish the structure, in the dictionary each was written in.</caption>
+<thead><tr><th>Archive</th><th>DD</th><th>Channels</th><th>COCOS</th><th>Row extent</th><th>Torus field</th><th>Stored</th></tr></thead>
+<tbody>
+<tr><td>WEST 57410/0</td><td>3.40.0</td><td>6</td><td>11</td><td>&minus;3.36×10<sup>&minus;3</sup> to +3.3×10<sup>&minus;4</sup> Wb</td><td>&minus;3.7625 T</td><td>channel 0; channels 0&ndash;4 verified b0_like, channel 5 reads reversed and is excluded unless selected</td></tr>
+<tr><td>JT-60SA E101154</td><td>4.1.0</td><td>1</td><td>17</td><td>positive Wb</td><td>not published in the entry</td><td>read, and needs a toroidal field supplied before it can be stored</td></tr>
+</tbody></table>
+
+<p><strong>The refusal.</strong> Reversing the toroidal field while the field and the flux are compared is refused with the peak and the field named. With the guard switched off the same test fails, and the red log is what this node's negative control records; with it in place the test passes. A row with no excursion (every sample zero), no field, a field that changes sign, or no finite sample states no b0_like sense at all and is refused too.</p>
+
+<table>
+<caption>MAST level1 store census, 200 shots sampled evenly from 17,111. The positive control is the same pass finding the poloidal flux loops.</caption>
+<thead><tr><th>Question</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Shots carrying an EFIT diamagnetic channel <code>efm/diamag_fluxx</code></td><td>131 of 200</td></tr>
+<tr><td>Finite samples in that channel</td><td>9,980, every one exactly 0.0</td></tr>
+<tr><td>Non-zero samples</td><td>713, every one of them NaN</td></tr>
+<tr><td>EFIT diamagnetic rating <code>esm/efm_rating_dia_flux</code></td><td>&minus;1.0 or 0.0 in every shot: the constraint was never rated as usable</td></tr>
+<tr><td>Shots carrying raw diamagnetic signals in <code>xma</code></td><td>139 of 200</td></tr>
+<tr><td>Their content (e.g. <code>dia_loopdot</code>, <code>dialoop_dot</code>, <code>dia_loop</code>, <code>dia_comp</code>)</td><td>on a 1 kHz clock spanning &minus;2.5 to 5.5 s, reaching the &plusmn;10 or &minus;5 rail with 2,300 to 13,000 distinct codes: amplifier output or its time derivative, not a flux</td></tr>
+<tr><td>Calibration published beside them (unit, loop area, turns, integrator gain)</td><td>none in the store</td></tr>
+<tr><td>Positive control: shots with <code>amb</code> poloidal flux loops</td><td>178 of 200, reaching 1.99 Wb</td></tr>
+<tr><td>Positive control: shots with the toroidal-field probe <code>amc/tf_current</code></td><td>179 of 200</td></tr>
+</tbody></table>
+
+<p id="sos-diamagnetic-source-store-provenance">The census reads the store at <code>/work/projects/imas_gpu/mast/level1/shots</code> read-only and records group names, array names, sample counts, finite counts and extents. Its first pass asked only whether an array name contained <code>diamag</code>, found the empty EFIT channel, and would have reported that the store carries no diamagnetic diagnostic at all. The group-level scan that followed found the live <code>xma</code> channels: an absence claim needs a scan whose positive control can see the thing being searched for, and the same pass must count the flux loops. The channel exists and varies; what it does not carry is a calibration to weber, and the archive's own equilibrium never adopted it.</p>
+
+<p><strong>Why the term is still not sourced on MAST.</strong> The row this node exists to write must state its units, its convention and its calibration, and then reproduce the archived constraint within its stated error. The store publishes no calibration for the raw loop signal, and the archived constraint value is zero wherever it is present, so there is nothing to reproduce and no honest factor to apply. Reading the raw signal and calling it weber would be a silent substitution of exactly the kind the decision forbids, and integrating an uncalibrated derivative behind a &plusmn;10 rail would invent the very quantity at issue.</p>
+</section>

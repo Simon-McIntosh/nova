@@ -620,6 +620,9 @@ def census(force=None):
     counts = defaultdict(int)
     for row in rows:
         counts[row["verdict"]] += 1
+    # Carry every verdict, so a reader sees merge=0 rather than a missing key.
+    for verdict in ("keep", "delete", "merge"):
+        counts.setdefault(verdict, 0)
     counts["total"] = len(rows)
     named = {p: repository_relative(ROOT / p) for p in pop}
     return {

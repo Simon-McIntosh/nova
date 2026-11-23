@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-23T10:58:11.247Z",
   "dispatched_at": "2026-11-23T10:48:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-hot-path-duplicate-register-c2a3f014f829",
+      "recorded_at": "2026-11-23T11:09:04.025511+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/hot_path_duplicates/compare.py",

@@ -1,0 +1,397 @@
+{
+ "bands": {
+  "axis_flux_fraction": {
+   "bound": 0.02,
+   "direction": "at-most",
+   "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json",
+   "unit": "fraction of the reference flux span"
+  },
+  "boundary_flux_fraction": {
+   "bound": 0.02,
+   "direction": "at-most",
+   "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json",
+   "unit": "fraction of the reference flux span, after gauge alignment"
+  },
+  "magnetic_axis_distance_m": {
+   "bound": 0.02,
+   "direction": "at-most",
+   "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json",
+   "unit": "m"
+  },
+  "plasma_current_fraction": {
+   "bound": 0.015,
+   "direction": "at-most",
+   "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json",
+   "unit": "fraction of the reference current"
+  },
+  "q95_difference": {
+   "bound": 0.1,
+   "direction": "at-most",
+   "evidence": "docs/figures/inverse-equilibrium-baseline/efit-on-nova-rows/receipt.json",
+   "unit": "magnitude"
+  }
+ },
+ "cases": [
+  {
+   "case": "iter-row-exchange-nominal",
+   "estimators": [
+    {
+     "gauge_wb": 65.02489300837756,
+     "lcfs_distance_m": 0.3290085842205453,
+     "metrics": {
+      "axis_flux_fraction": 0.8514937725154684,
+      "boundary_flux_fraction": 0.8405647682627995,
+      "magnetic_axis_distance_m": 0.04099957934232704,
+      "plasma_current_fraction": 4.0985262655144127e-16,
+      "q95_difference": 0.923580141841581
+     },
+     "name": "moment-reconstruction",
+     "note": "the cell-current moment reconstruction of the same rows, written by nova.equilibrium.moment.write_moment_equilibrium",
+     "q95_flux_map": 2.0596474835161915,
+     "q95_stored": NaN,
+     "reference_free": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": 0.6906204408737459
+     },
+     "reference_free_verdicts": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": true
+     },
+     "state": {
+      "boundary_points": 9,
+      "dd_version": "4.1.0",
+      "digest": "sha256:d076aa4952d55839dce592bf8a78a5880feb8c28a1de6afe16e218bfce5d521c",
+      "flux_axis": -138.23636025925933,
+      "flux_boundary": 2.3196026783364387,
+      "flux_map_nodes": [
+       33,
+       49
+      ],
+      "flux_span": 140.55596293759578,
+      "magnetic_axis_m": [
+       6.3142507902592415,
+       0.46512867622824783
+      ],
+      "plasma_current_a": -13634011.55852181,
+      "q95": NaN,
+      "reference_radius": 6.2,
+      "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/moment",
+      "time_s": 338.9275978120551,
+      "wall_rings": 1
+     },
+     "status": "scored",
+     "verdicts": {
+      "axis_flux_fraction": false,
+      "boundary_flux_fraction": false,
+      "magnetic_axis_distance_m": false,
+      "plasma_current_fraction": true,
+      "q95_difference": false
+     }
+    },
+    {
+     "gauge_wb": -266290.04517256754,
+     "lcfs_distance_m": 1.9787179111753215,
+     "metrics": {
+      "axis_flux_fraction": 3487.0386502303227,
+      "boundary_flux_fraction": 3487.940692289211,
+      "magnetic_axis_distance_m": 0.026374461913986482,
+      "plasma_current_fraction": 0.0,
+      "q95_difference": NaN
+     },
+     "name": "harmonic-reconstruction",
+     "note": "the source-free toroidal-harmonic reconstruction of the same rows, written by nova.equilibrium.harmonic.write_harmonic_equilibrium",
+     "q95_flux_map": NaN,
+     "q95_stored": NaN,
+     "reference_free": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": 0.5595689260492207
+     },
+     "reference_free_verdicts": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": true
+     },
+     "state": {
+      "boundary_points": 9,
+      "dd_version": "4.1.0",
+      "digest": "sha256:d3475eab6082e8be8f3f26dbf5ea86d3eba48d86a7c22fceaf64cb60b185af1f",
+      "flux_axis": 266216.83370531665,
+      "flux_boundary": -65.73084338057183,
+      "flux_map_nodes": null,
+      "flux_span": 266282.5645486972,
+      "magnetic_axis_m": [
+       6.263518388082886,
+       0.4969509545617625
+      ],
+      "plasma_current_a": -13634011.558521805,
+      "q95": NaN,
+      "reference_radius": null,
+      "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/harmonic",
+      "time_s": 338.9275978120551,
+      "wall_rings": 1
+     },
+     "status": "scored",
+     "verdicts": {
+      "axis_flux_fraction": false,
+      "boundary_flux_fraction": false,
+      "magnetic_axis_distance_m": false,
+      "plasma_current_fraction": true,
+      "q95_difference": false
+     }
+    },
+    {
+     "gauge_wb": -3.9567132501585576,
+     "lcfs_distance_m": 0.4057528243690528,
+     "metrics": {
+      "axis_flux_fraction": 0.0518127218095597,
+      "boundary_flux_fraction": 0.08271786784227309,
+      "magnetic_axis_distance_m": 0.27246583562120313,
+      "plasma_current_fraction": 1.3661754218381376e-16,
+      "q95_difference": 0.5021543136723281
+     },
+     "name": "profile-reconstruction",
+     "note": "the coupled profile reconstruction of the same rows, written by nova.equilibrium.profile.write_profile_equilibrium",
+     "q95_flux_map": 2.4810733116854444,
+     "q95_stored": NaN,
+     "reference_free": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": 0.7039511366041977
+     },
+     "reference_free_verdicts": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": true
+     },
+     "state": {
+      "boundary_points": 9,
+      "dd_version": "4.1.0",
+      "digest": "sha256:02caa0ef5de87e0fafdb8fedaefd04859edfff20e7cc4a5cba37d46635faa7bd",
+      "flux_axis": -69.25475400072321,
+      "flux_boundary": 0.7941112139300108,
+      "flux_map_nodes": [
+       33,
+       49
+      ],
+      "flux_span": 70.04886521465322,
+      "magnetic_axis_m": [
+       6.029575828175193,
+       0.5786226785278049
+      ],
+      "plasma_current_a": -13634011.558521807,
+      "q95": NaN,
+      "reference_radius": 6.2,
+      "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/profile",
+      "time_s": 338.9275978120551,
+      "wall_rings": 1
+     },
+     "status": "scored",
+     "verdicts": {
+      "axis_flux_fraction": false,
+      "boundary_flux_fraction": false,
+      "magnetic_axis_distance_m": false,
+      "plasma_current_fraction": true,
+      "q95_difference": false
+     }
+    },
+    {
+     "gauge_wb": 67.83601226712948,
+     "lcfs_distance_m": 0.3421390476066281,
+     "metrics": {
+      "axis_flux_fraction": 0.8883050678807244,
+      "boundary_flux_fraction": 0.9141873589933114,
+      "magnetic_axis_distance_m": 0.033480799433962996,
+      "plasma_current_fraction": 0.06000000000000033,
+      "q95_difference": 0.9899431053579575
+     },
+     "name": "moment-perturbed",
+     "note": "negative control: the section 3 perturbation applied to the moment reconstruction itself and then converted by that column's own conversion, so the control enters through the conversion",
+     "q95_flux_map": 1.993284519999815,
+     "q95_stored": NaN,
+     "reference_free": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": 0.6906204408737461
+     },
+     "reference_free_verdicts": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": true
+     },
+     "state": {
+      "boundary_points": 9,
+      "dd_version": "4.1.0",
+      "digest": "sha256:8497315a8d88036cd0939399e36ac8788182de06fdc09e0c5df09d95c123039d",
+      "flux_axis": -141.04747951801124,
+      "flux_boundary": 5.130721937088355,
+      "flux_map_nodes": [
+       33,
+       49
+      ],
+      "flux_span": 146.1782014550996,
+      "magnetic_axis_m": [
+       6.284016353077125,
+       0.4651246904505831
+      ],
+      "plasma_current_a": -14452052.252033118,
+      "q95": NaN,
+      "reference_radius": 6.2,
+      "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/moment-perturbed",
+      "time_s": 338.9275978120551,
+      "wall_rings": 1
+     },
+     "status": "scored",
+     "verdicts": {
+      "axis_flux_fraction": false,
+      "boundary_flux_fraction": false,
+      "magnetic_axis_distance_m": false,
+      "plasma_current_fraction": false,
+      "q95_difference": false
+     }
+    },
+    {
+     "gauge_wb": 373362.71172958735,
+     "lcfs_distance_m": 1.9002849524844807,
+     "metrics": {
+      "axis_flux_fraction": 4889.143360624562,
+      "boundary_flux_fraction": 4889.097443987354,
+      "magnetic_axis_distance_m": 0.03515862423385966,
+      "plasma_current_fraction": 0.06000000000000006,
+      "q95_difference": NaN
+     },
+     "name": "harmonic-perturbed",
+     "note": "negative control: the section 3 perturbation applied to the harmonic reconstruction itself and then converted by that column's own conversion, so the control enters through the conversion",
+     "q95_flux_map": NaN,
+     "q95_stored": NaN,
+     "reference_free": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": 0.4299753711372526
+     },
+     "reference_free_verdicts": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": false
+     },
+     "state": {
+      "boundary_points": 9,
+      "dd_version": "4.1.0",
+      "digest": "sha256:2cda8ac0ec43bfb75c4f0de7156f1eaf0d6afad9bd4fb4f18984779523b83091",
+      "flux_axis": -373435.92319683824,
+      "flux_boundary": -0.3522513773581018,
+      "flux_map_nodes": null,
+      "flux_span": 373435.5709454609,
+      "magnetic_axis_m": [
+       6.325004221573371,
+       0.49935164865612
+      ],
+      "plasma_current_a": -14452052.252033114,
+      "q95": NaN,
+      "reference_radius": null,
+      "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/harmonic-perturbed",
+      "time_s": 338.9275978120551,
+      "wall_rings": 1
+     },
+     "status": "scored",
+     "verdicts": {
+      "axis_flux_fraction": false,
+      "boundary_flux_fraction": false,
+      "magnetic_axis_distance_m": false,
+      "plasma_current_fraction": false,
+      "q95_difference": false
+     }
+    },
+    {
+     "gauge_wb": -4.081336845968551,
+     "lcfs_distance_m": 0.43369386336896765,
+     "metrics": {
+      "axis_flux_fraction": 0.05344465399477718,
+      "boundary_flux_fraction": 0.04765851474118149,
+      "magnetic_axis_distance_m": 0.24396738929358383,
+      "plasma_current_fraction": 0.06000000000000019,
+      "q95_difference": 0.5820489452683151
+     },
+     "name": "profile-perturbed",
+     "note": "negative control: the section 3 perturbation applied to the profile reconstruction itself and then converted by that column's own conversion, so the control enters through the conversion",
+     "q95_flux_map": 2.4011786800894575,
+     "q95_stored": NaN,
+     "reference_free": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": 0.7097232553988903
+     },
+     "reference_free_verdicts": {
+      "axis_inside_boundary": true,
+      "axis_inside_wall": true,
+      "boundary_area_fraction": true
+     },
+     "state": {
+      "boundary_points": 9,
+      "dd_version": "4.1.0",
+      "digest": "sha256:874529574a6b8abb44870e04f2b80bf9545bf837f27e9e5a5c21034b42d305dc",
+      "flux_axis": -69.13013040491322,
+      "flux_boundary": 3.596065822516138,
+      "flux_map_nodes": [
+       33,
+       49
+      ],
+      "flux_span": 72.72619622742936,
+      "magnetic_axis_m": [
+       6.059575828175193,
+       0.5786226785278049
+      ],
+      "plasma_current_a": -14452052.252033116,
+      "q95": NaN,
+      "reference_radius": 6.2,
+      "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/profile-perturbed",
+      "time_s": 338.9275978120551,
+      "wall_rings": 1
+     },
+     "status": "scored",
+     "verdicts": {
+      "axis_flux_fraction": false,
+      "boundary_flux_fraction": false,
+      "magnetic_axis_distance_m": false,
+      "plasma_current_fraction": false,
+      "q95_difference": false
+     }
+    }
+   ],
+   "machine": "ITER",
+   "reference": {
+    "boundary_points": 227,
+    "dd_version": "4.1.0",
+    "digest": "sha256:dd5a6ec1b876338d6bce121cd5ab70e5207a368e1d217692500c304a85c305e3",
+    "flux_axis": -73.21146725088177,
+    "flux_boundary": 3.1542034178327287,
+    "flux_map_nodes": [
+     65,
+     129
+    ],
+    "flux_span": 76.3656706687145,
+    "magnetic_axis_m": [
+     6.289868237209081,
+     0.4980901175347787
+    ],
+    "note": "the generating state of the row-exchange case, the same reference the section 3 table reads",
+    "plasma_current_a": -13634011.558521805,
+    "q95": -3.0550243513325954,
+    "reference_radius": 6.2,
+    "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/reference",
+    "time_s": 338.9275978120551,
+    "wall_rings": 1
+   },
+   "reference_q95_flux_map": 2.9832276253577725
+  }
+ ],
+ "fields": [
+  "magnetic_axis_distance_m",
+  "plasma_current_fraction",
+  "axis_flux_fraction",
+  "boundary_flux_fraction",
+  "q95_difference"
+ ]
+}

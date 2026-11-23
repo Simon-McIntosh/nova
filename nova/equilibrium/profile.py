@@ -724,4 +724,107 @@ __all__ = [
     "ProfilePrior",
     "ProfileResult",
     "ReconstructProfile",
+    "profile_equilibrium",
+    "write_profile_equilibrium",
 ]
+
+
+def profile_equilibrium(
+    result: ProfileResult,
+    grid_r: np.ndarray,
+    grid_z: np.ndarray,
+    inside_limiter: np.ndarray,
+    *,
+    limiter_r: np.ndarray,
+    limiter_z: np.ndarray,
+    vacuum_b0: float,
+    reference_radius: float,
+    time: float = 0.0,
+):
+    """Return the IMAS equilibrium one profile reconstruction is read as.
+
+    The reconstruction's solved flux map is written as the total poloidal flux.
+    Both levels written are the reconstruction's own: the boundary level is
+    ``result.boundary_flux``, the separatrix flux the profile iteration's own
+    traced boundary read returned, and the axis level is the solved map's value
+    at the sub-grid O-point ``result.axis`` the solve itself located. The
+    boundary ring is re-traced on that stored map at the same axis for the
+    outline geometry, so the outline and the levels describe one solved state.
+    The plasma current is the total of the solved cell currents.
+
+    The solved state carries the pressure and diamagnetic profile families, but
+    the split between them (the ``mu_0`` normalisation) is not exposed on the
+    result, so the stored profile carries the vacuum closure
+    ``F dF/dpsi = 0``; the safety factor is read with the field held at its
+    boundary value, identically for every reconstruction column.
+    """
+
+    from types import SimpleNamespace
+
+    from nova.equilibrium.connectivity_boundary import LCFS_ANGLES, host_boundary_read
+    from nova.equilibrium.reconstruction_state import equilibrium_from_state
+
+    grid_r = np.asarray(grid_r, dtype=float)
+    grid_z = np.asarray(grid_z, dtype=float)
+    inside = np.asarray(inside_limiter, dtype=bool)
+    # The result's flux is flat over the solve's own (vertical, radial) ordering;
+    # the boundary read and the stored map both take that 2-D form.
+    flux = np.asarray(result.flux, dtype=float).reshape(grid_z.size, grid_r.size)
+    axis = tuple(float(value) for value in np.asarray(result.axis, dtype=float))
+    read = host_boundary_read(
+        flux,
+        SimpleNamespace(
+            rg=grid_r,
+            zg=grid_z,
+            inside_limiter=inside,
+            limiter_r=np.asarray(limiter_r, dtype=float),
+            limiter_z=np.asarray(limiter_z, dtype=float),
+        ),
+        axis,
+        lcfs_norm=1.0,
+    )
+    if not read.found:
+        raise ValueError("the profile flux carries no closed boundary inside the wall")
+    angle = np.asarray(LCFS_ANGLES, dtype=float)
+    radii = np.asarray(read.radii, dtype=float)
+    ring = np.column_stack(
+        [axis[0] + radii * np.cos(angle), axis[1] + radii * np.sin(angle)]
+    )
+    if not np.allclose(ring[0], ring[-1]):
+        ring = np.vstack([ring, ring[0]])
+    # Both levels come from the reconstruction: the iteration's own traced
+    # separatrix flux, and the solved map's value at the O-point the solve
+    # reported. Sampling the map at its nearest node keeps the pair on one grid
+    # and one read, rather than mixing in a second boundary read's extremes.
+    i_r = int(np.argmin(np.abs(grid_r - axis[0])))
+    i_z = int(np.argmin(np.abs(grid_z - axis[1])))
+    return equilibrium_from_state(
+        flux=flux,
+        ring=ring,
+        axis=axis,
+        flux_axis=float(flux[i_z, i_r]),
+        flux_boundary=float(result.boundary_flux),
+        plasma_current=float(np.sum(np.asarray(result.cell_current, dtype=float))),
+        grid_r=grid_r,
+        grid_z=grid_z,
+        vacuum_b0=float(vacuum_b0),
+        reference_radius=float(reference_radius),
+        time=float(time),
+    )
+
+
+def write_profile_equilibrium(
+    path,
+    result: ProfileResult,
+    grid_r: np.ndarray,
+    grid_z: np.ndarray,
+    inside_limiter: np.ndarray,
+    **kwargs,
+):
+    """Write one profile reconstruction as an IMAS equilibrium and return the path."""
+
+    from nova.equilibrium.reconstruction_state import write_equilibrium
+
+    dd_version = str(kwargs.pop("dd_version", "4.1.0"))
+    equilibrium = profile_equilibrium(result, grid_r, grid_z, inside_limiter, **kwargs)
+    return write_equilibrium(path, equilibrium, dd_version=dd_version)

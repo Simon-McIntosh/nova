@@ -33,6 +33,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T185009989125-drift-sequences-fit-iteration",
       "section": "\u00a77"
+    },
+    "3": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T10:39:03.241532+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T185009989125-drift-sequences-fit-iteration",
+      "section": "\u00a77"
     }
   },
   "findings": [

@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:4011",
+    "nova/equilibrium/forward_operator.py:3192",
+    "nova/equilibrium/forward_operator.py:3901"
+  ],
+  "completed_at": "2026-11-23T00:52:04.839Z",
+  "dispatched_at": "2026-11-23T00:34:21Z",
+  "findings": [
+    {
+      "file": "tests/test_gs_map_fidelity.py",
+      "line": 285,
+      "severity": "non-blocking",
+      "summary": "test_map_jvp_matches_central_difference has no non-triviality guard on the tangent, so a map that became constant returns tangent_value=0 and finite=0, and error computes 0/max(0,1e-300)=0 which passes error<1e-6; the sibling boundary-flux test guards this at line 341 with abs(finite)>0. Add the same guard so a degenerate map reddens the test."
+    },
+    {
+      "file": "tests/test_gs_map_fidelity.py",
+      "line": 221,
+      "severity": "non-blocking",
+      "summary": "the six row assertions read _receipt_rows() from the committed fragment JSON rather than measuring, so a regression in the map code leaves them green because the fragment is static; only the driver main() at line 399 re-measures, and pytest never runs it. The fidelity guard therefore catches a corrupt or out-of-bound receipt but not a code regression."
+    },
+    {
+      "file": "tests/test_gs_map_fidelity.py",
+      "line": 155,
+      "severity": "non-blocking",
+      "summary": "_carrier and _measure_map re-implement the map/booking/closure measurement already owned by tests/test_certificate_exterior_support.py:59 _arm_measurement, roughly 45 percent of their lines identical with the same field names and formulas, instead of extending that owner with a case parameter; the two recipes will drift apart on the next fixture change."
+    },
+    {
+      "file": "tests/test_gs_map_fidelity.py",
+      "line": 392,
+      "severity": "non-blocking",
+      "summary": "the figure draws each panel with only its own null set, but nova AGENTS.md 'Plotting rules' and every comparable evidence fragment draw BOTH the solved and analytic null sets with a caption distinction, since a solved null drawn alone on a non-converged state reads as the answer; the caption's note that each panel carries its own null set is honest, but the two sets are never shown together."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html",
+      "line": 16,
+      "severity": "non-blocking",
+      "summary": "plan-commits lists through 8f654e2de and omits 706722415 and f5979377c, the two commits that create and edit this fragment, so a reader who resolves the record's provenance cannot reach the commit that wrote it."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 3 production call sites: nova/equilibrium/forward_operator.py:4011 (flux_map), :3192 (read) and :3901 (current_moment_image), which the test file exercises; no production code was changed by this node.",
+    "diff": "read commit by commit from 82a755fd to f5979377c: nine commits adding one test file, one launcher script, one evidence fragment and two SVG figures, all inside the declared scope.",
+    "done_when": "done_when asks the test to assert map relative sup at most 1e-2 at 2,000/5,000/10,000 for both cases, a JVP-vs-central test failing by id under a restored clamp, tests/test_gs_map_fidelity.py:239 reads the six rows from the committed fragment and asserts the bound, and the negative control fails by id in gate-negative-control.log.",
+    "goal": "the node goal is the brief's three clauses: measure the exact-mode map at 2,000/5,000/10,000 cells on both analytic cases with an exact-support exterior posed, commit a JVP regression test with a boundary-flux component and a negative control, and record the rows and 10,000-cell panels; all three are delivered.",
+    "manifest": "read; it states status complete, names the gate logs, the failing negative control, the two suite arms and the eleven CPU walls, and no field contradicts the artefacts.",
+    "write_paths": "read the five changed paths in the diff; every one lies inside the declared write paths, and no path outside them appears."
+  },
+  "justifications": {
+    "durability": "tests/test_gs_map_fidelity.py:284 guards the boundary-flux tangent against a clamp through NOVA_DUMMY_SADDLE_CLAMP=1, which reddens that test by id, but tests/test_gs_map_fidelity.py:285 has no non-triviality guard so a constant map yields tangent and central difference both zero and error 0/max(0,1e-300)=0 and passes.",
+    "evidence": "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html:77 carries the rows as a JSON block whose six entries reconcile exactly with the six rows-*.log MAP_FIDELITY_ROW lines, gate-jvp.log and gate-rows.log each name revision 8f654e2de and end EXIT=0, and gate-negative-control.log ends EXIT=1 with the failing id; the row gate itself (gate-rows.log, 17.76s) re-reads the committed block and measures nothing.",
+    "fit": "tests/test_gs_map_fidelity.py:1-30 follows the surrounding idiom (configure_dtypes before any array, the nova.media poloidal painters, descriptive names) but tests/test_gs_map_fidelity.py:392 draws each panel with only its own null set, where the repository's established evidence fragments draw both solved and analytic nulls distinguished in the caption.",
+    "goal_fidelity": "tests/test_gs_map_fidelity.py:239 asserts the six case-rung rows of the fixed 1e-2 bound and tests/test_gs_map_fidelity.py:268 and :304 bind the map and boundary-flux tangents, so all three brief clauses land; the done_when's 'from one GPU job' was not met, the rows having run as six CPU allocations (rows-*.log, jobs 1337392-1337397).",
+    "reuse": "tests/test_gs_map_fidelity.py:155 (_carrier) and :109 (_measure_map) duplicate the measurement recipe in tests/test_certificate_exterior_support.py:59 (_arm_measurement), about 45 percent of their lines identical with the same field names and formulas, rather than extending that owner to take a case name.",
+    "scope_discipline": "every path in 82a755fd..f5979377c is inside the declared write paths, tests/test_gs_map_fidelity.py, scripts/certificate_map_fidelity/run_rows.sh, the fragment and the two figures, while the declared tests/test_gs_runtime_operands.py is untouched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T003338900377-review-of-cfs-map-fidelity-rungs-f5979377c820",
+  "reviewed_base_sha": "82a755fd6433bec11db426918f2c78ba172fd81e",
+  "reviewed_head_sha": "f5979377c820a99b353671de7635ed380981772e",
+  "reviewed_run_id": "r-20261122T150133906524-cfs-map-fidelity-rungs",
+  "rubric": "landed",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T00:57:05.056920+00:00",
+  "total": 85
+}

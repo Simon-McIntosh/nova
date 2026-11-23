@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-23T00:34:40Z",
+  "figures": {
+    "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs/diverted-single-null-map-fidelity-10000.svg": {
+      "contrast": "No text is drawn; blue contours, black wall and red null markers all clear white.",
+      "data_ink": "Line contours only; no fill, no colour map, no shading.",
+      "decoration": "No gradient, background fill, grid or frame.",
+      "label_collision": "No labels exist; no ink touches a canvas edge; every contour lies inside the wall.",
+      "legibility": "Two identically framed single-null panels; the X-point sits in the lower divertor with the separatrix legs and the private-flux contours readable, and the red axis triangle and saddle cross are both distinguishable at the rendered size.",
+      "table_form": "A spatial poloidal map; not tabular information."
+    },
+    "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs/weak-rotation-reactor-static-map-fidelity-10000.svg": {
+      "contrast": "No text is drawn; blue contours and the black wall read clearly against white.",
+      "data_ink": "Line contours only; no fill, no colour map, no shading.",
+      "decoration": "No gradient, background fill, grid or frame.",
+      "label_collision": "No labels exist; no ink touches a canvas edge.",
+      "legibility": "Two identically framed panels of a smooth limited equilibrium, 13 to 14 concentric blue contours each, red axis triangle clear of the contours; readable at a glance.",
+      "table_form": "A spatial poloidal map; not tabular information."
+    }
+  },
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_note": "The fragment caption under each figure names the left panel as the map image and the right as the analytic state, and the repository poloidal painter keeps the canvas free of labels and axes by rule.",
+      "file": "tests/test_gs_map_fidelity.py",
+      "id": "fc67b28207d",
+      "line": 374,
+      "severity": "non-blocking",
+      "summary": "The two panels of each figure carry no on-canvas identification of which is the map image and which the analytic state, and the pair is near-identical by construction (measured null-marker centroids in the diverted render coincide to within 0.3 px). A reader who meets the image without its caption cannot tell the solved map from the reference; a short direct label per panel would remove that dependence. The caption says which is which, so this does not hold the node."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T003408880886-review-of-cfs-map-fidelity-rungs-f5979377c820-figure",
+  "reviewed_base_sha": "82a755fd6433bec11db426918f2c78ba172fd81e",
+  "reviewed_head_sha": "f5979377c820a99b353671de7635ed380981772e",
+  "reviewed_images": [
+    {
+      "case": "diverted-single-null, 10,000 requested cells (10,229 realised)",
+      "figure": "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs/diverted-single-null-map-fidelity-10000.svg",
+      "identified_by": "content: a teardrop first wall with a divertor leg and one admitted saddle (filled cross) per panel",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T003408880886-review-of-cfs-map-fidelity-rungs-f5979377c820-figure/image-0.png",
+      "size_px": [
+        1400,
+        720
+      ]
+    },
+    {
+      "case": "weak-rotation-reactor-static (limited), 10,000 requested cells (10,238 realised)",
+      "figure": "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs/weak-rotation-reactor-static-map-fidelity-10000.svg",
+      "identified_by": "content: a smooth oval first wall with no saddle marker and the magnetic axis alone per panel",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T003408880886-review-of-cfs-map-fidelity-rungs-f5979377c820-figure/image-1.png",
+      "size_px": [
+        1400,
+        720
+      ]
+    }
+  ],
+  "reviewed_run_id": "r-20261122T150133906524-cfs-map-fidelity-rungs",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Neither figure draws text, so text-versus-background contrast is not exercised. The data marks clear their background: mid-blue contours, black wall, red null markers on white.",
+    "data_ink": "The data carry the visual weight. Every mark is a contour line, the wall outline, or a null marker, drawn on one shared level array across the pair so the two panels are directly comparable.",
+    "decoration": "No gradient, background fill, grid, frame or styled theme is present; the panels are drawn with the axis off, so nothing competes with the flux map.",
+    "label_collision": "There are no labels, ticks, titles or legends, so nothing is clipped, overlapping another label, or lying over the data. Measured on the rendered PNGs: no ink touches any canvas edge in either figure.",
+    "legibility": "Both attached PNGs (1400x720, the 14x7.2 in slide canvas) read at a glance: two identically framed poloidal panels, unfilled blue line contours and a black first wall. The limited case carries a red axis triangle in each panel; the diverted case carries a red axis triangle plus a red filled saddle cross per panel, with the separatrix legs and private-flux contours legible at the bottom.",
+    "table_form": "Both images are poloidal field maps whose spatial relationships (contour compression, the X-point, the vessel boundary) are the point; neither depicts information that is naturally a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T00:54:11.788777+00:00",
+  "total": null
+}

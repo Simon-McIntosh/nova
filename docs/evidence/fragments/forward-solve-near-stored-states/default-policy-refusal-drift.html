@@ -140,6 +140,22 @@ enough to move the outcome between two of the three recorded refusal classes, so
 no intermediate input reproduces a recorded residual to a tight band: the band
 holds only when the record-era inputs themselves are substituted. That is why
 the reproduction above is a substitution and not a search.</p>
+<p>Job 1338014 repeated the nominal arm three times on one card: twice through
+the comparison construction and once through the seed-sensitivity construction
+the table above comes from. Two runs of the comparison construction, with
+nothing differing between them, differ by 1.19e-4 relative
+(0.0042536706460974995 and 0.004253165075350546), and each lies within 8.4e-5
+of the 0.004253522137685281 the four-arm job recorded, which sits between them.
+The seed-sensitivity construction gives 0.004247072269166507, 1.55e-3 from the
+comparison construction, and against the 0.0042525413742888945 the sensitivity
+job recorded it differs by 1.29e-3, so one construction's run-to-run scatter
+across jobs is about as large as the difference between the two constructions
+within one. The 2.31e-4 between the two nominal values this record quotes
+&mdash; 0.0042525413742888945 in the table above and 0.004253522137685281
+wherever else &mdash; is therefore at the scale of that scatter: the two are
+one arm measured twice, not two measurements that disagree. It moves the factor
+quoted from 0.140083 to 0.140051 of the recorded residual, and both sit a
+factor of 2.4 below the lower edge of the factor-of-three band.</p>
 </section>
 
 <section id="default-policy-refusal-drift-panels">
@@ -233,15 +249,24 @@ drawing compared against the arm record are in
 the same <code>redraw_panels.draw_arms</code> entry point the other published
 panels use, and its six SVGs carry every range, level count and null tally the
 committed panels carry; only matplotlib's generated element ids and the render
-timestamp differ. The current-drift figures and the positive and negative
-controls are recomputed from the records and the two current maps by job
-1338013, whose log ends in <code>EXIT=0</code> only when every claim in this
-record holds.</p>
-<p>The suite arms ran in trees exported from the base revision
-<code>d70c3598da3df64ee1cebb424bbfe2c1d498e0f9</code> and from the head
-<code>15f1720ad9680787fb8307aa4596309f8365b8e1</code> as it stood once the scripts
-and the panels had landed, as job 1337127: <code>16 passed in 3.31s</code> at the
-base revision and <code>16 passed in 3.34s</code> at the head; the test files are
-identical at both, so the node adds no product code and no test file of its
-own.</p>
+timestamp differ. The current-drift figures, the positive and negative controls
+and the scatter between the repeated nominal runs are recomputed from the
+records and the two current maps by job 1338142, whose log reports 22 claims,
+every one passing, and ends in <code>EXIT=0</code> only when they all hold.</p>
+<p>The nominal arm was repeated by job 1338014 on one titan card: two runs
+through the comparison construction and one through the seed-sensitivity
+construction, written to <code>input-drift/scatter/repeat.json</code>. The
+scatter paragraph in the sensitivity section states what those three runs
+measure.</p>
+<p>The suite arms run in trees exported from the base revision
+<code>d70c3598da3df64ee1cebb424bbfe2c1d498e0f9</code> and from this node's own
+head, each through
+<code>scripts/prototypes/stored_state_refusals/run_suite_arm.sh</code>, which
+writes the revision, the command resolved over that arm's tree and the exit
+status the package's <code>records.suite_arm_log</code> reads back. The two logs
+are <code>input-drift/suite-base.log</code> and
+<code>input-drift/suite-head.log</code>, and the manifest reports each arm's
+revision, command, exit status and passed count as its own log records them. The
+test files this node adds exist only at the head, which is why the two arms'
+commands differ.</p>
 </section>

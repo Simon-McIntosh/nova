@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T19:36:40.533Z",
+  "dispatched_at": "2026-11-23T19:27:56Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html:112",
+      "id": "done_when-1",
+      "reason": "a node implementing the contour observed side lands on the plateau by construction, so it either fails a correct implementation or passes only because the shared bias is smaller than the tolerance by accident.",
+      "text": "\u00a73 orders the observed side to reproduce the certificate's exact beta_p + l_i/2 \"to within the certificate's own error at the production contour sampling\", but the certificate's own error is its unresolved plateau: `limit` is 0.22299 at grid 161 while `analytic_route_value` sits 0.27808 above `exact` at grid 401 (`docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json`), so the certificate's own exact-field contour route already misses `exact` by 0.223-0.278 \u2014 the tolerance is as large as the bias it must discriminate against, and at the 401 grid the certificate's own route would fail it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html:112",
+      "id": "reasoning-1",
+      "reason": "without naming which of the two certificate values the observed side must match, the gate has no defined pass condition and two readings of the same sentence give opposite verdicts on a correct implementation.",
+      "text": "\u00a73 names \"the certificate's exact beta_p + l_i/2\" as the independent reference, but the receipt carries two references \u2014 `exact` (1.2325543621162165, the volume-side definition) and `analytic_route_value` (1.5106369718687442, the exact-field contour side) \u2014 and an observed side built on the contour integral of the grid-imaged field converges to the analytic *route* value, not to `exact`; the section does not say which is meant or which quantity the observed side is expected to land on",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html:69",
+      "id": "done_when-2",
+      "reason": "the done-when turns a measured control into a hard-coded expectation whose provenance the plan does not hold, so a passing implementation can fail on the number alone.",
+      "text": "\u00a71's new live-counter clause asserts the build count is \"76 on the MAST row\", but no committed record in the tree sources that number: no kernel counter exists (`grep` finds none in `nova/`), the current reuse test counts the fixture's own nine constructions (`tests/test_equilibrium_forward_operator.py:240,242`), and the plan itself says the only driver carrying it is uncommitted \u2014 so a node cannot check 76 before it implements, and a correct builder whose block count differs fails the gate on a constant unrelated to the reuse property",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "f5a1d88d53a4dd5b95fb4e4c686dcbab0d722c66",
+  "plan_fingerprint": "b792d28d9af426fecf1520eaf70973cabb88354c0a3e7d22c5b19456d9ff636c",
+  "plan_slug": "shafranov-observed-side",
+  "plan_version": 27,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T192710493549-plan-review-of-shafranov-observed-side",
+  "reviewed_blob_sha": "e51918527ea4823b3167fa347cb9d2e6d0452591",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited `/nova/evidence/archive/shafranov-observed-side-landed.html`, the certificate PNG/SVG and receipt all resolve, and the `\u00a71`/`\u00a74` cross-references in \u00a73 resolve to real sections.",
+    "done_when": "a finding \u2014 \u00a73's tolerance is drawn from the certificate's own unresolved bias, and \u00a71's live-counter clause hard-codes a build count no committed record sources.",
+    "evidence_paths": "pass \u2014 the certificate receipt and both figures sit on tracked paths (`docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json`, `shafranov-integral-certificate.png`/`.svg`), and the plan's record `docs/evidence/archive/shafranov-observed-side-landed.html` exists on disk.",
+    "naming": "pass \u2014 the two changed units carry no plan labels, stage names, ticket numbers or version tags.",
+    "reasoning": "a finding \u2014 \u00a73 names the certificate's `exact` (volume-side) value as the reference for an observed side that computes the contour (plateau) side, so the named reference and the delivered quantity are not the same quantity.",
+    "single_goal": "pass \u2014 each section names one endpoint; \u00a71's clauses (builder, two-solve test, live counter, defeated-reuse control) are clauses of one measure, and \u00a73's receipt, panels and discriminator strip are one regeneration.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares `s3` waits on `s1`, `s2` and `s4`, matching what \u00a73 consumes (the grid-imaged field from \u00a71, the analytic certificate from \u00a72, the Z provenance from \u00a74), and no declared edge points at a node that does not carry the consumed output."
+  },
+  "section_digests": {
+    "_document": "bed068e052bd6353ddf47129e3245da7ac804b6801e0c33dd7e736e266afe7ea",
+    "s-contract": "61c7b0c442759ab5a82fd40553b706909db7709feb4d44f4c9ea07221e6c0c82",
+    "s0": "d88c6a2860e5b0c59b37aa9054e43e4eb03dfa63d26c9d615ff39140715c16ac",
+    "s1": "f13b9789a678616a7502dc3c865cc5ac7385fd52226509b2abc776f14e4176f5",
+    "s2": "a65e4034bc865f895d045dd9a91dd94f5e1b38efe7a2abd7129d4a1347f2fe7d",
+    "s3": "85beef9080f196d63b339e392d9df292a5d46d96814337973c51a07595902f82",
+    "s4": "3e5ccd5452d0e5f7e57476f3bbbc6fc837aad75ff5b90a19d02ef090f1e1edcd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T19:49:03.338442+00:00",
+  "total": null
+}

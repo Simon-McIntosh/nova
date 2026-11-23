@@ -1,0 +1,91 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T14:55:25.889Z",
+  "dispatched_at": "2026-11-23T14:49:34Z",
+  "figures": {
+    "docs/figures/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main/iter.svg": {
+      "contrast": "pass: near-black legend text on white; grey about 3.1:1 on white; blue separable from grey.",
+      "data_ink": "pass: shared-level line contours in two colours, the wall and the null marks; no fill, gradient, grid, frame or tick labels.",
+      "decoration": "pass: white canvas, axes off, frameless legend; no shading or styled theme.",
+      "judged_from": "the rendered PNG image-2.png (1399x720) attached to this review run; no SVG and no other image was opened",
+      "label_collision": "pass for text: content within x 557-838, y 17-672, nothing clipped at the canvas edge; the legend at y 17-40 clears the data at y 74. Two non-blocking defects are recorded separately: the two null-marker pairs sit nearly on top of each other (axis and X-point), reading as one mark at page width; and the lower-left contour fan terminates against the bottom-left wall corner with nothing saying what region it is.",
+      "legibility": "pass at native resolution: the tall vessel, both contour families (grey as a fringe right of the blue), the lower-left flux fan, and both null sets are visible. Weakness recorded as a non-blocking finding: the panel occupies x 603-798, 13.9 % of the canvas width, and at page column the coincident null markers collapse to single dark marks.",
+      "table_form": "pass: a spatial flux field; the numbers (terminal misfit 10.03, 96 passes, -14.642 MA reconstructed, 1.37 % error) are in the table above the panels."
+    },
+    "docs/figures/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main/mastu.svg": {
+      "contrast": "pass: legend text is near-black on white; the grey reference #929292 measures about 3.1:1 on white and separates from the blue by lightness as well as hue where the two abut.",
+      "data_ink": "pass: all ink is data \u2014 two shared-level contour families, the wall outline and the null marks. No fill, gradient, grid, frame, tick, axis furniture or annotation text beyond the two-entry legend.",
+      "decoration": "pass: white canvas, axes off, no shading, band, drop shadow or styled theme; the figure-level legend is frameless.",
+      "judged_from": "the rendered PNG image-0.png (1399x720) attached to this review run; no SVG and no other image was opened",
+      "label_collision": "pass: all content lies within x 557-841, y 17-677 of the 1399x720 canvas and no ink touches a canvas edge, so nothing is clipped; the legend sits at y 17-40 and the plotted content begins at y 74, so no text overlaps another text or the data.",
+      "legibility": "pass at native resolution: the black first-wall outline, the wide grey imas-efit contour family and the thin blue nova contours over it are all distinguishable, and the solid axis triangle and the divertor null marks are visible. Weakness recorded as a non-blocking finding: the drawing occupies only x 560-841 of 1399 px, 20.1 % of the canvas width, so on a ~900 px evidence column the contour stack and null marks render at about two thirds of their native size in an already small panel.",
+      "table_form": "pass: a poloidal flux map is a spatial relationship a table cannot carry; the case's numbers (terminal misfit 50, 96 passes, 761.23 kA reconstructed, 2.28 % error) are published in the table above the panels."
+    },
+    "docs/figures/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main/tcv.svg": {
+      "contrast": "pass: near-black legend text on white; grey about 3.1:1 against white; blue distinguishable from grey where the bands separate.",
+      "data_ink": "pass: two shared-level contour families, the wall and two null marks carry all the ink; no fills, gradient, gridlines, frame, ticks or value labels.",
+      "decoration": "pass: white canvas, axes off, frameless two-entry legend above the panel, no shading or styled theme.",
+      "judged_from": "the rendered PNG image-1.png (1399x720) attached to this review run; no SVG and no other image was opened",
+      "label_collision": "pass: content within x 557-838, y 17-672, no ink at any canvas edge; legend y 17-40 is clear of the data starting at y 74; the grey X-point mark near (638, 228) and the blue cross near (637, 548) are far apart, so no mark overlap.",
+      "legibility": "pass at native resolution but with a recorded weakness: the grey reference coincides so closely with the blue subject that grey survives only as a fringe along the outer right and lower edges, and at a ~900 px page column that fringe disappears, so the panel then reads as a single blue contour set \u2014 the one reading it exists to prevent. The drawing occupies x 593-796, 14.5 % of the canvas width.",
+      "table_form": "pass: a spatial flux field; the numbers (terminal misfit 6.978, 96 passes, -237.75 kA reconstructed, 1.04 % error) sit in the table above the panels."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main/mastu.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "All three panels sit inside one 14.0 x 7.2 in canvas drawn at equal aspect, so each tall machine is rendered in a narrow column of the wide canvas. Measured on the delivered PNGs, plotted content occupies x 560-841 (281 px, 20.1 %) for MAST-U, x 593-796 (203 px, 14.5 %) for TCV and x 603-798 (195 px, 13.9 %) for ITER of a 1399 px width: about 80 % of the figure is empty white. The contour detail and null marks are therefore drawn at roughly a fifth of the size the canvas could give them, which is what makes the grey reference and the null markers marginal at page-column width. Folded: size the canvas width to each machine's aspect, or place the three panels side by side on one shared-scale canvas."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main/tcv.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In the TCV panel the reference and nova contours nearly coincide, so the 2.6 pt grey imas-efit line is almost entirely covered by the 1.4 pt blue nova line drawn over it. At native resolution grey remains visible as a fringe along the outer right and lower edges, but at the ~900 px evidence column that fringe disappears and the panel reads as a single blue contour set. Exempted: the wide-reference-under-narrow-subject encoding is the documented design, so agreement reads as a narrow line centred in a wide one, and the served vector figure preserves the grey where raster downsampling loses it; the finding is recorded so a future layout or caption change can address the page-scale read."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main/iter.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In the ITER panel the two null-marker pairs coincide almost entirely: at the axis the blue triangle sits on the grey reference triangle, and at the X-point the blue cross sits on the grey cross, with only a sliver of the reference shade showing. At native resolution both shades are discernible; at page-column width each pair reads as one dark mark, so the figure silently drops the statement that the two states agree on the null locations. The same overlap is present but milder on MAST-U. Exempted: the overlap records a genuine coincidence of the two null estimates and both marks are distinguishable on the delivered PNG at native resolution."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main/iter.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In the ITER panel a fan of blue and grey contours in the lower-left terminates against the bottom-left wall corner, and several arcs stop short in the interior, with nothing on the figure or in its caption saying what that region is. The content bounding box stops at y 672 of 720, so this is not a canvas clip: the contours end where the node grid meets the wall. A reader cannot tell whether this is a private-flux or scrape-off region truncated by the grid or a solved structure the wall cut off. Exempted: the truncation faithfully renders the data boundary the fit was solved over; a caption clause naming the region would remove the ambiguity."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html",
+      "line": 19,
+      "severity": "non-blocking",
+      "summary": "The three captions (lines 19-21) state which colour is which, 'both null sets' and the wall, but omit the terminal residual and the converged flag, and every state drawn is a non-converged terminal state (MAST-U misfit 50, TCV 6.978, ITER 10.03; converged 'no' on all three in the table above). The panels draw tidy closed contours under a two-entry legend, so a reader can take them for solved equilibria with no way to learn from the figure or its caption that the fit was still moving when its 96-pass budget ended. The section's plotting rule asks for the terminal residual and the converged flag in the caption. Folded: add the residual and converged flag to each caption in a follow-up fragment edit."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html",
+      "line": 21,
+      "severity": "non-blocking",
+      "summary": "Neither the legend nor the captions identify the null marks: the figure shows a solid triangle at the core and cross marks near the divertor in two shades, with no statement that the triangle is the magnetic axis and the cross the admitted X-point, nor which shade belongs to which state. The legend's own two entries are drawn with triangle glyphs, so the legend reinforces the ambiguity by reusing the axis-marker shape for a series key. On ITER and MAST-U, where the two shades coincide, the marks are the only place the null comparison can be read. Folded: add one caption clause naming the marker vocabulary and the shading, and drop the triangle glyph from the legend key."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T144856344645-review-of-fit-iteration-stored-cases-from-main-6e71688b127f-figure",
+  "reviewed_base_sha": "2445485444b981b790168259704348395a38451f",
+  "reviewed_head_sha": "6e71688b127ff4c6865d5ead68054282936020fd",
+  "reviewed_run_id": "r-20261123T104612125580-fit-iteration-stored-cases-from-main",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass: legend text is near-black on white in all three; the grey reference colour measures about 3.1:1 against white and is distinguished from the blue by lightness as well as hue.",
+    "data_ink": "pass: unfilled line contours, the wall outline and null marks are the only ink in every panel; no fills, gradients, gridlines, frames, ticks or value labels.",
+    "decoration": "pass: no gradient, background fill, shading, drop shadow or styled theme in any panel; axes are off and each figure-level legend is frameless.",
+    "label_collision": "pass: no text is clipped at a canvas edge or overlaps another text or the data in any panel (content within x 557-841, y 17-677, no ink on any edge). Overlapping null markers are data marks rather than labels and are recorded as non-blocking findings.",
+    "legibility": "pass with recorded weaknesses: all three panels are readable at their native 1399x720 resolution \u2014 wall, both contour families and both null sets visible. The panels fill only 13.9-20.1 % of the canvas width, the TCV grey reference degrades to invisible at page-column width, and coincident null markers merge; these are recorded as non-blocking findings, not as a blocked read.",
+    "table_form": "pass: all three are poloidal flux maps, a spatial relationship a table cannot carry; the per-case numbers are published in the table above the panels."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T14:56:08.945776+00:00",
+  "total": null
+}

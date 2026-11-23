@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T07:15:04.621Z",
+  "dispatched_at": "2026-11-23T07:06:15Z",
+  "findings": [
+    {
+      "anchor": "plan.html:94",
+      "id": "wiring-1",
+      "reason": "as wired neither node can be dispatched, so the read's \u00a74 bounds are measured against a cache row that no dispatched node has yet created, and the ordering that the earlier wiring finding resolved has been re-broken by the changed clause.",
+      "text": "\u00a79 clause (2) closes on the read's first call \"from the pinned cache\" and on \"\u00a74's H200 fills at 132, 300 and 550 cells complete\", but \u00a74 node (a) (plan.html:74) is the step that \"first adds that read at 132, 300 and 550 cells to the programs the pre-warm compiles into the pinned cache\", and plan-section-depends-on declares s4 depends on s9 (plan.html:23), so \u00a79 cannot measure what it names until \u00a74 has run while \u00a74 is ordered after \u00a79",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:94",
+      "id": "reasoning-1",
+      "reason": "a worker cannot tell whether a peak above 120 GB is carried as a recorded value or fails the node, so the clause closes on neither reading and the 2026-11-18 unbounded-cold-compile ruling is restated as a bound in the very sentence that disclaims one.",
+      "text": "clause (2) says the 132-cell read's cold compile \"completes inside one 120 GB CPU allocation, with its peak ... recorded and no bound on it\"; a compile that exceeds 120 GB is killed by the allocation and fails the clause, so 120 GB is a peak-memory bound in effect while the same sentence says none exists, and \u00a78 (plan.html:90) records that the read's current Hessian call already exceeds 120 GB, making it the binding number rather than a recorded observation",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5f424d1f0630541fdf36a9373443bb1c38c0d7bf",
+  "plan_fingerprint": "c724cbcb2c22656624b0d782ecd4ceb3df720aac0f546c11cc1546f99c92e076",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 139,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T070530172446-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "789717de96b0fa713f9fa05e6785bbde5aea964d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a78 (plan.html:90) and \u00a74 (plan.html:73-74), which the section cites, resolve, and both entries in its data-links (s8, s4) name sections that exist; the record path is a deliverable to be written, not an anchor to resolve.",
+    "done_when": "pass \u2014 clause (1) names the 1e-9 agreement and the one-instance lowering, clause (2) names the cold-compile peak and the \u00a74 bounds, and clause (3) declares the instance-count test's failing control by test id.",
+    "evidence_paths": "pass \u2014 the section names its record at docs/evidence/fragments/kernel-compile-barrier/kcb-assembled-read-hessian.html, a durable tracked path.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol, file or comment in this section.",
+    "reasoning": "a finding \u2014 clause (2) both requires the 132-cell read's cold compile to \"complete inside one 120 GB CPU allocation\" and states that there is \"no bound on it\", which are incompatible descriptions of the same measure.",
+    "single_goal": "pass \u2014 the section delivers one thing: the read's field Hessian assembled from \u00a78's outputs rather than differentiated.",
+    "wiring": "a finding \u2014 \u00a79 clause (2) requires the read's first call \"from the pinned cache\" and \"\u00a74's H200 fills ... complete\", while the pre-warm row that compiles that read is added by \u00a74 node (a) and plan-section-depends-on makes s4 wait on s9 (plan.html:23, :74, :94), so the two cannot be dispatched in either order."
+  },
+  "section_digests": {
+    "_document": "8aa2f4e5145f569b0e6cbd810ea4816ca4580ad9e1a7491aebefa7b76a7da11c",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "c0050e9c77ebe6780135151c511e8850c91e7dc99d0cb4fe32c9d032665dd522",
+    "s4": "4b8bf6686dd7741ef6ed148a144b3f512eff3f8ad043c934f568a9feb50f76f8",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea",
+    "s7": "6dfe0a01ad8470c02d38d7e3fa33263ff325b87943f260375c61e09e0cfe5db8",
+    "s8": "a4627c2611f0af4743802be210abf766114de0c5c5157b517d571a34443c1377",
+    "s9": "2df4471d7481bf47d1bfc87c0cb7a702061b710b98d116a864de8e1d4de31638"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:12:55.064628+00:00",
+  "total": null
+}

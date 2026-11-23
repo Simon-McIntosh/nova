@@ -1,0 +1,1545 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "e89d1a7c5411d32fcaa793ed62e0d68148e2e6bc",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T070534454144-plan-review-of-kernel-compile-barrier/brief.md",
+    "sha256": "64c51254b965b4e88cbc41c097408877d025973581528a11e5529baecc842d5d"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 1622593,
+      "input_tokens_cumulative": 1622593,
+      "output_tokens": 14857,
+      "output_tokens_cumulative": 14857,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-23T07:15:04.621Z",
+  "completed_at_source": "terminal_event",
+  "dispatch_width": "section",
+  "dispatched_at": "2026-11-23T07:06:15Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "",
+    "reason": "brief-names-no-plan",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-23T07:25:34.487805+00:00",
+    "horizon_seconds": 1200,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-23T07:05:34Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 18,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 11,
+    "headroom": -5,
+    "mean_context": 134545,
+    "observed_at": "2026-11-23T07:05:16Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 18,
+      "aggregate_tokens_per_second": 493.691,
+      "detail": "",
+      "mean_tokens_per_second": 44.881,
+      "observed_at": "2026-11-23T07:05:16Z",
+      "runs": 11.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-23T07:15:04.621Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T070534454144-plan-review-of-kernel-compile-barrier/manifest.md",
+  "member": "disposable-r-20261123T070534454144-plan-review-of-kernel-compile-barrier",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "plan-review-of-kernel-compile-barrier",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261123T070530172446-plan-review-of-kernel-compile-barrier/brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T070534454144-plan-review-of-kernel-compile-barrier/brief.md",
+    "brief_sha256": "64c51254b965b4e88cbc41c097408877d025973581528a11e5529baecc842d5d",
+    "capability": null,
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 653,
+          "cached_input_tokens": 545810,
+          "input_tokens": 546465,
+          "output_tokens": 600,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 547065,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "906c06ae-8766-4281-8a78-e20c226c00f5",
+      "session_id": "906c06ae-8766-4281-8a78-e20c226c00f5"
+    },
+    "done_when": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261123T070530172446-plan-review-of-kernel-compile-barrier/report.md contains RUBRIC lines for every checklist item and FINDING lines carrying WOULD_CHANGE_THE_PLAN and REASON for each finding; the manifest names the delivered report",
+    "estimated_hours": null,
+    "goal": "review the content of plan kernel-compile-barrier",
+    "id": "plan-review-of-kernel-compile-barrier",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-23T07:05:34Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 18,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 11,
+      "headroom": -5,
+      "mean_context": 134545,
+      "observed_at": "2026-11-23T07:05:16Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 18,
+        "aggregate_tokens_per_second": 493.691,
+        "detail": "",
+        "mean_tokens_per_second": 44.881,
+        "observed_at": "2026-11-23T07:05:16Z",
+        "runs": 11.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T070534454144-plan-review-of-kernel-compile-barrier/manifest.md",
+    "mcp_set": "",
+    "negative_control": "",
+    "node_body": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T070534454144-plan-review-of-kernel-compile-barrier/node.json",
+    "over_fence_note": "",
+    "over_fence_reason": "",
+    "peer_scopes": {},
+    "plan": "",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "20m",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261123T070530172446-plan-review-of-kernel-compile-barrier"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 380429.0,
+  "outcome": "plan review stored with 2 finding(s), 2 of which would change the plan",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "plan-review-of-kernel-compile-barrier",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-23T07:05:57.690674+00:00",
+    "score": 0.475,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 229.323058,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 482.1459,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.920470983606084,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 3.8288887438194448,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-fable-5-1",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.008949394955804744,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": {
+          "attempts": 42,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": 55.00000000000001,
+          "withheld": null
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T03:00:00.967852+00:00",
+        "stale": false,
+        "suits": "The most capable and most expensive Claude model, about two and a half times Opus's token price. Reserve it for the very hardest nodes.",
+        "utilisation_pct": 87.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 229.323058,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 482.1459,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.920470983606084,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 3.8288887438194448,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.008949394955804744,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": {
+          "attempts": 42,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": 55.00000000000001,
+          "withheld": null
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T03:00:00.967852+00:00",
+        "stale": false,
+        "suits": "The lane's fastest and cheapest model, about a twentieth of Sonnet's token price. Suits light, well-defined work.",
+        "utilisation_pct": 87.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 229.323058,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 482.1459,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.920470983606084,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 3.8288887438194448,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.008949394955804744,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": {
+          "attempts": 42,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": 55.00000000000001,
+          "withheld": null
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T03:00:00.967852+00:00",
+        "stale": false,
+        "suits": "A strong general model for deep or open-ended work, about twice Sonnet's token price.",
+        "utilisation_pct": 87.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 229.323058,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 482.1459,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 1.920470983606084,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 3.8288887438194448,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": 0.008949394955804744,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": {
+          "attempts": 42,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": 55.00000000000001,
+          "withheld": null
+        },
+        "reserved": true,
+        "resets_at": "2026-11-27T03:00:00.967852+00:00",
+        "stale": false,
+        "suits": "The lane default, an everyday coding model at about half of Opus's token price. Suits guided implementation and full reviews.",
+        "utilisation_pct": 87.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "congested",
+          "running": 11,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 316,
+          "passed": 7,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        ],
+        "reservation": {
+          "attempts": 42,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is reserved while the orchestrators it shares with it needs it; its window reading is unknown or stale"
+        },
+        "reserved": true,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": 2
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 4992.449386,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.5511,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.8993289307175925,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-30T04:41:27+00:00",
+        "stale": true,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 2.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 4992.449386,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.5511,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.8993289307175925,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-30T04:41:27+00:00",
+        "stale": true,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 2.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 4992.449386,
+        "budget_reason": null,
+        "budget_source": "ledger",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.5511,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 6.8993289307175925,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6.1-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 29,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-30T04:41:27+00:00",
+        "stale": true,
+        "suits": "The lane default, the current-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 2.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "in-harness-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "omp-local",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "congested",
+          "running": 11,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "omp",
+        "local": false,
+        "model": "local/deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 148,
+          "passed": 3,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": null,
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "local-backend: local work is offered through clive"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": 2
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 282.814,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"review\",\"spec_level\":\"exact\",\"capability\":null,\"goal\":\"review the content of plan kernel-compile-barrier\",\"done_when\":\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/kernel-compile-barrier/r-20261123T070530172446-plan-review-of-kernel-compile-barrier/report.md contains RUBRIC lines for every checklist item and FINDING lines carrying WOULD_CHANGE_THE_PLAN and REASON for each finding; the manifest names the delivered report\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":50392,\"estimated_hours\":null,\"estimated_hours_source\":null,\"attempts\":42,\"write_path_count\":1,\"negative_control_declared\":false,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null,\"lift_preference\":null},\"orchestrator_comment\":\"\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":2070.0,\"expected_wait_profile_age_s\":9121.089028,\"running\":11,\"waiting\":0,\"queue_position\":1,\"headroom\":-6,\"worker_slots\":4,\"tokens_per_second\":44.068,\"read_at\":\"2026-11-23T07:06:25.215455+00:00\"}}",
+    "rendered_token_estimate": 271,
+    "stage_ms": {
+      "budget-snapshot": 1188.44,
+      "context-estimate": 17.09,
+      "records": 862.065,
+      "verdict-inputs": 571.042
+    },
+    "template_digest": "5ea6c8844f959f84293c0d2c90c1db0de4375d09e641cca7be7c360603b00202",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_link": null,
+  "promoted_by": "review-self",
+  "promoted_revision": "e89d1a7c5411d32fcaa793ed62e0d68148e2e6bc",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261123T070534454144-plan-review-of-kernel-compile-barrier",
+    "scores": {},
+    "status": "ready",
+    "total": null
+  },
+  "review_tier": "none",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261123T070534454144-plan-review-of-kernel-compile-barrier",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "906c06ae-8766-4281-8a78-e20c226c00f5",
+  "session_harness": "claude",
+  "session_id": "9008c575-d5d6-4ddf-aef0-1fa5422a9b24",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 1622593,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 519.11,
+    "generated_tokens": 14857,
+    "generation_seconds": 510.654,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 50.0,
+    "machine_seconds": 8.456,
+    "peak_input_tokens": 115123,
+    "tokens_per_second": 29.09,
+    "wall_tokens_per_second": 28.62
+  },
+  "time_budget": "20m",
+  "tool_steps": 16.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 1800,
+        "classification": "promotable",
+        "commits_beyond_base": 15,
+        "delivery": {
+          "phase": "promotion-running",
+          "requested_at": "2026-11-23T07:05:27.776267+00:00",
+          "status": "promotion-queued"
+        },
+        "detail": "the worker manifest reports completion and an independent parsed review is attached; the run is ready for promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 158,
+        "ended_during_launch": false,
+        "exit_record": {
+          "attempt": 5,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-23T06:34:18Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-23T06:31:39Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261122T133641851585-slice-profile-at-main",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 68197,
+          "worker_pid": 3187219
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "promotion has been requested; waiting for the promotion service",
+          "lifting_condition": null,
+          "next_action": "reckon crew complete --run r-20261122T133641851585-slice-profile-at-main --gate not-run --wait --commit bf692471c5c42765fb4335c8c43a175dcbe2bc62 --commit 897d759f967bee5aab4175ef1332d8893fd4b7ed --commit 647b5bcd651eba934e54db02eee94da0381837cb --commit 642b6eb0cdb9dd35000e03590f696d5984f818e7 --commit 4b374175c0c4eeb1c244ffe93b2c9a171a944def --commit fda7ade5a1b595bc43383fda8b05bdfd87f226ba --commit 1a23ef83e1c5777b7f910a3ef2e3c543ab91257c --commit 80841901a23ccc8f8f8dad59437db14a1917c65b --commit 9572948e067484c00798fbe8f12607880ab61865 --commit 7b29fadc58fe3bea58c72c249851951567e6f0cb --commit 648441843b0b8fb02863f440a1404a6fc2cbfe9a --commit 2f263124c52d9e0487d12298c2d8443fec46e985 --commit de5c188b02c608d0732b2d4a66ac8605b788c291 --commit 7fdcd084590b9b87afac9e9e87a7878027ea4938 --commit 63c29897e2fa0fdab48947f28b2ebffb0aaa8b39",
+          "promotion_recorded": false,
+          "recovery": "promote",
+          "recovery_classification": "promotion-queued",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "promotion-queued"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-23T06:34:18Z",
+        "lane_event": null,
+        "launch_error": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1881,
+        "log_fresh": false,
+        "manifest_commits": [
+          "63c29897e",
+          "7fdcd0845",
+          "de5c188b0",
+          "2f263124c",
+          "648441843",
+          "7b29fadc5",
+          "9572948e0",
+          "80841901a",
+          "1a23ef83e",
+          "fda7ade5a",
+          "4b374175c",
+          "642b6eb0c",
+          "647b5bcd6",
+          "897d759f9",
+          "bf692471c"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "bab5af3d3283e2a2ef91096aa616df169e4e45d0c5e5ed0f88d321fe5c5e73a7",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T133641851585-slice-profile-at-main/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew complete --run r-20261122T133641851585-slice-profile-at-main --gate not-run --wait --commit bf692471c5c42765fb4335c8c43a175dcbe2bc62 --commit 897d759f967bee5aab4175ef1332d8893fd4b7ed --commit 647b5bcd651eba934e54db02eee94da0381837cb --commit 642b6eb0cdb9dd35000e03590f696d5984f818e7 --commit 4b374175c0c4eeb1c244ffe93b2c9a171a944def --commit fda7ade5a1b595bc43383fda8b05bdfd87f226ba --commit 1a23ef83e1c5777b7f910a3ef2e3c543ab91257c --commit 80841901a23ccc8f8f8dad59437db14a1917c65b --commit 9572948e067484c00798fbe8f12607880ab61865 --commit 7b29fadc58fe3bea58c72c249851951567e6f0cb --commit 648441843b0b8fb02863f440a1404a6fc2cbfe9a --commit 2f263124c52d9e0487d12298c2d8443fec46e985 --commit de5c188b02c608d0732b2d4a66ac8605b788c291 --commit 7fdcd084590b9b87afac9e9e87a7878027ea4938 --commit 63c29897e2fa0fdab48947f28b2ebffb0aaa8b39",
+        "node": "slice-profile-at-main",
+        "orientation_check": {
+          "checked_at": "2026-11-23T06:41:41Z",
+          "detail": "",
+          "expected": {
+            "base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/slice-profile-at-main",
+            "write_paths": [
+              "docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html",
+              "docs/figures/sub-millisecond-forward-path/slice-profile-at-main",
+              "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
+              "scripts/prototypes/bank_h200_slice_profile",
+              "scripts/prototypes/bank_newton_step/measure.py"
+            ]
+          },
+          "inputs": {
+            "commits": [
+              "63c29897e",
+              "7fdcd0845",
+              "de5c188b0",
+              "2f263124c",
+              "648441843",
+              "7b29fadc5",
+              "9572948e0",
+              "80841901a",
+              "1a23ef83e",
+              "fda7ade5a",
+              "4b374175c",
+              "642b6eb0c",
+              "647b5bcd6",
+              "897d759f9",
+              "bf692471c"
+            ],
+            "expected": {
+              "base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/slice-profile-at-main",
+              "write_paths": [
+                "docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html",
+                "docs/figures/sub-millisecond-forward-path/slice-profile-at-main",
+                "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
+                "scripts/prototypes/bank_h200_slice_profile",
+                "scripts/prototypes/bank_newton_step/measure.py"
+              ]
+            },
+            "head": "63c29897e2fa0fdab48947f28b2ebffb0aaa8b39",
+            "reported": {
+              "base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/slice-profile-at-main",
+              "write_paths": [
+                "docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html",
+                "docs/figures/sub-millisecond-forward-path/slice-profile-at-main",
+                "scripts/prototypes/bank_h200_slice_profile"
+              ]
+            },
+            "status": "complete"
+          },
+          "matched": true,
+          "mismatches": [
+            "write_paths"
+          ],
+          "repaired_echo": {
+            "write_paths": {
+              "expected": [
+                "docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html",
+                "docs/figures/sub-millisecond-forward-path/slice-profile-at-main",
+                "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
+                "scripts/prototypes/bank_h200_slice_profile",
+                "scripts/prototypes/bank_newton_step/measure.py"
+              ],
+              "reported": [
+                "docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html",
+                "docs/figures/sub-millisecond-forward-path/slice-profile-at-main",
+                "scripts/prototypes/bank_h200_slice_profile"
+              ]
+            }
+          },
+          "reported": {
+            "base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/slice-profile-at-main",
+            "write_paths": [
+              "docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html",
+              "docs/figures/sub-millisecond-forward-path/slice-profile-at-main",
+              "scripts/prototypes/bank_h200_slice_profile"
+            ]
+          }
+        },
+        "phase": "complete",
+        "plan": "",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "promote",
+        "recovery_classification": "promotable",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": "parsed",
+        "run_id": "r-20261122T133641851585-slice-profile-at-main",
+        "session": "906c06ae-8766-4281-8a78-e20c226c00f5",
+        "settled": null,
+        "stored_phase": "complete",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 1916,
+        "terminal_at": "2026-11-23T06:33:40Z",
+        "wait_age_seconds": null,
+        "wait_class": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/slice-profile-at-main"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 21600,
+        "classification": "scoring",
+        "commits_beyond_base": 12,
+        "delivery": {
+          "status": "delivered"
+        },
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 9913,
+        "ended_during_launch": false,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [
+            1606676,
+            1606677,
+            1606683,
+            2256570,
+            2256575,
+            2256574,
+            1821772,
+            2253890
+          ],
+          "exit_code": null,
+          "exited_at": "2026-11-23T03:39:58Z",
+          "forced_exit": {
+            "phase": "complete",
+            "reason": "terminal-run",
+            "signalled_at": "2026-11-23T03:39:54Z"
+          },
+          "last_record_type": "system",
+          "launched_at": "2026-11-23T00:54:43Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261122T150133906524-cfs-map-fidelity-rungs",
+          "signal": 15,
+          "signal_name": "SIGTERM",
+          "stream_records_seen": 79045,
+          "worker_pid": 1606676
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T150133906524-cfs-map-fidelity-rungs/review-brief.md --plan converged-forward-solve --section '§4' --role review --spec-level exact --node review-of-cfs-map-fidelity-rungs-1d87f7d91b3e --goal 'attach an independent review to run r-20261122T150133906524-cfs-map-fidelity-rungs' --done-when 'the review for r-20261122T150133906524-cfs-map-fidelity-rungs stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261122T150133906524-cfs-map-fidelity-rungs, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T150133906524-cfs-map-fidelity-rungs/review-records/r-20261122T150133906524-cfs-map-fidelity-rungs.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T150133906524-cfs-map-fidelity-rungs/review-records/r-20261122T150133906524-cfs-map-fidelity-rungs.at-1d87f7d91b3e307eeed1d243f09269cda8581b1f.json --time-budget 6h --session 906c06ae-8766-4281-8a78-e20c226c00f5 --allow-unreconciled-runs --local",
+          "promotion_recorded": false,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-23T03:39:58Z",
+        "lane_event": null,
+        "launch_error": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 12343,
+        "log_fresh": false,
+        "manifest_commits": [
+          "edb2d8d09",
+          "b27e012a5",
+          "9e6024b21",
+          "74cf9614d",
+          "87b4fdbc9",
+          "8e42b4cbe",
+          "8f654e2de",
+          "706722415",
+          "f5979377c",
+          "9dee2f8ce",
+          "2de405807",
+          "1d87f7d91"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "b6ce04f231e85768257b50793c6ccdbd360995c9e5d64aa17d66037fdc096d83",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T150133906524-cfs-map-fidelity-rungs/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T150133906524-cfs-map-fidelity-rungs/review-brief.md --plan converged-forward-solve --section '§4' --role review --spec-level exact --node review-of-cfs-map-fidelity-rungs-1d87f7d91b3e --goal 'attach an independent review to run r-20261122T150133906524-cfs-map-fidelity-rungs' --done-when 'the review for r-20261122T150133906524-cfs-map-fidelity-rungs stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261122T150133906524-cfs-map-fidelity-rungs, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T150133906524-cfs-map-fidelity-rungs/review-records/r-20261122T150133906524-cfs-map-fidelity-rungs.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T150133906524-cfs-map-fidelity-rungs/review-records/r-20261122T150133906524-cfs-map-fidelity-rungs.at-1d87f7d91b3e307eeed1d243f09269cda8581b1f.json --time-budget 6h --session 906c06ae-8766-4281-8a78-e20c226c00f5 --allow-unreconciled-runs --local",
+        "node": "cfs-map-fidelity-rungs",
+        "orientation_check": {
+          "checked_at": "2026-11-23T03:43:53Z",
+          "detail": "",
+          "expected": {
+            "base_sha": "82a755fd6433bec11db426918f2c78ba172fd81e",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/cfs-map-fidelity-rungs",
+            "write_paths": [
+              "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html",
+              "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs",
+              "scripts/certificate_map_fidelity/run_rows.sh",
+              "tests/test_certificate_exterior_support.py",
+              "tests/test_gs_map_fidelity.py",
+              "tests/test_gs_runtime_operands.py"
+            ]
+          },
+          "inputs": {
+            "commits": [
+              "edb2d8d09",
+              "b27e012a5",
+              "9e6024b21",
+              "74cf9614d",
+              "87b4fdbc9",
+              "8e42b4cbe",
+              "8f654e2de",
+              "706722415",
+              "f5979377c",
+              "9dee2f8ce",
+              "2de405807",
+              "1d87f7d91"
+            ],
+            "expected": {
+              "base_sha": "82a755fd6433bec11db426918f2c78ba172fd81e",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/cfs-map-fidelity-rungs",
+              "write_paths": [
+                "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html",
+                "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs",
+                "scripts/certificate_map_fidelity/run_rows.sh",
+                "tests/test_certificate_exterior_support.py",
+                "tests/test_gs_map_fidelity.py",
+                "tests/test_gs_runtime_operands.py"
+              ]
+            },
+            "head": "1d87f7d91b3e307eeed1d243f09269cda8581b1f",
+            "reported": {
+              "base_sha": "82a755fd6433bec11db426918f2c78ba172fd81e",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/cfs-map-fidelity-rungs",
+              "write_paths": [
+                "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html",
+                "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs",
+                "scripts/certificate_map_fidelity/run_rows.sh",
+                "tests/test_gs_map_fidelity.py",
+                "tests/test_gs_runtime_operands.py"
+              ]
+            },
+            "status": "complete"
+          },
+          "matched": true,
+          "mismatches": [
+            "write_paths"
+          ],
+          "repaired_echo": {
+            "write_paths": {
+              "expected": [
+                "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html",
+                "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs",
+                "scripts/certificate_map_fidelity/run_rows.sh",
+                "tests/test_certificate_exterior_support.py",
+                "tests/test_gs_map_fidelity.py",
+                "tests/test_gs_runtime_operands.py"
+              ],
+              "reported": [
+                "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html",
+                "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs",
+                "scripts/certificate_map_fidelity/run_rows.sh",
+                "tests/test_gs_map_fidelity.py",
+                "tests/test_gs_runtime_operands.py"
+              ]
+            }
+          },
+          "reported": {
+            "base_sha": "82a755fd6433bec11db426918f2c78ba172fd81e",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/cfs-map-fidelity-rungs",
+            "write_paths": [
+              "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html",
+              "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs",
+              "scripts/certificate_map_fidelity/run_rows.sh",
+              "tests/test_gs_map_fidelity.py",
+              "tests/test_gs_runtime_operands.py"
+            ]
+          }
+        },
+        "phase": "complete",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261122T150133906524-cfs-map-fidelity-rungs",
+        "session": "906c06ae-8766-4281-8a78-e20c226c00f5",
+        "settled": null,
+        "stored_phase": "complete",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 12348,
+        "terminal_at": "2026-11-23T03:39:50Z",
+        "wait_age_seconds": null,
+        "wait_class": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/cfs-map-fidelity-rungs"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 14400,
+        "classification": "scoring",
+        "commits_beyond_base": 13,
+        "delivery": {
+          "status": "delivered"
+        },
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 12836,
+        "ended_during_launch": false,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-22T22:19:23Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-22T18:45:36Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261122T184441308092-topology-read-buffer-diagnosis",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 40605,
+          "worker_pid": 3266340
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T184441308092-topology-read-buffer-diagnosis/review-brief.md --plan kernel-compile-barrier --section '§4' --role review --spec-level exact --node review-of-topology-read-buffer-diagnosis-679f1aa18d94 --goal 'attach an independent review to run r-20261122T184441308092-topology-read-buffer-diagnosis' --done-when 'the review for r-20261122T184441308092-topology-read-buffer-diagnosis stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261122T184441308092-topology-read-buffer-diagnosis, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T184441308092-topology-read-buffer-diagnosis/review-records/r-20261122T184441308092-topology-read-buffer-diagnosis.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T184441308092-topology-read-buffer-diagnosis/review-records/r-20261122T184441308092-topology-read-buffer-diagnosis.at-679f1aa18d94109079f1a73ce0656dd56d4d1b8b.json --time-budget 4h --session 906c06ae-8766-4281-8a78-e20c226c00f5 --allow-unreconciled-runs --local",
+          "promotion_recorded": false,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-22T22:19:23Z",
+        "lane_event": null,
+        "launch_error": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 31577,
+        "log_fresh": false,
+        "manifest_commits": [
+          "c1b64592c fix(equilibrium): read the buffer assignment of the read module",
+          "d1cb2a512 feat(equilibrium): compile the topology read without executing it",
+          "b9ec81332 fix(equilibrium): resolve a dumped buffer to its traced source line",
+          "ee79158fa feat(equilibrium): group a compile dump by the source line that creates it",
+          "8506028e0 fix(equilibrium): read one metadata field at a time from a dump",
+          "4039ee23c docs(equilibrium): record where the topology read asks for a terabyte",
+          "2fb3b03e4 docs(equilibrium): measure the topology read at three cell counts",
+          "cd5f8ab41 feat(equilibrium): read the argument and output bytes a compile dump declares",
+          "ab28996ef docs(equilibrium): record the two compile arms still holding the buffer table",
+          "f77fccde5 docs(equilibrium): order the limits paragraph by argument",
+          "051c8bd17 docs(equilibrium): record that no lane can compile the read",
+          "679f1aa18 docs(equilibrium): put the measured host memory of each compile arm in the record"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "9db3ead38aa6f59f7b8b351a7d5128aef6972b08bdb872585d72b1052ef1d62a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T184441308092-topology-read-buffer-diagnosis/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T184441308092-topology-read-buffer-diagnosis/review-brief.md --plan kernel-compile-barrier --section '§4' --role review --spec-level exact --node review-of-topology-read-buffer-diagnosis-679f1aa18d94 --goal 'attach an independent review to run r-20261122T184441308092-topology-read-buffer-diagnosis' --done-when 'the review for r-20261122T184441308092-topology-read-buffer-diagnosis stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the record is written at one of this run'\"'\"'s declared write paths, under review-records/ inside the directory of run r-20261122T184441308092-topology-read-buffer-diagnosis, and never in the worktree; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T184441308092-topology-read-buffer-diagnosis/review-records/r-20261122T184441308092-topology-read-buffer-diagnosis.json --write-path /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T184441308092-topology-read-buffer-diagnosis/review-records/r-20261122T184441308092-topology-read-buffer-diagnosis.at-679f1aa18d94109079f1a73ce0656dd56d4d1b8b.json --time-budget 4h --session 906c06ae-8766-4281-8a78-e20c226c00f5 --allow-unreconciled-runs --local",
+        "node": "topology-read-buffer-diagnosis",
+        "orientation_check": {
+          "checked_at": "2026-11-22T22:27:19Z",
+          "detail": "",
+          "expected": {
+            "base_sha": "783b491e56ee6b6a2295b615854d90ed828e7a69",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/topology-read-buffer-diagnosis",
+            "write_paths": [
+              "docs/evidence/fragments/kernel-compile-barrier/topology-read-buffer-diagnosis.html",
+              "docs/figures/kernel-compile-barrier/topology-read-buffer-diagnosis",
+              "scripts/prototypes/topology_read_compile_clause"
+            ]
+          },
+          "inputs": {
+            "commits": [
+              "c1b64592c fix(equilibrium): read the buffer assignment of the read module",
+              "d1cb2a512 feat(equilibrium): compile the topology read without executing it",
+              "b9ec81332 fix(equilibrium): resolve a dumped buffer to its traced source line",
+              "ee79158fa feat(equilibrium): group a compile dump by the source line that creates it",
+              "8506028e0 fix(equilibrium): read one metadata field at a time from a dump",
+              "4039ee23c docs(equilibrium): record where the topology read asks for a terabyte",
+              "2fb3b03e4 docs(equilibrium): measure the topology read at three cell counts",
+              "cd5f8ab41 feat(equilibrium): read the argument and output bytes a compile dump declares",
+              "ab28996ef docs(equilibrium): record the two compile arms still holding the buffer table",
+              "f77fccde5 docs(equilibrium): order the limits paragraph by argument",
+              "051c8bd17 docs(equilibrium): record that no lane can compile the read",
+              "679f1aa18 docs(equilibrium): put the measured host memory of each compile arm in the record"
+            ],
+            "expected": {
+              "base_sha": "783b491e56ee6b6a2295b615854d90ed828e7a69",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/topology-read-buffer-diagnosis",
+              "write_paths": [
+                "docs/evidence/fragments/kernel-compile-barrier/topology-read-buffer-diagnosis.html",
+                "docs/figures/kernel-compile-barrier/topology-read-buffer-diagnosis",
+                "scripts/prototypes/topology_read_compile_clause"
+              ]
+            },
+            "head": "679f1aa18d94109079f1a73ce0656dd56d4d1b8b",
+            "reported": {
+              "base_sha": "783b491e56ee6b6a2295b615854d90ed828e7a69",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/topology-read-buffer-diagnosis",
+              "write_paths": [
+                "docs/evidence/fragments/kernel-compile-barrier/topology-read-buffer-diagnosis.html",
+                "docs/figures/kernel-compile-barrier/topology-read-buffer-diagnosis",
+                "scripts/prototypes/topology_read_compile_clause"
+              ]
+            },
+            "status": "complete"
+          },
+          "matched": true,
+          "mismatches": [],
+          "reported": {
+            "base_sha": "783b491e56ee6b6a2295b615854d90ed828e7a69",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/topology-read-buffer-diagnosis",
+            "write_paths": [
+              "docs/evidence/fragments/kernel-compile-barrier/topology-read-buffer-diagnosis.html",
+              "docs/figures/kernel-compile-barrier/topology-read-buffer-diagnosis",
+              "scripts/prototypes/topology_read_compile_clause"
+            ]
+          }
+        },
+        "phase": "complete",
+        "plan": "kernel-compile-barrier",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261122T184441308092-topology-read-buffer-diagnosis",
+        "session": "906c06ae-8766-4281-8a78-e20c226c00f5",
+        "settled": null,
+        "stored_phase": "complete",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 31184,
+        "terminal_at": "2026-11-22T22:25:55Z",
+        "wait_age_seconds": null,
+        "wait_class": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/topology-read-buffer-diagnosis"
+      }
+    ]
+  },
+  "wall_seconds": 529,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-23T07:15:08Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-23T07:06:22Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261123T070534454144-plan-review-of-kernel-compile-barrier",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 3646,
+    "worker_pid": 3377831
+  },
+  "worker_seconds": 501,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

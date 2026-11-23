@@ -8,6 +8,13 @@
     "scripts/prototypes/bank_newton_converge/directional.py"
   ],
   "completed_at": "2026-11-23T07:05:14.358Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "repair-of-slice-profile-at-main-63c29897e2fa",
+      "recorded_at": "2026-11-23T07:24:34.208181+00:00"
+    }
+  },
   "dispatched_at": "2026-11-23T06:45:05Z",
   "findings": [
     {

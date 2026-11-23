@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T02:14:46.420Z",
+  "dispatched_at": "2026-11-23T02:06:58Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/converged-forward-solve/r-20261123T020539639260-plan-review-of-converged-forward-solve/plan.html:113",
+      "id": "done_when-1",
+      "reason": "as written the worker cannot choose between deleting those bindings here and leaving them, and either choice breaks a clause of its own done-when; the ownership sentence needs to carve out the wrapper bindings explicitly.",
+      "text": "clause (2) says \"Topology.read, read_with_connectivity and their test, benchmark and script bindings are deleted\", but the sentence added to the same clause says \"Tests, scripts and benchmarks outside the package that call the fixed-design read are \u00a76's alone \u2026 this section edits none of them\". Both cannot be satisfied: tests/test_hex_flood_sn_secondary.py:84 and tests/test_hex_flood_coil_nulls.py:139 call read_with_connectivity directly, and benchmarks/axis_seed_census.py:102 calls it, so deleting the wrapper without touching those bindings adds failure ids at this section's head and contradicts clause (3)'s \"paired base and head suite arms add no failure id\".",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/converged-forward-solve/r-20261123T020539639260-plan-review-of-converged-forward-solve/plan.html:113",
+      "id": "reasoning-1",
+      "reason": "a worker following the deletion literally leaves a package method calling a removed method, and the deletion or re-pointing of read_batch must be named in clause (2).",
+      "text": "the section states the wrappers are \"called only by tests and three benchmarks\", but nova/equilibrium/topology.py:1447 defines Topology.read_batch as `jax.vmap(self.read, \u2026)`, a package-internal caller of the very Topology.read clause (2) deletes; read_batch has no callers today, and clause (2)'s caller test covers only read_qualification, _fixed_design_read and ForwardFluxOperator.read, so it would not catch the dangling reference.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "cacfd7bd0b689a815f304bae4c87ea698cf31587",
+  "plan_fingerprint": "92a20f3e794b2e46802b416e5b5aeced39ef4c2c521fbaf7f90fb323ffaeeca4",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 645,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T020539639260-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "65764932ad7fbce2ab58599c1f02284c11e18338",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the five bare module names resolve under nova/equilibrium/ and nova/transport/, and the resolved followup f-cfs-legacy-read-migration exists at plan.html:398.",
+    "done_when": "a finding \u2014 clause (2) requires the deletion of the wrappers' test, benchmark and script bindings while the sentence added to the same clause says this section edits none of them, so the head suite-arm clause cannot be met.",
+    "evidence_paths": "pass \u2014 the section names no log path; its suite arms follow the plan's paired-arm convention.",
+    "naming": "pass \u2014 the section emits no code; no plan labels or ticket numbers are introduced into a symbol.",
+    "reasoning": "a finding \u2014 the section's claim that Topology.read and read_with_connectivity are \"called only by tests and three benchmarks\" is contradicted by Topology.read_batch (nova/equilibrium/topology.py:1447), which jax.vmaps self.read inside the package.",
+    "single_goal": "pass \u2014 the section carries one deliverable: move the six caller modules onto the locked read and delete the thin wrappers.",
+    "wiring": "pass \u2014 s10's declared depends-on converged-forward-solve#s8 is present, and s6 declares its wait on s10 in plan-section-depends-on."
+  },
+  "section_digests": {
+    "_document": "41fea3cb3b1f52beb18e34eb6d9cb7fe5c2451428b2fc0a8e1f5a9ed1122246f",
+    "s0": "66bed59341ceddd2b2d61465f1233d35c4d59c22234d867f09b1e4a337b0b482",
+    "s1": "e3926ed31983268b83ff4f7fe6feb947700172eb86a0d601549966b9cd8f4e20",
+    "s10": "b975fb6b64645ab63c39b6d4f07c80de1cd7068c0610e5c5d08ec6d88d3d5474",
+    "s11": "bcdf145b6f6167ee1fb0e6980f26af35d362556ca2c1578786bb542664d8bdbc",
+    "s2": "c9f5762cc802fb29d61de64d4b8a76c79a8c6ef89b6510286a607ad1008d573f",
+    "s3": "6ad65249a7f73416619be7f0562f8d08612c44f1b5615a521308d0b2a37938bd",
+    "s4": "f48dcef6449234059e50c5560ea5f8e3349b9ddb03e3e9f489413caf3c0fb97e",
+    "s5": "03f67d0cbbf577f055dd8a4969136a259d217bb4008e6951ed10b204b62c78a2",
+    "s6": "c0e0dc721ca46607371939e7c8c151fc6052ee40e43cae0e622e6cb73505b671",
+    "s7": "76684b5b2d88bb624df3953585fa4fe2cc6c1d02db0f2dbecde88fa24b251272",
+    "s8": "79eeed3fc13f4ae72bcd182f870d58269fe9d4ab0e5a1d690ad54050290ac60b",
+    "s9": "7ceb91cdc7ed92f26b4475dce674690ebff69fc9ca795477fb3da486f45ae5d9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T02:55:49.101361+00:00",
+  "total": null
+}

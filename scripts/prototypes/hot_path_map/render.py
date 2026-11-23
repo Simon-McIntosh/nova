@@ -39,6 +39,16 @@ def main():
         help="path of the copy that carries the per-module line numbers",
     )
     parser.add_argument(
+        "--arm-log",
+        action="append",
+        default=[],
+        help=(
+            "a focused-suite arm's log; its head line carries the revision of "
+            "the tree it resolved and its runner line is quoted, so the record "
+            "names each arm beside the gate it belongs to"
+        ),
+    )
+    parser.add_argument(
         "--driver-revision",
         default=None,
         help="revision HEAD carried when the map driver rendered this record",
@@ -236,6 +246,34 @@ def main():
             f"module's counts; the executed line numbers themselves are in "
             f"<code>{html.escape(args.line_copy)}</code>, beside the run's "
             f"other receipts.</p>"
+        )
+    for path in args.arm_log:
+        lines = Path(path).read_text().splitlines()
+        revision = ""
+        if lines and lines[0].startswith("# revision:"):
+            revision = lines[0].split(":", 1)[1].strip()
+        runner = ""
+        for line in lines:
+            words = line.split()
+            if not words or not words[0].isdigit():
+                continue
+            if " passed in " in line or " failed in " in line:
+                runner = line.strip()
+                break
+        if not runner:
+            runner = next(
+                (line.strip() for line in lines if line.startswith("no tests ran")),
+                "",
+            )
+        exit_line = next(
+            (line.strip() for line in reversed(lines) if line.startswith("EXIT=")),
+            "",
+        )
+        parts.append(
+            f'<p>Suite arm at revision <code>{html.escape(revision)}</code> '
+            f"({html.escape(Path(path).name)}): "
+            f"<code>{html.escape(runner)}</code> "
+            f"<code>{html.escape(exit_line)}</code></p>"
         )
     parts.append("</section>")
     parts.extend(["  </main>", "</body>", "</html>"])

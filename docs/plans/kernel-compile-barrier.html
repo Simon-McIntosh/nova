@@ -25,8 +25,8 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="135">
-<meta name="plan-modified" content="2026-11-22">
+<meta name="plan-version" content="136">
+<meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
   <main class="plan-doc">
@@ -354,7 +354,7 @@
     <div class="r-comment-body"><p>review of r-20261115T223952454215-edge-term-tangent-rows at 8978420fb..83374ed5 recorded: the arsinh-derivative reorder at nova/biot/polygonanalytic.py:391 matches JAX's atanh jvp and is green on the titan P100 (26 passed, tangent_max_relative=3.677e-12 against 1e-09), but no post-repair H200 arm exists, so done_when clause (2)'s named device is unmeasured; one blocking finding, scores 13/11/18/18/18/19, added_failure_count 0.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261122T213359598741-review-of-edge-term-tangent-rows-013763668822" data-who="reckon-build" data-when="2026-11-22T21:34:56.668Z">
-    <div class="r-comment-body"><p>Stored a parsed review of r-20261115T223952454215-edge-term-tangent-rows covering 83374ed5e4fdfba7562890882e5a36db2eb239bd..013763668822484d43e0799cc04870e678c11d3d with scores goal_fidelity 17, evidence 15, scope_discipline 20, durability 16, fit 17, reuse 20 (total 105), two non-blocking findings (the repair-head H200 arms cover one file, leaving the vertex file&#x27;s four test_tangent_compiles_within_three_primals rows unmeasured after the repair, and the added heading reuses an existing HTML id).</p></div>
+    <div class="r-comment-body"><p>Stored a parsed review of r-20261115T223952454215-edge-term-tangent-rows covering 83374ed5e4fdfba7562890882e5a36db2eb239bd..013763668822484d43e0799cc04870e678c11d3d with scores goal_fidelity 17, evidence 15, scope_discipline 20, durability 16, fit 17, reuse 20 (total 105), two non-blocking findings (the repair-head H200 arms cover one file, leaving the vertex file's four test_tangent_compiles_within_three_primals rows unmeasured after the repair, and the added heading reuses an existing HTML id).</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261120T120704016466-review-of-shared-root-paths-da2abb6c3b3c" data-who="reckon-build" data-when="2026-11-20T12:13:47.058Z">
     <div class="r-comment-body"><p>Independent review of r-20261120T094110687720-shared-root-paths at base 789479f7 and head da2abb6c3 is parsed with scores goal_fidelity 20, evidence 15, scope_discipline 19, durability 8, fit 18, reuse 5 (total 85) and five non-blocking findings; the rename verifies independently at 88 default references across 82 files at base against 0 at head with all 29 corpus lines byte-identical, and both suite arms carry the same six failure ids.</p></div>
@@ -373,6 +373,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20261120T200749156849" data-who="reckon-build" data-when="">
     <div class="r-comment-body"><p><strong>§7 landed on main at <code>00016d35e</code> (2026-11-20).</strong> 88 shared-storage default references across 82 tracked files now name <code>/work/projects/imas_gpu/nova</code>; the 29 DIII-D corpus references under <code>sophelio/raw</code> are unchanged, and the path check with its negative control is recorded. Reviewed head <code>23fa51437</code>: no blocking finding. Base (<code>789479f7d</code>) and head suite arms fail the same six test ids with none new. Two files are cut short for memory in both arms and are not claimed: <code>tests/test_operand_cache.py</code> (killed in <code>test_jet_matrix_persists_by_default</code> at 32 GB and at 120 GB, at base and at head) and <code>tests/equilibrium/test_topology_read.py</code> (one-hour limit, then 64 GB). The merge was made by hand on the lead's choice, because the landing gate reads only the last process of a per-file suite log and refuses a red suite; that defect is reported to reckon. One reference added on main after this node's base remains: <code>scripts/iron_operator_bound/west.sh</code>, lines 9 and 15, owned by the iron-core session. <a href="/nova/evidence/fragments/kernel-compile-barrier/shared-root.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s28-memory-review-20261123" data-who="S28 coordinator" data-when="2026-11-23">
+    <div class="r-comment-body"><p>Lead direction, 2026-11-23: put full attention on the read's compile memory, with a full independent evaluation of whether memory is being spent chasing precision limits with derivatives, the corner-height samples in particular. State at this date: batching the wall-event enumeration (<code>ba58f0d69</code>) was a real defect and value-preserving at 132, 300 and 550 cells, but the read still exceeds 64 GB on the H200 host (job 1337904), 24 GB on titan and 96 GB on CPU. The read requests up to fourth derivatives of the field through forward-mode nesting, and the kernel's custom JVP rule computes, for every target, a stable-pole JVP pair and six Richardson corner-height samples, selected afterwards by <code>jnp.where</code>. Three nodes are measuring this: an independent census of compile cost by derivative order and rule variant (<code>r-20261123T045219222369-derivative-order-memory-census</code>), a second pre-optimization census of the reshaped read (<code>r-20261121T202518813620-topology-read-compile-clause</code>), and a code review of the kernel and read (<code>r-20261123T045039841271-review-code-c96487bc590c</code>). <code>moment-row-z-gradient</code>, which doubles the corner samples to twelve, is held from landing until the census reports.</p></div>
 </div>
 </section>
 </main>

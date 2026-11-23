@@ -69,6 +69,16 @@
       "note": "\u00a73 done-when now requires the observed side to reproduce the Shafranov certificate's exact beta_p + l_i/2 within the certificate's own error at the production sampling, and each MAST row states the column beside EFIT's archived beta_p + l_i/2 with the difference.",
       "reason": "",
       "when": "2026-11-23T19:25:57.158409+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "e8ebd8a101b8a71b0028a39381fe2a44d7baf7ac",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a73 now states the endpoint only; the function names and the delete-not-move instruction moved to the node's brief (sos-observed-contour-integral).",
+      "reason": "",
+      "when": "2026-11-23T19:26:21.287096+00:00"
     }
   ],
   "responses": {
@@ -89,6 +99,15 @@
       "note": "\u00a71 done-when now requires the counter to read the nonzero build count (76 on the MAST row) during the operator build and a second operator on changed geometry to record nonzero evaluations; the queued node's done-when and brief carry it.",
       "reason": "",
       "when": "2026-11-23T19:25:48.841852+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "e8ebd8a101b8a71b0028a39381fe2a44d7baf7ac",
+      "commit_basis": "edit",
+      "note": "\u00a73 now states the endpoint only; the function names and the delete-not-move instruction moved to the node's brief (sos-observed-contour-integral).",
+      "reason": "",
+      "when": "2026-11-23T19:26:21.287096+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/shafranov-observed-side/r-20261123T135955354630-plan-review-of-shafranov-observed-side.json",

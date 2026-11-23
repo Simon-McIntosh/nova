@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-23T10:57:34.142Z",
+  "dispatched_at": "2026-11-23T10:47:12Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.html",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "the record and its json twin state the census was produced at revision 2653ef0c9b5fa5b9b05b9d9d9d01d5e9b416a5e9, but benchmarks/scripts_census.py at that revision carries its owning sprints as a source constant and emits no owning_sprints key, which the committed record does carry; the field was added by the command-line input at 54d4e4dd5. The record's revision therefore does not identify the code that produced it: a reader re-running 2653ef0c9 gets output without that key. The reproduced record at 34f6c3a3 differs from the committed one only in 'revision' (logs/reproduce.log: differing keys: ['revision']), so the verdicts themselves are sound."
+    },
+    {
+      "file": "tests/test_scripts_census.py",
+      "line": "38",
+      "severity": "non-blocking",
+      "text": "owning_sprints() reads the sprint window out of the record being checked and feeds it straight back into census(owning=...), so the test recomputes the census under whatever window the record declares and cannot by itself detect a wrong window; only the plan_owned row assertions (tests/test_scripts_census.py:79 and :110) incidentally constrain it, and a record declaring a window that still yields the same kept fixtures would pass."
+    },
+    {
+      "file": "tests/test_scripts_census.py",
+      "line": "56",
+      "severity": "non-blocking",
+      "text": "test_every_delete_citation_resolves asserts cite['resolves'] is True, a field the census sets itself at benchmarks/scripts_census.py:709 after flipping any delete with an unresolvable citation to keep at :763, so the assertion holds by construction for every row still classified delete and cannot redden unless that flip is removed; the independent git cat-file -e re-resolution the done_when names lives only in the run directory's uncommitted verify_census.py, not in any committed test."
+    },
+    {
+      "file": "tests/test_scripts_census.py",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "tests/test_scripts_census.py and docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.json were written outside the node's declared write paths (the html fragment, the figures directory and benchmarks/scripts_census.py), and the declared docs/figures/code-reuse-and-hot-path/bench-scripts census directory was never used; both extra files are implied by the record and its gate, but they are outside the declared scope."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 0 production call sites: git grep over the head tree finds no non-test importer of benchmarks/scripts_census.py, which is a standalone driver invoked by hand and by tests/test_scripts_census.py only.",
+    "diff": "Read f26e4620e17fd7ec8a9b63b8751772e2ade4de4a..34f6c3a36182656b526df83381905c606c5d834f commit by commit (fourteen commits, four files, +2632 lines, all adds); the sequence builds the driver, its test, the record, then repairs the live-crew-run holding, the driver-directory ownership scope, and the sprint window as a command-line input.",
+    "done_when": "All four clauses are asserted: coverage and count reconciliation by tests/test_scripts_census.py:51 and :66 (population 1574 = verdict sum 1574, and the population equals an independent git ls-files count); delete-citation resolution by tests/test_scripts_census.py:56 plus verify_census.py's 178 git cat-file -e checks; merge-folds-into-keep by tests/test_scripts_census.py:68; and the live-test forced-delete refusal by tests/test_scripts_census.py:108 and logs/negative-control-live-test.log (EXIT=1, entry named).",
+    "goal": "The node goal is one keep/delete/merge verdict for every Python file under benchmarks/ and scripts/, stored in one record; benchmarks/scripts_census.py:729 emits exactly that and the committed record at docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.json carries 1574 rows (keep=856, delete=715, merge=3) over 1574 tracked files.",
+    "manifest": "Read the reviewed run's manifest.md: status complete, after_suite records 13 passed in 220.37s at revision 54d4e4dd5 with EXIT=0, baseline_suite is none, three negative-control logs and a specificity control all present at their named paths; its evidence_inputs line says 82 files were kept for an unresolvable citation while the committed record carries 80 refused_deletes and the fragment says 80, a two-file overstatement in the narrative only.",
+    "write_paths": "The declared pair is docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.html and the figures directory, plus benchmarks/scripts_census.py; the diff also lands tests/test_scripts_census.py and the .json twin, neither of which the declaration names, and leaves the figures directory empty."
+  },
+  "justifications": {
+    "durability": "Three forced-delete refusals at tests/test_scripts_census.py:108-135 redden if the guards at benchmarks/scripts_census.py:663-672 are removed, but tests/test_scripts_census.py:38 feeds the record's own sprint window back in and :56 reads the census's self-set resolves field, and no test pins the absolute counts 856/715/3.",
+    "evidence": "logs/pytest-after-all_debug.log records 13 passed at 54d4e4dd5 with a bare EXIT=0 and verify_census.py re-enumerates the population independently and re-resolves 178 citations (VERIFY-OK), but the record's own revision field at docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.html:19 names a revision whose code cannot have produced it.",
+    "fit": "benchmarks/scripts_census.py is ruff-clean, follows the recovery_ladder_census refusal idiom the brief names, and carries no S28-S32 literal now that the sprint window is a command-line input at benchmarks/scripts_census.py:737.",
+    "goal_fidelity": "benchmarks/scripts_census.py:729 emits one verdict row per population file and the committed record sums keep=856 delete=715 merge=3 to the 1574-file population, satisfying the goal exactly.",
+    "reuse": "Nova owns no two-tree driver census: the nearest neighbours are worktree_path_candidates at nova/database/filepath.py:254 (a git-grep content search) and recovery_ladder_census.py, whose refusal idiom this extends; the addition reuses compute_provenance and repository_relative from the same module rather than reimplementing identity.",
+    "scope_discipline": "tests/test_scripts_census.py and docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.json landed outside the declared boundary pair and the declared figures directory (docs/figures/code-reuse-and-hot-path/bench-scripts-census) received nothing."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T104621037022-review-of-bench-scripts-census-34f6c3a36182",
+  "reviewed_base_sha": "f26e4620e17fd7ec8a9b63b8751772e2ade4de4a",
+  "reviewed_head_sha": "34f6c3a36182656b526df83381905c606c5d834f",
+  "reviewed_run_id": "r-20261122T202601421489-bench-scripts-census",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T10:58:15.343568+00:00",
+  "total": 100
+}

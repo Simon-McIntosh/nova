@@ -10,48 +10,86 @@ change. Both routes were then solved against an iteratively refined reference
 and both lie within 1.1e-12 of it, so the gap is double-precision rounding at
 this condition number, not a defect in either route.</p>
 
-<h4>Measurement</h4>
+<h4>What was compared, and what was not</h4>
 <p>The reference is the solution of the first Newton linear system
-<code>J(0) d = -F(0)</code>, which the persisted operator fixes without a
-nonlinear iteration, refined by iterative refinement whose float64 residuals
-are accumulated in <code>longdouble</code> until the correction stalls. The
-first Newton direction carries the converged state to leading order, so its
-distance from the reference predicts the converged coefficient difference; the
-measured direction gap (8.13e-13 Frobenius, 1.03e-12 max entry) and coefficient
-gap agree to this order. The Newton matrix condition number is a Hager one-norm
-estimate at the same step (<code>||J||_1 = 11.58</code>,
-<code>||J^-1||_1 = 8.80e6</code>).</p>
+<code>J(0) d = -F(0)</code> on the persisted operator, refined by iterative
+refinement whose float64 residuals are accumulated in <code>longdouble</code>
+until the correction stalls. It is a reference for the first Newton
+<em>direction</em>, not for the converged state: the first step carries the
+state to leading order, so its distance predicts the converged coefficient
+difference only to that order. The converged coefficient gap between the two
+routes is measured directly and reported above; each route's converged
+coefficient distance from a reference converged in extended precision is not
+measured (see the limits below). Probe fields from the two converged solutions
+are compared in the same run.</p>
+<p>Neither route was compared entry by entry against the reference in the
+converged state, and no interaction value, solve or bar was changed by this
+measurement.</p>
+
+<h4>Measurement</h4>
+<p>The Newton matrix condition number is a Hager one-norm estimate at the same
+step (<code>||J||_1 = 11.58</code>, <code>||J^-1||_1 = 8.80e6</code>). The
+resolvability check tests the <em>nearest</em> route distance, which is the
+smaller over routes of each route's larger of its two measures:
+<code>3.2889e-13</code> (the Cholesky route's maximum-entry distance; the LU
+route's maximum-entry distance is <code>1.0863e-12</code>). The reference's own
+forward error, <code>2.3889e-16</code>, sits about 3.1 decades below that
+tested figure, so the comparison resolves the gap.</p>
 <table><thead><tr><th>quantity</th><th>measurement</th></tr></thead><tbody>
 <tr><td>LU route, Frobenius distance from reference</td><td>7.7697e-13</td></tr>
 <tr><td>LU route, maximum-entry distance from reference</td><td>1.0863e-12</td></tr>
 <tr><td>Cholesky route, Frobenius distance from reference</td><td>2.4026e-13</td></tr>
 <tr><td>Cholesky route, maximum-entry distance from reference</td><td>3.2889e-13</td></tr>
+<tr><td>resolvability figure (nearest route measure)</td><td>3.2889e-13</td></tr>
 <tr><td>LU vs Cholesky coefficient gap (Frobenius / max entry)</td><td>1.1953e-12 / 2.2044e-12</td></tr>
 <tr><td>reference relative residual (extended precision)</td><td>4.3372e-16</td></tr>
 <tr><td>reference forward-error estimate</td><td>2.3889e-16</td></tr>
 <tr><td>Newton-matrix one-norm condition estimate</td><td>1.0186e8</td></tr>
 <tr><td>condition scale <code>kappa*eps</code></td><td>2.2616e-8</td></tr>
-<tr><td>planted 1e-10 factor/route perturbation, read by the same comparison</td><td>1.0000e-10 (detected as a defect)</td></tr>
 </tbody></table>
 
+<h4>Control: a real route defect is refused</h4>
+<p>The comparison was tested against a genuine route fault rather than a
+scaled copy of the reference. The Newton matrix is multiplied by
+<code>1 + 1e-10</code> before its own LU factorisation and solve, and that
+perturbed route is fed to the same distance comparison and the same verdict
+classifier. It reads Frobenius <code>9.9998e-10</code> / maximum-entry
+<code>9.9990e-10</code> from the refined reference, about 3&nbsp;000 times (3.5 decades) the
+nearest unperturbed route distance, and the
+classifier returns <code>defect</code> rather than <code>rounding</code>. The
+detector therefore fires on a route fault the instrument can see, and the
+rounding verdict on the two real routes is not a blind spot of the comparison.</p>
+
 <h4>Verdict</h4>
-<p>Rounding. The reference error (2.39e-16) sits about three decades below the
-nearest route distance (2.40e-13), so the comparison resolves the gap. Both
-route distances are more than four decades below <code>kappa*eps =
-2.26e-8</code>, the worst-case bound that rounding at condition number 1.02e8
-allows. The LU route is the farther of the two, by 3.2&times; in Frobenius,
-consistent with the Cholesky route carrying two built-in refinement passes in
-the original differential system while the LU route does not; neither route is
-systematically wrong. A planted 1e-10 relative perturbation of a route is read
-as 1.0e-10 by the same comparison, so the instrument still refuses a real
-defect well above the rounding band.</p>
+<p>Rounding. Both route distances are more than four decades below
+<code>kappa*eps = 2.26e-8</code>, the worst-case bound that rounding at
+condition number 1.02e8 allows. The LU route is the farther of the two, by
+3.3&times; in Frobenius, consistent with the Cholesky route carrying two
+built-in refinement passes in the original differential system while the LU
+route does not; neither route is systematically wrong.</p>
 
 <h4>Bar proposal</h4>
 <p>The 1e-12 route-comparison bar is below the rounding band of this operator:
-the routes themselves differ by 2.2e-12 at tolerance 1e-12 while each lies
-within 1.1e-12 of a reference that is three decades more accurate. The bar is
+the routes themselves differ by 2.2e-12 at their largest entry at tolerance
+1e-12 while each lies
+within 1.09e-12 of a reference that is three decades more accurate. The bar is
 proposed reset to 1e-11 for the route-to-route coefficient comparison, or
-stated as ten times <code>kappa*eps</code> at the measured condition number,
-which admits this rounding-level gap while still refusing the planted 1e-10
-route defect. No code, test or interaction value was changed.</p>
+stated as ten times <code>kappa*eps</code> (2.26e-7) at the measured condition
+number, which admits this rounding-level gap while still refusing the planted
+1e-10 route defect. No code, test or interaction value was changed.</p>
+
+<h4>Limits and follow-up</h4>
+<p>The extended-precision reference covers the first Newton linear system only.
+A nonlinear reference converged in extended precision would require the
+material residual and the 39&nbsp;792-unknown Jacobian to be formed in extended
+precision on every Newton step, which the current route cannot do within this
+measurement; each route's converged coefficient distance from such a reference
+is therefore not reported. The converged coefficient gap between the routes,
+and their probe-field gap, are reported directly.</p>
+<p>Follow-up work: the measurement rebuilds the affine Newton operands in
+<code>scripts/west_iron_linear/measure.py</code>, duplicating the assembly that
+<code>nova/biot/magnetisation.py</code> performs inside the solve. A later node
+should export that builder from the module and have the script call it, so the
+two cannot drift; this node deliberately changed nothing under
+<code>nova/</code>.</p>
 </section>

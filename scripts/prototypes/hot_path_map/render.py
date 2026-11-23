@@ -96,20 +96,36 @@ def main():
     parts.append(
         f'<h3 id="{NODE}-device-trace">Relation to the device trace</h3>'
         f"<p>The bank-solve device attribution measures the compiled "
-        f"<code>support_read.solve_batch</code> loop. The slice-profile bank "
-        f"fixture it reads is absent from shared storage at this revision, so "
-        f"that arm could not be driven and the modules it alone reaches are "
-        f"recorded not measured. "
-        f"{len(contradictions)} modules the device trace attributes kernels to "
-        f"are unreached or unmeasured here and are listed as contradictions, "
-        f"never as zero:</p><ul>"
+        f"<code>read_batch</code> loop, reading a slice-profile bank fixture "
+        f"that is absent from shared storage at this revision, so that arm cannot "
+        f"be driven here and the device trace's own measurement stands. "
+        f"What the line map adds is which lines each route executed, "
+        f"checked here per traced entry point rather than per module: a module "
+        f"reached by another function can carry a traced loop that never ran.</p>"
     )
-    for item in contradictions:
+    parts.append(f'<ul id="{NODE}-device-trace-entries">')
+    for item in data["device_trace_entries"]:
         parts.append(
-            f"<li><code>{html.escape(item['module'])}</code> — "
-            f"{html.escape(item['reason'])}</li>"
+            f"<li><code>{html.escape(item['module'])}</code> "
+            f"<code>{html.escape(item['function'])}</code> — "
+            f"{item['executed']}/{item['body_lines']} body lines executed"
+            + (
+                f"; <strong>contradiction</strong>: {html.escape(item['reason'])}"
+                if item["reason"]
+                else ""
+            )
+            + "</li>"
         )
     parts.append("</ul>")
+    module_level = [item for item in contradictions if "function" not in item]
+    if module_level:
+        parts.append("<ul>")
+        for item in module_level:
+            parts.append(
+                f"<li><code>{html.escape(item['module'])}</code> — "
+                f"{html.escape(item['reason'])}</li>"
+            )
+        parts.append("</ul>")
     parts.append(
         f'<h3 id="{NODE}-table">Every module under nova/</h3>'
         f"<p>Executed executable lines against the module's total, per route "

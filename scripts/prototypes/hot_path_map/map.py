@@ -6,6 +6,7 @@ coverage report does not carry is recorded ``not measured`` rather than zero.
 """
 
 import argparse
+import ast
 import json
 from pathlib import Path
 
@@ -20,6 +21,27 @@ TRACE_MODULES = (
     "nova/equilibrium/solve.py",
     "nova/equilibrium/constraint.py",
 )
+
+# Bundled entry points the device trace attributes its compiled kernels to. The
+# line map is checked at body granularity here, because a module can be reached
+# by a different function while the traced loop itself never runs.
+TRACE_ENTRIES = (
+    ("nova/equilibrium/support_read.py", "read"),
+    ("nova/equilibrium/support_read.py", "read_batch"),
+    ("nova/equilibrium/support_read.py", "read_and_book"),
+    ("nova/equilibrium/support_read.py", "bank_program"),
+)
+
+
+def body_lines(source, function):
+    """Return the line span of ``function``'s body, excluding its definition."""
+    tree = ast.parse(source)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            if node.name == function:
+                start = min(item.lineno for item in node.body)
+                return start, node.end_lineno
+    return None
 
 
 def relative(path, root):
@@ -118,6 +140,52 @@ def main():
                 )
             )
 
+    entries = []
+    for name, function in TRACE_ENTRIES:
+        source = (root / name).read_text()
+        span = body_lines(source, function)
+        row = next((item for item in modules if item["module"] == name), None)
+        union = set(row["union"]["lines"]) if row else set()
+        if span is None:
+            entries.append(
+                dict(
+                    module=name,
+                    function=function,
+                    executed=0,
+                    body_lines=0,
+                    reason=f"{function} not found in {name}",
+                )
+            )
+            continue
+        start, stop = span
+        if row is None:
+            entries.append(
+                dict(
+                    module=name,
+                    function=function,
+                    executed=0,
+                    body_lines=0,
+                    reason=f"{name} absent from nova tree",
+                )
+            )
+            continue
+        fired = sorted(number for number in union if start <= number <= stop)
+        entries.append(
+            dict(
+                module=name,
+                function=function,
+                executed=len(fired),
+                body_lines=stop - start + 1,
+                reason=(
+                    f"device trace attributes kernels to {function}, and no route "
+                    f"executed a line of its body"
+                    if not fired
+                    else None
+                ),
+            )
+        )
+    contradictions.extend(item for item in entries if item["reason"])
+
     payload = dict(
         revision=args.revision,
         tree=args.tree,
@@ -136,6 +204,7 @@ def main():
             "forward": None if control is None else control["forward"],
             "inverse": None if control is None else control["inverse"],
         },
+        device_trace_entries=entries,
         device_trace_contradictions=contradictions,
         modules=modules,
     )

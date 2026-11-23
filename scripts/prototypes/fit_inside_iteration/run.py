@@ -38,6 +38,12 @@ if str(REPOSITORY) not in sys.path:
 KNOWN = ("solovev", "mast", "iter")
 STORED = {"mastu": "mastu", "tcv": "tcv", "iter-stored": "iter"}
 NESTED_FORWARD_CALLS = {"solovev": 20, "mast": 15, "iter": 15}
+STEP_RULE = "coupled"
+STEP_BUDGET = 96
+
+
+class _ControlNotJudged(Exception):
+    """The fit did not converge, so the control's band is not applied."""
 
 
 def _write(path: Path, value) -> None:
@@ -201,10 +207,20 @@ def _fit_summary(fitted):
 def _progress(name):
     """Print each pass as it lands, since a solve-heavy pass can run for minutes."""
 
+    started = perf_counter()
+
     def report(index, misfit, update):
         print(
             "PASS "
-            + json.dumps(dict(case=name, index=index, misfit=misfit, update=update)),
+            + json.dumps(
+                dict(
+                    case=name,
+                    index=index,
+                    misfit=misfit,
+                    update=update,
+                    wall=perf_counter() - started,
+                )
+            ),
             flush=True,
         )
 
@@ -230,6 +246,7 @@ def _run_known(case, args):
         max_passes=args.max_passes,
         flux_tolerance=args.flux_tolerance,
         relaxation=args.relaxation,
+        step_rule=STEP_RULE,
     )
     flux = np.asarray(fitted.terminal_state.flux)
     span = abs(float(case["generated_topology"].flux_span))
@@ -250,6 +267,7 @@ def _run_known(case, args):
         max_passes=args.max_passes,
         flux_tolerance=args.flux_tolerance,
         relaxation=args.relaxation,
+        step_rule=STEP_RULE,
     )
     scaled_current = abs(float(np.sum(scaled.terminal_state.cell_current)))
     control = abs(scaled_current - case["plasma_current"]) / case["plasma_current"]
@@ -302,6 +320,7 @@ def _run_known(case, args):
         wall_seconds=fitted.wall_seconds,
         max_passes=args.max_passes,
         flux_tolerance=args.flux_tolerance,
+        step_rule=STEP_RULE,
         nested_forward_calls=NESTED_FORWARD_CALLS[case["name"]],
         reconstructed_plasma_current_a=float(
             np.sum(fitted.terminal_state.cell_current)
@@ -353,7 +372,9 @@ def _run_stored(case, args):
             on_pass=_progress(case["name"]),
             max_passes=args.max_passes,
             flux_tolerance=args.flux_tolerance,
+            max_update=args.max_update,
             relaxation=args.relaxation,
+            step_rule=STEP_RULE,
         )
     except Exception:
         # the starting map is still a state worth showing beside the reference
@@ -379,7 +400,11 @@ def _run_stored(case, args):
     except Exception as error:
         scores_error = f"{type(error).__name__}: {error}"
     control, control_error = None, None
+    # the control is judged on the cases the fit converged, so a case it did
+    # not converge does not spend a second full fit on a control no band reads
     try:
+        if not fitted.converged:
+            raise _ControlNotJudged
         scaled_measurement = _gain_error(case["measurement"])
         scaled = fitter.fit(
             scaled_measurement,
@@ -388,10 +413,14 @@ def _run_stored(case, args):
             on_pass=_progress(case["name"] + "-control"),
             max_passes=args.max_passes,
             flux_tolerance=args.flux_tolerance,
+            max_update=args.max_update,
             relaxation=args.relaxation,
+            step_rule=STEP_RULE,
         )
         scaled_current = abs(float(np.sum(scaled.terminal_state.cell_current)))
         control = abs(scaled_current - case["plasma_current"]) / case["plasma_current"]
+    except _ControlNotJudged:
+        control_error = "not judged: the fit did not converge, so no band reads it"
     except Exception as error:
         control_error = f"{type(error).__name__}: {error}"
     bands_applied = case["name"] != "iter"
@@ -426,6 +455,7 @@ def _run_stored(case, args):
         wall_seconds=fitted.wall_seconds,
         max_passes=args.max_passes,
         flux_tolerance=args.flux_tolerance,
+        step_rule=STEP_RULE,
         bands_applied=bands_applied,
         scores=scores,
         scores_error=scores_error,
@@ -462,9 +492,10 @@ def main(argv=None):
     parser.add_argument("--output", required=True)
     parser.add_argument("--figures", required=True)
     parser.add_argument("--generating-receipts")
-    parser.add_argument("--max-passes", type=int, default=64)
+    parser.add_argument("--max-passes", type=int, default=STEP_BUDGET)
     parser.add_argument("--flux-tolerance", type=float, default=1.0e-10)
     parser.add_argument("--relaxation", type=float, default=1.0)
+    parser.add_argument("--max-update", type=float, default=1.0)
     args = parser.parse_args(argv)
     output = Path(args.output).resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -495,7 +526,9 @@ def main(argv=None):
                 cases=args.cases,
                 max_passes=args.max_passes,
                 flux_tolerance=args.flux_tolerance,
+                max_update=args.max_update,
                 relaxation=args.relaxation,
+                step_rule=STEP_RULE,
             )
         ),
         flush=True,

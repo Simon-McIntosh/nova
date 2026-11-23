@@ -113,6 +113,16 @@
       "note": "section_depends_on now carries s10:[s9], s11:[s9], s12:[s11,s10]. \u00a79 is closed: its done-when is met by the landed stored-case record.",
       "reason": "",
       "when": "2026-11-23T19:16:57.791225+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "21ad4345423b3013e276581d0884b45e27b29d6e",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a710 clause (2) now records a case whose terminal map the parity scorer refuses (as \u00a79's were, SurfaceGeometryError) with the refusal and reason, not counted as scored.",
+      "reason": "",
+      "when": "2026-11-23T19:17:32.684089+00:00"
     }
   ],
   "responses": {
@@ -142,6 +152,15 @@
       "note": "\u00a711 now cites the \u00a77 record: 1,112-1,193 s per converged slice on a P100, about 120 P100 card-hours for a 400-slice arm; the H200 figure is removed.",
       "reason": "",
       "when": "2026-11-23T19:15:43.672948+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "21ad4345423b3013e276581d0884b45e27b29d6e",
+      "commit_basis": "edit",
+      "note": "\u00a710 clause (2) now records a case whose terminal map the parity scorer refuses (as \u00a79's were, SurfaceGeometryError) with the refusal and reason, not counted as scored.",
+      "reason": "",
+      "when": "2026-11-23T19:17:32.684089+00:00"
     },
     "wiring-1": {
       "action": "acted",

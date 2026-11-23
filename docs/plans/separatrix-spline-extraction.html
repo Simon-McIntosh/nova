@@ -20,7 +20,7 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
-  <meta name="plan-version" content="209">
+  <meta name="plan-version" content="210">
 <meta name="plan-modified" content="2026-11-23">
 <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
@@ -687,7 +687,7 @@
     <div class="r-comment-body"><p>§6 landed: the four MAST centroid panels draw their assembled separatrix (well_formed true, 675 to 677 segments, every lane) from stored states at the 2,048-segment capacity, head <code>33fa7135</code>; merged-head gate 11 of 11 on rigel. <a href="/nova/evidence/archive/separatrix-spline-extraction-landed.html#s6-centroid-panels-separatrix">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261122T134831665081-centroid-panels-separatrix" data-who="reckon-build" data-when="2026-11-22T19:03:43.545Z">
-    <div class="r-comment-body"><p>The four MAST centroid panels are redrawn from their stored states at the 2,048-segment branch capacity, and each lane&#x27;s committed receipt records the assembled separatrix: boundary_assembler available and well_formed true with 675-677 closed segments at the 10 mm display floor, one closed lobe and at least one open leg through the admitted X-point, on cpu-lane, titan-lane and full-axis-lane; the state test now asserts that block on the committed receipt and on the redraw, and its 1 percent current-perturbation control is re-runnable through NOVA_PANEL_STATIC_CURRENT_CONTROL=1.</p></div>
+    <div class="r-comment-body"><p>The four MAST centroid panels are redrawn from their stored states at the 2,048-segment branch capacity, and each lane's committed receipt records the assembled separatrix: boundary_assembler available and well_formed true with 675-677 closed segments at the 10 mm display floor, one closed lobe and at least one open leg through the admitted X-point, on cpu-lane, titan-lane and full-axis-lane; the state test now asserts that block on the committed receipt and on the redraw, and its 1 percent current-perturbation control is re-runnable through NOVA_PANEL_STATIC_CURRENT_CONTROL=1.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261103T051008024703-review-of-coil-edit-fine-panels-1f1391bd0a62" data-who="reckon-build" data-when="2026-11-03T05:28:23.860Z">
     <div class="r-comment-body"><p>review record stored at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261102T204241022825-coil-edit-fine-panels/review-records/r-20261102T204241022825-coil-edit-fine-panels.at-1f1391bd0a62944a9db45b84afaf6fc8f3442c2a.json</p></div>
@@ -718,6 +718,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-partial-r-20261105T160605201635-coil-edit-panels-on-solve-currents" data-who="35a66cc6-f4f1-4358-8dbb-99c9333c7249" data-when="2026-11-15T18:20:00+00:00">
     <div class="r-comment-body"><p>Run r-20261105T160605201635-coil-edit-panels-on-solve-currents delivered only part of this section; remaining work stays implementable. All five panels now draw terminal-current fields on the 10 mm map, from one regenerated archive. Every published row carries identical numbers (46 promoted, 0.056218 m, 7.4683e-9 Wb), so done-when (2), which asks for each figure re-solved with its own recovered producer command and lane, is not met per figure.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261123T135241096600-review-of-coil-edit-panels-per-figure-b989b7831722-figure" data-who="reckon-build" data-when="2026-11-23T14:06:21.806Z">
+    <div class="r-comment-body"><p>figure review of r-20261122T134834058462-coil-edit-panels-per-figure at b989b7831722 — 6/6 rubric items answered, 2 blocking and 3 non-blocking findings, no source touched.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261105T071819367797-review-of-forward-gs-remeasure-c03d8db6bcdc" data-who="reckon-build" data-when="2026-11-05T16:31:49.364Z">
     <div class="r-comment-body"><p>review parsed for r-20261102T201524817113-forward-gs-remeasure at 3ef818dfaef2a36da8fd0d6e0c34272ec5259218..c03d8db6bcdc553e412e0d4a978645806910f474 — scores goal_fidelity 14, evidence 9, scope_discipline 10, durability 12, fit 16, reuse 5 (total 66 of 120); 9 findings, the blocking one being that forward_gs_receipt.json:255 reports frames_with_separatrix 0 and every fine-map separatrix separation null on all five frames.</p></div>

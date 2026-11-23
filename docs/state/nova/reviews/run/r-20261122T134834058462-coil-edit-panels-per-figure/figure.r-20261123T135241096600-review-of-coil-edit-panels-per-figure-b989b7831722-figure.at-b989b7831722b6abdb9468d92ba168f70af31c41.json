@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T14:06:21.806Z",
+  "dispatched_at": "2026-11-23T13:53:21Z",
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The rendered PNG shows edit 5 (P4-UPPER circuit 8 current -8% of the seed, converged, residual 5.366e-09 Wb, 5 active-set iterations) beside edit 4 (-10%, not converged, 4.339e-02 Wb, 4 iterations), but the caption on this figure's own page (docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:186) and the live evidence fragment that embeds the same file (docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-on-solve-currents.html:5) both describe edit 12 (+6%, 5.730e-09 Wb, 3 iterations) beside edit 9 (+0%, 6.612e-03 Wb, 3 iterations), and cite 46 promoted nodes with the nearest 0.056 m where this figure's receipt records 27 promoted nodes and nearest 2.571 m. A reader is told the panel shows a state it does not show, and every state identifier and residual in the caption contradicts the picture, so the figure cannot be read against its text. The node re-rendered the PNGs in place and delivered a replacement evidence fragment that embeds no image, leaving the pages that do embed this path carrying the previous rendition's numbers."
+    },
+    {
+      "file": "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+      "line": null,
+      "severity": "blocking",
+      "summary": "The rendered PNG shows edit 19 (+20%, converged, residual 1.972e-09 Wb, 5 active-set iterations) beside edit 2 (-14%, not converged, 9.879e-03 Wb, 7 iterations), but the live caption that embeds this file (docs/evidence/fragments/separatrix-spline-extraction/coil-edit-fine-panels.html:70-95) describes 'the converged 12th edit beside the non-converged 9th' and gives largest node mismatch 5.6e-2 Wb against 4.6e-3 Wb, where this figure's own receipt records 6.951e-02 Wb and 1.836e-02 Wb. Both panel identities and both mismatch figures in the figure's caption are wrong for the picture a reader now sees, so the picture cannot be read against its own text."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The rendered PNG shows edit 15 (+12%, converged, 4.526e-09 Wb, 3 active-set iterations) beside edit 3 (-12%, not converged, 7.112e-03 Wb, 4 iterations), while the archived caption that embeds this path (docs/evidence/archive/single-grid-solver-cutover-landed.html:66) records the converged residual as 4.13e-09 and the non-converged one as stalling at 6.51e-03 after sixteen trips. An archive legitimately keeps a historical block, but this one cites a path whose bytes have been replaced and does not say so, unlike the forward-solve archive blocks that state the rendition shown is a later redraw."
+    },
+    {
+      "file": "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "This PNG and docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png are byte-identical (sha256 831fafd7931c64ebaa9ec2f942d4ce03b8b271d32c21f71672b82feb702b8655), so two separate studies publish the same picture with the same titles and no on-image indication of which study a reader is looking at. I checked the two state archives before recording this: the arrays for the drawn edits (psi, currents, moments, promoted masks, nulls, wall) are equal between them, while undrawn edits differ, so the duplicate follows the data and is not a mistaken copy. Recorded because a reader comparing the two figures will otherwise read one as the other's regeneration."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "line": 2088,
+      "severity": "non-blocking",
+      "summary": "The unassembled-crossing marks drawn here (marker '+', linestyle 'none', markersize 3.0) appear as a sparse scatter of small crosses around the wall in the non-converged panel of all five figures, and the figure legend built at lines 2646-2722 names eight series, none of which is that mark. A reader must reach the caption's phrase 'unassembled, crossings drawn unconnected' to learn what the crosses are; on the image alone the reader cannot tell whether they are data or an artefact."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T135241096600-review-of-coil-edit-panels-per-figure-b989b7831722-figure",
+  "reviewed_base_sha": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "reviewed_brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T134834058462-coil-edit-panels-per-figure/brief.md",
+  "reviewed_figures": [
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+    "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+    "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png"
+  ],
+  "reviewed_head_sha": "b989b7831722b6abdb9468d92ba168f70af31c41",
+  "reviewed_plan": "nova:separatrix-spline-extraction \u00a77",
+  "reviewed_run_id": "r-20261122T134834058462-coil-edit-panels-per-figure",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Pass on all five. Titles and legend are near-black on white and read at page width; the grey reference contours are deliberately recessive data, not text.",
+    "data_ink": "Pass on all five. The visual weight is carried by the contour sets and the null markers; no panel spends ink on furniture. The legend occupies the bottom band and does not compete with the data.",
+    "decoration": "Pass on all five. No gridlines, no background fill, no gradient, no shading; axes are off and the wall outline supplies scale.",
+    "label_collision": "Pass on all five as rendered: no title, axis, legend entry or direct label is clipped by the canvas or overlaps another label or the data. Two defects remain outside the six items and are recorded as findings: the sparse '+' mark series in the non-converged panels has no legend entry, and the live captions beside two of the figures name states the picture no longer shows.",
+    "legibility": "Pass on all five PNGs. Each carries two panels under a two-line title naming the edit, circuit, per-cent current change, converged/not-converged flag, terminal residual in Wb and active-set iteration count (forward-solve edits 5 and 4; mast and regeneration-row edits 19 and 2; single-grid and its titan sibling edits 15 and 3), one frameless four-column legend beneath both panels, and a legible wall outline.",
+    "table_form": "Pass on all five. Each image is a poloidal field comparison; nothing in it is information that would be clearer as a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T14:08:36.263238+00:00",
+  "total": null
+}

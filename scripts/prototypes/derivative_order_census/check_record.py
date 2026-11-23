@@ -79,6 +79,7 @@ def main():
             / "rows"
             / (f"derivative-{receipt['variant']}-{receipt['order']}.json")
         )
+        source = Path(receipt.get("receipt_path", source))
         assert (
             hashlib.sha256(source.read_bytes()).hexdigest() == receipt["receipt_sha256"]
         )
@@ -102,6 +103,7 @@ def main():
             / "rows"
             / (f"derivative-{comparison['variant']}-{comparison['order']}.npz")
         )
+        source = Path(comparison.get("array_path", source))
         assert (
             hashlib.sha256(source.read_bytes()).hexdigest()
             == comparison["array_sha256"]

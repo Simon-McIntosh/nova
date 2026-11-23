@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="code-reuse-and-hot-path">
+  <title>Unreached module deletion | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="unreached-module-delete-summary">Deleting the library modules no route reaches</h2>
+    <p>The measured line map records, for every module, the lines executed by
+    the forward route, by the inverse route, and by either. A module that both
+    routes leave at zero can still be load-bearing, because a test, a driver or
+    another library module may import it without running it, so the map alone
+    never licenses a deletion. Each candidate was therefore offered to a static
+    importer scan, and a module is removed only when the scan finds no importer
+    anywhere and no package initialiser re-exports it.</p>
+    <p>The scan reads the map at revision
+    <code>09ef90e40148bf724669e8fc2c7c3a823134f5b8</code> and the census at
+    revision <code>2653ef0c9b5fa5b9</code>, deletes nothing, and writes one
+    receipt; this record and its machine-readable twin
+    <code>docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.json</code>
+    are composed from it. Twenty-four modules were removed in commit
+    <code>104c8b67</code>, <strong>3029</strong> lines in total, and one is held
+    back by name.</p>
+
+    <h3 id="unreached-module-delete-counts">What the population came to</h3>
+    <table id="unreached-module-delete-counts-table">
+      <tr><th>population</th><th>modules</th></tr>
+      <tr><td>under <code>nova/</code> in the map</td><td>472</td></tr>
+      <tr><td>reached by a route (excluded before the scan)</td><td>187</td></tr>
+      <tr><td>under <code>nova/imas</code> (excluded, held by another sprint)</td><td>82</td></tr>
+      <tr><td>not measured by either route (refused and named)</td><td>0</td></tr>
+      <tr><td>candidates handed to the importer scan</td><td>203</td></tr>
+      <tr><td>refused by the scan</td><td>178</td></tr>
+      <tr><td>deletable</td><td>25</td></tr>
+      <tr><td>deleted</td><td>24</td></tr>
+      <tr><td>held back and named</td><td>1</td></tr>
+    </table>
+    <p>No module in the map is unmeasured: every one of the 472 carries a
+    coverage entry for both routes, so the refusal-to-name-unmeasured rule
+    fired on nothing. The reconciliation closes: 187 + 82 + 203 = 472, and
+    178 + 25 = 203.</p>
+
+    <h3 id="unreached-module-delete-method">How a module is cleared for deletion</h3>
+    <p>All four conditions must hold, and the scan refuses with the failing
+    condition named when any one does not.</p>
+    <ol>
+      <li><strong>Unreached.</strong> The map shows it measured and executing
+      zero lines on both routes.</li>
+      <li><strong>Unimported.</strong> No importer exists in <code>nova/</code>,
+      <code>tests/</code>, <code>apps/</code>, the census-kept files under
+      <code>benchmarks/</code> and <code>scripts/</code>, or
+      <code>/home/ITER/mcintos/Code/imas-ambix</code>. The scan resolves
+      absolute imports, relative imports at every level against the importing
+      file's own package, <code>importlib.import_module</code> and
+      <code>__import__</code> string arguments, and a bare sibling import
+      against the importing file's directory and any <code>sys.path</code> that
+      file inserts. A mention only counts at a token boundary, so
+      <code>nova.biot.geometry</code> inside <code>geometryparameters</code> is
+      not an import.</li>
+      <li><strong>Not re-exported.</strong> No package initialiser imports it,
+      so <code>nova.package.Name</code> cannot be reached through a package
+      attribute.</li>
+      <li><strong>Not owned.</strong> It is not under <code>nova/imas</code>,
+      and no plan in the sprints that own this work names it or its directory.
+      A plan's own text is read for the module path, its dotted name and its
+      directory; ownership that comes only from a shipped plan that has already
+      landed does not block a deletion here.</li>
+    </ol>
+    <p>The importer relation is then closed transitively: a module imported
+    only by modules that are themselves deletable is deleted with them, and a
+    module imported by any module that survives is refused with that importer's
+    name. No candidate in this population reached deletion through the
+    transitive path, so every accepted module has zero importers outright.</p>
+
+    <h3 id="unreached-module-delete-lines">Lines removed per package</h3>
+    <table id="unreached-module-delete-lines-table">
+      <tr><th>package</th><th>lines removed</th></tr>
+      <tr><td><code>nova/datachain</code></td><td>436</td></tr>
+      <tr><td><code>nova/dataset</code></td><td>56</td></tr>
+      <tr><td><code>nova/field</code></td><td>568</td></tr>
+      <tr><td><code>nova/limits</code></td><td>129</td></tr>
+      <tr><td><code>nova/linalg</code></td><td>30</td></tr>
+      <tr><td><code>nova/thermalhydralic</code></td><td>892</td></tr>
+      <tr><td><code>nova/utilities</code></td><td>918</td></tr>
+      <tr><td><strong>total</strong></td><td><strong>3029</strong></td></tr>
+    </table>
+
+    <h3 id="unreached-module-delete-deleted">Modules deleted (24)</h3>
+    <ul>
+      <li><code>nova/datachain/ccfe_uda.py</code> (33)</li>
+      <li><code>nova/datachain/magnetic_signals.py</code> (363)</li>
+      <li><code>nova/datachain/uda_benchmark.py</code> (40)</li>
+      <li><code>nova/dataset/access.py</code> (56)</li>
+      <li><code>nova/field/elm_3d_field.py</code> (74)</li>
+      <li><code>nova/field/elm_inductance.py</code> (28)</li>
+      <li><code>nova/field/errorfield.py</code> (267)</li>
+      <li><code>nova/field/gpec_benchmark.py</code> (199)</li>
+      <li><code>nova/limits/central_solinoid_limit.py</code> (86)</li>
+      <li><code>nova/limits/tieplate.py</code> (43)</li>
+      <li><code>nova/linalg/fista.py</code> (30)</li>
+      <li><code>nova/thermalhydralic/attributes.py</code> (167)</li>
+      <li><code>nova/thermalhydralic/naka/sampledata.py</code> (134)</li>
+      <li><code>nova/thermalhydralic/spectrum.py</code> (20)</li>
+      <li><code>nova/thermalhydralic/sultan/clear.py</code> (20)</li>
+      <li><code>nova/thermalhydralic/sultan/ensemble.py</code> (16)</li>
+      <li><code>nova/thermalhydralic/twente/twentedata.py</code> (535)</li>
+      <li><code>nova/utilities/Bezier.py</code> (104)</li>
+      <li><code>nova/utilities/mesh.py</code> (19)</li>
+      <li><code>nova/utilities/polybezier.py</code> (138)</li>
+      <li><code>nova/utilities/qdafile.py</code> (327)</li>
+      <li><code>nova/utilities/stat.py</code> (219)</li>
+      <li><code>nova/utilities/stress.py</code> (68)</li>
+      <li><code>nova/utilities/surface.py</code> (43)</li>
+    </ul>
+
+    <h3 id="unreached-module-delete-held">Held back and named</h3>
+    <p><code>nova/utilities/ANSYS.py</code> (227 lines) is unreached and
+    unimported, and it is left in place. The measured line map's own driver,
+    <code>scripts/prototypes/hot_path_map/job.sh</code>, names it as the map's
+    negative control, and the map refuses to write when that module carries no
+    coverage entry. Deleting it would make the landed map record
+    irreproducible, so the deletion is refused with that reason recorded.</p>
+    <p>Two packages are left holding nothing but an empty initialiser,
+    <code>nova/field/</code> and <code>nova/thermalhydralic/twente/</code>. The
+    scan refuses a package initialiser as a deletion candidate whatever its
+    size, because removing one changes the import semantics of anything that
+    reaches the package by name, so both were kept deliberately rather than
+    overlooked. Neither initialiser is referenced outside its own package.</p>
+
+    <h3 id="unreached-module-delete-worktrees">Live runs</h3>
+    <p>Thirty-two live crew worktrees were read at the time of the scan; each
+    one's staged changes, changes against its own head and changes against
+    <code>main</code> were parsed as importers. No deleted module is imported
+    by any of them, so nothing was held back on that ground.</p>
+
+    <h3 id="unreached-module-delete-controls">Controls</h3>
+    <p><strong>Negative control one.</strong> A module the map records as
+    reached is offered for deletion and is refused by the first condition:
+    <code>nova/equilibrium/forward.py</code>, accepted by neither check,
+    refused as <code>reached by a route (union 506 lines)</code>. The refusal
+    rests on the map alone, so it proves the map is consulted before any
+    importer reasoning.</p>
+    <p><strong>Negative control two.</strong> An unreached module whose only
+    importer is imas-ambix is refused. No candidate in this population has an
+    ambix importer in its real importer set, so the check is exercised by
+    injecting one: with <code>imas_ambix/live_import_probe.py</code> importing
+    the otherwise deletable <code>nova/datachain/ccfe_uda.py</code>, the
+    verdict flips from <code>ACCEPT, unreached and unimported (33 lines)</code>
+    to <code>REFUSE, imported by ambix imas_ambix/live_import_probe.py</code>.
+    The control is synthetic and marked as such in the receipt; it demonstrates
+    that an ambix importer is sufficient to refuse, and it is not evidence that
+    any real ambix importer exists.</p>
+
+    <h3 id="unreached-module-delete-gate">Gate</h3>
+    <p>The plan asks for a suite delta. The repository's default CPU lane is
+    itself measurement-heavy: a full run of the not-slow selection collected
+    <strong>10943</strong> tests and completed five of them in the first four
+    minutes, so a two-arm full execution could not finish inside the node's
+    deadline. Rather than claim a suite result that did not run, the gate was
+    chosen to test the only failure mode a pure file deletion can produce, and
+    it was run as one job per arm on <code>all_debug</code> with
+    <code>scripts/nova_lane/run.sh --rungs cpu --force-submit --wait</code>.</p>
+    <table id="unreached-module-delete-gate-table">
+      <tr><th>arm</th><th>revision</th><th>job</th><th>modules imported</th><th>import failures</th><th>collected</th></tr>
+      <tr><td>base</td><td><code>348ed92c</code></td><td>1339201</td><td>450 of 473</td><td>23</td><td>10943</td></tr>
+      <tr><td>head</td><td><code>104c8b67</code></td><td>1339213</td><td>435 of 449</td><td>14</td><td>10937</td></tr>
+    </table>
+    <p>Each arm imports every remaining <code>nova</code> module in a fresh
+    interpreter, one subprocess per module, so a native-library crash in one
+    module cannot hide the rest, and then runs
+    <code>pytest --collect-only</code> over the full test tree. The delta is
+    exact: <strong>zero new import failures</strong>. The nine failures that
+    disappeared are precisely the nine deleted modules that failed to import at
+    base for a missing optional dependency (<code>pyuda</code>,
+    <code>pylops</code>, <code>amigo</code>, and the <code>nova</code>
+    accessor cycle through <code>nova.dataset.access</code>); each one is a
+    deleted path and nothing else. The fourteen failures that remain are
+    pre-existing and unrelated: missing optional distributions
+    (<code>fabric</code>, <code>astropy</code>, <code>ssh</code>,
+    <code>codac_uda</code>), a missing sibling module, and pre-existing broken
+    imports in modules no route exercises.</p>
+    <p>Collection fell from 10943 to 10937 and the lost six items are exactly
+    the six <code>test_module_imports[...]</code> parametrisations that
+    <code>tests/test_thermalhydralic.py</code> derives from a
+    <code>pkgutil.walk_packages</code> sweep of the package: the deleted
+    modules each contributed one parametrisation. That test file, together
+    with the repo-wide source-sweeping guards, is run at head below. No other
+    collected item was lost and none was gained.</p>
+    <p id="unreached-module-delete-focused">The file whose parametrisation
+    shrank is run at head, in the same job shape, together with the
+    repository-wide source sweeps that walk <code>nova/</code> by directory
+    rather than by import (<code>tests/test_thermalhydralic.py</code>,
+    <code>tests/test_krylov_reverse_mode_guard.py</code>,
+    <code>tests/test_clip_mode_has_no_process_global.py</code>,
+    <code>tests/test_vs3_linkage_repair.py</code>,
+    <code>tests/test_base_install_imports.py</code>). On
+    <code>all_debug</code>, job 1339236 at revision
+    <code>104c8b67</code>: <strong>63 passed, 4 xfailed, 1 failed</strong> in
+    54&nbsp;s. The thermal-hydraulic import guards pass for every module that
+    remains, including the lean-core subprocess probe that walks the subtree
+    with the plotting stack blocked. The one failure is pre-existing and
+    outside this change: <code>test_clip_mode_has_no_process_global</code>
+    reports <code>benchmarks/outboard_census_exact_total.py</code>, which still
+    calls the retired <code>support_clip_mode</code> API. That file is
+    unchanged by the deletion commit
+    (<code>git diff 348ed92c 104c8b67 -- benchmarks/</code> is empty) and the
+    reference is present at the base revision, so the finding is not a
+    regression and is left for the owner of the benchmark tree.</p>
+
+    <h3 id="unreached-module-delete-limits">What this record does not claim</h3>
+    <p>It does not claim the full test suite is green: that run was not
+    completed, and that is stated rather than implied. It claims the import
+    graph and the collection graph are unchanged except for the deleted modules
+    themselves, and that no test collects one of them any longer.</p>
+  </main>
+</body>
+</html>

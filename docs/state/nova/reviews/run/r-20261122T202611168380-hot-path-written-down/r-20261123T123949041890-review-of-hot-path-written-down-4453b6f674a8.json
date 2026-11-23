@@ -1,0 +1,58 @@
+{
+  "added_failure_basis": "The reviewed run's manifest carries no baseline_suite and after_suite keys because no test file lies in its write scope (the suite gate is unarmed), so no suite pair exists to difference. Its gate is the route comparison, section-check.log, whose header names revision 4453b6f674a89e0507f49c8b2c46f3f8723c5da4 and the section_route.py command, and whose last two lines are 'ROUTE-CHECK differences=0' and 'EXIT=0'. I re-ran the same script against the head copies of the section and the map in a scratch directory: it printed differences=0 and exited 0, and with --add shared=nova/utilities/ANSYS.py it printed differences=2 naming that module and exited 1. Added failures: none.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T12:52:53.839Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "hot-path-written-down",
+      "recorded_at": "2026-11-23T12:54:14.803183+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-23T12:40:15Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/hot_path_map/section_route.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "Six of the seven delivered paths -- nova/equilibrium/AGENTS.md, section_route.py, route-modules.json and the three driver edits in forward_route.py/job.sh/map.py -- lie outside the two declared write paths (the evidence fragment HTML and the figures directory). The work is what plan s6 and the brief require ('Write the route section in nova/equilibrium/AGENTS.md', 'Compare the section against a fresh s1 measurement using the landed s1 driver'), so the defect is the declaration, not the work; it is recorded so the coordinator can ratify the shared paths."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_map/section_route.py",
+      "line": 116,
+      "severity": "non-blocking",
+      "text": "Nothing invokes this check automatically: a grep over nova/, scripts/, tests/ and docs/ finds section_route.py named only in AGENTS.md prose and in the evidence fragment -- no test, commit hook or CI target runs it -- so the documented route can drift out of step with the measured map and the guard would not fire until a reader runs it by hand. The locked decision hot-path-guard: document-only forbids an enforcing test, so the section's 'run the check in the same commit that changes one' is the whole guard; the finding records that it is a convention with nothing binding it."
+    },
+    {
+      "file": "nova/equilibrium/AGENTS.md",
+      "line": 52,
+      "severity": "non-blocking",
+      "text": "The section says 'The plan-level record of \u00a71's measurement is <path>'; \u00a71 is a plan-section label; a reader without code-reuse-and-hot-path cannot resolve the label. Repository documents must stand alone by the naming guidance, and the path it cites (docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html) already identifies the record without the section number."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T123949041890-review-of-hot-path-written-down-4453b6f674a8",
+  "reviewed_base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+  "reviewed_head_sha": "4453b6f674a89e0507f49c8b2c46f3f8723c5da4",
+  "reviewed_run_id": "r-20261122T202611168380-hot-path-written-down",
+  "scores": {
+    "durability": 8,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 11
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T12:54:37.127723+00:00",
+  "total": 91,
+  "verdicts": {
+    "diff": "Read all three commits 8d8b526ae..4453b6f67 against base 348ed92c7: 7 paths, +8545/-3. 8d8b526ae repairs the stale test-module reference in three driver files; a6c0e29c0 adds the 244-line route section and the 116-line section_route.py; 4453b6f67 commits the 130831-byte stripped comparison basis route-modules.json. The section's quoted numbers (182/210/182/0/28, forward.py 504/1043 and 506/1043, fixed_point.py 1167, support_read.py 93, ANSYS.py 0/150) all reconcile with route-modules.json, whose assertions block reads passed:true with no failures.",
+    "done_when": "Clause (1) is asserted by scripts/prototypes/hot_path_map/section_route.py, which compares the three marker blocks against the map's executed modules in both directions and exits nonzero on any difference; its section-check.log records ROUTE-CHECK differences=0 and EXIT=0 at head 4453b6f67, and I reproduced that the strip section and map give differences=0. Clause (2) is asserted by --root in the same run (210 named, 0 missing) and I confirmed independently that all 210 full paths exist at 4453b6f67 via git ls-tree. The map was measured at 8d8b526ae, whose nova/ and tests/ trees are byte-identical to the head (git diff 8d8b526ae 4453b6f67 changes only AGENTS.md, the fragment, section_route.py and route-modules.json), so the measurement describes the head's code.",
+    "goal": "Plan code-reuse-and-hot-path s6 asks nova/equilibrium/AGENTS.md to name the one public forward route and the inverse route module by module as measured at the section's head, and to list any s5 entry accepted but unlanded beside it; AGENTS.md:42-283 delivers the two routes, phase by phase for the forward route and as the 28-module inverse delta, plus a pending-collapses statement naming all ten duplicate-register entries.",
+    "manifest": "Read; status complete, tests line names the literal section_route.py command with absolute interpreter and PYTHONPATH, test_logs name section-check.log, its negative-control log and s1-head2.log, negative_control_log names the red log (differences=2 here, EXIT=1), and baseline_suite/after_suite are declared unarmed because no test file is in scope.",
+    "write_paths": "The declared write paths are the fragment HTML and figures directory only; the diff's six other paths (AGENTS.md, section_route.py, route-modules.json, forward_route.py, job.sh, map.py) are outside them, though every one is required by the brief or by the section's own check command."
+  }
+}

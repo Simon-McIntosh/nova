@@ -53,6 +53,16 @@
       "note": "Plan v8: \u00a73 lists runner.py as naming a moved module in a provenance string the import scan cannot see, so the ambix node updates the string rather than an import.",
       "reason": "",
       "when": "2026-11-23T05:19:43.687819+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "8951887650703b921eaa2dea90ea56a29f7f84d9",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Plan v8: \u00a75 prose states the CORSICA reference values are captured from the translate-on-read path at the base revision before that path is removed.",
+      "reason": "",
+      "when": "2026-11-23T05:20:03.740365+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "Plan v8 (895188765): \u00a72 now deletes contour_tree_layout.py with the other unreached modules and the deleting node repoints the reuse-map.md citation at the file at the base revision, naming the commit; both gates hold.",
       "reason": "",
       "when": "2026-11-23T05:19:22.930656+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "8951887650703b921eaa2dea90ea56a29f7f84d9",
+      "commit_basis": "edit",
+      "note": "Plan v8: \u00a75 prose states the CORSICA reference values are captured from the translate-on-read path at the base revision before that path is removed.",
+      "reason": "",
+      "when": "2026-11-23T05:20:03.740365+00:00"
     },
     "reasoning-1": {
       "action": "acted",

@@ -57,6 +57,30 @@ def _columns(index, link, reference):
     )
 
 
+def _reference_reduction(index, link):
+    """Return ref / subref from the per-element prefix scan build() replaces."""
+    index, link = list(index), list(link)
+    lookup = {label: position for position, label in enumerate(index)}
+    ref = [lookup.get(value, -1) for value in link]
+    if -1 in ref:
+        split = [name.split("_")[0] for name in index]
+        ref = [
+            (split.index(value) if value in split else 0)
+            if ref[position] == -1
+            else ref[position]
+            for position, value in enumerate(link)
+        ]
+    indexer = [position for position, value in enumerate(link) if value == ""]
+    ref = [
+        position if value == "" else ref[position]
+        for position, value in enumerate(link)
+    ]
+    subref = [0] * len(link)
+    for order, row in enumerate(indexer):
+        subref[row] = order
+    return ref, [subref[value] for value in ref]
+
+
 def _layout(shape, count, seed):
     """Return a link column with a named structure over count rows.
 
@@ -146,6 +170,46 @@ def test_link_sort_cost_is_linear_at_a_stated_row_count(monkeypatch):
     )
 
 
+@pytest.mark.parametrize("shape", ["chain", "star", "revchain", "clusters", "mixed"])
+@pytest.mark.parametrize("count", [1, 2, 3, 5, 9, 17, 60])
+def test_reduction_matches_reference_prefix_scan(shape, count):
+    index, link = _layout(shape, count, seed=count * 17 + len(shape))
+    frame = _frame(index, link)
+    frame.multipoint.sort_link()
+    frame.multipoint.build()
+    assert (list(frame.ref), list(frame.subref)) == _reference_reduction(
+        list(frame.index), list(frame.link)
+    )
+
+
+def test_reduction_resolves_labels_missing_from_the_index():
+    index = ["coil_0_0", "coil_0_1", "coil_1_0", "coil_1_1"]
+    link = ["", "coil_0_0", "coil_0_9", "coil_9_9"]
+    frame = _frame(index, link)
+    frame.multipoint.build()
+    assert (list(frame.ref), list(frame.subref)) == _reference_reduction(index, link)
+    assert list(frame.ref) == [0, 0, 0, 0]
+
+
+def test_reduction_cost_does_not_rescan_the_index_per_row():
+    """The per-row prefix scan costs about two seconds at this row count."""
+    from time import perf_counter
+
+    count = 12000
+    index = [f"coil_{row % 40}_{row}" for row in range(count)]
+    link = [""] * count
+    link[-1] = "coil_0_4"
+    frame = _frame(index, link)
+    started = perf_counter()
+    frame.multipoint.build()
+    seconds = perf_counter() - started
+    assert seconds < 0.5, (
+        f"{seconds:.2f} s to reduce {count} rows: the reduction scans the index "
+        "per missing label instead of resolving the prefixes in one pass"
+    )
+
+
+@pytest.mark.timeout(1800)
 @pytest.mark.slow
 def test_stored_case_machine_link_columns_match_reference_walk(monkeypatch, tmp_path):
     """The stored MAST-U case machine's frame columns are unchanged by the sort.
@@ -155,6 +219,8 @@ def test_stored_case_machine_link_columns_match_reference_walk(monkeypatch, tmp_
     replayed through the per-row reference walk and the columns compared, which
     is the before/after identity of the ordering at the size the build reaches.
     """
+    from time import perf_counter
+
     from tests import test_equilibrium_forward_reference as owner
     from tests.test_magnetics_fit_efit_comparison import _read_case
     from nova.frame.multipoint import MultiPoint
@@ -163,10 +229,12 @@ def test_stored_case_machine_link_columns_match_reference_walk(monkeypatch, tmp_
     case = _read_case("mastu")["case"]
     captured = []
     recorded = {"size": 0}
+    cost = {"calls": 0, "seconds": 0.0}
     sort = MultiPoint.sort_link
 
     def recording_sort(self):
         size = len(self.frame)
+        cost["calls"] += 1
         if size >= 4000 and size - recorded["size"] >= 2000:
             recorded["size"] = size
             captured.append(
@@ -176,11 +244,22 @@ def test_stored_case_machine_link_columns_match_reference_walk(monkeypatch, tmp_
                     size,
                 )
             )
-        return sort(self)
+        started = perf_counter()
+        try:
+            return sort(self)
+        finally:
+            cost["seconds"] += perf_counter() - started
 
     monkeypatch.setattr(MultiPoint, "sort_link", recording_sort)
+    build_started = perf_counter()
     owner.build_machine(case, -300, passive=bool(case.passive))
+    build_seconds = perf_counter() - build_started
     monkeypatch.setattr(MultiPoint, "sort_link", sort)
+    print(
+        f"STORED_CASE_BUILD build_s={build_seconds:.2f} "
+        f"rows={recorded['size']} sort_calls={cost['calls']} "
+        f"sort_s={cost['seconds']:.2f}"
+    )
     assert len(captured) >= 3, f"only {len(captured)} frame states captured"
     assert max(size for _, _, size in captured) > 25000
     for index, link, size in captured:

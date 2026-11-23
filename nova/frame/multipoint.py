@@ -127,19 +127,24 @@ class MultiPoint(metamethod.MultiPoint):
         self.frame.link = np.array(order, dtype=object)
 
     def build(self):
-        """Compute the ref / subref reduction indices from the links."""
+        """Compute the ref / subref reduction indices from the links.
+
+        Labels absent from the index resolve to the first index entry whose
+        name shares the label's leading prefix, and to row 0 when none does.
+        Resolving that per row rescanned the index, which made the reduction
+        quadratic and ran once per inserted element.
+        """
         range_index = np.arange(len(self.frame), dtype=int)
         link = np.asarray(self.frame.link)
         self.indexer = list(range_index[link == ""])
         self.index = self.frame.index[self.indexer]
         ref = self.frame.index.get_indexer(link)
-        if np.any(ref == -1):
-            split = [name.split("_")[0] for name in self.frame.index]
-            ref[ref == -1] = [
-                split.index(value) if value in split else 0
-                for position, value in enumerate(link)
-                if ref[position] == -1
-            ]
+        missing = ref == -1
+        if missing.any():
+            prefix: dict[str, int] = {}
+            for position, name in enumerate(np.asarray(self.frame.index, dtype=object)):
+                prefix.setdefault(str(name).split("_")[0], position)
+            ref[missing] = [prefix.get(value, 0) for value in link[missing]]
         ref[self.indexer] = range_index[self.indexer]
         self.frame.ref = ref
         subref = np.zeros(len(self.frame), dtype=int)

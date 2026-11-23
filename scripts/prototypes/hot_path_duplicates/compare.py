@@ -475,22 +475,24 @@ def compare(receipt_path):
             record = function(receipt)
         except Exception as error:  # noqa: BLE001
             emit("ENTRY_ERROR", entry=function.__name__, error=repr(error))
+            receipt.setdefault("errors", []).append(function.__name__)
             continue
         receipt["entries"].append(record)
         if not record["agrees"]:
             emit("ENTRY_DISAGREES", **record)
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
     receipt_path.write_text(json.dumps(receipt, indent=2, default=str))
-    emit(
-        "SUMMARY",
-        receipt=str(receipt_path),
-        failed=[
-            item.get("entry")
-            for item in receipt["entries"]
-            if item.get("agrees") is False or "error" in item
-        ],
+    disagreeing = [
+        item.get("entry") for item in receipt["entries"] if item.get("agrees") is False
+    ]
+    failed = disagreeing + list(receipt.get("errors", []))
+    emit("SUMMARY", receipt=str(receipt_path), failed=failed)
+    print(
+        f"{len(receipt['entries']) - len(disagreeing)} entries passed, "
+        f"{len(failed)} failed",
+        flush=True,
     )
-    print("EXIT=0", flush=True)
+    return len(failed)
 
 
 def main():
@@ -509,7 +511,7 @@ def main():
         driver=str(Path(__file__).resolve()),
     )
     assert jax.default_backend() == "cpu"
-    compare(args.receipt)
+    raise SystemExit(1 if compare(args.receipt) else 0)
 
 
 if __name__ == "__main__":

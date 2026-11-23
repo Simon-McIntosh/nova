@@ -140,12 +140,12 @@ def draw(axes, data, codes=("nova", "efit")):
             [float(ref_axis[0])],
             [float(ref_axis[1])],
             marker="o",
-            markersize=10.0,
+            markersize=14.0,
             markerfacecolor="none",
             markeredgecolor=REFERENCE,
             markeredgewidth=1.6,
             linestyle="none",
-            zorder=2,
+            zorder=7,
         )
         ref_points = np.asarray(data["x_points_ref"], float).reshape(-1, 2)
         ref_points = ref_points[np.all(np.isfinite(ref_points), axis=1)]
@@ -154,13 +154,37 @@ def draw(axes, data, codes=("nova", "efit")):
                 ref_points[:, 0],
                 ref_points[:, 1],
                 marker="x",
-                markersize=9.0,
+                markersize=12.0,
                 markeredgecolor=REFERENCE,
                 markeredgewidth=1.6,
                 linestyle="none",
-                zorder=2,
+                zorder=7,
             )
-    axes.set_xlim(wall_r.min() - 0.35, wall_r.max() + 0.35)
+    if "psi_ref" in data:
+        # The nulls sit within a few millimetres of one another, which no
+        # panel at machine scale can separate, so the distances are written
+        # where they can be read.
+        ref_axis = np.asarray(data["axis_ref"], float).ravel()
+        rows = []
+        for code, name in (("nova", "nova"), ("efit", "imas-efit")):
+            axis = np.asarray(data["axis_" + code], float).ravel()
+            point = np.asarray(data["x_points_" + code], float).reshape(-1, 2)
+            distance = 1e3 * float(np.linalg.norm(axis - ref_axis))
+            rows.append("%s axis %.1f mm" % (name, distance))
+            reference_points = np.asarray(data["x_points_ref"], float).reshape(-1, 2)
+            if point.size and reference_points.size:
+                nearest = 1e3 * float(np.linalg.norm(point[0] - reference_points[0]))
+                rows.append("%s X-point %.1f mm" % (name, nearest))
+        axes.text(
+            float(wall_r.max()) + 0.42,
+            float(np.mean(wall_z)),
+            "from the generating\nnulls, at this slice:\n" + "\n".join(rows),
+            fontsize=12,
+            color=REFERENCE,
+            va="center",
+            zorder=8,
+        )
+    axes.set_xlim(wall_r.min() - 0.35, wall_r.max() + 1.55)
     axes.set_ylim(wall_z.min() - 0.35, wall_z.max() + 0.35)
     axes.set_aspect("equal")
     axes.set_axis_off()

@@ -1,11 +1,14 @@
 """Assert the two clauses this node is measured on, from the reduced summary.
 
 Clause one: for each code and each noise sequence the arm carries at least the
-two hundred slices it is stated over.  Clause two: the control holds -- the
-white draw's lag-one correlation sits within the analysis module's limit for
-both codes, and the 1/f sequence's lag-one sits above its floor.  Every number
-comes from ``analyse.py``; this module only refuses a record whose own tables
-do not meet the clauses, and prints the rows it judged.
+two hundred slices it is stated over, and it is the arm that code declares, read
+from its own row set.  Clause two: the control holds -- the white draw's lag-one
+correlation sits within the analysis module's limit for both codes, and the 1/f
+sequence's lag-one sits above its floor.  Clauses are judged per code, because
+the two columns fit different row sets; nothing here asserts a comparison
+between the codes' error measures.  Every number comes from ``analyse.py``; this
+module only refuses a record whose own tables do not meet the clauses, and
+prints the rows it judged.
 """
 
 from __future__ import annotations
@@ -78,6 +81,16 @@ def check(payload: dict) -> tuple[list[str], int, list[str]]:
                 arm["slices_with_boundary"] >= SLICES // 2,
                 "%s %s: a boundary on only %d slices"
                 % (code, sequence, arm["slices_with_boundary"]),
+            )
+            judge(
+                arm.get("row_set") == analyse.DECLARED_ROWS[code],
+                "%s %s: the arm's row set is %r, not the declared %r"
+                % (
+                    code,
+                    sequence,
+                    arm.get("row_set"),
+                    analyse.DECLARED_ROWS[code],
+                ),
             )
         judge(
             streams.get("white_lag1_pass") is True,

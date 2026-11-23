@@ -1,9 +1,10 @@
 """The axis-against-slice figures and the table of both codes' sequences.
 
 Every measure comes from ``analyse.py``'s reduction, so neither code is
-summarised here by a second rule.  The arm selection is that module's too: the
-figure and the gate read the same row set, so a comparison cannot be drawn on
-one information set and gated on another.
+summarised here by a second rule.  The arm selection is that module's too: each
+figure and the gate read the arm its code declares, so a column cannot be drawn
+on one arm and gated on another, and the row set each column was fitted from is
+written into the table the record quotes.
 
 What this module adds is the figure the study is read from -- the reconstructed
 magnetic axis against slice number, one trace per noise sequence, one figure
@@ -38,7 +39,7 @@ COMPONENTS = ((0, "R [m]"), (1, "Z [m]"))
 
 
 def arm_rows(code: str, sequence: str) -> list[dict]:
-    """The slices of this code and sequence on the row set both codes share."""
+    """The slices of this code's declared arm for this sequence."""
     return analyse.selected_rows(code, sequence, SLICES, FACTOR)
 
 
@@ -58,8 +59,7 @@ def disagreement(left: list[dict], right: list[dict]) -> int:
     if not shared:
         return 0
     distance = [
-        float(np.linalg.norm(left_axis[index] - right_axis[index]))
-        for index in shared
+        float(np.linalg.norm(left_axis[index] - right_axis[index])) for index in shared
     ]
     return int(shared[int(np.argmax(distance))])
 
@@ -92,10 +92,10 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
     # decides both leaves a label flush with the canvas edge.
     figure, panels = plt.subplots(2, 1, figsize=(14.0, 7.2), dpi=100, sharex=True)
     figure.subplots_adjust(
-        left=0.085, right=0.945, top=0.875, bottom=0.115, hspace=0.16
+        left=0.085, right=0.945, top=0.875, bottom=0.115, hspace=0.42
     )
     axis_truth = np.asarray(truth["axis"], dtype=float)
-    handles = []
+    handles = {}
     for panel, (component, label) in zip(panels, COMPONENTS):
         panel.axhline(
             float(axis_truth[component]),
@@ -110,25 +110,36 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
                 continue
             slices = np.arange(values.shape[0])
             drift = sequence == "drift"
+            # The control is dashed and drawn over the subject: on nova's two
+            # sequences the traces coincide to a few tenths of a millimetre, and
+            # a solid control underneath would hide there entirely.
             (line,) = panel.plot(
                 slices,
                 values[:, component],
                 color=COLOURS[code] if drift else CONTROL,
                 linewidth=3.0 if drift else 2.4,
-                zorder=3 if drift else 2,
+                linestyle="solid" if drift else (0, (4, 2)),
+                zorder=3 if drift else 4,
                 label="1/f drift" if drift else "white (control)",
             )
-            if drift:
-                handles = [line]
+            handles["1/f drift" if drift else "white (control)"] = line
         panel.set_ylabel(label)
         panel.set_xlim(0, SLICES - 1)
+        panel.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
+        # A tick at the axes boundary would meet the neighbouring panel's
+        # own label, so each panel keeps a margin above and below its data.
+        panel.margins(y=0.18)
     panels[-1].set_xlabel("slice")
     if handles:
         figure.legend(
-            handles=handles,
+            handles=[
+                handles[key]
+                for key in ("1/f drift", "white (control)")
+                if key in handles
+            ],
             loc="upper center",
             bbox_to_anchor=(0.5, 0.995),
-            ncol=1,
+            ncol=2,
             frameon=False,
         )
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -145,8 +156,7 @@ def html_rows(table: dict) -> str:
             arm = table.get(code, {}).get(sequence)
             if arm is None:
                 rows.append(
-                    "<tr><td>%s</td><td>%s</td><td>none</td></tr>"
-                    % (code, sequence)
+                    "<tr><td>%s</td><td>%s</td><td>none</td></tr>" % (code, sequence)
                 )
                 continue
             rows.append(
@@ -188,11 +198,13 @@ def main(argv=None) -> int:
         for sequence in SEQUENCES:
             rows = arm_rows(code, sequence)
             table[code][sequence] = analyse.reduce_arm(rows, truth) if rows else None
-        draw_code(code, truth, directory / ("axis-error-%s.svg" % code))
-    worst = disagreement(
-        arm_rows("nova", "drift"), arm_rows("efit", "drift")
+        draw_code(code, truth, directory / ("axis-position-%s.svg" % code))
+    worst = disagreement(arm_rows("nova", "drift"), arm_rows("efit", "drift"))
+    payload = dict(
+        table=table,
+        disagreement_slice=worst,
+        row_set=dict(analyse.DECLARED_ROWS),
     )
-    payload = dict(table=table, disagreement_slice=worst)
     if args.table:
         Path(args.table).write_text(json.dumps(payload, indent=2))
     if args.html:

@@ -94,9 +94,7 @@ def test_thresholds_refuse_a_sequence_made_from_white():
     rng = np.random.default_rng(3)
     white = rng.standard_normal((600, 2)) * 1e-3
     lag = analyse.lag_one(white)
-    white_arm = dict(
-        axis_lag1=lag, flux_lag1=lag, q95_lag1=lag
-    )
+    white_arm = dict(axis_lag1=lag, flux_lag1=lag, q95_lag1=lag)
     # A drift column that is white in all but its name is exactly the case the
     # floor exists to catch: it passes the white clause and fails the drift one.
     verdict = analyse.thresholds((white_arm, white_arm))
@@ -129,9 +127,7 @@ def test_thresholds_accept_a_held_drift_sequence():
 
 
 def test_reduce_arm_reports_the_distance_from_the_generating_axis():
-    truth = dict(
-        axis=[6.0, 0.5], flux_boundary=3.0, flux_span=77.0, q95=3.0
-    )
+    truth = dict(axis=[6.0, 0.5], flux_boundary=3.0, flux_span=77.0, q95=3.0)
     rows = rows_of([[6.003, 0.504]] * 8)
     arm = analyse.reduce_arm(rows, truth)
     assert arm["slices"] == 8
@@ -139,32 +135,39 @@ def test_reduce_arm_reports_the_distance_from_the_generating_axis():
     assert arm["slices_with_boundary"] == 8
 
 
-def test_arm_selection_takes_the_row_set_both_codes_share(tmp_path, monkeypatch):
+def write_rows(path, rows):
+    path.write_text("\n".join(json.dumps(row) for row in rows))
+
+
+def test_arm_selection_takes_the_row_set_the_code_declares(tmp_path, monkeypatch):
     monkeypatch.setattr(analyse, "STUDY", tmp_path)
-    other = rows_of([[6.0, 0.5]] * 5)
-    shared = rows_of([[6.0, 0.5]] * 3)
-    (tmp_path / "nova-white-200-0.0100.jsonl").write_text(
-        "\n".join(json.dumps(row) for row in other)
-    )
-    (tmp_path / "nova-white-200-0.0100-loops-shard0.jsonl").write_text(
-        "\n".join(json.dumps(row) for row in shared)
-    )
-    selected = analyse.selected_rows("nova", "white", 200, 0.01)
-    assert len(selected) == 3
+    fuller = rows_of([[6.0, 0.5]] * 5)
+    loops = rows_of([[6.0, 0.5]] * 3)
+    for code in ("nova", "efit"):
+        write_rows(tmp_path / ("%s-white-200-0.0100.jsonl" % code), fuller)
+        write_rows(tmp_path / ("%s-white-200-0.0100-loops-shard0.jsonl" % code), loops)
+    assert analyse.DECLARED_ROWS == {"nova": "all", "efit": "loops"}
+    assert len(analyse.selected_rows("nova", "white", 200, 0.01)) == 5
+    assert len(analyse.selected_rows("efit", "white", 200, 0.01)) == 3
+
+
+def test_arm_selection_names_each_code_row_set(tmp_path, monkeypatch):
+    assert analyse.arm_row_set("nova-white-200-0.0100") == "all"
+    assert analyse.arm_row_set("nova-white-200-0.0100-loops") == "loops"
+    assert analyse.declared_stem("nova", "white") == "nova-white-200-0.0100"
+    assert analyse.declared_stem("efit", "white") == "efit-white-200-0.0100-loops"
 
 
 def test_arm_selection_reports_missing_rather_than_comparing_row_sets(
     tmp_path, monkeypatch
 ):
     monkeypatch.setattr(analyse, "STUDY", tmp_path)
-    (tmp_path / "nova-white-200-0.0100.jsonl").write_text(
-        "\n".join(json.dumps(row) for row in rows_of([[6.0, 0.5]] * 4))
-    )
-    assert analyse.selected_rows("nova", "white", 200, 0.01) == []
+    write_rows(tmp_path / "efit-white-200-0.0100.jsonl", rows_of([[6.0, 0.5]] * 4))
+    assert analyse.selected_rows("efit", "white", 200, 0.01) == []
 
 
-def complete_payload(white_lag=0.05, drift_lag=0.8, slices=200):
-    def arm(lag):
+def complete_payload(white_lag=0.05, drift_lag=0.8, slices=200, row_set=None):
+    def arm(code, lag):
         return dict(
             slices=slices,
             slices_with_boundary=slices,
@@ -174,13 +177,14 @@ def complete_payload(white_lag=0.05, drift_lag=0.8, slices=200):
             axis_lag1=lag,
             flux_lag1=lag,
             q95_lag1=lag,
+            row_set=analyse.DECLARED_ROWS[code] if row_set is None else row_set,
         )
 
     control = {}
     for code in ("nova", "efit"):
         control[code] = dict(
-            white=arm(white_lag),
-            drift=arm(drift_lag),
+            white=arm(code, white_lag),
+            drift=arm(code, drift_lag),
             white_lag1_pass=abs(white_lag) <= analyse.LAG_ONE_LIMIT,
             drift_lag1_pass=drift_lag > analyse.DRIFT_LAG_ONE_FLOOR,
         )
@@ -190,15 +194,20 @@ def complete_payload(white_lag=0.05, drift_lag=0.8, slices=200):
 def test_gate_counts_only_its_assertions():
     failures, performed, lines = check.check(complete_payload())
     assert failures == []
-    assert performed == 22
+    assert performed == 26
     assert len(lines) == 4
+
+
+def test_gate_fails_an_arm_that_holds_another_row_set():
+    failures, _, _ = check.check(complete_payload(row_set="loops"))
+    assert any("not the declared" in line for line in failures)
 
 
 def test_gate_fails_a_drift_arm_that_does_not_hold_its_memory():
     payload = complete_payload(drift_lag=0.46)
     failures, performed, _ = check.check(payload)
     assert failures
-    assert performed == 22
+    assert performed == 26
 
 
 def test_gate_fails_a_short_arm():

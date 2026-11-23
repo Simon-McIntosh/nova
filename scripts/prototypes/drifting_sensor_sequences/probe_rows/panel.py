@@ -86,13 +86,8 @@ def nova_slice(sequence: str, factor: float, index: int) -> tuple:
     A sequence is written as one map stack per shard, so the slice is looked up
     where its index appears; the stacks of one arm share one lattice.
     """
-    pattern = "nova-%s-*-%.4f-%s"
-    for path in sorted(
-        (STUDY / "maps").glob(
-            pattern % (sequence, factor, analyse.SELECTED_ROWS)
-            + "*.npz"
-        )
-    ):
+    stem = analyse.declared_stem("nova", sequence, 200, factor)
+    for path in sorted((STUDY / "maps").glob(stem + "-shard*.npz")):
         stored = np.load(path)
         matches = np.flatnonzero(np.asarray(stored["slice"], dtype=int) == index)
         if matches.size:

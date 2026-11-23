@@ -36,7 +36,7 @@ export NOVA_MAGNETICS_FIT_EVIDENCE="$OUT/magnetics"
 "$PY" -m coverage run --rcfile="$RC" \
   --data-file="$OUT/inverse.coverage" -m pytest \
   -o addopts='' -p no:cacheprovider --timeout=3600 -q \
-  "tests/test_equilibrium_magnetics_fit.py::test_known_state_recovery[mast]"
+  "tests/test_equilibrium_magnetics_fit_known_states.py::test_known_state_recovery[mast]"
 INVERSE_STATUS=$?
 echo "INVERSE_EXIT=$INVERSE_STATUS"
 "$PY" -m coverage json --rcfile="$RC" \

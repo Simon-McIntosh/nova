@@ -22,6 +22,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T185014477588-reduced-reconstructions-scored",
       "section": "\u00a75"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T08:04:07.303685+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T185014477588-reduced-reconstructions-scored",
+      "section": "\u00a75"
     }
   },
   "findings": [

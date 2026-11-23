@@ -1,0 +1,50 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-23T14:04:17.036Z",
+  "dispatched_at": "2026-11-23T13:53:54Z",
+  "findings": [
+    {
+      "line": "195",
+      "path": "tests/test_certificate_exterior_support.py",
+      "severity": "non-blocking",
+      "text": "decomposition_relative_sup is computed as max|booking_delta + exterior_closure - delta| where booking_delta = image - reference_image and exterior_closure = exterior + reference_image - analytic cancel to image + exterior - analytic, which is exactly delta because flux_map at nova/equilibrium/forward_operator.py:4011 computes that same sum; it therefore reads 0.000e+00 in all six published rows and the assertion at line 229 (and its twin at tests/test_gs_map_fidelity.py:190) can never fail, so it guards nothing. This arrived through the merge of the already-reviewed head rather than from this node's own commit."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production runtime code reaches the landed change: the fragment is documentation and the merged additions are tests and a driver script, so there is no production call site to name.",
+    "diff": "Read commit by commit against a02cf0423; it is two commits (f0712b57 merge, 71bcf3d40 docs) and seven paths, the six merged paths are byte-identical to their 1d87f7d91 originals (git rev-parse comparison), and the added tests reach production through nova/equilibrium/forward_operator.py:4011 flux_map and nova/equilibrium/moment.py:811 rather than altering it.",
+    "done_when": "The done_when names the merge, the two-arm rigel run and a committed record of added failure ids; merged.log and main.log are the two arms, and the fragment's 'Failure ids and what the merge adds' section states the single id fails identically at both revisions so zero are added.",
+    "goal": "The source node goal is that the reviewed map-fidelity head merges cleanly onto main, one rigel job runs the map-fidelity and certificate-support files at both revisions, and a committed record states the added failure ids; commit f0712b57 has exactly the two parents a02cf0423 and 1d87f7d91 with an empty combined diff, sacct shows job 1339334 FAILED on partition rigel with 8 CPUs and 120G, and 71bcf3d40 commits the record.",
+    "manifest": "Read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T124755398434-map-fidelity-merged-gate/manifest.md; it states status complete, records baseline_suite and after_suite as completed JSON with log paths, added failures 0 and all 8 map-fidelity tests passing.",
+    "write_paths": "The declared write path was docs/evidence/fragments/converged-forward-solve/map-fidelity-merged-gate.html; the node's own commit 71bcf3d40 adds only that file, and the remaining six diff paths come from the instructed merge of 1d87f7d91 rather than from the node's pen."
+  },
+  "justifications": {
+    "durability": "tests/test_gs_map_fidelity.py:185-192 measures the 2,000-cell rung live so a map regression reddens, but the 5,000/10,000 rungs read frozen rows from the published fragment at :188 and the decomposition assertion at :190 (and tests/test_certificate_exterior_support.py:229) reduces to an algebraic identity that reads exactly 0.0 in all six rows, so it cannot fail.",
+    "evidence": "merged.log and main.log each open with '# revision <sha>' and '# command:' and close with a bare EXIT=1, and the fragment's per-file counts (8/0 map, 3/1 exterior at the merge; 3/1 exterior at main) reconcile exactly with the 11-passed/1-failed and 3-passed/1-failed summaries, though the manifest's tests: line prepends JAX_PLATFORMS=cpu that the log's '# command:' line does not carry (the payload exported it instead).",
+    "fit": "the fragment follows the converged-forward-solve evidence idiom in docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html, carrying plan-slug/plan-commits/plan-verdict meta and no version, ticket or plan-stage label in any added path or symbol.",
+    "goal_fidelity": "docs/evidence/fragments/converged-forward-solve/map-fidelity-merged-gate.html records the clean merge f0712b57 (parents a02cf0423 and 1d87f7d91, no combined-diff content), rigel job 1339334 and added failure ids 0, which is the node goal in three clauses.",
+    "reuse": "the landed change adds no definition of its own and the merged tests/test_gs_map_fidelity.py:60 imports build_carrier and measure_arm from tests/test_certificate_exterior_support.py:65 rather than carrying a second copy of the recipe.",
+    "scope_discipline": "commit 71bcf3d40 changes only the declared docs/evidence/fragments/converged-forward-solve/map-fidelity-merged-gate.html, and the six other diff paths arrive solely through merge commit f0712b57 that the brief instructed."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T135328679275-review-of-map-fidelity-merged-gate-71bcf3d400a8",
+  "reviewed_base_sha": "a02cf0423db62d3c96e89617b3757fd870a566f8",
+  "reviewed_head_sha": "71bcf3d400a896b245212589d0c0b659ccc3776f",
+  "reviewed_run_id": "r-20261123T124755398434-map-fidelity-merged-gate",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T14:05:01.867804+00:00",
+  "total": 108
+}

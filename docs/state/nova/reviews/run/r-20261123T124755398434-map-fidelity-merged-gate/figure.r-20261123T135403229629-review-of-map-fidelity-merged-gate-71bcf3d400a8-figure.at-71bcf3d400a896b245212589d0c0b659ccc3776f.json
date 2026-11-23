@@ -1,0 +1,41 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-23T13:54:25Z",
+  "findings": [
+    {
+      "file": "tests/test_gs_map_fidelity.py",
+      "id": "f1901f963e6",
+      "line": 367,
+      "severity": "non-blocking",
+      "summary": "The flux contours, which are the entire subject of both figures, are drawn at linewidth=0.5 pt on the 14x7.2 in canvas at 100 dpi (line 351), i.e. a stroke about 0.69 px wide. matplotlib antialiases a sub-pixel stroke to roughly 67% pixel coverage, so the rendered contour tone measures (118,152,221) at densest and (130,161,224)-(162,185,232) elsewhere, about 2.5-2.9:1 against white even though the declared flux colour #3366cc (nova/media/ink.py:45) passes at 4.7:1. The contours are legible but read faint at a glance; a wider stroke (about 1.0 pt) or drawing them at full colour would restore the intended contrast without changing the data."
+    },
+    {
+      "file": "tests/test_gs_map_fidelity.py",
+      "id": "f1a86c5a047",
+      "line": 390,
+      "severity": "non-blocking",
+      "summary": "The figure legend builds two handles and both are triangles (style.axis_marker), one per null colour. The filled cross that marks the admitted saddle, visible at the bottom of both panels of the diverted figure in both the analytic red and the map-image purple, therefore has no legend entry, so a reader is given no key for the second marker shape used in the plot area. One further legend line (cross = admitted saddle) or a caption sentence naming the shape would close it."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T135403229629-review-of-map-fidelity-merged-gate-71bcf3d400a8-figure",
+  "reviewed_base_sha": "a02cf0423db62d3c96e89617b3757fd870a566f8",
+  "reviewed_head_sha": "71bcf3d400a896b245212589d0c0b659ccc3776f",
+  "reviewed_run_id": "r-20261123T124755398434-map-fidelity-merged-gate",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "PASS for both figures: panel titles, legend entries and the legend text are black (0,0,0) at 21:1 on white, with grey antialiasing at 6.4-10.5:1; no text falls below the 3:1 floor.",
+    "data_ink": "PASS for both figures: the ink is the fourteen-line contour set, the first-wall outline, and the two null marker sets; the data carry the visual weight and no gradient, fill or shaded band encodes anything.",
+    "decoration": "PASS for both figures: white ground, axes off, no gridlines, no spines, no background fill and a frameless legend, so nothing decorative competes with the data.",
+    "label_collision": "PASS for both figures: no ink touches any canvas edge on any side, so no crossing label or contour is clipped; the two panel titles and the single legend do not overlap each other; the coincident null markers are distinguishable (purple larger and at lower zorder) exactly as the caption states; no label sits over data.",
+    "legibility": "PASS for both figures: two clean side-by-side panels with the titles 'map image' and 'analytic state' in clear space and one frameless legend, readable at a glance. Both null sets are visible where they coincide, the map-image purple drawn larger and beneath so it shows as a fringe around the red analytic marker; the contour set reads as the same topology in both panels. Caveat carried as finding 1: the 0.5 pt contour stroke renders sub-pixel at about 2.5-2.9:1 on white, so the data are faint though still visible.",
+    "table_form": "PASS for both figures: the images show a spatial field and its null topology, which is what a contour panel is for; nothing is depicted that is naturally a table."
+  },
+  "status": "parsed",
+  "subject": "run",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T14:04:53.130651+00:00",
+  "total": null
+}

@@ -1,17 +1,58 @@
 {
   "assembly_drawn": {
     "converged": {
-      "closed_drawn": 1,
-      "open_drawn": 2,
-      "unassembled": 0
+      "assembled": {
+        "axis_enclosing_component_count": 1,
+        "boundary_flux": -0.10071214387018546,
+        "closed_candidate_count": 1,
+        "closed_segment_count": 75,
+        "cycle_component_count": 1,
+        "open_branch_count": 2,
+        "source": "archive",
+        "well_formed": true
+      },
+      "drawn": {
+        "closed_drawn": 1,
+        "open_drawn": 2,
+        "unassembled": 0
+      }
     },
     "non_converged": {
-      "closed_drawn": 1,
-      "open_drawn": 2,
-      "unassembled": 0
+      "assembled": {
+        "axis_enclosing_component_count": 1,
+        "boundary_flux": -0.08260298244084079,
+        "closed_candidate_count": 1,
+        "closed_segment_count": 56,
+        "cycle_component_count": 1,
+        "open_branch_count": 0,
+        "source": "archive",
+        "well_formed": true
+      },
+      "drawn": {
+        "closed_drawn": 0,
+        "open_drawn": 0,
+        "unassembled": 1
+      }
+    },
+    "reference": {
+      "assembled": {
+        "axis_enclosing_component_count": 1,
+        "boundary_flux": -0.12292990492108508,
+        "closed_candidate_count": 0,
+        "closed_segment_count": 0,
+        "cycle_component_count": 1,
+        "open_branch_count": 0,
+        "source": "archive",
+        "well_formed": false
+      },
+      "drawn": {
+        "closed_drawn": 0,
+        "open_drawn": 0,
+        "unassembled": 1
+      }
     }
   },
-  "caption": "terminal poloidal flux on shared levels between the axis and boundary flux (0.3416 to -0.1229 Wb)  |  every solved state imposes the vertical current-centre row at 0.083203 m (the reference's own centre, tolerance 1e-06 m)  |  reference is the unedited equilibrium, its admitted saddle above its axis (blue set: unassembled, crossings drawn unconnected, admitted saddle (0.590, +1.220) m)  |  solved sets orange: unassembled, crossings drawn unconnected, admitted saddle (0.648, +1.188) m above its axis in the converged panel and saddle (0.526, -1.429) m below its axis in the failed panel  |  the reference nulls are drawn larger and beneath the solved ones, so a coincident axis or saddle reads as both  |  other qualified nulls hollow in both sets  |  wall drawn  |  the converged panel draws the field of its terminal currents on a 10 mm map, largest node mismatch 1.311e-05 Wb, solved-node mismatch 6.345e-09 Wb, 27 promoted nodes, nearest promoted node 2.571 m from its polished X-point; the non-converged panel draws the field of its terminal currents on a 10 mm map, largest node mismatch 1.947e-02 Wb, solved-node mismatch 8.043e-03 Wb, 3 promoted nodes, nearest promoted node 0.087 m from its polished X-point",
+  "caption": "terminal poloidal flux on shared levels between the axis and boundary flux (0.3416 to -0.1229 Wb)  |  every solved state imposes the vertical current-centre row at 0.083203 m (the reference's own centre, tolerance 1e-06 m)  |  reference is the unedited equilibrium, its admitted saddle above its axis (blue set: unassembled, crossings drawn unconnected, admitted saddle (0.590, +1.220) m)  |  solved sets orange in the converged panel: lobe solid, legs dashed, admitted saddle (0.648, +1.188) m above its axis; in the failed panel: unassembled, crossings drawn unconnected, admitted saddle (0.526, -1.429) m below its axis  |  the reference nulls are drawn larger and beneath the solved ones, so a coincident axis or saddle reads as both  |  other qualified nulls hollow in both sets  |  wall drawn  |  the converged panel draws the field of its terminal currents on a 10 mm map, largest node mismatch 1.311e-05 Wb, solved-node mismatch 6.345e-09 Wb, 27 promoted nodes, nearest promoted node 2.571 m from its polished X-point; the non-converged panel draws the field of its terminal currents on a 10 mm map, largest node mismatch 1.947e-02 Wb, solved-node mismatch 8.043e-03 Wb, 3 promoted nodes, nearest promoted node 0.087 m from its polished X-point",
   "command": "benchmarks/coil_edit_latency.py panel --display-map --panel-data docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz --panel-figure docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png --receipt docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json --solve-receipt /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T134834058462-coil-edit-panels-per-figure/solve/h200-fsapi/solve.json",
   "display_map": {
     "moments_route": "stored terminal moments at the solve's target current",
@@ -45,27 +86,29 @@
     "two_cell_threshold_m": 0.12125000008381903
   },
   "render": {
-    "accepted_time_limit": "02:00:00",
+    "accepted_time_limit": "03:00:00",
     "command": "benchmarks/coil_edit_latency.py panel --display-map --panel-data docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz --panel-figure docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png --receipt docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json --solve-receipt /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T134834058462-coil-edit-panels-per-figure/solve/h200-fsapi/solve.json",
-    "cpus_per_task": "2",
+    "cpus_per_task": "10",
     "device": "Tesla P100-PCIE-16GB",
     "host": "98dci4-gpu-0002.iter.org",
-    "job_id": "1339576",
-    "job_name": "coil-edit-panel-receipts",
+    "job_id": "1341007",
+    "job_name": "coil-edit-drawings",
     "node": "98dci4-gpu-0002.iter.org",
     "partition": "titan",
     "platform": "gpu",
     "reservation": null,
     "superseded": {
-      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/coil_edit_latency.py panel --display-map --panel-data docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz --panel-figure docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png --receipt docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json --solve-receipt /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T134834058462-coil-edit-panels-per-figure/solve/h200-fsapi/solve.json",
-      "device": "NVIDIA H200 NVL",
-      "host": "98dci4-gpu-0003",
-      "job_id": "1337244",
-      "partition": "betelgeuse",
-      "published_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
-      "published_figure": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
-      "read_archive": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
-      "reconstructed_from": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T134834058462-coil-edit-panels-per-figure/logs/h200-solve.log"
+      "accepted_time_limit": "02:00:00",
+      "command": "benchmarks/coil_edit_latency.py panel --display-map --panel-data docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz --panel-figure docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png --receipt docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json --solve-receipt /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T134834058462-coil-edit-panels-per-figure/solve/h200-fsapi/solve.json",
+      "cpus_per_task": "2",
+      "device": "Tesla P100-PCIE-16GB",
+      "host": "98dci4-gpu-0002.iter.org",
+      "job_id": "1339576",
+      "job_name": "coil-edit-panel-receipts",
+      "node": "98dci4-gpu-0002.iter.org",
+      "partition": "titan",
+      "platform": "gpu",
+      "reservation": null
     }
   },
   "runtime": {
@@ -75,10 +118,10 @@
     "platform": "gpu"
   },
   "scheduler": {
-    "accepted_time_limit": "02:00:00",
-    "cpus_per_task": "2",
-    "job_id": "1339576",
-    "job_name": "coil-edit-panel-receipts",
+    "accepted_time_limit": "03:00:00",
+    "cpus_per_task": "10",
+    "job_id": "1341007",
+    "job_name": "coil-edit-drawings",
     "node": "98dci4-gpu-0002.iter.org",
     "partition": "titan",
     "reservation": null

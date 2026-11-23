@@ -16,8 +16,9 @@
 <p><code>nova/equilibrium/AGENTS.md</code> now names, module by module, the one
 public forward route and the inverse route. The lists were written from a fresh
 measurement at revision <code>8d8b526ae1d315945ed603b8f15477382559cb27</code> in one <code>all_debug</code>
-job (<code>1339132</code>, 4 cores, 32 GB) rather than from the earlier §1 record,
-per the decision <code>s28-handoff</code>: the tree has moved since §1 landed
+job (<code>1339132</code>, 4 cores, 32 GB) rather than from an earlier line-map record,
+per the decision <code>s28-handoff</code>: the tree has moved since that record
+was written
 (<code>nova/equilibrium/harmonic.py</code> and
 <code>nova/equilibrium/reconstruction_state.py</code> are new, and
 <code>nova/equilibrium/moment.py</code>, <code>profile.py</code>,
@@ -26,7 +27,7 @@ so a route copied from that record would name a tree that no longer exists.</p>
 
 <h2>The measurement</h2>
 
-<p>The landed §1 driver, <code>scripts/prototypes/hot_path_map/job.sh</code>,
+<p>The landed line-map driver, <code>scripts/prototypes/hot_path_map/job.sh</code>,
 was run unchanged except for one repair: the known-state recovery test had moved
 out of <code>tests/test_equilibrium_magnetics_fit.py</code> into
 <code>tests/test_equilibrium_magnetics_fit_known_states.py</code> and its fixture
@@ -74,7 +75,7 @@ and the same for the inverse route -- and exits 1, so the comparison is not one
 that can only pass. The log is
 <code>/home/ITER/mcintos/.cache/nova-s33/hot-path-written-down/section-check-negative-control.log</code>.</p>
 
-<h2>What the route executes, and what §5 still proposes to remove</h2>
+<h2>What the route executes, and what the duplicate register still proposes to remove</h2>
 
 <p>Device attribution orders the work, and the line map gives its reach.
 <a href="/nova/evidence/fragments/sub-millisecond-forward-path/bank-solve-trace-four-read.html">The bank-solve trace attributes</a>
@@ -96,18 +97,50 @@ arm exercises, not a defect. The section states the same relation: the bank
 arm's supplied-point read is not on either measured route, and the census read
 is.</p>
 
-<p>No §5 entry is accepted-and-pending. All ten are raised as reckon decisions and
+<p>No entry in the duplicate register is accepted-and-pending. All ten are raised as reckon decisions and
 every one is still <code>ready</code> (unanswered), so the section lists all ten
 as awaiting an answer rather than as landed collapses; an accepted one moves the
 module it stops executing between the section's blocks in the same commit as the
 code change.</p>
 
-<p>The delivered paths are <code>nova/equilibrium/AGENTS.md</code> (the route
-section), <code>scripts/prototypes/hot_path_map/section_route.py</code> (the
-check), <code>scripts/prototypes/hot_path_map/{forward_route.py, job.sh,
-map.py}</code> (the stale-reference repair), and the comparison basis
-<code>docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down/route-modules.json</code>
-(the stripped map, cited by the section's check command).</p>
+<h2>Declared and shared paths</h2>
+
+<p>The dispatch declares two write paths, this fragment and the matching figures
+directory. The work needs seven, and six of the seven lie outside the
+declaration: the route section itself lives in the module's own
+<code>AGENTS.md</code>, the comparison basis and the check sit beside the plan's
+evidence, and the driver repair is in the driver. Writing the route anywhere
+other than the module's <code>AGENTS.md</code> would put the description where
+the code's readers do not look, and the brief asks for exactly that file; the
+three driver edits are the same kind of necessity, because the measurement the
+section reports cannot be reproduced until the driver names the test module the
+known-state recovery moved into.</p>
+
+<ul>
+<li><code>nova/equilibrium/AGENTS.md</code> — the route section (shared: the
+module's own documentation).</li>
+<li><code>scripts/prototypes/hot_path_map/section_route.py</code> — the check
+(shared: the line-map driver's directory).</li>
+<li><code>scripts/prototypes/hot_path_map/forward_route.py</code>,
+<code>job.sh, map.py</code> — the stale-reference repair (shared).</li>
+<li><code>docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down/route-modules.json</code>
+— the comparison basis the section's check command cites (shared: the plan's
+evidence tree).</li>
+<li><code>docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down.html</code>
+— this fragment (declared).</li>
+</ul>
+
+<p>No path is outside the repository's mergeable set and no path is one the
+fence holds read-only, so the merge reconciles them as ordinary edits. The
+shared paths are recorded here and in the manifest's <code>evidence_inputs</code>
+so the coordinator can ratify each with <code>crew complete --accept-path</code>
+rather than discovering them at promotion.</p>
+
+<p>The check is a convention rather than an enforced gate:
+<code>section_route.py</code> runs when a reader or a commit author runs it,
+because the route section is documentation and the locked decision for this
+section is document-only, so no test was added to invoke it. The section states
+that a change to a list must run the check in the same commit.</p>
 
 </section>
   </main>

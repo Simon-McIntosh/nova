@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T18:21:39.380Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-23T18:04:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+      "line": "171",
+      "severity": "non-blocking",
+      "text": "the published record carries the unsubstituted template token {node_test_files} in the Gate paragraph, and again inside the embedded receipt.py at line 943, so a reader sees an internal harness placeholder where a resolved path list belongs."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+      "line": "266",
+      "severity": "non-blocking",
+      "text": "the absence check and the module-import sweep exist only as scripts in the run directory, not in the repository, so nothing committed fails if a future change names or imports one of the 24 deleted modules; the gate is durable as evidence but not as a guard."
+    },
+    {
+      "file": "benchmarks/scripts_census.py",
+      "line": "139",
+      "severity": "non-blocking",
+      "text": "the scan.py embedded in the record re-implements the AST import resolution that imports_of and imports_of_walk here already own, adding relative-prefix and dynamic-string handling for the package-module graph; the record acknowledges the overlap, but the owner is neither extended nor wrapped, so the repository now carries the same capability in two places."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+      "line": "867",
+      "severity": "non-blocking",
+      "text": "the published receipt.py driver hard-codes D = /home/ITER/mcintos/.cache/nova-s33/unreached-module-delete together with the base and head revisions, so it cannot run from the record alone, while the re-derivation paragraph presents the drivers as reproducible from the repository."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read commit by commit against 348ed92c \u2014 104c8b673 removes 24 files with 3029 deletions and zero insertions, and the seven later commits touch only the evidence html and its JSON twin.",
+    "done_when": "clause 1 holds \u2014 I re-ran an AST import scan (absolute imports plus level-resolved relative imports) over nova/, tests/, apps/, scripts/ and benchmarks/ and a precise import grep over imas-ambix, and found zero importers for all 24 deleted modules; clause 2's gate is recorded in gate-base.json (473 modules, 450 ok, 23 failures) and gate-head.json (449 modules, 435 ok, 14 failures), whose delta I recomputed as new_failures=[] and collection falling from 10943 to 10937; clause 3 holds \u2014 the per-package table at unreached-module-delete.html:79 re-sums from the diff to 3029. The focused set's single failure I reproduced at the base tree by running tests/test_clip_mode_has_no_process_global.py at 1685bb394, where it fails identically on benchmarks/outboard_census_exact_total.py, so it is pre-existing rather than a regression.",
+    "goal": "section 4 of docs/plans/code-reuse-and-hot-path.html:138 asks that modules under nova/ which section 1 shows unreached and which no importer reaches be deleted with the record at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html; commit 104c8b67 deletes exactly the 24 modules that record's \"Modules deleted\" list names, 3029 lines, and holds nova/utilities/ANSYS.py back by name.",
+    "manifest": "read; status complete, eight commits, the gate arm jobs and revisions, both focused logs, and the full-suite shortfall under outside_scope \u2014 the record states the deletion gate it ran rather than claiming a suite delta it never made.",
+    "write_paths": "the manifest declares only the evidence fragment and its figures directory; the 24 nova/ deletions and the JSON twin lie outside that pair, and every one of them is implied by section 4 and listed in changed_paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: section 4 of docs/plans/code-reuse-and-hot-path.html:138 asks that modules under nova/ which section 1 shows unreached and which no importer reaches be deleted with the record at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html; commit 104c8b67 deletes exactly the 24 modules that record's \"Modules deleted\" list names, 3029 lines, and holds nova/utilities/ANSYS.py back by name.\nVERDICT done_when: clause 1 holds \u2014 I re-ran an AST import scan (absolute imports plus level-resolved relative imports) over nova/, tests/, apps/, scripts/ and benchmarks/ and a precise import grep over imas-ambix, and found zero importers for all 24 deleted modules; clause 2's gate is recorded in gate-base.json (473 modules, 450 ok, 23 failures) and gate-head.json (449 modules, 435 ok, 14 failures), whose delta I recomputed as new_failures=[] and collection falling from 10943 to 10937; clause 3 holds \u2014 the per-package table at unreached-module-delete.html:79 re-sums from the diff to 3029. The focused set's single failure I reproduced at the base tree by running tests/test_clip_mode_has_no_process_global.py at 1685bb394, where it fails identically on benchmarks/outboard_census_exact_total.py, so it is pre-existing rather than a regression.\nVERDICT write_paths: the manifest declares only the evidence fragment and its figures directory; the 24 nova/ deletions and the JSON twin lie outside that pair, and every one of them is implied by section 4 and listed in changed_paths.\nVERDICT manifest: read; status complete, eight commits, the gate arm jobs and revisions, both focused logs, and the full-suite shortfall under outside_scope \u2014 the record states the deletion gate it ran rather than claiming a suite delta it never made.\nVERDICT diff: read commit by commit against 348ed92c \u2014 104c8b673 removes 24 files with 3029 deletions and zero insertions, and the seven later commits touch only the evidence html and its JSON twin.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: unreached-module-delete.html:91 lists the 24 deleted modules and the diff of 104c8b673 deletes exactly those files with 3029 deletions and no insertions.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-base.json and gate-head.json carry the two-arm sweep and collection numbers, whose delta I recomputed from those files, and the focused set's single failure reproduces at the base tree.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every one of the 24 source deletions is the section-4 deliverable, and the only path outside the declared pair is docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.json, the record's conventional machine-readable twin.\nSCORE durability: 8\nJUSTIFICATION durability: no committed test or check fails if one of the 24 removed modules is imported again, because the absence check and the module sweep live in the run directory at unreached-module-delete.html:266 rather than in the repository.\nSCORE fit: 17\nJUSTIFICATION fit: the diff introduces no source file and carries no plan, sprint or version identifier, matching the surrounding evidence-document style; the sole blemish is the literal template token at unreached-module-delete.html:171.\nSCORE reuse: 14\nJUSTIFICATION reuse: the record adds no library definition, but its embedded scan.py resolves imports with relative-prefix and dynamic-string handling that benchmarks/scripts_census.py:139 lacks and does not receive, so that capability is re-derived beside its owner rather than extended through it.\nFINDING docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:171 non-blocking: the published record carries the unsubstituted template token {node_test_files} in the Gate paragraph, and again inside the embedded receipt.py at line 943, so a reader sees an internal harness placeholder where a resolved path list belongs.\nFINDING docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:266 non-blocking: the absence check and the module-import sweep exist only as scripts in the run directory, not in the repository, so nothing committed fails if a future change names or imports one of the 24 deleted modules; the gate is durable as evidence but not as a guard.\nFINDING benchmarks/scripts_census.py:139 non-blocking: the scan.py embedded in the record re-implements the AST import resolution that imports_of and imports_of_walk here already own, adding relative-prefix and dynamic-string handling for the package-module graph; the record acknowledges the overlap, but the owner is neither extended nor wrapped, so the repository now carries the same capability in two places.\nFINDING docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:867 non-blocking: the published receipt.py driver hard-codes D = /home/ITER/mcintos/.cache/nova-s33/unreached-module-delete together with the base and head revisions, so it cannot run from the record alone, while the re-derivation paragraph presents the drivers as reproducible from the repository.\n",
+  "review_run_id": "r-20261123T180357820307-review-of-unreached-module-delete-5ae605f519c6",
+  "reviewed_base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+  "reviewed_head_sha": "5ae605f519c670caddb13b81b77bd449464cd5f8",
+  "reviewed_run_id": "r-20261122T202605453490-unreached-module-delete",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 14,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T18:37:22.907028+00:00",
+  "total": 91
+}

@@ -1,0 +1,41 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T08:15:48.259Z",
+  "dispatched_at": "2026-11-23T08:02:09Z",
+  "findings": [],
+  "plan_commit": "27edfa6591479044515fa7e9b3f20b68ec8b4bfb",
+  "plan_fingerprint": "2de099387f6f3caec41d845c7cfbbceb76fbbd986a8e2a1ff37224712caeea3c",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 143,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T080142236424-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "1804de9561ba6d7e1d3d3f9ed1c053e9f0d2b403",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 run r-20261121T202518813620-topology-read-compile-clause exists and its manifest records job 1338238 with the cited 876.49 GiB at 24 cells and 3,183.55 GiB at 132; jobs 1337904 and 1338281 are recorded in their runs; commit 0982496f1 resolves as a commit object (unmerged on main, which is consistent with \u00a74 landing it); the \u00a78 and \u00a74 section anchors it links to resolve.",
+    "done_when": "pass \u2014 clause (2)'s requirement that the head arm complete the 24-cell compile in a fixed `--mem=120G` job is a measure that can fail (the differentiated base arm is recorded killed at that same 120 GB, job 1338281), and clause (3) declares the negative control: restoring forward-mode differentiation must fail the instance-count test by test id.",
+    "evidence_paths": "pass \u2014 the section names its record at docs/evidence/fragments/kernel-compile-barrier/kcb-assembled-read-hessian.html, and the census and kill receipts it cites live under durable run directories (r-20261121T202518813620-topology-read-compile-clause for job 1338238; r-20261123T045219222369-derivative-order-memory-census for job 1338281).",
+    "naming": "pass \u2014 \u00a79 carries no plan label, stage name, ticket number or version tag into any symbol or comment; the census is cited by its run and job rather than by an unnamed section.",
+    "reasoning": "pass \u2014 the stated premise matches the cited evidence (job 1338238 attributes 84 percent of the 132-cell read to the second-order packed analytic moment call, which \u00a79's assembly removes); the endpoints are measurable and can fail; and \u00a79 names no code path, file, function or step sequence \u2014 the Hessian expression states the quantity the record must hold, not an implementation to follow.",
+    "single_goal": "pass \u2014 \u00a79 carries one deliverable, the read's flux Hessian assembled from \u00a78's kernel outputs, with the compile arms and control serving that one verdict.",
+    "wiring": "pass \u2014 \u00a79's only declared dependency is `kernel-compile-barrier#s8` (the outputs it assembles from), and `plan-section-depends-on` declares `s4: [..., kernel-compile-barrier#s9]`, so \u00a74 runs after \u00a79 exactly as clause (2) states \"bounding that remainder is \u00a74's work, which runs after this section\"."
+  },
+  "section_digests": {
+    "_document": "8aa2f4e5145f569b0e6cbd810ea4816ca4580ad9e1a7491aebefa7b76a7da11c",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "c0050e9c77ebe6780135151c511e8850c91e7dc99d0cb4fe32c9d032665dd522",
+    "s4": "c52ff33730d8852bfa36e4e62f1fda5a2078c31394842246404c85608d53912a",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea",
+    "s7": "6dfe0a01ad8470c02d38d7e3fa33263ff325b87943f260375c61e09e0cfe5db8",
+    "s8": "a4627c2611f0af4743802be210abf766114de0c5c5157b517d571a34443c1377",
+    "s9": "b5a6a8707d699ad04f378ce2186ae2ae3f89e8bbfed5cb362831765117301538"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T08:15:52.558841+00:00",
+  "total": null
+}

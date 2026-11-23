@@ -25,7 +25,7 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -217,6 +217,15 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
       </p>
     <p class="r-dec-rat">No declared relationship carries an S28 answer or landing into this plan, so waiting would stall the sprint on another sprint&#x27;s schedule. §5 closes when each entry is raised as a reckon decision; §6 writes what the head executes and lists accepted collapses still pending.</p>
     </div>
+<div class="r-dec" data-key="deletion-gate" data-choice="deletion-check" data-by="Simon McIntosh" data-when="2026-11-23T17:19:26+00:00" data-sections="s3,s4">
+    <p class="r-dec-q">The full suite cannot finish inside the one-hour all_debug limit. May the deletion sections land on a deletion-specific check instead of a two-arm suite delta?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="deletion-check">Import sweep, collection parity and the absence check</button>
+      <button class="r-opt" data-value="chunked-suite">Full suite split into one-hour all_debug jobs per arm</button>
+      <button class="r-opt" data-value="rigel-suite">Full suite as one long rigel job per arm</button>
+      </p>
+    <p class="r-dec-rat">A deletion can only break an importer or a collector. Every remaining module importing in a fresh interpreter, collection parity across the whole test tree, no tracked file naming a deleted path, and identical failure ids on a focused set measure that directly; the full suite stopped at 28 and 4 minutes of a run that needs several hours.</p>
+    </div>
 </section>
 
 <section data-reckon="followups" id="followups" class="r-followups">
@@ -253,6 +262,9 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="coordinator" data-when="2026-11-23">
     <div class="r-comment-body">§2 landed from run r-20261122T202601421489-bench-scripts-census (head 34f6c3a36) after three audit rounds and two reviews; see landed record anchor s2-bench-scripts-census.</div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261123T132929959525-review-of-bench-scripts-delete-76a7d44acfbe" data-who="reckon-build" data-when="2026-11-23T13:42:45.610Z">
+    <div class="r-comment-body"><p>Independent review of r-20261122T202603608268-bench-scripts-delete at 348ed92c..76a7d44ac scored 15/10/18/5/18/20 (goal_fidelity/evidence/scope_discipline/durability/fit/reuse), zero added failures, with two blocking findings: benchmarks/near_field_elliptic.py:1190 and scripts/prototypes/diiid_xpoint_profile_extent/measure.py:17 still name deleted paths at the head.</p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261123T124148141242-review-of-unreached-module-delete-dc3a174a7ef3" data-who="reckon-build" data-when="2026-11-23T13:03:40.005Z">
     <div class="r-comment-body"><p>no plan edit; the review is delivered as a stored record on run r-20261122T202605453490-unreached-module-delete at head dc3a174a7 with scores goal_fidelity 19, evidence 14, scope_discipline 18, durability 5, fit 18, reuse 17 and four non-blocking findings.</p></div>
 </div>
@@ -282,9 +294,6 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261123T133138334433-review-of-hot-path-written-down-bbcc26df6aea" data-who="reckon-build" data-when="2026-11-23T13:46:38.991Z">
     <div class="r-comment-body"><p>review r-20261123T133138334433-review-of-hot-path-written-down-bbcc26df6aea scores the run r-20261122T202611168380-hot-path-written-down at head bbcc26df6aea9073102c52049824e0826f5e33f7: goal_fidelity 19, evidence 17, scope_discipline 13, durability 12, fit 18, reuse 19; added_failure_count 0; two non-blocking findings (a pre-guard gate log cited as the head result in the fragment, and the revision guard diffing against HEAD rather than the working tree).</p></div>
-</div>
-<div class="r-comment" data-section="s3" data-id="c-run-r-20261123T132929959525-review-of-bench-scripts-delete-76a7d44acfbe" data-who="reckon-build" data-when="2026-11-23T13:42:45.610Z">
-    <div class="r-comment-body"><p>Independent review of r-20261122T202603608268-bench-scripts-delete at 348ed92c..76a7d44ac scored 15/10/18/5/18/20 (goal_fidelity/evidence/scope_discipline/durability/fit/reuse), zero added failures, with two blocking findings: benchmarks/near_field_elliptic.py:1190 and scripts/prototypes/diiid_xpoint_profile_extent/measure.py:17 still name deleted paths at the head.</p></div>
 </div>
 </section>
 </main>

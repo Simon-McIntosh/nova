@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T19:17:13.999Z",
+  "dispatched_at": "2026-11-23T19:02:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+      "line": "227",
+      "severity": "non-blocking",
+      "text": "the plan's focused-set clause requires the same failure ids at the base and the head, but only the head arm (job 1339236) has a log; base equality rests on benchmarks/outboard_census_exact_total.py being unchanged rather than on a base-arm run."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+      "line": "270",
+      "severity": "non-blocking",
+      "text": "the absence check and the module-import sweep exist only in the run directory, so nothing committed fails if a later change imports one of the 24 deleted modules; the record names the debt and its discharge shape but leaves it unbuilt."
+    },
+    {
+      "file": "benchmarks/scripts_census.py",
+      "line": "124",
+      "severity": "non-blocking",
+      "text": "imports_of and imports_of_walk own AST import resolution, and the run's scan.py re-derives it rather than extending the owner; the owner cannot parse at either revision because of the Python-2 except at line 417, and that repair belongs to a benchmarks/ node."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read commit by commit against 348ed92c \u2014 104c8b673 removes exactly 24 files with 3029 deletions and zero insertions; the eight later commits touch only the evidence html and its JSON twin, clearing the placeholder token and the hard-coded driver paths an earlier review raised.",
+    "done_when": "every deleted module carries a measured zero-execution union entry in hot-path-map.json (I recomputed all 24); an independent AST scan over nova/, tests/, apps/, scripts/ and benchmarks/ and a grep over imas-ambix find no importer at 2d281377; the live-worktree read is recorded at unreached-module-delete.html:133; the per-package table at :78 re-sums to 3029; both controls fire at :139. The plan's focused-set clause (same failure ids at base and head) is only half measured: job 1339236 runs the set at head (:227) and no base-arm log exists; I established the base side independently, since the only file the failing test names, benchmarks/outboard_census_exact_total.py, is byte-identical between 348ed92c and 2d281377.",
+    "goal": "docs/plans/code-reuse-and-hot-path.html section 4 asks for modules under nova/ that section 1 measures unreached and no importer reaches to be deleted with the record at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html; commit 104c8b673 deletes exactly the 24 modules listed at unreached-module-delete.html:91, 3029 lines, and holds nova/utilities/ANSYS.py back by name at :119.",
+    "manifest": "read; status complete, nine commits from 104c8b673 to 2d281377, gate arm jobs 1339201 and 1339213, both focused logs, the absence-check and re-derivation logs; it states the deletion gate it ran and records the incomplete full-suite attempt under retry_failures and outside_scope rather than claiming a suite delta.",
+    "write_paths": "the manifest declares only the evidence fragment and docs/figures/code-reuse-and-hot-path/unreached-module-delete; the 24 nova/ deletions and the JSON twin lie outside that pair, and every changed path is implied by section 4 and listed in the manifest's changed_paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: docs/plans/code-reuse-and-hot-path.html section 4 asks for modules under nova/ that section 1 measures unreached and no importer reaches to be deleted with the record at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html; commit 104c8b673 deletes exactly the 24 modules listed at unreached-module-delete.html:91, 3029 lines, and holds nova/utilities/ANSYS.py back by name at :119.\nVERDICT done_when: every deleted module carries a measured zero-execution union entry in hot-path-map.json (I recomputed all 24); an independent AST scan over nova/, tests/, apps/, scripts/ and benchmarks/ and a grep over imas-ambix find no importer at 2d281377; the live-worktree read is recorded at unreached-module-delete.html:133; the per-package table at :78 re-sums to 3029; both controls fire at :139. The plan's focused-set clause (same failure ids at base and head) is only half measured: job 1339236 runs the set at head (:227) and no base-arm log exists; I established the base side independently, since the only file the failing test names, benchmarks/outboard_census_exact_total.py, is byte-identical between 348ed92c and 2d281377.\nVERDICT write_paths: the manifest declares only the evidence fragment and docs/figures/code-reuse-and-hot-path/unreached-module-delete; the 24 nova/ deletions and the JSON twin lie outside that pair, and every changed path is implied by section 4 and listed in the manifest's changed_paths.\nVERDICT manifest: read; status complete, nine commits from 104c8b673 to 2d281377, gate arm jobs 1339201 and 1339213, both focused logs, the absence-check and re-derivation logs; it states the deletion gate it ran and records the incomplete full-suite attempt under retry_failures and outside_scope rather than claiming a suite delta.\nVERDICT diff: read commit by commit against 348ed92c \u2014 104c8b673 removes exactly 24 files with 3029 deletions and zero insertions; the eight later commits touch only the evidence html and its JSON twin, clearing the placeholder token and the hard-coded driver paths an earlier review raised.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: unreached-module-delete.html:91 lists 24 modules and 104c8b673 deletes exactly those paths, 3029 deletions against zero insertions, with the one unreached-but-implied nova/utilities/ANSYS.py held back at :119.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-base.json and gate-head.json record both all_debug arms (473 to 449 modules, 23 to 14 import failures whose head set is a strict subset, collection 10943 to 10937 with returncode 0 both), but the focused-set paragraph at unreached-module-delete.html:227 has a head arm only, so base-vs-head equality is shown by the unchanged benchmarks file rather than by a base log.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: all 24 source deletions are the section-4 deliverable, and the only changed path outside the declared pair is the record's JSON twin, docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.json.\nSCORE durability: 7\nJUSTIFICATION durability: unreached-module-delete.html:270 states that absence-check.sh is evidence and not a guard, and no committed test fails if one of the 24 removed modules is imported again.\nSCORE fit: 18\nJUSTIFICATION fit: the diff adds no source file and carries no plan or sprint identifier, the evidence document follows the due fragment's sectioned style, and the template placeholder an earlier round left in the Gate paragraph is gone (drivers.log: \"ok the record carries no harness placeholder token\").\nSCORE reuse: 14\nJUSTIFICATION reuse: the record's embedded scan.py resolves relative, sys.path-inserted and dynamic-string imports that benchmarks/scripts_census.py:124 imports_of and :135 imports_of_walk own and do not receive, so the capability is re-derived beside its owner; the owner does not parse at either revision (SyntaxError at scripts_census.py:417), which the record reports and leaves to a benchmarks node.\nFINDING docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:227 non-blocking: the plan's focused-set clause requires the same failure ids at the base and the head, but only the head arm (job 1339236) has a log; base equality rests on benchmarks/outboard_census_exact_total.py being unchanged rather than on a base-arm run.\nFINDING docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:270 non-blocking: the absence check and the module-import sweep exist only in the run directory, so nothing committed fails if a later change imports one of the 24 deleted modules; the record names the debt and its discharge shape but leaves it unbuilt.\nFINDING benchmarks/scripts_census.py:124 non-blocking: imports_of and imports_of_walk own AST import resolution, and the run's scan.py re-derives it rather than extending the owner; the owner cannot parse at either revision because of the Python-2 except at line 417, and that repair belongs to a benchmarks/ node.\n",
+  "review_run_id": "r-20261123T190127982655-review-of-unreached-module-delete-2d281377afd2",
+  "reviewed_base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+  "reviewed_head_sha": "2d281377afd2debd64841346796bb83ab79c2a9b",
+  "reviewed_run_id": "r-20261122T202605453490-unreached-module-delete",
+  "scores": {
+    "durability": 7,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 14,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T19:24:49.681196+00:00",
+  "total": 90
+}

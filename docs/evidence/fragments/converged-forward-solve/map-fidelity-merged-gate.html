@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="map-fidelity-merged-gate">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-title" content="Merged-head gate for the map-fidelity rungs">
+<meta name="plan-summary" content="Ran the map-fidelity and exterior-support files at the
+map-fidelity reviewed head merged onto main, and at the main sha the merge was built on,
+in one rigel CPU allocation. No failure is added at the merge and every map-fidelity test
+passes; the one failure is the 5,000-cell exterior test timing out at 300 s at both
+revisions.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<meta name="plan-commits" content="f0712b57270b8c9c471c819f057368af7c57e3bf">
+<meta name="plan-recorded-at" content="2026-11-23">
+<meta name="plan-verdict" content="complete">
+<meta name="plan-environment" content="CPU x64 (JAX_PLATFORMS=cpu), one rigel allocation, 8 cores and 120 GB">
+<title>Merged-head gate for the map-fidelity rungs | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="map-fidelity-merged-gate">Merged-head gate for the map-fidelity rungs</h1>
+
+<p>This gate runs the map-fidelity rungs' tests at the reviewed head merged onto
+main, and at the main sha the merge was built on, so a failure the merge adds is
+visible against the base it lands on. It changes no product source or test.</p>
+
+<h2 id="merge-identity">Merge identity</h2>
+<table>
+<thead><tr><th>Item</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Reviewed head merged</td><td><code>1d87f7d91b3e307eeed1d243f09269cda8581b1f</code></td></tr>
+<tr><td>Main sha the merge was built on</td><td><code>a02cf0423db62d3c96e89617b3757fd870a566f8</code></td></tr>
+<tr><td>Merge commit</td><td><code>f0712b57270b8c9c471c819f057368af7c57e3bf</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="gate-run">Gate run</h2>
+<p>One rigel job, <code>1339334</code>, at <code>--cpus-per-task=8 --time=06:00:00
+--mem=120G</code>, with <code>PYTHONPATH=.</code> and <code>JAX_PLATFORMS=cpu</code>.
+Each arm ran from its own <code>git archive</code> tree under node-local <code>/tmp</code>,
+with a job-local compilation cache under the same trap-cleaned directory, and each
+arm is one pytest invocation over the files present at its revision.</p>
+
+<table>
+<thead><tr><th>Arm</th><th>Revision</th><th>Files run</th><th>Result</th></tr></thead>
+<tbody>
+<tr>
+<td>Merged</td>
+<td><code>f0712b57270b8c9c471c819f057368af7c57e3bf</code></td>
+<td><code>tests/test_gs_map_fidelity.py</code> and <code>tests/test_certificate_exterior_support.py</code></td>
+<td><code>1 failed, 11 passed in 1597.27s (0:26:37)</code></td>
+</tr>
+<tr>
+<td>Main</td>
+<td><code>a02cf0423db62d3c96e89617b3757fd870a566f8</code></td>
+<td><code>tests/test_certificate_exterior_support.py</code> (<code>test_gs_map_fidelity.py</code> absent at this revision)</td>
+<td><code>1 failed, 3 passed in 807.65s (0:13:27)</code></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="per-file">Per-file counts</h3>
+<table>
+<thead><tr><th>Revision</th><th>File</th><th>Passed</th><th>Failed</th></tr></thead>
+<tbody>
+<tr><td>Merged</td><td><code>tests/test_gs_map_fidelity.py</code></td><td>8</td><td>0</td></tr>
+<tr><td>Merged</td><td><code>tests/test_certificate_exterior_support.py</code></td><td>3</td><td>1</td></tr>
+<tr><td>Main</td><td><code>tests/test_gs_map_fidelity.py</code></td><td>absent</td><td>absent</td></tr>
+<tr><td>Main</td><td><code>tests/test_certificate_exterior_support.py</code></td><td>3</td><td>1</td></tr>
+</tbody>
+</table>
+
+<p>Every test of <code>tests/test_gs_map_fidelity.py</code> passes at the merge: the
+6 map-reproduction rows (2 analytic cases at the 2,000, 5,000 and 10,000-cell
+rungs) and the 2 derivative tests.</p>
+
+<h2 id="failures">Failure ids and what the merge adds</h2>
+<p>The single failure is the same id at both revisions:</p>
+<pre><code>tests/test_certificate_exterior_support.py::test_exterior_closure_falls_below_booking[5000]</code></pre>
+<p>It is a <code>pytest-timeout</code> timeout of more than 300 s while the 5,000-cell
+carrier is built on the CPU lane, not an assertion about the map:</p>
+<pre><code>Failed: Timeout (>300.0s) from pytest-timeout.</code></pre>
+<p>The 550 and 2,000-cell rows and the legacy positive control pass in both arms.
+Because the same id fails at main and at the merge, <strong>the merge adds no
+failure</strong>, and the gate passes on its two clauses: no added failure ids and
+every map-fidelity test green.</p>
+
+<h2 id="logs">Job and logs</h2>
+<table>
+<thead><tr><th>Item</th><th>Path</th></tr></thead>
+<tbody>
+<tr><td>Merged arm log</td><td><code>/home/ITER/mcintos/.cache/nova-converged-forward-solve/map-fidelity-merged-gate/merged.log</code></td></tr>
+<tr><td>Main arm log</td><td><code>/home/ITER/mcintos/.cache/nova-converged-forward-solve/map-fidelity-merged-gate/main.log</code></td></tr>
+<tr><td>Job log</td><td><code>/home/ITER/mcintos/.cache/nova-converged-forward-solve/map-fidelity-merged-gate/job-1339334.log</code></td></tr>
+</tbody>
+</table>
+</main>
+</body>
+</html>

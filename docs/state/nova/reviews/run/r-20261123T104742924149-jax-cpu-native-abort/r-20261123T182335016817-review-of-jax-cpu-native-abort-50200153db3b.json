@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-23T18:40:53.230Z",
+  "dispatched_at": "2026-11-23T18:24:39Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T104742924149-jax-cpu-native-abort/manifest.md",
+      "line": 6,
+      "severity": "blocking",
+      "text": "the run records status complete while done-when clause 2's -n 8 arm has no result, and its blocker sits under an independent 'blocker:' key rather than the contract's 'blockers:', so a reader of the contract field sees no blocker at all."
+    },
+    {
+      "file": "tests/test_jax_config.py",
+      "line": 116,
+      "severity": "non-blocking",
+      "text": "the assertion draws before and after from the same constant stub, so it cannot fail when the release drops nothing -- the test name claims a drop the assertion asserts against; stub the count to fall 3 to 0 so the assertion is independent."
+    },
+    {
+      "file": "tests/test_equilibrium_magnetics_fit_known_states.py",
+      "line": 156,
+      "severity": "non-blocking",
+      "text": "the release is keyed on case name, so a second program compiled from an already-built case (test_displaced_flux_loop_is_identified at line 223) is not preceded by a release -- the case that failed with 'Failed to materialize symbols' in the recorded four-case arm."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html",
+      "line": 19,
+      "severity": "non-blocking",
+      "text": "the fragment's own table peaks at 40,883 mappings against the 65,530 limit it names as the cause, and the no-release pair run was SIGKILLed for memory, so the mapping-limit mechanism is inferred from another node's reading rather than shown by this node's evidence."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from e28db604e to 50200153d (269ee501a fix, then five evidence commits): the code change is a private helper extracted from nova/jax/config.py:232 plus a public wrapper, the fixture wiring at tests/test_equilibrium_magnetics_fit_known_states.py:156, one unit test, an evidence fragment and one SVG.",
+    "done_when": "clause 1 is measured (base-arm.log, Fatal Python error, EXIT=134) and clause 2's single-process arm is measured (after-unbounded.log, 1 failed, 3 passed in 7473.98s, no abort), but clause 2's -n 8 arm has no result (after-n8-arm.log: 15 lines, no summary, no EXIT), and clause 3 is measured (fast-base-arm.log and fast-head-arm.log, 46 passed each).",
+    "goal": "the node goal is to name the native-abort cause and fix or contain it; nova/jax/config.py:255 adds release_compilation_caches and tests/test_equilibrium_magnetics_fit_known_states.py:156-158 calls it before building a new machine.",
+    "manifest": "read; it records status complete, the fix, the fast-selection suite pair and its own paragraph that the -n 8 arm could not be measured, with the blocker under a 'blocker:' key rather than the contract's 'blockers:'.",
+    "write_paths": "the five declared paths (nova/jax/config.py, tests/test_equilibrium_magnetics_fit_known_states.py, tests/test_jax_config.py, the evidence fragment and the figures directory) are exactly the five paths the diff touches."
+  },
+  "justifications": {
+    "durability": "tests/test_jax_config.py:116 takes both before and after from the same constant stub, and no test fails if the fixture at tests/test_equilibrium_magnetics_fit_known_states.py:158 stops releasing.",
+    "evidence": "after-n8-arm.log carries no pytest summary line and no EXIT line, while the reviewed manifest's status is complete.",
+    "fit": "the new function follows the existing nova/jax/config.py:232 idiom and introduces no plan, sprint or ticket label.",
+    "goal_fidelity": "nova/jax/config.py:255 adds the release the goal allows, but the containment is invoked only from the test module and done-when clause 2's -n 8 arm is unmeasured.",
+    "reuse": "nova/jax/config.py:232's release body is extracted into _release_compilation_caches and both callers share it, extending the owner rather than duplicating it.",
+    "scope_discipline": "every path in the diff (five files) is inside the declared write paths."
+  },
+  "node": "jax-cpu-native-abort",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to name the cause of the CPU native abort and fix it in nova or contain it; nova/jax/config.py:255 adds release_compilation_caches and tests/test_equilibrium_magnetics_fit_known_states.py:156-158 calls it before building a new machine.\nVERDICT done_when: clause 1 is measured (base-arm.log, Fatal Python error, EXIT=134) and clause 2's single-process arm is measured (after-unbounded.log, 1 failed, 3 passed in 7473.98s, no abort), but clause 2's -n 8 arm has no result (after-n8-arm.log has no summary and no EXIT), and clause 3 is measured (fast-base-arm.log and fast-head-arm.log, 46 passed each).\nVERDICT write_paths: the five declared paths are nova/jax/config.py, tests/test_equilibrium_magnetics_fit_known_states.py, tests/test_jax_config.py, docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html and docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort; the diff touches exactly those five.\nVERDICT manifest: read; it records status complete, the fix, the fast-selection suite pair, and its own paragraph that the -n 8 arm could not be measured, and it carries its blocker under 'blocker:' rather than the contract's 'blockers:'.\nVERDICT diff: read commit by commit from e28db604e to 50200153d: the code change is a private helper extracted from nova/jax/config.py:232 plus a public wrapper, the fixture wiring, one unit test, an evidence fragment and one SVG.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: nova/jax/config.py:255 adds the release the goal allows, but the containment is invoked only from the fixture, and done-when clause 2's -n 8 arm is unmeasured.\nSCORE evidence: 11\nJUSTIFICATION evidence: after-n8-arm.log carries no pytest summary line and no EXIT line, while the reviewed manifest's status is complete.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (five files) is inside the declared write paths.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_jax_config.py:116 takes both before and after from the same constant stub, and no test fails if the fixture at tests/test_equilibrium_magnetics_fit_known_states.py:158 stops releasing.\nSCORE fit: 18\nJUSTIFICATION fit: the new function follows the existing nova/jax/config.py:232 idiom and introduces no plan, sprint or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/jax/config.py:232's release body is extracted into _release_compilation_caches and both callers share it, extending the owner rather than duplicating it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T104742924149-jax-cpu-native-abort/manifest.md:6 blocking: the run records status complete while done-when clause 2's -n 8 arm has no result, and its blocker sits under an independent 'blocker:' key rather than the contract's 'blockers:', so a reader of the contract field sees no blocker at all.\nFINDING tests/test_jax_config.py:116 non-blocking: the assertion draws before and after from the same constant stub, so it cannot fail when the release drops nothing -- the test name claims a drop the assertion asserts against; stub the count to fall 3 to 0 so the assertion is independent.\nFINDING tests/test_equilibrium_magnetics_fit_known_states.py:156 non-blocking: the release is keyed on case name, so a second program compiled from an already-built case (test_displaced_flux_loop_is_identified at line 223) is not preceded by a release -- the case that failed with 'Failed to materialize symbols' in the recorded four-case arm.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html:19 non-blocking: the fragment's own table peaks at 40,883 mappings against the 65,530 limit it names as the cause, and the no-release pair run was SIGKILLed for memory, so the mapping-limit mechanism is inferred from another node's reading rather than shown by this node's evidence.",
+  "review_run_id": "r-20261123T182335016817-review-of-jax-cpu-native-abort-50200153db3b",
+  "reviewed_base_sha": "e28db604eee205382f5c7874129eebfe4339cd92",
+  "reviewed_head_sha": "50200153db3b92acf16d07a83eb7fbf00c5d3533",
+  "reviewed_run_id": "r-20261123T104742924149-jax-cpu-native-abort",
+  "scores": {
+    "durability": 12,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T18:49:57.047807+00:00",
+  "total": 94
+}

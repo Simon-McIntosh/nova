@@ -17,13 +17,22 @@ temporary in-memory copy, which is how the check can be shown to fail: a
 module no route executes is reported by name.
 
 ``--root`` additionally asserts that every module the section names exists in
-the tree.
-"""
+the tree, and -- given a git checkout -- that no Python file under ``nova/`` or
+``tests/`` changed between the map's recorded revision and the checked tree. A
+line map describes the code it was measured on: a change that makes a route
+execute another module leaves the map's sets untouched, so a comparison against
+a stale map passes while the documented route has drifted. When a code change
+is found the check names the revision and the changed files and exits nonzero,
+so the remedy is a fresh ``job.sh`` re-measurement, not a doc change."""
 
 import argparse
 import json
 import re
+import subprocess
 from pathlib import Path
+
+CODE_ROOTS = ("nova", "tests")
+CODE_SUFFIX = ".py"
 
 MARKERS = ("shared", "forward", "inverse")
 MODULE = re.compile(r"nova/[A-Za-z0-9_./]+\.py")
@@ -54,6 +63,24 @@ def measured(map_path):
             if cell and cell.get("executed"):
                 routes[route].add(row["module"])
     return payload, routes
+
+
+def git(root, *args):
+    return subprocess.run(
+        ["git", "-C", str(root), *args], capture_output=True, text=True
+    )
+
+
+def code_changed_since(root, revision):
+    """Return (map_revision_known, changed_python_paths) for the tree at root."""
+    resolved = git(root, "rev-parse", "--verify", f"{revision}^{{commit}}")
+    if resolved.returncode != 0:
+        return False, []
+    diff = git(root, "diff", "--name-only", revision, "HEAD", "--", *CODE_ROOTS)
+    if diff.returncode != 0:
+        return False, []
+    changed = [line for line in diff.stdout.splitlines() if line.endswith(CODE_SUFFIX)]
+    return True, changed
 
 
 def main():
@@ -92,10 +119,26 @@ def main():
     shared_and_one = declared["shared"] & (declared["forward"] | declared["inverse"])
     for module in sorted(shared_and_one):
         differences.append(f"filed both shared and single-route: {module}")
+    map_current = None
     if args.root:
         for module in sorted(named):
             if not (args.root / module).exists():
                 differences.append(f"named, absent from the tree: {module}")
+        revision = payload.get("revision")
+        if not revision:
+            differences.append("map records no measurement revision")
+        else:
+            known, changed = code_changed_since(args.root, revision)
+            map_current = known and not changed
+            if not known:
+                differences.append(
+                    f"map revision {revision} is not in this checkout, so the map "
+                    "cannot be shown current for this tree"
+                )
+            for module in changed:
+                differences.append(
+                    f"code changed since the measured revision {revision}: {module}"
+                )
 
     print("ROUTES " + json.dumps(dict(
         revision=payload.get("revision"),
@@ -105,6 +148,7 @@ def main():
         forward_only=len(declared["forward"]),
         inverse_only=len(declared["inverse"]),
         named=len(named),
+        map_current=map_current,
         differences=len(differences),
     )))
     for line in differences:

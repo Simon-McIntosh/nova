@@ -139,8 +139,13 @@ siblings, `nova/geometry/polygeom.py`), the Biot-Savart entry points it reaches 
 `scripts/prototypes/hot_path_map/section_route.py` reads the three blocks below
 out of their markers and compares each route's set with the modules the map
 measured as executed, naming every difference in both directions — a module
-named but not executed on its route, a module executed but not named, and a
-module named but absent from the tree:
+named but not executed on its route, a module executed but not named, a module
+named but absent from the tree, and a Python file under `nova/` or `tests/`
+changed since the map's recorded revision. The last of these is why the check
+cannot rest on the lists alone: a change that makes a route execute another
+module leaves the map's measured sets untouched, so a stale map would compare
+clean while this section had drifted. When code has moved since the measurement
+the remedy is a fresh `job.sh` run, not an edit here.
 
 ```
 python scripts/prototypes/hot_path_map/section_route.py \

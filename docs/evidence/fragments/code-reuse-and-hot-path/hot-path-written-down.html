@@ -60,6 +60,24 @@ measured as executed, in both directions: a module named but not executed on
 its route, a module executed but not named, and a module named but absent from
 the tree are each a difference the check names before exiting nonzero.</p>
 
+<p>The check also compares the map's recorded revision with the tree it is run
+in. A line map describes the code it was measured on, so a comparison against a
+map measured before a change can pass while the documented route has drifted:
+that change may make a route execute another module without touching the map's
+set of names. The check therefore asks git for the Python files under
+<code>nova/</code> and <code>tests/</code> that changed between the map's
+revision and the checked tree, prints <code>map_current: true|false</code>, and
+names each changed file as a difference. A map whose revision cannot be resolved
+in the checkout is a difference too, so the guard cannot switch itself off by
+failing to find its input.</p>
+
+<p>The control for that guard is a copy of the same map with its revision field
+set to <code>09ef90e40148bf724669e8fc2c7c3a823134f5b8</code>, the earlier
+measurement. Against that map the check reports <code>map_current false</code>,
+names the 17 changed Python files, and exits 1; the check as it stood before this
+comparison was added reports <code>differences 0</code> and exits 0 on the same
+input, which is the drift the guard exists to catch.</p>
+
 <p>At the section's head the check reports <code>forward 182, inverse 210, shared
 182, forward_only 0, inverse_only 28, named 210, differences 0</code> and exits
 0, so done-when (1) holds at this revision and done-when (2) holds with it: the

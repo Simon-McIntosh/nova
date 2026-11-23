@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import dataclass, fields, replace
 from types import SimpleNamespace
 
@@ -17,14 +18,7 @@ from nova.equilibrium.measurement import Magnetics, SliceMeasurement, whitened_s
 from nova.equilibrium.solve_request import ForwardSolveReceipt, ForwardSolveRequest
 from nova.equilibrium.source import DomainProfile, ForwardSource, PolynomialFluxFunction
 from nova.jax.config import configure_dtypes
-# Re-exported: the comparison module and these tests' fixtures resolve the
-# receipt and diagnostic-source helpers through this module's namespace.
-from tests.magnetics_fit_harness import (
-    _persist_forward as _persist_forward,
-    _persist_forward_failure,
-    _PlasmaDiagnosticSource as _PlasmaDiagnosticSource,
-    _physical_sensor_rows as _physical_sensor_rows,
-)
+from tests.magnetics_fit_harness import _persist_forward_failure
 
 
 def test_refused_residuals_preserve_strict_json_receipts(tmp_path):
@@ -111,13 +105,17 @@ def test_unqualified_forward_receipt_preserves_convergence(tmp_path, monkeypatch
         constraint_context={},
     )
     monkeypatch.setenv("NOVA_EFIT_COMPARISON_OUTPUT", str(tmp_path))
+    persisted = []
+    # The comparison module imports this helper from the harness at call time,
+    # so the patch lands on the harness namespace and the stub is exercised.
     monkeypatch.setattr(
-        __import__(__name__, fromlist=["_persist_forward"]),
+        sys.modules["tests.magnetics_fit_harness"],
         "_persist_forward",
-        lambda *args: None,
+        lambda *args: persisted.append(args),
     )
     monkeypatch.setattr(comparison, "_panel", lambda *args, **kwargs: None)
     assert comparison._attempt(data, None, "seed") is None
+    assert persisted, "the comparison module stopped reaching the patched helper"
     comparison._record_forward_refusal(data)
     result = json.loads((tmp_path / "case-result.json").read_text())
     assert result["qualified"] is False
@@ -486,7 +484,6 @@ def completed_comparison(linear_fit, monkeypatch, tmp_path):
     from tests import test_magnetics_fit_efit_comparison as comparison
     from nova.frame import coilset
     from nova.imas import mast_efit_referee
-    import sys
 
     request = linear_fit[0].request
     measurement = SliceMeasurement(
@@ -515,10 +512,9 @@ def completed_comparison(linear_fit, monkeypatch, tmp_path):
         poloidal_flux_loop=None,
     )
     harness = sys.modules["tests.magnetics_fit_harness"]
-    for target in (sys.modules[__name__], harness):
-        monkeypatch.setattr(target, "_PlasmaDiagnosticSource", Source)
-        monkeypatch.setattr(target, "_physical_sensor_rows", lambda *args: np.ones(1))
-        monkeypatch.setattr(target, "_persist_forward", lambda *args: None)
+    monkeypatch.setattr(harness, "_PlasmaDiagnosticSource", Source)
+    monkeypatch.setattr(harness, "_physical_sensor_rows", lambda *args: np.ones(1))
+    monkeypatch.setattr(harness, "_persist_forward", lambda *args: None)
     monkeypatch.setattr(coilset, "CoilSet", lambda **kwargs: conductor)
     monkeypatch.setattr(comparison, "_as_equilibrium", lambda *args: (None, 0.0))
     monkeypatch.setattr(comparison, "_reference_centroid", lambda data: 0.0)
@@ -989,7 +985,3 @@ def test_fitted_conductor_currents_refuse_missing_uncertainties(linear_fit):
             replace(measurement, conductor_current=np.zeros(1)),
             plasma_current_scale=1.0,
         )
-
-
-
-

@@ -3226,6 +3226,143 @@ def packed_analytic_greens(
     )
 
 
+def _field_line_integral(
+    vertex,
+    coefficients,
+    coordinate,
+    squared,
+    linear,
+    constant,
+    gamma,
+    split,
+    against_arsinh,
+):
+    """Integrate a cubic source polynomial over the filament distance cubed.
+
+    Write ``D² = A t² + 2 C t + E`` and ``Gamma = A t + C``.
+    The elementary primitives are ``Gamma/(B² D)``, ``-1/(A D)``
+    and ``asinh(Gamma/B)/sqrt(A)``, where ``B² = A E - C²``.
+    Eliminating the quadratic and cubic powers leaves one existing pole
+    contraction, one plain contraction and one weighted arsinh contraction.
+    """
+    zero = range_function([], 0.0 * vertex.one, 0.0 * vertex.one)
+    p = list(coefficients) + [zero] * (4 - len(coefficients))
+    quadratic = total(p[2], scaled(product(linear, p[3]), -3.0 / squared))
+    first = total(
+        p[1],
+        scaled(product(constant, p[3]), -2.0 / squared),
+        scaled(product(linear, quadratic), -2.0 / squared),
+    )
+    pole = total(
+        p[0],
+        scaled(product(constant, quadratic), -1.0 / squared),
+        scaled(product(linear, first), -1.0 / squared),
+    )
+    plain = scaled(
+        total(product(p[3], product(coordinate, coordinate)), scaled(first, -1.0)),
+        1.0 / squared,
+    )
+    return (4.0 / vertex.span) * (
+        vertex.plain(plain) + vertex.across(product(pole, gamma), split)
+    ) + 4.0 * against_arsinh(scaled(quadratic, squared**-1.5))
+
+
+def _field_line_moments(vertex, edge, centre_r, height, *, horizontal=False):
+    """Return boundary primitives of both fields and their linear source moments."""
+    one = vertex.one
+
+    def constant(value):
+        return range_function([], value * one, value * one)
+
+    zero = constant(0.0)
+    cosine = vertex.cosine
+    if horizontal:
+        slope, squared = 1.0, 1.0
+        intercept = scaled(cosine, vertex.radius)
+        coordinate = vertex.edge_radius
+        linear = zero
+        denominator = vertex.ring_squared
+        gamma = coordinate
+        split = vertex.ring
+        against_arsinh = vertex.against_first_arsinh
+        radial = [
+            scaled(product(cosine, intercept), -vertex.level),
+            scaled(cosine, -vertex.level),
+        ]
+        vertical = [zero, intercept, constant(1.0)]
+        weights = (
+            [constant(1.0)],
+            [total(intercept, constant(-centre_r)), constant(1.0)],
+            [constant(vertex.level + height)],
+        )
+    else:
+        slope, squared = edge.slope, edge.squared_slope
+        intercept = constant(edge.plane_radius_value)
+        coordinate = constant(vertex.level)
+        linear = scaled(edge.plane_radius, slope)
+        denominator = total(
+            product(edge.plane_radius, edge.plane_radius),
+            range_function([4.0 * vertex.radius**2], 0.0 * one, 0.0 * one),
+        )
+        gamma = total(scaled(coordinate, squared), linear)
+        split = vertex.split(edge.plane_squared)
+        residual = edge._second_residual(vertex)
+        derivative = product(gamma, edge.edge_slope)
+
+        def against_arsinh(weight):
+            series = across_the_range(weight)
+            core = sine_squared_times(_oscillatory_primitive(series))
+            reduced = (
+                series[0] * residual
+                + (2.0 * slope * vertex.radius / (edge.axial_slope * vertex.span))
+                * vertex.plain(core)
+                + (0.5 / (edge.axial_slope * vertex.span))
+                * edge._across(vertex, product(core, derivative), split)
+            )
+            return vertex.xp.where(
+                _edge_residual_band(edge),
+                edge._second_residual(vertex, weight=weight),
+                reduced,
+            )
+
+        radial = [
+            zero,
+            scaled(product(cosine, intercept), -1.0),
+            scaled(cosine, -slope),
+        ]
+        vertical = [
+            product(intercept, edge.plane_radius),
+            scaled(total(intercept, edge.plane_radius), slope),
+            constant(slope * slope),
+        ]
+        weights = (
+            [constant(1.0)],
+            [total(intercept, constant(-centre_r)), constant(slope)],
+            [constant(height), constant(1.0)],
+        )
+
+    def weighted(coefficients, weight):
+        result = [zero for _ in range(len(coefficients) + len(weight) - 1)]
+        for i, coefficient in enumerate(coefficients):
+            for j, factor in enumerate(weight):
+                result[i + j] = total(result[i + j], product(coefficient, factor))
+        return _field_line_integral(
+            vertex,
+            result,
+            coordinate,
+            squared,
+            linear,
+            denominator,
+            gamma,
+            split,
+            against_arsinh,
+        )
+
+    return tuple(
+        weighted(row, weight) for row in (radial, vertical) for weight in weights
+    )
+
+
 def _packed_analytic_moments_primal(
     xp,
     target_r,
@@ -3241,6 +3378,7 @@ def _packed_analytic_moments_primal(
     nodes: int = _NODES,
     negative_field_scale=None,
     stable_poles=False,
+    field_derivatives=False,
 ):
     """Return all nine exact section rows from one static packed reduction.
 
@@ -3338,6 +3476,25 @@ def _packed_analytic_moments_primal(
     corner_line = shaped(
         vertex.horizontal_flux_line_moments(centre_r, lane_height - centre_z)
     )
+    if field_derivatives:
+        field_line = shaped(
+            _field_line_moments(
+                vertex,
+                part,
+                centre_r,
+                lane_height - centre_z,
+            )
+        )
+        horizontal_field_line = shaped(
+            _field_line_moments(
+                vertex,
+                part,
+                centre_r,
+                lane_height - centre_z,
+                horizontal=True,
+            )
+        )
+        height_contour = [xp.zeros_like(radius) for _ in range(6)]
     slope = part.slope.reshape(endpoint_shape)[0]
     plane_radius = part.plane_radius_value.reshape(endpoint_shape)[0]
     corner_level = vertex.level.reshape(endpoint_shape)[0]
@@ -3349,6 +3506,18 @@ def _packed_analytic_moments_primal(
     per_edge_flux = []
     for index in range(sides):
         edge_weight = weight[index]
+        if field_derivatives:
+            for component in range(6):
+                height_contour[component] = (
+                    height_contour[component]
+                    + slope[index]
+                    * edge_weight
+                    * (
+                        field_line[component][1, index]
+                        - field_line[component][0, index]
+                    )
+                    + chain[index] * horizontal_field_line[component][0, index]
+                )
         for component in range(3):
             field_contour[component] = (
                 field_contour[component]
@@ -3435,7 +3604,7 @@ def _packed_analytic_moments_primal(
     conditioned_flux = _conditioned_flux_moments(
         xp, signed, height, edge, weight, norm, section_centre, expansion_centre
     )
-    return (
+    rows = (
         *conditioned_flux,
         uniform_radial,
         xp.where(axis, 0.0, radial_central - displacement_r * uniform_radial),
@@ -3452,6 +3621,24 @@ def _packed_analytic_moments_primal(
             vertical_vertical_central - displacement_z * uniform_vertical,
         ),
     )
+    if not field_derivatives:
+        return rows
+    # Translation in height transfers the target derivative to the boundary.
+    # A vertical source weight also contributes its unweighted area field.
+    scale = -norm / (4.0 * np.pi)
+    height_radial = [scale * sign * value for value in height_contour[:3]]
+    height_vertical = [scale * value for value in height_contour[3:]]
+    height_radial[2] = height_radial[2] + uniform_radial
+    height_vertical[2] = height_vertical[2] + uniform_vertical
+    for values in (height_radial, height_vertical):
+        values[1] = values[1] - displacement_r * values[0]
+        values[2] = values[2] - displacement_z * values[0]
+    # Cylindrical divergence fixes the other independent radial-field derivative.
+    radial_radial = [
+        -sign * radial / evaluation_radius - vertical
+        for radial, vertical in zip(rows[3:6], height_vertical, strict=True)
+    ]
+    return (*rows, *radial_radial, *height_radial)
 
 
 @partial(jax.custom_jvp, nondiff_argnums=(9,))
@@ -3599,9 +3786,16 @@ def packed_analytic_moments(
     reflection_partner,
     *,
     nodes: int = _NODES,
+    field_derivatives: bool = False,
 ):
-    """Return packed section moments with analytic corner and edge-line tangents."""
-    if xp is jnp:
+    """Return packed section moments with analytic corner and edge-line tangents.
+
+    With ``field_derivatives=True``, append ``d_r Br`` and ``d_z Br`` triplets
+    in the same uniform, radial and vertical source-moment order as the fields.
+    They are ordinary boundary-reduction values, with no differentiation of
+    the packed kernel. The default nine rows retain their arithmetic.
+    """
+    if xp is jnp and not field_derivatives:
         return _packed_moments_with_stable_height(
             target_r,
             target_z,
@@ -3626,6 +3820,7 @@ def packed_analytic_moments(
         reflection_axis,
         reflection_partner,
         nodes=nodes,
+        field_derivatives=field_derivatives,
     )
 
 

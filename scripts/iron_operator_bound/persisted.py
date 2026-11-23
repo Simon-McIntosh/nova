@@ -158,9 +158,9 @@ def cellwise(blocks, vector):
     components, so the product is taken on the cell-major view and returned to
     the state's component-major order.
     """
-    rows = jnp.asarray(blocks)
-    cells = vector.reshape(2, -1, 3).transpose(1, 0, 2).reshape(-1, 6)
-    acted = jnp.einsum("cij,cj->ci", rows, cells)
+    rows = np.asarray(blocks)
+    cells = np.asarray(vector).reshape(2, -1, 3).transpose(1, 0, 2).reshape(-1, 6)
+    acted = np.einsum("cij,cj->ci", rows, cells)
     return acted.reshape(-1, 2, 3).transpose(1, 0, 2).reshape(-1)
 
 
@@ -195,55 +195,42 @@ def load(label, inputs):
 
 
 def stage(source):
-    """Stage the interaction and return the actions every mode reads."""
+    """Stage the interaction and return the actions every mode reads.
+
+    The actions are plain array products.  A jitted closure over the matrix
+    makes JAX capture it as a constant of the compiled executable, and lowering
+    reported 9.9 GB captured for the graded operator and 12.7 GB for the
+    uniform forty-millimetre one, which the allocator cannot hold beside the
+    matrix itself.  A single matrix-vector product gains nothing from a
+    compilation, so this is BLAS and the matrix stays an ordinary array.
+    """
     began = time.monotonic()
-    matrix = np.asarray(
-        source["matrix"] if "matrix" in source else source["interaction"].matrix
+    matrix = np.array(
+        source["matrix"] if "matrix" in source else source["interaction"].matrix,
+        dtype=np.float64,
     )
-    device = jax.device_put(np.asarray(matrix, dtype=np.float64))
-    del matrix
-    metric = jax.device_put(source["metric"])
-    root = jax.device_put(source["root"])
-    inverse = jax.device_put(source["inverse"])
+    metric = np.asarray(source["metric"], dtype=np.float64)
+    root = np.asarray(source["root"], dtype=np.float64)
+    inverse = np.asarray(source["inverse"], dtype=np.float64)
 
-    @jax.jit
-    def action(vector):
-        return device @ vector
-
-    @jax.jit
-    def metric_action(vector):
-        return cellwise(metric, vector)
-
-    @jax.jit
-    def deflate(vector):
-        return cellwise(inverse, vector)
-
-    @jax.jit
     def symmetric_action(vector):
-        left = cellwise(root, device @ cellwise(inverse, vector))
-        right = cellwise(inverse, device.T @ cellwise(root, vector))
+        left = cellwise(root, matrix @ cellwise(inverse, vector))
+        right = cellwise(inverse, matrix.T @ cellwise(root, vector))
         return (left + right) / 2
 
-    @jax.jit
     def state_action(vector):
-        left = cellwise(metric, device @ vector)
-        right = device.T @ cellwise(metric, vector)
+        left = cellwise(metric, matrix @ vector)
+        right = matrix.T @ cellwise(metric, vector)
         return (left + right) / 2
 
-    source["state_action"] = lambda vector: np.asarray(
-        state_action(jnp.asarray(vector))
-    )
-    source["device"] = device
-    source["root_device"] = root
-    source["inverse_device"] = inverse
-    source["action"] = lambda vector: np.asarray(action(jnp.asarray(vector)))
-    source["metric_action"] = lambda vector: np.asarray(
-        metric_action(jnp.asarray(vector))
-    )
-    source["deflate"] = lambda vector: np.asarray(deflate(jnp.asarray(vector)))
-    source["symmetric_action"] = lambda vector: np.asarray(
-        symmetric_action(jnp.asarray(vector))
-    )
+    source["state_action"] = state_action
+    source["operator"] = matrix
+    source["root_blocks"] = root
+    source["inverse_blocks"] = inverse
+    source["action"] = lambda vector: matrix @ vector
+    source["metric_action"] = lambda vector: cellwise(metric, vector)
+    source["deflate"] = lambda vector: cellwise(inverse, vector)
+    source["symmetric_action"] = symmetric_action
     source["row"] = dict(
         label=source["label"],
         cells=source["count"],
@@ -430,36 +417,27 @@ def newton_actions(source, blocks):
     here takes.  The skew part is returned too, because its size says how far
     the route's object sits from the matrix its own docstring states.
     """
-    device = source["device"]
-    root = jax.device_put(blocks["root"])
-    transform = jax.device_put(blocks["transform"])
-    transpose = jax.device_put(blocks["transform"].transpose(0, 2, 1))
+    operator = source["operator"]
+    root = np.asarray(blocks["root"])
+    transform = np.asarray(blocks["transform"])
+    transpose = np.moveaxis(transform, 1, 2)
 
-    @jax.jit
     def left(vector):
-        return cellwise(root, device @ cellwise(transform, vector))
+        return cellwise(root, operator @ cellwise(transform, vector))
 
-    @jax.jit
     def right(vector):
-        return cellwise(transpose, device.T @ cellwise(root, vector))
+        return cellwise(transpose, operator.T @ cellwise(root, vector))
 
-    @jax.jit
     def action(vector):
         return vector - left(vector)
 
-    @jax.jit
     def symmetric(vector):
         return vector - (left(vector) + right(vector)) / 2
 
-    @jax.jit
     def skew(vector):
         return (right(vector) - left(vector)) / 2
 
-    return (
-        lambda vector: np.asarray(action(jnp.asarray(vector))),
-        lambda vector: np.asarray(symmetric(jnp.asarray(vector))),
-        lambda vector: np.asarray(skew(jnp.asarray(vector))),
-    )
+    return action, symmetric, skew
 
 
 def block_matrix(blocks, count):
@@ -496,7 +474,7 @@ def newton_identity(count=3, seed=7):
     root, _ = signed_root(differential)
     transform = np.linalg.solve(metric, root)
     interaction = rng.normal(size=(dimension, dimension))
-    source = dict(device=jax.device_put(interaction), dimension=dimension)
+    source = dict(operator=interaction, dimension=dimension)
     blocks = dict(root=root, transform=transform)
     action, symmetric, skew = newton_actions(source, blocks)
     dense = np.eye(dimension) - (
@@ -636,8 +614,8 @@ def check(size=0.04, *, seed=4):
     peak = bound(source, ncvec=min(24, 2 * count), seed=seed)
     row = dict(
         cell_library=iron.__file__,
-        device=str(jax.devices()[0]),
-        x64=bool(jax.config.jax_enable_x64),
+        backend="numpy-blas",
+        x64=True,
         cells=count,
         unknowns=source["dimension"],
         owner_maximum=owner["maximum"],
@@ -655,8 +633,8 @@ def check(size=0.04, *, seed=4):
 
 
 def apply_metric(metric, vector):
-    """Apply per-cell metric blocks to a component-major vector, in numpy."""
-    return np.asarray(cellwise(metric, jnp.asarray(vector)))
+    """Apply per-cell metric blocks to a component-major vector."""
+    return cellwise(metric, vector)
 
 
 def skew_norm(skew, dimension, *, tolerance=1e-8, ncvec=48, seed=424242):

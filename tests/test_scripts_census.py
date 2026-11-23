@@ -10,16 +10,26 @@ and a forced delete is refused for its intended reason alone.
 
 from __future__ import annotations
 
+import json
+import subprocess
+
 import pytest
 
 from benchmarks import scripts_census as census
 
 pytestmark = pytest.mark.slow
 
+RECORD = census.RECORD_SELF + ".json"
+
+
+def owning_sprints():
+    """The sprint window this record declares, which the census takes as input."""
+    return tuple(json.loads((census.ROOT / RECORD).read_text())["owning_sprints"])
+
 
 @pytest.fixture(scope="module")
 def payload():
-    return census.census()
+    return census.census(owning=owning_sprints())
 
 
 def test_population_holds_the_positive_control():
@@ -33,6 +43,21 @@ def test_counts_reconcile_with_the_measured_population(payload):
     assert summed == counts["total"]
     assert counts["total"] == len(census.population(census.tracked()))
     assert payload["reconciles"] is True
+
+
+def test_population_is_the_tracked_python_files_of_both_trees():
+    done = subprocess.run(
+        ["git", "-C", str(census.ROOT), "ls-files"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    tracked = [
+        path
+        for path in done.stdout.splitlines()
+        if path.endswith(".py") and path.split("/", 1)[0] in census.TREES
+    ]
+    assert census.population(census.tracked()) == sorted(tracked)
 
 
 def test_every_delete_citation_resolves(payload):
@@ -107,14 +132,14 @@ def test_the_census_keeps_no_driver_through_its_own_machinery(payload):
 
 def test_forced_delete_of_a_live_test_driver_is_refused():
     with pytest.raises(census.Refused) as raised:
-        census.census(census.POSITIVE)
+        census.census(census.POSITIVE, owning_sprints())
     assert census.POSITIVE in str(raised.value)
 
 
 def test_forced_delete_of_a_driver_a_kept_file_imports_is_refused():
     forced = "scripts/prototypes/stored_state_refusals/panels.py"
     with pytest.raises(census.Refused) as raised:
-        census.census(forced)
+        census.census(forced, owning_sprints())
     message = str(raised.value)
     assert forced in message
     assert "imported_by_kept:" in message
@@ -125,7 +150,7 @@ def test_forced_delete_of_a_driver_a_kept_file_imports_is_refused():
 def test_forced_delete_of_a_plan_owned_directory_file_is_refused():
     forced = "scripts/iron_linear_magnetisation/gate.py"
     with pytest.raises(census.Refused) as raised:
-        census.census(forced)
+        census.census(forced, owning_sprints())
     message = str(raised.value)
     assert forced in message
     assert "plan_owned:" in message

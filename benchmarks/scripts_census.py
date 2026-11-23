@@ -9,8 +9,9 @@ population a failure rather than a clean result.
 A file receives exactly one verdict:
 
 keep   -- imported by kept code or tests, run by a live gate, lane or test,
-          owned by a plan in a focused sprint (S28-S32, live or held), or the
-          instrument this census is applied from;
+          owned by a plan in one of the owning sprints given on the command
+          line (``--owning-sprint``, live or held), or the instrument this
+          census is applied from;
 delete -- reached by none of those. Each delete names every evidence record that
           cites it and the revision that record ran at, and the revision is
           proven to resolve. A cited driver whose record names no resolvable
@@ -60,9 +61,9 @@ CONTAINERS = ("benchmarks", "scripts", "scripts/prototypes")
 # runner, an importer or a citation would let the census verify itself.
 EXCLUDED = (SELF, "tests/test_scripts_census.py")
 
-# A file any focused-sprint plan names in its own text is live or held work and
-# is kept: held work is parked, never discarded.
-OWNING = ("S28", "S29", "S30", "S31", "S32")
+# The sprints whose plans own code are an input, not a property of this driver:
+# a file any plan in one of them names in its own text is live or held work and
+# is kept, because held work is parked, never discarded.
 
 PATH_RE = re.compile(r"(?:benchmarks|scripts)/[A-Za-z0-9_./-]+?[.]py")
 # An import statement, including one inside a probe string a test writes out and
@@ -368,14 +369,15 @@ def references_in(text, popset, lookup):
     return found
 
 
-def plan_texts(paths):
+def plan_texts(paths, owning):
+    """Each owning plan's own text, keyed by plan slug."""
     out = {}
     for p in paths:
         if not p.startswith("docs/plans/") or not p.endswith(".html"):
             continue
         text = (ROOT / p).read_text(errors="replace")
         match = re.search(r'name="plan-sprint" content="(S\d+)"', text)
-        if match and match.group(1) in OWNING:
+        if match and match.group(1) in owning:
             out[Path(p).stem] = text
     return out
 
@@ -497,7 +499,8 @@ def live_test_targets(imports, lookup):
     return got
 
 
-def census(force=None):
+def census(force=None, owning=()):
+    """The whole census, with ``owning`` naming the sprints whose plans own code."""
     paths = tracked()
     pop = population(paths)
     # ``paths`` is the whole tracked tree (importers, plans and records live
@@ -568,7 +571,7 @@ def census(force=None):
         for t in references_in(text, popset, lookup):
             reasons[t].add("live_runner:" + p)
 
-    plans = plan_texts(paths)
+    plans = plan_texts(paths, set(owning))
     tree_dirs = ancestor_directories(pop)
     under = files_under(pop, tree_dirs)
     owning_dirs = owning_directories(pop)
@@ -722,6 +725,7 @@ def census(force=None):
         "revision": git(["rev-parse", "HEAD"]).strip(),
         "provenance": compute_provenance("numpy"),
         "trees": list(TREES),
+        "owning_sprints": list(owning),
         "positive_control": POSITIVE,
         "negative_control": "forced delete of " + POSITIVE + " is refused",
         "live_runs": sorted({run for runs in live_runs.values() for run, _ in runs}),
@@ -737,8 +741,15 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="")
     parser.add_argument("--force-delete", default=None)
+    parser.add_argument(
+        "--owning-sprint",
+        action="append",
+        required=True,
+        metavar="SPRINT",
+        help="a sprint whose plans own code; repeat for each one",
+    )
     args = parser.parse_args(argv)
-    payload = census(args.force_delete)
+    payload = census(args.force_delete, args.owning_sprint)
     text = json.dumps(payload, separators=(",", ":"), sort_keys=True) + "\n"
     if args.output:
         Path(args.output).write_text(text)

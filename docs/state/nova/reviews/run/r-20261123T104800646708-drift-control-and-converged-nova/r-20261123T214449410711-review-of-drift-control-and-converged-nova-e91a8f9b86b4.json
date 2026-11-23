@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's manifest carries no baseline_suite/after_suite JSON keys, so the pair is read from the two gate logs its tests and test_logs lines name: guard-suite-base.log (revision e28db604eee205382f5c7874129eebfe4339cd92, the log's own command line is 'PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/drifting_sensor_sequences/probe_rows/test_reduction_guards.py', 16 passed in 1.84s, last line EXIT=0) and guard-suite-head-b76c7d054.log (revision b76c7d05453aeba8c58a186b8a50dc6840e2c819, same command, 22 passed in 4.34s, last line EXIT=0). Neither arm records a failing test id, so the head adds zero failing ids over the base, measured with both arms shown to collect and pass tests on all_debug. The reviewed head e91a8f9b8 differs from the tested head b76c7d054 only by the two docs-only commits 257ddf514 and e91a8f9b8, each changing one line of the evidence fragment and nothing else.",
+  "completed_at": "2026-11-23T22:17:28.882Z",
+  "dispatched_at": "2026-11-23T21:47:16Z",
+  "findings": [
+    {
+      "correction": "Regenerate slice-overlay-drift-101.svg from an overlay payload whose x_points_ref is non-empty, or reword the caption so it names only nova's and imas-efit's X-point markers and states that the generating state is marked at its axis only.",
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-control-and-converged-nova.html",
+      "line": "58",
+      "severity": "blocking",
+      "text": "blocking: the overlay caption states 'the generating state's are open grey, a circle at its axis and a cross at its X-point', but the committed slice-overlay-drift-101.svg draws no such cross. The SVG carries exactly five marker glyphs, each used once (nova triangle and plus, imas-efit square and diamond, one open grey circle), and the payload the panel is drawn from has no generating-state saddle at all: the study's overlay npz holds x_points_ref with shape (0, 2), so paint.py:150 draws nothing for it while still drawing the grey axis circle at paint.py:142. The figure therefore omits the generating state's admitted X-point, which nova's binding figure rules require a panel comparing a solved field with its reference to draw for BOTH sets ('draws BOTH sets of nulls in their own styles, and says in the caption which is which'), and the caption asserts the reviewed marker instead. The repair is either to regenerate the panel with the generating state's saddle drawn (reference.py already computes and stores x_points, so this is plumbed) or to correct the caption to the two null sets the figure actually marks."
+    },
+    {
+      "correction": "Say six tests were added, or list all six, so the citation's enumeration matches the delta it cites.",
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-control-and-converged-nova.html",
+      "line": "21",
+      "severity": "non-blocking",
+      "text": "non-blocking: the citation says '(the added tests are the call-site guard and its negative control, and the added duplicate-slice refusal of an arm)', which reads as an exhaustive account of the 16-to-22 delta, but six tests separate the base e28db604e (16) from the head b76c7d054 (22): test_current_draw_carries_the_sequence_colour_and_keeps_its_size, test_run_nova_records_a_current_draw_that_holds_the_sequence_memory, test_run_nova_guard_catches_a_white_current_draw, test_row_matched_arm_is_available_by_name, test_grouped_refuses_a_slice_one_arm_carries_twice and test_grouped_merges_shards_that_do_not_repeat_a_slice. A reader counting guards from this sentence undercounts them by half."
+    },
+    {
+      "correction": "Compose the row-matched stem through a declared_stem variant that takes the row set as an argument (or assert the declared set is 'all' beside this line) instead of appending a literal '-loops'.",
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/analyse.py",
+      "line": "427",
+      "severity": "non-blocking",
+      "text": "non-blocking: row_matched composes the row-matched arm name as declared_stem('nova', sequence) + '-loops', which is correct only while DECLARED_ROWS['nova'] is 'all'. If nova's declared row set ever becomes 'loops', declared_stem already returns 'nova-<sequence>-200-0.0100-loops' and the appended suffix looks up '...-loops-loops', so the row-matched block would silently report the arm absent. The same commit removed two hand-spelled copies of the stem rule from figures.py, and this line re-spells the row-set suffix that declared_stem owns; the row-matched lookup wants a stem builder that takes the row set explicitly rather than a literal appended to the declared one."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Examined scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py:draw_code and figures.py:main (arm_rows), analyse.py:selected_rows (grouped), analyse.py:main (grouped and the row_matched block), and panel.py:main via analyse.declared_stem; scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py consumes only analyse.load and analyse.axis_distance, so it does not reach the changed functions.",
+    "diff": "Read the five commits against 1acf2fd5b one by one: 96a88c76b corrects the converged arm's node and rate and the two figure captions, f8a473e5d and 257ddf514 add and then correct the guard-suite citation, b76c7d054 makes grouped() refuse a repeated slice and routes both stem spellings through declared_stem with two new tests, and e91a8f9b8 quotes the probe fit's own wall.",
+    "done_when": "The node's done_when asks the generator's lag-one and spectrum measured, the failing control repaired so the 1/f control exceeds 0.5 for both codes, 200 converged slices per sequence or each unconverged slice reported, and the section 7 table and figures regenerated on the repaired arms; the guard suite gate (test_reduction_guards.py, 16 passed at e28db604e and 22 at b76c7d054, both EXIT=0) measures the guards and the record reports the converged coverage slice by slice, while clauses (1) for nova and (3)'s converged basis remain open and are named as open.",
+    "goal": "The reviewed node's goal is to make section 7 readable with a passing 1/f control and nova fitted to convergence; the increment repairs the record's converged-arm attribution and the reduction's duplicate merge, but nova's two-component axis lag-one still reads 0.342 declared and 0.481 row-matched against the 0.5 floor (docs/evidence/fragments/inverse-equilibrium-baseline/drift-control-and-converged-nova.html:34) and the converged arm is 33 of 400 slices, both stated plainly rather than hidden.",
+    "manifest": "Read the reviewed manifest; it records the ten commits, both nova row sets and imas-efit's control values, the converged coverage with per-slice convergence state, the CHECK-FAILED gate result, the duplicate-slice refusal and the corrected titan attribution, with the base and head guard-suite logs named and both ending EXIT=0.",
+    "write_paths": "Read the declared write paths and the delivered diff 1acf2fd5bf9ce1bf81533003b0b2499981ceed16..e91a8f9b86b4a3e89b22a135c45a8ea9bac85d03: all four changed paths (the evidence fragment, analyse.py, figures.py and test_reduction_guards.py) lie inside the declared probe_rows/ directory and the declared fragment."
+  },
+  "justifications": {
+    "durability": "test_grouped_refuses_a_slice_one_arm_carries_twice (test_reduction_guards.py:356) reddens if the duplicate-slice refusal is removed and test_grouped_merges_shards_that_do_not_repeat_a_slice (:370) reddens if shards are mis-ordered or dropped; neither the row_matched stem composition at analyse.py:427 nor the figure caption at html:58 is guarded by any test.",
+    "evidence": "I recomputed the converged arm independently from nova-white-200-0.0100-shard{0,1}.jsonl and got 33 slices, walls 224.1-1803.1 s summing to 5.799 card-hours and axis/flux/q95 lag-one 0.0903/0.2181/0.2511, matching html:46-50, and the paired 12-slice radial lag-one -0.0405/-0.0749 and scatter 11.711/11.683 mm also match; the two gate logs record 16 and 22 passed with EXIT=0, though the run's manifest carries no baseline_suite/after_suite JSON pair and html:21 mis-enumerates the six added tests.",
+    "fit": "The added code follows the module's % formatting and its docstring states the mechanism ('An arm is one run, so each slice index appears once'), and it introduces no plan label, version or ticket reference.",
+    "goal_fidelity": "The record now states the open result accurately (docs/evidence/fragments/inverse-equilibrium-baseline/drift-control-and-converged-nova.html:34-50) and the converged-arm numbers reproduce from the raw shard rows, but the passing 1/f control for nova and a converged 200-slice arm are not delivered.",
+    "reuse": "analyse.py:427 and figures.py:49 now resolve the arm stem through analyse.declared_stem rather than re-spelling it, extending the owner of the row-set rule; analyse.py:427 still appends a literal '-loops' to that owned stem.",
+    "scope_discipline": "Every path in the reviewed diff is inside the declared probe_rows/ directory and the declared evidence fragment, and the change carries nothing the goal does not imply."
+  },
+  "notes": "Independent read-only review of r-20261123T104800646708-drift-control-and-converged-nova covering the five commits gained since the previous review at 1acf2fd5b. The converged-arm walls, coverage and lag-one statistics were recomputed from the study cache at /home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/drift-control-20261123/nova-white-200-0.0100-shard{0,1}.jsonl and the paired two-pass arm under drift-control-20261123-twopass; the titan job header in drift-conv.log reads job 1339485 on 98dci4-gpu-0002 with 2 cards and a TIME LIMIT end, and the probe row at probe-white-h200-49pass.jsonl is the 1352.8 s H200 fit outside every arm stem. Both figures cited by the fragment were rendered and inspected: axis-position-nova.svg matches its caption, and slice-overlay-drift-101.svg contains five marker glyphs with no generating-state X-point, which is the blocking finding.",
+  "project": "nova",
+  "review_run_id": "r-20261123T214449410711-review-of-drift-control-and-converged-nova-e91a8f9b86b4",
+  "reviewed_base_sha": "1acf2fd5bf9ce1bf81533003b0b2499981ceed16",
+  "reviewed_commits": [
+    "96a88c76b59459ff620913b4776d905d81b6278c",
+    "f8a473e5d01198a6b30a06410b1d3098dad71e8c",
+    "b76c7d05453aeba8c58a186b8a50dc6840e2c819",
+    "257ddf514645856f2caccfc66c2ce2dbe9c4eb57",
+    "e91a8f9b86b4a3e89b22a135c45a8ea9bac85d03"
+  ],
+  "reviewed_head_sha": "e91a8f9b86b4a3e89b22a135c45a8ea9bac85d03",
+  "reviewed_run_id": "r-20261123T104800646708-drift-control-and-converged-nova",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 13,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T23:20:00+00:00",
+  "total": 105,
+  "verdict_lines": [
+    "VERDICT goal: the node's goal is a readable section 7; the increment corrects the converged-arm attribution and the duplicate merge, but nova's axis lag-one still reads 0.342 and 0.481 against the 0.5 floor at docs/evidence/fragments/inverse-equilibrium-baseline/drift-control-and-converged-nova.html:34 and the converged arm is 33 of 400 slices, both reported as open.",
+    "VERDICT done_when: the guard-suite gate is recorded (16 passed at e28db604e, 22 at b76c7d054, both EXIT=0 in guard-suite-base.log and guard-suite-head-b76c7d054.log); the converged coverage is reported per slice, and the two physics clauses the run cannot yet meet are stated rather than claimed.",
+    "VERDICT write_paths: read the manifest's declared paths; every path in 1acf2fd5b..e91a8f9b8 (the fragment, analyse.py, figures.py, test_reduction_guards.py) lies inside the declared probe_rows/ directory and the declared fragment.",
+    "VERDICT manifest: read; it records the ten commits, both nova row sets, the converged coverage with per-slice state, the CHECK-FAILED gate result, the corrected titan attribution and the base/head suite logs, with logs named and both ending EXIT=0.",
+    "VERDICT diff: read the five commits against 1acf2fd5b; they correct the converged attribution and both figure captions, add then correct the suite citation, and make grouped() refuse a repeated slice with both stem spellings routed through declared_stem plus two new guard tests.",
+    "VERDICT call_sites: figures.draw_code and figures.main (arm_rows), analyse.selected_rows and analyse.main (grouped, row_matched), and panel.main (declared_stem) are the workflow consumers examined; spectrum_sweep/series.py does not reach the changed functions."
+  ]
+}

@@ -128,6 +128,7 @@ def entry_topology_read(receipt):
 
 def entry_extreme_selection(receipt):
     """Pick the extreme value and its index, twice."""
+    from nova.equilibrium import connectivity_boundary, stencil_nulls
     from nova.equilibrium.connectivity_boundary import _arg_extreme as boundary
     from nova.equilibrium.stencil_nulls import _arg_extreme as stencil
 
@@ -143,6 +144,19 @@ def entry_extreme_selection(receipt):
             second = np.asarray(boundary(values, maximize=maximize, axis=axis))
             if not np.array_equal(first, second):
                 mismatches.append([maximize, axis, first.tolist(), second.tolist()])
+    line = values[7]
+    exact_companions = []
+    for name in ("_argmax_exact", "_argmin_exact"):
+        first = int(getattr(stencil_nulls, name)(line))
+        second = int(getattr(connectivity_boundary, name)(line))
+        exact_companions.append(
+            dict(
+                function=name,
+                stencil=first,
+                boundary=second,
+                agrees=bool(first == second),
+            )
+        )
     perturbed = values.copy()
     perturbed[0, 2] = perturbed[0].max() + 7.0
     control_gap = int(
@@ -181,12 +195,13 @@ def entry_extreme_selection(receipt):
             "64x9 seeded normal array with one constant tie row and two all-tie "
             "rows, maxima over axes 0 and 1"
         ),
+        exact_companions=exact_companions,
         index_mismatches=mismatches,
         max_index_gap=0
         if not mismatches
         else max(abs(item[2] - item[3]) for item in mismatches),
         tolerance_max_index_gap=0,
-        agrees=not mismatches,
+        agrees=not mismatches and all(item["agrees"] for item in exact_companions),
     )
 
 
@@ -378,6 +393,73 @@ def entry_route_resolution(receipt):
     )
 
 
+def entry_plot_columns(receipt):
+    """Bring one plotting indexer's frame columns up to date, twice."""
+    from nova.frame import polyplot, vtkplot
+
+    def implementations(module):
+        found = {}
+        for name, value in vars(module).items():
+            if isinstance(value, type) and value.__module__ == module.__name__:
+                method = value.__dict__.get("update_columns")
+                if callable(method):
+                    found[f"{module.__name__}.{name}.update_columns"] = method
+        return found
+
+    class Frame:
+        def __init__(self, columns):
+            self.columns = columns
+            self.calls = 0
+
+        def update_columns(self):
+            self.calls += 1
+
+    class Host:
+        def __init__(self, columns, required, additional):
+            self.required = required
+            self.additional = additional
+            self.frame = Frame(columns)
+
+    cases = (
+        ("all present", ["a", "b", "c"], ["a"], ["b"]),
+        ("one missing", ["a"], ["a", "b"], []),
+        ("all missing", [], ["a"], ["b", "c"]),
+    )
+    comparisons = []
+    for module in (polyplot, vtkplot):
+        for label, method in implementations(module).items():
+            for case, columns, required, additional in cases:
+                host = Host(columns, required, additional)
+                method(host)
+                comparisons.append(
+                    dict(
+                        implementation=label,
+                        case=case,
+                        delegate_calls=host.frame.calls,
+                    )
+                )
+    by_case = {}
+    for item in comparisons:
+        by_case.setdefault(item["case"], []).append(item["delegate_calls"])
+    disagreements = [case for case, counts in by_case.items() if len(set(counts)) != 1]
+    return dict(
+        entry="plot-columns",
+        implementation_a=(
+            "nova.frame.polyplot plot indexer update_columns "
+            "(PolyPlot and PolyPlotChildren)"
+        ),
+        implementation_b="nova.frame.vtkplot plot indexer update_columns",
+        input=(
+            "three column states (all present, one missing, all missing) through "
+            "a stub host carrying required, additional and frame.columns"
+        ),
+        comparisons=comparisons,
+        tolerance="exact equality of delegate call counts per column state",
+        disagreements=disagreements,
+        agrees=not disagreements,
+    )
+
+
 def compare(receipt_path):
     receipt = {"entries": [], "negative_controls": []}
     for function in (
@@ -386,6 +468,7 @@ def compare(receipt_path):
         entry_storage_mode,
         entry_level_polish,
         entry_route_resolution,
+        entry_plot_columns,
     ):
         emit("ENTRY_START", entry=function.__name__)
         try:

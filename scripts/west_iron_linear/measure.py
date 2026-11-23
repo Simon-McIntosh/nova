@@ -19,6 +19,8 @@ from nova.jax.config import configure_dtypes
 
 configure_dtypes()
 import jax  # noqa: E402
+import jax.numpy as jnp  # noqa: E402
+import jax.scipy.linalg as jla  # noqa: E402
 import numpy as np  # noqa: E402
 from nova.biot import magnetisation as iron  # noqa: E402
 from nova.biot import tiledassembly as tiled  # noqa: E402
@@ -83,6 +85,302 @@ def coefficient_agreement(reference, candidate):
     )
     assert max(row.values()) <= 1e-12, row
     return row
+
+
+def relative_distance(reference, candidate):
+    """Frobenius and maximum-entry distance with no agreement floor.
+
+    The route comparison asks how far each route sits from a refined reference,
+    so this reports the same two measures as :func:`coefficient_agreement`
+    without asserting a bound the measurement exists to test.
+    """
+    reference, candidate = np.asarray(reference), np.asarray(candidate)
+    if reference.shape != candidate.shape:
+        raise AssertionError("distance operands have different shapes")
+    assert np.isfinite(reference).all() and np.isfinite(candidate).all()
+    norm = float(np.linalg.norm(reference))
+    assert norm > 0, "distance has no nonzero control"
+    return dict(
+        frobenius_relative=float(np.linalg.norm(candidate - reference) / norm),
+        maximum_entry_relative=float(
+            np.abs(candidate - reference).max() / np.abs(reference).max()
+        ),
+    )
+
+
+def _linear_problem(inputs, size, interaction):
+    """Rebuild the affine Newton operands the production solve builds, once.
+
+    The persisted interaction and the external field are deterministic, so these
+    operands match the ones ``solve_magnetisation`` constructs internally. They
+    are built here because the refined reference needs the Jacobian, residual
+    and right-hand side as explicit arrays.
+    """
+    cells = iron._mesh(inputs["region"], size)
+    law = iron._fit_law(inputs["table_b"], inputs["table_mu"])
+    geometry = iron.linear_magnetisation_geometry(cells.polygons)
+    values = np.asarray(inputs["external"](geometry["points"]), dtype=np.float64)
+    owners = geometry["owners"]
+    project = np.einsum(
+        "qij,qj,q->qi",
+        np.linalg.inv(geometry["gram"])[owners],
+        geometry["basis"],
+        geometry["weights"],
+    )
+    projected = np.zeros((2, len(cells.polygons), 3))
+    for component in range(2):
+        np.add.at(projected[component], owners, project * values[:, component, None])
+    operands = (
+        iron._stage_linear_interaction(interaction.matrix),
+        jnp.asarray(projected.reshape(-1)),
+        *(jnp.asarray(value, dtype=jnp.float64) for value in law),
+        jnp.asarray(geometry["basis"]),
+        jnp.asarray(project),
+        jnp.asarray(owners),
+    )
+    metric = np.zeros((len(cells.polygons), 6, 6))
+    metric[:, :3, :3] = geometry["gram"]
+    metric[:, 3:, 3:] = geometry["gram"]
+    scale = max(float(np.linalg.norm(projected.reshape(-1))) / iron._MU0, 1e-30)
+    return operands, jnp.asarray(metric), scale, geometry
+
+
+def _extended_direction(factor, jacobian_host, rhs, passes=3, floor=1e-17):
+    """Solve J d = rhs, refining with residuals formed in extended precision.
+
+    The Jacobian is float64; the defect ``rhs - J d`` is accumulated in
+    ``longdouble`` so the refinement drives the forward error down to the
+    working precision independently of the condition number, which is what makes
+    the reference accurate enough to measure a 1e-12 route gap.
+    """
+    extended = jacobian_host.astype(np.longdouble)
+    rhs_extended = np.asarray(rhs).astype(np.longdouble)
+    direction = jla.lu_solve(factor, rhs)
+    history, corrections = [], []
+    for _ in range(passes):
+        defect = rhs_extended - extended @ np.asarray(direction).astype(np.longdouble)
+        size = float(np.sqrt(np.vdot(defect, defect)))
+        history.append(
+            size / max(float(np.sqrt(np.vdot(rhs_extended, rhs_extended))), 1e-300)
+        )
+        correction = jla.lu_solve(factor, jnp.asarray(defect.astype(np.float64)))
+        corrections.append(
+            float(np.linalg.norm(np.asarray(correction)))
+            / max(float(np.linalg.norm(np.asarray(direction))), 1e-300)
+        )
+        direction = direction + correction
+        if history[-1] <= floor:
+            break
+    return direction, history, corrections
+
+
+def _one_norm(matrix):
+    """Maximum absolute column sum, accumulated over column blocks."""
+    best = 0.0
+    for start in range(0, matrix.shape[1], 2048):
+        block = np.abs(matrix[:, start : start + 2048]).sum(axis=0)
+        best = max(best, float(block.max()))
+    return best
+
+
+def _inverse_one_norm(factor, dimension):
+    """Hager one-norm estimate of J^{-1} using an existing LU factor."""
+    estimate = 0.0
+    x = jnp.full((dimension,), 1.0 / dimension)
+    for _ in range(6):
+        y = jla.lu_solve(factor, x, trans=1)
+        z = jla.lu_solve(factor, jnp.sign(y))
+        magnitude = jnp.abs(z)
+        total = float(magnitude.sum())
+        if total <= estimate:
+            break
+        estimate = total
+        x = jnp.zeros((dimension,)).at[int(jnp.argmax(magnitude))].set(1.0)
+    return estimate
+
+
+def _linear_step_routes(operands, metric):
+    """Solve one Newton linear system by each route and by a refined reference.
+
+    The system is the first Newton step, ``J(0) d = -F(0)``, which the persisted
+    operator and the external field fix without a nonlinear iteration. The
+    reference refines its solve with float64 residuals accumulated in extended
+    precision, so its own forward error is about ``kappa * eps_extended`` and sits
+    decades below the ``kappa * eps_float64`` both routes can reach.
+    """
+    state = jnp.zeros(int(operands[1].size), dtype=jnp.float64)
+    dimension = int(state.size)
+    jacobian = iron._linear_jacobian(state, operands, jnp.asarray(0.0))
+    jacobian_host = np.asarray(jacobian)
+    right = -iron._linear_residual(state, operands)
+    factor = jla.lu_factor(jacobian)
+    lu_direction = jla.lu_solve(factor, right)
+    reference, refinement, corrections = _extended_direction(
+        factor, jacobian_host, right
+    )
+    cholesky_factor = iron._linear_cholesky_factor(
+        state, operands, metric, jnp.asarray(0.0)
+    )
+    cholesky_update = iron._linear_cholesky_programs(state.device)[3]
+    candidate, _ = cholesky_update(state, operands, cholesky_factor, jnp.asarray(1.0))
+    cholesky_direction = candidate - state
+    extended = jacobian_host.astype(np.longdouble)
+    right_extended = np.asarray(right).astype(np.longdouble)
+    residual = right_extended - extended @ np.asarray(reference).astype(np.longdouble)
+    residual_relative = float(
+        float(np.sqrt(np.vdot(residual, residual)))
+        / max(float(np.sqrt(np.vdot(right_extended, right_extended))), 1e-300)
+    )
+    matrix_norm = _one_norm(jacobian_host)
+    inverse_norm = _inverse_one_norm(factor, dimension)
+    condition = dict(
+        method="Hager one-norm estimate at the first Newton step",
+        matrix_one_norm=matrix_norm,
+        inverse_one_norm=inverse_norm,
+        condition_estimate=matrix_norm * inverse_norm,
+    )
+    precision_floor = max(
+        float(np.finfo(np.float64).eps), corrections[-1] if corrections else 0.0
+    )
+    reference_error = dict(
+        residual_relative=residual_relative,
+        forward_error_estimate=precision_floor,
+        refinement_history=refinement,
+        correction_history=corrections,
+    )
+    del jacobian_host
+    return dict(
+        reference=np.asarray(reference),
+        lu=np.asarray(lu_direction),
+        cholesky=np.asarray(cholesky_direction),
+        condition=condition,
+        reference_error=reference_error,
+    )
+
+
+def route_refinement(inputs, size, interaction, *, tolerance, max_iterations):
+    """Measure both linear routes against an iteratively refined reference.
+
+    Runs the LU route and the Cholesky route over the nonlinear problem at one
+    tolerance to reproduce their coefficient difference, then solves the first
+    Newton linear system by each route and by an extended-precision-refined
+    reference and reports each route's Frobenius and maximum-entry distance from
+    it. The first Newton step carries the state to leading order, so its
+    direction distance predicts the converged coefficient difference.
+    """
+    lu = iron.solve_magnetisation(
+        inputs["region"],
+        inputs["external"],
+        inputs["table_b"],
+        inputs["table_mu"],
+        cell_size=size,
+        basis="linear",
+        interaction=interaction,
+        tolerance=tolerance,
+        max_iterations=max_iterations,
+        linear_factorisation="combined",
+    )
+    cholesky = iron.solve_magnetisation(
+        inputs["region"],
+        inputs["external"],
+        inputs["table_b"],
+        inputs["table_mu"],
+        cell_size=size,
+        basis="linear",
+        interaction=interaction,
+        tolerance=tolerance,
+        max_iterations=max_iterations,
+        linear_factorisation="cholesky",
+    )
+    if not (lu.converged and cholesky.converged):
+        raise AssertionError("a route did not converge at the measurement tolerance")
+    operands, metric, _scale, _geometry = _linear_problem(inputs, size, interaction)
+    step = _linear_step_routes(operands, metric)
+    del metric
+    reference_coefficients = step["reference"].reshape(2, -1, 3)
+    distances = {
+        "lu": relative_distance(reference_coefficients, step["lu"].reshape(2, -1, 3)),
+        "cholesky": relative_distance(
+            reference_coefficients, step["cholesky"].reshape(2, -1, 3)
+        ),
+    }
+    routes = dict(
+        coefficient=relative_distance(
+            np.asarray(lu.linear_coefficients),
+            np.asarray(cholesky.linear_coefficients),
+        ),
+        direction=relative_distance(
+            step["lu"].reshape(2, -1, 3), step["cholesky"].reshape(2, -1, 3)
+        ),
+        lu_residual_history=list(lu.residual_history),
+        cholesky_residual_history=list(cholesky.residual_history),
+        lu_iterations=lu.iterations,
+        cholesky_iterations=cholesky.iterations,
+    )
+    sizes = {name: max(value.values()) for name, value in distances.items()}
+    condition = step["condition"]
+    reference_error = step["reference_error"]
+    floor = condition["condition_estimate"] * np.finfo(np.float64).eps
+    nearest = min(sizes.values())
+    resolvable = bool(nearest > 10 * reference_error["forward_error_estimate"])
+    ratio = max(sizes.values()) / max(min(sizes.values()), 1e-300)
+    rounding = (
+        resolvable
+        and all(value <= 10 * floor for value in sizes.values())
+        and ratio <= 100
+    )
+    farther = max(sizes, key=sizes.get)
+    if not resolvable:
+        outcome = "indeterminate"
+    elif rounding:
+        outcome = "rounding"
+    else:
+        outcome = "defect"
+    verdict = dict(
+        machine_epsilon=float(np.finfo(np.float64).eps),
+        extended_epsilon=float(np.finfo(np.longdouble).eps),
+        rounding_scale=floor,
+        distance_ratio=ratio,
+        farther_route=farther,
+        outcome=outcome,
+    )
+    if outcome == "defect":
+        deviation = np.abs(step["lu"] - step["reference"])
+        if farther == "cholesky":
+            deviation = np.abs(step["cholesky"] - step["reference"])
+        order = np.argsort(deviation)[-5:][::-1]
+        verdict["largest_entries"] = [
+            dict(
+                index=int(i),
+                distance=float(deviation[i]),
+                relative=float(deviation[i] / abs(step["reference"][i]))
+                if step["reference"][i] != 0
+                else None,
+            )
+            for i in order
+        ]
+    planted = step["reference"] * (1 + 1e-10)
+    planted_distance = relative_distance(
+        reference_coefficients, planted.reshape(2, -1, 3)
+    )
+    negative_control = dict(
+        planted_relative=1e-10,
+        planted_distance=planted_distance,
+        detected=bool(max(planted_distance.values()) > 1e-11),
+    )
+    return dict(
+        routes=routes,
+        reference=dict(
+            converged=True,
+            error=reference_error,
+            resolvable=resolvable,
+            correction_relative=reference_error["residual_relative"],
+        ),
+        condition=condition,
+        distances=distances,
+        negative_control=negative_control,
+        verdict=verdict,
+    )
 
 
 def refinement_verdict(reference, candidate):
@@ -443,6 +741,7 @@ def main():
     parser.add_argument("--refinement", action="store_true")
     parser.add_argument("--resume-refinement", action="store_true")
     parser.add_argument("--compare-routes", action="store_true")
+    parser.add_argument("--refine-routes", action="store_true")
     parser.add_argument("--cholesky", action="store_true")
     parser.add_argument("--assemble-only", action="store_true")
     replay_mode = parser.add_mutually_exclusive_group()
@@ -543,6 +842,26 @@ def main():
         row["completed"] = bool(row["full_drive"]["converged"])
         save(path, row)
         assert row["completed"], row["full_drive"]["termination"]
+        print(json.dumps(row), flush=True)
+        return
+    if args.refine_routes:
+        assert args.mesh == "uniform-0.04"
+        source = args.output.parent / f"{args.mesh}-operator.npy"
+        interaction = iron.load_magnetisation_interaction(
+            source, region=inputs["region"], cell_size=size, basis="linear"
+        )
+        row["operator_path"] = str(source)
+        row["geometry_digest"] = interaction.geometry_digest
+        save(path, row)
+        row["refined_reference"] = route_refinement(
+            inputs,
+            size,
+            interaction,
+            tolerance=1e-12,
+            max_iterations=60,
+        )
+        row["completed"] = True
+        save(path, row)
         print(json.dumps(row), flush=True)
         return
     if args.compare_routes:

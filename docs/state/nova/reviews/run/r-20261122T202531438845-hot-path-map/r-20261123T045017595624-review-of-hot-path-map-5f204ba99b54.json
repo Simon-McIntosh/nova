@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed node's write paths carry no test file, so no baseline/after suite pair was armed and the reviewed run records neither; its single gate log carries no test-role delta to derive failures from.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-23T05:21:17.960Z",
+  "dispatched_at": "2026-11-23T04:50:59Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/hot_path_map/map.py",
+      "line": "130",
+      "severity": "non-blocking",
+      "text": "non-blocking: the negative control is captured and reported but never asserted, and render.py:139 hardcodes the words \"measured, and zero\", so a map that marked every module reached would exit 0 and print \"reads 150/150 (...) ... and zero\" instead of failing as the done_when requires."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_map/job.sh",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "non-blocking: REV is captured once at job start from git rev-parse HEAD with no clean-tree check, so the record states revision ff088fd7e although the job ran driver code committed at 09fa12f11 and later \u2014 its own map.json carries device_trace_entries, a field ff088fd7e's map.py does not produce."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_map/render.py",
+      "line": "236",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate-result and line-copy paragraphs are appended after \"</html>\", so the delivered fragment carries content outside its body and any strict HTML consumer will drop or reject it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read all fifteen commits; seven paths are added and no nova/ product source is touched, and the record's headline sums (15560 forward, 19310 inverse, 210 modules reached, 0 not measured) recompute exactly from hot-path-map.json.",
+    "done_when": "every clause is met \u2014 472 of 472 modules carry per-route and union counts, nova/equilibrium/forward.py reads 504/1043 forward and 506/1043 inverse, revision ff088fd7e is stated, job 1337973 ran on all_debug (sacct COMPLETED), and nova/utilities/ANSYS.py reads 0/150 on both routes with 210 modules reached as the positive control.",
+    "goal": "the goal is a stored per-module line map of both hot-path routes; docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html:12 and its hot-path-map.json deliver it for all 472 modules under nova/.",
+    "manifest": "read; status complete, it names job 1337973, the literal job.sh command, the gate log, the 472/472 coverage of nova/scripts and nova/utilities, and the four support-read contradictions, all of which reconcile with the landed json.",
+    "write_paths": "only the fragment among the seven delivered paths lies inside the two dispatched declared paths; the five driver files under scripts/prototypes/hot_path_map/ are outside them and are named in the reviewed manifest's changed_paths, the sibling hot-path-map.json is required by the plan's own done_when, and the declared figures directory delivers no figure, which the table representation justifies."
+  },
+  "justifications": {
+    "durability": "no test is added and scripts/prototypes/hot_path_map/map.py:130 records the negative control without asserting it, so a map that marks everything reached exits 0 instead of failing.",
+    "evidence": "scripts/prototypes/hot_path_map/job.sh:8 records revision ff088fd7e from git rev-parse HEAD while the drivers were edited mid-job, and the committed hot-path-map.json carries device_trace_entries that map.py at ff088fd7e cannot write, so the stated revision did not run the composing code.",
+    "fit": "the modules follow the surrounding prototype idiom and carry no forbidden name, but render.py:236 appends the gate-result and line-copy paragraphs after the closing </html> tag.",
+    "goal_fidelity": "the map exists and covers every module, but docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html:13 substitutes a stored MAST case for the slice-profile bank arm, so the traced compiled loop is unmeasured and reported only as four contradictions.",
+    "reuse": "scripts/prototypes/hot_path_map/map.py:49 relative() re-implements nova/database/filepath.py:397 repository_relative, and the local copy drops the worktree rewrites the owner performs.",
+    "scope_discipline": "five of the seven delivered paths (scripts/prototypes/hot_path_map/*) lie outside the declared write paths docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html and docs/figures/code-reuse-and-hot-path/hot-path-map, though the manifest names them."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 8dde314acacf331db89b0773ce616bdfe930ff85\nreviewed_head_sha: 5f204ba99b5458d32d84894d5777d51ad3caca81\nVERDICT goal: the goal is a stored per-module line map of both hot-path routes; docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html:12 and its hot-path-map.json deliver it for all 472 modules under nova/.\nVERDICT done_when: every clause is met \u2014 472 of 472 modules carry per-route and union counts, nova/equilibrium/forward.py reads 504/1043 forward and 506/1043 inverse, revision ff088fd7e is stated, job 1337973 ran on all_debug (sacct COMPLETED), and nova/utilities/ANSYS.py reads 0/150 on both routes with 210 modules reached as the positive control.\nVERDICT write_paths: only the fragment among the seven delivered paths lies inside the two dispatched declared paths; the five driver files under scripts/prototypes/hot_path_map/ are outside them and are named in the reviewed manifest's changed_paths, the sibling hot-path-map.json is required by the plan's own done_when, and the declared figures directory delivers no figure, which the table representation justifies.\nVERDICT manifest: read; status complete, it names job 1337973, the literal job.sh command, the gate log, the 472/472 coverage of nova/scripts and nova/utilities, and the four support-read contradictions, all of which reconcile with the landed json.\nVERDICT diff: read all fifteen commits; seven paths are added and no nova/ product source is touched, and the record's headline sums (15560 forward, 19310 inverse, 210 modules reached, 0 not measured) recompute exactly from hot-path-map.json.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: the map exists and covers every module, but docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html:13 substitutes a stored MAST case for the slice-profile bank arm, so the traced compiled loop is unmeasured and reported only as four contradictions.\nSCORE evidence: 13\nJUSTIFICATION evidence: scripts/prototypes/hot_path_map/job.sh:8 records revision ff088fd7e from git rev-parse HEAD while the drivers were edited mid-job, and the committed hot-path-map.json carries device_trace_entries that map.py at ff088fd7e cannot write, so the stated revision did not run the composing code.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: five of the seven delivered paths (scripts/prototypes/hot_path_map/*) lie outside the declared write paths docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html and docs/figures/code-reuse-and-hot-path/hot-path-map, though the manifest names them.\nSCORE durability: 4\nJUSTIFICATION durability: no test is added and scripts/prototypes/hot_path_map/map.py:130 records the negative control without asserting it, so a map that marks everything reached exits 0 instead of failing.\nSCORE fit: 16\nJUSTIFICATION fit: the modules follow the surrounding prototype idiom and carry no forbidden name, but render.py:236 appends the gate-result and line-copy paragraphs after the closing </html> tag.\nSCORE reuse: 10\nJUSTIFICATION reuse: scripts/prototypes/hot_path_map/map.py:49 relative() re-implements nova/database/filepath.py:397 repository_relative, and the local copy drops the worktree rewrites the owner performs.\nFINDING scripts/prototypes/hot_path_map/map.py:130 non-blocking: the negative control is captured and reported but never asserted, and render.py:139 hardcodes the words \"measured, and zero\", so a map that marked every module reached would exit 0 and print \"reads 150/150 (...) ... and zero\" instead of failing as the done_when requires.\nFINDING scripts/prototypes/hot_path_map/job.sh:8 non-blocking: REV is captured once at job start from git rev-parse HEAD with no clean-tree check, so the record states revision ff088fd7e although the job ran driver code committed at 09fa12f11 and later \u2014 its own map.json carries device_trace_entries, a field ff088fd7e's map.py does not produce.\nFINDING scripts/prototypes/hot_path_map/render.py:236 non-blocking: the gate-result and line-copy paragraphs are appended after \"</html>\", so the delivered fragment carries content outside its body and any strict HTML consumer will drop or reject it.\n",
+  "review_run_id": "r-20261123T045017595624-review-of-hot-path-map-5f204ba99b54",
+  "reviewed_base_sha": "8dde314acacf331db89b0773ce616bdfe930ff85",
+  "reviewed_head_sha": "5f204ba99b5458d32d84894d5777d51ad3caca81",
+  "reviewed_run_id": "r-20261122T202531438845-hot-path-map",
+  "scores": {
+    "durability": 4,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 10,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T05:22:41.625132+00:00",
+  "total": 72
+}

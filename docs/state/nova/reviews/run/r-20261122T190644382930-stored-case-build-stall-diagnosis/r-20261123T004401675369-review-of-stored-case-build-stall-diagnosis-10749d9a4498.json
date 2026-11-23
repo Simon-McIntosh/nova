@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-23T00:57:24.291Z",
+  "dispatched_at": "2026-11-23T00:45:24Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/stored-case-build-stall-diagnosis.html",
+      "line": "36",
+      "severity": "non-blocking",
+      "text": "the text says \"Over the 242 calls that exceed half a second the fitted exponent is 2.06\", but the cited arms2.log yields 326 sort_link calls above 0.5 s (308 in the second arm) with a fitted exponent of 2.049 (2.136 in the second arm); the count and exponent do not reproduce from the cited log, though the load-bearing totals (1907 calls, 11 756 rows, 825.8 s) check out and the quadratic conclusion is unaffected."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T190644382930-stored-case-build-stall-diagnosis/manifest.md",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "the tests: line is not the literal command a gate receipt can re-run (it carries prose and /home/ITER/mcintos/Code/nova/.venv-placeholder), and the manifest has no artifacts: line citing head-sample.log and arms2.log, so the raw evidence for the fragment's stack and timing claims is not reachable from the record."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites; the change is a docs fragment, and the runtime code it discusses is its subject matter rather than a caller of the change.",
+    "diff": "read commit by commit against be5ee98f7; three commits add one 56-line HTML evidence fragment and no code; 20a (10749d9a4) is the repair of the prior blocking finding and now records that the log cannot order the silence.",
+    "done_when": "all three clauses are answered and recorded: a 16-dump stack sample with file:line, a two-arm 900 s measurement at be5ee98f7 and 77283793bc on one CPU partition, and an explicit \"Nothing between the two revisions touches the code on that stack\"; I verified the arms table against arms2.log (825.8 s / 814.8 s, 11756 rows, 1907/1906 calls) and the stack distribution against head-sample.log (11 at columnar.py:84, 2 at multipoint.py:78, 1 at multipoint.py:76 of 16 dumps).",
+    "goal": "the goal asks where the stored MAST-U pre-fit build spends three host-side hours; the fragment names the frames (nova/frame/columnar.py:84 via nova/frame/multipoint.py:76,78 sort_link) and the quadratic cost, and states that the recorded run's log cannot place its hours in that phase, which is the honest reading the brief allows (\"or say it is not established\").",
+    "manifest": "read in full; status is complete and it names commits 62f573bc3, 4bb386db4, 10749d9a4 and the suite logs, but its tests: line is not a literal command (it carries prose and a .venv-placeholder) and it has no artifacts: line naming head-sample.log/arms2.log, the raw evidence for the fragment's central claim.",
+    "write_paths": "the node declared the fragment path and a figures directory; the delivered diff is the single fragment file, inside both, and the manifest's changed_paths names the same one path."
+  },
+  "justifications": {
+    "durability": "the fragment is a document with no committed test that fails if its claims regress; the negative-control check_fragment_ordering.py lives under ~/.cache and guards only the ordering language, not the numbers.",
+    "evidence": "the arms table at stored-case-build-stall-diagnosis.html:43-46 and the 16-dump stack distribution at :12 reproduce from arms2.log and head-sample.log, but the derived statistic at :36 does not.",
+    "fit": "stored-case-build-stall-diagnosis.html:1-3 follows the sibling fragment idiom (section id, h2, h3, tables) and carries no plan or version label in its filename or ids.",
+    "goal_fidelity": "stored-case-build-stall-diagnosis.html:36 names the conductor-insertion phase and its quadratic sort_link cost as the measured answer, and lines 6-7 state that the recorded run's three hours cannot be placed in that phase from its log.",
+    "reuse": "the change adds prose and a table only; no code definition is introduced, so there is no capability to fork, and the fragment cites the owning modules rather than copying them.",
+    "scope_discipline": "the only path in the diff is the declared fragment file, and it carries no source, config or figure change."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal asks where the stored MAST-U pre-fit build spends three host-side hours; the fragment names the frames (nova/frame/columnar.py:84 via nova/frame/multipoint.py:76,78 sort_link) and the quadratic cost, and states that the recorded run's log cannot place its hours in that phase, which is the honest reading the brief allows (\"or say it is not established\").\nVERDICT done_when: all three clauses are answered and recorded: a 16-dump stack sample with file:line, a two-arm 900 s measurement at be5ee98f7 and 77283793bc on one CPU partition, and an explicit \"Nothing between the two revisions touches the code on that stack\"; I verified the arms table against arms2.log (825.8 s / 814.8 s, 11756 rows, 1907/1906 calls) and the stack distribution against head-sample.log (11 at columnar.py:84, 2 at multipoint.py:78, 1 at multipoint.py:76 of 16 dumps).\nVERDICT write_paths: the node declared the fragment path and a figures directory; the delivered diff is the single fragment file, inside both, and the manifest's changed_paths names the same one path.\nVERDICT manifest: read in full; status is complete and it names commits 62f573bc3, 4bb386db4, 10749d9a4 and the suite logs, but its tests: line is not a literal command (it carries prose and a .venv-placeholder) and it has no artifacts: line naming head-sample.log/arms2.log, the raw evidence for the fragment's central claim.\nVERDICT diff: read commit by commit against be5ee98f7; three commits add one 56-line HTML evidence fragment and no code; 10749d9a4 is the repair of the prior blocking finding and now records that the log cannot order the silence.\n\nCALL_SITES: none\n\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: stored-case-build-stall-diagnosis.html:36 names the conductor-insertion phase and its quadratic sort_link cost as the measured answer, and lines 6-7 state that the recorded run's three hours cannot be placed in that phase from its log.\nSCORE evidence: 14\nJUSTIFICATION evidence: the arms table at stored-case-build-stall-diagnosis.html:43-46 and the 16-dump stack distribution at :12 reproduce from arms2.log and head-sample.log, but the derived statistic at :36 does not.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the only path in the diff is the declared fragment file, and it carries no source, config or figure change.\nSCORE durability: 9\nJUSTIFICATION durability: the fragment is a document with no committed test that fails if its claims regress; the negative-control check_fragment_ordering.py lives under ~/.cache and guards only the ordering language, not the numbers.\nSCORE fit: 17\nJUSTIFICATION fit: stored-case-build-stall-diagnosis.html:1-3 follows the sibling fragment idiom (section id, h2, h3, tables) and carries no plan or version label in its filename or ids.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds prose and a table only; no code definition is introduced, so there is no capability to fork, and the fragment cites the owning modules rather than copying them.\n\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/stored-case-build-stall-diagnosis.html:36 non-blocking: the text says \"Over the 242 calls that exceed half a second the fitted exponent is 2.06\", but the cited arms2.log yields 326 sort_link calls above 0.5 s (and 308 in the second arm) with a fitted exponent of 2.049 (2.136 in the second arm); the count and exponent do not reproduce from the cited log, though the load-bearing totals (1907 calls, 11 756 rows, 825.8 s) check out and the quadratic conclusion is unaffected.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T190644382930-stored-case-build-stall-diagnosis/manifest.md:18 non-blocking: the tests: line is not the literal command a gate receipt can re-run (it carries prose and /home/ITER/mcintos/Code/nova/.venv-placeholder), and the manifest has no artifacts: line citing head-sample.log and arms2.log, so the raw evidence for the fragment's stack and timing claims is not reachable from the record.",
+  "review_run_id": "r-20261123T004401675369-review-of-stored-case-build-stall-diagnosis-10749d9a4498",
+  "reviewed_base_sha": "be5ee98f736dcc20393153f8bb6e7bf163ef873e",
+  "reviewed_head_sha": "10749d9a4498ef35c8ce8fdc159233456de51d08",
+  "reviewed_run_id": "r-20261122T190644382930-stored-case-build-stall-diagnosis",
+  "scores": {
+    "durability": 9,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T01:00:08.329058+00:00",
+  "total": 95
+}

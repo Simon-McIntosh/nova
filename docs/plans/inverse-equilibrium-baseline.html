@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="95">
+<meta name="plan-version" content="96">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -424,6 +424,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261122T235050226246-review-of-stored-case-build-stall-diagnosis-4bb386db446a" data-who="reckon-build" data-when="2026-11-23T00:32:11.726Z">
     <div class="r-comment-body"><p>review of r-20261122T190644382930 stored at status parsed, scores goal_fidelity 12 / evidence 10 / scope_discipline 20 / durability 10 / fit 15 / reuse 20; one blocking finding at :3 (the phase attribution is an unverified inference) and five non-blocking findings (:8 line number, :32 two counts, :32 50 s, :40 call count, :24 missing figure)</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261123T004401675369-review-of-stored-case-build-stall-diagnosis-10749d9a4498" data-who="reckon-build" data-when="2026-11-23T00:57:24.291Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261122T190644382930-stored-case-build-stall-diagnosis stored at its review-records path against reviewed base be5ee98f736dcc20393153f8bb6e7bf163ef873e and reviewed head 10749d9a4498ef35c8ce8fdc159233456de51d08: all six dimensions scored, added_failure_count 0 with no added failure ids, two non-blocking findings (the fragment&#x27;s 242-call/2.06 exponent does not reproduce from arms2.log which gives 326 calls and 2.049; the reviewed manifest&#x27;s tests: line is not a literal command and it cites no artifacts), and the prior review&#x27;s blocking ordering finding is answered by the repair commit.</p></div>
 </div>
 </section>
 </main>

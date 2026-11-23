@@ -11,6 +11,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T215439012216-multipoint-link-linear-build",
       "section": "\u00a79"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T07:07:27.373032+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T215439012216-multipoint-link-linear-build",
+      "section": "\u00a79"
     }
   },
   "findings": [

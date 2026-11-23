@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T19:29:40.096Z",
+  "dispatched_at": "2026-11-23T19:21:40Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:205",
+      "id": "done_when-1",
+      "reason": "without the ITER constraint-label exemption carried into \u00a710, its done-when contradicts \u00a72 and would produce a band verdict \u00a72 and \u00a79's evidence forbid.",
+      "text": "\u00a710 clause (2) requires that \"every case that converges is scored against the \u00a72 bands\", but \u00a72's done-when (line 127) states the ITER 135013 row \"is not judged against the bands\" under the label same magnetics, different constraints, and \u00a79's record repeats that \"no section 2 band is read on it even where the fit converges\"; a node following \u00a710 literally would band-judge ITER against a rule that forbids it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:13",
+      "id": "reasoning-1",
+      "reason": "the plan's declared effort feeds planning and the roadmap, and the figure is demonstrably 4 h short of the sum of its own sections.",
+      "text": "plan-effort-hours reads 60.0 while the twelve declared section efforts sum to 64.0 (8+7+4+3+3+4+6+4+8+4+8+5); the earlier correction added \u00a710 (4), \u00a711 (4) and \u00a712 (5) to 47, but \u00a711's declared effort is 8.0, so the summary understates the plan by 4 h",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "8ff796edaa4c57c912ad4595448aa379537bf844",
+  "plan_fingerprint": "3c351dbcab14465c8f35da8ab5c249d447edcad7d647e94ee774429b1a9fb5e3",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 131,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T192048712662-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "00c519cd97f7103806150046cde3800af090cea2",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited sections \u00a71, \u00a72, \u00a77 and \u00a79 exist; \u00a77's cost fragment (1111.7\u20131193.3 s, ~120 P100 card-hours) and \u00a79's stored-case fragment (SurfaceGeometryError, 2.28 %) resolve and carry the quoted figures.",
+    "done_when": "a finding \u2014 \u00a710 clause (2) requires every converged case scored against the \u00a72 bands, which \u00a72's own done-when forbids for the ITER row.",
+    "evidence_paths": "pass \u2014 s10 names stored-cases-500-passes.html, s11 fit-iteration-convergence-rate.html and s12 fit-iteration-fewer-passes.html under docs/evidence/fragments/, all durable.",
+    "naming": "pass \u2014 the units carry no plan labels, ticket numbers or version tags beyond \u00a7 section references.",
+    "reasoning": "a finding \u2014 plan-effort-hours (60.0) does not match the 64.0 sum of the twelve declared section efforts.",
+    "single_goal": "pass \u2014 s10 delivers the longer-budget run, s11 the diagnosis and s12 the repair, each one deliverable.",
+    "wiring": "pass \u2014 s10:[s9], s11:[s9] and s12:[s11,s10] each name a section that exists and whose output the section consumes."
+  },
+  "section_digests": {
+    "_document": "35451fe5ea6e096485040dde64a1c075fc6579a695ceb9c7b9e6c2a807328541",
+    "s0": "222214efd929830ab3769e033a76bb2b0b963eee1000f2f8d79d3f78da1ee921",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s10": "8c231197b9606eaf217083bbbbb2ee412958c378bdbc05096fcd97a6c1530116",
+    "s11": "3ad4d4f9dd13506b6db05524c4cb96e7263fdcfd1c4ff204af39e4f0915edc4e",
+    "s12": "7de72f07db63b8b9b0c38c6ee16a15eb85d09ea542860cfcc0ef8f1792ead24f",
+    "s2": "1d7c7611f002d7765b98531126cc095d6d244b387578c5d44d7284ff93c9e59c",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "95b901a9be71a11db2f0b5f656f0952915a0c3838fafa8e46f0bf5675bd54527",
+    "s5": "29c483a08413dd1159c9231c767d22b4355253776c11cd6ac1fd6286aa327477",
+    "s6": "38673123cc34cb5be04fbd26c1a149df7d18d2adc2937221123fbc79c8308d95",
+    "s7": "46d0b31ae1bfd2347befe820b2b71442fafa724354e9fb3836af929192f8e4d1",
+    "s8": "5f1a44b0fc4688ef69242b46b85666aefaf1d27e32404e14f4874b566bc15a1f",
+    "s9": "6b59708e5b47c987c440323356fb9dd0f2ec4438ce599455f755a5cf0772d5bb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T19:29:17.517089+00:00",
+  "total": null
+}

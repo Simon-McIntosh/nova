@@ -42,6 +42,9 @@ def entry_topology_read(receipt):
     pitch = float(pitch)
 
     axis_gap = float(
+        np.linalg.norm(np.asarray(reading.axis) - np.asarray(reference.axis))
+    )
+    axis_gap_to_analytic = float(
         np.linalg.norm(np.asarray(reading.axis) - np.asarray(analytic_axis))
     )
     selected = np.asarray(reading.membership) * area
@@ -73,7 +76,7 @@ def entry_topology_read(receipt):
     disturbed_selected = np.asarray(disturbed.reading.membership) * area
     control_gap = float(np.max(np.abs(disturbed_selected - census) / area))
     control_axis_gap = float(
-        np.linalg.norm(np.asarray(disturbed.reading.axis) - np.asarray(analytic_axis))
+        np.linalg.norm(np.asarray(disturbed.reading.axis) - np.asarray(reference.axis))
     )
     control_fires = bool(control_gap >= 0.05 or control_axis_gap >= 0.05 * pitch)
     emit(
@@ -116,6 +119,7 @@ def entry_topology_read(receipt):
         axis_a=np.asarray(reference.axis).tolist(),
         axis_b=np.asarray(reading.axis).tolist(),
         axis_gap_m=axis_gap,
+        axis_gap_to_analytic_m=axis_gap_to_analytic,
         boundary_class_a=int(reference.boundary_class),
         boundary_class_b=int(reading.boundary_class),
         membership_area_sum_relative=area_gap,
@@ -143,7 +147,15 @@ def entry_extreme_selection(receipt):
             first = np.asarray(stencil(values, axis, maximize=maximize))
             second = np.asarray(boundary(values, maximize=maximize, axis=axis))
             if not np.array_equal(first, second):
-                mismatches.append([maximize, axis, first.tolist(), second.tolist()])
+                mismatches.append(
+                    dict(
+                        maximize=maximize,
+                        axis=axis,
+                        stencil=first.tolist(),
+                        boundary=second.tolist(),
+                        index_gap=int(np.max(np.abs(first - second))),
+                    )
+                )
     line = values[7]
     exact_companions = []
     for name in ("_argmax_exact", "_argmin_exact"):
@@ -197,9 +209,7 @@ def entry_extreme_selection(receipt):
         ),
         exact_companions=exact_companions,
         index_mismatches=mismatches,
-        max_index_gap=0
-        if not mismatches
-        else max(abs(item[2] - item[3]) for item in mismatches),
+        max_index_gap=max((item["index_gap"] for item in mismatches), default=0),
         tolerance_max_index_gap=0,
         agrees=not mismatches and all(item["agrees"] for item in exact_companions),
     )
@@ -425,9 +435,12 @@ def entry_plot_columns(receipt):
         ("one missing", ["a"], ["a", "b"], []),
         ("all missing", [], ["a"], ["b", "c"]),
     )
+    modules = (polyplot, vtkplot)
+    found = {module.__name__: implementations(module) for module in modules}
     comparisons = []
-    for module in (polyplot, vtkplot):
-        for label, method in implementations(module).items():
+    by_case = {case: {module.__name__: [] for module in modules} for case, *_ in cases}
+    for module in modules:
+        for label, method in found[module.__name__].items():
             for case, columns, required, additional in cases:
                 host = Host(columns, required, additional)
                 method(host)
@@ -438,10 +451,19 @@ def entry_plot_columns(receipt):
                         delegate_calls=host.frame.calls,
                     )
                 )
-    by_case = {}
-    for item in comparisons:
-        by_case.setdefault(item["case"], []).append(item["delegate_calls"])
-    disagreements = [case for case, counts in by_case.items() if len(set(counts)) != 1]
+                by_case[case][module.__name__].append(host.frame.calls)
+    missing = [name for name, methods in found.items() if not methods]
+    vacuous = [
+        case
+        for case, counts in by_case.items()
+        if any(not side for side in counts.values())
+    ]
+    disagreements = [
+        case
+        for case, counts in by_case.items()
+        if case not in vacuous
+        and len({tuple(sorted(side)) for side in counts.values()}) != 1
+    ]
     return dict(
         entry="plot-columns",
         implementation_a=(
@@ -454,9 +476,154 @@ def entry_plot_columns(receipt):
             "a stub host carrying required, additional and frame.columns"
         ),
         comparisons=comparisons,
+        implementations_found={
+            name: sorted(methods) for name, methods in found.items()
+        },
         tolerance="exact equality of delegate call counts per column state",
+        missing_implementations=missing,
+        vacuous_cases=vacuous,
         disagreements=disagreements,
-        agrees=not disagreements,
+        agrees=not missing and not vacuous and not disagreements,
+    )
+
+
+def _function_bodies(tree, modules):
+    """Every function the route modules define, with its body's source form."""
+    import ast
+    import hashlib
+
+    rows = []
+    for relative in modules:
+        path = tree / relative
+        if not path.exists():
+            continue
+        parsed = ast.parse(path.read_text())
+        for node in ast.walk(parsed):
+            if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+                continue
+            body = list(node.body)
+            if (
+                body
+                and isinstance(body[0], ast.Expr)
+                and isinstance(body[0].value, ast.Constant)
+                and isinstance(body[0].value.value, str)
+            ):
+                body = body[1:]
+            source = ast.unparse(ast.Module(body=body, type_ignores=[]))
+            rows.append(
+                dict(
+                    module=relative,
+                    function=node.name,
+                    statements=len(body),
+                    source=source,
+                    digest=hashlib.sha256(source.encode()).hexdigest()[:12],
+                )
+            )
+    return rows
+
+
+def ast_scan(tree, map_path):
+    """The static duplicate scan the register's candidate list comes from.
+
+    Function names shared by two route modules, exact body digests across
+    modules, and a near-identity pass over the shared names. The route modules
+    are the ones the line map records as executing at least one line.
+    """
+    import difflib
+
+    line_map = json.loads(map_path.read_text())
+    modules = [
+        item["module"]
+        for item in line_map["modules"]
+        if item.get("union", {}).get("executed", 0) > 0
+    ]
+    rows = _function_bodies(tree, modules)
+
+    names = {}
+    for row in rows:
+        names.setdefault(row["function"], set()).add(row["module"])
+    shared = {name: sorted(found) for name, found in names.items() if len(found) > 1}
+
+    groups = {}
+    for row in rows:
+        groups.setdefault(row["digest"], []).append(row)
+    identical = []
+    for digest, entries in sorted(groups.items()):
+        modules_in_group = {entry["module"] for entry in entries}
+        if len(entries) < 2 or len(modules_in_group) < 2:
+            continue
+        identical.append(
+            dict(
+                digest=digest,
+                same_name=len({entry["function"] for entry in entries}) == 1,
+                entries=[
+                    {key: entry[key] for key in ("module", "function", "statements")}
+                    for entry in entries
+                ],
+            )
+        )
+
+    near = []
+    for name in sorted(shared):
+        per_module = {}
+        for row in rows:
+            if row["function"] == name:
+                per_module.setdefault(row["module"], []).append(row)
+        ordered = sorted(per_module)
+        for first in range(len(ordered)):
+            for second in range(first + 1, len(ordered)):
+                for left in per_module[ordered[first]]:
+                    for right in per_module[ordered[second]]:
+                        ratio = difflib.SequenceMatcher(
+                            None, left["source"], right["source"]
+                        ).ratio()
+                        if ratio >= 0.85:
+                            near.append(
+                                dict(
+                                    function=name,
+                                    module_a=ordered[first],
+                                    module_b=ordered[second],
+                                    statements_a=left["statements"],
+                                    statements_b=right["statements"],
+                                    ratio=round(ratio, 4),
+                                )
+                            )
+    near.sort(key=lambda item: (-item["ratio"], item["function"]))
+    return dict(
+        line_map=str(map_path),
+        line_map_revision=line_map.get("revision"),
+        route_modules=modules,
+        route_module_count=len(modules),
+        shared_names=shared,
+        shared_name_count=len(shared),
+        identical_bodies=identical,
+        same_named_multi_statement=[
+            group
+            for group in identical
+            if group["same_name"]
+            and min(entry["statements"] for entry in group["entries"]) >= 2
+        ],
+        near_identity_threshold=0.85,
+        near_identity=near,
+    )
+
+
+def write_ast_scan(path, tree, revision):
+    map_path = (
+        tree / "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.json"
+    )
+    scan = ast_scan(tree, map_path)
+    scan["revision"] = revision
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(scan, indent=2))
+    emit(
+        "AST_SCAN",
+        path=str(path),
+        revision=revision,
+        route_module_count=scan["route_module_count"],
+        shared_name_count=scan["shared_name_count"],
+        identical_groups=len(scan["identical_bodies"]),
+        near_identity_pairs=len(scan["near_identity"]),
     )
 
 
@@ -485,11 +652,26 @@ def compare(receipt_path):
     disagreeing = [
         item.get("entry") for item in receipt["entries"] if item.get("agrees") is False
     ]
-    failed = disagreeing + list(receipt.get("errors", []))
-    emit("SUMMARY", receipt=str(receipt_path), failed=failed)
+    required_controls = ("topology-read", "extreme-selection", "route-resolution")
+    fired = {
+        item["entry"]
+        for item in receipt["negative_controls"]
+        if item.get("disagrees_beyond_tolerance")
+    }
+    silent = [entry for entry in required_controls if entry not in fired]
+    for entry in silent:
+        emit("NEGATIVE_CONTROL_SILENT", entry=entry, required=True)
+    failed = disagreeing + list(receipt.get("errors", [])) + silent
+    emit(
+        "SUMMARY",
+        receipt=str(receipt_path),
+        failed=failed,
+        controls_fired=sorted(fired),
+        controls_required=list(required_controls),
+    )
     print(
         f"{len(receipt['entries']) - len(disagreeing)} entries passed, "
-        f"{len(failed)} failed",
+        f"{len(failed)} failed, {len(fired)} negative controls fired",
         flush=True,
     )
     return len(failed)
@@ -497,10 +679,13 @@ def compare(receipt_path):
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
-    parser.add_argument("--receipt", type=Path, required=True)
+    parser.add_argument("--receipt", type=Path)
+    parser.add_argument("--scan-ast", type=Path)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--tree", type=Path, default=Path.cwd())
     args = parser.parse_args()
+    if args.receipt is None and args.scan_ast is None:
+        parser.error("one of --receipt or --scan-ast is required")
     emit(
         "HEADER",
         revision=args.revision,
@@ -511,7 +696,9 @@ def main():
         driver=str(Path(__file__).resolve()),
     )
     assert jax.default_backend() == "cpu"
-    raise SystemExit(1 if compare(args.receipt) else 0)
+    if args.scan_ast is not None:
+        write_ast_scan(args.scan_ast, args.tree, args.revision)
+    raise SystemExit(1 if args.receipt is not None and compare(args.receipt) else 0)
 
 
 if __name__ == "__main__":

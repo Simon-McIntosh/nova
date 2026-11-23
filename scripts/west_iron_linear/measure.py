@@ -742,6 +742,7 @@ def main():
     parser.add_argument("--resume-refinement", action="store_true")
     parser.add_argument("--compare-routes", action="store_true")
     parser.add_argument("--refine-routes", action="store_true")
+    parser.add_argument("--operator", type=Path)
     parser.add_argument("--cholesky", action="store_true")
     parser.add_argument("--assemble-only", action="store_true")
     replay_mode = parser.add_mutually_exclusive_group()
@@ -846,7 +847,11 @@ def main():
         return
     if args.refine_routes:
         assert args.mesh == "uniform-0.04"
-        source = args.output.parent / f"{args.mesh}-operator.npy"
+        source = (
+            args.operator
+            if args.operator is not None
+            else args.output.parent / f"{args.mesh}-operator.npy"
+        )
         interaction = iron.load_magnetisation_interaction(
             source, region=inputs["region"], cell_size=size, basis="linear"
         )

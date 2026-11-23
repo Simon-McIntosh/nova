@@ -34,6 +34,11 @@ def main():
     parser.add_argument("--job", required=True)
     parser.add_argument("--log", required=True)
     parser.add_argument(
+        "--line-copy",
+        default=None,
+        help="path of the copy that carries the per-module line numbers",
+    )
+    parser.add_argument(
         "--driver-revision",
         default=None,
         help="revision HEAD carried when the map driver rendered this record",
@@ -205,6 +210,13 @@ def main():
         )
     parts.append("</section>")
     parts.extend(["  </main>", "</body>", "</html>"])
+    if args.line_copy:
+        parts.append(
+            f"<p>The machine-readable copy beside this fragment carries every "
+            f"module's counts; the executed line numbers themselves are in "
+            f"<code>{html.escape(args.line_copy)}</code>, beside the run's "
+            f"other receipts.</p>"
+        )
     text, unmapped = relativize_worktree_paths("\n".join(parts) + "\n")
     args.output.write_text(text)
     if unmapped:

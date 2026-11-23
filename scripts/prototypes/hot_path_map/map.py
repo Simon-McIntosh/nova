@@ -87,6 +87,11 @@ def main():
     parser.add_argument("--tree", required=True)
     parser.add_argument("--negative-control", required=True)
     parser.add_argument("--output-json", type=Path, required=True)
+    parser.add_argument(
+        "--strip-lines",
+        action="store_true",
+        help="omit per-module line numbers, keeping the counts and percentages",
+    )
     args = parser.parse_args()
 
     root = args.root.resolve()
@@ -210,6 +215,12 @@ def main():
         device_trace_contradictions=contradictions,
         modules=modules,
     )
+    if args.strip_lines:
+        for row in modules:
+            for key in ("forward", "inverse", "union"):
+                if row.get(key):
+                    row[key].pop("lines", None)
+        payload["line_numbers"] = "omitted from this copy"
     text, unmapped = relativize_worktree_paths(json.dumps(payload, indent=1))
     args.output_json.write_text(text)
     if unmapped:

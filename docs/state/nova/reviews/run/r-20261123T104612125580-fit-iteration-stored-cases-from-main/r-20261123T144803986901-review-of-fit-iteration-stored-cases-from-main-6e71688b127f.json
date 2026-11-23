@@ -11,6 +11,14 @@
   ],
   "completed_at": "2026-11-23T14:57:37.368Z",
   "dispatched_at": "2026-11-23T14:48:44Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T15:15:21.797286+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261123T104612125580-fit-iteration-stored-cases-from-main"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/fit_inside_iteration/test_run.py",

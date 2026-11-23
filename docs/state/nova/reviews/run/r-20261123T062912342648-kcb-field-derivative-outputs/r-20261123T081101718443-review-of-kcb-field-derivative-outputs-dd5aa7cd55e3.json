@@ -40,6 +40,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261123T062912342648-kcb-field-derivative-outputs",
       "section": "\u00a78"
+    },
+    "4": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T17:52:03.411681+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261123T062912342648-kcb-field-derivative-outputs",
+      "section": "\u00a78"
     }
   },
   "findings": [

@@ -1,0 +1,41 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-23T18:21:26.983Z",
+  "dispatched_at": "2026-11-23T18:12:08Z",
+  "findings": [],
+  "justifications": {
+    "durability": "The guard over the record's claims (check_containment.py) is a scratch script in the run directory rather than a committed test, so a later rewrite of the fragment could reintroduce the false containment claim without reddening any repo test; the recorded negative control proves the guard fires on the pre-fix prose, which bounds the exposure but does not make it durable.",
+    "evidence": "The run's negative-control.log opens '# revision c046bd8f35c6db8155b01d7b893b98271f0fc531^' and ends EXIT=1 with three FAIL assertions, while head-check.log at c046bd8f3 ends EXIT=0; the check inputs head-record.html and negative-control-reverted-record.html diff-identically to the committed fragment at c046bd8f3 and 17fc3a721 respectively.",
+    "fit": "The added prose at docs/evidence/fragments/kernel-compile-barrier/field-derivative-merged-gate.html line 13 matches the record's existing measured-numbers idiom and introduces no plan, ticket or sprint identifier.",
+    "goal_fidelity": "docs/evidence/fragments/kernel-compile-barrier/field-derivative-merged-gate.html line 13 now states the generic agreement sits inside its budget by 7.0x and the corner-height figure is 1.99x above its budget, which is the correction the prior blocking finding required.",
+    "reuse": "The gained commit adds no function, class or module; it edits prose only, so it forks no capability, and the check it relies on is a scratch verification of one record rather than a mechanism the repository owns.",
+    "scope_discipline": "git show --stat c046bd8f3 reports exactly one file changed, the declared docs fragment; nothing outside the declared path was touched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T181122845049-review-of-field-derivative-merged-gate-c046bd8f35c6",
+  "reviewed_base_sha": "17fc3a721764bb92ac97a6fdcd8d65b50558a695",
+  "reviewed_head_sha": "c046bd8f35c6db8155b01d7b893b98271f0fc531",
+  "reviewed_run_id": "r-20261123T172135485423-field-derivative-merged-gate",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T18:37:02.031024+00:00",
+  "total": 112,
+  "verdicts": {
+    "call_sites": "The gained commit changes a docs evidence fragment only; it adds no runtime definition, so this delta has no production call site. The source call sites of the earlier commits (nova/equilibrium/fixed_points.py, nova/equilibrium/topology.py, nova/biot/tiledassembly.py) were named in the prior review at 17fc3a721 and are untouched by this delta.",
+    "diff": "Read 17fc3a721..c046bd8f3 commit by commit: one commit, c046bd8f3, replacing one paragraph in the evidence fragment; the arithmetic is re-derivable and correct (1.518378368161929e-10/2.1738626871940731e-11 = 6.98, 2.0643076666778661e-9/1.0377804968078152e-9 = 1.989, 1e-6/2.0643076666778661e-9 = 484), and the section-8 figures come from the delivered run's manifest line 25.",
+    "done_when": "The node's done_when clause 3 requires the record to state section 8's measurements and this gate; the gained commit now states each agreement cohort against its own step-halving budget instead of claiming both lie inside it, and the earlier clauses (merge and one all_debug job) were reviewed at 17fc3a721 and are unchanged at the head.",
+    "goal": "The reviewed node's goal is the merged-head gate for the field-derivative outputs; the gained commit c046bd8f3 repairs only that node's evidence record, and this delta review reads 17fc3a721764bb92ac97a6fdcd8d65b50558a695..c046bd8f35c6db8155b01d7b893b98271f0fc531, whose sole change is docs/evidence/fragments/kernel-compile-barrier/field-derivative-merged-gate.html line 13.",
+    "manifest": "The manifest reads status complete, checkpoint naming the repair at c046bd8f3 with review finding f0e85ac2d4f answered, negative_control_log names /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T172135485423-field-derivative-merged-gate/negative-control.log, and the recorded check passes at the head and fails at the parent.",
+    "write_paths": "The declared path is docs/evidence/fragments/kernel-compile-barrier/field-derivative-merged-gate.html; commit c046bd8f3 touches only that file (git show --stat: 1 file changed, 1 insertion, 1 deletion)."
+  }
+}

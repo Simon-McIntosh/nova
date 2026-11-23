@@ -49,8 +49,10 @@ in that job's output; the comparison basis this section is checked against is
 `docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down/route-modules.json`,
 the stripped copy of the same map; the measurement's own record is
 `docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down.html`.
-The plan-level record of §1's measurement is
-`docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html`.
+The earlier line-map record is
+`docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html`; its map was
+measured at revision 09ef90e4 and the tree has moved since, so read the record
+for how the route was measured rather than for the module lists.
 
 The two routes:
 

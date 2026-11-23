@@ -15,7 +15,7 @@
     <code>nova.database.filepath.worktree_path_candidates</code> owns, not a
     directory walk. A driver known to be tracked must appear or the census
     refuses. This record was produced by
-    <code>benchmarks/scripts_census.py</code> at revision <code>6ac00cda2d8995ffe79b278f58d842831f36d156</code>;
+    <code>benchmarks/scripts_census.py</code> at revision <code>2653ef0c9b5fa5b9b05b9d9d9d01d5e9b416a5e9</code>;
     its machine-readable twin sits at
     <code>docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.json</code>.</p>
     <p>Plan ownership reads each focused plan's own text and the declared
@@ -29,7 +29,7 @@
     </table>
     <p>The three verdicts sum to <strong>1574</strong> and the measured population of both trees is <strong>1574</strong>, so the counts reconcile: <strong>yes</strong>.</p>
     <h3 id="bench-scripts-census-method">How a verdict is reached</h3>
-    <p><strong>keep</strong> &#8212; imported by kept code or tests (<code>nova/</code>, <code>tests/</code>, <code>apps/</code>) or transitively by a kept driver, including a bare sibling import that resolves against the importing file's own directory and the directories that file puts on <code>sys.path</code>; reached by a live runner (a launcher under <code>scripts/</code>, a test, or the packaging metadata) through a full path, an import statement, or a path assembled from quoted segments; named by a plan in S28&#8211;S32, read from that plan's own text rather than guessed from a filename, where a named directory owns its files only when it directly holds a driver and is not a container such as <code>scripts/prototypes/</code>, or declared a write path by one of that plan's live crew runs, so a node queued behind an unlanded upstream keeps the drivers it is holding; a package <code>__init__.py</code>; or this census instrument itself.</p>
+    <p><strong>keep</strong> &#8212; imported by kept code or tests (<code>nova/</code>, <code>tests/</code>, <code>apps/</code>) or transitively by a kept driver, including a bare sibling import that resolves against the importing file's own directory and the directories that file puts on <code>sys.path</code>; reached by a live runner (a launcher under <code>scripts/</code>, a test, or the packaging metadata) through a full path, an import statement, or a path assembled from quoted segments; named by a plan in one of the owning sprints the census was given (S28, S29, S30, S31, S32), read from that plan's own text rather than guessed from a filename, where a named directory owns its files only when it directly holds a driver and is not a container such as <code>scripts/prototypes/</code>, or declared a write path by one of that plan's live crew runs, so a node queued behind an unlanded upstream keeps the drivers it is holding; a package <code>__init__.py</code>; or this census instrument itself.</p>
     <p><strong>delete</strong> &#8212; reached by none of those. Each delete names every evidence record that cites it, by exact path or by a driver directory that holds it, and the revision that evidence record ran at; the revision is proven to resolve by <code>git cat-file -e &lt;revision&gt;:&lt;path&gt;</code>.</p>
     <p>The census driver, its test and this record are excluded as runners, importers and citations: each names drivers as fixtures and as the population, so counting any of them would let the census verify itself.</p>
     <p><strong>merge</strong> &#8212; a byte-identical duplicate that folds into a twin classified keep.</p>
@@ -37,7 +37,7 @@
     <h3 id="bench-scripts-census-controls">Controls</h3>
     <p><strong>Positive control.</strong> <code>benchmarks/recovery_ladder_census.py</code> is known to be tracked and must appear in the census, or the census refuses; it is present.</p>
     <p><strong>Negative controls.</strong> Three forced deletes are refused and named, each for its own reason and no other: <code>benchmarks/recovery_ladder_census.py</code>, a driver a live test imports, refused as <code>imported_by_core, imported by a live test</code>; <code>scripts/prototypes/stored_state_refusals/panels.py</code>, refused as <code>imported_by_kept:&#8230;</code> for the sibling files that import it; and <code>scripts/iron_linear_magnetisation/gate.py</code>, refused as <code>plan_owned:iron-core-magnetisation</code> for the driver directory the plan names. The census's own test names the last two as fixtures and is excluded, so neither refusal rests on it. Each exits 1 with <code>Refused: delete refused: &#8230; is a kept driver (&#8230;) and cannot be deleted</code>. Forcing an unkept driver succeeds, so the guard is specific rather than blanket. Each control log records the revision, the command, the reason and the exit status.</p>
-    <p>Gate: tests/test_scripts_census.py at revision 1374209cab40f8b900663e6fe983795762e9b06d on all_debug (job 1338909): 12 passed in 177.58s (0:02:57).</p>
+    <p>Gate: tests/test_scripts_census.py at revision 54d4e4dd5b8ea33522bed8f081b83e3a4dd2722d on all_debug (job 1338989): 13 passed in 220.37s (0:03:40).</p>
     <h3 id="bench-scripts-census-merges">Merge verdicts (3)</h3>
     <table id="bench-scripts-census-merge-table">
       <tr><th>driver</th><th>folds into (kept)</th></tr>

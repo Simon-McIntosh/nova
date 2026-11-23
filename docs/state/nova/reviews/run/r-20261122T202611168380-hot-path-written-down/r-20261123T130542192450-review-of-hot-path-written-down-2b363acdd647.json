@@ -1,0 +1,58 @@
+{
+  "added_failure_basis": "The reviewed run's manifest declares baseline_suite and after_suite as unarmed because no test file lies in its write scope, so no suite pair exists to difference. Its gate is the route comparison: logs/section-check.log carries the header line naming revision 2b363acdd64782f02a47f342b979166ae57ba1b7 and the section_route.py command, and ends 'ROUTE-CHECK differences=0' then a bare 'EXIT=0'. I re-ran the same script from the head copies of the section and the map in scratch (/tmp/reckon-crew-scratch/r-20261123T130542192450-review-of-hot-path-written-down-2b363acdd647) against --root /home/ITER/mcintos/Code/nova: ROUTES forward=182 inverse=210 shared=182 forward_only=0 inverse_only=28 named=210 differences=0, EXIT=0, reproduced; and with --add shared=nova/utilities/ANSYS.py it printed the two DIFF lines naming that module and EXIT=1, reproduced. Added failures: none.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T13:15:49.982Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-hot-path-written-down-2b363acdd647",
+      "recorded_at": "2026-11-23T13:23:50.607833+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-23T13:06:09Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/AGENTS.md",
+      "line": 42,
+      "severity": "non-blocking",
+      "text": "Six of the seven delivered paths -- the AGENTS.md section, section_route.py, route-modules.json and the three driver edits -- lie outside the two declared write paths (the fragment HTML and the brief's figures directory). The work is exactly what the brief asks ('Write the route section in nova/equilibrium/AGENTS.md', 'Compare the section against a fresh s1 measurement ... using the landed s1 driver'), so the defect is the declaration rather than the diff; the fragment's 'Declared and shared paths' section (docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down.html) now enumerates each path and asks the coordinator to ratify the six with crew complete --accept-path. Answer: exempted (run r-20261122T202611168380-hot-path-written-down, coordinator ratifies)."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_map/section_route.py",
+      "line": 101,
+      "severity": "non-blocking",
+      "text": "The check prints the measurement's revision (payload['revision']) but never compares it with the tree it is checking: --root only asserts the named modules exist. A code change after the measurement that makes a route start executing a module still passes differences=0 against the stale map, so the drift the s28-handoff decision exists to avoid is invisible to the check; only a fresh job.sh re-measurement detects it. I verified the condition is not live at this head -- git diff 8d8b526ae 2b363acdd over nova/ and tests/ changes only AGENTS.md (the doc itself), so the map describes the head's code -- but the check itself cannot see that fact."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_map/section_route.py",
+      "line": 116,
+      "severity": "non-blocking",
+      "text": "Nothing invokes this check automatically: a grep over nova/, scripts/, tests/ and docs/plans finds section_route.py named only in nova/equilibrium/AGENTS.md prose and in the evidence fragment, so the documented route can drift and no test, hook or CI target fails. The repair round records this and declines automatic invocation under the locked decision hot-path-guard: document-only, so the section's 'run the check in the same commit that changes one is a convention with nothing binding it. Answer: exempted (locked decision hot-path-guard)."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T130542192450-review-of-hot-path-written-down-2b363acdd647",
+  "reviewed_base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+  "reviewed_head_sha": "2b363acdd64782f02a47f342b979166ae57ba1b7",
+  "reviewed_run_id": "r-20261122T202611168380-hot-path-written-down",
+  "scores": {
+    "durability": 8,
+    "evidence": 19,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T13:30:12.845305+00:00",
+  "total": 93,
+  "verdicts": {
+    "diff": "Read all five commits 8d8b526ae..2b363acdd against base 348ed92c7: 7 paths, +8639/-3. 8d8b526ae repoints forward_route.py, job.sh and map.py at tests/magnetics_fit_harness.py and tests/test_equilibrium_magnetics_fit_known_states.py; a6c0e29c0 adds the 246-line route section and the 117-line section_route.py; 4453b6f67 commits the 130831-byte stripped map route-modules.json; d080f2dd0 removes the plan-section label from the section; 2b363acdd records the seven delivered paths in the fragment. Every number I re-derived from route-modules.json agrees with the section and fragment: 473 measured modules, 182 forward / 210 inverse, 15517 / 19324 lines, forward.py 504/1043 and 506/1043, ANSYS.py control 0/150, assertions passed with no failures.",
+    "done_when": "Clause (1) is measured by scripts/prototypes/hot_path_map/section_route.py, which compares the three marker blocks with the map's executed modules in both directions and exits nonzero on any difference; logs/section-check.log records differences=0 at the head and I reproduced that. Clause (2) is measured by --root in the same run (210 named, 0 absent) and I confirmed the two test modules the section and driver name exist at the head (git ls-tree).",
+    "goal": "The node goal is to write the measured forward and inverse routes into the equilibrium AGENTS.md, matching a fresh measurement; nova/equilibrium/AGENTS.md:42-283 delivers both routes (phase by phase for the forward route, as a 28-module delta for the inverse), the route sets at :71, and the pending-collapses statement at :157 naming all ten duplicate-register entries as still unanswered.",
+    "manifest": "Read; status complete, the tests line names the literal section_route.py command with absolute interpreter and PYTHONPATH, test_logs name section-check.log, its negative-control log and s1-head2.log, negative_control_log names the red log, and baseline_suite/after_suite are declared unarmed with no test file in scope.",
+    "write_paths": "The declared write paths are the fragment HTML and the figures directory only; the diff's other six paths (nova/equilibrium/AGENTS.md, section_route.py, route-modules.json, forward_route.py, job.sh, map.py) are outside them, though the brief requires the AGENTS.md section and the driver repair and the section's own check command requires the map and the check."
+  }
+}

@@ -25,7 +25,7 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -253,6 +253,9 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="coordinator" data-when="2026-11-23">
     <div class="r-comment-body">§2 landed from run r-20261122T202601421489-bench-scripts-census (head 34f6c3a36) after three audit rounds and two reviews; see landed record anchor s2-bench-scripts-census.</div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261123T124148141242-review-of-unreached-module-delete-dc3a174a7ef3" data-who="reckon-build" data-when="2026-11-23T13:03:40.005Z">
+    <div class="r-comment-body"><p>no plan edit; the review is delivered as a stored record on run r-20261122T202605453490-unreached-module-delete at head dc3a174a7 with scores goal_fidelity 19, evidence 14, scope_discipline 18, durability 5, fit 18, reuse 17 and four non-blocking findings.</p></div>
+</div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261123T091608198628-review-of-hot-path-duplicate-register-c62046c999c4" data-who="reckon-build" data-when="2026-11-23T09:25:29.164Z">
     <div class="r-comment-body"><p>review of r-20261122T202607457728-hot-path-duplicate-register at base 7505cdfbc551ac367c977575d4a3d74a9f1bddd2 and head c62046c999c4fe117a8501c33bf882354105cad2 scores goal_fidelity 17, evidence 16, scope_discipline 12, durability 7, fit 17, reuse 17, with seven non-blocking findings and a parsed record stored under the reviewed run's review-records directory.</p></div>
 </div>
@@ -274,8 +277,8 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261123T123949041890-review-of-hot-path-written-down-4453b6f674a8" data-who="reckon-build" data-when="2026-11-23T12:52:53.839Z">
     <div class="r-comment-body"><p>review of r-20261122T202611168380-hot-path-written-down at base 348ed92c7 and head 4453b6f67 scores goal_fidelity 19, evidence 19, scope_discipline 11, durability 8, fit 16, reuse 18, added_failure_count 0, with three non-blocking findings (six delivered paths outside the declared write paths, the route check invoked by nothing automatic, a plan-section label §1 in AGENTS.md:52); stored as a parsed record under the reviewed run's review-records directory.</p></div>
 </div>
-<div class="r-comment" data-section="s4" data-id="c-run-r-20261123T124148141242-review-of-unreached-module-delete-dc3a174a7ef3" data-who="reckon-build" data-when="2026-11-23T13:03:40.005Z">
-    <div class="r-comment-body"><p>no plan edit; the review is delivered as a stored record on run r-20261122T202605453490-unreached-module-delete at head dc3a174a7 with scores goal_fidelity 19, evidence 14, scope_discipline 18, durability 5, fit 18, reuse 17 and four non-blocking findings.</p></div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261123T130542192450-review-of-hot-path-written-down-2b363acdd647" data-who="reckon-build" data-when="2026-11-23T13:15:49.982Z">
+    <div class="r-comment-body"><p>review of r-20261122T202611168380-hot-path-written-down at base 348ed92c7ab08a9592a7f997d62bfec41ae687d4 and head 2b363acdd64782f02a47f342b979166ae57ba1b7: goal_fidelity 19, goal met; evidence 19, both done-when clauses measured and reproduced; scope_discipline 12, six of seven delivered paths outside the two declared write paths; durability 8, no test fails on regression since the section is document-only; fit 17; reuse 18; added_failure_count 0; three non-blocking findings, no blocking finding.</p></div>
 </div>
 </section>
 </main>

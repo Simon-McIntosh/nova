@@ -20,6 +20,7 @@ import numpy as np
 
 import analyse
 
+
 STUDY = Path(os.environ.get("DRIFT_STUDY", str(Path(__file__).resolve().parent)))
 
 
@@ -80,13 +81,57 @@ def efit_x_points(output: Path, index: int) -> np.ndarray:
     return np.asarray(rows, dtype=float).reshape(-1, 2)
 
 
-def nova_slice(sequence: str, factor: float, index: int) -> tuple:
+def nova_stem(sequence: str, factor: float, arm: str = "all") -> str:
+    """One nova arm's map stem; the row-set tag is the only thing that differs.
+
+    The stem rule is the reduction's, so a map and the record it belongs to
+    cannot be looked for under two spellings.
+    """
+    stem = analyse.declared_stem("nova", sequence, 200, factor)
+    if arm == "all" or stem.endswith("-" + arm):
+        return stem
+    return "%s-%s" % (stem, arm)
+
+
+def slice_record(sequence: str, factor: float, index: int, arm: str = "all") -> dict:
+    """One slice's fit record, read from the arm the stem names."""
+    stem = nova_stem(sequence, factor, arm)
+    for path in sorted(STUDY.glob(stem + "*.jsonl")):
+        for text in path.read_text().splitlines():
+            if text.strip():
+                row = json.loads(text)
+                if int(row["slice"]) == index:
+                    return row
+    receipt = (
+        STUDY / "receipts" / ("nova-%s-%.4f-%05d.json" % (sequence, factor, index))
+    )
+    if receipt.exists():
+        return json.loads(receipt.read_text())
+    raise SystemExit("slice %d of %s carries no fit record" % (index, sequence))
+
+
+def nova_slice(sequence: str, factor: float, index: int, arm: str = "all") -> tuple:
     """One slice's map and its lattice from the arm's stored map stack.
 
     A sequence is written as one map stack per shard, so the slice is looked up
     where its index appears; the stacks of one arm share one lattice.
     """
-    stem = analyse.declared_stem("nova", sequence, 200, factor)
+    stem = nova_stem(sequence, factor, arm)
+    pattern = stem + "-slice%05d.npz" % index
+    for path in sorted((STUDY / "maps").glob(pattern)):
+        stored = np.load(path)
+        return (
+            np.asarray(stored["flux"], dtype=float),
+            np.asarray(stored["radius"], dtype=float),
+            np.asarray(stored["height"], dtype=float),
+        )
+    for shard in sorted((STUDY / "maps").glob(stem + "-shard*-slice%05d.npz" % index)):
+        stored = np.load(shard)
+        return (
+            np.asarray(stored["flux"], dtype=float),
+            np.asarray(stored["radius"], dtype=float),
+            np.asarray(stored["height"], dtype=float),
+        )
     for path in sorted((STUDY / "maps").glob(stem + "-shard*.npz")):
         stored = np.load(path)
         matches = np.flatnonzero(np.asarray(stored["slice"], dtype=int) == index)
@@ -116,11 +161,13 @@ def main() -> int:
     parser.add_argument("--slice", type=int, default=0)
     parser.add_argument("--factor", type=float, default=0.01)
     parser.add_argument("--output", required=True)
+    parser.add_argument("--nova-arm", choices=("all", "loops"), default="all")
     args = parser.parse_args()
 
-    stem = "nova-%s-%.4f-%05d" % (args.sequence, args.factor, args.slice)
-    receipt = json.loads((STUDY / "receipts" / (stem + ".json")).read_text())
-    psi_nova, radius, height = nova_slice(args.sequence, args.factor, args.slice)
+    receipt = slice_record(args.sequence, args.factor, args.slice, args.nova_arm)
+    psi_nova, radius, height = nova_slice(
+        args.sequence, args.factor, args.slice, args.nova_arm
+    )
 
     output = efit_output(args.sequence, args.factor)
     wall_file = STUDY / "conf" / "machine-wall.npz"

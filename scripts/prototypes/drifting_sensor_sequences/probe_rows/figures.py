@@ -38,9 +38,19 @@ FACTOR = 0.01
 COMPONENTS = ((0, "R [m]"), (1, "Z [m]"))
 
 
-def arm_rows(code: str, sequence: str) -> list[dict]:
-    """The slices of this code's declared arm for this sequence."""
-    return analyse.selected_rows(code, sequence, SLICES, FACTOR)
+def arm_rows(code: str, sequence: str, arm: str | None = None) -> list[dict]:
+    """The slices of this code's declared arm, or the arm a caller names.
+
+    The overlay is drawn on the row-matched pair -- nova from the same 24 flux
+    loops imas-efit reads -- so the two states come from one information set.
+    """
+    if arm is None:
+        return analyse.selected_rows(code, sequence, SLICES, FACTOR)
+    stem = analyse.declared_stem(code, sequence, SLICES, FACTOR, rows=arm)
+    paths = sorted(STUDY.glob("%s.jsonl" % stem)) + sorted(
+        STUDY.glob("%s-shard*.jsonl" % stem)
+    )
+    return analyse.grouped(paths).get(stem, [])
 
 
 def axis_position(rows: list[dict]) -> np.ndarray:
@@ -92,7 +102,7 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
     # decides both leaves a label flush with the canvas edge.
     figure, panels = plt.subplots(2, 1, figsize=(14.0, 7.2), dpi=100, sharex=True)
     figure.subplots_adjust(
-        left=0.085, right=0.945, top=0.875, bottom=0.115, hspace=0.42
+        left=0.085, right=0.945, top=0.875, bottom=0.115, hspace=0.58
     )
     axis_truth = np.asarray(truth["axis"], dtype=float)
     handles = {}
@@ -125,10 +135,13 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
             handles["1/f drift" if drift else "white (control)"] = line
         panel.set_ylabel(label)
         panel.set_xlim(0, SLICES - 1)
-        panel.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
-        # A tick at the axes boundary would meet the neighbouring panel's
-        # own label, so each panel keeps a margin above and below its data.
-        panel.margins(y=0.18)
+        # Ticks are placed at fixed fractions of each panel's own range: an
+        # automatic locator puts one at the boundary, where it meets the
+        # neighbouring panel's label across the gap.
+        panel.margins(y=0.26)
+        low, high = panel.get_ylim()
+        panel.set_yticks([low + 0.28 * (high - low), low + 0.72 * (high - low)])
+        panel.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter("%.3f"))
     panels[-1].set_xlabel("slice")
     if handles:
         figure.legend(
@@ -164,7 +177,8 @@ def html_rows(table: dict) -> str:
                 "<td>%.2f</td><td>%.2f</td>"
                 "<td>%.5f</td><td>%.5f</td>"
                 "<td>%.4f</td><td>%.4f</td>"
-                "<td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>"
+                "<td>%.3f</td><td>%.3f</td><td>%.3f</td>"
+                "<td>%.3f</td><td>%.3f</td></tr>"
                 % (
                     code,
                     sequence,
@@ -176,6 +190,8 @@ def html_rows(table: dict) -> str:
                     arm["q95_rms"],
                     arm["q95_mean_50"],
                     arm["axis_lag1"],
+                    arm["axis_lag1_r"],
+                    arm["axis_lag1_z"],
                     arm["flux_lag1"],
                     arm["q95_lag1"],
                 )
@@ -189,6 +205,7 @@ def main(argv=None) -> int:
     parser.add_argument("--figure-dir", required=True)
     parser.add_argument("--table", default="")
     parser.add_argument("--html", action="store_true")
+    parser.add_argument("--nova-arm", choices=("all", "loops"), default="all")
     args = parser.parse_args(argv)
     truth = json.loads((STUDY / "generating.json").read_text())
     directory = Path(args.figure_dir)
@@ -199,7 +216,9 @@ def main(argv=None) -> int:
             rows = arm_rows(code, sequence)
             table[code][sequence] = analyse.reduce_arm(rows, truth) if rows else None
         draw_code(code, truth, directory / ("axis-position-%s.svg" % code))
-    worst = disagreement(arm_rows("nova", "drift"), arm_rows("efit", "drift"))
+    worst = disagreement(
+        arm_rows("nova", "drift", args.nova_arm), arm_rows("efit", "drift")
+    )
     payload = dict(
         table=table,
         disagreement_slice=worst,

@@ -234,6 +234,8 @@ def reduce_arm(rows: list[dict], truth: dict, block: int = BLOCK) -> dict:
         q95_mean_50=q95_mean,
         q95_mean_ratio=ratio(q95_mean, q95_rms),
         axis_lag1=lag_one(values["axis"]),
+        axis_lag1_r=lag_one(values["axis"][:, 0]),
+        axis_lag1_z=lag_one(values["axis"][:, 1]),
         flux_lag1=lag_one(flux),
         q95_lag1=lag_one(values["q95"]),
         axis_mean=values["axis"].mean(axis=0).tolist(),
@@ -265,10 +267,20 @@ def arm_row_set(stem: str) -> str:
 
 
 def declared_stem(
-    code: str, sequence: str, slices: int = 200, factor: float = 0.01
+    code: str,
+    sequence: str,
+    slices: int = 200,
+    factor: float = 0.01,
+    rows: str | None = None,
 ) -> str:
-    """The arm stem this code's column states, by its declared row set."""
-    tag = DECLARED_ROWS[code]
+    """The arm stem this code's column states, by its row set.
+
+    ``rows`` names a row set other than the code's declared one (the
+    consecutive 24-loop arm beside nova's 72-row arm, for instance), so a
+    caller composes the stem once here rather than appending a suffix that
+    would double when a declared set is itself that row set.
+    """
+    tag = DECLARED_ROWS[code] if rows is None else rows
     return "%s-%s-%d-%.4f%s" % (
         code,
         sequence,
@@ -279,25 +291,46 @@ def declared_stem(
 
 
 def selected_rows(
-    code: str, sequence: str, slices: int = 200, factor: float = 0.01
+    code: str,
+    sequence: str,
+    slices: int = 200,
+    factor: float = 0.01,
+    rows: str | None = None,
 ) -> list[dict]:
     """The slices of this code's declared arm, or empty when it is absent.
 
     One arm-selection rule for the reduction, the gate and the figures: the arm
     whose stem this code declares is the one stated, and a run holding only
-    another row set is reported missing rather than silently reduced.
+    another row set is reported missing rather than silently reduced.  ``rows``
+    selects a named row set instead of the declared one.
     """
     pattern = "%s-%s-%d-%.4f*.jsonl" % (code, sequence, slices, factor)
     runs = grouped(sorted(STUDY.glob(pattern)))
-    return runs.get(declared_stem(code, sequence, slices, factor), [])
+    return runs.get(declared_stem(code, sequence, slices, factor, rows), [])
 
 
 def grouped(paths: list[Path]) -> dict[str, list[dict]]:
-    """Merge shard files of one run into a single slice-ordered series."""
+    """Merge shard files of one run into a single slice-ordered series.
+
+    An arm is one run, so each slice index appears once.  A file that repeats a
+    slice another file of the same stem already carries -- a probe record left
+    at the arm's own name, for instance -- is refused rather than merged, since
+    merging would double-weight that slice in every statistic the arm reports.
+    """
     runs: dict[str, list[dict]] = {}
+    seen: dict[tuple[str, int], Path] = {}
     for path in paths:
         stem = re.sub(r"-shard[0-9]+$", "", path.stem)
-        runs.setdefault(stem, []).extend(load(path))
+        for row in load(path):
+            index = int(row["slice"])
+            key = (stem, index)
+            if key in seen:
+                raise ValueError(
+                    "arm %s repeats slice %d: %s and %s"
+                    % (stem, index, seen[key], path)
+                )
+            seen[key] = path
+            runs.setdefault(stem, []).append(row)
     for rows in runs.values():
         rows.sort(key=lambda row: row["slice"])
     return runs
@@ -400,9 +433,31 @@ def main() -> int:
         if match:
             spectrum["efit"][(float(match.group(2)), float(match.group(3)))] = value
 
+    # The row-matched pair: nova fitted from the same 24 flux loops imas-efit
+    # reads.  Declared separately from `control`, whose nova column is the
+    # 72-row set, so a reader sees both of nova's arms and the one that is
+    # like-for-like with imas-efit.
+    row_matched = {
+        "nova": {
+            sequence: summary.get(declared_stem("nova", sequence, rows="loops"))
+            for sequence in ("white", "drift")
+        },
+        "efit": {sequence: pick("efit", sequence) for sequence in ("white", "drift")},
+    }
+    # Each entry is a copy: the declarations above share one dictionary per
+    # arm, and stamping the row set in place would edit the control's arms too.
+    row_matched = {
+        code: {
+            sequence: None if arm is None else dict(arm, row_set="loops")
+            for sequence, arm in streams.items()
+        }
+        for code, streams in row_matched.items()
+    }
+
     payload = dict(
         reference=reference,
         control=control,
+        row_matched=row_matched,
         sizes={
             code: {str(k): v for k, v in points.items()}
             for code, points in sizes.items()

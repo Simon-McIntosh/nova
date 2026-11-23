@@ -182,18 +182,46 @@ def fit_sequence(args) -> int:
         noise = study.noise_columns(
             sequence, args.slices, sigma, args.seed, args.factor
         )
-        rng = np.random.default_rng(args.seed + 991)
-        current = reference["plasma_current"] + sigma_ip * rng.standard_normal(
-            args.slices
+        current = reference["plasma_current"] + study.current_draw(
+            sequence, args.slices, sigma_ip, args.seed + 991
         )
         path = STUDY / (
             "nova-%s-%d-%.4f%s%s.jsonl"
             % (sequence, args.slices, args.factor, tag, suffix)
         )
-        grids: list[np.ndarray] = []
-        indices: list[int] = []
-        with path.open("w") as stream:
+        maps = STUDY / "maps"
+        maps.mkdir(parents=True, exist_ok=True)
+        stem = "nova-%s-%d-%.4f%s%s" % (
+            sequence,
+            args.slices,
+            args.factor,
+            tag,
+            suffix,
+        )
+        # Resume: a slice already recorded under this arm's own file is kept,
+        # and each slice's map lands beside its record as soon as it is fitted,
+        # so an expired allocation loses at most the slice in flight.  A record
+        # counts as kept only when it was fitted under the pass budget and
+        # tolerance this run asks for: a slice left at a shorter cap is refitted
+        # rather than counted as a converged one.  A record carrying no settings
+        # predates the field, so its budget is unknown and it is refitted.
+        settings = dict(
+            max_passes=int(args.max_passes),
+            flux_tolerance=float(args.flux_tolerance),
+            step_rule=str(args.step_rule),
+        )
+        done = set()
+        if path.exists():
+            for text in path.read_text().splitlines():
+                if not text.strip():
+                    continue
+                row = json.loads(text)
+                if row.get("fit_settings") == settings:
+                    done.add(int(row["slice"]))
+        with path.open("a") as stream:
             for index in slots:
+                if index in done:
+                    continue
                 measured = case["total"] + noise[index]
                 measurement = study.fitted_measurement(
                     case, measured, sigma, current[index], mask=mask
@@ -211,24 +239,31 @@ def fit_sequence(args) -> int:
                     record = record_of(case, fitted, index)
                     record["plasma_current_measured"] = float(current[index])
                     record["rows"] = args.rows
-                    grids.append(
-                        np.asarray(
+                    record["fit_settings"] = settings
+                    np.savez(
+                        maps / ("%s-slice%05d.npz" % (stem, index)),
+                        radius=study.GRID_RADIUS,
+                        height=study.GRID_HEIGHT,
+                        flux=np.asarray(
                             study.nova_flux_map(case, fitted.terminal_state).flux,
                             dtype=float,
-                        )
+                        ),
+                        slice=np.array(index, dtype=int),
                     )
-                    indices.append(index)
                     stream.write(json.dumps(record) + "\n")
                     stream.flush()
                     study.land("nova-%s-%.4f" % (sequence, args.factor), record)
-        maps = STUDY / "maps"
-        maps.mkdir(parents=True, exist_ok=True)
+                done.add(index)
+        grids: list[np.ndarray] = []
+        indices: list[int] = []
+        for index in list(slots):
+            stored = maps / ("%s-slice%05d.npz" % (stem, index))
+            if not stored.exists():
+                continue
+            grids.append(np.asarray(np.load(stored)["flux"], dtype=float))
+            indices.append(index)
         np.savez(
-            maps
-            / (
-                "nova-%s-%d-%.4f%s%s.npz"
-                % (sequence, args.slices, args.factor, tag, suffix)
-            ),
+            maps / (stem + ".npz"),
             radius=study.GRID_RADIUS,
             height=study.GRID_HEIGHT,
             flux=np.asarray(grids, dtype=float),

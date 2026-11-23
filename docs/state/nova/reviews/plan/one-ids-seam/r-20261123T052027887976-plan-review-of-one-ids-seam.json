@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T05:47:39.620Z",
+  "dispatched_at": "2026-11-23T05:24:33Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/one-ids-seam.html:61",
+      "id": "reasoning-1",
+      "reason": "without a distinction between \"converts and moves\" and \"derives-then-fixed and stays\", the census row for both modules contradicts \u00a75, and a node following \u00a71 moves two of nova's own IO modules out of the ingest it still reads through.",
+      "text": "\u00a71's class rule sends every convention-conversion module \"to the ingest member under \u00a75\", and \u00a71's control (line 66) explicitly classes `nova/io/ingest.py` and `nova/io/signalstore.py` as \"convention conversion through the sourcemap helper\"; but \u00a75 (line 101) keeps both modules in nova, replacing their derived convention with a fixed one (\"those modules take the fixed convention\", and the signal store \"stops keying on a derived one\"). Both modules in fact derive a COCOS value through `nova.io.sourcemap.dd_equilibrium_convention`, so \u00a71 sends them to the member while \u00a75 keeps them.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/one-ids-seam.html:76",
+      "id": "done_when-1",
+      "reason": "a positive control proves the scanner is not blind, not that the deletion guard goes red when a reference remains, so the node's gate can pass on an unfixed link.",
+      "text": "\u00a72's only control is the scan over `nova.imas.dataset` finding its importers, a positive control that cannot fail; it does not show \u00a72's check (\"the scan returns no reference to any deleted module name\") fires when a reference survives.",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "8951887650703b921eaa2dea90ea56a29f7f84d9",
+  "plan_fingerprint": "082e34966d5cb32d0fdb7561d8f395668bd3d1fb96c2bb8b88c454583344af94",
+  "plan_slug": "one-ids-seam",
+  "plan_version": 8,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T052027887976-plan-review-of-one-ids-seam",
+  "reviewed_blob_sha": "1c78e26988bf41489c95e6b30cdd4a59983c84ac",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited file resolves in this worktree: `nova/imas/decimate.py`, `fuse.py`, `transient.py`, `toroidal_field_coil.py`, `waveform.py`, `contour_tree_layout.py`; `nova/catalog/mast_geometry.py` and its `.json`; `nova/io/sourcemap.py`, `ingest.py`, `signalstore.py`; `nova/equilibrium/convention.py`; `nova/imas/dataset.py`; `nova/calibrate/sweep.py`; the five named imas-ambix modules plus `machine_identity.py` and `imas_ambix/data/description_identity.py`; plans `machine-description-retirement.html` and `cut-cell-current-attribution.html`; and the extensionless href `/nova/evidence/fragments/dd-cocos-ingest/flux-function-sign` resolves to `flux-function-sign.html`. \u00a72 also explicitly repoints the two stale `reuse-map.md` citations of `contour_tree_layout.py`.",
+    "done_when": "a finding \u2014 \u00a72 declares a positive control where the rubric asks for a negative control, so its deletion check (the scan returning no reference to a deleted module) is never shown to fire.",
+    "evidence_paths": "pass \u2014 \u00a71 renders a committed record at `docs/research/imas-seam-census.html`, and every cited evidence target (`docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html`, `dd-translator.html`, `docs/evidence/contour-tree-topology-authority/reuse-map.md`) is a durable committed file; no section names a scratchpad or node-local temporary path.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag is carried into a symbol, filename or comment; `f-ddc-006` appears only as a followup id in plan prose.",
+    "reasoning": "a finding \u2014 \u00a71's class rule and \u00a75 assign `nova/io/ingest.py` and `nova/io/signalstore.py` two different destinations.",
+    "single_goal": "pass \u2014 each of \u00a71\u2013\u00a77 names one deliverable (census, deletion, MAST move, DIII-D move, flux-function sign, one convention, solve seam).",
+    "wiring": "pass \u2014 the `plan-section-depends-on` graph is acyclic and every edge resolves to a section that supplies what the dependent needs (s2\u2192s1, s3\u2192s1, s4\u2192s1, s5\u2192s3,s4, s6\u2192s5,s7, s7\u2192s5); \u00a72's section attribute carries an empty `data-links` where the DAG declares s2\u2192s1 (surface only; the queue reads the DAG meta)."
+  },
+  "section_digests": {
+    "_document": "a72509674351b1f6c6da6c018f610d8a4b6d279fba4f1c6c3983c4984eaa69d0",
+    "s1": "9940af6b75a415caa5bec296abfe5423208218dfc48059e2e4592701a9c5082b",
+    "s2": "4d4306905d99e21016f6430f76825e5e72193c67ed314750cf944e975513b8ce",
+    "s3": "37794c72c974cc2313e311e578b4438fda49ceebb2278fe2803a45654d8384dc",
+    "s4": "4e7c9afbff46d47d2d199ce6001bb7a3900c9b1841434faccd2ae76cc7b1ebb7",
+    "s5": "7047ae78b112c700a41facc69ef9ce80b9d99ba08997f8289cf312f5f9210b6e",
+    "s6": "e8683fc2c1f7e0c827c6e7825b90a3907be409c0ebb99a64c29d956ee77e81d3",
+    "s7": "953227931f58fcac68dba80d7a089238e98ad7483629eed3a39e52c94effb2fa"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T05:47:43.632221+00:00",
+  "total": null
+}

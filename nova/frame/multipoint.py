@@ -71,15 +71,60 @@ class MultiPoint(metamethod.MultiPoint):
         self.build()
 
     def sort_link(self):
-        """Ensure links point to a monotonically earlier row."""
-        for position, link in enumerate(self.frame.link):
-            if link and link in self.frame.index:
-                name = self.frame.index[position]
-                link_index = self.frame.index.get_loc(link)
-                if link_index > position:  # reverse
-                    self.frame.at[link, "link"] = name
-                    self.frame.loc[np.asarray(self.frame.link) == link, "link"] = name
-                    self.frame.at[name, "link"] = ""
+        """Ensure links point to a monotonically earlier row.
+
+        Resolve every link to its first matching row position in one indexer
+        pass. A frame whose links all point backwards is left untouched, so the
+        common case costs one indexer build and no rewrites: the frame is
+        re-sorted after every inserted element, and a per-row label scan would
+        make that rebuild quadratic in the accumulated row count.
+
+        Where a link points forward the reversal is applied in row order,
+        carrying each link group with the row that becomes its new target:
+        the row that named a later label takes its place, every row pointing at
+        that label is re-pointed at it, and its own link is cleared.
+        """
+        link = np.asarray(self.frame.link, dtype=object)
+        index = self.frame.index
+        nonempty = np.array([bool(value) for value in link], dtype=bool)
+        if not nonempty.any():
+            return
+        lookup: dict[object, int] = {}
+        for row, label in enumerate(np.asarray(index, dtype=object)):
+            lookup.setdefault(label, row)
+        rows = np.arange(len(link), dtype=int)
+        forward = nonempty & (
+            np.fromiter(
+                (lookup.get(value, -1) for value in link), dtype=int, count=len(link)
+            )
+            > rows
+        )
+        if not forward.any():
+            return
+        order = link.tolist()
+        groups: dict[object, list[int]] = {}
+        for row in range(int(forward.argmax()), len(order)):
+            if order[row]:
+                groups.setdefault(order[row], []).append(row)
+        for row, target in enumerate(order):
+            if not target:
+                continue
+            target_row = lookup.get(target, -1)
+            if target_row <= row:
+                continue
+            name = index[row]
+            for member in groups.pop(target, ()):
+                if order[member] != target:
+                    continue
+                if member == row:
+                    order[member] = ""
+                else:
+                    order[member] = name
+                    groups.setdefault(name, []).append(member)
+            if order[target_row] != name:
+                order[target_row] = name
+                groups.setdefault(name, []).append(target_row)
+        self.frame.link = np.array(order, dtype=object)
 
     def build(self):
         """Compute the ref / subref reduction indices from the links."""

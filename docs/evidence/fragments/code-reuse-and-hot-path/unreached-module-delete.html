@@ -174,14 +174,20 @@
     <code>pytest --collect-only</code> over the full test tree. The delta is
     exact: <strong>zero new import failures</strong>. The nine failures that
     disappeared are precisely the nine deleted modules that failed to import at
-    base for a missing optional dependency (<code>pyuda</code>,
-    <code>pylops</code>, <code>amigo</code>, and the <code>nova</code>
-    accessor cycle through <code>nova.dataset.access</code>); each one is a
+    base: six for a missing optional distribution (<code>pyuda</code>,
+    <code>codac_uda</code>, <code>pylops</code>, <code>amigo</code>), one
+    through the dataset accessor (<code>ImportError: cannot import name
+    'xarray' from 'nova'</code>), one importing a symbol
+    <code>nova.imas.coils_non_axisymmetric</code> does not define, and one
+    whose module-scope code emits a progress bar before failing, so the tail
+    line the receipt kept is the bar rather than the exception. Each one is a
     deleted path and nothing else. The fourteen failures that remain are
     pre-existing and unrelated: missing optional distributions
     (<code>fabric</code>, <code>astropy</code>, <code>ssh</code>,
-    <code>codac_uda</code>), a missing sibling module, and pre-existing broken
-    imports in modules no route exercises.</p>
+    <code>codac_uda</code>), missing sibling modules, and pre-existing broken
+    imports in modules no route exercises. The two arm receipts are
+    <code>gate-base.json</code> and <code>gate-head.json</code> in the run
+    directory, with the full per-arm collection listings beside them.</p>
     <p>Collection fell from 10943 to 10937 and the lost six items are exactly
     the six <code>test_module_imports[...]</code> parametrisations that
     <code>tests/test_thermalhydralic.py</code> derives from a

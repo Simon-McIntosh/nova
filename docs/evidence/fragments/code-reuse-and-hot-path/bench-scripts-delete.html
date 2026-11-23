@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="code-reuse-and-hot-path">
+  <title>Delete and merge benchmarks and scripts | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="bench-scripts-delete-summary">Delete and merge benchmarks and scripts</h2>
+    <p>This node applies the <code>bench-scripts-census</code> delete and merge
+    verdicts. The census was taken at revision
+    <code>2653ef0c9b5fa5b9b05b9d9d9d01d5e9b416a5e9</code>; this batch base is
+    <code>348ed92c7ab08a9592a7f997d62bfec41ae687d4</code>.</p>
+
+    <h3 id="bench-scripts-delete-partition">The verdicts split on a kept-code reference</h3>
+    <p>The census models Python imports only. Applying its 715 delete and 3
+    merge <em>unconditionally</em> would orphan files the census did not model
+    as consumers: shell and <code>sbatch</code> drivers invoke a
+    prototype&rsquo;s entry module by name, kept Python modules import a sibling
+    the census marked delete, and product docstrings name a benchmark. Those
+    references break the census&rsquo;s own keep rule (&ldquo;imported by kept
+    code&rdquo;) because the keeping happens after the citation pass and does
+    not cascade into the newly kept file&rsquo;s imports.</p>
+    <p>So each delete path is checked against the whole tracked tree before it
+    is removed. A path named by any kept <code>.py</code>, <code>.sh</code>,
+    <code>.bash</code> or <code>.sbatch</code> file outside <code>docs/</code>
+    is withheld from this node and reported to the census defect. Every
+    <code>docs/</code> reference is a historical evidence record carrying the
+    revision it ran at, which the plan permits.</p>
+    <table id="bench-scripts-delete-partition-table">
+      <tr><th>set</th><th>files</th><th>lines</th></tr>
+      <tr><td>census delete + merge</td><td>718</td><td>214021</td></tr>
+      <tr><td>withheld: named by kept code</td><td>102</td><td>28590</td></tr>
+      <tr><td>deletable in this node</td><td>616</td><td>185431</td></tr>
+    </table>
+
+    <h3 id="bench-scripts-delete-batches">Batches</h3>
+    <p>Each batch is one commit of no more than about thirty thousand removed
+    lines. Before every commit the absence check re-derives, from the whole
+    tracked tree, that no batch path is present and that no kept code file
+    names one.</p>
+    <table id="bench-scripts-delete-batch-table">
+      <tr><th>batch</th><th>files</th><th>lines removed</th><th>running total</th></tr>
+      <tr><td>1</td><td>54</td><td>29789</td><td>29789</td></tr>
+    </table>
+
+    <h3 id="bench-scripts-delete-withheld">Withheld paths</h3>
+    <p>The 102 withheld paths are named by 95 shell or <code>sbatch</code>
+    driver edges, 32 kept-Python edges, six test docstrings and five product
+    docstrings. They are reported on the node&rsquo;s manifest rather than
+    edited here, because repairing a shell driver or a product docstring is a
+    separate decision from applying the census.</p>
+  </main>
+</body>
+</html>

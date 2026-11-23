@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T00:17:41.053Z",
+  "dispatched_at": "2026-11-22T23:58:07Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-api/r-20261122T203639932201-plan-review-of-forward-solve-api/plan.html:13",
+      "id": "wiring-1",
+      "reason": "plan effort feeds the roadmap's effort arithmetic, and a stale total misstates the plan's width after exactly the change this review reads.",
+      "text": "`plan-effort-hours` reads 26.0 while the open section elements (s2 6.0, s3 6.0, s5 8.0, s6 6.0, s7 4.0) sum to 30.0, so adding \u00a77 left the plan's declared width 4.0 h short",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-api/r-20261122T203639932201-plan-review-of-forward-solve-api/plan.html:66",
+      "id": "reasoning-1",
+      "reason": "a node dispatched on \u00a77 would re-derive fields the tree already holds, so the section should scope and state its real remainder: the JSON round-trip, the no-extra-compile measure and its negative control.",
+      "text": "\u00a77 reads as a section that delivers the labelled flux map, but the tree already carries it: `ForwardLabelledFlux` in `nova/equilibrium/forward.py` holds psi, psi_norm, o_point, primary_x_point, secondary_x_point, lcfs, lcfs_vertex_count, strike_points, strike_segment, strike_parameter and a `domain_label` enum with exactly CORE, PRIVATE_FLUX, WALL_SHADOW and OPEN and no scrape-off-layer class, landed by 7eebe4c94 and merged as 6fb07a403, which the plan's own resolved followup f-fsa-002 records as \"node C labelled receipt\"; tests/test_solve_receipt_topology.py already asserts the flux vectors, the axis, the primary X-point read, the LCFS vertex count and the strike points, and restricts the domain labels to the resolvable set",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/forward-solve-api/r-20261122T203639932201-plan-review-of-forward-solve-api/plan.html:67",
+      "id": "done_when-1",
+      "reason": "the measure as written cannot be run at head; it needs a named base revision for its before arm, or a control that can fail at head, such as the same solve with the labelled-flux read suppressed.",
+      "text": "clause (2) requires a test showing \"the program count of one solve is equal before and after\" the receipt change, but that change already landed at 7eebe4c94, so at head there is no before arm to measure and a literal reading can only compare against a hardcoded count that fails on any unrelated change to the solve's compile footprint",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3130afa040bf8cc9c8a8d4fd784489e20193208a",
+  "plan_fingerprint": "13d701b6506eccc11ef70c6ac451e2128bab19335926dd7ee309ca11c5f20c60",
+  "plan_slug": "forward-solve-api",
+  "plan_version": 166,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261122T203639932201-plan-review-of-forward-solve-api",
+  "reviewed_blob_sha": "765de462f81f870eeea79604cd6692f870dc9700",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited commits `32f16b3b`, `260a8b44` and `588578a0` resolve in nova, `sub-millisecond-forward-path#s4` exists, the \u00a75 cross-reference to \u00a77 is present, and the extensionless archive href resolves as `<path>.html` under the docs convention.",
+    "done_when": "a finding \u2014 \u00a77's clause (2) asks for a compiled-program count \"equal before and after\" a receipt change already in the tree, so its before arm cannot be run at head.",
+    "evidence_paths": "pass \u2014 \u00a77 names no scratch or temporary path; its gate and round-trip logs land under the run's report directory, and the receipt it cites is a committed path under `docs/figures/forward-solve-api/`.",
+    "naming": "pass \u2014 no plan label, ticket number or version tag reaches a symbol; the dated split note is plan history in plan prose, not code.",
+    "reasoning": "a finding \u2014 \u00a77 presents the labelled flux map as work to deliver, but every field its done-when names already exists in `ForwardLabelledFlux` at head with tests covering it.",
+    "single_goal": "pass \u2014 \u00a77 carries one deliverable, the labelled flux map in the receipt; the traced-edit latency and the warm-start sweep stay in \u00a75, so the earlier split finding is answered.",
+    "wiring": "a finding \u2014 the header wires `s7` and the `s5` wait on `sub-millisecond-forward-path#s4` correctly, but its effort total was not updated when \u00a77 was added (declares 26.0 h against sections summing 30.0 h)."
+  },
+  "section_digests": {
+    "_document": "731c04a1a3afd694d4e935b5d10f41a31474e9dcec63de6ae2b5e905e981f92e",
+    "s1": "15b140d9bfa92a8c1b5a9f2958b79468405f9375f2c62195a350a8f0378045d1",
+    "s2": "5ee351f40278f0a5290dd1ca86ce1e55e3fb9bc04310a1d343bd193207f00742",
+    "s3": "d6c6916c41cfd391aa7adb318257e5cbf776306467438a5dbef9721025dd5357",
+    "s4": "83822b14a2b02467715017811a9cc6eb6124f709c56b71467fd19a407f9a67c4",
+    "s5": "7417e988d8de88f0bd945ecb66b0ca70dcd09745d1e9b1a976adc975562d4a07",
+    "s6": "716994f254e6e95b3e35fd9228389d7ed937d6a0d5a855a37d25b105030f1385",
+    "s7": "658e2f900cc3f459d33ce4ef8ee6c4de6e2d95b6503f0ae12378b5e398cc3974"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T00:17:43.812348+00:00",
+  "total": null
+}

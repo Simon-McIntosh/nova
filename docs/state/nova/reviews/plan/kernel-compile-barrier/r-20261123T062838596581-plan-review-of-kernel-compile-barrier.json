@@ -33,7 +33,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 137,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fa1d9b7b93c2d1d6355ecfad5d669fead3628208",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a74 now waits on \u00a79 (plan-section-depends-on s4: s2, s3, s9), since \u00a79 is what brings the read inside \u00a74's first-call bounds.",
+      "reason": "",
+      "when": "2026-11-23T07:02:37.095161+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fa1d9b7b93c2d1d6355ecfad5d669fead3628208",
+      "commit_basis": "edit",
+      "note": "\u00a74 now waits on \u00a79 (plan-section-depends-on s4: s2, s3, s9), since \u00a79 is what brings the read inside \u00a74's first-call bounds.",
+      "reason": "",
+      "when": "2026-11-23T07:02:37.095161+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261123T062838596581-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261123T062838596581-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "51f460f251de07d1f7e9a912225c177b534fd24c",
   "rubric": "content",

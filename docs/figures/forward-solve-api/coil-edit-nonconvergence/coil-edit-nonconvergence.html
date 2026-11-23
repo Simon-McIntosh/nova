@@ -186,8 +186,15 @@ out.</p>
 <img src="/nova/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png" alt="Poloidal flux contours of a converged and a non-converged coil edit on shared levels, with the wall and both null sets">
 <figcaption>Left: edit 5 (P4-upper circuit 8 current &minus;8&#37; of the seed), converged, terminal residual 5.366e-09 Wb, five active-set iterations. Right: edit 4 (&minus;10&#37;), not converged, terminal residual 4.339e-02 Wb, four active-set iterations. The percentage is the fraction by which the edit scales that circuit's current, and an <em>active-set iteration</em> is one active-set trip the driver took; the two panels are the two largest-residual points of their respective sets. The converged panel draws the field of its terminal currents on a 10 mm map (largest node mismatch 1.311e-05 Wb, solved-node mismatch 6.345e-09 Wb, 27 promoted nodes, nearest promoted node 2.571 m from its polished X-point, outside the two-lattice-cell band of 0.121 m within which a promotion would leave the near-X geometry uncertified); the non-converged panel draws its own (1.947e-02 Wb, 8.043e-03 Wb, 3 promoted nodes, nearest 0.087 m, inside that band). Reference contours are grey and solved contours orange, both at 1.2&nbsp;pt on one shared level array;
 the reference nulls are drawn larger and beneath the solved ones, so a coincident axis or saddle reads
-as both, and other qualified nulls are hollow in both sets over the MAST first wall. A frameless legend
-names the contour series, the dashed saddle legs and the two null sets.</figcaption>
+as both, and other qualified nulls are hollow in both sets over the MAST first wall. The separatrix sets are drawn as blue reference
+unassembled, crossings drawn unconnected; orange converged lobe solid, legs
+dashed; orange failed unassembled, crossings drawn unconnected. The blue
+reference chain is its own scan-order crossings, the blue plus marks,
+unconnected, not an assembled boundary; the orange converged separatrix is a
+solid lobe with its two dashed legs; and the orange non-converged set could
+not be assembled either, so it is drawn from its own scan-order crossings as
+separate marks. A frameless legend
+names the contour series, the crossing marks and the two null sets.</figcaption>
 </figure>
 <h2 id="artifacts">Where this rides</h2>
 <ul>

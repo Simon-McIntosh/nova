@@ -175,6 +175,21 @@
     failure mode a pure file deletion can produce, and it was run as one job per
     arm on <code>all_debug</code> with
     <code>scripts/nova_lane/run.sh --rungs cpu --force-submit --wait</code>.</p>
+    <p id="unreached-module-delete-gate-substitution">The substitution is not
+    this record's own judgement. It is the recorded decision
+    <code>deletion-gate</code> in <code>docs/plans/code-reuse-and-hot-path.html</code>,
+    dated <code>2026-11-23T17:19:26+00:00</code> and applying to sections
+    <code>s3</code> and <code>s4</code>, which asks whether the deletion
+    sections may land on a deletion-specific check instead of a chunked suite
+    and chooses <em>import sweep, collection parity and the absence check</em>,
+    with the reason that a deletion can only break an importer or a collector.
+    Its rationale also names a fourth element, identical failure ids on a
+    focused set. All four are measured below: the import sweep and collection
+    parity in the arm table, the focused set in the paragraph after it, and the
+    absence check in
+    <a href="#unreached-module-delete-absence">its own paragraph</a>. The
+    suite-delta clause of this section's done-when is therefore met as the
+    decision defines the gate, not as a full two-arm execution.</p>
     <table id="unreached-module-delete-gate-table">
       <tr><th>arm</th><th>revision</th><th>job</th><th>modules imported</th><th>import failures</th><th>collected</th></tr>
       <tr><td>base</td><td><code>348ed92c</code></td><td>1339201</td><td>450 of 473</td><td>23</td><td>10943</td></tr>
@@ -239,6 +254,17 @@
     beside this record: <code>focused-head.log</code> for the run that includes
     the pre-existing failure and <code>focused-pass.log</code> for the run that
     does not.</p>
+    <p id="unreached-module-delete-absence">The third element of the decision,
+    the absence check, reads every tracked file for the dotted name of each
+    deleted module through <code>git grep</code>, so an untracked scratch tree
+    can neither make the answer look clean by being ignored nor look dirty by
+    being scanned. All <strong>24</strong> deleted modules were checked and
+    <strong>no tracked file under <code>nova/</code>, <code>tests/</code>,
+    <code>benchmarks/</code>, <code>scripts/</code>, <code>apps/</code> or
+    <code>input/</code> names one</strong>; the only hits are in evidence
+    documents, which have to name what they record. The check is
+    <code>absence-check.sh</code> in the run directory and its output is
+    <code>absence.log</code> beside it.</p>
 
     <h3 id="unreached-module-delete-limits">What this record does not claim</h3>
     <p>It does not claim the full test suite is green: that run was not
@@ -256,7 +282,28 @@
     package-module graph this node needed, and whose modification is outside
     that scope. <code>scan.py</code> needs the hot-path map, the census and an
     imas-ambix source tree; <code>delete.py</code> reads the scan receipt and
-    the map; <code>receipt.py</code> composes the JSON twin from both.<br><br>
+    the map; <code>receipt.py</code> composes the JSON twin from both.</p>
+    <p id="unreached-module-delete-import-owner">That overlap is real and is
+    stated rather than waved away, and it is also partial in a way this node
+    measured. The owner's <code>imports_of</code> reads absolute
+    <code>import</code> and <code>from X import y</code> forms; run over a
+    snippet carrying a relative import and a dynamic one it returns
+    <code>['importlib', 'mod', 'mod.thing', 'pkg.sub', 'pkg.sub.name']</code>
+    &mdash; the relative <code>from .mod import thing</code> loses its package
+    prefix, and <code>importlib.import_module("nova.foo")</code> is absent
+    entirely. For a script census that is correct, because a script imports its
+    neighbours by top-level name. For the package graph it is not: a module
+    deleted from <code>nova/</code> is named by its dotted package path, so an
+    unqualified <code>mod</code> would not refuse it and a dynamic import would
+    vanish from its edge set. <code>scan.py</code> resolves both
+    (<code>resolve(owner, level, module, pkg)</code> and constant-string
+    <code>import_module</code>/<code>__import__</code> arguments) for that
+    reason. Folding the two together means teaching the owner relative-prefix
+    resolution and dynamic-import strings, which is a change to
+    <code>benchmarks/</code> and outside this round's write scope; the drivers
+    are therefore published in this record, byte-identical to the copies that
+    produced the receipt, so any reader can extract and re-run them without the
+    run directory.<br><br>
     <code>python3 scan.py --base &lt;tree&gt; --map &lt;hot-path-map.json&gt; --census
     &lt;bench-scripts-census.json&gt; --ambix &lt;imas-ambix&gt; --plans-dir
     &lt;tree&gt;/docs/plans --live-worktrees &lt;list&gt; --out scan.json</code><br>

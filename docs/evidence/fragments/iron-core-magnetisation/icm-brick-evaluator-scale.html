@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="docs-project" content="nova" />
+    <meta name="reckon-type" content="evidence-fragment" />
+    <title>Brick evaluator scale — iron core magnetisation</title>
+  </head>
+  <body>
+    <main>
+      <h1 id="icm-brick-evaluator-scale-state">The brick evaluator's field scale is right</h1>
+
+      <p>
+        §8 carried an open 1.32 factor: one uniformly magnetised limb gave
+        1.609e-3&nbsp;T through the brick evaluator's six-rotation sum against
+        1.219e-3&nbsp;T from an independent point-dipole sum over the same
+        bricks, and 2.439e-3&nbsp;T with the up-down mirror added. This record
+        settles it with numbers, from one brick up.
+      </p>
+
+      <p>
+        <strong>The defect is in the image enumeration, not in the field
+        kernel.</strong> The closed-form brick tensor reduces to the point
+        dipole exactly as a brick shrinks against its distance, and the
+        six-rotation composition reproduces a point-dipole sum over the same
+        bricks to 1.1e-8 relative. The 1.32 comes from a helper that intended
+        to yield six images and yielded eleven: in
+        <code>images(mirror=False)</code>, the loop variable rebinds the
+        parameter that selects the image set, so from the second sector on the
+        guard re-reads as true and each sector emits its mirror as well
+        &mdash; six rotations plus five mirrors. That helper exists only on the
+        unlanded §8 branch; the base revision's <code>images()</code> takes no
+        argument and is a plain twelve-image set, so nothing in
+        <code>bricks.py</code> is changed here.
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>step</th><th>case</th><th>evaluator</th><th>point-dipole sum</th><th>relative difference</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>one brick, 10 edges</td><td>brick tensor</td><td>analytic dipole</td><td>2.183e-05</td></tr>
+          <tr><td>1</td><td>one brick, 30 edges</td><td>brick tensor</td><td>analytic dipole</td><td>2.700e-07</td></tr>
+          <tr><td>1</td><td>one brick, 100 edges</td><td>brick tensor</td><td>analytic dipole</td><td>2.305e-09</td></tr>
+          <tr><td>2</td><td>one sector, no images</td><td>8.29766276e-04 T</td><td>8.29766288e-04 T</td><td>1.495e-08</td></tr>
+          <tr><td>2</td><td>one sector, six rotations</td><td>1.21940670e-03 T</td><td>1.21940672e-03 T</td><td>1.109e-08</td></tr>
+          <tr><td>3</td><td>full limb, six rotations</td><td>1.21940670e-03 T</td><td>1.21940672e-03 T</td><td>1.109e-08</td></tr>
+          <tr><td>3</td><td>full limb, twelve images</td><td>2.43881340e-03 T</td><td>2.43881343e-03 T</td><td>1.109e-08</td></tr>
+          <tr><td>3</td><td>full limb, pre-fix eleven images</td><td>1.60904713e-03 T</td><td>1.21940672e-03 T</td><td>0.3195 (1.320&times;)</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="icm-brick-evaluator-scale-table">Reading the table</h2>
+
+      <p>
+        Step 1 puts a single 0.1&nbsp;m brick at 10, 30 and 100 brick edges from
+        the field point and compares the closed-form tensor with the analytic
+        field of the equivalent dipole. The relative difference falls as
+        (edge/distance)<sup>4</sup> &mdash; faster than the (edge/distance)<sup>2</sup>
+        the criterion asks for, because a rectangular brick has inversion
+        symmetry and its quadrupole vanishes. The kernel and its 1/(4&pi;)
+        normalisation are not in question.
+      </p>
+
+      <p>
+        Step 2 takes the §8 limb as a uniform 0.1&nbsp;m brick grid spanning
+        both halves of the midplane and compares the compressed tensor with a
+        point-dipole sum over the same bricks, at (R, z) = (8.4667, 0.6)&nbsp;m.
+        With no images it is 8.29766276e-04 against 8.29766288e-04&nbsp;T;
+        with the six rotations, 1.21940670e-03 against 1.21940672e-03&nbsp;T.
+        Both agree to about 1e-8, so neither the moment map
+        <code>frame.T @ moment</code> nor the rotation composition is at
+        fault.
+      </p>
+
+      <p>
+        Step 3 is the case §8 quoted. The six-rotation sum is
+        1.219&nbsp;mT, the analytic value. The twelve-image sum is
+        2.439&nbsp;mT, exactly twice it, because a sector that already spans
+        both halves has its partner under the up-down mirror and the mirror
+        duplicates it. The pre-fix helper's eleven images give
+        1.609&nbsp;mT: the six rotations, plus the mirror of five of them, with
+        the k&nbsp;=&nbsp;0 image alone unmirrored. That is
+        1.609/1.219&nbsp;=&nbsp;1.3195, the factor §8 recorded.
+      </p>
+
+      <h2 id="icm-brick-evaluator-scale-line">Where the factor first appears</h2>
+
+      <p>
+        At step 2, the first case whose image set comes from the pre-fix
+        helper. The line is the inner generator of
+        <code>images(mirror=False)</code> on the unlanded branch:
+      </p>
+
+      <pre><code>for mirror in (1.0, -1.0) if mirror else (1.0,):</code></pre>
+
+      <p>
+        The parameter <code>mirror</code> is read to choose the iterable, and
+        the loop then assigns to <code>mirror</code>. The first sector's
+        iterable is built while the parameter is <code>False</code> and yields
+        one image; every later iteration re-reads the rebound <code>1.0</code>,
+        takes the truthy branch, and yields two. The count is eleven, not six.
+        Replacing the parameter's name with a distinct loop variable, or
+        hoisting the condition out of the loop, removes it.
+      </p>
+
+      <p>
+        The base revision does not carry this helper: <code>images()</code> has
+        no <code>mirror</code> parameter and yields twelve images, which is
+        correct for the one-sided sector <code>sector_bricks</code> builds.
+        The branch that introduced it (<code>7762e7e84</code>) is not an
+        ancestor of the base, so there is no live defect to repair and
+        <code>bricks.py</code> is untouched.
+      </p>
+
+      <h2 id="icm-brick-evaluator-scale-test">What pins it</h2>
+
+      <p>
+        <code>tests/test_brick_evaluator_scale.py</code> pins steps 1 and 2
+        against the analytic dipole, plus the twelve-image
+        <code>response()</code> against its own point-dipole sum, and the
+        doubling a mirror produces over a both-halves sector. Five tests pass
+        against the base evaluator. The declared negative control restores the
+        pre-fix image generator and reddens
+        <code>test_one_sector_with_six_rotations_matches_the_point_dipole</code>
+        (ACTUAL 0.001609 against DESIRED 0.001219, relative difference 0.3195)
+        and <code>test_a_mirror_over_a_both_halves_sector_doubles_the_field</code>
+        (ratio 2.438e-3 / 1.609e-3 = 1.516 against the required 2.0).
+      </p>
+
+      <h2 id="icm-brick-evaluator-scale-note">One correction to the §8 record</h2>
+
+      <p>
+        The §8 fragment quotes the 1.609e-3&nbsp;T case at
+        (16&nbsp;m,&nbsp;0.6&nbsp;m). The measurement behind it ran at
+        (8.4667&nbsp;m,&nbsp;0.6&nbsp;m); at 16&nbsp;m the same uniform limb
+        gives 1.172e-4&nbsp;T through six rotations, not 1.609e-3&nbsp;T. The
+        factor and its cause are unchanged, but the radius in that sentence
+        should read 8.4667&nbsp;m.
+      </p>
+    </main>
+  </body>
+</html>

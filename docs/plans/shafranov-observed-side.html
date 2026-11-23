@@ -19,12 +19,12 @@
   <meta name="plan-sprint" content="S29">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,mast,active-set,grad-shafranov,efit">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <title>Shafranov observed side | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-modified" content="2026-11-23">
 <meta name="plan-blocks" content="">
 <meta name="plan-standalone" content="The plan it unblocked, constraint-augmented-newton-krylov, is superseded; no open plan waits on the Shafranov observed side and it waits on none.">
@@ -175,7 +175,10 @@
     <div class="r-comment-body"><p>Reviewed 062298ce691bf2db318801efe27c5b457fa4e2b7..f0e895842237a1a4d4b9a2766819a08fa1ebf091 and scored goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 12; the analytic-route order 2.03 with its X-point-corner and cancellation mechanism is receipt-backed and asserted, both suite arms are 0 added failures, and three non-blocking findings are recorded (the third-party figure-audit duplication, the unsourced prose timing numbers, and the archive's dangling links to the deleted timing figure).</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261122T135237120281-sos-grid-route-current-rule" data-who="reckon-build" data-when="2026-11-22T21:24:46.543Z">
-    <div class="r-comment-body"><p>At the fourth-order contour rule the grid-imaged analytic route fits a contour-sampling order of 2.03 over samplings 501-2001, limited by the vertex that lands on the X-point corner where the central tangent is off by order one; the route settles on a plateau 22.3 percent above exact 1.23255 because the combination&#x27;s own cancellation amplifies the volume side&#x27;s vertical-moment residual by 2 mu0 |Sv| / |W| near 7000; the contour/volume identity rungs pass their 5.0e-4 bound at 321, 641 and 1281, and their vertical-moment residual fits order 0.80 against the first order the cell-centre volume mask predicts. The order test prints, persists and asserts its fitted order to its own receipt and no test writes the tracked receipt; the certificate is redrawn from the receipt on the 21/41/81 grid ladder with every drawn and labelled number a receipt key.</p></div>
+    <div class="r-comment-body"><p>At the fourth-order contour rule the grid-imaged analytic route fits a contour-sampling order of 2.03 over samplings 501-2001, limited by the vertex that lands on the X-point corner where the central tangent is off by order one; the route settles on a plateau 22.3 percent above exact 1.23255 because the combination's own cancellation amplifies the volume side's vertical-moment residual by 2 mu0 |Sv| / |W| near 7000; the contour/volume identity rungs pass their 5.0e-4 bound at 321, 641 and 1281, and their vertical-moment residual fits order 0.80 against the first order the cell-centre volume mask predicts. The order test prints, persists and asserts its fitted order to its own receipt and no test writes the tracked receipt; the certificate is redrawn from the receipt on the 21/41/81 grid ladder with every drawn and labelled number a receipt key.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-23T06:51:40.924628+00:00">
+    <div class="r-comment-body"><p>Landed r-20261122T135237120281-sos-grid-route-current-rule on the measured suite pair; <a href="/nova/evidence/archive/shafranov-observed-side-landed.html#sos-grid-route-current-rule">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-mast-solved-state-ruling" data-who="reckon-build" data-when="2026-11-23T05:40:00Z">
     <div class="r-comment-body"><p><strong>Lead ruling 2026-11-22.</strong> MAST carries no usable calibrated diamagnetic loop, so it falls to the toroidal-volume-term decision's 'elsewhere' branch: on MAST rows Z comes from the solved state, with provenance <code>solved-state</code>. The evidence: a 200-shot census of the MAST level1 store found the EFIT diamagnetic channel all zeros or NaN and never rated usable, and the raw <code>xma</code> loop signals uncalibrated amplifier outputs on a ±10 V rail with no loop area, turns or integrator gain published. The reader now stores calibrated loops with verified sign and source (run <code>sos-diamagnetic-source</code>, demonstrated on WEST 57410), so a machine that publishes a calibrated loop takes Z from it. Done-when (2) is therefore met by the census, not by a MAST reproduction.</p></div>

@@ -1,0 +1,96 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run carries no baseline_suite/after_suite JSON keys, but its manifest's tests line and the two gate logs record a readable pair at both revisions: guard-suite-base.log (revision e28db604eee205382f5c7874129eebfe4339cd92, 16 passed in 1.84s, last line EXIT=0) and guard-suite-head.log (revision 1acf2fd5bf9ce1bf81533003b0b2499981ceed16, 20 passed in 5.26s, last line EXIT=0), both running scripts/prototypes/drifting_sensor_sequences/probe_rows/test_reduction_guards.py on all_debug. Neither arm records a failing test id, so the count of failing ids the head adds over the base is a measured zero with the instrument shown to see tests on both arms.",
+  "completed_at": "2026-11-23T21:09:35.633Z",
+  "dispatched_at": "2026-11-23T20:07:24Z",
+  "findings": [
+    {
+      "correction": "Name 98dci4-gpu-0002, job 1339485, two P100 cards and the 224-1803 s per-slice range in lines 42, 45 and 48; identify the 1352.8 s H200 probe as a single-row probe from 98dci4-gpu-0003 that contributed no slice.",
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-control-and-converged-nova.html",
+      "line": "42",
+      "severity": "blocking",
+      "text": "blocking: the converged section says the job 'ran on one H200 and then on the card the window allowed' and gives the rate as '1352.8 s for 49 passes on one H200' (line 48) with '5.7 h' in the card-time column (line 45), but the landed rows show all 33 converged slices were written by job 1339485 on 98dci4-gpu-0002 (titan, P100) over two cards (the driver's own drift-conv.log line 3 says 'host 98dci4-gpu-0002 job 1339485 converged on 2 cards'), with walls 224.1-1803.1 s summing to 20875.8 s = 5.80 card-hours, while the 1352.8 s fit is a separate one-row probe from job 1339183 on 98dci4-gpu-0003 (H200, one card, slice 0 only, drift-gpu.log line 3) that contributed no slice to the arm. Reporting a titan card-time and rate as an H200 figure is exactly what nova's compute guidance forbids ('a titan number must never carry a throughput or latency headline attributed to the H200'), and it misstates the arm's cost as one H200 rate rather than two P100 cards. The correction is to name the node, the two cards and the 224-1803 s range, and to keep the 1352.8 s H200 probe identified as a probe that contributed no slice."
+    },
+    {
+      "correction": "Move the one-row H200 probe out of the declared arm stem (e.g. nova-white-200-0.0100-probe.jsonl) so grouped() no longer merges it into the 33-slice arm; confirm the arm reduces to 33 rows with one slice 0.",
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/analyse.py",
+      "line": "295",
+      "severity": "blocking",
+      "text": "blocking: grouped() merges every file matching the declared arm glob under one stem, and the reviewed run left its one-row H200 probe at <cache>/drift-control-20261123/nova-white-200-0.0100.jsonl \u2014 the declared nova white stem \u2014 beside the 33 converged slices in nova-white-200-0.0100-shard{0,1}.jsonl. The landed reduction therefore reads the arm as 34 rows with slice 0 present twice (49 passes at 1352.8 s from the H200 probe and again at 1667.2 s from the titan refit), and the duplicate inflates the very statistic the study exists to measure: measured with the reviewed head's own analyse.py, the converged arm's axis lag-one is 0.1884 as merged against 0.0903 with slice 0 counted once, flux 0.3328 against 0.2181 and q95 0.3763 against 0.2511. The probe row belongs outside the arm stem (its own name), so it is either stated as the separate probe it is or left out, never merged into the arm."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+      "line": "165",
+      "severity": "non-blocking",
+      "text": "non-blocking: html_rows emits a fourteen-column body for the two declared arms only (code, sequence, slices, axis_rms, axis_mean_50, flux_rms, flux_mean_50, q95_rms, q95_mean_50 and the five lag-one columns) while the fragment's control table is eleven columns carrying a row-set column, both nova arms and a per-row control verdict, so the emitter cannot reproduce the table the record publishes. Nothing reconciles the new fragment either: test_fragment_tables.py binds only drifting-sensor-probe-rows.html, so a future regeneration cannot reproduce the published table and a drift between the reduction and the record goes uncaught."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/analyse.py",
+      "line": "411",
+      "severity": "non-blocking",
+      "text": "non-blocking: the row-matched lookup hard-codes 'nova-%s-200-0.0100-loops' and figures.py:50 spells the arm stem inline with the same format, both re-spelling the rule analyse.declared_stem owns at analyse.py:267; panel.py:84 added a comment saying the stem rule must have one spelling precisely so a map and its record cannot be looked for under two names, and these two new sites are the drift that comment warns about."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-control-and-converged-nova.html",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "non-blocking: the overlay caption says only 'Both null sets are drawn'; the figure rules require that when a solved field is drawn beside the reference one the caption says which marker style belongs to which field, so a reader cannot tell the nova, imas-efit and generating-state null markers apart in the central overlapping markers, and no legend entry names them."
+    },
+    {
+      "file": "scripts/edge_sheet/figure.py",
+      "line": "33",
+      "severity": "non-blocking",
+      "text": "non-blocking: _drawn_tick_labels changes the artifact check that scripts/iron_limb_production/figure.py, scripts/iron_graded_refinement/figure.py, scripts/west_iron_save/figure.py (and other iron_*/magnetisation figure scripts) call through save_checked, and no test exercises it, so a regression in the tick filter silently stops the clipping and overlap check for every one of those figures. The logic is defensible (it filters on the tick's current location against the view limits rather than on the tick's visibility attribute), but it is shared machinery with no guard. No test guards iteration.fit_sequence's resume/refit rule or panel.nova_stem/nova_slice/filter_slice either."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Examined study.run_nova and run_efit and the spectrum sweep (study.py), iteration.fit_sequence, figures.main/draw_code/arm_rows, panel.main/nova_slice/slice_record called from paint.py, and scripts/edge_sheet/figure.save_checked. study.current_draw is also re-read from the shared reduction in analyse.main via the arm rows.",
+    "diff": "Read the five commits against e28db604e one by one: 2f50118d9 colours the plasma-current draw and adds per-slice map landing with resume; 3b8c4650d adds the row-matched loops block, the arm option on the figure and panel paths and the overlay on the loops pair; 8c91953af adds the arm-selection guard; 2d9c17673 writes the fragment and figures and filters undrawn text artists; 1acf2fd5b splits the axis lag-one into components, adds the call-site guard with its negative control, fixes the typo and captions, and adds the fit-settings key to the resume rule.",
+    "done_when": "The done_when asks for the generator's own lag-one and spectrum measured, the cause repaired so the 1/f control exceeds 0.5 for both codes with white within 0.15 of zero, 200 converged slices per sequence including the row-matched arm or each unconverged slice reported, and the section 7 table and figures regenerated; the record measures the generator (0.590 against an analytic 0.619) and repairs the cause, but nova's control still fails the mean clause and the table is computed from the two-pass arms, so clauses (1) and (3) are not fully met.",
+    "goal": "The node's goal is to make section 7 readable: a passing 1/f control with nova fitted to convergence; study.py:370 current_draw repairs the coloured plasma-current draw and imas-efit passes all three clauses, but nova's axis mean stays at 0.342 (declared) and 0.481 (row-matched) against the 0.5 floor (drift-control-and-converged-nova.html:34) and the converged arm is 33 of 400 slices, so the goal is partly delivered and honestly reported as open.",
+    "manifest": "Read the reviewed manifest; it records the five commits, the lag-one arms with both codes and both nova row sets, the converged coverage with its per-slice convergence state, the CHECK-FAILED gate result, and the two results reported rather than resolved; its tests line names the all_debug arms and guard-suite-base.log / guard-suite-head.log carry the revision, the command, and a trailing EXIT= line.",
+    "write_paths": "Read the declared write paths and the delivered diff e28db604eee205382f5c7874129eebfe4339cd92..1acf2fd5bf9ce1bf81533003b0b2499981ceed16; all eleven changed paths lie inside them: seven files under scripts/prototypes/drifting_sensor_sequences/probe_rows/, scripts/edge_sheet/figure.py, the fragment under docs/evidence/fragments/inverse-equilibrium-baseline/, and three svgs under docs/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/."
+  },
+  "justifications": {
+    "durability": "tests/test_reduction_guards.py:196 drives study.run_nova's own loop and reduces the recorded plasma current (mean lag-one over ten seeds above a literal 0.53), and the negative control at line 214 reinstates the white Gaussian and requires the same reduction inside 0.15, so the landed fix regresses the suite if removed; iteration.py's resume rule, panel.nova_stem/nova_slice and edge_sheet/figure.py's tick filter have no test, and no test pins the one-arm-stem rule that the probe-row collision broke.",
+    "evidence": "The gate (analyse.thresholds, check.py) asserts the done-when's lag-one clauses and its result is recorded (CHECK-FAILED nova 1 of 26, reproduced from nova-drift-200-0.0100-shard*.jsonl 0.342/0.626/0.613); I independently recomputed the row-matched block from the arm files with the landed reduction and got 0.481/0.594/0.613; and I recomputed the converged arm from its shard files (33 slices, 26 converged, 7 at the 96-pass cap, 20875.8 s = 5.80 h). Two measured defects cost this score: the 5.7 h and 1352.8 s figures are a titan-to-H200 misattribution (the 33 slices are job 1339485 on 98dci4-gpu-0002, 5.80 card-hours over two P100 cards), and the one-row H200 probe sits at the declared arm stem, so the landed grouped() reduces the arm to 34 rows with slice 0 duplicated and axis lag-one 0.1884 instead of 0.0903.",
+    "fit": "The added helpers follow the module idiom (%-formatting, spelled-out docstrings, no classes) and introduce no forbidden name or plan label; the earlier misspelt 'carrries' is corrected at panel.py:110 and the captions match the rendered figures.",
+    "goal_fidelity": "The repair is real: reverting study.run_nova's draw to the white Gaussian reproduces the defect (recorded lag-one inside 0.15 in test_run_nova_guard_catches_a_white_current_draw), yet nova's axis mean still reads 0.342/0.481 against the 0.5 floor (docs/evidence/fragments/inverse-equilibrium-baseline/drift-control-and-converged-nova.html:34) and the converged arm covers 33 of 400 slices, so the goal's passing control and converged 200-slice arm are not delivered.",
+    "reuse": "study.current_draw wraps the existing noise_columns owner and panel.py reuses analyse.declared_stem, but figures.py:50 and analyse.py:411 re-spell the arm-stem format rather than calling declared_stem, adding two more copies of a naming rule the module already owns.",
+    "scope_discipline": "Every path in e28db604e..1acf2fd5b lies inside the declared write paths, and the diff adds nothing the goal does not imply (scripts/edge_sheet/figure.py is declared and its change is the figure check the new figures needed). The two blocking findings are data and content corrections within the declared paths, not scope excess."
+  },
+  "notes": "Independent read-only review of r-20261123T104800646708-drift-control-and-converged-nova covering the five commits gained since the previous review at 2d9c1767. The converged arm's rows, walls and per-slice convergence flags were recomputed from <cache>/drift-control-20261123/nova-white-200-0.0100-shard{0,1}.jsonl; the one-row probe at nova-white-200-0.0100.jsonl was checked against drift-gpu.log (job 1339183, 98dci4-gpu-0003) and the 49-pass slice-0 wall of 1352.8 s, while drift-conv.log (job 1339485 on 98dci4-gpu-0002) records the 33-slice arm on two cards. The reduction was reproduced from the twopass arm files with the reviewed head's analyse.py.",
+  "project": "nova",
+  "review_run_id": "r-20261123T195824570909-review-of-drift-control-and-converged-nova-1acf2fd5bf9c",
+  "reviewed_base_sha": "e28db604eee205382f5c7874129eebfe4339cd92",
+  "reviewed_commits": [
+    "2f50118d9eeb490515561f0c159cdd6b090e9798",
+    "3b8c4650d7620f55db2eded13894e4c9659784f9",
+    "8c91953af57c5ff951ece957a53a81573e34df3d",
+    "2d9c176734eb41592d91c31c80d51e0bb672dec1",
+    "1acf2fd5bf9ce1bf81533003b0b2499981ceed16"
+  ],
+  "reviewed_head_sha": "1acf2fd5bf9ce1bf81533003b0b2499981ceed16",
+  "reviewed_run_id": "r-20261123T104800646708-drift-control-and-converged-nova",
+  "scores": {
+    "durability": 16,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 11,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T22:05:00.000000+00:00",
+  "total": 90,
+  "verdict_lines": [
+    "VERDICT goal: the node's goal is a passing 1/f control with nova fitted to convergence; study.py:370 current_draw repairs the draw and imas-efit passes, but nova's axis reads 0.342/0.481 against the 0.5 floor (fragment line 34) and the converged arm is 33 of 400 slices, so it is partly delivered.",
+    "VERDICT done_when: the done_when's generator measurement and cause repair are recorded (0.590 against 0.619 analytic) but nova's mean clause still fails and the section 7 table is computed on the two-pass arms, not the converged ones.",
+    "VERDICT write_paths: read; all eleven changed paths in e28db604e..1acf2fd5b lie inside the declared probe_rows/, edge_sheet/figure.py, evidence fragment and figures directory.",
+    "VERDICT manifest: read; it records the five commits, both nova arms, the converged-arm coverage with its per-slice state, the CHECK-FAILED gate result and the two open results, with guard-suite base/head logs carrying revision, command and EXIT=0.",
+    "VERDICT diff: read the five commits against e28db604e; the change is the coloured current draw with per-slice resume, the loops-arm surface, the arm guard, the record and figures, and the axis split with its call-site guard and negative control.",
+    "VERDICT call_sites: study.run_nova/run_efit, iteration.fit_sequence, figures.main/draw_code/arm_rows, panel.main via paint.py, and scripts/edge_sheet/figure.save_checked (called by the iron_*/magnetisation figure scripts) are the workflow consumers examined."
+  ]
+}

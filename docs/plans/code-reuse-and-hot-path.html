@@ -21,11 +21,11 @@
 <meta name="plan-capability-reasoning" content="standard">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="moderate">
-<meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -175,7 +175,7 @@ perturbed input to one implementation reports a disagreement beyond the
 stated tolerance.</p>
 
 <h2 id="s6">§6 — The hot path, written down</h2>
-<section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p><code>nova/equilibrium/AGENTS.md</code> names the one public forward
 route and the inverse route, module by module, as measured at this
 section's head. Any §5 entry S28 has accepted but not yet landed is listed
@@ -200,6 +200,15 @@ execute makes the comparison in (1) fail and name it.</p>
     <p class="r-dec-rat">Git keeps the driver at the revision the evidence ran at, so
 nothing is lost; a driver a live gate or test still runs is kept.</p>
     </div>
+<div class="r-dec" data-key="deletion-gate" data-choice="deletion-check" data-by="Simon McIntosh" data-when="2026-11-23T17:19:26+00:00" data-sections="s3,s4">
+    <p class="r-dec-q">The full suite cannot finish inside the one-hour all_debug limit. May the deletion sections land on a deletion-specific check instead of a two-arm suite delta?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="deletion-check">Import sweep, collection parity and the absence check</button>
+      <button class="r-opt" data-value="chunked-suite">Full suite split into one-hour all_debug jobs per arm</button>
+      <button class="r-opt" data-value="rigel-suite">Full suite as one long rigel job per arm</button>
+      </p>
+    <p class="r-dec-rat">A deletion can only break an importer or a collector. Every remaining module importing in a fresh interpreter, collection parity across the whole test tree, no tracked file naming a deleted path, and identical failure ids on a focused set measure that directly; the full suite stopped at 28 and 4 minutes of a run that needs several hours.</p>
+    </div>
 <div class="r-dec" data-key="hot-path-guard" data-choice="document-only" data-by="Simon McIntosh" data-when="2026-11-22">
     <p class="r-dec-q">After §6, should a test fail when the public forward solve executes a module outside the documented route?</p>
     <p class="r-dec-opts">
@@ -216,15 +225,6 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
       <button class="r-opt" data-value="defer-s6">Defer §6 until S28&#x27;s collapses land</button>
       </p>
     <p class="r-dec-rat">No declared relationship carries an S28 answer or landing into this plan, so waiting would stall the sprint on another sprint&#x27;s schedule. §5 closes when each entry is raised as a reckon decision; §6 writes what the head executes and lists accepted collapses still pending.</p>
-    </div>
-<div class="r-dec" data-key="deletion-gate" data-choice="deletion-check" data-by="Simon McIntosh" data-when="2026-11-23T17:19:26+00:00" data-sections="s3,s4">
-    <p class="r-dec-q">The full suite cannot finish inside the one-hour all_debug limit. May the deletion sections land on a deletion-specific check instead of a two-arm suite delta?</p>
-    <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="deletion-check">Import sweep, collection parity and the absence check</button>
-      <button class="r-opt" data-value="chunked-suite">Full suite split into one-hour all_debug jobs per arm</button>
-      <button class="r-opt" data-value="rigel-suite">Full suite as one long rigel job per arm</button>
-      </p>
-    <p class="r-dec-rat">A deletion can only break an importer or a collector. Every remaining module importing in a fresh interpreter, collection parity across the whole test tree, no tracked file naming a deleted path, and identical failure ids on a focused set measure that directly; the full suite stopped at 28 and 4 minutes of a run that needs several hours.</p>
     </div>
 </section>
 
@@ -294,6 +294,9 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261123T133138334433-review-of-hot-path-written-down-bbcc26df6aea" data-who="reckon-build" data-when="2026-11-23T13:46:38.991Z">
     <div class="r-comment-body"><p>review r-20261123T133138334433-review-of-hot-path-written-down-bbcc26df6aea scores the run r-20261122T202611168380-hot-path-written-down at head bbcc26df6aea9073102c52049824e0826f5e33f7: goal_fidelity 19, evidence 17, scope_discipline 13, durability 12, fit 18, reuse 19; added_failure_count 0; two non-blocking findings (a pre-guard gate log cited as the head result in the fragment, and the revision guard diffing against HEAD rather than the working tree).</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-11-23T17:24:43.683493+00:00">
+    <div class="r-comment-body"><p>Landed r-20261122T202611168380-hot-path-written-down on the measured suite pair; <a href="/nova/evidence/archive/code-reuse-and-hot-path-landed.html#hot-path-written-down">evidence</a></p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T07:47:24.379Z",
+  "dispatched_at": "2026-11-23T07:28:04Z",
+  "figures": {
+    "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs/diverted-single-null-map-fidelity-10000.svg": {
+      "contrast": "Black text; darkest contour pixels 3.84:1, red markers 5.89:1, purple markers 6.81:1 against white.",
+      "data_ink": "Line contours and the wall outline only; no fill, no colour map, no shading.",
+      "decoration": "No gradient, background fill, grid or frame; one frameless legend and one label per panel.",
+      "label_collision": "Labels clear of the geometry and of each other; no ink within 4 px of any canvas edge; every contour lies inside the wall, the private-flux loop grazing the wall's inner vertex where it meets the strike surface.",
+      "legibility": "Two identically framed single-null panels; the X-point sits in the lower divertor with separatrix legs and private-flux contours readable above the wall, the axis triangle in each panel's upper half, and the red saddle cross distinguishable from the larger purple cross beneath it at the rendered size.",
+      "table_form": "A spatial poloidal map; not tabular information."
+    },
+    "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs/weak-rotation-reactor-static-map-fidelity-10000.svg": {
+      "contrast": "Black text; darkest contour pixels 4.37:1, red marker 5.89:1, purple marker 6.81:1 against white.",
+      "data_ink": "Line contours and the wall outline only; no fill, no colour map, no shading.",
+      "decoration": "No gradient, background fill, grid or frame; one frameless legend and one label per panel.",
+      "label_collision": "Labels clear of the geometry and of each other; no ink within 4 px of any canvas edge; every contour lies inside the wall.",
+      "legibility": "Two identically framed limited-equilibrium panels with direct labels 'map image' and 'analytic state' above each panel's upper-left clear space; 13 to 14 concentric blue contours and the axis marker readable at the rendered size, the purple map-image marker visible beneath the red analytic triangle.",
+      "table_form": "A spatial poloidal map; not tabular information."
+    }
+  },
+  "findings": [],
+  "project": "nova",
+  "review_run_id": "r-20261123T072708323851-review-of-cfs-map-fidelity-rungs-1d87f7d91b3e-figure",
+  "reviewed_base_sha": "82a755fd6433bec11db426918f2c78ba172fd81e",
+  "reviewed_head_sha": "1d87f7d91b3e307eeed1d243f09269cda8581b1f",
+  "reviewed_images": [
+    {
+      "case": "diverted-single-null, 10,000 requested cells (10,229 realised)",
+      "figure": "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs/diverted-single-null-map-fidelity-10000.svg",
+      "identified_by": "content: teardrop first wall with a divertor leg, one admitted saddle (filled cross) per panel and a private-flux loop beneath it",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T072708323851-review-of-cfs-map-fidelity-rungs-1d87f7d91b3e-figure/image-0.png",
+      "size_px": [
+        1400,
+        720
+      ]
+    },
+    {
+      "case": "weak-rotation-reactor-static (limited), 10,000 requested cells (10,238 realised)",
+      "figure": "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs/weak-rotation-reactor-static-map-fidelity-10000.svg",
+      "identified_by": "content: smooth oval first wall, no saddle marker, the magnetic axis alone in each panel",
+      "png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T072708323851-review-of-cfs-map-fidelity-rungs-1d87f7d91b3e-figure/image-1.png",
+      "size_px": "1400x720"
+    }
+  ],
+  "reviewed_run_id": "r-20261122T150133906524-cfs-map-fidelity-rungs",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Text clears its background without ambiguity: the panel labels and legend text render near-black on white. The data marks were measured on the rendered PNGs: darkest contour stroke pixels 3.84:1 (diverted) and 4.37:1 (limited) against white, red null markers 5.89:1, purple map-image markers 6.81:1, all at or above the 3:1 line the plotting rules hold for coloured series.",
+    "data_ink": "The data carry the visual weight in both figures. Every mark is a contour line, the first wall, or a null marker; there is no fill, colour map, shading or panel furniture, and the pair shares one level array so the two panels are directly comparable.",
+    "decoration": "Neither figure carries a gradient, background fill, grid, frame, tick or styled theme. The face is white, the panels are drawn with the axis off, and the only non-data ink is the two-entry legend and one short direct label per panel.",
+    "label_collision": "No label is clipped, overlapping another label, or lying over data. Each direct label sits above the upper-left of its panel in clear space (nearest contour 5 px or more away) and the legend sits above the panels. Measured on the rendered PNGs, no ink falls within 4 px of any canvas edge in either figure, so nothing is cut off at the boundary.",
+    "legibility": "Both rendered PNGs read at a glance. Each is two identically framed poloidal panels, left 'map image' and right 'analytic state', carrying unfilled blue line contours and a black first wall, with a frameless two-entry legend across the top ('analytic nulls' red, 'map-image nulls' purple). The limited case (image-1) draws one red axis triangle per panel with the purple map-image triangle visible as a fringe beneath, over 13 to 14 concentric contours. The diverted case (image-0) draws the axis triangle high in each panel and the admitted saddle as a red filled cross with the larger purple cross beneath it at the divertor, with the separatrix legs and the private-flux loop below the X-point individually readable. Contour crossings along a mid-plane row agree across the pair (13 to 14 closed contours per panel), consistent with the shared level array.",
+    "table_form": "Neither image depicts tabular information. Both are poloidal flux maps whose contour compression, X-point topology and vessel boundary are spatial relationships; the rung table these panels accompany lives in the evidence fragment as an HTML table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:49:30.827184+00:00",
+  "total": null
+}

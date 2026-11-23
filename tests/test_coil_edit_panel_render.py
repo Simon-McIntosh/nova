@@ -777,6 +777,85 @@ def test_the_panel_subcommand_persists_its_caption(
     )
 
 
+def test_the_panel_subcommand_writes_the_near_x_block_it_computed(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """A receipt written by the panel path carries the block it computed.
+
+    The display map is replaced by a stand-in that keeps the archive's own
+    lattice and fixes the two distances it reports, so the written receipt has
+    to carry a block derived from those distances and from the archive's node
+    spacings rather than a value copied from anywhere else.  The block is the
+    producer's own output, which is what a reader of a published receipt is
+    entitled to assume.
+    """
+    import sys
+    from types import SimpleNamespace
+
+    import benchmarks.coil_edit_latency as renderer
+
+    archive = PANEL_ARCHIVE
+    loaded = _panel_load(archive)
+    distances = {"converged": 0.5, "failed": 0.05}
+
+    def stand_in(_profile: Any, _context: Any, panel: Any, **_kwargs: Any) -> Any:
+        label = "converged" if panel["converged"] else "failed"
+        return SimpleNamespace(
+            radius=loaded["radius"],
+            height=loaded["height"],
+            flux=np.asarray(panel["psi"], dtype=float).T,
+            branches=panel["branches"],
+            saddle_converged=False,
+            saddle_rz=None,
+            spacing_m=DEFAULT_DISPLAY_SPACING,
+            reproduction_relative_error=0.0,
+            max_node_mismatch_wb=1.0e-09,
+            max_solved_node_mismatch_wb=1.0e-09,
+            promoted_node_count=3,
+            nearest_promoted_to_xpoint_m=distances[label],
+        )
+
+    monkeypatch.setattr(renderer, "_require_measurement_host", lambda: None)
+    monkeypatch.setattr(renderer, "_panel_display_map", stand_in)
+    monkeypatch.setattr(
+        renderer,
+        "_prepare_case",
+        lambda _carrier: (
+            object(),
+            {"circuit_context": {}, "target_current": None},
+            None,
+        ),
+    )
+    receipt = tmp_path / "panel-receipt.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "coil_edit_latency.py",
+            "panel",
+            "--display-map",
+            "--panel-data",
+            str(archive),
+            "--panel-figure",
+            str(tmp_path / "panel.png"),
+            "--receipt",
+            str(receipt),
+        ],
+    )
+    renderer.main()
+    written = json.loads(receipt.read_text())
+
+    threshold = 2.0 * min(
+        float(np.min(np.diff(np.asarray(loaded[axis], dtype=float))))
+        for axis in ("radius", "height")
+    )
+    block = written["near_x_geometry"]
+    assert block["two_cell_threshold_m"] == threshold
+    assert block["converged_promoted_within_two_cells"] is False
+    assert block["non_converged_promoted_within_two_cells"] is True
+    assert block["converged_current_field_certifies_near_x"] is True
+
+
 #: The five published coil-edit panel sets and the tag of the invocation that
 #: solved each.  A figure's state comes from its own run, so no two figures
 #: cite the same output path.

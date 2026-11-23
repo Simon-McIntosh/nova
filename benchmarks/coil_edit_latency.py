@@ -3939,6 +3939,7 @@ def main() -> None:
                     "inspected_render": str(arguments.panel_figure),
                 },
                 "display_map": panel["display_map"],
+                "near_x_geometry": panel["near_x_geometry"],
                 "state_archive": _declared_path(arguments.panel_data),
                 "state_archive_md5": _sha256(arguments.panel_data),
             }

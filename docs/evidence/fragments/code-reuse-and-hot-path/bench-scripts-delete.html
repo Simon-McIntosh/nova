@@ -26,17 +26,21 @@
     <p>So each delete path is checked against the whole tracked tree before it
     is removed. A path named by any kept <code>.py</code>, <code>.sh</code>,
     <code>.bash</code> or <code>.sbatch</code> file outside <code>docs/</code>
-    is withheld from this node and reported to the census defect. Every
-    <code>docs/</code> reference is a historical evidence record carrying the
-    revision it ran at, which the plan permits.</p>
+    is withheld from this node and reported to the census defect. The initial
+    scan exempted <code>docs/</code> references; the final check
+    below verifies that each exempted evidence reference carries a revision
+    at which its named driver exists.</p>
     <table id="bench-scripts-delete-partition-table">
       <tr><th>set</th><th>files</th><th>lines</th></tr>
       <tr><td>census delete + merge</td><td>718</td><td>214021</td></tr>
       <tr><td>withheld: named by kept code</td><td>102</td><td>28590</td></tr>
       <tr><td>deletable by the path-string scan</td><td>616</td><td>185431</td></tr>
       <tr><td>deleted at the head, after restoring two sibling imports</td><td>614</td><td>184989</td></tr>
-      <tr><td>deleted at the head, after the repair round</td><td>562</td><td>163332</td></tr>
-      <tr><td>restored: cited by kept code or a kept record</td><td>54</td><td>21657</td></tr>
+      <tr><td>deleted after the first repair round</td><td>562</td><td>163332</td></tr>
+      <tr><td>restored in the first two rounds, including sibling imports</td><td>54</td><td>22099</td></tr>
+      <tr><td>restored: owned scope and an unpinned citation</td><td>6</td><td>1221</td></tr>
+      <tr><td>all restored files</td><td>60</td><td>23320</td></tr>
+      <tr><td>deleted at the final measured head</td><td>556</td><td>162111</td></tr>
     </table>
 
     <h3 id="bench-scripts-delete-batches">Batches</h3>
@@ -55,7 +59,9 @@
       <tr><td>7</td><td>8</td><td>7032</td><td>185431</td></tr>
       <tr><td>restored after verification</td><td>2</td><td>-442</td><td>184989</td></tr>
       <tr><td>restored in the repair round</td><td>52</td><td>-21657</td><td>163332</td></tr>
-      <tr><td>net at head</td><td>562</td><td>163332</td><td>163332</td></tr>
+      <tr><td>restored owned scripts</td><td>5</td><td>-994</td><td>162338</td></tr>
+      <tr><td>restored benchmark with an unpinned citation</td><td>1</td><td>-227</td><td>162111</td></tr>
+      <tr><td>net at final measured head</td><td>556</td><td>162111</td><td>162111</td></tr>
     </table>
 
     <h3 id="bench-scripts-delete-withheld">Withheld paths</h3>
@@ -131,7 +137,9 @@
     removed 29931, 29959 and 29691 lines against the 29926, 29946 and 29685
     first recorded, taken from each commit&rsquo;s own
     <code>--shortstat</code>.</p>
-    <h3 id="bench-scripts-delete-verification">Verification</h3>
+    <h3 id="bench-scripts-delete-verification">Earlier verification</h3>
+    <p>The following measurements precede the six scoped restorations; the
+    final source-head results follow in their own table.</p>
     <p>No test or source file changed between the batch base
     <code>348ed92c</code> and the head: the diff over <code>tests/</code>,
     <code>nova/</code>, <code>pyproject.toml</code> and <code>uv.lock</code> is
@@ -192,6 +200,62 @@
     reason. The collection pass at the head walks the whole fast suite and
     reports no collection error, which is the check the two restored siblings
     repair.</p>
+
+    <h3 id="bench-scripts-delete-repair-restored">Scoped and cited drivers retained</h3>
+    <p>At the delivered head <code>e1bc21735a5b5cda1ae6edec2d83846c18338b00</code>,
+    the reproduction reported <q>REPRODUCED: 6 required files absent at delivered head</q>
+    and <code>EXIT=1</code>. Each file below is restored byte for byte from
+    <code>348ed92c7ab08a9592a7f997d62bfec41ae687d4</code>. The four iron-limb
+    files keep the declared driver directory whole; the polygon production
+    comparison is also owned by active work. The benchmark is retained because
+    its archived citation carries no revision.</p>
+    <table id="bench-scripts-delete-repair-restored-table">
+      <tr><th>restored path</th><th>lines restored</th></tr>
+      <tr><td><code>scripts/iron_limb_production/comparison.py</code></td><td>51</td></tr>
+      <tr><td><code>scripts/iron_limb_production/figure.py</code></td><td>292</td></tr>
+      <tr><td><code>scripts/iron_limb_production/negative_control_west.py</code></td><td>48</td></tr>
+      <tr><td><code>scripts/iron_limb_production/refinement.py</code></td><td>335</td></tr>
+      <tr><td><code>scripts/prototypes/polygon_stable_evaluator/production_pair.py</code></td><td>268</td></tr>
+      <tr><td><code>benchmarks/incomplete_third_kind.py</code></td><td>227</td></tr>
+      <tr><td>this repair</td><td>1221</td></tr>
+      <tr><td>all restoration rounds</td><td>23320</td></tr>
+    </table>
+    <p>The seven deletion batches removed 616 files and 185431 lines. All
+    restoration rounds retain 60 files and 23320 lines, leaving 556 files and
+    162111 lines removed: <code>185431 - 23320 = 162111</code>. The earlier
+    aggregate restoration row omitted the two sibling imports' 442 lines;
+    the corrected total includes them.</p>
+    <h3 id="bench-scripts-delete-repair-final-verification">Final source-head deletion gate</h3>
+    <p>One <code>all_debug</code> job, <code>1340500</code>, ran the locked
+    deletion check at source head <code>ff6b1e5d746f7410f4b050612a9e5e001746c705</code>
+    against batch base <code>348ed92c7ab08a9592a7f997d62bfec41ae687d4</code>. The log and
+    JSON receipts live under <code>~/.cache/nova-s33/bench-scripts-delete-repair/</code>.
+    This record-only update follows that measured source head; no product,
+    driver or test change follows the measurement.</p>
+    <table id="bench-scripts-delete-repair-final-verification-table">
+      <tr><th>measure</th><th>base</th><th>head / delta</th></tr>
+      <tr><td>fresh-interpreter module imports</td><td>473 modules; 23 failures</td><td>473 modules; 23 failures; 0 new failures</td></tr>
+      <tr><td>whole tests tree collection</td><td>10934 tests collected in 28.11s; EXIT=0</td><td>10930 tests collected in 28.44s; EXIT=0; 0 new collection errors</td></tr>
+      <tr><td>focused set</td><td>0 test files</td><td>identical failure ids: []</td></tr>
+      <tr><td>whole tracked-tree absence check</td><td>&mdash;</td><td>556 paths remain deleted; 1241 reference candidates not admitted by the conservative evidence exemption</td></tr>
+      <tr><td>deletion gate</td><td>&mdash;</td><td><code>FAIL; EXIT=1</code></td></tr>
+    </table>
+    <p><code>result.json</code> stores both measured revisions;
+    <code>base.json</code> and <code>head.json</code> enumerate every import,
+    collection summary and focused failure id. <code>focused-set.json</code>
+    names the paths selecting each test. The existing census parser supplies
+    bare-import resolution; the existing import-sweep probe supplies one fresh
+    interpreter per module. The batch-base arm has a local tracked-file index
+    and revision backed by the repository's objects, so its tests can inspect
+    git without mutating the shared index.</p>
+    <p>The absence check reads every tracked text file, including tests and
+    <code>AGENTS.md</code>. Its negative control injects one deleted path into
+    an in-memory kept test: <code>absence-negative-control.log</code> records
+    the named refusal and <code>EXIT=1</code>. A known importable module and a
+    synthetic benchmark import are positive controls on the import sweep and
+    focused-test selector. Evidence exemptions require a revision that resolves
+    to the cited file, checked through one batched <code>git cat-file</code>
+    operation.</p>
   </main>
 </body>
 </html>

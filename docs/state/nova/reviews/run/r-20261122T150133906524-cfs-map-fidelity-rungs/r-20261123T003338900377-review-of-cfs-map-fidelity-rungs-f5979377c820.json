@@ -9,6 +9,13 @@
     "nova/equilibrium/forward_operator.py:3901"
   ],
   "completed_at": "2026-11-23T00:52:04.839Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-cfs-map-fidelity-rungs-f5979377c820",
+      "recorded_at": "2026-11-23T03:41:37.402628+00:00"
+    }
+  },
   "dispatched_at": "2026-11-23T00:34:21Z",
   "findings": [
     {

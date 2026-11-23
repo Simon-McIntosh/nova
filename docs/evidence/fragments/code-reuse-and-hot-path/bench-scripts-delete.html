@@ -33,7 +33,8 @@
       <tr><th>set</th><th>files</th><th>lines</th></tr>
       <tr><td>census delete + merge</td><td>718</td><td>214021</td></tr>
       <tr><td>withheld: named by kept code</td><td>102</td><td>28590</td></tr>
-      <tr><td>deletable in this node</td><td>616</td><td>185431</td></tr>
+      <tr><td>deletable by the path-string scan</td><td>616</td><td>185431</td></tr>
+      <tr><td>deleted at the head, after restoring two sibling imports</td><td>614</td><td>184989</td></tr>
     </table>
 
     <h3 id="bench-scripts-delete-batches">Batches</h3>
@@ -86,14 +87,25 @@
     them; the remaining references are historical records under
     <code>docs/</code> that carry the revision they ran at.</p>
     <table id="bench-scripts-delete-verification-table">
-      <tr><th>measure</th><th>result</th></tr>
-      <tr><td>absence check, 614 paths</td><td>0 code/test/AGENTS references</td></tr>
-      <tr><td>reachable gate at head (worktree)</td><td>49 passed, 5 failed, 4 xfailed</td></tr>
-      <tr><td>scratch-tree arm at base</td><td>35 passed, 11 failed, 8 errors</td></tr>
-      <tr><td>scratch-tree arm at head</td><td>35 passed, 11 failed, 8 errors</td></tr>
-      <tr><td>added failures, base to head</td><td>0</td></tr>
-      <tr><td>broad fast lane collection</td><td>10939 items, 0 collection errors</td></tr>
+      <tr><th>measure</th><th>revision</th><th>result</th></tr>
+      <tr><td>absence check, 614 paths</td><td><code>ba0fe4eb8</code></td><td>0 code/test/AGENTS references</td></tr>
+      <tr><td>reachable gate, worktree at head</td><td><code>ba0fe4eb8</code></td><td><code>5 failed, 49 passed, 4 xfailed, 1 warning in 198.64s</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>scratch-tree arm at the batch base</td><td><code>348ed92c</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 32.08s</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>scratch-tree arm at the head</td><td><code>f38f5fc1f</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 28.49s</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>added failures, base to head</td><td>&mdash;</td><td>0; the two arms report the same nineteen failure and error ids</td></tr>
+      <tr><td>fast-lane collection, worktree</td><td><code>ba0fe4eb8</code></td><td><code>9715/10939 tests collected (1224 deselected) in 22.95s</code> (<code>EXIT=0</code>), 0 collection errors</td></tr>
     </table>
+    <p>Each measurement is one <code>all_debug</code> job submitted with
+    <code>sbatch --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G</code>;
+    its log opens with the revision it ran at and the literal
+    <code>python -m pytest</code> command, and ends with that command&rsquo;s own
+    <code>EXIT=</code> line. The four logs are
+    <code>gate-worktree-ba0fe4eb8.log</code>,
+    <code>arm-base-348ed92c.log</code>, <code>arm-head-f38f5fc.log</code> and
+    <code>collect-worktree-ba0fe4eb8.log</code>. The full fast lane was started
+    and stopped after twenty-eight minutes without completing: its execution
+    time on a one-hour partition is not a result, so the record rests on the
+    collection pass above and on the eight-file gate both arms run.</p>
     <p>The two scratch-tree arms carry identical failure and error ids: they
     run the same instrument against the base and the head from a clean
     extraction, so the identical results are the delta measurement, and the
@@ -111,8 +123,9 @@
     touch. Two are git-hook tests whose scratch repositories fail on
     <code>.git/index: Not a directory</code> before any code under test runs.
     The fifth reads that same retired SVG file, so it fails for the same
-    reason. The broad fast lane collects the whole fast suite with no import
-    error, which is the check the two restored siblings repair.</p>
+    reason. The collection pass at the head walks the whole fast suite and
+    reports no collection error, which is the check the two restored siblings
+    repair.</p>
   </main>
 </body>
 </html>

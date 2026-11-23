@@ -6,6 +6,13 @@
     "scripts/prototypes/stored_state_refusals/submit.sh:119"
   ],
   "completed_at": "2026-11-23T00:32:48.403Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-default-policy-refusal-drift-26ba1790a7e9",
+      "recorded_at": "2026-11-23T02:16:35.584693+00:00"
+    }
+  },
   "dispatched_at": "2026-11-22T23:55:29Z",
   "finding_dispositions": {},
   "findings": [

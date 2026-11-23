@@ -227,6 +227,18 @@
     (<code>git diff 348ed92c 104c8b67 -- benchmarks/</code> is empty) and the
     reference is present at the base revision, so the finding is not a
     regression and is left for the owner of the benchmark tree.</p>
+    <p id="unreached-module-delete-focused-pass">The same guards are run again
+    at revision <code>00c8095ff7ea</code> over the four files that do not carry
+    that pre-existing failure, so the gate has a passing result of its own:
+    <code>PYTHONPATH=. JAX_PLATFORMS=cpu
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider
+    -q tests/test_thermalhydralic.py tests/test_krylov_reverse_mode_guard.py
+    tests/test_vs3_linkage_repair.py tests/test_base_install_imports.py</code> on
+    <code>all_debug</code>, job 1339385: <strong>63 passed, 4 xfailed, 22
+    warnings in 44.69s</strong>, exit 0. Both logs are cited from the manifest
+    beside this record: <code>focused-head.log</code> for the run that includes
+    the pre-existing failure and <code>focused-pass.log</code> for the run that
+    does not.</p>
 
     <h3 id="unreached-module-delete-limits">What this record does not claim</h3>
     <p>It does not claim the full test suite is green: that run was not

@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": "none",
+  "completed_at": "2026-11-23T07:11:29.389Z",
+  "dispatched_at": "2026-11-23T06:45:07Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html",
+      "line": 201,
+      "severity": "non-blocking",
+      "summary": "The fragment cites -0.021339473744693815 (line 201) and +0.061765 (line 267) as the same Newton matrix 'read at the operator's bound-breaking direction' and 'at that operator's TOP direction, but no receipt carries either number and no committed code path in scripts/iron_operator_bound/persisted.py computes the matrix at a caller-supplied direction; witness-graded-16-80.json and witness-uniform-0.08.json carry the +0.061765 figure nowhere. The claim these support (the operator's own direction is already indefinite) is corroborated by newton_minimum and the closed form, so the headline stands, but the two numbers are unverifiable citations."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html",
+      "line": 334,
+      "severity": "non-blocking",
+      "summary": "The suite table reports the head arm at f2afbe069d5bb0a2db8b93ef8e3fa5551622111c as 'cut short at 5 of 101 tests' and line 361 says 'the head arm is recorded as incomplete rather than as a pass', while gate-head-fast.log (written after the last commit) records a completed head arm at 4aa6ca3adb7d043466e21d6bb7371e9963ad7864 with 100 passed, 5 failed, 14 deselected. The fragment was never updated to the completed arm, so a later reader consulting it would believe the head arm never completed."
+    },
+    {
+      "file": "scripts/iron_operator_bound/figure.py",
+      "line": 211,
+      "severity": "non-blocking",
+      "summary": "check_labels re-implements the clipped-and-overlapping-text figure audit that scripts/edge_sheet/figure.py already implements, adding another script-local copy rather than the style-module owner the plotting rules name; a later figure's saved audit can drift from this one."
+    },
+    {
+      "file": "scripts/iron_operator_bound/persisted.py",
+      "line": 361,
+      "severity": "non-blocking",
+      "summary": "generalised_spectrum builds the metric-weighted generalised block eigenproblem (cholesky reduction plus signed singular values) independently of nova/biot/magnetisation.py:370 galerkin_block_spectrum, which owns the same symmetrisation and 1/mu0 normalisation for the assembled interaction; the docstring states why the owner's global signature cannot return a per-cell band, so this is a documented sibling rather than an accidental fork, but the reduction machinery is duplicated."
+    },
+    {
+      "file": "scripts/iron_operator_bound/persisted.py",
+      "line": 894,
+      "severity": "non-blocking",
+      "summary": "The three bound receipts predates the eigen_tolerance field added at :907 and carry no tolerance, so the reading's stopping criterion is not recorded beside the eigen-residual; the residual is recorded so the reading is self-described, but the manifest's claim that only the uniform-0.04 receipt predates the field is inaccurate to the other two."
+    }
+  ],
+  "item_commit_range": "c06ff41029a84805c3be8ee6e9ca9f6b8f0ca35d..4aa6ca3adb7d043466e21d6bb7371e9963ad7864; 22 commits, of which 6 are gained since the review at bb6c6c8b9dd2c0b5e606004f18a068b9f349831c",
+  "item_verdicts": {
+    "call_sites": "No production runtime call site exists: nothing under nova/ imports scripts/iron_operator_bound, and figure.py:158 imports persisted.cell_size only within the same node's scripts tree.",
+    "diff": "Read commit by commit against c06ff410: the 6 commits gained since bb6c6c8b9 delegate the cell split to the owner, gate the calibration identities with stated tolerances and --mutate, record operator digests, remove the figure's PNG twin, and finish the fragment; the earlier 16 commits built the instrument, the receipts and the figure.",
+    "done_when": "The done_when's three clauses are each asserted: the quotient and eigen-residual for graded 16/80, uniform 40 and uniform 80 mm (fragment table lines 28-33, matching bound-*.json), the graded Newton witness attributed to the operator via the closed form 1-(mu0 chi)q and localised to cells (witness-graded-* and region-graded-*.json, fragment lines 160-260), and a deliberately perturbed operator reading above the bound (control-uniform-0.08.json lift 0.049999999999996714 against PLANT 0.05).",
+    "goal": "The node's goal is the re-measurement of the demagnetisation bound on the persisted WEST operators; scripts/iron_operator_bound/persisted.py:267 bound() and :894 record_bound() compute the largest metric-weighted quotient of G/mu0 with its eigen-residual, and the fragment docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html:24-35 reports it for all three operators.",
+    "manifest": "Read; it records the measurement, the calibration gate, both suite arms and the receipts. One statement is inaccurate: it says only the uniform-0.04 bound receipt predates eigen_tolerance, while all three bound receipts (written 02:11-02:17) carry no eigen_tolerance field.",
+    "write_paths": "Declared paths are scripts/iron_operator_bound, the fragment and the figure directory; the 4-path diff touches exactly those and nothing else."
+  },
+  "justifications": {
+    "durability": "scripts/iron_operator_bound/persisted.py:719-725 check_verdict() raises SystemExit on any identity outside CHECK_TOLERANCE, and gate-check-mutated.log shows it reddening (EXIT=1, seed_relation_error 1.0e-07 exceeds 1.0e-10); each comparison is independent of the value under test (owner dense spectrum, a literal I-RGW, and the constant 0.05), but no test in tests/ runs --mode check, so the guard fires only when a human runs it.",
+    "evidence": "Every headline number reconciles with its receipt: bound-graded-16-80.json maximum 1.0255064121948232 and residual 2.909e-10, witness-graded-16-80.json newton_minimum -0.024633110848539044 with predicted band [-0.024682757457559434, -0.020754235605388693], and control-uniform-0.08.json lift 0.049999999999996714; but fragment lines 201 and 267 cite -0.021339473744693815 and +0.061765 that no receipt or committed code path produces.",
+    "fit": "scripts/iron_operator_bound/persisted.py follows the module's own idiom and the fragment metadata at lines 2-9 matches the evidence-fragment convention, though figure.py:211 check_labels is a fourth script-local copy of the clipped/overlapping-text audit the plotting rules place in the style module.",
+    "goal_fidelity": "scripts/iron_operator_bound/persisted.py:267-297 computes the metric-weighted quotient of G/mu0 and its residual, and record_bound() at :894 writes it for the three persisted operators, which is exactly the node goal.",
+    "reuse": "localise() at persisted.py:593 delegates the cell and cell-pair split to scripts/iron_operator_bound/localise.py:131 and check() at :673 reads nova/biot/magnetisation.py:410 galerkin_spectrum as the owner's answer, but generalised_spectrum() at :361 builds the metric-weighted generalised block eigenproblem independently of the interpretive owner at nova/biot/magnetisation.py:370.",
+    "scope_discipline": "The diff touches only docs/evidence/fragments/iron-core-magnetisation/icm-graded-bound-remeasure.html, docs/figures/iron-core-magnetisation/icm-graded-bound-remeasure/operator-bound.svg and scripts/iron_operator_bound/persisted.py and figure.py, all inside the declared write paths, and no product code under nova/ changes."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the bound re-measurement; bound() and record_bound() at scripts/iron_operator_bound/persisted.py:267,894 produce it.\nVERDICT done_when: all three clauses are recorded and verified against the receipts.\nVERDICT write_paths: the 4-path diff is inside scripts/iron_operator_bound, the fragment and the figure directory.\nVERDICT manifest: read; records both suite arms and the receipts, with one inaccurate statement about eigen_tolerance.\nVERDICT diff: read commit by commit against c06ff410; the six commits since bb6c6c8b9 fix the prior review's localisation, calibration and provenance findings.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 20\nSCORE durability: 15\nSCORE fit: 16\nSCORE reuse: 12\n",
+  "review_run_id": "r-20261123T064008344474-review-of-icm-graded-bound-remeasure-4aa6ca3adb7d",
+  "reviewed_base_sha": "c06ff41029a84805c3be8ee6e9ca9f6b8f0ca35d",
+  "reviewed_head_sha": "4aa6ca3adb7d043466e21d6bb7371e9963ad7864",
+  "reviewed_run_id": "r-20261122T141646800999-icm-graded-bound-remeasure",
+  "rubric": "code",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:11:56.499818+00:00",
+  "total": 97
+}

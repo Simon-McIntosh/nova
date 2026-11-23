@@ -27,6 +27,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T141951224815-icm-cholesky-route-onto-main",
       "section": "\u00a711"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T03:27:48.452841+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T141951224815-icm-cholesky-route-onto-main",
+      "section": "\u00a711"
     }
   },
   "findings": [

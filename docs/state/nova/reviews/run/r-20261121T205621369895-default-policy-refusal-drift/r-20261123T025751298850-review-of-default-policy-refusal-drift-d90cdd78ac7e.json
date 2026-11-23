@@ -16,6 +16,12 @@
       "recorded_at": "2026-11-23T03:51:11.242431+00:00",
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261121T205621369895-default-policy-refusal-drift"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T03:51:11.242431+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261121T205621369895-default-policy-refusal-drift"
     }
   },
   "findings": [

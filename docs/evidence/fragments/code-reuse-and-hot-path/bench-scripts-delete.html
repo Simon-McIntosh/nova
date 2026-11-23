@@ -12,7 +12,7 @@
     <p>This node applies the <code>bench-scripts-census</code> delete and merge
     verdicts. The census was taken at revision
     <code>2653ef0c9b5fa5b9b05b9d9d9d01d5e9b416a5e9</code>; this batch base is
-    <code>348ed92c7ab08a9592a7f997d62bfec41ae687d4</code>.</p>
+    <code>348ed92c7ab0</code>.</p>
 
     <h3 id="bench-scripts-delete-partition">The verdicts split on a kept-code reference</h3>
     <p>The census models Python imports only. Applying its 715 delete and 3
@@ -89,11 +89,11 @@
     <table id="bench-scripts-delete-verification-table">
       <tr><th>measure</th><th>revision</th><th>result</th></tr>
       <tr><td>absence check, 614 paths</td><td><code>ba0fe4eb8</code></td><td>0 code/test/AGENTS references</td></tr>
-      <tr><td>reachable gate, worktree at head</td><td><code>ba0fe4eb8</code></td><td><code>5 failed, 49 passed, 4 xfailed, 1 warning in 198.64s</code> (<code>EXIT=1</code>)</td></tr>
-      <tr><td>scratch-tree arm at the batch base</td><td><code>348ed92c</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 32.08s</code> (<code>EXIT=1</code>)</td></tr>
-      <tr><td>scratch-tree arm at the head</td><td><code>f38f5fc1f</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 28.49s</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>reachable gate, worktree at head</td><td><code>ba0fe4eb8</code></td><td><code>5 failed, 49 passed, 4 xfailed, 1 warning in 177.47s (0:02:57)</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>scratch-tree arm at the batch base</td><td><code>348ed92c7ab0</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 32.57s</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>scratch-tree arm at the head</td><td><code>f38f5fc1f</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 29.05s</code> (<code>EXIT=1</code>)</td></tr>
       <tr><td>added failures, base to head</td><td>&mdash;</td><td>0; the two arms report the same nineteen failure and error ids</td></tr>
-      <tr><td>fast-lane collection, worktree</td><td><code>ba0fe4eb8</code></td><td><code>9715/10939 tests collected (1224 deselected) in 22.95s</code> (<code>EXIT=0</code>), 0 collection errors</td></tr>
+      <tr><td>fast-lane collection, worktree</td><td><code>ba0fe4eb8</code></td><td><code>9715/10939 tests collected (1224 deselected) in 23.32s</code> (<code>EXIT=0</code>), 0 collection errors</td></tr>
     </table>
     <p>Each measurement is one <code>all_debug</code> job submitted with
     <code>sbatch --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G</code>;

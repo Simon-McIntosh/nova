@@ -4,6 +4,13 @@
   "added_failure_ids": [],
   "call_sites": [],
   "completed_at": "2026-11-23T10:58:11.247Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-hot-path-duplicate-register-c2a3f014f829",
+      "recorded_at": "2026-11-23T11:09:48.301158+00:00"
+    }
+  },
   "dispatched_at": "2026-11-23T10:48:33Z",
   "finding_dispositions": {
     "0": {

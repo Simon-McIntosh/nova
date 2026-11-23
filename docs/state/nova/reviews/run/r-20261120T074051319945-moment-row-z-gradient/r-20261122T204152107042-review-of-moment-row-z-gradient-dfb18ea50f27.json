@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-23T00:19:54.160Z",
+  "dispatched_at": "2026-11-22T23:55:26Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/moment_row_z_gradient/per_file_processes.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "scripts/prototypes/moment_row_z_gradient/per_file_processes.py:1 non-blocking: it duplicates the per-file-in-own-process subprocess runner that scripts/prototypes/polygon_stable_evaluator/suite_files.py already provides for this run instead of sharing that loop, so the per-file log and EXIT contract now has two homes."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/moment-row-z-gradient.html",
+      "line": 245,
+      "severity": "non-blocking",
+      "text": "docs/evidence/fragments/sub-millisecond-forward-path/moment-row-z-gradient.html:245 non-blocking: the delivered-head compile pair is a titan P100 reading, not the betelgeuse H200 the done_when names, so the shipped kernel's H200 instruction and cold-compile ratios remain unmeasured at the delivered head even though the 2.3x limit is met on both devices and the substitution is stated."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit 7f2ce51d3..dfb18ea50; six commits touch exactly the five declared files: the restored corner-coincidence control (acec6e2ee), the branch probe and per-file runner (1126abe81), the pair script's device-argument and revision-resolution fixes (8242bac31, 16ee45e8f), and two fragment commits that record the recheck and the delivered-head cost pair and its revisions.",
+    "done_when": "The done_when asks for paired 132-cell H200 production-row instruction and cold-compile ratios against main, blocked above 2.3x; compile-ratios-titan/production-budget.json records completed true at delivered head 16ee45e8f with instruction_ratio 0.9173 and cold_compile_ratio 0.9085, and the earlier H200 pair stays 1.0397/1.0351, but the delivered-head pair is a titan P100 reading rather than the betelgeuse job the done_when names.",
+    "goal": "The node goal books the moment-1 and moment-2 Z-gradient rows as the height derivative of their own flux rows; this delta changes no kernel line (git diff acec6e2ee..dfb18ea touches only production_pair.py and the fragment) and instead adds the coincidence control and the delivered-head recheck that the prior review at 7f2ce51d3 named missing, recorded at docs/evidence/fragments/sub-millisecond-forward-path/moment-row-z-gradient.html:161-164.",
+    "manifest": "Read; the reviewed run's manifest records status complete, the recheck at acec6e2ee (8 passed in 78.8 s, 2 in 139.4 s, 4 passed with 7 skipped, exit 0), the titan pair as job 1337230, and states baseline_suite and after_suite as 'not armed for this node', so the added-failure derivation is zero with no added ids.",
+    "write_paths": "The declared paths are nova/biot/polygonanalytic.py, nova/equilibrium/topology.py, tests/biot, scripts/prototypes/moment_row_z_gradient, the evidence fragment and scripts/prototypes/polygon_stable_evaluator/production_pair.py; all five paths in the delta lie inside them and nothing outside is touched."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_polygon_stable_evaluator.py:129-130 asserts the coincidence derivative is 1.18 and separated from the ordinary -0.07 by more than one, so removing the sampled-tangent branch or booking the ordinary derivative reddens it; no negative-control log of that test on a pre-fix tree is in the delta.",
+    "evidence": "compile-ratios-titan/production-budget.json records completed true with instruction_ratio 0.9173 and cold_compile_ratio 0.9085 at head 16ee45e8f, EXIT=0 in final-production-pair-titan.log, but on the titan P100 rather than the betelgeuse H200 the done_when names.",
+    "fit": "scripts/prototypes/moment_row_z_gradient/coincidence_control_probe.py:1 follows the sibling probe idiom and no added name carries a plan, version or ticket label.",
+    "goal_fidelity": "docs/evidence/fragments/sub-millisecond-forward-path/moment-row-z-gradient.html:164 records the restored coincidence control and the delivered-head cost pair, which are the findings the prior review at 7f2ce51d3 left open.",
+    "reuse": "a search of scripts/ for per-file process runners found scripts/prototypes/polygon_stable_evaluator/suite_files.py already carrying the per-file subprocess loop that scripts/prototypes/moment_row_z_gradient/per_file_processes.py re-implements rather than shares, though the repository holds many run-local gate scripts and no single canonical owner.",
+    "scope_discipline": "all five paths in git diff 7f2ce51d3..dfb18ea lie inside the declared write paths and no other path appears."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal books the moment-1 and moment-2 Z-gradient rows as the height derivative of their own flux rows; this delta changes no kernel line (git diff acec6e2ee..dfb18ea touches only production_pair.py and the fragment) and instead adds the coincidence control and the delivered-head recheck that the prior review at 7f2ce51d3 named missing, recorded at docs/evidence/fragments/sub-millisecond-forward-path/moment-row-z-gradient.html:161-164.\nVERDICT done_when: The done_when asks for paired 132-cell H200 production-row instruction and cold-compile ratios against main, blocked above 2.3x; compile-ratios-titan/production-budget.json records completed true at delivered head 16ee45e8f with instruction_ratio 0.9173 and cold_compile_ratio 0.9085, and the earlier H200 pair stays 1.0397/1.0351, but the delivered-head pair is a titan P100 reading rather than the betelgeuse job the done_when names.\nVERDICT write_paths: The declared paths are nova/biot/polygonanalytic.py, nova/equilibrium/topology.py, tests/biot, scripts/prototypes/moment_row_z_gradient, the evidence fragment and scripts/prototypes/polygon_stable_evaluator/production_pair.py; all five paths in the delta lie inside them and nothing outside is touched.\nVERDICT manifest: Read; the reviewed run's manifest records status complete, the recheck at acec6e2ee (8 passed in 78.8 s, 2 in 139.4 s, 4 passed with 7 skipped, exit 0), the titan pair as job 1337230, and states baseline_suite and after_suite as 'not armed for this node', so the added-failure derivation is zero with no added ids.\nVERDICT diff: Read commit by commit 7f2ce51d3..dfb18ea50; six commits touch exactly the five declared files: the restored corner-coincidence control (acec6e2ee), the branch probe and per-file runner (1126abe81), the pair script's device-argument and revision-resolution fixes (8242bac31, 16ee45e8f), and two fragment commits that record the recheck and the delivered-head cost pair and its revisions.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/moment-row-z-gradient.html:164 records the restored coincidence control and the delivered-head cost pair, which are the findings the prior review at 7f2ce51d3 left open.\nSCORE evidence: 17\nJUSTIFICATION evidence: compile-ratios-titan/production-budget.json records completed true with instruction_ratio 0.9173 and cold_compile_ratio 0.9085 at head 16ee45e8f, EXIT=0 in final-production-pair-titan.log, but on the titan P100 rather than the betelgeuse H200 the done_when names.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all five paths in git diff 7f2ce51d3..dfb18ea lie inside the declared write paths and no other path appears.\nSCORE durability: 18\nJUSTIFICATION durability: tests/biot/test_polygon_stable_evaluator.py:129-130 asserts the coincidence derivative is 1.18 and separated from the ordinary -0.07 by more than one, so removing the sampled-tangent branch or booking the ordinary derivative reddens it; no negative-control log of that test on a pre-fix tree is in the delta.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/prototypes/moment_row_z_gradient/coincidence_control_probe.py:1 follows the sibling probe idiom and no added name carries a plan, version or ticket label.\nSCORE reuse: 15\nJUSTIFICATION reuse: a search of scripts/ for per-file process runners found scripts/prototypes/polygon_stable_evaluator/suite_files.py already carrying the per-file subprocess loop that scripts/prototypes/moment_row_z_gradient/per_file_processes.py re-implements rather than shares, though the repository holds many run-local gate scripts and no single canonical owner.\nFINDING scripts/prototypes/moment_row_z_gradient/per_file_processes.py:1 non-blocking: it duplicates the per-file-in-own-process subprocess runner that scripts/prototypes/polygon_stable_evaluator/suite_files.py already provides for this run instead of sharing that loop, so the per-file log and EXIT contract now has two homes.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/moment-row-z-gradient.html:245 non-blocking: the delivered-head compile pair is a titan P100 reading, not the betelgeuse H200 the done_when names, so the shipped kernel's H200 instruction and cold-compile ratios remain unmeasured at the delivered head even though the 2.3x limit is met on both devices and the substitution is stated.",
+  "review_run_id": "r-20261122T204152107042-review-of-moment-row-z-gradient-dfb18ea50f27",
+  "reviewed_base_sha": "7f2ce51d3a32f3cb668b16337fbf9060514289e0",
+  "reviewed_head_sha": "dfb18ea50f2730f093db079cf65bad84beb7ff29",
+  "reviewed_run_id": "r-20261120T074051319945-moment-row-z-gradient",
+  "rubric": "",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T00:20:49.386196+00:00",
+  "total": 107
+}

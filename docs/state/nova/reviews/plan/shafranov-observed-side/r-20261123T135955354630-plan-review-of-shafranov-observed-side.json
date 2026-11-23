@@ -79,9 +79,28 @@
       "note": "\u00a73 now states the endpoint only; the function names and the delete-not-move instruction moved to the node's brief (sos-observed-contour-integral).",
       "reason": "",
       "when": "2026-11-23T19:26:21.287096+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "e8ebd8a101b8a71b0028a39381fe2a44d7baf7ac",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The followup prompt now names the certificate PNG/SVG as the only files to regenerate (timing images deleted in d4bc41b1e) and says to read the receipt, whose key list has grown, rather than the quoted list. The body is in a structured region and keeps its audit text.",
+      "reason": "",
+      "when": "2026-11-23T19:26:29.502604+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "e8ebd8a101b8a71b0028a39381fe2a44d7baf7ac",
+      "commit_basis": "edit",
+      "note": "The followup prompt now names the certificate PNG/SVG as the only files to regenerate (timing images deleted in d4bc41b1e) and says to read the receipt, whose key list has grown, rather than the quoted list. The body is in a structured region and keeps its audit text.",
+      "reason": "",
+      "when": "2026-11-23T19:26:29.502604+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",

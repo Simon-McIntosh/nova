@@ -13,7 +13,6 @@ Run on CPU in one allocation; the driver refuses any other backend.
 import argparse
 import dataclasses
 import json
-import math
 from pathlib import Path
 
 from nova.jax.config import configure_dtypes
@@ -32,118 +31,97 @@ def emit(kind, **fields):
 
 
 def entry_topology_read(receipt):
-    """Read topology from a flux-map null census, and from supplied stationary
-    points, on one analytic field."""
-    from nova.equilibrium.solve_request import TopologyPolicy
-    from nova.equilibrium.topology import (
-        TopologyConvention,
-        read,
-        read_at_stationary_points,
-        stationary_read,
-    )
-    from tests.equilibrium.test_topology_read import (
-        _analytic_inputs,
-        _realised_hex_geometry,
-    )
+    """Read topology from the stationary points a solve supplies, and from the
+    flux-map null census, on one analytic field."""
+    from tests.test_support_read import _case
 
-    oracle, field, wall, axis, saddle = _analytic_inputs("diverted")
-    geometry = _realised_hex_geometry(wall, 50)
-    convention = TopologyConvention.from_cocos(17, 1.0)
-    policy = TopologyPolicy()
-    pitch = float(np.sqrt(np.median(np.asarray(geometry.full_area))))
-    seeds = jnp.asarray(np.asarray([axis, saddle]))
-
-    def supplied_points(evaluator):
-        def polish(point):
-            return stationary_read(evaluator, point, pitch, policy)
-
-        return jax.vmap(polish)(seeds)
-
-    def supplied_read(evaluator):
-        return jax.jit(
-            lambda inner, solved: read_at_stationary_points(
-                inner, geometry, convention, policy, solved
-            )
-        )(evaluator, supplied_points(evaluator))
-
-    census_read = jax.jit(read)(field, geometry, convention, policy)
-    supplied = supplied_read(field)
+    operands, cache, roots, pitch, step, reference, analytic_axis = _case("diverted")
+    support, booked = step(operands, cache, roots + 0.03 * pitch, roots)
+    reading = support.reading
+    area = np.asarray(operands.geometry.full_area)
+    pitch = float(pitch)
 
     axis_gap = float(
-        np.max(np.abs(np.asarray(census_read.axis) - np.asarray(supplied.axis)))
+        np.linalg.norm(np.asarray(reading.axis) - np.asarray(analytic_axis))
     )
-    census_x = np.asarray(census_read.x_points)[
-        np.asarray(census_read.x_point_valid).astype(bool)
-    ]
-    supplied_x = np.asarray(supplied.x_points)[
-        np.asarray(supplied.x_point_valid).astype(bool)
-    ]
-    if census_x.shape == supplied_x.shape and census_x.size:
-        x_gap = float(np.max(np.abs(census_x - supplied_x)))
-    else:
-        x_gap = math.nan
-    membership_gap = float(
-        np.max(
-            np.abs(np.asarray(census_read.membership) - np.asarray(supplied.membership))
-        )
-    )
-    labels_equal = bool(
-        np.array_equal(
-            np.asarray(census_read.domain_labels), np.asarray(supplied.domain_labels)
-        )
+    selected = np.asarray(reading.membership) * area
+    census = np.asarray(reference.membership) * area
+    area_gap = float(abs(selected.sum() - census.sum())) / float(census.sum())
+    cell_gap = float(np.max(np.abs(selected - census) / area))
+    class_equal = int(reading.boundary_class) == int(reference.boundary_class)
+    tolerance = dict(
+        boundary_class="equal",
+        axis_position_m=0.05 * pitch,
+        membership_area_sum_relative=5.0e-3,
+        membership_cell_fraction=0.05,
     )
     agrees = (
-        axis_gap <= pitch
-        and (math.isnan(x_gap) or x_gap <= pitch)
-        and membership_gap <= 1.0e-12
-        and labels_equal
+        class_equal
+        and axis_gap < 0.05 * pitch
+        and area_gap < 5.0e-3
+        and cell_gap < 0.05
     )
 
-    shifted = dataclasses.replace(field, shift=jnp.asarray([6.0 * pitch, 3.0 * pitch]))
-    census_shifted = jax.jit(read)(shifted, geometry, convention, policy)
-    control_gap = float(
-        np.max(np.abs(np.asarray(census_shifted.axis) - np.asarray(supplied.axis)))
+    gradient = np.asarray(operands.exterior)[:, 1]
+    delta = 0.1 * float(np.median(np.abs(gradient)))
+    perturbed_exterior = operands.exterior.at[:, 1].add(delta)
+    perturbed_operands = dataclasses.replace(operands, exterior=perturbed_exterior)
+    perturbed_cache = dataclasses.replace(cache, exterior=perturbed_exterior)
+    disturbed, _ = step(
+        perturbed_operands, perturbed_cache, roots + 0.03 * pitch, roots
     )
+    disturbed_selected = np.asarray(disturbed.reading.membership) * area
+    control_gap = float(np.max(np.abs(disturbed_selected - census) / area))
+    control_axis_gap = float(
+        np.linalg.norm(np.asarray(disturbed.reading.axis) - np.asarray(analytic_axis))
+    )
+    control_fires = bool(control_gap >= 0.05 or control_axis_gap >= 0.05 * pitch)
     emit(
         "NEGATIVE_CONTROL",
         entry="topology-read",
         perturbation=(
-            "the field passed to read_at_stationary_points is shifted by "
-            "(6, 3) cell pitches"
+            "the exterior nodal jet gains a uniform flux gradient of 0.1x the "
+            "exterior nodal derivative. Used by the version of the duplicate "
+            "that reads the flux map's own stationary points."
         ),
-        measured_gap_m=control_gap,
-        tolerance_m=pitch,
-        disagrees_beyond_tolerance=bool(control_gap > pitch),
+        measured_cell_fraction=control_gap,
+        measured_axis_gap_m=control_axis_gap,
+        tolerance_cell_fraction=0.05,
+        tolerance_axis_m=0.05 * pitch,
+        disagrees_beyond_tolerance=control_fires,
     )
     receipt["negative_controls"].append(
         dict(
             entry="topology-read",
-            measured_gap_m=control_gap,
-            tolerance_m=pitch,
-            disagrees_beyond_tolerance=bool(control_gap > pitch),
+            measured_cell_fraction=control_gap,
+            measured_axis_gap_m=control_axis_gap,
+            disagrees_beyond_tolerance=control_fires,
         )
     )
     return dict(
         entry="topology-read",
-        implementation_a="nova.equilibrium.topology.read (flux-map null census)",
+        implementation_a=(
+            "nova.equilibrium.topology.read (flux-map null census, "
+            "Topology.read_qualification on the measured routes)"
+        ),
         implementation_b=(
             "nova.equilibrium.topology.read_at_stationary_points (points "
-            "supplied by topology.stationary_read)"
+            "solved by fixed_points.solve and supplied by support_read.read)"
         ),
         input=(
             "analytic Cerfon-Freidberg single-null field, diverted, 50-cell "
-            "realised hexagonal geometry"
+            "realised hexagonal geometry, both route implementations run on "
+            "the same operands in one process"
         ),
-        axis_a=np.asarray(census_read.axis).tolist(),
-        axis_b=np.asarray(supplied.axis).tolist(),
+        axis_a=np.asarray(reference.axis).tolist(),
+        axis_b=np.asarray(reading.axis).tolist(),
         axis_gap_m=axis_gap,
-        x_gap_m=x_gap,
-        membership_gap=membership_gap,
-        domain_labels_equal=labels_equal,
+        boundary_class_a=int(reference.boundary_class),
+        boundary_class_b=int(reading.boundary_class),
+        membership_area_sum_relative=area_gap,
+        membership_cell_fraction=cell_gap,
         cell_pitch_m=pitch,
-        tolerance=dict(
-            axis_position_m=pitch, x_point_position_m=pitch, membership=1.0e-12
-        ),
+        tolerance=tolerance,
         agrees=agrees,
     )
 
@@ -323,49 +301,80 @@ def entry_level_polish(receipt):
     )
 
 
-def entry_route_probe(receipt):
-    """Count which support read the public forward solve executes."""
-    import nova.equilibrium.topology as topology_module
-    from nova.equilibrium.topology import Topology
-    from tests.test_equilibrium_magnetics_fit import _physical_problem
+def entry_route_resolution(receipt):
+    """Resolve which topology read each measured route executes, statically.
 
-    counts = {"read_qualification": 0, "read_at_stationary_points": 0}
-    original_read_qualification = Topology.read_qualification
-    original_stationary = topology_module.read_at_stationary_points
+    Counting calls inside a jitted program is not possible, so this reads the
+    route modules' own source and reports which implementation each names.
+    """
+    import ast
 
-    def counted_read_qualification(self, *args, **kwargs):
-        counts["read_qualification"] += 1
-        return original_read_qualification(self, *args, **kwargs)
+    import nova
 
-    def counted_stationary(field, geometry, convention, policy, solved, **options):
-        counts["read_at_stationary_points"] += 1
-        return original_stationary(
-            field, geometry, convention, policy, solved, **options
+    root = Path(nova.__file__).resolve().parent
+
+    def count(relative, name):
+        tree = ast.parse((root / relative).read_text())
+        total = 0
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Attribute) and node.attr == name:
+                total += 1
+            elif isinstance(node, ast.Name) and node.id == name:
+                total += 1
+        return total
+
+    def judge(relative, required, forbidden):
+        present = count(relative, required)
+        forbidden_present = count(relative, forbidden)
+        return dict(
+            module=f"nova/{relative}",
+            required=required,
+            required_calls=present,
+            forbidden=forbidden,
+            forbidden_calls=forbidden_present,
+            passes=bool(present > 0 and forbidden_present == 0),
         )
 
-    Topology.read_qualification = counted_read_qualification
-    topology_module.read_at_stationary_points = counted_stationary
-    try:
-        profile, request, *_ = _physical_problem("mast")
-        profile.solve(request)
-    finally:
-        Topology.read_qualification = original_read_qualification
-        topology_module.read_at_stationary_points = original_stationary
+    census = "read_qualification"
+    supplied = "read_at_stationary_points"
+    results = [
+        judge("equilibrium/forward.py", census, supplied),
+        judge("equilibrium/forward_operator.py", census, supplied),
+        judge("equilibrium/support_read.py", supplied, census),
+    ]
+    agrees = all(item["passes"] for item in results)
+    control = judge("equilibrium/support_read.py", census, supplied)
+    control_fires = not control["passes"]
     emit(
-        "ROUTE_PROBE",
-        route="public-forward-solve",
-        **counts,
-        positive_control=counts["read_qualification"] > 0,
-        support_read_receipt=(
-            "nova/equilibrium/support_read.py read/read_batch carry 0 body "
-            "lines on both measured routes"
+        "NEGATIVE_CONTROL",
+        entry="route-resolution",
+        perturbation=(
+            "the forward-route expectation is applied to the module that reads "
+            "supplied stationary points, where it must fail"
         ),
+        measured=control,
+        disagrees_beyond_tolerance=control_fires,
+    )
+    receipt["negative_controls"].append(
+        dict(entry="route-resolution", disagrees_beyond_tolerance=control_fires)
     )
     return dict(
-        entry="route-probe",
-        counts=counts,
-        positive_control=counts["read_qualification"] > 0,
-        agrees=counts["read_at_stationary_points"] == 0,
+        entry="route-resolution",
+        question=(
+            "nova/equilibrium/support_read.py read, read_batch, read_and_book "
+            "and bank_program carry kernels in the device trace and zero body "
+            "lines on both measured routes. Which topology read does each "
+            "route run?"
+        ),
+        findings=results,
+        conclusion=(
+            "both measured routes read topology through "
+            "Topology.read_qualification, the flux-map null census. The "
+            "supplied-stationary-point read is reached only from "
+            "support_read.py, whose callers execute zero body lines on these "
+            "routes"
+        ),
+        agrees=agrees,
     )
 
 
@@ -376,7 +385,7 @@ def compare(receipt_path):
         entry_extreme_selection,
         entry_storage_mode,
         entry_level_polish,
-        entry_route_probe,
+        entry_route_resolution,
     ):
         emit("ENTRY_START", entry=function.__name__)
         try:

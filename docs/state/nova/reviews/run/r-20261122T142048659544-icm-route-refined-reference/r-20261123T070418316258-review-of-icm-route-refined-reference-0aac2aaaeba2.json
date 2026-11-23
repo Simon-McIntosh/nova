@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/west_iron_linear/measure.py:915",
+    "scripts/west_iron_linear/measure.py:343",
+    "scripts/west_iron_linear/measure.py:371",
+    "scripts/west_iron_linear/measure.py:408"
+  ],
+  "completed_at": "2026-11-23T07:29:30.891Z",
+  "dispatched_at": "2026-11-23T07:09:56Z",
+  "findings": [
+    {
+      "file": "scripts/west_iron_linear/measure.py",
+      "line": 111,
+      "severity": "non-blocking",
+      "text": "_linear_problem re-implements the affine Newton operand assembly owned by nova/biot/magnetisation.py:1055-1110 rather than calling an exported builder, so the refined reference can drift from the production solve if that assembly changes; the fragment records this as follow-up at :130 but the brief forbade touching nova/, so it is carried, not fixed."
+    },
+    {
+      "file": "scripts/west_iron_linear/measure.py",
+      "line": 398,
+      "severity": "non-blocking",
+      "text": "the per-probe relative gap divides by np.linalg.norm(cholesky_field, axis=1) with no guard, so a probe where the Cholesky route's field is zero yields inf or nan; the maximum_entry path at :402 guards with 1e-300 but the per-probe path does not."
+    },
+    {
+      "file": "scripts/west_iron_linear/measure.py",
+      "line": 422,
+      "severity": "non-blocking",
+      "text": "rejected = outcome != \"rounding\" counts an indeterminate outcome as a refused defect, so a perturbation that fell below the resolvability floor would record the control fitted/refused rather than untested; requiring outcome == \"defect\" would make the control's claim match its name."
+    },
+    {
+      "file": "scripts/west_iron_linear/measure.py",
+      "line": 368,
+      "severity": "non-blocking",
+      "text": "resolvable is recomputed here and again inside _route_verdict at :371, so a future change to one expression would leave the receipt's reference.resolvable disagreeing with verdict.resolvable for the same numbers."
+    },
+    {
+      "file": "docs/evidence/fragments/iron-core-magnetisation/icm-route-refined-reference.html",
+      "line": 83,
+      "severity": "non-blocking",
+      "text": "the fragment cites uniform-0.04.json, but job 1338337 never ran and that receipt still carries the discredited self-referential negative_control block (negative_control.detected: true), which the fragment now disowns; regenerating the receipt or citing the preserved uniform-0.04-job1338206.json name would stop a reader opening the artifact from seeing the old control."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read the five commits 22315ca4..0aac2aaa: ae1ba4097 replaces the self-referential planted-reference control with a real 1+1e-10 factor defect and extracts _route_verdict; 930d9566a,383f60581,db59f567f,0aac2aaae are fragment edits that quote the resolvability figure, add the suite arms, and state the unmeasured operator control and the reuse follow-up.",
+    "done_when": "the done_when asks for the residual and condition estimate, both routes' distances with the reference error at least a decade below, and a stated verdict; uniform-0.04.json records residual 4.3372e-16, condition 1.0186e8, LU 7.7697e-13/1.0863e-12, Cholesky 2.4026e-13/3.2889e-13, forward error 2.3889e-16 and outcome rounding, and the focused suite arms at logs/base-focused.log and logs/after-focused.log record 1 failed/12 passed each, EXIT=1 each, same id.",
+    "goal": "the source goal is an iteratively refined reference solve on the persisted uniform 40 mm operator with both routes' distances and a rounding-or-defect verdict; measure.py:306 route_refinement and the fragment at :88 deliver it, unchanged in substance by the five gained commits.",
+    "manifest": "read; status complete, commits list all eight, tests describe the focused arms and the H200 receipt, and it records the operator control as not yet measured (job 1338337 queued), matching the fragment.",
+    "write_paths": "declared paths are scripts/west_iron_linear, the evidence fragment and a figures directory; the gained commits' two-path diff is measure.py and the fragment, both inside scope, and the figures path is unused."
+  },
+  "justifications": {
+    "durability": "no test asserts the new defect control; the smoke driver run_defect_smoke.py only prints defect_rejected, so a regression that made _route_verdict return rounding would not fail anything.",
+    "evidence": "the route numbers at fragment:40-51 match uniform-0.04.json exactly, but the repair's own additions (defect_control, probe_gap) are measured only on the 0.08 m gate_shell smoke (logs/defect-smoke.log) and job 1338337 that would measure them on the operator never ran, as fragment:77-86 discloses.",
+    "fit": "the new _route_verdict at measure.py:269 has a docstring and mechanism names with no plan label, matching the surrounding numpy/jnp style, though measure.py:388-399 adds an unguarded probe-scale division.",
+    "goal_fidelity": "docs/evidence/fragments/iron-core-magnetisation/icm-route-refined-reference.html:89 states the rounding verdict on the persisted operator, and measure.py:306 route_refinement still reports the residual, condition estimate, both routes' distances and the verdict the goal names.",
+    "reuse": "measure.py:111 _linear_problem still re-implements the affine Newton operand assembly owned by nova/biot/magnetisation.py:1055-1110 instead of calling an exported builder, documented as follow-up at fragment:130 but not resolved.",
+    "scope_discipline": "the five gained commits touch only scripts/west_iron_linear/measure.py and docs/evidence/fragments/iron-core-magnetisation/icm-route-refined-reference.html, both inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal is an iteratively refined reference solve on the persisted uniform 40 mm operator, reporting both routes' distances and a rounding-or-defect verdict; scripts/west_iron_linear/measure.py:306 route_refinement still delivers it, unchanged in substance by the five gained commits.\nVERDICT done_when: the done_when asks for the residual and condition estimate, both routes' distances with the reference error at least a decade below, and a stated verdict; the receipt uniform-0.04.json records residual 4.3372e-16, condition 1.0186e8, LU 7.7697e-13/1.0863e-12 and Cholesky 2.4026e-13/3.2889e-13 with forward error 2.3889e-16 and outcome rounding, and logs/base-focused.log and logs/after-focused.log each record 1 failed/12 passed, EXIT=1, the same id.\nVERDICT write_paths: the declared paths are scripts/west_iron_linear, the evidence fragment and a figures directory; the gained commits touch only measure.py and the fragment, both inside scope, and the figures path is unused.\nVERDICT manifest: read; status complete, all eight commits listed, the focused arms and H200 receipt recorded, and the operator control reported as not yet measured by job 1338337, matching the fragment.\nVERDICT diff: read the five commits against 22315ca4; ae1ba4097 replaces the self-referential control with a real 1+1e-10 factor defect and extracts _route_verdict, and the other four are fragment edits that quote the resolvability figure, add the suite arms, state the unmeasured operator control and record the reuse follow-up.\nCALL_SITES: scripts/west_iron_linear/measure.py:915, scripts/west_iron_linear/measure.py:343, scripts/west_iron_linear/measure.py:371, scripts/west_iron_linear/measure.py:408\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: scripts/west_iron_linear/measure.py:306 route_refinement and docs/evidence/fragments/iron-core-magnetisation/icm-route-refined-reference.html:89 still report the distances and the rounding verdict the goal names.\nSCORE evidence: 16\nJUSTIFICATION evidence: the table at the fragment:40-51 matches uniform-0.04.json exactly, but the repair's defect_control and probe_gap are measured only on the 0.08 m smoke (logs/defect-smoke.log) because job 1338337 never ran, as fragment:77-86 discloses.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the five gained commits touch only scripts/west_iron_linear/measure.py and docs/evidence/fragments/iron-core-magnetisation/icm-route-refined-reference.html, both inside the declared write paths.\nSCORE durability: 7\nJUSTIFICATION durability: run_defect_smoke.py only prints defect_rejected, so no test fails if _route_verdict regresses to always returning rounding.\nSCORE fit: 17\nJUSTIFICATION fit: the new _route_verdict at scripts/west_iron_linear/measure.py:269 follows the module's numpy/jnp style and mechanism names with no plan label.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/west_iron_linear/measure.py:111 _linear_problem re-implements the operand assembly owned by nova/biot/magnetisation.py:1055-1110 without extending an exported builder.\nFINDING scripts/west_iron_linear/measure.py:111 non-blocking: _linear_problem re-implements the affine Newton operand assembly owned by nova/biot/magnetisation.py:1055-1110 rather than calling an exported builder, so the refined reference can drift from the production solve if that assembly changes; the fragment records this as follow-up at :130 but the brief forbade touching nova/.\nFINDING scripts/west_iron_linear/measure.py:398 non-blocking: the per-probe relative gap divides by np.linalg.norm(cholesky_field, axis=1) with no guard, so a probe where the Cholesky route's field is zero yields inf or nan, while the maximum_entry path at :402 guards with 1e-300.\nFINDING scripts/west_iron_linear/measure.py:422 non-blocking: rejected = outcome != \"rounding\" counts an indeterminate outcome as a refused defect, so a perturbation that fell below the resolvability floor would read as a fitted control rather than an untested one.\nFINDING scripts/west_iron_linear/measure.py:368 non-blocking: resolvable is recomputed here and again inside _route_verdict at :371, so a future change to one expression would leave reference.resolvable disagreeing with verdict.resolvable for the same numbers.\nFINDING docs/evidence/fragments/iron-core-magnetisation/icm-route-refined-reference.html:83 non-blocking: the fragment cites uniform-0.04.json, but job 1338337 never ran and that receipt still carries the discredited self-referential negative_control block, which the fragment now disowns; citing the preserved uniform-0.04-job1338206.json or regenerating it would stop a reader opening the artifact from seeing the old control.\n",
+  "review_run_id": "r-20261123T070418316258-review-of-icm-route-refined-reference-0aac2aaaeba2",
+  "reviewed_base_sha": "6db36fee4fb17a4c05996dda9bf298ec0a5b02a2",
+  "reviewed_head_sha": "0aac2aaaeba2687cef7ab09c904b4246c98bb085",
+  "reviewed_run_id": "r-20261122T142048659544-icm-route-refined-reference",
+  "rubric": "code-review",
+  "scope_note": "incremental review of the five commits gained since the review at 22315ca421844d8f9fa19b1aa94c9f901a7ddcb4 (ae1ba4097, 930d9566a, 383f60581, db59f567f, 0aac2aaae)",
+  "scores": {
+    "durability": 7,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:29:51.915316+00:00",
+  "total": 82
+}

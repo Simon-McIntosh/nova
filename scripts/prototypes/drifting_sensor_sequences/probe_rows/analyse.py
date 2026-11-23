@@ -12,6 +12,13 @@ import numpy as np
 
 STUDY = Path(os.environ.get("DRIFT_STUDY", str(Path(__file__).resolve().parent)))
 BLOCK = 50
+# Each code's column states the row set it was fitted from: nova's stored arms
+# reconstruct the study's 72-row magnetics set, and imas-efit's read the 24 flux
+# loops.  One rule selects them, for the reduction, the gate and the figures
+# alike, and a code whose declared arm is absent is reported missing rather than
+# reduced from another row set, so no reader can state a comparison across two
+# information sets.
+DECLARED_ROWS = {"nova": "all", "efit": "loops"}
 # One lag-one rule for the controls: the white draw and the index-0
 # colouring must sit within this of zero, and the drift sequence above its
 # complement.
@@ -136,6 +143,7 @@ def summarise(rows: list[dict], truth: dict, jacobian: dict) -> dict:
     axis_error = float(np.sqrt(np.mean(axis_distance(rows, axis_truth) ** 2)))
     record = dict(
         slices=len(rows),
+        slices_with_boundary=int(np.sum(np.isfinite(values["q95"]))),
         axis_rms=float(axis_error),
         flux_rms=float(np.sqrt(np.mean((flux_fraction - flux_truth) ** 2))),
         q95_rms=float(np.sqrt(np.mean((values["q95"] - q95_truth) ** 2))),
@@ -205,19 +213,26 @@ def reduce_arm(rows: list[dict], truth: dict, block: int = BLOCK) -> dict:
     axis_mean = block_error(values["axis"], axis_truth, block)
     flux_mean = block_error(flux, flux_truth, block)
     q95_mean = block_error(values["q95"], q95_truth, block)
+
+    def ratio(mean, spread):
+        """A block-mean error as a fraction of the per-slice error."""
+        if not np.isfinite(spread) or spread == 0.0:
+            return float("nan")
+        return float(mean / spread)
+
     return dict(
         slices=len(rows),
         slices_with_boundary=int(np.sum(np.isfinite(values["q95"]))),
         converged=float(np.mean([bool(row.get("converged", True)) for row in rows])),
         axis_rms=axis_rms,
         axis_mean_50=axis_mean,
-        axis_mean_ratio=axis_mean / axis_rms,
+        axis_mean_ratio=ratio(axis_mean, axis_rms),
         flux_rms=flux_rms,
         flux_mean_50=flux_mean,
-        flux_mean_ratio=flux_mean / flux_rms,
+        flux_mean_ratio=ratio(flux_mean, flux_rms),
         q95_rms=q95_rms,
         q95_mean_50=q95_mean,
-        q95_mean_ratio=q95_mean / q95_rms,
+        q95_mean_ratio=ratio(q95_mean, q95_rms),
         axis_lag1=lag_one(values["axis"]),
         flux_lag1=lag_one(flux),
         q95_lag1=lag_one(values["q95"]),
@@ -241,6 +256,40 @@ def thresholds(table: tuple[dict, dict]) -> dict:
             and drift["q95_lag1"] > DRIFT_LAG_ONE_FLOOR
         ),
     )
+
+
+def arm_row_set(stem: str) -> str:
+    """The row set an arm's stem names; an untagged stem is the full set."""
+    tag = stem.rsplit("-", 1)[-1]
+    return "all" if re.match(r"^[0-9.]+$", tag) else tag
+
+
+def declared_stem(
+    code: str, sequence: str, slices: int = 200, factor: float = 0.01
+) -> str:
+    """The arm stem this code's column states, by its declared row set."""
+    tag = DECLARED_ROWS[code]
+    return "%s-%s-%d-%.4f%s" % (
+        code,
+        sequence,
+        slices,
+        factor,
+        "" if tag == "all" else "-" + tag,
+    )
+
+
+def selected_rows(
+    code: str, sequence: str, slices: int = 200, factor: float = 0.01
+) -> list[dict]:
+    """The slices of this code's declared arm, or empty when it is absent.
+
+    One arm-selection rule for the reduction, the gate and the figures: the arm
+    whose stem this code declares is the one stated, and a run holding only
+    another row set is reported missing rather than silently reduced.
+    """
+    pattern = "%s-%s-%d-%.4f*.jsonl" % (code, sequence, slices, factor)
+    runs = grouped(sorted(STUDY.glob(pattern)))
+    return runs.get(declared_stem(code, sequence, slices, factor), [])
 
 
 def grouped(paths: list[Path]) -> dict[str, list[dict]]:
@@ -301,23 +350,22 @@ def main() -> int:
     }
 
     def pick(code: str, sequence: str) -> dict | None:
-        """The series that reconstructs best for this code and sequence, then longest.
+        """This code's declared arm, or None when that arm is absent.
 
-        Two reference configurations exist for the efit arms: every magnetics row,
-        and the 24 flux loops alone; the row set whose reconstruction is closest to
-        the generating state is the one the lag-one control is stated on.
+        The arm is the one ``DECLARED_ROWS`` names for the code, so a run
+        holding only another row set is absent rather than silently reduced.
+        Choosing the arm by reconstruction quality made a code comparison
+        across two information sets, which is not the like-for-like comparison
+        the study states.
         """
-        candidates = []
-        for key in summary:
-            match = re.match(r"%s-%s-([0-9]+)-0\.0100" % (code, sequence), key)
-            if match:
-                value = summary[key]
-                candidates.append((value["axis_rms"], -int(match.group(1)), key))
-        return summary[min(candidates)[2]] if candidates else None
+        return summary.get(declared_stem(code, sequence))
 
     control = {}
     for code in ("nova", "efit"):
         streams = {sequence: pick(code, sequence) for sequence in ("white", "drift")}
+        for sequence, arm in streams.items():
+            if arm is not None:
+                arm["row_set"] = arm_row_set(declared_stem(code, sequence))
         if streams["white"] is None or streams["drift"] is None:
             control[code] = dict(white=streams["white"], drift=streams["drift"])
             continue

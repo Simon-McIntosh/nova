@@ -18,9 +18,9 @@ from pathlib import Path
 
 import numpy as np
 
+import analyse
+
 STUDY = Path(os.environ.get("DRIFT_STUDY", str(Path(__file__).resolve().parent)))
-BLUE = "#1f5fa8"
-ORANGE = "#c06a1b"
 
 
 def wall_polyline(path: Path) -> tuple[np.ndarray, np.ndarray]:
@@ -80,6 +80,36 @@ def efit_x_points(output: Path, index: int) -> np.ndarray:
     return np.asarray(rows, dtype=float).reshape(-1, 2)
 
 
+def nova_slice(sequence: str, factor: float, index: int) -> tuple:
+    """One slice's map and its lattice from the arm's stored map stack.
+
+    A sequence is written as one map stack per shard, so the slice is looked up
+    where its index appears; the stacks of one arm share one lattice.
+    """
+    stem = analyse.declared_stem("nova", sequence, 200, factor)
+    for path in sorted((STUDY / "maps").glob(stem + "-shard*.npz")):
+        stored = np.load(path)
+        matches = np.flatnonzero(np.asarray(stored["slice"], dtype=int) == index)
+        if matches.size:
+            return (
+                np.asarray(stored["flux"], dtype=float)[matches[0]],
+                np.asarray(stored["radius"], dtype=float),
+                np.asarray(stored["height"], dtype=float),
+            )
+    raise SystemExit("slice %d of %s is in no map stack" % (index, sequence))
+
+
+def efit_output(sequence: str, factor: float) -> Path:
+    """The arm's output directory, whichever row-set tag its stem carries."""
+    matches = sorted(STUDY.glob("efit-%s-*-%.4f*" % (sequence, factor)))
+    directories = [path for path in matches if path.is_dir()]
+    if len(directories) != 1:
+        raise SystemExit(
+            "%s carries %d imas-efit outputs" % (sequence, len(directories))
+        )
+    return directories[0]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--sequence", required=True)
@@ -88,15 +118,11 @@ def main() -> int:
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
-    maps = STUDY / "maps"
     stem = "nova-%s-%.4f-%05d" % (args.sequence, args.factor, args.slice)
-    nova = np.load(maps / (stem + ".npz"))
     receipt = json.loads((STUDY / "receipts" / (stem + ".json")).read_text())
-    radius = np.asarray(nova["radius"], float)
-    height = np.asarray(nova["height"], float)
-    psi_nova = np.asarray(nova["flux"], float)
+    psi_nova, radius, height = nova_slice(args.sequence, args.factor, args.slice)
 
-    output = STUDY / ("efit-%s-200-%.4f" % (args.sequence, args.factor))
+    output = efit_output(args.sequence, args.factor)
     wall_file = STUDY / "conf" / "machine-wall.npz"
     state = efit_state(output, args.slice, wall_file)
     psi_efit = resample(state.flux_map, radius, height)
@@ -119,16 +145,30 @@ def main() -> int:
     offset = span_axis - efit_axis
     psi_efit = psi_efit + offset
 
+    # The generating state's own field on this lattice, so the panel shows what
+    # both reconstructions are set against.  It is already in the generating
+    # gauge and orientation, being the state the rows came from.
+    reference_file = STUDY / "reference-grid.npz"
+    if not reference_file.exists():
+        raise SystemExit("%s is missing: run reference.py" % reference_file)
+    reference = np.load(reference_file)
+    psi_ref = np.asarray(reference["psi"], dtype=float)
+    axis_ref = np.asarray(reference["axis"], dtype=float)
+    x_points_ref = np.asarray(reference["x_points"], dtype=float).reshape(-1, 2)
+
     payload = dict(
         radius=radius,
         height=height,
         psi_nova=psi_nova,
         psi_efit=psi_efit,
+        psi_ref=psi_ref,
         levels=levels,
         axis_nova=np.asarray(receipt["axis"], float),
         x_points_nova=(np.asarray(receipt.get("x_points") or [], float).reshape(-1, 2)),
         axis_efit=np.asarray(state.magnetic_axis_m, float),
         x_points_efit=np.asarray(x_efit, float).reshape(-1, 2),
+        axis_ref=axis_ref,
+        x_points_ref=x_points_ref,
         wall_r=wall_r,
         wall_z=wall_z,
         flux_axis_efit=float(state.flux_axis),

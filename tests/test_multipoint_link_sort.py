@@ -209,7 +209,7 @@ def test_reduction_cost_does_not_rescan_the_index_per_row():
     )
 
 
-@pytest.mark.timeout(3300)
+@pytest.mark.timeout(900)
 @pytest.mark.slow
 def test_stored_case_machine_link_columns_match_reference_walk(monkeypatch, tmp_path):
     """The stored MAST-U case machine's frame columns are unchanged by the sort.
@@ -218,11 +218,15 @@ def test_stored_case_machine_link_columns_match_reference_walk(monkeypatch, tmp_
     frame that grows to the case's full row count. States from that build are
     replayed through the per-row reference walk and the columns compared, which
     is the before/after identity of the ordering at the size the build reaches.
+    The build stops where it enters ``plasmagrid.solve``: that solve writes the
+    plasma grid's own data through a Biot-Savart coupling matrix, not the
+    frame's index or link columns, and on a CPU partition it runs for hours.
     """
     from time import perf_counter
 
     from tests import test_equilibrium_forward_reference as owner
     from tests.test_magnetics_fit_efit_comparison import _read_case
+    from nova.biot.plasmagrid import PlasmaGrid
     from nova.frame.multipoint import MultiPoint
 
     monkeypatch.setenv("NOVA_EFIT_COMPARISON_OUTPUT", str(tmp_path))
@@ -250,9 +254,21 @@ def test_stored_case_machine_link_columns_match_reference_walk(monkeypatch, tmp_
         finally:
             cost["seconds"] += perf_counter() - started
 
+    class _SolveReached(Exception):
+        pass
+
+    def stopped_solve(self):
+        raise _SolveReached
+
     monkeypatch.setattr(MultiPoint, "sort_link", recording_sort)
+    monkeypatch.setattr(PlasmaGrid, "solve", stopped_solve)
     build_started = perf_counter()
-    owner.build_machine(case, -300, passive=bool(case.passive))
+    try:
+        owner.build_machine(case, -300, passive=bool(case.passive))
+    except _SolveReached:
+        pass
+    else:
+        raise AssertionError("the build finished without reaching plasmagrid.solve")
     build_seconds = perf_counter() - build_started
     monkeypatch.setattr(MultiPoint, "sort_link", sort)
     print(

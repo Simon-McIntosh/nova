@@ -30,11 +30,35 @@ WIDTH_INCHES = 14.0
 HEIGHT_INCHES = 7.2
 
 
+def _drawn_tick_labels(axis):
+    """The tick labels matplotlib draws for this axis.
+
+    A locator may place a tick just outside the view limits.  The tick object
+    keeps its label, with text and a position at the axis boundary, and no
+    reader ever sees it, so testing that label for overlap reports a collision
+    that does not exist.  Testing the tick's own location against the axis
+    limits is what separates those from a label that is drawn, and a drawn
+    label stays strict: it is checked for clipping and overlap like any other.
+    """
+    labels = []
+    for scale, limits in (
+        (axis.xaxis, axis.get_xlim),
+        (axis.yaxis, axis.get_ylim),
+    ):
+        low, high = limits()
+        ticks = list(scale.get_major_ticks()) + list(scale.get_minor_ticks())
+        for tick in ticks:
+            if not tick.get_visible():
+                continue
+            if low - 1e-9 <= tick.get_loc() <= high + 1e-9:
+                labels.append(tick.label1)
+    return labels
+
+
 def _text_artists(fig):
     artists = []
     for axis in fig.axes:
-        artists.extend(axis.get_xticklabels())
-        artists.extend(axis.get_yticklabels())
+        artists.extend(_drawn_tick_labels(axis))
         artists.append(axis.xaxis.label)
         artists.append(axis.yaxis.label)
         artists.extend(axis.texts)
@@ -42,9 +66,6 @@ def _text_artists(fig):
     legend = fig.legends[0] if fig.legends else None
     if legend is not None:
         artists.extend(legend.get_texts())
-    # A tick outside the view keeps its label object with stale text and a
-    # position at the axis boundary, and matplotlib draws neither; reading it
-    # would report a collision no reader can see.
     return [
         artist
         for artist in artists

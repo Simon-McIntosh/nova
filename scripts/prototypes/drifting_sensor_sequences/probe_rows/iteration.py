@@ -200,12 +200,24 @@ def fit_sequence(args) -> int:
         )
         # Resume: a slice already recorded under this arm's own file is kept,
         # and each slice's map lands beside its record as soon as it is fitted,
-        # so an expired allocation loses at most the slice in flight.
+        # so an expired allocation loses at most the slice in flight.  A record
+        # counts as kept only when it was fitted under the pass budget and
+        # tolerance this run asks for: a slice left at a shorter cap is refitted
+        # rather than counted as a converged one.  A record carrying no settings
+        # predates the field, so its budget is unknown and it is refitted.
+        settings = dict(
+            max_passes=int(args.max_passes),
+            flux_tolerance=float(args.flux_tolerance),
+            step_rule=str(args.step_rule),
+        )
         done = set()
         if path.exists():
             for text in path.read_text().splitlines():
-                if text.strip():
-                    done.add(int(json.loads(text)["slice"]))
+                if not text.strip():
+                    continue
+                row = json.loads(text)
+                if row.get("fit_settings") == settings:
+                    done.add(int(row["slice"]))
         with path.open("a") as stream:
             for index in slots:
                 if index in done:
@@ -227,6 +239,7 @@ def fit_sequence(args) -> int:
                     record = record_of(case, fitted, index)
                     record["plasma_current_measured"] = float(current[index])
                     record["rows"] = args.rows
+                    record["fit_settings"] = settings
                     np.savez(
                         maps / ("%s-slice%05d.npz" % (stem, index)),
                         radius=study.GRID_RADIUS,

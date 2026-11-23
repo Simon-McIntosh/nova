@@ -18,6 +18,8 @@ from pathlib import Path
 
 import numpy as np
 
+import analyse
+
 
 STUDY = Path(os.environ.get("DRIFT_STUDY", str(Path(__file__).resolve().parent)))
 
@@ -80,9 +82,15 @@ def efit_x_points(output: Path, index: int) -> np.ndarray:
 
 
 def nova_stem(sequence: str, factor: float, arm: str = "all") -> str:
-    """One nova arm's map stem; the row-matched arm carries the loops tag."""
-    base = "nova-%s-200-%.4f" % (sequence, factor)
-    return base if arm == "all" else "%s-%s" % (base, arm)
+    """One nova arm's map stem; the row-set tag is the only thing that differs.
+
+    The stem rule is the reduction's, so a map and the record it belongs to
+    cannot be looked for under two spellings.
+    """
+    stem = analyse.declared_stem("nova", sequence, 200, factor)
+    if arm == "all" or stem.endswith("-" + arm):
+        return stem
+    return "%s-%s" % (stem, arm)
 
 
 def slice_record(sequence: str, factor: float, index: int, arm: str = "all") -> dict:
@@ -99,7 +107,7 @@ def slice_record(sequence: str, factor: float, index: int, arm: str = "all") -> 
     )
     if receipt.exists():
         return json.loads(receipt.read_text())
-    raise SystemExit("slice %d of %s carrries no fit record" % (index, sequence))
+    raise SystemExit("slice %d of %s carries no fit record" % (index, sequence))
 
 
 def nova_slice(sequence: str, factor: float, index: int, arm: str = "all") -> tuple:

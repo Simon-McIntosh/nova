@@ -178,7 +178,8 @@ def html_rows(table: dict) -> str:
                 "<td>%.2f</td><td>%.2f</td>"
                 "<td>%.5f</td><td>%.5f</td>"
                 "<td>%.4f</td><td>%.4f</td>"
-                "<td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>"
+                "<td>%.3f</td><td>%.3f</td><td>%.3f</td>"
+                "<td>%.3f</td><td>%.3f</td></tr>"
                 % (
                     code,
                     sequence,
@@ -190,6 +191,8 @@ def html_rows(table: dict) -> str:
                     arm["q95_rms"],
                     arm["q95_mean_50"],
                     arm["axis_lag1"],
+                    arm["axis_lag1_r"],
+                    arm["axis_lag1_z"],
                     arm["flux_lag1"],
                     arm["q95_lag1"],
                 )

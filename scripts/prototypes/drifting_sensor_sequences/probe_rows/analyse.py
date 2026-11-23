@@ -234,6 +234,8 @@ def reduce_arm(rows: list[dict], truth: dict, block: int = BLOCK) -> dict:
         q95_mean_50=q95_mean,
         q95_mean_ratio=ratio(q95_mean, q95_rms),
         axis_lag1=lag_one(values["axis"]),
+        axis_lag1_r=lag_one(values["axis"][:, 0]),
+        axis_lag1_z=lag_one(values["axis"][:, 1]),
         flux_lag1=lag_one(flux),
         q95_lag1=lag_one(values["q95"]),
         axis_mean=values["axis"].mean(axis=0).tolist(),
@@ -411,10 +413,15 @@ def main() -> int:
         },
         "efit": {sequence: pick("efit", sequence) for sequence in ("white", "drift")},
     }
-    for streams in row_matched.values():
-        for arm in streams.values():
-            if arm is not None:
-                arm["row_set"] = "loops"
+    # Each entry is a copy: the declarations above share one dictionary per
+    # arm, and stamping the row set in place would edit the control's arms too.
+    row_matched = {
+        code: {
+            sequence: None if arm is None else dict(arm, row_set="loops")
+            for sequence, arm in streams.items()
+        }
+        for code, streams in row_matched.items()
+    }
 
     payload = dict(
         reference=reference,

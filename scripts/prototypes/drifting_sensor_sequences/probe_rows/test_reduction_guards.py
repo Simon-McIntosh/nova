@@ -103,6 +103,182 @@ def test_current_draw_carries_the_sequence_colour_and_keeps_its_size():
     assert np.std(white) == pytest.approx(sigma_ip, rel=0.25)
 
 
+def fake_case(sensors=72):
+    """A case small enough to iterate: only the keys run_nova's sequence loop reads."""
+    from types import SimpleNamespace
+
+    return dict(
+        reference=dict(
+            plasma_current=-1.4e7,
+            q95=3.0,
+            b0=2.5,
+            axis=[6.0, 0.5],
+            flux_boundary=3.0,
+            flux_span=77.0,
+            flux_axis=-70.0,
+        ),
+        generated=SimpleNamespace(
+            terminal_state=SimpleNamespace(
+                topology=SimpleNamespace(
+                    axis=[6.0, 0.5],
+                    axis_flux=-70.0,
+                    boundary_flux=3.0,
+                    flux_span=77.0,
+                )
+            )
+        ),
+        sigma_loop=1.0e-4,
+        sigma_probe=1.0e-4,
+        total=np.zeros(sensors),
+        profile=None,
+        initial=None,
+        sensors=None,
+        magnetic_source=None,
+        basis=None,
+        request=None,
+        vacuum=None,
+    )
+
+
+def nova_arguments(**over):
+    from types import SimpleNamespace
+
+    values = dict(
+        cells=500,
+        reuse_rows=True,
+        shard=0,
+        shards=1,
+        factor=0.01,
+        sequences="white,drift",
+        slices=200,
+        seed=7,
+        rows="all",
+        jacobian=False,
+        skip_sweep=True,
+        sweep_factors="",
+        sweep_part="",
+        sweep_slices=0,
+        index_sweep="",
+        corner_sweep="",
+    )
+    values.update(over)
+    return SimpleNamespace(**values)
+
+
+def run_nova_over_a_fake_card(monkeypatch, tmp_path, seed=7):
+    """Drive run_nova's sequence loop with the draw left real; return its file.
+
+    Everything the loop reaches before the fit is left real -- the noise
+    columns, the
+    plasma-current draw and the record it writes -- so the current the file
+    carries is the one the production call site produced.  The case, the fit,
+    the computed map and the metrics are replaced because this guard is about
+    which current reaches the record, not about the reconstruction.
+    """
+    from contextlib import nullcontext
+    from types import ModuleType, SimpleNamespace
+
+    class FakeFit:
+        def __init__(self, *args, **kwargs):
+            pass
+
+    fake_fit = FakeFit()
+    fake_fit.fit = lambda *args, **kwargs: SimpleNamespace(
+        forward=SimpleNamespace(terminal_state=None)
+    )
+
+    module = ModuleType("nova.equilibrium.magnetics_fit")
+    module.MagneticsFit = lambda *args, **kwargs: fake_fit
+    for name in ("nova", "nova.equilibrium", "nova.equilibrium.magnetics_fit"):
+        monkeypatch.setitem(
+            sys.modules, name, module if name.endswith("fit") else ModuleType(name)
+        )
+
+    folder = tmp_path / ("seed%d" % seed)
+    folder.mkdir(exist_ok=True)
+    monkeypatch.setattr(study, "STUDY", folder)
+    monkeypatch.setattr(study, "serial_pools", lambda: None)
+    monkeypatch.setattr(study, "build_case", lambda *args, **kwargs: fake_case())
+    monkeypatch.setattr(study, "write_prepare", lambda case: None)
+    monkeypatch.setattr(study, "q95_of", lambda *args, **kwargs: 1.0)
+    monkeypatch.setattr(
+        study,
+        "nova_flux_map",
+        lambda case, state: SimpleNamespace(
+            flux=np.zeros((2, 2)),
+            topology=SimpleNamespace(axis=np.array([6.0, 0.5])),
+        ),
+    )
+    monkeypatch.setattr(study, "nova_metrics", lambda case, fitted: dict(slice=0))
+    monkeypatch.setattr(study, "guard", lambda *args, **kwargs: nullcontext())
+    monkeypatch.setattr(study, "land", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        study,
+        "fitted_measurement",
+        lambda case, measured, sigma, current, mask=None: None,
+    )
+    study.run_nova(nova_arguments(seed=seed))
+    return folder / "nova-drift-200-0.0100.jsonl"
+
+
+def recorded_currents(path):
+    """The plasma current each written slice carries, in slice order."""
+    rows = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    return np.array([row["plasma_current_measured"] for row in rows])
+
+
+SEEDS = (7, 11, 13, 17, 19, 23, 29, 31, 37, 41)
+
+
+def mean_recorded_lag(monkeypatch, tmp_path):
+    """The mean lag-one of the recorded current over several seeds.
+
+    One realisation of a coloured draw moves about 0.1 around its own mean, so
+    a single seed can sit either side of a floor by chance; the mean over ten
+    seeds is the statistic the guard states.
+    """
+    lags = [
+        analyse.lag_one(
+            recorded_currents(run_nova_over_a_fake_card(monkeypatch, tmp_path, seed))
+        )
+        for seed in SEEDS
+    ]
+    return float(np.mean(lags))
+
+
+def test_run_nova_records_a_current_draw_that_holds_the_sequence_memory(
+    monkeypatch, tmp_path
+):
+    """The call site, not just the generator, must colour the current row.
+
+    ``current_draw`` can be correct while ``run_nova`` asks for a different
+    sequence or drops the draw; this drives the loop that writes the record and
+    reduces the current read back out of the file it produced.
+    """
+    path = run_nova_over_a_fake_card(monkeypatch, tmp_path)
+    assert recorded_currents(path).size == 200
+    assert mean_recorded_lag(monkeypatch, tmp_path) > 0.53
+
+
+def test_run_nova_guard_catches_a_white_current_draw(monkeypatch, tmp_path):
+    """The negative control: reinstating a white current draw fails the guard.
+
+    A guard that cannot fail proves nothing, so this run replaces the draw with
+    the white Gaussian the defect used and requires the same reduction to fall
+    inside the white control instead of holding the drift memory.
+    """
+    monkeypatch.setattr(
+        study,
+        "current_draw",
+        lambda sequence, slices, sigma, seed, **kwargs: (
+            sigma * np.random.default_rng(seed).standard_normal(slices)
+        ),
+    )
+    lag = mean_recorded_lag(monkeypatch, tmp_path)
+    assert abs(lag) < analyse.LAG_ONE_LIMIT
+    assert lag <= analyse.DRIFT_LAG_ONE_FLOOR
+
+
 def test_thresholds_refuse_a_sequence_made_from_white():
     rng = np.random.default_rng(3)
     white = rng.standard_normal((600, 2)) * 1e-3

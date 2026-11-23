@@ -210,6 +210,25 @@
    "nova.utilities.polybezier",
    "nova.utilities.stat"
   ],
-  "resolved_not_deleted": []
+  "resolved_not_deleted": [],
+  "suite_delta": {
+   "state": "unarmed",
+   "resolved_command": "",
+   "reason": "the run's fenced write scope holds no test file, so the armed '{node_test_files}' resolves to no target",
+   "attempted_arms": {
+    "base": {
+     "job": "1339391",
+     "revision": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+     "reached_percent": 0
+    },
+    "head": {
+     "job": "1339392",
+     "revision": "dc3a174a7ef3af431fe60bed78133aa7ac73cdc8",
+     "reached_percent": 4,
+     "collected": 10937
+    }
+   },
+   "not_measured": "the full not-slow suite at either arm"
+  }
  }
 }

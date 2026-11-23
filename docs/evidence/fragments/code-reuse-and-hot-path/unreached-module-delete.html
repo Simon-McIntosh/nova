@@ -155,13 +155,25 @@
     any real ambix importer exists.</p>
 
     <h3 id="unreached-module-delete-gate">Gate</h3>
-    <p>The plan asks for a suite delta. The repository's default CPU lane is
-    itself measurement-heavy: a full run of the not-slow selection collected
-    <strong>10943</strong> tests and completed five of them in the first four
-    minutes, so a two-arm full execution could not finish inside the node's
-    deadline. Rather than claim a suite result that did not run, the gate was
-    chosen to test the only failure mode a pure file deletion can produce, and
-    it was run as one job per arm on <code>all_debug</code> with
+    <p id="unreached-module-delete-suite-delta">The plan asks for a suite delta,
+    and this node states plainly why it carries none, on two grounds that were
+    both measured rather than assumed. First the lane's cost: a full run of the
+    not-slow selection collects <strong>10943</strong> tests at roughly one test
+    per minute, so a two-arm full execution is a day's work per arm. Both arms
+    were nevertheless started with the plan's own command &mdash;
+    <code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python
+    -m pytest -p no:cacheprovider -q</code> &mdash; as jobs 1339391 at the base
+    revision and 1339392 at head on <code>all_debug</code>, and the head arm had
+    reached <strong>4%</strong> of its 10937 collected items when the attempt was
+    stopped, which is the rate above stated by this node's own run. Second the
+    scope: this run is fenced to this record and its figures, which hold no test
+    file, so the suite command armed for it resolves over
+    <code>{node_test_files}</code> to no target and the run records
+    <code>suite_gate: unarmed</code>. A suite delta is therefore not this node's
+    to measure, and claiming one would report a measurement the run never made.
+    Rather than leave the deletion ungated, the gate was chosen to test the only
+    failure mode a pure file deletion can produce, and it was run as one job per
+    arm on <code>all_debug</code> with
     <code>scripts/nova_lane/run.sh --rungs cpu --force-submit --wait</code>.</p>
     <table id="unreached-module-delete-gate-table">
       <tr><th>arm</th><th>revision</th><th>job</th><th>modules imported</th><th>import failures</th><th>collected</th></tr>
@@ -238,6 +250,30 @@
     &lt;tree&gt;/docs/plans --live-worktrees &lt;list&gt; --out scan.json</code><br>
     <code>python3 delete.py --base &lt;tree&gt; --scan scan.json --map
     &lt;hot-path-map.json&gt; --offer nova/equilibrium/forward.py</code></p>
+    <p id="unreached-module-delete-rederive-run">Run from a source tree at the
+    base revision, the extracted drivers reproduce this record's verdicts: the
+    re-derived scan reports <strong>203</strong> candidates, <strong>178</strong>
+    refusals, <strong>25</strong> deletable and none unmeasured, with
+    <strong>zero</strong> per-module verdict differences against the scan the
+    deletion was made from. The only differences are which importer each of
+    seven refusals names first, and no verdict depends on that choice. The
+    reached-module control re-derives as <code>nova/equilibrium/forward.py</code>
+    refused at a union of 506 executed lines, and the ambix control as
+    <code>nova/datachain/ccfe_uda.py</code> refused through its injected
+    importer. The live-worktree input is environmental &mdash; 32 trees existed
+    when the deployment scan ran and most have since been removed &mdash; so the
+    re-derivation is taken against the base tree alone, which is a member of
+    that list at the time of the scan.</p>
+    <p id="unreached-module-delete-rederive-control">The re-derivation is its own
+    negative control. Taken against the record as it stood before these drivers
+    were embedded, it fails at extraction: the earlier record carries none of the
+    three driver blocks, so the verdicts it states cannot be reproduced from it.
+    Taken against the earlier receipt twin beside this record, it fails on the
+    control: the record quotes <code>nova/equilibrium/forward.py</code> at a
+    union of 506 lines while that twin named <code>nova/__init__.py</code> at 19.
+    Both are the condition the two repairs remove, and both runs are logged as
+    <code>rederive.log</code> and <code>rederive-negative-control.log</code> in
+    the run directory.</p>
 <h4 id="unreached-module-delete-appendix-scan-py">scan.py &#8212; the importer scan</h4>
     <pre><code>&quot;&quot;&quot;Static importer scan.
 
@@ -771,6 +807,8 @@ import json
 
 D = &quot;/home/ITER/mcintos/.cache/nova-s33/unreached-module-delete&quot;
 HOLD = &quot;nova/utilities/ANSYS.py&quot;
+BASE_REV = &quot;348ed92c7ab08a9592a7f997d62bfec41ae687d4&quot;
+HEAD_REV = &quot;dc3a174a7ef3af431fe60bed78133aa7ac73cdc8&quot;
 
 scan = json.load(open(f&quot;{D}/scan.json&quot;))
 hmap = json.load(open(&quot;/home/ITER/mcintos/Code/nova/docs/evidence/fragments/&quot;
@@ -839,6 +877,19 @@ rec = {
         &quot;new_failures&quot;: new_fail,
         &quot;resolved_by_deletion&quot;: resolved,
         &quot;resolved_not_deleted&quot;: unexpected,
+        &quot;suite_delta&quot;: {
+            &quot;state&quot;: &quot;unarmed&quot;,
+            &quot;resolved_command&quot;: &quot;&quot;,
+            &quot;reason&quot;: &quot;the run&#x27;s fenced write scope holds no test file, so the &quot;
+                      &quot;armed &#x27;{node_test_files}&#x27; resolves to no target&quot;,
+            &quot;attempted_arms&quot;: {
+                &quot;base&quot;: {&quot;job&quot;: &quot;1339391&quot;, &quot;revision&quot;: BASE_REV,
+                         &quot;reached_percent&quot;: 0},
+                &quot;head&quot;: {&quot;job&quot;: &quot;1339392&quot;, &quot;revision&quot;: HEAD_REV,
+                         &quot;reached_percent&quot;: 4, &quot;collected&quot;: 10937},
+            },
+            &quot;not_measured&quot;: &quot;the full not-slow suite at either arm&quot;,
+        },
     },
 }
 pkg = {}

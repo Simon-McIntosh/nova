@@ -25,7 +25,7 @@
   <title>Forward Solve Near Stored States | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -166,6 +166,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261123T025904766578-review-of-default-policy-refusal-drift-d90cdd78ac7e-figure" data-who="reckon-build" data-when="2026-11-23T03:04:40.056Z">
     <div class="r-comment-body"><p>figure review of r-20261121T205621369895-default-policy-refusal-drift at head d90cdd78ac7e95af3794e07773df1b89fa443fb8 — parsed, all six rubric items answered, three non-blocking findings, no blocking finding</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261121T205621369895-default-policy-refusal-drift" data-who="reckon-build" data-when="2026-11-23T02:56:21Z">
+    <div class="r-comment-body"><p>§1 — the two stored cases stop elsewhere than the comparison record because two inputs the harness reads from the stored case differ from what the record used, not because the solver changed: the fitted conductor-current vector (0 of 288 TCV conductors identical within 1e-6 A, median relative difference 4.94 percent, L2 8586.08 A on 109820.01 A) and the stored flux state used as the seed (gauge-free RMS 21.9 percent of today&#x27;s TCV span, 47.4 percent on ITER); substituting the record-era values reproduces both recorded outcomes — TCV residual 0.030442406985959472 against the recorded 0.030364200526436996 (factor 1.0026, reason 12, axis (0.83545,-0.028185) against the recorded (0.83545035,-0.02818493)) and ITER no magnetic axis admitted with reason 3 and NoQualifiedAxisError — while a seed nudge of 3.1e-4 relative moves the TCV arm from reason 12 with an admitted axis to reason 3 with none, so the reproduction is a substitution and not a search; the standing cases for the solver as it is today are tcv-input-stored (5.2411575147855504e-4, reason 8, axis (0.88555,-0.015045)) and iter-input-stored (0.12310610396516597, reason 12, axis (5.5846, 2.4128)), the recorded values being reachable only through the comparison run copy under ~/.cache; evidence in docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html, with one poloidal flux panel per terminal state under docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/</p></div>
 </div>
 </section>
 </main>

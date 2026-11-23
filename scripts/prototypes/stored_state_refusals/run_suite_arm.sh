@@ -22,7 +22,9 @@
 set -euo pipefail
 
 readonly SHARED_PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-WORKTREE=$(git -C "$(dirname -- "$0")/../../.." rev-parse --show-toplevel)
+# An exported tree carries no git directory, so the default tree cannot be
+# resolved there and the caller supplies --tree and --revision instead.
+WORKTREE=$(git -C "$(dirname -- "$0")/../../.." rev-parse --show-toplevel 2>/dev/null || true)
 
 log=''
 tree=''

@@ -49,6 +49,16 @@ RECORD_SELF = "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-cen
 # the positive control on enumeration and the subject of the negative control.
 POSITIVE = "benchmarks/recovery_ladder_census.py"
 
+# Directories that hold other directories rather than drivers. A plan or a
+# record naming one names the tree's layout, not the work parked under it, so
+# the name confers no ownership and cites nothing.
+CONTAINERS = ("benchmarks", "scripts", "scripts/prototypes")
+
+# This run's own machinery: the census driver, its test and its record. Each
+# names drivers as fixtures and as the population, so counting any of them as a
+# runner, an importer or a citation would let the census verify itself.
+EXCLUDED = (SELF, "tests/test_scripts_census.py")
+
 # A file any focused-sprint plan names in its own text is live or held work and
 # is kept: held work is parked, never discarded.
 OWNING = ("S28", "S29", "S30", "S31", "S32")
@@ -314,6 +324,16 @@ def files_under(pop, directories):
     return mapping
 
 
+def driver_directories(pop):
+    """Directories that directly hold a tracked driver, so name held work."""
+    return {str(Path(path).parent) for path in pop}
+
+
+def owning_directories(pop):
+    """Driver directories that are not containers of the two trees."""
+    return {path for path in driver_directories(pop) if path not in CONTAINERS}
+
+
 PATH_TOKEN_RE = re.compile(r"(?:benchmarks|scripts)/[A-Za-z0-9_./-]+")
 
 
@@ -416,7 +436,7 @@ def resolve(citations, texts):
 def live_test_targets(imports, lookup):
     got = set()
     for path, names in imports.items():
-        if not path.startswith("tests/"):
+        if not path.startswith("tests/") or path in EXCLUDED:
             continue
         for name in names:
             target = lookup.get(name)
@@ -455,7 +475,11 @@ def census(force=None):
         except SyntaxError:
             pass
 
-    core = {p for p in imports if p.split("/", 1)[0] in ("nova", "tests", "apps")}
+    core = {
+        p
+        for p in imports
+        if p.split("/", 1)[0] in ("nova", "tests", "apps") and p not in EXCLUDED
+    }
 
     def targets(files):
         """Population files a set of files imports, by name or by sibling path."""
@@ -475,7 +499,7 @@ def census(force=None):
         reasons[t].add("imported_by_core")
 
     for p in paths:
-        if p in popset or p.startswith("docs/"):
+        if p in popset or p.startswith("docs/") or p in EXCLUDED:
             continue
         live = p in ("tox.ini", "pyproject.toml", "conftest.py") or (
             p.startswith(("tests/", "scripts/", ".github/"))
@@ -495,21 +519,24 @@ def census(force=None):
     plans = plan_texts(paths)
     tree_dirs = ancestor_directories(pop)
     under = files_under(pop, tree_dirs)
+    owning_dirs = owning_directories(pop)
     for t in pop:
         for slug in sorted(plans):
             if t in plans[slug]:
                 reasons[t].add("plan_owned:" + slug)
     for slug in sorted(plans):
         for token in directory_tokens(plans[slug]):
-            # A plan naming a directory owns everything under it, and a plan
-            # naming one driver owns the directory that driver sits in: the
-            # rest of that directory is the same held work.
+            # A plan naming a driver directory owns everything under it, and a
+            # plan naming one driver owns the directory that driver sits in:
+            # the rest of that directory is the same held work. A container
+            # holds no driver of its own, so naming it claims nothing.
             owned = set()
-            if token in tree_dirs:
+            if token in owning_dirs:
                 owned.update(under[token])
             if token in popset:
                 parent = str(Path(token).parent)
-                owned.update(under.get(parent, []))
+                if parent in owning_dirs:
+                    owned.update(under.get(parent, []))
             for held in owned:
                 reasons[held].add("plan_owned:" + slug)
 
@@ -521,22 +548,25 @@ def census(force=None):
 
     dups = duplicates(pop)
 
-    frontier = {p for p in popset if reasons.get(p)}
+    frontier = {p for p in popset if reasons.get(p) and p not in EXCLUDED}
     while frontier:
         nxt = {p for p in targets(frontier) if not reasons.get(p)}
         for t in nxt:
             reasons[t].add("imported_by_kept")
         frontier = nxt
     # Name the kept file each transitive import came from, so a keep a reader
-    # cannot otherwise explain says which driver reaches it.
+    # cannot otherwise explain says which driver reaches it. The bare marker is
+    # dropped only once a named importer replaces it: a file kept by nothing but
+    # an import would otherwise lose its only reason in this pass.
     for p in pop:
-        reasons[p].discard("imported_by_kept")
-    for p in pop:
-        if not reasons.get(p):
+        if not reasons.get(p) or p in EXCLUDED:
             continue
         for t in targets({p}):
             if t != p and reasons.get(t):
                 reasons[t].add("imported_by_kept:" + p)
+    for p in pop:
+        if any(r.startswith("imported_by_kept:") for r in reasons[p]):
+            reasons[p].discard("imported_by_kept")
 
     merge_into = {}
     for names in dups:
@@ -597,8 +627,9 @@ def census(force=None):
             continue
         texts[p] = text
         hits = set(references_in(text, deletes, lookup))
-        # A record that names a directory cites every driver under it.
-        for token in directory_tokens(text) & tree_dirs:
+        # A record that names a driver directory cites every driver under it.
+        # A container names no work of its own, so it cites nothing.
+        for token in directory_tokens(text) & owning_dirs:
             hits.update(held for held in under[token] if held in deletes)
         for hit in hits:
             if p not in citations[hit]:

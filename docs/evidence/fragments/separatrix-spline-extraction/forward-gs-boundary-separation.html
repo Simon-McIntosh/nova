@@ -159,6 +159,42 @@
     field is not the labelled equilibrium, and the assembler draws the curve it
     actually has rather than a substitute.</p>
 
+    <h2 id="fbs-arms">Gate arms</h2>
+    <p>Each arm runs the node test file over a tree resolved at its own
+    revision, in one job on a debug partition, with
+    <code>JAX_PLATFORMS=cpu</code>.</p>
+    <table>
+      <thead>
+        <tr><th>arm</th><th>revision</th><th>result</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>base</td>
+          <td><code>5c503f9a8b37036f39f5a074757751b821a6e481</code></td>
+          <td><code>1 failed, 9 passed in 12.26s</code></td>
+        </tr>
+        <tr>
+          <td>red control</td>
+          <td><code>cf1eeed167ed43e4c9e4da71ae7b60afbb23dc08</code></td>
+          <td><code>1 failed, 10 deselected in 10.50s</code></td>
+        </tr>
+        <tr>
+          <td>after</td>
+          <td><code>655770a13b601f5408c48d3b0ad403cdbe71e084</code></td>
+          <td><code>1 failed, 10 passed in 11.67s</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>The single failure in the base and after arms is
+    <code>test_a_persisted_frame_assembles_its_separatrix_from_its_own_field</code>,
+    which opens a persisted operand that was removed from shared storage on
+    2026-11-19; it is present in both arms and is not a regression. The red
+    control runs the new display-target test against the pre-fix benchmark and
+    fails with <code>IndexError: index 0 is out of bounds for axis 0 with size
+    0</code> at <code>benchmarks/diiid_forward_gs_match.py:1899</code>, which is
+    the exact failure the earlier H200 run hit.</p>
+
     <h2 id="fbs-pending">What this record does not yet claim</h2>
     <p>Frames 146 and 137 remain, and the cohort figures —
     <code>frame_flux_comparison.png</code>, <code>cohort_match_summary.png</code>

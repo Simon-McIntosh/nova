@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import pickle
+import re
 from pathlib import Path
 
 import numpy as np
@@ -158,27 +159,53 @@ def residual_fields(path) -> dict:
     )
 
 
+REVISION = re.compile(r"^[0-9a-f]{7,64}$")
+
+
 def suite_arm_log(path: Path) -> dict:
     """Read a suite arm's log into the facts promotion checks it for.
 
-    The log carries its revision and the exact command on the first two lines
-    and its exit status on the last, so the ``exit_status`` a manifest reports
-    can be read back from the log it cites rather than taken on trust.
+    The log carries its revision and the exact command on the two lines an arm
+    run at a revision other than the checkout's own also names its tree on, and
+    its exit status on the last, so every field a manifest reports can be read
+    back from the log it cites rather than taken on trust. ``tree`` is the
+    directory the command resolved over, and is ``None`` on a log written before
+    that line existed.
     """
     lines = Path(path).read_text().splitlines()
     if len(lines) < 2:
-        raise ValueError(f"{path}: a suite arm log needs a header and a body")
+        raise ValueError(f"{path}: a suite arm log needs a header and a command")
     header, command = lines[0], lines[1]
     if not header.startswith("# revision "):
         raise ValueError(f"{path}: first line is not '# revision <sha>'")
     if not command.startswith("# command: "):
         raise ValueError(f"{path}: second line is not '# command: <command>'")
+    revision = header.removeprefix("# revision ").strip()
+    if not REVISION.match(revision):
+        raise ValueError(f"{path}: '{revision}' is not a revision")
+    body_start = 2
+    tree = None
+    if len(lines) > 3 and lines[2].startswith("# tree: "):
+        tree = lines[2].removeprefix("# tree: ").strip()
+        body_start = 3
     tail = lines[-1]
     if not tail.startswith("EXIT="):
         raise ValueError(f"{path}: last line is not 'EXIT=<code>'")
     return dict(
-        revision=header.removeprefix("# revision ").strip(),
+        revision=revision,
         command=command.removeprefix("# command: ").strip(),
+        tree=tree,
         exit_status=int(tail.removeprefix("EXIT=")),
-        body=lines[2:-1],
+        body=lines[body_start:-1],
     )
+
+
+def suite_arm_passed(log: dict) -> int | None:
+    """Return the passed count the arm's own pytest summary line reports."""
+    for line in reversed(log["body"]):
+        if " passed" in line:
+            try:
+                return int(line.split(" passed")[0].split()[-1])
+            except ValueError, IndexError:
+                continue
+    return None

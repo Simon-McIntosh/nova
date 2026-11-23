@@ -1,0 +1,28 @@
+{
+  "question": "nova.equilibrium.forward_operator._polished_level_root and the inline polish loop inside nova.equilibrium.separatrix_clip._traced_level_arc implement the same clipped-Newton level-set root with the same iteration count, difference step and endpoint handling. Should the inline copy be removed?",
+  "context": {
+    "implementations": [
+      "nova.equilibrium.forward_operator._polished_level_root (forward_operator.py:514-541, 28 lines): twelve clipped Newton iterations on the chord parameter, difference_step 1e-5, endpoints zeroed",
+      "the inline polish closure in nova.equilibrium.separatrix_clip._traced_level_arc (separatrix_clip.py:710-725, 16 lines): the same loop written in place over the traced chord"
+    ],
+    "routes": "Both are on the equilibrium route, on different surfaces of the same level-set trace: the forward operator polishes a chord root, and separatrix_clip polishes the same kind of crossing while tracing an arc.",
+    "measured_agreement": "Three 65-point chords across one fixed quadratic level set, one interior vertex each, through the same evaluator. Largest point gap exactly 0.0 against a stated 1e-12 tolerance.",
+    "lines_removable": 16,
+    "removal": "The 16-line inline loop is removable if separatrix_clip imports the owner. The owner currently lives in forward_operator, so the node has to place it where both modules can import it without a cycle (a level-set module, or the separatrix module owning it and forward_operator importing back).",
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry level-set-polish; receipt at hot-path-duplicates/receipt.json; measured at revision ef0aba6f1454248ee592e51b35d4c84c3028a543"
+  },
+  "options": [
+    {
+      "value": "accept-for-s28-node",
+      "label": "Give S28 a node to give the polish one owner both modules import, removing the 16-line inline loop"
+    },
+    {
+      "value": "decline",
+      "label": "Keep both: moving the owner out of forward_operator costs more than the 16 duplicated lines, and the inline copy keeps separatrix_clip free of a forward-operator import"
+    }
+  ],
+  "recommended": "accept-for-s28-node",
+  "project": "nova",
+  "plan": "code-reuse-and-hot-path",
+  "section": "s5"
+}

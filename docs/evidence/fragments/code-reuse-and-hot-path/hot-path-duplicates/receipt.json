@@ -1,0 +1,202 @@
+{
+  "entries": [
+    {
+      "entry": "topology-read",
+      "implementation_a": "nova.equilibrium.topology.read (flux-map null census, Topology.read_qualification on the measured routes)",
+      "implementation_b": "nova.equilibrium.topology.read_at_stationary_points (points solved by fixed_points.solve and supplied by support_read.read)",
+      "input": "analytic Cerfon-Freidberg single-null field, diverted, 50-cell realised hexagonal geometry, both route implementations run on the same operands in one process",
+      "axis_a": [
+        1.7870647018106882,
+        0.04677362656484758
+      ],
+      "axis_b": [
+        1.7870853536782019,
+        0.0466884356119983
+      ],
+      "axis_gap_m": 8.76584170479821e-05,
+      "boundary_class_a": 1,
+      "boundary_class_b": 1,
+      "membership_area_sum_relative": 0.0007829007194638985,
+      "membership_cell_fraction": 0.013532994919771738,
+      "cell_pitch_m": 0.2704856057561504,
+      "tolerance": {
+        "boundary_class": "equal",
+        "axis_position_m": 0.01352428028780752,
+        "membership_area_sum_relative": 0.005,
+        "membership_cell_fraction": 0.05
+      },
+      "agrees": true
+    },
+    {
+      "entry": "extreme-selection",
+      "implementation_a": "nova.equilibrium.stencil_nulls._arg_extreme",
+      "implementation_b": "nova.equilibrium.connectivity_boundary._arg_extreme",
+      "input": "64x9 seeded normal array with one constant tie row and two all-tie rows, maxima over axes 0 and 1",
+      "exact_companions": [
+        {
+          "function": "_argmax_exact",
+          "stencil": 6,
+          "boundary": 6,
+          "agrees": true
+        },
+        {
+          "function": "_argmin_exact",
+          "stencil": 4,
+          "boundary": 4,
+          "agrees": true
+        }
+      ],
+      "index_mismatches": [],
+      "max_index_gap": 0,
+      "tolerance_max_index_gap": 0,
+      "agrees": true
+    },
+    {
+      "entry": "storage-group-mode",
+      "implementation_a": "nova.database.netcdf.netCDF.subgroup/get_mode (is_file)",
+      "implementation_b": "nova.database.zarrstore.ZarrStore.subgroup/get_mode (is_store)",
+      "input": "one temp root holding an existing .nc file and an existing .zarr directory, plus an absent basename, group 'plasma'",
+      "comparisons": [
+        {
+          "quantity": "subgroup_nested",
+          "netcdf": "plasma/equilibrium/flux",
+          "zarr": "plasma/equilibrium/flux",
+          "agrees": true
+        },
+        {
+          "quantity": "subgroup_none",
+          "netcdf": null,
+          "zarr": null,
+          "agrees": true
+        },
+        {
+          "quantity": "subgroup_declared",
+          "netcdf": "plasma/flux",
+          "zarr": "plasma/flux",
+          "agrees": true
+        },
+        {
+          "quantity": "mode_absent",
+          "netcdf": "w",
+          "zarr": "w",
+          "agrees": true
+        },
+        {
+          "quantity": "mode_present",
+          "netcdf": "a",
+          "zarr": "a",
+          "agrees": true
+        },
+        {
+          "quantity": "mode_explicit",
+          "netcdf": "r",
+          "zarr": "r",
+          "agrees": true
+        }
+      ],
+      "disagreements": [],
+      "tolerance": "exact string equality",
+      "agrees": true
+    },
+    {
+      "entry": "level-set-polish",
+      "implementation_a": "nova.equilibrium.forward_operator._polished_level_root",
+      "implementation_b": "nova.equilibrium.separatrix_clip._traced_level_arc polish loop",
+      "input": "three 65-point chords across one fixed quadratic level set, one interior vertex each",
+      "max_point_gap_m": 0.0,
+      "tolerance_m": 1e-12,
+      "agrees": true
+    },
+    {
+      "entry": "route-resolution",
+      "question": "nova/equilibrium/support_read.py read, read_batch, read_and_book and bank_program carry kernels in the device trace and zero body lines on both measured routes. Which topology read does each route run?",
+      "findings": [
+        {
+          "module": "nova/equilibrium/forward.py",
+          "required": "read_qualification",
+          "required_calls": 1,
+          "forbidden": "read_at_stationary_points",
+          "forbidden_calls": 0,
+          "passes": true
+        },
+        {
+          "module": "nova/equilibrium/forward_operator.py",
+          "required": "read_qualification",
+          "required_calls": 2,
+          "forbidden": "read_at_stationary_points",
+          "forbidden_calls": 0,
+          "passes": true
+        },
+        {
+          "module": "nova/equilibrium/support_read.py",
+          "required": "read_at_stationary_points",
+          "required_calls": 2,
+          "forbidden": "read_qualification",
+          "forbidden_calls": 0,
+          "passes": true
+        }
+      ],
+      "conclusion": "both measured routes read topology through Topology.read_qualification, the flux-map null census. The supplied-stationary-point read is reached only from support_read.py, whose callers execute zero body lines on these routes",
+      "agrees": true
+    },
+    {
+      "entry": "plot-columns",
+      "implementation_a": "nova.frame.polyplot plot indexer update_columns (PolyPlot and PolyPlotChildren)",
+      "implementation_b": "nova.frame.vtkplot plot indexer update_columns",
+      "input": "three column states (all present, one missing, all missing) through a stub host carrying required, additional and frame.columns",
+      "comparisons": [
+        {
+          "implementation": "nova.frame.polyplot.PolyPlot.update_columns",
+          "case": "all present",
+          "delegate_calls": 0
+        },
+        {
+          "implementation": "nova.frame.polyplot.PolyPlot.update_columns",
+          "case": "one missing",
+          "delegate_calls": 1
+        },
+        {
+          "implementation": "nova.frame.polyplot.PolyPlot.update_columns",
+          "case": "all missing",
+          "delegate_calls": 1
+        },
+        {
+          "implementation": "nova.frame.vtkplot.VtkPlot.update_columns",
+          "case": "all present",
+          "delegate_calls": 0
+        },
+        {
+          "implementation": "nova.frame.vtkplot.VtkPlot.update_columns",
+          "case": "one missing",
+          "delegate_calls": 1
+        },
+        {
+          "implementation": "nova.frame.vtkplot.VtkPlot.update_columns",
+          "case": "all missing",
+          "delegate_calls": 1
+        }
+      ],
+      "tolerance": "exact equality of delegate call counts per column state",
+      "disagreements": [],
+      "agrees": true
+    }
+  ],
+  "negative_controls": [
+    {
+      "entry": "topology-read",
+      "measured_cell_fraction": 0.8781855313025444,
+      "measured_axis_gap_m": 0.05193977983402063,
+      "disagrees_beyond_tolerance": true
+    },
+    {
+      "entry": "extreme-selection",
+      "measured_index_gap": 1,
+      "tolerance_max_index_gap": 0,
+      "disagrees_beyond_tolerance": true
+    },
+    {
+      "entry": "route-resolution",
+      "disagrees_beyond_tolerance": true
+    }
+  ]
+}

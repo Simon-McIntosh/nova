@@ -1,0 +1,1925 @@
+{
+ "route_modules": [
+  "nova/__init__.py",
+  "nova/biot/__init__.py",
+  "nova/biot/arc.py",
+  "nova/biot/arcamplitude.py",
+  "nova/biot/arcbandedcoupling.py",
+  "nova/biot/array.py",
+  "nova/biot/beam.py",
+  "nova/biot/biot.py",
+  "nova/biot/biotframe.py",
+  "nova/biot/bow.py",
+  "nova/biot/circle.py",
+  "nova/biot/completeelliptic.py",
+  "nova/biot/constants.py",
+  "nova/biot/crosssection.py",
+  "nova/biot/cylinder.py",
+  "nova/biot/data.py",
+  "nova/biot/elliptic.py",
+  "nova/biot/error.py",
+  "nova/biot/fieldnull.py",
+  "nova/biot/flux.py",
+  "nova/biot/gradedresidual.py",
+  "nova/biot/greens.py",
+  "nova/biot/grid.py",
+  "nova/biot/groupset.py",
+  "nova/biot/incompleteelliptic.py",
+  "nova/biot/incompletemoments.py",
+  "nova/biot/line.py",
+  "nova/biot/loop.py",
+  "nova/biot/matrix.py",
+  "nova/biot/momentchannel.py",
+  "nova/biot/null.py",
+  "nova/biot/operate.py",
+  "nova/biot/pairedfloat.py",
+  "nova/biot/plasmagrid.py",
+  "nova/biot/point.py",
+  "nova/biot/polybeam.py",
+  "nova/biot/polybow.py",
+  "nova/biot/polygon.py",
+  "nova/biot/polygonanalytic.py",
+  "nova/biot/polygonarc.py",
+  "nova/biot/polysection.py",
+  "nova/biot/rangefunction.py",
+  "nova/biot/reduce.py",
+  "nova/biot/sectionaverage.py",
+  "nova/biot/shape.py",
+  "nova/biot/sheet.py",
+  "nova/biot/solve.py",
+  "nova/biot/space.py",
+  "nova/biot/symmetricelliptic.py",
+  "nova/biot/target.py",
+  "nova/biot/tiledassembly.py",
+  "nova/biot/zeta.py",
+  "nova/calibrate/__init__.py",
+  "nova/calibrate/correction_model.py",
+  "nova/calibrate/correction_set.py",
+  "nova/calibrate/corrections.py",
+  "nova/calibrate/scale_step.py",
+  "nova/catalog/__init__.py",
+  "nova/catalog/mast_geometry.py",
+  "nova/control/__init__.py",
+  "nova/control/control.py",
+  "nova/database/content_store.py",
+  "nova/database/datafile.py",
+  "nova/database/filepath.py",
+  "nova/database/netcdf.py",
+  "nova/database/zarrstore.py",
+  "nova/definitions.py",
+  "nova/equilibrium/__init__.py",
+  "nova/equilibrium/boundary_comparison.py",
+  "nova/equilibrium/branch_selection.py",
+  "nova/equilibrium/cell_partition.py",
+  "nova/equilibrium/clip_quadrature.py",
+  "nova/equilibrium/cold_seed.py",
+  "nova/equilibrium/conductor_current.py",
+  "nova/equilibrium/connectivity_boundary.py",
+  "nova/equilibrium/conservation.py",
+  "nova/equilibrium/constraint.py",
+  "nova/equilibrium/convention.py",
+  "nova/equilibrium/current.py",
+  "nova/equilibrium/diagnostics.py",
+  "nova/equilibrium/display_flux.py",
+  "nova/equilibrium/domain.py",
+  "nova/equilibrium/fixed_point.py",
+  "nova/equilibrium/fixed_points.py",
+  "nova/equilibrium/flux_surface_connectivity.py",
+  "nova/equilibrium/flux_surface_extraction.py",
+  "nova/equilibrium/flux_surface_geometry.py",
+  "nova/equilibrium/forward.py",
+  "nova/equilibrium/forward_operator.py",
+  "nova/equilibrium/gs.py",
+  "nova/equilibrium/labels.py",
+  "nova/equilibrium/magnetics_fit.py",
+  "nova/equilibrium/manifold_advance.py",
+  "nova/equilibrium/map_extraction.py",
+  "nova/equilibrium/measurement.py",
+  "nova/equilibrium/moment.py",
+  "nova/equilibrium/morphology.py",
+  "nova/equilibrium/observation.py",
+  "nova/equilibrium/observation_kernels.py",
+  "nova/equilibrium/parallel_components.py",
+  "nova/equilibrium/profile.py",
+  "nova/equilibrium/reduced_newton.py",
+  "nova/equilibrium/separatrix_branches.py",
+  "nova/equilibrium/separatrix_clip.py",
+  "nova/equilibrium/solve.py",
+  "nova/equilibrium/solve_request.py",
+  "nova/equilibrium/source.py",
+  "nova/equilibrium/stencil_mesh.py",
+  "nova/equilibrium/stencil_nulls.py",
+  "nova/equilibrium/support_read.py",
+  "nova/equilibrium/topology.py",
+  "nova/equilibrium/wall_mask.py",
+  "nova/frame/__init__.py",
+  "nova/frame/arraylocindexer.py",
+  "nova/frame/coil.py",
+  "nova/frame/coilset.py",
+  "nova/frame/coilsetattrs.py",
+  "nova/frame/columnar.py",
+  "nova/frame/dataarray.py",
+  "nova/frame/dataframe.py",
+  "nova/frame/energize.py",
+  "nova/frame/error.py",
+  "nova/frame/frame.py",
+  "nova/frame/framedata.py",
+  "nova/frame/framelink.py",
+  "nova/frame/frameset.py",
+  "nova/frame/framesetloc.py",
+  "nova/frame/framespace.py",
+  "nova/frame/indexer.py",
+  "nova/frame/metadata.py",
+  "nova/frame/metaframe.py",
+  "nova/frame/metamethod.py",
+  "nova/frame/multipoint.py",
+  "nova/frame/plasmaloc.py",
+  "nova/frame/poloidalgrid.py",
+  "nova/frame/polygeo.py",
+  "nova/frame/polygrid.py",
+  "nova/frame/polyplot.py",
+  "nova/frame/select.py",
+  "nova/frame/subspace.py",
+  "nova/frame/vtkgeo.py",
+  "nova/frame/vtkplot.py",
+  "nova/geometry/frenet.py",
+  "nova/geometry/geoframe.py",
+  "nova/geometry/hexstencil.py",
+  "nova/geometry/pointloop.py",
+  "nova/geometry/polyframe.py",
+  "nova/geometry/polygen.py",
+  "nova/geometry/polygeom.py",
+  "nova/geometry/polygon.py",
+  "nova/geometry/polyshape.py",
+  "nova/geometry/rotate.py",
+  "nova/geometry/section.py",
+  "nova/geometry/select.py",
+  "nova/graphics/line.py",
+  "nova/graphics/plot.py",
+  "nova/imas/__init__.py",
+  "nova/imas/database.py",
+  "nova/imas/dataset.py",
+  "nova/imas/diiid_current.py",
+  "nova/imas/diiid_description.py",
+  "nova/imas/edge_consistency.py",
+  "nova/imas/ids_entry.py",
+  "nova/imas/ids_index.py",
+  "nova/imas/machine_artifact.py",
+  "nova/imas/machine_drive.py",
+  "nova/imas/machine_evidence.py",
+  "nova/imas/mast_block_scale.py",
+  "nova/imas/mast_chain_factory.py",
+  "nova/imas/mast_corrections.py",
+  "nova/imas/mast_parity_chain.py",
+  "nova/imas/mast_passive_response.py",
+  "nova/imas/mast_seed_parameters.py",
+  "nova/imas/mast_solve_input_ids.py",
+  "nova/imas/mast_solve_inputs.py",
+  "nova/imas/mast_vacuum_cohort.py",
+  "nova/imas/mast_vacuum_response.py",
+  "nova/imas/parity_tolerances.py",
+  "nova/imas/test_utilities.py",
+  "nova/io/__init__.py",
+  "nova/io/egress.py",
+  "nova/io/ingest.py",
+  "nova/io/json.py",
+  "nova/io/signalstore.py",
+  "nova/io/sourcemap.py",
+  "nova/io/standardname.py",
+  "nova/io/streaming.py",
+  "nova/jax/config.py",
+  "nova/jax/tree_util.py",
+  "nova/linalg/interpolant.py",
+  "nova/linalg/split_spline.py",
+  "nova/linalg/tensor_spline.py",
+  "nova/media/__init__.py",
+  "nova/media/ink.py",
+  "nova/media/poloidal.py",
+  "nova/media/sources/__init__.py",
+  "nova/media/sources/frame.py",
+  "nova/media/sources/mast_thomson.py",
+  "nova/media/sources/nova_labels.py",
+  "nova/media/sources/plasma_mesh.py",
+  "nova/transport/__init__.py",
+  "nova/transport/coupled_window.py",
+  "nova/transport/current_diffusion.py",
+  "nova/transport/ensemble.py",
+  "nova/transport/evolved_state.py",
+  "nova/transport/forward.py",
+  "nova/transport/torax_geometry.py",
+  "nova/transport/window_batch.py",
+  "nova/utilities/axes.py",
+  "nova/utilities/importmanager.py"
+ ],
+ "shared_names": {
+  "__getattr__": [
+   "nova/__init__.py",
+   "nova/biot/operate.py",
+   "nova/calibrate/correction_model.py",
+   "nova/equilibrium/__init__.py",
+   "nova/frame/dataframe.py",
+   "nova/frame/framelink.py",
+   "nova/frame/framespace.py",
+   "nova/imas/__init__.py"
+  ],
+  "wrapper": [
+   "nova/__init__.py",
+   "nova/database/filepath.py",
+   "nova/frame/frameset.py",
+   "nova/imas/machine_artifact.py"
+  ],
+  "decorator": [
+   "nova/__init__.py",
+   "nova/frame/frameset.py"
+  ],
+  "_Bphi_hat": [
+   "nova/biot/arc.py",
+   "nova/biot/bow.py",
+   "nova/biot/polybow.py"
+  ],
+  "_Ax_hat": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py",
+   "nova/biot/line.py",
+   "nova/biot/polybeam.py"
+  ],
+  "_validate_source_geometry": [
+   "nova/biot/arc.py",
+   "nova/biot/cylinder.py"
+  ],
+  "_Aphi_hat": [
+   "nova/biot/arc.py",
+   "nova/biot/bow.py",
+   "nova/biot/polybow.py"
+  ],
+  "reps": [
+   "nova/biot/arc.py",
+   "nova/biot/bow.py"
+  ],
+  "_Bz_hat": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py",
+   "nova/biot/bow.py",
+   "nova/biot/line.py",
+   "nova/biot/matrix.py",
+   "nova/biot/polybeam.py",
+   "nova/biot/polybow.py"
+  ],
+  "_By_hat": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py",
+   "nova/biot/line.py",
+   "nova/biot/matrix.py",
+   "nova/biot/polybeam.py"
+  ],
+  "alpha": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py"
+  ],
+  "_vector": [
+   "nova/biot/arc.py",
+   "nova/biot/matrix.py"
+  ],
+  "_Bx_hat": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py",
+   "nova/biot/line.py",
+   "nova/biot/matrix.py",
+   "nova/biot/polybeam.py"
+  ],
+  "__post_init__": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py",
+   "nova/biot/biot.py",
+   "nova/biot/bow.py",
+   "nova/biot/circle.py",
+   "nova/biot/cylinder.py",
+   "nova/biot/data.py",
+   "nova/biot/grid.py",
+   "nova/biot/groupset.py",
+   "nova/biot/line.py",
+   "nova/biot/matrix.py",
+   "nova/biot/null.py",
+   "nova/biot/operate.py",
+   "nova/biot/plasmagrid.py",
+   "nova/biot/polysection.py",
+   "nova/biot/solve.py",
+   "nova/biot/target.py",
+   "nova/biot/zeta.py",
+   "nova/control/control.py",
+   "nova/database/datafile.py",
+   "nova/database/filepath.py",
+   "nova/equilibrium/branch_selection.py",
+   "nova/equilibrium/conductor_current.py",
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/current.py",
+   "nova/equilibrium/flux_surface_geometry.py",
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/moment.py",
+   "nova/equilibrium/observation.py",
+   "nova/equilibrium/profile.py",
+   "nova/equilibrium/solve_request.py",
+   "nova/equilibrium/source.py",
+   "nova/equilibrium/stencil_mesh.py",
+   "nova/equilibrium/topology.py",
+   "nova/equilibrium/wall_mask.py",
+   "nova/frame/coil.py",
+   "nova/frame/coilset.py",
+   "nova/frame/frame.py",
+   "nova/frame/frameset.py",
+   "nova/frame/framesetloc.py",
+   "nova/frame/metadata.py",
+   "nova/frame/metaframe.py",
+   "nova/frame/metamethod.py",
+   "nova/frame/polygrid.py",
+   "nova/frame/polyplot.py",
+   "nova/frame/select.py",
+   "nova/geometry/frenet.py",
+   "nova/geometry/geoframe.py",
+   "nova/geometry/pointloop.py",
+   "nova/geometry/polyframe.py",
+   "nova/geometry/polygeom.py",
+   "nova/geometry/polygon.py",
+   "nova/imas/database.py",
+   "nova/imas/dataset.py",
+   "nova/imas/ids_entry.py",
+   "nova/imas/mast_parity_chain.py",
+   "nova/io/signalstore.py",
+   "nova/io/standardname.py",
+   "nova/media/sources/frame.py",
+   "nova/transport/coupled_window.py",
+   "nova/transport/current_diffusion.py",
+   "nova/transport/ensemble.py",
+   "nova/transport/evolved_state.py",
+   "nova/transport/forward.py",
+   "nova/transport/window_batch.py"
+  ],
+  "_Ay_hat": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py",
+   "nova/biot/line.py",
+   "nova/biot/polybeam.py"
+  ],
+  "_Az_hat": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py",
+   "nova/biot/line.py",
+   "nova/biot/polybeam.py"
+  ],
+  "_Br_hat": [
+   "nova/biot/arc.py",
+   "nova/biot/bow.py",
+   "nova/biot/polybow.py"
+  ],
+  "_Ar_hat": [
+   "nova/biot/arc.py",
+   "nova/biot/bow.py",
+   "nova/biot/polybow.py"
+  ],
+  "_intergrate": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py",
+   "nova/biot/bow.py",
+   "nova/biot/line.py",
+   "nova/biot/matrix.py",
+   "nova/biot/polybeam.py",
+   "nova/biot/polybow.py"
+  ],
+  "phi": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py",
+   "nova/biot/line.py",
+   "nova/biot/matrix.py"
+  ],
+  "theta": [
+   "nova/biot/arc.py",
+   "nova/biot/beam.py"
+  ],
+  "fold": [
+   "nova/biot/arcamplitude.py",
+   "nova/equilibrium/fixed_point.py"
+  ],
+  "at": [
+   "nova/biot/arcbandedcoupling.py",
+   "nova/biot/greens.py",
+   "nova/equilibrium/support_read.py",
+   "nova/frame/dataarray.py",
+   "nova/media/sources/mast_thomson.py"
+  ],
+  "__getitem__": [
+   "nova/biot/array.py",
+   "nova/biot/matrix.py",
+   "nova/biot/operate.py",
+   "nova/biot/plasmagrid.py",
+   "nova/calibrate/correction_model.py",
+   "nova/frame/arraylocindexer.py",
+   "nova/frame/dataframe.py",
+   "nova/frame/framelink.py",
+   "nova/frame/framesetloc.py",
+   "nova/frame/framespace.py",
+   "nova/frame/indexer.py",
+   "nova/graphics/plot.py"
+  ],
+  "load_arrays": [
+   "nova/biot/array.py",
+   "nova/biot/operate.py"
+  ],
+  "gamma": [
+   "nova/biot/beam.py",
+   "nova/biot/constants.py",
+   "nova/biot/zeta.py"
+  ],
+  "loop": [
+   "nova/biot/biot.py",
+   "nova/equilibrium/flux_surface_geometry.py"
+  ],
+  "field": [
+   "nova/biot/biot.py",
+   "nova/biot/sheet.py",
+   "nova/equilibrium/flux_surface_geometry.py"
+  ],
+  "set_target": [
+   "nova/biot/biotframe.py",
+   "nova/biot/shape.py"
+  ],
+  "center": [
+   "nova/biot/biotframe.py",
+   "nova/frame/polygrid.py"
+  ],
+  "set_source": [
+   "nova/biot/biotframe.py",
+   "nova/biot/shape.py"
+  ],
+  "__call__": [
+   "nova/biot/biotframe.py",
+   "nova/biot/grid.py",
+   "nova/biot/matrix.py",
+   "nova/biot/null.py",
+   "nova/biot/tiledassembly.py",
+   "nova/biot/zeta.py",
+   "nova/equilibrium/conductor_current.py",
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/solve_request.py",
+   "nova/equilibrium/source.py",
+   "nova/equilibrium/stencil_mesh.py",
+   "nova/frame/arraylocindexer.py",
+   "nova/frame/framesetloc.py",
+   "nova/frame/metamethod.py",
+   "nova/frame/polygrid.py",
+   "nova/frame/polyplot.py",
+   "nova/frame/select.py",
+   "nova/frame/vtkplot.py",
+   "nova/geometry/polygen.py",
+   "nova/imas/mast_chain_factory.py",
+   "nova/imas/mast_parity_chain.py",
+   "nova/linalg/interpolant.py",
+   "nova/linalg/split_spline.py",
+   "nova/linalg/tensor_spline.py",
+   "nova/transport/current_diffusion.py",
+   "nova/transport/evolved_state.py"
+  ],
+  "update_metaframe": [
+   "nova/biot/biotframe.py",
+   "nova/frame/dataframe.py",
+   "nova/frame/select.py"
+  ],
+  "start_point": [
+   "nova/biot/biotframe.py",
+   "nova/biot/space.py"
+  ],
+  "__init__": [
+   "nova/biot/biotframe.py",
+   "nova/biot/error.py",
+   "nova/biot/momentchannel.py",
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/polygonarc.py",
+   "nova/biot/sheet.py",
+   "nova/biot/tiledassembly.py",
+   "nova/biot/zeta.py",
+   "nova/equilibrium/magnetics_fit.py",
+   "nova/equilibrium/moment.py",
+   "nova/equilibrium/reduced_newton.py",
+   "nova/equilibrium/source.py",
+   "nova/equilibrium/support_read.py",
+   "nova/frame/arraylocindexer.py",
+   "nova/frame/columnar.py",
+   "nova/frame/dataframe.py",
+   "nova/frame/error.py",
+   "nova/frame/framelink.py",
+   "nova/frame/framespace.py",
+   "nova/frame/indexer.py",
+   "nova/frame/subspace.py",
+   "nova/graphics/plot.py",
+   "nova/transport/coupled_window.py",
+   "nova/transport/ensemble.py",
+   "nova/transport/forward.py",
+   "nova/transport/window_batch.py"
+  ],
+  "axis": [
+   "nova/biot/biotframe.py",
+   "nova/biot/space.py"
+  ],
+  "normal": [
+   "nova/biot/biotframe.py",
+   "nova/biot/space.py",
+   "nova/equilibrium/current.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "stack": [
+   "nova/biot/biotframe.py",
+   "nova/equilibrium/observation.py"
+  ],
+  "end_point": [
+   "nova/biot/biotframe.py",
+   "nova/biot/space.py"
+  ],
+  "zeta": [
+   "nova/biot/bow.py",
+   "nova/biot/zeta.py"
+  ],
+  "_stack": [
+   "nova/biot/bow.py",
+   "nova/biot/matrix.py"
+  ],
+  "_coupling": [
+   "nova/biot/circle.py",
+   "nova/biot/polysection.py"
+  ],
+  "Aphi": [
+   "nova/biot/circle.py",
+   "nova/biot/cylinder.py",
+   "nova/biot/polysection.py"
+  ],
+  "Psi": [
+   "nova/biot/circle.py",
+   "nova/biot/cylinder.py",
+   "nova/biot/polysection.py"
+  ],
+  "Bz": [
+   "nova/biot/circle.py",
+   "nova/biot/cylinder.py",
+   "nova/biot/matrix.py",
+   "nova/biot/polysection.py"
+  ],
+  "Br": [
+   "nova/biot/circle.py",
+   "nova/biot/cylinder.py",
+   "nova/biot/matrix.py",
+   "nova/biot/polysection.py"
+  ],
+  "_held_tangent": [
+   "nova/biot/completeelliptic.py",
+   "nova/biot/elliptic.py",
+   "nova/biot/gradedresidual.py"
+  ],
+  "sign": [
+   "nova/biot/constants.py",
+   "nova/imas/mast_vacuum_response.py"
+  ],
+  "p_sum": [
+   "nova/biot/constants.py",
+   "nova/biot/greens.py"
+  ],
+  "a2": [
+   "nova/biot/constants.py",
+   "nova/biot/line.py"
+  ],
+  "initialize": [
+   "nova/biot/crosssection.py",
+   "nova/biot/reduce.py",
+   "nova/biot/shape.py",
+   "nova/biot/solve.py",
+   "nova/biot/space.py",
+   "nova/frame/energize.py",
+   "nova/frame/metamethod.py",
+   "nova/frame/multipoint.py",
+   "nova/frame/polygeo.py",
+   "nova/frame/polyplot.py",
+   "nova/frame/select.py",
+   "nova/frame/vtkgeo.py",
+   "nova/frame/vtkplot.py"
+  ],
+  "__len__": [
+   "nova/biot/data.py",
+   "nova/biot/grid.py",
+   "nova/biot/groupset.py",
+   "nova/frame/arraylocindexer.py",
+   "nova/frame/columnar.py",
+   "nova/frame/dataframe.py",
+   "nova/frame/framesetloc.py",
+   "nova/frame/plasmaloc.py",
+   "nova/frame/polygrid.py",
+   "nova/geometry/frenet.py",
+   "nova/geometry/section.py",
+   "nova/media/sources/frame.py",
+   "nova/media/sources/mast_thomson.py"
+  ],
+  "post_solve": [
+   "nova/biot/data.py",
+   "nova/biot/operate.py"
+  ],
+  "eliminate": [
+   "nova/biot/elliptic.py",
+   "nova/linalg/tensor_spline.py",
+   "nova/transport/current_diffusion.py"
+  ],
+  "product": [
+   "nova/biot/elliptic.py",
+   "nova/biot/rangefunction.py",
+   "nova/linalg/interpolant.py"
+  ],
+  "harmonic_moments": [
+   "nova/biot/elliptic.py",
+   "nova/biot/incompletemoments.py"
+  ],
+  "cn_pole_moment": [
+   "nova/biot/elliptic.py",
+   "nova/biot/incompletemoments.py"
+  ],
+  "sn_pole_moment": [
+   "nova/biot/elliptic.py",
+   "nova/biot/incompletemoments.py"
+  ],
+  "substitute": [
+   "nova/biot/elliptic.py",
+   "nova/linalg/tensor_spline.py",
+   "nova/transport/current_diffusion.py"
+  ],
+  "plot": [
+   "nova/biot/fieldnull.py",
+   "nova/biot/grid.py",
+   "nova/biot/groupset.py",
+   "nova/biot/loop.py",
+   "nova/biot/plasmagrid.py",
+   "nova/biot/point.py",
+   "nova/biot/space.py",
+   "nova/equilibrium/topology.py",
+   "nova/frame/frameset.py",
+   "nova/frame/polygrid.py",
+   "nova/frame/polyplot.py",
+   "nova/frame/vtkplot.py",
+   "nova/geometry/frenet.py",
+   "nova/geometry/section.py",
+   "nova/linalg/interpolant.py"
+  ],
+  "categorize": [
+   "nova/biot/fieldnull.py",
+   "nova/biot/null.py"
+  ],
+  "x_psi": [
+   "nova/biot/fieldnull.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "o_point": [
+   "nova/biot/fieldnull.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "o_psi": [
+   "nova/biot/fieldnull.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "update": [
+   "nova/biot/flux.py",
+   "nova/equilibrium/fixed_points.py",
+   "nova/equilibrium/flux_surface_extraction.py",
+   "nova/equilibrium/topology.py",
+   "nova/frame/metaframe.py",
+   "nova/geometry/pointloop.py"
+  ],
+  "_rule": [
+   "nova/biot/gradedresidual.py",
+   "nova/biot/sheet.py"
+  ],
+  "primitive": [
+   "nova/biot/gradedresidual.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "corner": [
+   "nova/biot/greens.py",
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/polygonarc.py",
+   "nova/frame/polygrid.py"
+  ],
+  "limit": [
+   "nova/biot/grid.py",
+   "nova/frame/polygeo.py",
+   "nova/geometry/polyframe.py"
+  ],
+  "__getattribute__": [
+   "nova/biot/grid.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "pointloop": [
+   "nova/biot/grid.py",
+   "nova/biot/plasmagrid.py"
+  ],
+  "solve": [
+   "nova/biot/grid.py",
+   "nova/biot/loop.py",
+   "nova/biot/plasmagrid.py",
+   "nova/biot/point.py",
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/fixed_points.py",
+   "nova/equilibrium/flux_surface_connectivity.py",
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/moment.py",
+   "nova/equilibrium/profile.py",
+   "nova/equilibrium/reduced_newton.py",
+   "nova/equilibrium/support_read.py",
+   "nova/imas/mast_vacuum_response.py",
+   "nova/transport/coupled_window.py",
+   "nova/transport/ensemble.py",
+   "nova/transport/forward.py"
+  ],
+  "mask": [
+   "nova/biot/grid.py",
+   "nova/equilibrium/domain.py"
+  ],
+  "shape": [
+   "nova/biot/grid.py",
+   "nova/biot/groupset.py",
+   "nova/biot/operate.py",
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/display_flux.py",
+   "nova/frame/columnar.py",
+   "nova/frame/dataframe.py",
+   "nova/geometry/polyshape.py",
+   "nova/imas/ids_index.py"
+  ],
+  "generate": [
+   "nova/biot/grid.py",
+   "nova/frame/metamethod.py",
+   "nova/graphics/plot.py"
+  ],
+  "build_index": [
+   "nova/biot/groupset.py",
+   "nova/frame/dataframe.py"
+  ],
+  "assemble": [
+   "nova/biot/groupset.py",
+   "nova/biot/tiledassembly.py",
+   "nova/frame/framelink.py",
+   "nova/io/egress.py"
+  ],
+  "insert": [
+   "nova/biot/loop.py",
+   "nova/frame/coil.py",
+   "nova/frame/coilsetattrs.py",
+   "nova/frame/framelink.py",
+   "nova/frame/poloidalgrid.py"
+  ],
+  "build_transform": [
+   "nova/biot/matrix.py",
+   "nova/biot/polysection.py"
+  ],
+  "to_global": [
+   "nova/biot/matrix.py",
+   "nova/biot/space.py"
+  ],
+  "loc": [
+   "nova/biot/matrix.py",
+   "nova/frame/columnar.py",
+   "nova/frame/dataarray.py",
+   "nova/frame/framesetloc.py"
+  ],
+  "to_local": [
+   "nova/biot/matrix.py",
+   "nova/biot/space.py"
+  ],
+  "compute": [
+   "nova/biot/matrix.py",
+   "nova/biot/solve.py"
+  ],
+  "rotate": [
+   "nova/biot/matrix.py",
+   "nova/geometry/rotate.py"
+  ],
+  "across_paired": [
+   "nova/biot/momentchannel.py",
+   "nova/biot/polygonanalytic.py"
+  ],
+  "plain_paired": [
+   "nova/biot/momentchannel.py",
+   "nova/biot/polygonanalytic.py"
+  ],
+  "split": [
+   "nova/biot/momentchannel.py",
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/polygonarc.py",
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/reduced_newton.py"
+  ],
+  "plain": [
+   "nova/biot/momentchannel.py",
+   "nova/biot/polygonanalytic.py"
+  ],
+  "against_root": [
+   "nova/biot/momentchannel.py",
+   "nova/biot/polygonanalytic.py"
+  ],
+  "against_root_paired": [
+   "nova/biot/momentchannel.py",
+   "nova/biot/polygonanalytic.py"
+  ],
+  "across": [
+   "nova/biot/momentchannel.py",
+   "nova/biot/polygonanalytic.py"
+  ],
+  "candidate_table_status": [
+   "nova/biot/null.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "fit_dtype": [
+   "nova/biot/null.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "tree_flatten": [
+   "nova/biot/null.py",
+   "nova/biot/operate.py",
+   "nova/biot/target.py",
+   "nova/biot/zeta.py",
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/solve_request.py",
+   "nova/equilibrium/source.py",
+   "nova/equilibrium/topology.py",
+   "nova/jax/tree_util.py",
+   "nova/linalg/interpolant.py",
+   "nova/linalg/split_spline.py",
+   "nova/linalg/tensor_spline.py"
+  ],
+  "load": [
+   "nova/biot/operate.py",
+   "nova/catalog/mast_geometry.py",
+   "nova/control/control.py",
+   "nova/database/netcdf.py",
+   "nova/database/zarrstore.py",
+   "nova/frame/dataframe.py",
+   "nova/frame/frameset.py",
+   "nova/utilities/importmanager.py"
+  ],
+  "dtype": [
+   "nova/biot/operate.py",
+   "nova/imas/ids_index.py"
+  ],
+  "evaluate": [
+   "nova/biot/operate.py",
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/rangefunction.py",
+   "nova/biot/tiledassembly.py",
+   "nova/equilibrium/conductor_current.py",
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/current.py",
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/fixed_points.py",
+   "nova/equilibrium/flux_surface_connectivity.py",
+   "nova/equilibrium/solve.py",
+   "nova/equilibrium/support_read.py",
+   "nova/equilibrium/topology.py",
+   "nova/linalg/split_spline.py",
+   "nova/linalg/tensor_spline.py"
+  ],
+  "__setitem__": [
+   "nova/biot/operate.py",
+   "nova/calibrate/correction_model.py",
+   "nova/frame/arraylocindexer.py",
+   "nova/frame/dataframe.py",
+   "nova/frame/framelink.py",
+   "nova/frame/framesetloc.py",
+   "nova/frame/framespace.py",
+   "nova/frame/indexer.py",
+   "nova/frame/subspace.py",
+   "nova/imas/ids_index.py"
+  ],
+  "scale": [
+   "nova/biot/pairedfloat.py",
+   "nova/calibrate/scale_step.py"
+  ],
+  "value": [
+   "nova/biot/pairedfloat.py",
+   "nova/biot/polygonarc.py",
+   "nova/equilibrium/fixed_points.py",
+   "nova/equilibrium/observation.py",
+   "nova/equilibrium/topology.py",
+   "nova/media/sources/nova_labels.py"
+  ],
+  "divide": [
+   "nova/biot/pairedfloat.py",
+   "nova/frame/polygrid.py"
+  ],
+  "contract": [
+   "nova/biot/pairedfloat.py",
+   "nova/biot/rangefunction.py"
+  ],
+  "add": [
+   "nova/biot/pairedfloat.py",
+   "nova/equilibrium/current.py",
+   "nova/equilibrium/support_read.py",
+   "nova/imas/mast_vacuum_response.py"
+  ],
+  "psi_mask": [
+   "nova/biot/plasmagrid.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "target": [
+   "nova/biot/plasmagrid.py",
+   "nova/calibrate/correction_set.py"
+  ],
+  "x_mask": [
+   "nova/biot/plasmagrid.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "extract": [
+   "nova/biot/point.py",
+   "nova/geometry/polygon.py"
+  ],
+  "_end_point": [
+   "nova/biot/polybeam.py",
+   "nova/biot/space.py"
+  ],
+  "_rows": [
+   "nova/biot/polybeam.py",
+   "nova/biot/polybow.py",
+   "nova/frame/arraylocindexer.py",
+   "nova/frame/indexer.py",
+   "nova/io/sourcemap.py"
+  ],
+  "_section_vertices": [
+   "nova/biot/polybeam.py",
+   "nova/biot/polybow.py"
+  ],
+  "terms": [
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/polygonarc.py"
+  ],
+  "__add__": [
+   "nova/biot/polygonanalytic.py",
+   "nova/frame/coilset.py",
+   "nova/frame/framelink.py"
+  ],
+  "endpoint_lanes": [
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/polygonarc.py"
+  ],
+  "column": [
+   "nova/biot/polygonanalytic.py",
+   "nova/equilibrium/reduced_newton.py",
+   "nova/equilibrium/solve.py"
+  ],
+  "arsinh_terms": [
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/polygonarc.py"
+  ],
+  "integrate": [
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/tiledassembly.py",
+   "nova/biot/zeta.py",
+   "nova/equilibrium/clip_quadrature.py",
+   "nova/equilibrium/current.py"
+  ],
+  "_first_residual": [
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/polygonarc.py"
+  ],
+  "corner_part": [
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/polygonarc.py"
+  ],
+  "pieces": [
+   "nova/biot/polygonanalytic.py",
+   "nova/biot/polygonarc.py",
+   "nova/biot/sheet.py"
+  ],
+  "__truediv__": [
+   "nova/biot/polygonanalytic.py",
+   "nova/linalg/interpolant.py"
+  ],
+  "interior": [
+   "nova/biot/polygonarc.py",
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/current.py",
+   "nova/equilibrium/stencil_mesh.py"
+  ],
+  "resolve": [
+   "nova/biot/polysection.py",
+   "nova/biot/target.py",
+   "nova/equilibrium/solve_request.py",
+   "nova/io/standardname.py"
+  ],
+  "key": [
+   "nova/biot/polysection.py",
+   "nova/biot/target.py",
+   "nova/io/sourcemap.py"
+  ],
+  "step": [
+   "nova/biot/sheet.py",
+   "nova/biot/tiledassembly.py",
+   "nova/equilibrium/topology.py",
+   "nova/transport/current_diffusion.py"
+  ],
+  "flux": [
+   "nova/biot/sheet.py",
+   "nova/biot/tiledassembly.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "plasma_index": [
+   "nova/biot/solve.py",
+   "nova/frame/framesetloc.py"
+  ],
+  "get_index": [
+   "nova/biot/solve.py",
+   "nova/graphics/plot.py",
+   "nova/imas/ids_index.py"
+  ],
+  "path": [
+   "nova/biot/space.py",
+   "nova/database/filepath.py"
+  ],
+  "axes": [
+   "nova/biot/space.py",
+   "nova/graphics/plot.py"
+  ],
+  "internal": [
+   "nova/biot/target.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "node_number": [
+   "nova/biot/target.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "coordinate": [
+   "nova/biot/target.py",
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "external": [
+   "nova/biot/target.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "receipt": [
+   "nova/biot/tiledassembly.py",
+   "nova/equilibrium/source.py",
+   "nova/jax/config.py"
+  ],
+  "pair": [
+   "nova/biot/tiledassembly.py",
+   "nova/equilibrium/constraint.py"
+  ],
+  "mapped": [
+   "nova/biot/tiledassembly.py",
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "tree_unflatten": [
+   "nova/biot/zeta.py",
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/solve_request.py",
+   "nova/equilibrium/source.py",
+   "nova/jax/tree_util.py"
+  ],
+  "__contains__": [
+   "nova/calibrate/correction_model.py",
+   "nova/frame/columnar.py",
+   "nova/frame/dataframe.py"
+  ],
+  "applied": [
+   "nova/calibrate/correction_set.py",
+   "nova/imas/mast_block_scale.py"
+  ],
+  "on_ladder": [
+   "nova/calibrate/scale_step.py",
+   "nova/imas/mast_block_scale.py"
+  ],
+  "covers": [
+   "nova/calibrate/scale_step.py",
+   "nova/imas/mast_block_scale.py"
+  ],
+  "as_dict": [
+   "nova/calibrate/scale_step.py",
+   "nova/catalog/mast_geometry.py",
+   "nova/equilibrium/branch_selection.py",
+   "nova/equilibrium/conductor_current.py",
+   "nova/equilibrium/topology.py",
+   "nova/imas/machine_artifact.py",
+   "nova/imas/machine_drive.py",
+   "nova/imas/machine_evidence.py",
+   "nova/imas/mast_block_scale.py",
+   "nova/imas/mast_parity_chain.py",
+   "nova/imas/mast_passive_response.py",
+   "nova/imas/mast_solve_input_ids.py",
+   "nova/imas/mast_vacuum_cohort.py",
+   "nova/imas/mast_vacuum_response.py",
+   "nova/io/sourcemap.py"
+  ],
+  "ratio": [
+   "nova/calibrate/scale_step.py",
+   "nova/imas/mast_block_scale.py"
+  ],
+  "measured": [
+   "nova/calibrate/scale_step.py",
+   "nova/imas/mast_block_scale.py"
+  ],
+  "span": [
+   "nova/calibrate/scale_step.py",
+   "nova/imas/mast_block_scale.py"
+  ],
+  "interval": [
+   "nova/calibrate/scale_step.py",
+   "nova/imas/mast_vacuum_response.py"
+  ],
+  "validate": [
+   "nova/catalog/mast_geometry.py",
+   "nova/frame/metadata.py",
+   "nova/frame/metaframe.py",
+   "nova/imas/diiid_description.py",
+   "nova/imas/machine_artifact.py",
+   "nova/imas/machine_drive.py",
+   "nova/imas/machine_evidence.py",
+   "nova/imas/mast_block_scale.py",
+   "nova/imas/mast_parity_chain.py",
+   "nova/imas/mast_solve_inputs.py",
+   "nova/imas/mast_vacuum_cohort.py",
+   "nova/imas/mast_vacuum_response.py",
+   "nova/io/sourcemap.py"
+  ],
+  "_array": [
+   "nova/catalog/mast_geometry.py",
+   "nova/frame/framesetloc.py"
+  ],
+  "select": [
+   "nova/catalog/mast_geometry.py",
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/stencil_nulls.py",
+   "nova/imas/diiid_description.py",
+   "nova/imas/machine_drive.py",
+   "nova/imas/mast_vacuum_response.py",
+   "nova/io/sourcemap.py"
+  ],
+  "contains": [
+   "nova/catalog/mast_geometry.py",
+   "nova/equilibrium/fixed_points.py",
+   "nova/imas/machine_evidence.py"
+  ],
+  "store": [
+   "nova/control/control.py",
+   "nova/database/netcdf.py",
+   "nova/database/zarrstore.py",
+   "nova/frame/coilset.py",
+   "nova/frame/dataframe.py",
+   "nova/frame/frameset.py"
+  ],
+  "rename": [
+   "nova/database/content_store.py",
+   "nova/imas/database.py"
+  ],
+  "build": [
+   "nova/database/datafile.py",
+   "nova/frame/multipoint.py",
+   "nova/geometry/frenet.py",
+   "nova/imas/mast_vacuum_response.py"
+  ],
+  "clear": [
+   "nova/database/filepath.py",
+   "nova/frame/metadata.py"
+  ],
+  "filepath": [
+   "nova/database/filepath.py",
+   "nova/database/netcdf.py",
+   "nova/database/zarrstore.py"
+  ],
+  "get_mode": [
+   "nova/database/netcdf.py",
+   "nova/database/zarrstore.py"
+  ],
+  "subgroup": [
+   "nova/database/netcdf.py",
+   "nova/database/zarrstore.py"
+  ],
+  "delete_group": [
+   "nova/database/netcdf.py",
+   "nova/database/zarrstore.py"
+  ],
+  "store_overwrite": [
+   "nova/database/netcdf.py",
+   "nova/database/zarrstore.py"
+  ],
+  "scatter": [
+   "nova/equilibrium/clip_quadrature.py",
+   "nova/equilibrium/connectivity_boundary.py",
+   "nova/equilibrium/current.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "advance": [
+   "nova/equilibrium/clip_quadrature.py",
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/parallel_components.py",
+   "nova/equilibrium/support_read.py"
+  ],
+  "limiter_radial_extent": [
+   "nova/equilibrium/cold_seed.py",
+   "nova/equilibrium/moment.py"
+  ],
+  "objective": [
+   "nova/equilibrium/conductor_current.py",
+   "nova/equilibrium/moment.py"
+  ],
+  "_receipt": [
+   "nova/equilibrium/conductor_current.py",
+   "nova/equilibrium/forward.py"
+  ],
+  "current": [
+   "nova/equilibrium/conductor_current.py",
+   "nova/frame/framesetloc.py"
+  ],
+  "choose": [
+   "nova/equilibrium/connectivity_boundary.py",
+   "nova/equilibrium/reduced_newton.py",
+   "nova/equilibrium/solve.py",
+   "nova/equilibrium/stencil_nulls.py",
+   "nova/geometry/select.py"
+  ],
+  "_arg_extreme": [
+   "nova/equilibrium/connectivity_boundary.py",
+   "nova/equilibrium/stencil_nulls.py"
+  ],
+  "_argmax_exact": [
+   "nova/equilibrium/connectivity_boundary.py",
+   "nova/equilibrium/stencil_nulls.py"
+  ],
+  "one": [
+   "nova/equilibrium/connectivity_boundary.py",
+   "nova/equilibrium/support_read.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "_argmin_exact": [
+   "nova/equilibrium/connectivity_boundary.py",
+   "nova/equilibrium/stencil_nulls.py"
+  ],
+  "body": [
+   "nova/equilibrium/connectivity_boundary.py",
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/flux_surface_connectivity.py",
+   "nova/equilibrium/parallel_components.py",
+   "nova/equilibrium/solve.py"
+  ],
+  "gradient": [
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/stencil_mesh.py",
+   "nova/geometry/frenet.py"
+  ],
+  "delta_star": [
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/stencil_mesh.py"
+  ],
+  "poloidal_field": [
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "flatten": [
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/forward_operator.py"
+  ],
+  "node_count": [
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/stencil_mesh.py"
+  ],
+  "cell_area": [
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/stencil_mesh.py"
+  ],
+  "erode": [
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/stencil_mesh.py"
+  ],
+  "node_radius": [
+   "nova/equilibrium/conservation.py",
+   "nova/equilibrium/stencil_mesh.py"
+  ],
+  "constraint_response_matrix": [
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/forward.py"
+  ],
+  "flux_delta": [
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/reduced_newton.py"
+  ],
+  "promoted_shadow_mask": [
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/forward.py"
+  ],
+  "observe": [
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/reduced_newton.py"
+  ],
+  "shadow_mask": [
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/forward.py"
+  ],
+  "rows": [
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/reduced_newton.py"
+  ],
+  "residual": [
+   "nova/equilibrium/constraint.py",
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/forward_operator.py",
+   "nova/transport/coupled_window.py"
+  ],
+  "conic": [
+   "nova/equilibrium/current.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "book": [
+   "nova/equilibrium/current.py",
+   "nova/equilibrium/support_read.py"
+  ],
+  "_target": [
+   "nova/equilibrium/display_flux.py",
+   "nova/equilibrium/reduced_newton.py"
+  ],
+  "core": [
+   "nova/equilibrium/domain.py",
+   "nova/equilibrium/source.py"
+  ],
+  "project": [
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/measurement.py",
+   "nova/equilibrium/reduced_newton.py",
+   "nova/geometry/frenet.py",
+   "nova/transport/current_diffusion.py"
+  ],
+  "bisect": [
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/flux_surface_connectivity.py",
+   "nova/equilibrium/flux_surface_extraction.py",
+   "nova/equilibrium/separatrix_clip.py",
+   "nova/equilibrium/topology.py",
+   "nova/geometry/select.py"
+  ],
+  "machine": [
+   "nova/equilibrium/fixed_point.py",
+   "nova/imas/machine_artifact.py"
+  ],
+  "_relative_residual": [
+   "nova/equilibrium/fixed_point.py",
+   "nova/transport/coupled_window.py"
+  ],
+  "outer_body": [
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/reduced_newton.py"
+  ],
+  "score": [
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/fixed_points.py"
+  ],
+  "iterate": [
+   "nova/equilibrium/fixed_point.py",
+   "nova/transport/coupled_window.py"
+  ],
+  "picard": [
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/profile.py"
+  ],
+  "cycle": [
+   "nova/equilibrium/fixed_point.py",
+   "nova/equilibrium/support_read.py"
+  ],
+  "condition": [
+   "nova/equilibrium/fixed_points.py",
+   "nova/equilibrium/flux_surface_connectivity.py",
+   "nova/equilibrium/solve.py",
+   "nova/equilibrium/topology.py",
+   "nova/imas/mast_vacuum_response.py"
+  ],
+  "gradient_with_value": [
+   "nova/equilibrium/fixed_points.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "value_gradient": [
+   "nova/equilibrium/fixed_points.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "newton_step": [
+   "nova/equilibrium/flux_surface_connectivity.py",
+   "nova/equilibrium/support_read.py"
+  ],
+  "_coordinate_grids": [
+   "nova/equilibrium/flux_surface_connectivity.py",
+   "nova/linalg/split_spline.py"
+  ],
+  "propagate": [
+   "nova/equilibrium/flux_surface_connectivity.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "gather": [
+   "nova/equilibrium/flux_surface_connectivity.py",
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/separatrix_clip.py"
+  ],
+  "_tensor_bernstein": [
+   "nova/equilibrium/flux_surface_extraction.py",
+   "nova/linalg/tensor_spline.py"
+  ],
+  "clip": [
+   "nova/equilibrium/flux_surface_extraction.py",
+   "nova/equilibrium/separatrix_clip.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "cell": [
+   "nova/equilibrium/flux_surface_extraction.py",
+   "nova/transport/torax_geometry.py"
+  ],
+  "_bernstein_matrix": [
+   "nova/equilibrium/flux_surface_extraction.py",
+   "nova/linalg/tensor_spline.py"
+  ],
+  "size": [
+   "nova/equilibrium/flux_surface_geometry.py",
+   "nova/equilibrium/reduced_newton.py"
+  ],
+  "trial": [
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/support_read.py"
+  ],
+  "moment_residual": [
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/observation.py"
+  ],
+  "source": [
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/magnetics_fit.py"
+  ],
+  "flux_map": [
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/moment.py"
+  ],
+  "solve_batch": [
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/profile.py",
+   "nova/equilibrium/support_read.py"
+  ],
+  "accepted": [
+   "nova/equilibrium/forward.py",
+   "nova/equilibrium/support_read.py"
+  ],
+  "shared_node_flux": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/stencil_mesh.py"
+  ],
+  "_profile_support": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/observation_kernels.py"
+  ],
+  "flux_span": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "cell_current": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/source.py"
+  ],
+  "read": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/support_read.py",
+   "nova/equilibrium/topology.py",
+   "nova/io/signalstore.py"
+  ],
+  "__eq__": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/frame/indexer.py",
+   "nova/geometry/geoframe.py",
+   "nova/geometry/polyframe.py"
+  ],
+  "rebuild": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/support_read.py"
+  ],
+  "polish": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/separatrix_clip.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "radius": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/frame/plasmaloc.py"
+  ],
+  "sample_flux_field": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/equilibrium/stencil_mesh.py"
+  ],
+  "width": [
+   "nova/equilibrium/forward_operator.py",
+   "nova/geometry/polyframe.py",
+   "nova/imas/mast_block_scale.py"
+  ],
+  "apply": [
+   "nova/equilibrium/gs.py",
+   "nova/io/sourcemap.py"
+  ],
+  "fit": [
+   "nova/equilibrium/magnetics_fit.py",
+   "nova/equilibrium/moment.py"
+  ],
+  "number": [
+   "nova/equilibrium/measurement.py",
+   "nova/equilibrium/moment.py",
+   "nova/equilibrium/profile.py"
+  ],
+  "centroid": [
+   "nova/equilibrium/moment.py",
+   "nova/geometry/polyframe.py",
+   "nova/geometry/polygeom.py"
+  ],
+  "section": [
+   "nova/equilibrium/moment.py",
+   "nova/geometry/polyframe.py",
+   "nova/geometry/polygeom.py"
+  ],
+  "basis": [
+   "nova/equilibrium/moment.py",
+   "nova/linalg/interpolant.py"
+  ],
+  "_result": [
+   "nova/equilibrium/profile.py",
+   "nova/equilibrium/solve.py"
+  ],
+  "names": [
+   "nova/equilibrium/profile.py",
+   "nova/io/streaming.py"
+  ],
+  "sweep": [
+   "nova/equilibrium/profile.py",
+   "nova/geometry/section.py"
+  ],
+  "row": [
+   "nova/equilibrium/profile.py",
+   "nova/equilibrium/separatrix_clip.py"
+  ],
+  "_split": [
+   "nova/equilibrium/reduced_newton.py",
+   "nova/frame/framesetloc.py",
+   "nova/frame/indexer.py"
+  ],
+  "refresh": [
+   "nova/equilibrium/reduced_newton.py",
+   "nova/equilibrium/support_read.py"
+  ],
+  "_scatter": [
+   "nova/equilibrium/reduced_newton.py",
+   "nova/equilibrium/stencil_mesh.py"
+  ],
+  "qualify": [
+   "nova/equilibrium/separatrix_clip.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "sample": [
+   "nova/equilibrium/separatrix_clip.py",
+   "nova/equilibrium/stencil_mesh.py",
+   "nova/transport/coupled_window.py"
+  ],
+  "from_cells": [
+   "nova/equilibrium/separatrix_clip.py",
+   "nova/equilibrium/stencil_mesh.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "factor": [
+   "nova/equilibrium/solve.py",
+   "nova/io/sourcemap.py"
+  ],
+  "from_dict": [
+   "nova/equilibrium/solve_request.py",
+   "nova/imas/machine_artifact.py",
+   "nova/imas/machine_drive.py",
+   "nova/imas/machine_evidence.py",
+   "nova/imas/mast_block_scale.py",
+   "nova/io/sourcemap.py",
+   "nova/transport/coupled_window.py",
+   "nova/transport/forward.py"
+  ],
+  "to_dict": [
+   "nova/equilibrium/solve_request.py",
+   "nova/frame/select.py",
+   "nova/transport/coupled_window.py",
+   "nova/transport/forward.py"
+  ],
+  "read_batch": [
+   "nova/equilibrium/support_read.py",
+   "nova/equilibrium/topology.py"
+  ],
+  "ionize": [
+   "nova/equilibrium/topology.py",
+   "nova/frame/plasmaloc.py"
+  ],
+  "normalize": [
+   "nova/equilibrium/topology.py",
+   "nova/geometry/rotate.py"
+  ],
+  "coefficients": [
+   "nova/equilibrium/topology.py",
+   "nova/linalg/interpolant.py"
+  ],
+  "boundary": [
+   "nova/equilibrium/topology.py",
+   "nova/geometry/polyframe.py"
+  ],
+  "attrs": [
+   "nova/frame/arraylocindexer.py",
+   "nova/frame/coilsetattrs.py",
+   "nova/imas/dataset.py"
+  ],
+  "set_conditional_attributes": [
+   "nova/frame/coil.py",
+   "nova/frame/coilsetattrs.py"
+  ],
+  "__iadd__": [
+   "nova/frame/coilset.py",
+   "nova/frame/framelink.py"
+  ],
+  "__setattr__": [
+   "nova/frame/coilset.py",
+   "nova/frame/dataframe.py",
+   "nova/frame/framelink.py",
+   "nova/frame/framespace.py"
+  ],
+  "restore_store_metadata": [
+   "nova/frame/coilset.py",
+   "nova/frame/frameset.py"
+  ],
+  "frame_factory_kwargs": [
+   "nova/frame/coilset.py",
+   "nova/frame/frameset.py"
+  ],
+  "empty": [
+   "nova/frame/columnar.py",
+   "nova/frame/dataframe.py",
+   "nova/imas/ids_index.py",
+   "nova/imas/mast_vacuum_response.py"
+  ],
+  "to_list": [
+   "nova/frame/columnar.py",
+   "nova/frame/dataframe.py",
+   "nova/frame/framesetloc.py",
+   "nova/frame/indexer.py",
+   "nova/frame/select.py"
+  ],
+  "concatenate": [
+   "nova/frame/columnar.py",
+   "nova/frame/framelink.py"
+  ],
+  "drop": [
+   "nova/frame/columnar.py",
+   "nova/frame/framedata.py",
+   "nova/frame/framelink.py",
+   "nova/frame/multipoint.py"
+  ],
+  "iloc": [
+   "nova/frame/columnar.py",
+   "nova/frame/dataarray.py"
+  ],
+  "get": [
+   "nova/frame/columnar.py",
+   "nova/frame/dataframe.py",
+   "nova/imas/dataset.py",
+   "nova/imas/ids_index.py"
+  ],
+  "update_frame": [
+   "nova/frame/dataarray.py",
+   "nova/frame/framespace.py"
+  ],
+  "aloc": [
+   "nova/frame/dataarray.py",
+   "nova/frame/framesetloc.py",
+   "nova/frame/framespace.py"
+  ],
+  "index": [
+   "nova/frame/dataframe.py",
+   "nova/frame/framesetloc.py"
+  ],
+  "columns": [
+   "nova/frame/dataframe.py",
+   "nova/frame/metaframe.py",
+   "nova/imas/machine_drive.py"
+  ],
+  "hascol": [
+   "nova/frame/dataframe.py",
+   "nova/frame/metaframe.py"
+  ],
+  "update_columns": [
+   "nova/frame/dataframe.py",
+   "nova/frame/polyplot.py",
+   "nova/frame/select.py",
+   "nova/frame/vtkplot.py"
+  ],
+  "translate": [
+   "nova/frame/framedata.py",
+   "nova/frame/framelink.py",
+   "nova/geometry/polygon.py"
+  ],
+  "insert_required": [
+   "nova/frame/framedata.py",
+   "nova/frame/framelink.py"
+  ],
+  "__str__": [
+   "nova/frame/frameset.py",
+   "nova/frame/plasmaloc.py",
+   "nova/geometry/geoframe.py"
+  ],
+  "_column": [
+   "nova/frame/indexer.py",
+   "nova/imas/diiid_description.py",
+   "nova/imas/mast_solve_input_ids.py"
+  ],
+  "dataframe": [
+   "nova/frame/metaframe.py",
+   "nova/frame/polygrid.py"
+  ],
+  "unset": [
+   "nova/frame/metamethod.py",
+   "nova/utilities/importmanager.py"
+  ],
+  "height": [
+   "nova/frame/plasmaloc.py",
+   "nova/geometry/polyframe.py"
+  ],
+  "area": [
+   "nova/frame/plasmaloc.py",
+   "nova/geometry/polyframe.py",
+   "nova/geometry/polygeom.py",
+   "nova/imas/mast_passive_response.py"
+  ],
+  "polygons": [
+   "nova/frame/polygeo.py",
+   "nova/geometry/polyframe.py"
+  ],
+  "length": [
+   "nova/geometry/frenet.py",
+   "nova/geometry/polygeom.py",
+   "nova/imas/ids_index.py"
+  ],
+  "dumps": [
+   "nova/geometry/geoframe.py",
+   "nova/geometry/polyframe.py"
+  ],
+  "loads": [
+   "nova/geometry/geoframe.py",
+   "nova/geometry/polyframe.py"
+  ],
+  "box": [
+   "nova/geometry/polygen.py",
+   "nova/geometry/polygeom.py"
+  ],
+  "geometry": [
+   "nova/geometry/polygeom.py",
+   "nova/transport/coupled_window.py"
+  ],
+  "by_angle": [
+   "nova/geometry/rotate.py",
+   "nova/geometry/section.py"
+  ],
+  "to_axes": [
+   "nova/geometry/rotate.py",
+   "nova/geometry/section.py"
+  ],
+  "to_vector": [
+   "nova/geometry/rotate.py",
+   "nova/geometry/section.py"
+  ],
+  "ids": [
+   "nova/imas/dataset.py",
+   "nova/imas/ids_index.py"
+  ],
+  "ingest": [
+   "nova/imas/diiid_description.py",
+   "nova/io/ingest.py"
+  ],
+  "create": [
+   "nova/imas/machine_artifact.py",
+   "nova/imas/machine_drive.py",
+   "nova/imas/machine_evidence.py",
+   "nova/imas/mast_block_scale.py",
+   "nova/io/sourcemap.py"
+  ],
+  "digest": [
+   "nova/imas/machine_artifact.py",
+   "nova/imas/machine_drive.py",
+   "nova/imas/machine_evidence.py",
+   "nova/io/sourcemap.py"
+  ],
+  "forward_model_blockers": [
+   "nova/imas/machine_artifact.py",
+   "nova/imas/machine_evidence.py"
+  ],
+  "canonical_bytes": [
+   "nova/imas/machine_artifact.py",
+   "nova/imas/machine_drive.py",
+   "nova/imas/machine_evidence.py",
+   "nova/io/sourcemap.py"
+  ],
+  "channels": [
+   "nova/imas/machine_drive.py",
+   "nova/imas/mast_block_scale.py",
+   "nova/io/sourcemap.py"
+  ],
+  "for_channel": [
+   "nova/imas/machine_drive.py",
+   "nova/io/sourcemap.py"
+  ],
+  "as_list": [
+   "nova/imas/machine_drive.py",
+   "nova/imas/machine_evidence.py"
+  ],
+  "sort_key": [
+   "nova/imas/machine_drive.py",
+   "nova/imas/machine_evidence.py",
+   "nova/io/sourcemap.py"
+  ],
+  "_trimmed": [
+   "nova/imas/machine_drive.py",
+   "nova/io/sourcemap.py"
+  ],
+  "from_list": [
+   "nova/imas/machine_drive.py",
+   "nova/imas/machine_evidence.py"
+  ],
+  "slice_count": [
+   "nova/imas/mast_parity_chain.py",
+   "nova/imas/mast_solve_inputs.py"
+  ],
+  "unscaled_channels": [
+   "nova/imas/mast_solve_inputs.py",
+   "nova/imas/mast_vacuum_cohort.py"
+  ],
+  "scaled_channels": [
+   "nova/imas/mast_solve_inputs.py",
+   "nova/imas/mast_vacuum_cohort.py"
+  ],
+  "excited_families": [
+   "nova/imas/mast_vacuum_cohort.py",
+   "nova/imas/mast_vacuum_response.py"
+  ],
+  "energised_families": [
+   "nova/imas/mast_vacuum_cohort.py",
+   "nova/imas/mast_vacuum_response.py"
+  ],
+  "write": [
+   "nova/io/egress.py",
+   "nova/io/signalstore.py"
+  ],
+  "tensorize": [
+   "nova/io/ingest.py",
+   "nova/io/sourcemap.py"
+  ],
+  "evaluate_fixed": [
+   "nova/linalg/split_spline.py",
+   "nova/linalg/tensor_spline.py"
+  ],
+  "conservation": [
+   "nova/transport/coupled_window.py",
+   "nova/transport/window_batch.py"
+  ],
+  "_readonly": [
+   "nova/transport/coupled_window.py",
+   "nova/transport/window_batch.py"
+  ],
+  "_readonly_array": [
+   "nova/transport/ensemble.py",
+   "nova/transport/forward.py"
+  ],
+  "from_members": [
+   "nova/transport/ensemble.py",
+   "nova/transport/window_batch.py"
+  ],
+  "member": [
+   "nova/transport/ensemble.py",
+   "nova/transport/window_batch.py"
+  ],
+  "for_member": [
+   "nova/transport/ensemble.py",
+   "nova/transport/window_batch.py"
+  ],
+  "member_ids": [
+   "nova/transport/ensemble.py",
+   "nova/transport/window_batch.py"
+  ]
+ },
+ "identical_bodies": {
+  "81a234d408c5": [
+   [
+    "nova/biot/polygonanalytic.py",
+    "against_arctan"
+   ],
+   [
+    "nova/biot/polygonanalytic.py",
+    "against_arctan"
+   ]
+  ]
+ }
+}

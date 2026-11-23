@@ -1,0 +1,28 @@
+{
+  "question": "nova/equilibrium/support_read.py read, read_batch, read_and_book and bank_program carry kernels in the device trace and zero body lines on both measured routes. Which topology read does each route execute, and is the zero a defect or a duplicate that only one arm exercises?",
+  "context": {
+    "implementations": [
+      "nova.equilibrium.topology.read, reached on the routes as Topology.read_qualification: the flux-map null census",
+      "nova.equilibrium.topology.read_at_stationary_points: the same reading built from stationary points solved by fixed_points.solve, reached only through support_read.read"
+    ],
+    "routes": "Static call-site check over the modules' own source, because counting calls inside a jitted program is not possible. nova/equilibrium/forward.py calls read_qualification once (2816); forward_operator.py calls it twice (3015, 3028); neither calls read_at_stationary_points. support_read.py calls read_at_stationary_points twice (388, 470) and read_qualification zero times. The forward-route expectation applied to support_read.py fails, which is the control that the check can fail.",
+    "measured_agreement": "The two implementations agree on the analytic diverted field to the tolerances stated for the topology-read entry (axis 8.8e-05 m against 1.35e-02 m, membership area sum 7.8e-04 against 5e-03 relative). So the zero body lines are explained by the routes taking the census, not by a mis-measured trace: support_read's callers belong to the bank-solve arm, whose slice-profile bank fixture is absent from shared storage at this revision, and the device trace measures that arm's compiled program independently.",
+    "lines_removable": 0,
+    "removal": "None. This entry records which implementation is live on each route so the duplicate pairs above are judged against the arm that actually runs; it proposes no deletion of its own.",
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry route-resolution; receipt at hot-path-duplicates/receipt.json; measured at revision ef0aba6f1454248ee592e51b35d4c84c3028a543"
+  },
+  "options": [
+    {
+      "value": "accept-for-s28-node",
+      "label": "Give S28 a node to record this resolution beside the hot path and re-measure the bank arm once its fixture is available"
+    },
+    {
+      "value": "decline",
+      "label": "No S28 node: the resolution is recorded in this fragment and answers the line map's four contradictions; a node would only copy the paragraph, and the bank arm's measurement belongs to whoever restores its fixture"
+    }
+  ],
+  "recommended": "decline",
+  "project": "nova",
+  "plan": "code-reuse-and-hot-path",
+  "section": "s5"
+}

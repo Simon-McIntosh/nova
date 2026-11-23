@@ -460,3 +460,41 @@ def test_a_persisted_frame_assembles_its_separatrix_from_its_own_field():
         assert np.isfinite(sup_mm), f"frame {result.frame} has no finite sup distance"
         drawn.append((result.frame, rms_mm, sup_mm))
     assert drawn, "no frame assembled a separatrix from its own display field"
+
+
+def test_display_targets_extend_the_response_builder_before_the_flux_product(
+    monkeypatch,
+):
+    """The first display block contracts a response built on that same call.
+
+    The target store begins with an empty response matrix and grows it inside
+    ``rows``. The flux product therefore has to read the rows after that growth:
+    reading them in the same subscript binds the empty matrix and the first
+    panel block raises ``IndexError`` on row 0.
+    """
+
+    current = np.asarray([2.0, 3.0])
+    built = []
+
+    def build(machine, points):
+        response = np.c_[np.full(points.shape[0], 1.0), np.zeros(points.shape[0])]
+        built.append(points.copy())
+        return response, {"build_seconds": 0.0, "loaded_from_cache": False}
+
+    monkeypatch.setattr(gate, "_build_conductor_response", build)
+    targets = gate._ConductorTargets(object(), current)
+    assert targets.matrix.shape == (0, current.size)
+
+    block = np.asarray([[0.10, 0.20], [0.30, 0.40]])
+    flux = targets.flux(block)
+
+    np.testing.assert_allclose(flux, [2.0, 2.0])
+    assert targets.matrix.shape == (2, current.size)
+    assert len(built) == 1
+
+    np.testing.assert_allclose(targets.flux(block), flux)
+    assert len(built) == 1, "a repeated block must not rebuild the response"
+
+    np.testing.assert_allclose(targets.flux(np.asarray([[0.50, 0.60]])), [2.0])
+    assert targets.matrix.shape == (3, current.size)
+    assert len(built) == 2

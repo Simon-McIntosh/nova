@@ -1896,7 +1896,10 @@ class _ConductorTargets:
         key = (block.tobytes(), carry.tobytes())
         cached = self._flux.get(key)
         if cached is None:
-            cached = self._matrix[self.rows(block)] @ carry
+            # rows() extends the matrix, so the rows are read before the
+            # subscription binds it.
+            rows = self.rows(block)
+            cached = self._matrix[rows] @ carry
             self._flux[key] = cached
         return cached
 

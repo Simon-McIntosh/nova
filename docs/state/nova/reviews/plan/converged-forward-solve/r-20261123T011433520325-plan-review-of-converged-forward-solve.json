@@ -25,7 +25,30 @@
   "plan_slug": "converged-forward-solve",
   "plan_version": 643,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "e0dfbbb0290281af2d63c262a821c9243a3b2fc2",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a710 clause 1 now scopes the migration to package modules (nova/) and names them; tests, scripts and benchmarks outside the package are \u00a76's alone, deleted where they only exercised the fixed-design read and re-pointed otherwise.",
+      "reason": "",
+      "when": "2026-11-23T02:02:01.679321+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "e0dfbbb0290281af2d63c262a821c9243a3b2fc2",
+      "commit_basis": "edit",
+      "note": "\u00a710 clause 1 now scopes the migration to package modules (nova/) and names them; tests, scripts and benchmarks outside the package are \u00a76's alone, deleted where they only exercised the fixed-design read and re-pointed otherwise.",
+      "reason": "",
+      "when": "2026-11-23T02:02:01.679321+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/converged-forward-solve/r-20261123T011433520325-plan-review-of-converged-forward-solve.json",
   "review_run_id": "r-20261123T011433520325-plan-review-of-converged-forward-solve",
   "reviewed_blob_sha": "31ae79d46941717fa560401a07efbd463b467f1e",
   "rubric": "content",

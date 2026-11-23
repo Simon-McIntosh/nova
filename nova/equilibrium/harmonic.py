@@ -702,11 +702,10 @@ def harmonic_equilibrium(
     the field held at its boundary value.
     """
 
-    import imas
-    from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
     from types import SimpleNamespace
 
     from nova.equilibrium.connectivity_boundary import LCFS_ANGLES, host_boundary_read
+    from nova.equilibrium.reconstruction_state import equilibrium_from_state
 
     grid_r = np.asarray(grid_r, dtype=float)
     grid_z = np.asarray(grid_z, dtype=float)
@@ -750,7 +749,7 @@ def harmonic_equilibrium(
     # the safety factor then reads as not supplied, exactly as for any state
     # carrying no map.
     stored_map = total if np.isfinite(read.axis_psi) else None
-    return _state_equilibrium(
+    return equilibrium_from_state(
         flux=stored_map,
         ring=ring,
         axis=axis,
@@ -762,57 +761,7 @@ def harmonic_equilibrium(
         vacuum_b0=float(vacuum_b0),
         reference_radius=float(reference_radius),
         time=float(time),
-        ids_module=imas,
-        time_mode=IDS_TIME_MODE_HOMOGENEOUS,
     )
-
-
-def _state_equilibrium(
-    *,
-    flux,
-    ring,
-    axis,
-    flux_axis,
-    flux_boundary,
-    plasma_current,
-    grid_r,
-    grid_z,
-    vacuum_b0,
-    reference_radius,
-    time,
-    ids_module,
-    time_mode,
-):
-    """Write one reconstructed state's fields into an equilibrium IDS."""
-
-    equilibrium = ids_module.IDSFactory().equilibrium()
-    equilibrium.ids_properties.homogeneous_time = time_mode
-    equilibrium.time = np.array([float(time)])
-    equilibrium.time_slice.resize(1)
-    frame = equilibrium.time_slice[0]
-    frame.boundary.outline.r = np.asarray(ring)[:, 0]
-    frame.boundary.outline.z = np.asarray(ring)[:, 1]
-    frame.boundary.type = 1
-    quantities = frame.global_quantities
-    quantities.magnetic_axis.r = float(axis[0])
-    quantities.magnetic_axis.z = float(axis[1])
-    quantities.psi_axis = float(flux_axis)
-    quantities.psi_boundary = float(flux_boundary)
-    quantities.ip = float(plasma_current)
-    span = float(flux_boundary) - float(flux_axis)
-    norm = np.linspace(0.0, 1.0, int(np.asarray(grid_r).size))
-    frame.profiles_1d.psi = float(flux_axis) + span * norm
-    frame.profiles_1d.f_df_dpsi = np.zeros_like(norm)
-    if flux is not None:
-        frame.profiles_2d.resize(1)
-        stored = frame.profiles_2d[0]
-        stored.grid.dim1 = np.asarray(grid_r, dtype=float)
-        stored.grid.dim2 = np.asarray(grid_z, dtype=float)
-        stored.grid_type.index = 1
-        stored.psi = np.asarray(flux, dtype=float).T
-    equilibrium.vacuum_toroidal_field.b0 = np.array([-abs(float(vacuum_b0))])
-    equilibrium.vacuum_toroidal_field.r0 = float(reference_radius)
-    return equilibrium
 
 
 def write_harmonic_equilibrium(
@@ -825,16 +774,10 @@ def write_harmonic_equilibrium(
 ):
     """Write one harmonic inversion as an IMAS equilibrium and return the path."""
 
-    import imas
-    from pathlib import Path
+    from nova.equilibrium.reconstruction_state import write_equilibrium
 
-    out = Path(path)
-    out.mkdir(parents=True, exist_ok=True)
     dd_version = str(kwargs.pop("dd_version", "4.1.0"))
     equilibrium = harmonic_equilibrium(
         inversion, grid_r, grid_z, inside_limiter, **kwargs
     )
-    writer = imas.DBEntry(f"imas:hdf5?path={out.resolve()}", "w", dd_version=dd_version)
-    writer.put(equilibrium)
-    writer.close()
-    return out
+    return write_equilibrium(path, equilibrium, dd_version=dd_version)

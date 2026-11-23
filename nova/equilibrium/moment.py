@@ -1046,9 +1046,7 @@ def moment_equilibrium(
     from the flux-surface geometry with the field held at its boundary value.
     """
 
-    import imas
-    from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
-
+    from nova.equilibrium.reconstruction_state import equilibrium_from_state
     from nova.equilibrium.stencil_nulls import magnetic_axis_subgrid
 
     if reconstruction.ring is None:
@@ -1072,7 +1070,7 @@ def moment_equilibrium(
         if plasma_current is not None
         else float(np.sum(reconstruction.cell_current))
     )
-    return _state_equilibrium(
+    return equilibrium_from_state(
         flux=flux,
         ring=ring,
         axis=axis,
@@ -1084,57 +1082,7 @@ def moment_equilibrium(
         vacuum_b0=float(vacuum_b0),
         reference_radius=float(reference_radius),
         time=float(time),
-        ids_module=imas,
-        time_mode=IDS_TIME_MODE_HOMOGENEOUS,
     )
-
-
-def _state_equilibrium(
-    *,
-    flux,
-    ring,
-    axis,
-    flux_axis,
-    flux_boundary,
-    plasma_current,
-    grid_r,
-    grid_z,
-    vacuum_b0,
-    reference_radius,
-    time,
-    ids_module,
-    time_mode,
-):
-    """Write one reconstructed state's fields into an equilibrium IDS."""
-
-    imas = ids_module
-    equilibrium = imas.IDSFactory().equilibrium()
-    equilibrium.ids_properties.homogeneous_time = time_mode
-    equilibrium.time = np.array([float(time)])
-    equilibrium.time_slice.resize(1)
-    frame = equilibrium.time_slice[0]
-    frame.boundary.outline.r = ring[:, 0]
-    frame.boundary.outline.z = ring[:, 1]
-    equilibrium.time_slice[0].boundary.type = 1
-    quantities = frame.global_quantities
-    quantities.magnetic_axis.r = float(axis[0])
-    quantities.magnetic_axis.z = float(axis[1])
-    quantities.psi_axis = float(flux_axis)
-    quantities.psi_boundary = float(flux_boundary)
-    quantities.ip = float(plasma_current)
-    span = float(flux_boundary) - float(flux_axis)
-    norm = np.linspace(0.0, 1.0, int(np.asarray(grid_r).size))
-    frame.profiles_1d.psi = float(flux_axis) + span * norm
-    frame.profiles_1d.f_df_dpsi = np.zeros_like(norm)
-    frame.profiles_2d.resize(1)
-    stored = frame.profiles_2d[0]
-    stored.grid.dim1 = np.asarray(grid_r, dtype=float)
-    stored.grid.dim2 = np.asarray(grid_z, dtype=float)
-    stored.grid_type.index = 1
-    stored.psi = np.asarray(flux, dtype=float).T
-    equilibrium.vacuum_toroidal_field.b0 = np.array([-abs(float(vacuum_b0))])
-    equilibrium.vacuum_toroidal_field.r0 = float(reference_radius)
-    return equilibrium
 
 
 def write_moment_equilibrium(
@@ -1147,16 +1095,10 @@ def write_moment_equilibrium(
 ):
     """Write one moment reconstruction as an IMAS equilibrium and return the path."""
 
-    import imas
-    from pathlib import Path
+    from nova.equilibrium.reconstruction_state import write_equilibrium
 
-    out = Path(path)
-    out.mkdir(parents=True, exist_ok=True)
     dd_version = str(kwargs.pop("dd_version", "4.1.0"))
     equilibrium = moment_equilibrium(
         reconstruction, grid_r, grid_z, inside_limiter, **kwargs
     )
-    writer = imas.DBEntry(f"imas:hdf5?path={out.resolve()}", "w", dd_version=dd_version)
-    writer.put(equilibrium)
-    writer.close()
-    return out
+    return write_equilibrium(path, equilibrium, dd_version=dd_version)

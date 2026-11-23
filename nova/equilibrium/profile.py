@@ -724,6 +724,8 @@ __all__ = [
     "ProfilePrior",
     "ProfileResult",
     "ReconstructProfile",
+    "profile_equilibrium",
+    "write_profile_equilibrium",
 ]
 
 
@@ -741,10 +743,14 @@ def profile_equilibrium(
 ):
     """Return the IMAS equilibrium one profile reconstruction is read as.
 
-    The reconstruction's solved flux map is written as the total poloidal flux,
-    together with the flux extremes and magnetic axis of the boundary read the
-    profile iteration itself uses. The boundary ring is that read at the
-    separatrix, and the plasma current is the total of the solved cell currents.
+    The reconstruction's solved flux map is written as the total poloidal flux.
+    Both levels written are the reconstruction's own: the boundary level is
+    ``result.boundary_flux``, the separatrix flux the profile iteration's own
+    traced boundary read returned, and the axis level is the solved map's value
+    at the sub-grid O-point ``result.axis`` the solve itself located. The
+    boundary ring is re-traced on that stored map at the same axis for the
+    outline geometry, so the outline and the levels describe one solved state.
+    The plasma current is the total of the solved cell currents.
 
     The solved state carries the pressure and diamagnetic profile families, but
     the split between them (the ``mu_0`` normalisation) is not exposed on the
@@ -753,11 +759,10 @@ def profile_equilibrium(
     boundary value, identically for every reconstruction column.
     """
 
-    import imas
-    from imas.ids_defs import IDS_TIME_MODE_HOMOGENEOUS
     from types import SimpleNamespace
 
     from nova.equilibrium.connectivity_boundary import LCFS_ANGLES, host_boundary_read
+    from nova.equilibrium.reconstruction_state import equilibrium_from_state
 
     grid_r = np.asarray(grid_r, dtype=float)
     grid_z = np.asarray(grid_z, dtype=float)
@@ -787,33 +792,25 @@ def profile_equilibrium(
     )
     if not np.allclose(ring[0], ring[-1]):
         ring = np.vstack([ring, ring[0]])
-    equilibrium = imas.IDSFactory().equilibrium()
-    equilibrium.ids_properties.homogeneous_time = IDS_TIME_MODE_HOMOGENEOUS
-    equilibrium.time = np.array([float(time)])
-    equilibrium.time_slice.resize(1)
-    frame = equilibrium.time_slice[0]
-    frame.boundary.outline.r = ring[:, 0]
-    frame.boundary.outline.z = ring[:, 1]
-    frame.boundary.type = 1
-    quantities = frame.global_quantities
-    quantities.magnetic_axis.r = float(axis[0])
-    quantities.magnetic_axis.z = float(axis[1])
-    quantities.psi_axis = float(read.axis_psi)
-    quantities.psi_boundary = float(read.psi_bnd)
-    quantities.ip = float(np.sum(np.asarray(result.cell_current, dtype=float)))
-    span = float(read.psi_bnd) - float(read.axis_psi)
-    norm = np.linspace(0.0, 1.0, grid_r.size)
-    frame.profiles_1d.psi = float(read.axis_psi) + span * norm
-    frame.profiles_1d.f_df_dpsi = np.zeros_like(norm)
-    frame.profiles_2d.resize(1)
-    stored = frame.profiles_2d[0]
-    stored.grid.dim1 = grid_r
-    stored.grid.dim2 = grid_z
-    stored.grid_type.index = 1
-    stored.psi = flux.T
-    equilibrium.vacuum_toroidal_field.b0 = np.array([-abs(float(vacuum_b0))])
-    equilibrium.vacuum_toroidal_field.r0 = float(reference_radius)
-    return equilibrium
+    # Both levels come from the reconstruction: the iteration's own traced
+    # separatrix flux, and the solved map's value at the O-point the solve
+    # reported. Sampling the map at its nearest node keeps the pair on one grid
+    # and one read, rather than mixing in a second boundary read's extremes.
+    i_r = int(np.argmin(np.abs(grid_r - axis[0])))
+    i_z = int(np.argmin(np.abs(grid_z - axis[1])))
+    return equilibrium_from_state(
+        flux=flux,
+        ring=ring,
+        axis=axis,
+        flux_axis=float(flux[i_z, i_r]),
+        flux_boundary=float(result.boundary_flux),
+        plasma_current=float(np.sum(np.asarray(result.cell_current, dtype=float))),
+        grid_r=grid_r,
+        grid_z=grid_z,
+        vacuum_b0=float(vacuum_b0),
+        reference_radius=float(reference_radius),
+        time=float(time),
+    )
 
 
 def write_profile_equilibrium(
@@ -826,14 +823,8 @@ def write_profile_equilibrium(
 ):
     """Write one profile reconstruction as an IMAS equilibrium and return the path."""
 
-    import imas
-    from pathlib import Path
+    from nova.equilibrium.reconstruction_state import write_equilibrium
 
-    out = Path(path)
-    out.mkdir(parents=True, exist_ok=True)
     dd_version = str(kwargs.pop("dd_version", "4.1.0"))
     equilibrium = profile_equilibrium(result, grid_r, grid_z, inside_limiter, **kwargs)
-    writer = imas.DBEntry(f"imas:hdf5?path={out.resolve()}", "w", dd_version=dd_version)
-    writer.put(equilibrium)
-    writer.close()
-    return out
+    return write_equilibrium(path, equilibrium, dd_version=dd_version)

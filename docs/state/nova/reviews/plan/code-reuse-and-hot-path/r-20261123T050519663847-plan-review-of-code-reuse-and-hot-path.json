@@ -1,0 +1,47 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T05:21:37.154Z",
+  "dispatched_at": "2026-11-23T05:08:46Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/code-reuse-and-hot-path.html:145",
+      "id": "wiring-1",
+      "reason": "adding `s4:[\"...#s2\"]` (or s3) to `plan-section-depends-on` changes the dispatch order, and without it a worker either stalls ad hoc on \u00a72 or substitutes its own notion of \"kept\", which is the one decision \u00a72 exists to make.",
+      "text": "\u00a74's candidate test and done-when measure imports against \"kept scripts and benchmarks\", which \u00a72's census defines (and \u00a73 realizes), yet \u00a74 declares only \u00a71 as a section dependency, so it can be released and scan a tree where that set is not yet established \u2014 with the census absent, a module imported only by a script \u00a72 will keep is one the scan can miss or misjudge, and a module imported only by a script \u00a72 will delete is held back for the wrong reason.",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "03b10519204fa44ab0084cb4fbf2839d19426606",
+  "plan_fingerprint": "07d34eba4d2ac11dff8edb2053f4f1521f12795833d81015e08fcffa1cdbc038",
+  "plan_slug": "code-reuse-and-hot-path",
+  "plan_version": 12,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T050519663847-plan-review-of-code-reuse-and-hot-path",
+  "reviewed_blob_sha": "bad29f65293203f5a4e96768db339fb5c57d18d0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the six equilibrium modules \u00a70 cites resolve at the stated line counts (5,861 / 4,172 / 4,125 / 3,570 / 3,295 / 2,969 against the 5.9k\u20133.0k quoted), the `docs/evidence/fragments/<plan>/` convention exists with 32 sibling directories, and S28 resolves to `docs/plans/sub-millisecond-forward-path.html` (S28, active).",
+    "done_when": "pass \u2014 each of \u00a71\u2013\u00a76 states a record with measurable contents and names a negative control that can fail (an unimported module reading zero, a live-test driver forced to delete refused, a kept file naming a deleted path, a reached module offered for deletion, a perturbed input exceeding tolerance, a non-executed module added to the written route).",
+    "evidence_paths": "pass \u2014 every record lands under the durable `docs/evidence/fragments/code-reuse-and-hot-path/` directory (\u00a71's `hot-path-map.html` with its machine-readable copy beside it, \u00a72's `bench-scripts-census.html`, \u00a73's per-batch `bench-scripts-delete-<n>`, \u00a74's `unreached-module-delete.html`, \u00a75's `hot-path-duplicates.html`), never a scratchpad or node-local path.",
+    "naming": "pass \u2014 no sprint id, plan label or ticket number reaches a code symbol; S28/S33 appear only in plan prose and decision metadata, and `nova/equilibrium/AGENTS.md` is named by what it documents.",
+    "reasoning": "pass \u2014 the `s28-handoff` decision's rationale holds: `plan-informs` names `sub-millisecond-forward-path` and `inverse-equilibrium-baseline` one-way, so no declared relationship carries an S28 answer back, and \u00a75 (\"this section does not wait for it\") and \u00a76 (\"as measured at this section's head\") both read consistently with the chosen option.",
+    "single_goal": "pass \u2014 each section carries one deliverable; \u00a73's several batches are dispatched as separate nodes, so no node closes on two verdicts at once.",
+    "wiring": "a finding \u2014 \u00a74's done-when scans for importers among \"kept scripts and benchmarks\", a set \u00a72's census produces, but the declared dependency map gives \u00a74 only \u00a71 (`s4:[\"code-reuse-and-hot-path#s1\"]`), so nothing orders \u00a74 behind the set its own check consumes."
+  },
+  "section_digests": {
+    "_document": "cbfc0228ae85f16ffab4e9c764e7c328d6d258acb2c6bf3346be8464122b9bf6",
+    "s0": "e6db08d8f54a9d4335cd673fa19ac9d023eba7179593fe0803ecb07b5a41da06",
+    "s1": "46e54aefbb5b38beadd795657da978e29a2f668fae1fe946c832eda8411c9d87",
+    "s2": "aff047ba7e90fdf2c1795ed211cfad34df198c5806d02991ff0918a72171dc62",
+    "s3": "f4c7b6af5ee01f5479c00e9e5d16e4bfb68cf2363f69061fea8843dec526179b",
+    "s4": "976360c9ad3575528fcff468a3a7daf365c56526b8a1589681b08326880ed319",
+    "s5": "5a7aa1cd277f87d3cafb5244cb05d2aedb7ba6140a7c1997e32c962160d3242a",
+    "s6": "8a3e48a327612f5765659f550f39cb6b6213f2c8ee4a490fa457a6a79174db42"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T05:21:51.493679+00:00",
+  "total": null
+}

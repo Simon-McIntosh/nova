@@ -514,11 +514,11 @@ def completed_comparison(linear_fit, monkeypatch, tmp_path):
         probe=None,
         poloidal_flux_loop=None,
     )
-    monkeypatch.setattr(sys.modules[__name__], "_PlasmaDiagnosticSource", Source)
-    monkeypatch.setattr(
-        sys.modules[__name__], "_physical_sensor_rows", lambda *args: np.ones(1)
-    )
-    monkeypatch.setattr(sys.modules[__name__], "_persist_forward", lambda *args: None)
+    harness = sys.modules["tests.magnetics_fit_harness"]
+    for target in (sys.modules[__name__], harness):
+        monkeypatch.setattr(target, "_PlasmaDiagnosticSource", Source)
+        monkeypatch.setattr(target, "_physical_sensor_rows", lambda *args: np.ones(1))
+        monkeypatch.setattr(target, "_persist_forward", lambda *args: None)
     monkeypatch.setattr(coilset, "CoilSet", lambda **kwargs: conductor)
     monkeypatch.setattr(comparison, "_as_equilibrium", lambda *args: (None, 0.0))
     monkeypatch.setattr(comparison, "_reference_centroid", lambda data: 0.0)

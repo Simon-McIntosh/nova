@@ -4,6 +4,13 @@
   "added_failures_note": "The reviewed run's manifest carries no baseline_suite/after_suite JSON keys, so the pair is read from the two gate logs its tests and test_logs lines name: guard-suite-base.log (revision e28db604eee205382f5c7874129eebfe4339cd92, the log's own command line is 'PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q scripts/prototypes/drifting_sensor_sequences/probe_rows/test_reduction_guards.py', 16 passed in 1.84s, last line EXIT=0) and guard-suite-head-b76c7d054.log (revision b76c7d05453aeba8c58a186b8a50dc6840e2c819, same command, 22 passed in 4.34s, last line EXIT=0). Neither arm records a failing test id, so the head adds zero failing ids over the base, measured with both arms shown to collect and pass tests on all_debug. The reviewed head e91a8f9b8 differs from the tested head b76c7d054 only by the two docs-only commits 257ddf514 and e91a8f9b8, each changing one line of the evidence fragment and nothing else.",
   "completed_at": "2026-11-23T22:17:28.882Z",
   "dispatched_at": "2026-11-23T21:47:16Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "drift-control-and-converged-nova",
+      "recorded_at": "2026-11-23T22:21:10.541356+00:00"
+    }
+  },
   "findings": [
     {
       "correction": "Regenerate slice-overlay-drift-101.svg from an overlay payload whose x_points_ref is non-empty, or reword the caption so it names only nova's and imas-efit's X-point markers and states that the generating state is marked at its axis only.",

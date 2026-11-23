@@ -1,21 +1,56 @@
 <section id="reduced-reconstructions-scored-record">
 <h2>Scoring each reduced reconstruction as its own column</h2>
-<p>The harmonic, moment and profile reconstructions now stand beside the section 3 columns on the
+<p>The harmonic, moment and profile reconstructions stand beside the section 3 columns on the
 same row-exchange case, scored by the same comparator
-(<code>nova.imas.mast_efit_referee.compare_states</code>) against the same bands, read through IMAS
-from each column's own equilibrium at data dictionary 4.1.0 and identified by the digest it carries.
-The reference is the section 3 reference: axis (6.28987,
-0.49809) m, span 76.3657 Wb.</p>
+(<code>nova.imas.mast_efit_referee.compare_states</code>) against the same bands, read through
+IMAS from each column's own equilibrium at data dictionary 4.1.0 and identified by the digest
+it carries. The reference is the section 3 reference: axis (6.28987, 0.49809) m, span 76.3657 Wb, its
+q95 reading 2.9832 from its own flux map.</p>
 <p>Each reconstruction owns its conversion, placed beside the reconstruction rather than in the
 benchmark: <code>nova.equilibrium.moment.write_moment_equilibrium</code>,
 <code>nova.equilibrium.harmonic.write_harmonic_equilibrium</code> and
-<code>nova.equilibrium.profile.write_profile_equilibrium</code>. All three write the same field set
-&mdash; boundary outline, global quantities, the flux profile on the reconstruction's own grid and
-the vacuum toroidal field at radius 6.2 m with b<sub>0</sub> 5.3 T &mdash; so the comparator reads
-them as it reads any state. Each conversion states one closure in its docstring: no reconstruction
-supplies a toroidal-field function, so every column and the reference carry
-<code>F dF/d&#968; = 0</code>, the vacuum closure, which keeps the safety factor as a comparison of
-flux maps on one surface definition rather than of four stored conventions.</p>
+<code>nova.equilibrium.profile.write_profile_equilibrium</code>. Each writes the same field
+set &mdash; boundary outline, global quantities, the flux profile on the reconstruction's own
+grid and the vacuum toroidal field at radius 6.2 m with b<sub>0</sub> 5.3 T &mdash; so the
+comparator reads them as it reads any state. No reconstruction supplies a toroidal-field
+function, so every column and the reference carry <code>F dF/d&#968; = 0</code>, the vacuum
+closure, which keeps the safety factor a comparison of flux maps on one surface definition
+rather than of four stored conventions.</p>
+<h3>What the reuse repair changed</h3>
+<p>The three conversions no longer assemble an IDS each. Every column writes through one
+shared function, <code>nova.equilibrium.reconstruction_state.equilibrium_from_state</code>,
+which owns the boundary ring, the global quantities, the stored map convention (the IDS
+<code>psi</code> array is indexed (radial, vertical), so the internal (vertical, radial) map is
+transposed once on write) and the stored level convention. Each conversion passes only its
+reconstruction's own arguments: the moment conversion its ring, map and levels, the harmonic
+conversion its ring, centroid axis and the levels its boundary read found, and the profile
+conversion its iteration's levels, its own boundary level and the map value at the axis node
+it reports. The private assembly copies that <code>moment.py</code>, <code>harmonic.py</code>
+and <code>profile.py</code> each carried are deleted.</p>
+<p>The two pre-existing IDS writers were read before deciding where a shared writer belongs.
+<code>benchmarks/estimator_scoreboard.py</code> assembles a declared manifest entry from a
+record rather than a reconstruction result, and <code>nova.imas.pulsedesign</code> writes a
+pulsedesign equilibrium rather than a reconstruction, so neither is a reconstruction writer
+and neither is reused here.</p>
+<p>Three further defects in the same finding are repaired with it. The profile conversion now
+writes <code>result.boundary_flux</code>, the level its own iteration produced, as
+<code>psi_boundary</code>, and the map value at its reported axis as <code>psi_axis</code>.
+Before the repair it re-read a boundary through a second traced read and discarded
+<code>ProfileResult.boundary_flux</code>; the negative control below shows that reverted tree
+writing &minus;40 Wb where the iteration measured &minus;7.25 Wb. <code>profile.__all__</code>
+now lists <code>profile_equilibrium</code> and <code>write_profile_equilibrium</code>. The
+driver that wrote these states is committed beside the figure, so the table is regenerable
+from the repository rather than from a session's scratch directory: <code>case.py</code>
+builds the row-exchange case and <code>emit_states.py</code> writes all six states.</p>
+<p>The controls are likewise reconstructed rather than copied. Each column's control is the
+section 3 perturbation applied to the <em>reconstruction</em> &mdash; plasma current scaled by
+1.06, the state shifted 0.03 m radially, the flux span grown 2 &percnt; at each end and the
+map scaled by 1.04 about its axis node &mdash; and the perturbed reconstruction then goes
+through that column's own conversion. The moment and profile conversions take the perturbed
+map, ring, axis and levels as arguments; the harmonic control perturbs the pole and the
+coefficients, and its conversion re-derives ring, levels and map from the perturbed inversion,
+which is the path the conversion takes for any inversion. So each control exercises the
+conversion rather than a copy of an already-written equilibrium.</p>
 <h3>The table</h3>
 <table id="reduced-reconstructions-scored-table">
 <thead>
@@ -23,7 +58,7 @@ flux maps on one surface definition rather than of four stored conventions.</p>
 <tr><th>axis [m]</th><th>current</th><th>axis flux</th><th>boundary flux</th><th>q95</th><th>axis in wall</th><th>axis in boundary</th><th>boundary/bbox</th><th>digest</th><th>axis [m]</th><th>current</th><th>axis flux</th><th>boundary flux</th><th>q95</th><th>axis in wall</th><th>axis in boundary</th><th>boundary/bbox</th><th>digest</th><th>axis [m]</th><th>current</th><th>axis flux</th><th>boundary flux</th><th>q95</th><th>axis in wall</th><th>axis in boundary</th><th>boundary/bbox</th><th>digest</th><th>axis [m]</th><th>current</th><th>axis flux</th><th>boundary flux</th><th>q95</th><th>axis in wall</th><th>axis in boundary</th><th>boundary/bbox</th><th>digest</th><th>axis [m]</th><th>current</th><th>axis flux</th><th>boundary flux</th><th>q95</th><th>axis in wall</th><th>axis in boundary</th><th>boundary/bbox</th><th>digest</th><th>axis [m]</th><th>current</th><th>axis flux</th><th>boundary flux</th><th>q95</th><th>axis in wall</th><th>axis in boundary</th><th>boundary/bbox</th><th>digest</th></tr>
 </thead>
 <tbody>
-<tr><td><code>iter-row-exchange-nominal</code></td><td>0.041 m<br/><small>FAIL</small></td><td>4.099e-16 of current<br/><small>pass</small></td><td>0.8515 of span<br/><small>FAIL</small></td><td>0.8406 of span<br/><small>FAIL</small></td><td>0.9236 q<br/><small>FAIL; this state 2.060; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.6906 of bbox<br/><small>pass</small></td><td><code>d076aa4952d5</code><br/><small>dd 4.1.0</small></td><td>0.3259 m<br/><small>FAIL</small></td><td>0 of current<br/><small>pass</small></td><td>176.6 of span<br/><small>FAIL</small></td><td>176.6 of span<br/><small>FAIL</small></td><td>not supplied<br/><small>no flux map; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.2849 of bbox<br/><small>FAIL</small></td><td><code>5a22f4464314</code><br/><small>dd 4.1.0</small></td><td>0.2725 m<br/><small>FAIL</small></td><td>1.366e-16 of current<br/><small>pass</small></td><td>0.05067 of span<br/><small>FAIL</small></td><td>0.08157 of span<br/><small>FAIL</small></td><td>0.5022 q<br/><small>FAIL; this state 2.481; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.704 of bbox<br/><small>pass</small></td><td><code>eb4eb26bcdea</code><br/><small>dd 4.1.0</small></td><td>0.06359 m<br/><small>FAIL</small></td><td>0.06 of current<br/><small>FAIL</small></td><td>0.8883 of span<br/><small>FAIL</small></td><td>0.9142 of span<br/><small>FAIL</small></td><td>0.7613 q<br/><small>FAIL; this state 2.222; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.6906 of bbox<br/><small>pass</small></td><td><code>a597bfa19b2c</code><br/><small>dd 4.1.0</small></td><td>0.3243 m<br/><small>FAIL</small></td><td>0.06 of current<br/><small>FAIL</small></td><td>180.2 of span<br/><small>FAIL</small></td><td>183.7 of span<br/><small>FAIL</small></td><td>not supplied<br/><small>no flux map; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.2849 of bbox<br/><small>FAIL</small></td><td><code>3b7f8d21c3d7</code><br/><small>dd 4.1.0</small></td><td>0.244 m<br/><small>FAIL</small></td><td>0.06 of current<br/><small>FAIL</small></td><td>0.0323 of span<br/><small>FAIL</small></td><td>0.04484 of span<br/><small>FAIL</small></td><td>0.3105 q<br/><small>FAIL; this state 2.673; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.704 of bbox<br/><small>pass</small></td><td><code>7d85ceba5a18</code><br/><small>dd 4.1.0</small></td></tr>
+<tr><td><code>iter-row-exchange-nominal</code></td><td>0.041 m<br/><small>FAIL</small></td><td>4.099e-16 of current<br/><small>pass</small></td><td>0.8515 of span<br/><small>FAIL</small></td><td>0.8406 of span<br/><small>FAIL</small></td><td>0.9236 q<br/><small>FAIL; this state 2.060; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.6906 of bbox<br/><small>pass</small></td><td><code>d076aa4952d5</code><br/><small>dd 4.1.0</small></td><td>0.02637 m<br/><small>FAIL</small></td><td>0 of current<br/><small>pass</small></td><td>3487 of span<br/><small>FAIL</small></td><td>3488 of span<br/><small>FAIL</small></td><td>not supplied<br/><small>no flux map; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.5596 of bbox<br/><small>pass</small></td><td><code>d3475eab6082</code><br/><small>dd 4.1.0</small></td><td>0.2725 m<br/><small>FAIL</small></td><td>1.366e-16 of current<br/><small>pass</small></td><td>0.05181 of span<br/><small>FAIL</small></td><td>0.08272 of span<br/><small>FAIL</small></td><td>0.5022 q<br/><small>FAIL; this state 2.481; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.704 of bbox<br/><small>pass</small></td><td><code>02caa0ef5de8</code><br/><small>dd 4.1.0</small></td><td>0.03348 m<br/><small>FAIL</small></td><td>0.06 of current<br/><small>FAIL</small></td><td>0.8883 of span<br/><small>FAIL</small></td><td>0.9142 of span<br/><small>FAIL</small></td><td>0.9899 q<br/><small>FAIL; this state 1.993; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.6906 of bbox<br/><small>pass</small></td><td><code>8497315a8d88</code><br/><small>dd 4.1.0</small></td><td>0.03516 m<br/><small>FAIL</small></td><td>0.06 of current<br/><small>FAIL</small></td><td>4889 of span<br/><small>FAIL</small></td><td>4889 of span<br/><small>FAIL</small></td><td>not supplied<br/><small>no flux map; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.43 of bbox<br/><small>FAIL</small></td><td><code>2cda8ac0ec43</code><br/><small>dd 4.1.0</small></td><td>0.244 m<br/><small>FAIL</small></td><td>0.06 of current<br/><small>FAIL</small></td><td>0.05344 of span<br/><small>FAIL</small></td><td>0.04766 of span<br/><small>FAIL</small></td><td>0.582 q<br/><small>FAIL; this state 2.401; stored not supplied</small></td><td>pass</td><td>pass</td><td>0.7097 of bbox<br/><small>pass</small></td><td><code>874529574a6b</code><br/><small>dd 4.1.0</small></td></tr>
 </tbody>
 </table>
 <dl class="state-sources" id="reduced-reconstructions-scored-sources">
@@ -31,69 +66,99 @@ flux maps on one surface definition rather than of four stored conventions.</p>
 <dt>moment-reconstruction</dt><dd>the cell-current moment reconstruction of the same rows, written by nova.equilibrium.moment.write_moment_equilibrium</dd>
 <dt>harmonic-reconstruction</dt><dd>the source-free toroidal-harmonic reconstruction of the same rows, written by nova.equilibrium.harmonic.write_harmonic_equilibrium</dd>
 <dt>profile-reconstruction</dt><dd>the coupled profile reconstruction of the same rows, written by nova.equilibrium.profile.write_profile_equilibrium</dd>
-<dt>moment-perturbed</dt><dd>negative control: the section 3 perturbation of the moment column, written as its own IMAS dataset</dd>
-<dt>harmonic-perturbed</dt><dd>negative control: the section 3 perturbation of the harmonic column, written as its own IMAS dataset</dd>
-<dt>profile-perturbed</dt><dd>negative control: the section 3 perturbation of the profile column, written as its own IMAS dataset</dd>
+<dt>moment-perturbed</dt><dd>negative control: the section 3 perturbation applied to the moment reconstruction itself and then converted by that column's own conversion, so the control enters through the conversion</dd>
+<dt>harmonic-perturbed</dt><dd>negative control: the section 3 perturbation applied to the harmonic reconstruction itself and then converted by that column's own conversion, so the control enters through the conversion</dd>
+<dt>profile-perturbed</dt><dd>negative control: the section 3 perturbation applied to the profile reconstruction itself and then converted by that column's own conversion, so the control enters through the conversion</dd>
 </dl>
+</section>
 <h3>Band verdicts as measured</h3>
 <table id="reduced-reconstructions-scored-marginal">
 <thead><tr><th>band</th><th>limit</th><th>moment</th><th>harmonic</th><th>profile</th></tr></thead>
 <tbody>
-<tr><td>axis distance [m]</td><td>&#8804; 0.02 m</td><td>0.041 FAIL</td><td>0.3259 FAIL</td><td>0.2725 FAIL</td></tr>
+<tr><td>axis distance [m]</td><td>&#8804; 0.02 m</td><td>0.041 FAIL</td><td>0.02637 FAIL</td><td>0.2725 FAIL</td></tr>
 <tr><td>current fraction</td><td>&#8804; 0.015</td><td>4.099e-16 pass</td><td>0 pass</td><td>1.366e-16 pass</td></tr>
-<tr><td>axis flux fraction of span</td><td>&#8804; 0.02</td><td>0.8515 FAIL</td><td>176.6 FAIL</td><td>0.05067 FAIL</td></tr>
-<tr><td>boundary flux fraction of span</td><td>&#8804; 0.02</td><td>0.8406 FAIL</td><td>176.6 FAIL</td><td>0.08157 FAIL</td></tr>
-<tr><td>q95 difference</td><td>&#8804; 0.1</td><td>0.9236 FAIL</td><td>not supplied (FAIL)</td><td>0.5022 FAIL</td></tr>
+<tr><td>axis flux fraction of span</td><td>&#8804; 0.02</td><td>0.8515 FAIL</td><td>3487 FAIL</td><td>0.05181 FAIL</td></tr>
+<tr><td>boundary flux fraction of span</td><td>&#8804; 0.02</td><td>0.8406 FAIL</td><td>3488 FAIL</td><td>0.08272 FAIL</td></tr>
+<tr><td>q95 difference</td><td>&#8804; 0.1</td><td>0.9236 FAIL</td><td>not supplied</td><td>0.5022 FAIL</td></tr>
 </tbody>
 </table>
-<p>Reading the margins. The moment column localises the axis to 0.041 m, twice its 0.02 m band,
-while its interior flux sits 0.85 of a span from the reference's, so the reconstruction's gauge and
-its boundary level both miss badly even though its current is exact by construction. The profile
-column is the closest: axis 0.2725 m, axis flux 0.0507 of a span, boundary flux 0.0816 and q95
-difference 0.502, from 2.481 on its own map against 2.983 on the reference map. The harmonic column
-does not close a physical interior at all: its total flux diverges toward its own focal ring, so
-the read's interior extreme sits 176.6 spans from the reference, the traced ring covers an area
-fraction of 0.285 of the bounding box (its reference-free FAIL) and the field has no elliptic
-stationary point. That is why its conversion withholds the 2-D map and its q95 reads <em>not supplied</em> rather
-than borrowing the reference's. The registered rule is that a metric absent from the state fails,
-so that band is recorded as a failure too; what is absent is the measure, not the verdict. Its axis
-is the traced ring's centroid, the only interior position the read supplies, because no magnetic
-extremum exists to report.</p>
+<h4>Reference-free checks</h4>
+<table id="reduced-reconstructions-scored-reference-free">
+<thead><tr><th>check</th><th>moment</th><th>harmonic</th><th>profile</th></tr></thead>
+<tbody>
+<tr><td>axis inside boundary</td><td>1 pass</td><td>1 pass</td><td>1 pass</td></tr>
+<tr><td>axis inside wall</td><td>1 pass</td><td>1 pass</td><td>1 pass</td></tr>
+<tr><td>boundary area fraction</td><td>0.6906 pass</td><td>0.5596 pass</td><td>0.704 pass</td></tr>
+</tbody>
+</table>
+<p>Reading the margins. The moment column localises its axis to 0.041 m, twice its 0.02 m
+band, while its axis flux sits 0.8515 as far from the reference's as a full reference span and
+its boundary flux 0.8406, so the reconstruction's gauge and its boundary level both miss badly
+even though its current matches by construction (4.1e-16 of the reference). The profile column
+is the closest: axis 0.2725 m, axis flux 0.05181 of a span, boundary flux 0.08272 and a q95 difference
+of 0.5022, from 2.4811 on its own map against 2.9832 on the reference map. Its boundary level is
+now the iteration's own value rather than a second read, which is what the repair changed.
+The harmonic column does not close a physical interior at all: its total flux diverges toward
+its own focal ring, so its axis flux sits 3487 reference spans from the reference's, and the
+field has no elliptic stationary point. That is why its conversion withholds the 2-D map and
+its q95 reads <em>not supplied</em> rather than borrowing the reference's, why the comparator
+records the absent measure as a failed verdict, and why its axis is the traced ring's
+centroid: the only interior position the read supplies, with no magnetic extremum to report.
+The reference-free checks hold for all three columns; the harmonic control is the harmonic
+column's own property rather than a pass.</p>
 <h3>Negative control: the section 3 perturbation through each column</h3>
-<p>Each new column was perturbed exactly as the section 3 table perturbs its copy &mdash; current
-scaled by 1.06, boundary and axis shifted 0.03 m radially, the flux span grown 2 % at each end, the
-stored map's minor radius scaled by 1.1 &mdash; written as its own IMAS dataset and scored as its own
-column. Every scoreable band fails for every control, so none of these conversions can pass a state
-whatever its content.</p>
+<p>Each new column was perturbed as the section 3 table perturbs its copy, with the
+perturbation applied to the reconstruction and then written by that column's own conversion
+(see the repair note above). Every scoreable band fails for every control, so none of these
+conversions can pass a state whatever its content.</p>
 <table id="reduced-reconstructions-scored-controls">
 <thead><tr><th>control</th><th>axis [m]</th><th>current</th><th>axis flux</th><th>boundary flux</th><th>q95</th></tr></thead>
 <tbody>
-<tr><td>moment-perturbed</td><td>0.06359 FAIL</td><td>0.06 FAIL</td><td>0.8883 FAIL</td><td>0.9142 FAIL</td><td>0.7613 FAIL</td></tr>
-<tr><td>harmonic-perturbed</td><td>0.3243 FAIL</td><td>0.06 FAIL</td><td>180.2 FAIL</td><td>183.7 FAIL</td><td>not supplied (FAIL)</td></tr>
-<tr><td>profile-perturbed</td><td>0.244 FAIL</td><td>0.06 FAIL</td><td>0.0323 FAIL</td><td>0.04484 FAIL</td><td>0.3105 FAIL</td></tr>
+<tr><td>moment-perturbed</td><td>0.03348 FAIL</td><td>0.06 FAIL</td><td>0.8883 FAIL</td><td>0.9142 FAIL</td><td>0.9899 FAIL</td></tr>
+<tr><td>harmonic-perturbed</td><td>0.03516 FAIL</td><td>0.06 FAIL</td><td>4889 FAIL</td><td>4889 FAIL</td><td>not supplied</td></tr>
+<tr><td>profile-perturbed</td><td>0.244 FAIL</td><td>0.06 FAIL</td><td>0.05344 FAIL</td><td>0.04766 FAIL</td><td>0.582 FAIL</td></tr>
 </tbody>
 </table>
-<p>One qualification is stated rather than smoothed: the harmonic control's q95 is not supplied, for
-the harmonic column's own property that withholds its map, so no q95 value exists to evaluate on that
-control. The band is still recorded as a failure, because an absent measure fails by the registered
-rule, and both sides of the comparison carry the same absence. It therefore cannot be read as a pass,
-and it is the one control band whose failure is a report of absence rather than of disagreement.</p>
-<h3>Measured at the delivered revision</h3>
-<p>The conversion code and the receipt stand at revision
-6e66c58829a4da19b111d7861ee6321b7d549e3d. The focused conversion tests ran there as
-<code>3 passed in 18.87s</code>, and the scoped gate re-run on <code>all_debug</code> against the
-same revision reported the same three tests (<code>3 passed in 15.68s</code>) and exited 0. The
-acceptance control, which asserts that each perturbed column is accepted as a faithful
-reconstruction and is expected to fail, failed on all three with exit 1, listing every band each
-control violates.</p>
-<p>Both suite arms cover the three modules the conversions sit in
-(<code>tests/test_equilibrium_moment.py</code>, <code>tests/test_equilibrium_harmonic.py</code> and
-<code>tests/test_equilibrium_profile.py</code>). At the base revision
-06d728006cba140ec3cf0670927100f31f8cfce0 the arm reported <code>48 passed in 42.27s</code>. At the
-delivered revision aeda56d56, with the new conversion tests added to the same three files, it
-reported <code>51 passed in 54.70s</code>: the three added tests and the base's 48, with no base
-failure introduced.</p>
-<h3>Where the evidence lives</h3>
+<p>One qualification is stated rather than smoothed: no harmonic column, reconstruction or
+control, supplies a q95, because its conversion withholds a map that has no elliptic
+stationary point. Both sides of that column therefore carry the same absent measure, and the
+comparator cannot score the band either way; the absent measure is recorded as a failure, so
+the control cannot be read as passing a band it never measured. Every other control fails
+every band it evaluates.</p>
+<h3>Guards, suite arms and the negative control</h3>
+<p>The focused module <code>tests/test_reduced_reconstruction_columns.py</code> holds seven guards:
+the moment conversion's stored map, the profile conversion's solve ordering, the harmonic
+conversion's total flux, the harmonic conversion adding the conductor (vacuum) term, the harmonic
+conversion withholding the map when the read has no elliptic stationary point, the profile
+conversion writing its iteration's own levels, and one writer assembling every column's state (no
+module keeps a private <code>_state_equilibrium</code>, and both profile conversion names are
+exported). Both arms ran the same command over their own tree:
+<code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_reduced_reconstruction_columns.py</code>.</p>
+<table id="reduced-reconstructions-scored-arms">
+<thead><tr><th>arm</th><th>revision</th><th>result</th><th>log</th></tr></thead>
+<tbody>
+<tr>
+<td>baseline</td>
+<td>06d728006cba140ec3cf0670927100f31f8cfce0</td>
+<td>no tests ran, exit 4: the module is created by this work, so the base tree carries no such file</td>
+<td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T185014477588-reduced-reconstructions-scored/baseline-suite-repair.log</code></td>
+</tr>
+<tr>
+<td>after</td>
+<td>a593e3b9f (the revision the states and this table were regenerated from)</td>
+<td>7 passed in 34.47s, exit 0</td>
+<td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T185014477588-reduced-reconstructions-scored/after-suite-repair.log</code></td>
+</tr>
+</tbody>
+</table>
+<p>The negative control reverts each answering commit in a scratch copy of <code>nova/</code> under
+<code>/tmp</code>. With the shared writer reverted, the focused module reports 2 failed in 34.52s
+and exits 1: the profile conversion then writes &minus;40 Wb where its iteration measured
+&minus;7.25 Wb, and the one-writer guard fails because the module it names does not exist. With the
+guard commit reverted instead, the three original conversion tests still pass (3 passed, exit 0)
+and the one-writer guard is absent &mdash; <code>-k one_writer</code> selects nothing (3 deselected,
+exit 5) &mdash; so the check cannot pass because it no longer exists. The control log is
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T185014477588-reduced-reconstructions-scored/negative-control-repair.log</code>.</p><h3>Where the evidence lives</h3>
 <ul>
 <li>Scoreboard receipt, beside the section 3 receipt:
 <code>docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/receipt-reduced-reconstructions-scored.json</code></li>
@@ -101,8 +166,12 @@ failure introduced.</p>
 <code>docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/cases-reduced-reconstructions-scored.json</code></li>
 <li>Published table:
 <code>docs/figures/inverse-equilibrium-baseline/estimator-scoreboard/table-reduced-reconstructions-scored.html</code></li>
-<li>Conversions: <code>nova/equilibrium/moment.py</code>, <code>nova/equilibrium/harmonic.py</code>
-and <code>nova/equilibrium/profile.py</code>; states under
+<li>State driver, runnable from the repository:
+<code>docs/figures/inverse-equilibrium-baseline/reduced-reconstructions-scored/case.py</code> and
+<code>emit_states.py</code></li>
+<li>Conversions: <code>nova/equilibrium/moment.py</code>,
+<code>nova/equilibrium/harmonic.py</code> and <code>nova/equilibrium/profile.py</code>, all
+through <code>nova/equilibrium/reconstruction_state.py</code>; states under
 <code>/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states</code></li>
 </ul>
 </section>

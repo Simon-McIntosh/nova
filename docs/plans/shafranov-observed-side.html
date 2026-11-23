@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 <meta name="plan-modified" content="2026-11-23">
 <meta name="plan-blocks" content="">
 <meta name="plan-standalone" content="The plan it unblocked, constraint-augmented-newton-krylov, is superseded; no open plan waits on the Shafranov observed side and it waits on none.">
@@ -170,6 +170,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261123T060050735520-review-of-sos-grid-route-current-rule-f0e895842237-figure" data-who="reckon-build" data-when="2026-11-23T06:43:42.799Z">
     <div class="r-comment-body"><p>Figure review of r-20261122T135237120281-sos-grid-route-current-rule at head f0e895842237a1a4d4b9a2766819a08fa1ebf091: parsed, all 6 rubric items answered; 4 non-blocking findings and no blocking finding; no suite (figure review).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261123T060011363220-review-of-sos-grid-route-current-rule-f0e895842237" data-who="reckon-build" data-when="2026-11-23T06:43:48.758Z">
+    <div class="r-comment-body"><p>Reviewed 062298ce691bf2db318801efe27c5b457fa4e2b7..f0e895842237a1a4d4b9a2766819a08fa1ebf091 and scored goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 12; the analytic-route order 2.03 with its X-point-corner and cancellation mechanism is receipt-backed and asserted, both suite arms are 0 added failures, and three non-blocking findings are recorded (the third-party figure-audit duplication, the unsourced prose timing numbers, and the archive&#x27;s dangling links to the deleted timing figure).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-s4-mast-solved-state-ruling" data-who="reckon-build" data-when="2026-11-23T05:40:00Z">
     <div class="r-comment-body"><p><strong>Lead ruling 2026-11-22.</strong> MAST carries no usable calibrated diamagnetic loop, so it falls to the toroidal-volume-term decision's 'elsewhere' branch: on MAST rows Z comes from the solved state, with provenance <code>solved-state</code>. The evidence: a 200-shot census of the MAST level1 store found the EFIT diamagnetic channel all zeros or NaN and never rated usable, and the raw <code>xma</code> loop signals uncalibrated amplifier outputs on a ±10 V rail with no loop area, turns or integrator gain published. The reader now stores calibrated loops with verified sign and source (run <code>sos-diamagnetic-source</code>, demonstrated on WEST 57410), so a machine that publishes a calibrated loop takes Z from it. Done-when (2) is therefore met by the census, not by a MAST reproduction.</p></div>

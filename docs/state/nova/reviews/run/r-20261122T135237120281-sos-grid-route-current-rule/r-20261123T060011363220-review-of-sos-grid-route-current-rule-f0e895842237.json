@@ -2,26 +2,23 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "call_sites": "scripts/render_shafranov_integral_certificate.py:main; no production module calls shafranov_contour_integrals or beta_p_plus_half_internal_inductance (nova/equilibrium/__init__.py:39 exports other diagnostics symbols, not these).",
-  "completed_at": "",
+  "completed_at": "2026-11-23T06:43:48.758Z",
   "dispatched_at": "2026-11-23T06:15:21Z",
   "findings": [
     {
       "file": "scripts/render_shafranov_integral_certificate.py",
-      "id": "fa1dbe40cdd",
       "line": 66,
       "severity": "non-blocking",
       "summary": "_check_artists re-implements the clipped/overlapping-text figure audit that scripts/edge_sheet/figure.py:52-68 already implements, making a third script-local copy of a check the plotting rules say belongs in the style module; promote it to nova.media.ink instead of copying; otherwise a later figure's saved audit drifts from this one."
     },
     {
       "file": "docs/evidence/fragments/shafranov-observed-side/sos-grid-route-current-rule.html",
-      "id": "f10f00c51d5",
       "line": 87,
       "severity": "non-blocking",
       "summary": "The prose timing numbers (7.157 s, 6.267e-05 s, ratio 114199, 76 kernel calls) still trace to no receipt, and the printed ratio does not follow from the printed operands (7.157/6.267e-05 = 114201); the figure-audit followup asked for them to be emitted into a receipt, so this prose is still unverifiable."
     },
     {
       "file": "docs/evidence/archive/constraint-augmented-newton-krylov-landed.html",
-      "id": "f4832fc313c",
       "line": 897,
       "severity": "non-blocking",
       "summary": "The landed deletion of field-response-timing.png and .svg leaves this cumulative archive record's image and its linked SVG at lines 897 and 901 pointing at files that no longer exist; the archive is outside the node's write scope, so the repair belongs to a coordinator."
@@ -59,6 +56,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-23T06:43:53.514327+00:00",
+  "timestamp": "2026-11-23T06:44:22.041591+00:00",
   "total": 103
 }

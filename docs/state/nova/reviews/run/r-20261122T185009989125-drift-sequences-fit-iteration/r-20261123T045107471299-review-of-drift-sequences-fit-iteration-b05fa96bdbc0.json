@@ -1,0 +1,86 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run was fenced unarmed and records no baseline_suite/after_suite pair, so no test was added and the added-failure count is zero by absence of arms; the node's own gate (probe_rows/check.py) is not a suite arm and its two failures are recorded in the findings.",
+  "call_site_count:=1 if False else 'call_site_count'": 1,
+  "call_sites": [
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:study.noise_columns",
+    "scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:analyse.reduce_arm"
+  ],
+  "completed_at": "2026-11-23T05:22:46.118Z",
+  "dispatched_at": "2026-11-23T04:51:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html",
+      "line": "23",
+      "text": "blocking: the imas-efit column is the 24-flux-loop arm while nova fits its 72-row set, so the two codes reconstruct from different information sets; plan \u00a77 requires both codes reconstruct from the same rows, and the headline 9.7-10.4 mm against 29.7-38.3 mm comparison is therefore not a like-for-like code comparison."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html",
+      "line": "43",
+      "text": "blocking: done_when clause (2) fails for both codes (nova 0.047/0.085/0.105, imas-efit 0.462/0.544/0.606 against the 0.5 floor) and the gate exits 1, yet plan \u00a77 says a pipeline failing this control is repaired before any comparison is read and the record states the comparison as its landed result; the positive control is not established."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html",
+      "line": "44",
+      "text": "non-blocking: the claim that the white half of the control rules out a 1/f draw the reduction failed to see does not follow, because a drift draw that was generated white would pass the white control and fail the drift one; the arm that rules the generator out is imas-efit's 0.462/0.544/0.606 on the same draw, not the white control."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+      "line": "120",
+      "text": "non-blocking: the axis-against-slice figure plots the axis error in mm, whereas plan \u00a77's figure clause names the axis position against slice index for both sequences on one panel."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+      "line": "37",
+      "text": "non-blocking: arm_rows selects the figure's arm by the '-loops' tag while analyse.pick at analyse.py:303 selects the control's arm by minimum axis_rms, so the figure and the gate apply two different arm-selection rules; they coincide on this run's single efit arm but the manifest's claim that the two cannot disagree is overstated."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/check.py",
+      "line": "55",
+      "text": "non-blocking: performed is incremented before the arm is even fetched, so the arm lookup counts as a check and the reported 'of 28' includes four no-op increments, overstating how many assertions the gate ran."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py",
+      "line": "27",
+      "text": "non-blocking: WIDTH and HEIGHT are defined and never called; main() hard-codes figsize=(7.2, 7.2) at paint.py:135, so the constants are dead code."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Read commit by commit 06d72800..b05fa96b: five commits add iteration.py, check.py and figures.py, extend analyse.py and study.py, and redraw paint.py/panel.py; all 11 paths lie inside the declared write paths.",
+    "done_when": "done_when clause (1) is asserted by probe_rows/check.py:47 only for the slice count and slices_with_boundary; the RMS and 50-slice-mean quantities it names are reported but never asserted, and clause (2) is asserted (check.py:72-78) and reads CHECK-FAILED for both codes, 2 of 28 checks failed, EXIT=1 in study/logs/gate-check.log.",
+    "goal": "The node goal is to report, over at least 200 slices for each code and each noise sequence, the RMS and lag-one of the axis position, boundary flux and q95 with the 50-slice-mean error beside the single-slice error (inverse-equilibrium-baseline.html:193); the landed table carries all of these for four arms at docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html:33-38, but clause (2) is unmet and the two codes are not compared on the same rows.",
+    "manifest": "Read; it states the four arms at 200 slices, the two failing 1/f lag-one clauses, and the two-pass cap; its artifact list and the gate log it names agree with the numbers in study/summary.json and study/table.json.",
+    "write_paths": "The declared scope is scripts/prototypes/probe_rows/, scripts/prototypes/drifting_sensor_sequences/probe_rows/, the evidence fragment and the figure directory."
+  },
+  "justifications": {
+    "durability": "No test file is added and none is in scope; probe_rows/check.py:47 re-reads the summary the production reduction already wrote, so no assertion fails if iteration.py, study.py or analyse.py regresses.",
+    "evidence": "probe_rows/check.py:47 gates the slice count, boundary count and lag-one flags, and its result is recorded in study/logs/gate-check.log (EXIT=1), but it never asserts the RMS error or 50-slice-mean quantities clause (1) names.",
+    "fit": "The new modules follow the surrounding prototype-script idiom (argparse main, HERE sys.path insert, save_checked) and use no plan or ticket label, though paint.py:27-28 leaves two dead constants.",
+    "goal_fidelity": "The delivered table at docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html:30-38 states all four arms at 200 slices, but the 1/f control fails for both codes and the efit column is the 24-loop arm against nova's 72 rows, so the comparison the goal exists to enable is not established.",
+    "reuse": "probe_rows/iteration.py reuses study.py's noise, rows and geometry and analyse.reduce_arm rather than forking them, and the one new reduction field was added to the owner at analyse.py:210.",
+    "scope_discipline": "Every path in the diff (11 of them) is inside the declared write paths at scripts/prototypes/drifting_sensor_sequences/probe_rows/ and docs/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to report, over at least 200 slices for each code and each noise sequence, the RMS and lag-one of the axis position, boundary flux and q95 with the 50-slice-mean error beside the single-slice error (inverse-equilibrium-baseline.html:193); the landed table carries all of these for four arms at docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html:33-38, but clause (2) is unmet and the two codes are not compared on the same rows.\nVERDICT done_when: done_when clause (1) is asserted by probe_rows/check.py:47 only for the slice count and slices_with_boundary; the RMS and 50-slice-mean quantities it names are reported but never asserted, and clause (2) is asserted (check.py:72-78) and reads CHECK-FAILED for both codes, 2 of 28 checks failed, EXIT=1 in study/logs/gate-check.log.\nVERDICT write_paths: The declared scope is scripts/prototypes/probe_rows/, scripts/prototypes/drifting_sensor_sequences/probe_rows/, the evidence fragment and the figure directory.\nVERDICT manifest: Read; it states the four arms at 200 slices, the two failing 1/f lag-one clauses, and the two-pass cap; its artifact list and the gate log it names agree with the numbers in study/summary.json and study/table.json.\nVERDICT diff: Read commit by commit 06d72800..b05fa96b: five commits add iteration.py, check.py and figures.py, extend analyse.py and study.py, and redraw paint.py/panel.py; all 11 paths lie inside the declared write paths.\nCALL_SITES: scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:study.noise_columns, scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py:analyse.reduce_arm\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: The delivered table at docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html:30-38 states all four arms at 200 slices, but the 1/f control fails for both codes and the efit column is the 24-loop arm against nova's 72 rows, so the comparison the goal exists to enable is not established.\nSCORE evidence: 13\nJUSTIFICATION evidence: probe_rows/check.py:47 gates the slice count, boundary count and lag-one flags, and its result is recorded in study/logs/gate-check.log (EXIT=1), but it never asserts the RMS error or 50-slice-mean quantities clause (1) names.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: Every path in the diff (11 of them) is inside the declared write paths at scripts/prototypes/drifting_sensor_sequences/probe_rows/ and docs/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/.\nSCORE durability: 7\nJUSTIFICATION durability: No test file is added and none is in scope; probe_rows/check.py:47 re-reads the summary the production reduction already wrote, so no assertion fails if iteration.py, study.py or analyse.py regresses.\nSCORE fit: 15\nJUSTIFICATION fit: The new modules follow the surrounding prototype-script idiom (argparse main, HERE sys.path insert, save_checked) and use no plan or ticket label, though paint.py:27-28 leaves two dead constants.\nSCORE reuse: 16\nJUSTIFICATION reuse: probe_rows/iteration.py reuses study.py's noise, rows and geometry and analyse.reduce_arm rather than forking them, and the one new reduction field was added to the owner at analyse.py:210.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html:23 blocking: the imas-efit column is the 24-flux-loop arm while nova fits its 72-row set, so the two codes reconstruct from different information sets; plan \u00a77 requires both codes reconstruct from the same rows, and the headline 9.7-10.4 mm against 29.7-38.3 mm comparison is therefore not a like-for-like code comparison.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html:43 blocking: done_when clause (2) fails for both codes (nova 0.047/0.085/0.105, imas-efit 0.462/0.544/0.606 against the 0.5 floor) and the gate exits 1, yet plan \u00a77 says a pipeline failing this control is repaired before any comparison is read and the record states the comparison as its landed result; the positive control is not established.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html:44 non-blocking: the claim that the white half of the control rules out a 1/f draw the reduction failed to see does not follow, because a drift draw that was generated white would pass the white control and fail the drift one; the arm that rules the generator out is imas-efit's 0.462/0.544/0.606 on the same draw, not the white control.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py:120 non-blocking: the axis-against-slice figure plots the axis error in mm, whereas plan \u00a77's figure clause names the axis position against slice index for both sequences on one panel.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py:37 non-blocking: arm_rows selects the figure's arm by the '-loops' tag while analyse.pick at analyse.py:303 selects the control's arm by minimum axis_rms, so the figure and the gate apply two different arm-selection rules; they coincide on this run's single efit arm but the manifest's claim that the two cannot disagree is overstated.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/check.py:55 non-blocking: performed is incremented before the arm is even fetched, so the arm lookup counts as a check and the reported 'of 28' includes four no-op increments, overstating how many assertions the gate ran.\nFINDING scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py:27 non-blocking: WIDTH and HEIGHT are defined and never called; main() hard-codes figsize=(7.2, 7.2) at paint.py:135, so the constants are dead code.",
+  "review_run_id": "r-20261123T045107471299-review-of-drift-sequences-fit-iteration-b05fa96bdbc0",
+  "reviewed_base_sha": "06d728006cba140ec3cf0670927100f31f8cfce0",
+  "reviewed_head_sha": "b05fa96bdbc009e84f075088241e6a8a1cc8aa0a",
+  "reviewed_run_id": "r-20261122T185009989125-drift-sequences-fit-iteration",
+  "scores": {
+    "durability": 7,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 12,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T05:23:24.439203+00:00",
+  "total": 82
+}

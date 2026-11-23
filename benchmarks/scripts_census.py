@@ -131,6 +131,196 @@ def imports_of_walk(tree):
             yield found
 
 
+def _evaluated(node, constants):
+    """The path an expression builds, or ``None`` when it is not a path at all.
+
+    A prototype script puts a directory on ``sys.path`` and imports its
+    neighbours as bare modules, so the directories on ``sys.path`` are read from
+    the expressions that build them: ``Path(__file__).resolve().parent``,
+    ``.parents[2]``, a literal appended with ``/``, and a module-level name
+    bound to any of those.
+    """
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if isinstance(node, ast.Name) and node.id in constants:
+        return constants[node.id]
+    if isinstance(node, ast.Attribute):
+        base = _evaluated(node.value, constants)
+        if base is None:
+            return None
+        if node.attr == "parent":
+            return str(Path(base).parent)
+        return None
+    if isinstance(node, ast.Subscript):
+        if not isinstance(node.value, ast.Attribute):
+            return None
+        if node.value.attr != "parents" or not isinstance(node.slice, ast.Constant):
+            return None
+        base = _evaluated(node.value.value, constants)
+        if base is None:
+            return None
+        target = Path(base)
+        for _ in range(int(node.slice.value)):
+            target = target.parent
+        return str(target)
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+        left = _evaluated(node.left, constants)
+        right = _evaluated(node.right, constants)
+        if left is None or right is None:
+            return None
+        return str(Path(left) / right)
+    if isinstance(node, ast.Call):
+        name = _called_name(node.func)
+        arguments = node.args
+        if name in ("str", "Path", "resolve") and arguments:
+            return _evaluated(arguments[0], constants)
+        if name == "resolve" and isinstance(node.func, ast.Attribute):
+            return _evaluated(node.func.value, constants)
+        if name == "dirname" and arguments:
+            inner = _evaluated(arguments[0], constants)
+            return None if inner is None else str(Path(inner).parent)
+        if name == "abspath" and arguments:
+            return _evaluated(arguments[0], constants)
+    return None
+
+
+def _called_name(func):
+    if isinstance(func, ast.Name):
+        return func.id
+    if isinstance(func, ast.Attribute):
+        return func.attr
+    return ""
+
+
+def sys_path_roots(path, tree):
+    """Directories this file adds to ``sys.path``, plus its own directory."""
+    here = str(Path(path).parent)
+    constants = {"__file__": path}
+    roots = {here}
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target = node.targets[0]
+            if isinstance(target, ast.Name):
+                value = _evaluated(node.value, constants)
+                if value is not None:
+                    constants[target.id] = value
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
+            _record_path_call(node.value, constants, roots)
+        for call in _calls_in(node):
+            _record_path_call(call, constants, roots)
+    return roots
+
+
+def _calls_in(node):
+    for inner in ast.walk(node):
+        if isinstance(inner, ast.Call):
+            yield inner
+
+
+def _record_path_call(call, constants, roots):
+    """Keep the directory a ``sys.path`` call adds, resolved against the repo."""
+    name = _called_name(call.func)
+    if name not in ("insert", "append", "extend"):
+        return
+    if not isinstance(call.func, ast.Attribute):
+        return
+    owner = call.func.value
+    if not isinstance(owner, ast.Attribute) or owner.attr != "path":
+        return
+    if not isinstance(owner.value, ast.Attribute):
+        return
+    arguments = call.args
+    if name == "insert":
+        arguments = arguments[1:]
+    for argument in arguments:
+        value = _evaluated(argument, constants)
+        if value is not None:
+            roots.add(value)
+
+
+def _module_candidates(name, base_dirs):
+    out = set()
+    for base in base_dirs:
+        stem = Path(base) / name if base else Path(name)
+        out.add(str(stem) + ".py")
+        out.add(str(Path(stem) / "__init__.py"))
+    return out
+
+
+def repo_relative(candidate):
+    path = Path(candidate)
+    if path.is_absolute():
+        try:
+            return str(path.relative_to(ROOT))
+        except ValueError:
+            return None
+    text = str(Path(*[part for part in path.parts if part not in ("", ".")]))
+    return text
+
+
+def sibling_targets(path, tree, popset):
+    """Population files this script imports as bare modules from ``sys.path``.
+
+    A prototype puts its own directory, or a directory it builds, on
+    ``sys.path`` and then writes ``import panels`` or
+    ``from records import ...``. Those names resolve against the directories the
+    file itself puts on the path, never against the whole tree."""
+    roots = sys_path_roots(path, tree)
+    here = str(Path(path).parent)
+    found = set()
+    for node in ast.walk(tree):
+        bases = []
+        names = []
+        if isinstance(node, ast.Import):
+            bases = list(roots)
+            names = [alias.name.split(".")[0] for alias in node.names]
+        elif isinstance(node, ast.ImportFrom):
+            target = here
+            for _ in range(max(node.level - 1, 0)):
+                target = str(Path(target).parent)
+            bases = [target] if node.level else list(roots)
+            if node.module is None:
+                names = [alias.name for alias in node.names]
+            else:
+                names = [node.module.split(".")[0]]
+        for name in names:
+            for candidate in _module_candidates(name, bases):
+                relative = repo_relative(candidate)
+                if relative in popset:
+                    found.add(relative)
+    return found
+
+
+def ancestor_directories(pop):
+    """Every directory holding a population file, the two tree roots excluded.
+
+    A record naming ``scripts/`` or ``scripts/prototypes/`` names no particular
+    driver, so only a directory at least one level below the two trees counts as
+    citing or owning what it holds."""
+    out = set()
+    for path in pop:
+        parts = path.split("/")[:-1]
+        for depth in range(2, len(parts) + 1):
+            out.add("/".join(parts[:depth]))
+    return out
+
+
+def files_under(pop, directories):
+    mapping = defaultdict(list)
+    for path in pop:
+        parts = path.split("/")[:-1]
+        for depth in range(2, len(parts) + 1):
+            mapping["/".join(parts[:depth])].append(path)
+    return mapping
+
+
+PATH_TOKEN_RE = re.compile(r"(?:benchmarks|scripts)/[A-Za-z0-9_./-]+")
+
+
+def directory_tokens(text):
+    return {token.rstrip("/") for token in PATH_TOKEN_RE.findall(text)}
+
+
 def assembled_paths(text):
     out = set()
     for root, tail in ASSEMBLED_RE.findall(text):
@@ -248,6 +438,7 @@ def census(force=None):
 
     sources = {}
     imports = {}
+    trees = {}
     for p in paths:
         if not p.endswith(".py"):
             continue
@@ -259,16 +450,24 @@ def census(force=None):
             continue
         sources[p] = text
         imports[p] = imports_of(text)
+        try:
+            trees[p] = ast.parse(text)
+        except SyntaxError:
+            pass
 
     core = {p for p in imports if p.split("/", 1)[0] in ("nova", "tests", "apps")}
 
     def targets(files):
+        """Population files a set of files imports, by name or by sibling path."""
         got = set()
         for p in files:
             for name in imports[p]:
                 t = lookup.get(name)
                 if t is not None:
                     got.add(t)
+            tree = trees.get(p)
+            if tree is not None:
+                got |= sibling_targets(p, tree, popset)
         return got
 
     reasons = defaultdict(set)
@@ -294,10 +493,25 @@ def census(force=None):
             reasons[t].add("live_runner:" + p)
 
     plans = plan_texts(paths)
+    tree_dirs = ancestor_directories(pop)
+    under = files_under(pop, tree_dirs)
     for t in pop:
         for slug in sorted(plans):
             if t in plans[slug]:
                 reasons[t].add("plan_owned:" + slug)
+    for slug in sorted(plans):
+        for token in directory_tokens(plans[slug]):
+            # A plan naming a directory owns everything under it, and a plan
+            # naming one driver owns the directory that driver sits in: the
+            # rest of that directory is the same held work.
+            owned = set()
+            if token in tree_dirs:
+                owned.update(under[token])
+            if token in popset:
+                parent = str(Path(token).parent)
+                owned.update(under.get(parent, []))
+            for held in owned:
+                reasons[held].add("plan_owned:" + slug)
 
     for p in pop:
         if p.endswith("/__init__.py"):
@@ -313,6 +527,16 @@ def census(force=None):
         for t in nxt:
             reasons[t].add("imported_by_kept")
         frontier = nxt
+    # Name the kept file each transitive import came from, so a keep a reader
+    # cannot otherwise explain says which driver reaches it.
+    for p in pop:
+        reasons[p].discard("imported_by_kept")
+    for p in pop:
+        if not reasons.get(p):
+            continue
+        for t in targets({p}):
+            if t != p and reasons.get(t):
+                reasons[t].add("imported_by_kept:" + p)
 
     merge_into = {}
     for names in dups:
@@ -372,8 +596,13 @@ def census(force=None):
         except OSError:
             continue
         texts[p] = text
-        for hit in references_in(text, deletes, lookup):
-            citations[hit].append(p)
+        hits = set(references_in(text, deletes, lookup))
+        # A record that names a directory cites every driver under it.
+        for token in directory_tokens(text) & tree_dirs:
+            hits.update(held for held in under[token] if held in deletes)
+        for hit in hits:
+            if p not in citations[hit]:
+                citations[hit].append(p)
     resolved = resolve(citations, texts)
 
     refused = []

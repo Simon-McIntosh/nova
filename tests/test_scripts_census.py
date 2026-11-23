@@ -50,7 +50,38 @@ def test_every_merge_folds_into_a_kept_driver(payload):
         assert by_path[row["merge_into"]]["verdict"] == "keep", row["path"]
 
 
-def test_forced_delete_of_a_live_test_driver_is_refused(payload):
+def test_sibling_import_keeps_the_neighbour(payload):
+    by_path = {row["path"]: row for row in payload["verdicts"]}
+    row = by_path["scripts/prototypes/stored_state_refusals/panels.py"]
+    assert row["verdict"] == "keep", row["reason"]
+    kept_by = [
+        reason for reason in row["reason"] if reason.startswith("imported_by_kept:")
+    ]
+    assert kept_by, row["reason"]
+
+
+def test_plan_named_directory_keeps_every_file_under_it(payload):
+    by_path = {row["path"]: row for row in payload["verdicts"]}
+    row = by_path["scripts/iron_linear_magnetisation/gate.py"]
+    assert row["verdict"] == "keep", row["reason"]
+    assert any(reason.startswith("plan_owned:") for reason in row["reason"])
+
+
+def test_forced_delete_of_a_live_test_driver_is_refused():
     with pytest.raises(census.Refused) as raised:
         census.census(census.POSITIVE)
     assert census.POSITIVE in str(raised.value)
+
+
+def test_forced_delete_of_a_driver_a_kept_file_imports_is_refused():
+    forced = "scripts/prototypes/stored_state_refusals/panels.py"
+    with pytest.raises(census.Refused) as raised:
+        census.census(forced)
+    assert forced in str(raised.value)
+
+
+def test_forced_delete_of_a_plan_owned_directory_file_is_refused():
+    forced = "scripts/iron_linear_magnetisation/gate.py"
+    with pytest.raises(census.Refused) as raised:
+        census.census(forced)
+    assert forced in str(raised.value)

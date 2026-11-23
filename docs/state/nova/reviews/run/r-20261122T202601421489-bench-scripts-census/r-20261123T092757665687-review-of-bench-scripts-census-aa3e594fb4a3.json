@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-23T09:40:12.753Z",
+  "dispatched_at": "2026-11-23T09:28:32Z",
+  "findings": [
+    {
+      "file": "benchmarks/scripts_census.py",
+      "line": "527",
+      "severity": "blocking",
+      "text": "the plan-ownership pass reads docs/plans HTML only and never a plan's live crew runs, which the steering brief requires; a queued node's sole upright directory scripts/prototypes/h200_levers is therefore delete with an empty reason while r-20261115T225214446552-smfp-lever-closing-h200 (sub-millisecond-forward-path, phase awaiting-upstream) declares it a write path, so section 3 can delete a pending node's drivers."
+    },
+    {
+      "file": "benchmarks/scripts_census.py",
+      "line": "536",
+      "severity": "non-blocking",
+      "text": "the clause that lets a plan naming one driver own that driver's directory fires only when the named token is itself a population file, so a plan naming a shell launcher confers nothing: docs/plans/kernel-compile-barrier.html names scripts/iron_operator_bound/west.sh, a live S31 node holds scripts/iron_operator_bound, and eight of its .py files are still delete with an empty reason."
+    },
+    {
+      "file": "tests/test_scripts_census.py",
+      "line": "34",
+      "severity": "non-blocking",
+      "text": "the population assertion compares the census's own counts with the census's own population() over the same tracked() call, so a regression that drops a subtree while still holding the files the other tests anchor stays green; the independent git ls-files count that would redden lives only in the run directory's uncommitted verify_census.py."
+    },
+    {
+      "file": "benchmarks/scripts_census.py",
+      "line": "64",
+      "severity": "non-blocking",
+      "text": "the plan-sprint identifiers S28-S32 are written as a source constant and repeated in the module docstring at line 12, which the naming rules forbid in source and docstrings; the sprint window belongs in the emitted record or a resolved configuration, not in a module-level tuple."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified 0 production call sites",
+    "diff": "Read f26e4620e17fd7ec8a9b63b8751772e2ade4de4a..aa3e594fb4a363c1db9746b0b1158ec582026e5b commit by commit (ten commits): four files, +2533 lines, all adds; the last commit is the record regeneration and the two before it change ownership scope and its tests.",
+    "done_when": "The done_when's four clauses are each asserted: coverage and reconciliation by verify_census.py, citation resolution by git cat-file -e inside benchmarks/scripts_census.py:404, merge folding by tests/test_scripts_census.py:47, and the forced-delete refusal by the three negative-control logs.",
+    "goal": "The node goal is one verdict per Python file under benchmarks/ and scripts/ stored in one record; benchmarks/scripts_census.py:606 emits exactly that and the committed record carries 1574 rows with keep=821 delete=750 merge=3.",
+    "manifest": "Read the reviewed run's manifest at runs/r-20261122T202601421489-bench-scripts-census/manifest.md: status complete, after_suite 9e33bd731 exit 0 completed true failure_count 0, three negative-control logs plus a specificity control, and reproduce/verify probe logs.",
+    "write_paths": "Read the declared pair docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.html and the figures directory; the diff also lands benchmarks/scripts_census.py, tests/test_scripts_census.py and the .json twin, none of which the declaration names."
+  },
+  "justifications": {
+    "durability": "tests/test_scripts_census.py:108 asserts the forced delete of a live-test driver raises Refused naming it, which reddens if the guard at benchmarks/scripts_census.py:600 is removed, but the population reconciliation at tests/test_scripts_census.py:34 compares the census against its own enumeration.",
+    "evidence": "logs/pytest-after-all_debug.log records 12 passed at revision 9e33bd7310bf282fa0096d2b1e344631b27536e0 with a bare EXIT=0, and verify_census.py re-enumerates the population with its own git ls-files and re-resolves every delete citation, VERIFY-OK.",
+    "fit": "The module is ruff-clean and follows the surrounding driver idiom, but benchmarks/scripts_census.py:64 carries the plan-sprint identifiers S28-S32 as a source constant and the docstring at line 12 repeats them.",
+    "goal_fidelity": "The record at docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.html gives one verdict to each of 1574 tracked files, but the keep rule at benchmarks/scripts_census.py:519 reads plan HTML only and never the live crew runs the steering brief requires.",
+    "reuse": "Nova owns no tracked-file enumeration or verdict-census helper; worktree_path_candidates at nova/database/filepath.py:254 is a git-grep content search, and the addition reuses compute_provenance and repository_relative from the same module.",
+    "scope_discipline": "benchmarks/scripts_census.py and tests/test_scripts_census.py sit outside the declared path pair but are implied by the plan and by the steering brief's own instruction to extend benchmarks/recovery_ladder_census.py under tests/test_recovery_ladder_census.py."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T092757665687-review-of-bench-scripts-census-aa3e594fb4a3",
+  "reviewed_base_sha": "f26e4620e17fd7ec8a9b63b8751772e2ade4de4a",
+  "reviewed_head_sha": "aa3e594fb4a363c1db9746b0b1158ec582026e5b",
+  "reviewed_run_id": "r-20261122T202601421489-bench-scripts-census",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 19,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T09:40:29.628659+00:00",
+  "total": 100
+}

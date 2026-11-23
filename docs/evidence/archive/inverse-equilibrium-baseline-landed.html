@@ -39,6 +39,11 @@
     <p>2026-11-17. Landed by hand at merge e7e97c373 from head 238f90964, on the lead's ruling that the section land on the GPU gate. The nested class reached no fit on a stored imas-efit case. With imas-efit's fitted currents the observation kernels reproduce its rows within 1 % on all six sensor families (0.08 % to 0.72 %), and against rows scaled by 1.10 the same replay falls to 8.9 % to 9.3 %, outside the 5 % band, in titan job 1323912. The MAST-U stored state qualifies at 5.3e-16 and its perturbed solve stalls at 1.2e-4 with the active-set step refused; TCV stalls at 0.030; ITER admits no magnetic axis. The line search now treats an unqualified trial as a rejected step, and q95 is read on the physical flux span.</p><p>Gate: the combined tree of main and the head passed 85 tests on the H200 with <code>test_the_solve_defaults_to_the_root_find</code>, which fails at base, deselected (job 1324234). The CPU suite arms abort with SIGABRT inside JAX compilation while building the known-state case, at the original base and at every later revision, so no CPU failure count exists; the lead waived the suite-delta check for that reason. Codex scored the landing head 104/120 with no finding and could not file its record without that count, which is why the merge was made by hand. The full record is <code>docs/evidence/fragments/inverse-equilibrium-baseline/efit-comparison.html</code>; the refusals are carried to the plan <code>forward-solve-near-stored-states</code>.</p>
   </section>
 
+  <section id="review-of-magnetics-fit-file-completes-on-cpu-6a6a298d3a9e" data-evidence-origin="append">
+    <h2>s9 landed</h2>
+    <p>Run <code>r-20261123T045434818189-review-of-magnetics-fit-file-completes-on-cpu-6a6a298d3a9e</code> landed after the landing pass measured its suite at base and head.</p>
+  </section>
+
 </main>
 </body>
 </html>

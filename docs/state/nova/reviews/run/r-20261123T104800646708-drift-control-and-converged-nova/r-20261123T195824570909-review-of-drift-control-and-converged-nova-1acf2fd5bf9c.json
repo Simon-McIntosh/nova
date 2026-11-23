@@ -4,6 +4,13 @@
   "added_failures_note": "The reviewed run carries no baseline_suite/after_suite JSON keys, but its manifest's tests line and the two gate logs record a readable pair at both revisions: guard-suite-base.log (revision e28db604eee205382f5c7874129eebfe4339cd92, 16 passed in 1.84s, last line EXIT=0) and guard-suite-head.log (revision 1acf2fd5bf9ce1bf81533003b0b2499981ceed16, 20 passed in 5.26s, last line EXIT=0), both running scripts/prototypes/drifting_sensor_sequences/probe_rows/test_reduction_guards.py on all_debug. Neither arm records a failing test id, so the count of failing ids the head adds over the base is a measured zero with the instrument shown to see tests on both arms.",
   "completed_at": "2026-11-23T21:09:35.633Z",
   "dispatched_at": "2026-11-23T20:07:24Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "drift-control-and-converged-nova",
+      "recorded_at": "2026-11-23T21:11:40.833176+00:00"
+    }
+  },
   "findings": [
     {
       "correction": "Name 98dci4-gpu-0002, job 1339485, two P100 cards and the 224-1803 s per-slice range in lines 42, 45 and 48; identify the 1352.8 s H200 probe as a single-row probe from 98dci4-gpu-0003 that contributed no slice.",

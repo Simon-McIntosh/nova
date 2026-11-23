@@ -1,4 +1,4 @@
-"""Exact-mode map fidelity at the analytic state, and the map's JVP.
+"""Exact-mode map fidelity at the fidelity rungs, and the map's JVP.
 
 The map is ``gs.apply`` on the production ``ForwardFluxOperator``: the booked
 plasma current imaged through the coupling blocks and added to the exterior
@@ -8,11 +8,16 @@ level, evaluated once with no solve.  The exterior is posed on the exact
 analytic separatrix support, so the closure residual cannot mask the booking
 term and a failure from the fixture cannot be read as a map failure.
 
-The rung requests realise about 2,000, 5,000 and 10,000 solver cells.  Those
-measurements cost a carrier build each, so the driver at the foot of this file
-takes them in one allocation and publishes its rows into the evidence fragment
-this node writes; the tests read that block, so a missing or corrupted
-measurement fails rather than passing on a stale constant.
+The map, its booking term and the exact-support exterior come from the
+certificate-support gate's own ``build_carrier`` and ``measure_arm``, so the two
+gates share one implementation of the recipe instead of each carrying a copy.
+
+The rung requests realise about 2,000, 5,000 and 10,000 solver cells.  The
+2,000-cell rung is measured in this test from the analytic state, so a code
+regression fails the gate.  The 5,000- and 10,000-cell rungs each cost a carrier
+build far beyond a gate's budget, so they are read from the evidence fragment
+the driver at the foot of this file publishes; a missing or corrupted row fails
+rather than passing on a stale constant.
 
 The map's derivative is checked against central differences through the same
 operator the map uses.  The boundary-flux component is the one a padded dummy
@@ -43,7 +48,10 @@ import pytest  # noqa: E402
 from benchmarks import solovev_certificate as certificate  # noqa: E402
 from nova.equilibrium import topology  # noqa: E402
 from scripts.analytic_oracle_fixtures import measure as fixture  # noqa: E402
-from scripts.prototypes.support import geometry, measure as proto  # noqa: E402
+from tests.test_certificate_exterior_support import (  # noqa: E402
+    build_carrier,
+    measure_arm,
+)
 
 
 LIMITED = "weak-rotation-reactor-static"
@@ -52,30 +60,38 @@ CASES = (LIMITED, DIVERTED)
 # Negative requests target solver cells after boundary qualification; the
 # realised mesh is a little larger (2,098 and 5,158 at the first two rungs).
 RUNG_REQUESTS = {2000: -2000, 5000: -5000, 10000: -10000}
+# The only rung a gate rebuilds; the heavier rungs are published rows.
+LIVE_CELLS = 2000
 DERIVATIVE_REQUEST = -550
 MAP_TOLERANCE = 1.0e-2
 DECOMPOSITION_TOLERANCE = 1.0e-10
 MAP_JVP_TOLERANCE = 1.0e-6
 BOUNDARY_JVP_TOLERANCE = 1.0e-6
-JVP_STEP_FRACTION = 1.0e-6
+JVP_SPAN_FRACTION = 1.0e-6
 CLAMP_ENV = "NOVA_DUMMY_SADDLE_CLAMP"
+IMAGE_NULL_COLOR = "#7a3ea8"
 ROOT = Path(__file__).resolve().parents[1]
 FRAGMENT = (
     ROOT
-    / "docs/evidence/fragments/converged-forward-solve"
-    / "cfs-map-fidelity-rungs.html"
+    / "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html"
 )
 ROWS_ID = "cfs-map-fidelity-rows"
 
 _MEASUREMENTS: dict[tuple[str, int], dict[str, object]] = {}
-_STATES: dict[str, tuple[object, object, float]] = {}
+_STATES: dict[tuple[str, int], tuple[object, object, float]] = {}
 _CARRIERS: dict[tuple[str, int], dict[str, object]] = {}
 
-
-def _branch(case_name: str) -> topology.TopologyClass:
-    if certificate._is_diverted_case(case_name):
-        return topology.TopologyClass.DIVERTED
-    return topology.TopologyClass.LIMITED
+PUBLISHED_ROW_KEYS = (
+    "case",
+    "requested_cells",
+    "realised_cells",
+    "span_wb",
+    "map_relative_sup",
+    "booking_image_relative_sup",
+    "exterior_closure_relative_sup",
+    "decomposition_relative_sup",
+    "exterior_cache",
+)
 
 
 def _analytic_operator(case_name: str, request: int):
@@ -87,7 +103,7 @@ def _analytic_operator(case_name: str, request: int):
     central difference by 4.0e-3 at this state; the production clip is the map
     a solve differentiates and agrees to 2.9e-8.
     """
-    key = f"{case_name}:{request}"
+    key = (case_name, request)
     if key in _STATES:
         return _STATES[key]
     configure_dtypes()
@@ -106,116 +122,38 @@ def _analytic_operator(case_name: str, request: int):
     return _STATES[key]
 
 
+def _carrier(case_name: str, cells: int) -> dict[str, object]:
+    """Build one rung's carrier through the certificate-support gate's recipe.
+
+    The rung's machine comes from the certificate case and the requested cell
+    count; everything above it — the analytic state, the exact-support
+    exterior, the operator, the closed-form current target and the analytic
+    support override — is built by the shared ``build_carrier``.
+    """
+    key = (case_name, cells)
+    if key in _CARRIERS:
+        return _CARRIERS[key]
+    carrier_case, _source, exact = certificate._case(case_name, clip_mode="exact")
+    machine = certificate._case_machine(
+        case_name, carrier_case, exact, RUNG_REQUESTS[cells]
+    )
+    record = build_carrier(case_name, machine)
+    _CARRIERS[key] = record
+    return record
+
+
 def _measure_map(case_name: str, cells: int) -> dict[str, object]:
     """Measure one rung's map, booking and closure terms at the analytic state."""
     key = (case_name, cells)
     if key in _MEASUREMENTS:
         return _MEASUREMENTS[key]
     carrier = _carrier(case_name, cells)
-    machine = carrier["machine"]
-    analytic = carrier["analytic"]
-    operator = carrier["operator"]
-    active = carrier["active"]
-    target = carrier["target"]
-    branch = carrier["branch"]
-    span = carrier["span"]
-    grid = len(machine.node)
-    value = np.asarray(
-        active.flux_map(requested_class=branch, target_current=target)(analytic)
+    measured, _built = measure_arm(
+        case_name, cells, carrier["machine"], "exact", branch=carrier["branch"]
     )
-    delta = value[:grid] - np.asarray(analytic)[:grid]
-    raw = active.cell_current_moments(analytic, branch)
-    booked = float(np.sum(raw.cell_current))
-    scaled = active.scaled_current_moments(
-        raw, active.current_normalisation_amplitude(target, booked)
-    )
-    booking_delta = np.asarray(
-        operator.current_moment_image(scaled) - carrier["reference_image"]
-    )[:grid]
-    exterior_closure = np.asarray(
-        carrier["exterior"] + carrier["reference_image"] - np.asarray(analytic)
-    )[:grid]
-    measured = {
-        "case": case_name,
-        "requested_cells": cells,
-        "realised_cells": grid,
-        "span_wb": span,
-        "map_relative_sup": float(np.max(np.abs(delta)) / span),
-        "booking_image_relative_sup": float(np.max(np.abs(booking_delta)) / span),
-        "exterior_closure_relative_sup": float(np.max(np.abs(exterior_closure)) / span),
-        "decomposition_relative_sup": float(
-            np.max(np.abs(booking_delta + exterior_closure - delta)) / span
-        ),
-        "exterior_cache": carrier["exterior_cache"],
-    }
-    _MEASUREMENTS[key] = measured
-    return measured
-
-
-def _carrier(case_name: str, cells: int) -> dict[str, object]:
-    """Build all the pieces one rung's measurement and figure both need."""
-    key = (case_name, cells)
-    if key in _CARRIERS:
-        return _CARRIERS[key]
-    configure_dtypes()
-    assert jax.config.jax_enable_x64 is True
-    carrier_case, source, exact = certificate._case(case_name, clip_mode="exact")
-    machine = certificate._case_machine(
-        case_name, carrier_case, exact, RUNG_REQUESTS[cells]
-    )
-    coordinates = np.vstack(
-        (machine.node, machine.wall_node, machine.sample_coordinates)
-    )
-    analytic = jnp.asarray(
-        certificate._exact_state(case_name, exact, coordinates), dtype=np.float64
-    )
-    empty = fixture.forward_operator(source, machine)
-    span = abs(float(fixture._analytic_axis_flux(exact)))
-    centres = np.asarray(empty.moment_geometry.atomic_mesh.centroids)
-    physical, exterior, exterior_cache = fixture.cached_fixture_exterior(
-        source, exact, machine, empty, analytic, support_arm="exact"
-    )
-    operator = fixture.forward_operator(source, machine, exterior).with_clip_mode(
-        "exact"
-    )
-    target, _centroid, _receipt = certificate._closed_form_current_target(
-        case_name, source, operator, physical
-    )
-    branch = _branch(case_name)
-    exact_polygons = geometry.analytic_polygons(exact, machine.cell_polygons)
-    true_physical = geometry.analytic_moments(source, exact_polygons, centres)
-    reference_image = np.asarray(
-        operator.current_moment_image(operator.coupling_current_moments(true_physical))
-    )
-    base_partition = jax.jit(lambda state: operator._support_partition(state, branch))(
-        analytic
-    )
-    exact_support = geometry.pack(exact_polygons, base_partition[3])
-    active = proto.override(
-        operator,
-        proto.partition(
-            operator,
-            analytic,
-            jnp.asarray(fixture._analytic_axis_flux(exact)),
-            jnp.asarray(0.0),
-            fixture._analytic_saddle(exact),
-            exact_support,
-        ),
-    )
-    record = {
-        "machine": machine,
-        "analytic": analytic,
-        "operator": operator,
-        "active": active,
-        "target": target,
-        "branch": branch,
-        "span": span,
-        "exterior": exterior,
-        "reference_image": reference_image,
-        "exterior_cache": exterior_cache,
-    }
-    _CARRIERS[key] = record
-    return record
+    row = {name: measured[name] for name in PUBLISHED_ROW_KEYS}
+    _MEASUREMENTS[key] = row
+    return row
 
 
 def _receipt_rows() -> dict[tuple[str, int], dict[str, object]]:
@@ -228,17 +166,27 @@ def _receipt_rows() -> dict[tuple[str, int], dict[str, object]]:
         text,
         re.DOTALL,
     )
-    if match is None:
-        pytest.fail(f"no {ROWS_ID} block in {FRAGMENT}")
-    rows = json.loads(match.group(1))
-    return {(row["case"], int(row["requested_cells"])): row for row in rows}
+    if match is not None:
+        rows = json.loads(match.group(1))
+        return {(row["case"], int(row["requested_cells"])): row for row in rows}
+    pytest.fail(f"no {ROWS_ID} block in {FRAGMENT}")
 
 
 @pytest.mark.parametrize("case_name", CASES, ids=("limited", "diverted"))
 @pytest.mark.parametrize("cells", sorted(RUNG_REQUESTS))
+@pytest.mark.timeout(0)
 def test_map_reproduces_the_analytic_state_within_the_bound(case_name, cells):
-    """The exact-mode map is within the fixed bound at every analytic rung."""
-    row = _receipt_rows()[(case_name, cells)]
+    """The exact-mode map is within the fixed bound at every analytic rung.
+
+    The 2,000-cell rung is measured here from the analytic state, so a code
+    regression turns this test red. The 5,000- and 10,000-cell rungs each cost
+    a carrier build far beyond a gate's budget, so their rows come from the
+    evidence fragment the driver publishes.
+    """
+    if cells == LIVE_CELLS:
+        row = _measure_map(case_name, cells)
+    else:
+        row = _receipt_rows()[(case_name, int(cells))]
     print("MAP_FIDELITY_ROW " + json.dumps(row, default=str), flush=True)
     assert row["decomposition_relative_sup"] < DECOMPOSITION_TOLERANCE, row
     assert row["exterior_closure_relative_sup"] < row["booking_image_relative_sup"], row
@@ -271,7 +219,7 @@ def test_map_jvp_matches_central_difference(forcing_direction):
     map_fn = operator.flux_map(requested_class=topology.TopologyClass.LIMITED)
     _value, tangent = jax.linearize(map_fn, state)
     tangent_value = np.asarray(tangent(direction))
-    step = JVP_STEP_FRACTION * span
+    step = JVP_SPAN_FRACTION * span
     finite = np.asarray(
         (map_fn(state + step * direction) - map_fn(state - step * direction))
         / (2.0 * step)
@@ -282,6 +230,7 @@ def test_map_jvp_matches_central_difference(forcing_direction):
     )
     print(f"MAP_JVP_RELATIVE_SUP={error:.17g}", flush=True)
     assert np.isfinite(error)
+    assert np.max(np.abs(finite)) > 0.0
     assert error < MAP_JVP_TOLERANCE
 
 
@@ -325,7 +274,7 @@ def test_map_boundary_flux_jvp_matches_central_difference(forcing_direction):
         )(base)
     )
     compiled = jax.jit(lambda field: _boundary_level(operator, field))
-    step = JVP_STEP_FRACTION * span
+    step = JVP_SPAN_FRACTION * span
     finite = float(
         (compiled(base + step * direction) - compiled(base - step * direction))
         / (2.0 * step)
@@ -342,11 +291,21 @@ def test_map_boundary_flux_jvp_matches_central_difference(forcing_direction):
 
 
 def _figure(case_name: str, cells: int = 10000) -> Path:
-    """Draw the map image beside the analytic state at one carrier rung."""
+    """Draw the map image beside the analytic state at one carrier rung.
+
+    Each panel carries BOTH null sets in the null vocabulary — solid triangle
+    for the axis, filled cross for the admitted saddle — with the analytic set
+    in the default marker colour and the map image's in a second hue, so the
+    reader sees whether the map's topology matches the state it came from.
+    """
     import matplotlib
 
     matplotlib.use("Agg")
+    from dataclasses import replace
+
     import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+
     from nova.media import ink, poloidal
 
     carrier = _carrier(case_name, cells)
@@ -371,12 +330,15 @@ def _figure(case_name: str, cells: int = 10000) -> Path:
         axis=float(exact_read.axis_flux),
     )
     style = ink.DEFAULT_INK
+    image_style = replace(
+        style, axis_color=IMAGE_NULL_COLOR, xpoint_color=IMAGE_NULL_COLOR
+    )
     figure, panels = plt.subplots(1, 2, figsize=(14.0, 7.2))
     figure.patch.set_facecolor(style.figure_facecolor)
-    figure.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.99, wspace=0.02)
-    for panel, values, reading in (
-        (panels[0], image[:grid], image_read),
-        (panels[1], exact_grid, exact_read),
+    figure.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.93, wspace=0.02)
+    for panel, values, label in (
+        (panels[0], image[:grid], "map image"),
+        (panels[1], exact_grid, "analytic state")
     ):
         ink.poloidal_axes(panel, style)
         poloidal.draw_scattered_contours(
@@ -389,15 +351,47 @@ def _figure(case_name: str, cells: int = 10000) -> Path:
             color=style.flux_color,
             linewidth=0.5,
         )
-    for panel, reading in ((panels[0], image_read), (panels[1], exact_read)):
         poloidal.draw_wall(panel, radius=wall[:, 0], height=wall[:, 1], style=style)
-        poloidal.draw_nulls(
-            panel,
-            magnetic_axis=np.asarray(reading.axis),
-            x_points=np.asarray(reading.x_point)[None, :],
-            style=style,
-            contain=wall,
-        )
+        for reading, null_style in (
+            (exact_read, style),
+            (image_read, image_style),
+        ):
+            poloidal.draw_nulls(
+                panel,
+                magnetic_axis=np.asarray(reading.axis),
+                x_points=np.asarray(reading.x_point)[None, :],
+                style=null_style,
+                contain=wall,
+            )
+        panel.text(
+            0.02,
+            0.98,
+            label,
+            transform=panel.transAxes,
+            ha="left",
+            va="top",
+            fontsize=14)
+    handles = (
+        Line2D(
+            [],
+            [],
+            marker=style.axis_marker,
+            markersize=style.axis_markersize,
+            color=style.axis_color,
+            linestyle="none",
+            label="analytic nulls",
+        ),
+        Line2D(
+            [],
+            [],
+            marker=style.xpoint_marker,
+            markersize=style.xpoint_markersize,
+            color=IMAGE_NULL_COLOR,
+            linestyle="none",
+            label="map-image nulls",
+        ),
+    )
+    figure.legend(handles=handles, loc="upper center", frameon=False, ncol=2)
     directory = ROOT / "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs"
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / f"{case_name}-map-fidelity-{cells}.svg"

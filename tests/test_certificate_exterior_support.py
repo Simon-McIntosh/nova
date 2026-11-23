@@ -56,93 +56,134 @@ def _cache_dir(cells: int) -> Path:
     return DEFAULT_CACHE
 
 
-def _arm_measurement(cells: int, arm: str) -> dict[str, object]:
-    """Return the booking and exterior closure terms for one support arm.
+def _branch_for(case: str) -> topology.TopologyClass:
+    if certificate._is_diverted_case(case):
+        return topology.TopologyClass.DIVERTED
+    return topology.TopologyClass.LIMITED
 
-    ``arm="exact"`` takes the fixture's default (exact analytic support)
-    exterior, so flipping that default — the declared negative-control
-    mutation — turns the closure clause red.  ``arm="legacy"`` names the
-    legacy spline-support exterior explicitly.
+
+def build_carrier(case: str, machine, *, support_arm: str | None = None, branch=None):
+    """Build the exact-support map state for one analytic case and carrier
+    machine.
+
+    ``support_arm=None`` takes the fixture's default exact-support exterior and
+    overrides the operator's support partition with the analytic separatrix
+    polygons; a named arm takes that exterior and keeps the operator's own
+    partition, which is the legacy positive control.
     """
-    key = (cells, arm)
-    if key in _MEASUREMENTS:
-        return _MEASUREMENTS[key]
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
-    carrier, source, exact = certificate._case(CASE, clip_mode="exact")
-    wall = certificate._diverted_wall(exact)
-    machine = proto.machine_from_cache(
-        carrier, RUNG_REQUESTS[cells], wall, _cache_dir(cells)
-    )
+    carrier, source, exact = certificate._case(case, clip_mode="exact")
+    if branch is None:
+        branch = _branch_for(case)
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = jnp.asarray(
-        certificate._exact_state(CASE, exact, coordinates), dtype=jnp.float64
+        certificate._exact_state(case, exact, coordinates), dtype=jnp.float64
     )
     empty = fixture.forward_operator(source, machine)
     span = abs(float(fixture._analytic_axis_flux(exact)))
     centres = np.asarray(empty.moment_geometry.atomic_mesh.centroids)
-
-    if arm == "exact":
-        physical, exterior, exterior_cache = fixture.cached_fixture_exterior(
-            source, exact, machine, empty, analytic
-        )
-    else:
-        physical, exterior, exterior_cache = fixture.cached_fixture_exterior(
-            source, exact, machine, empty, analytic, support_arm="legacy"
-        )
+    physical, exterior, exterior_cache = fixture.cached_fixture_exterior(
+        source,
+        exact,
+        machine,
+        empty,
+        analytic,
+        support_arm="exact" if support_arm is None else support_arm,
+    )
     operator = fixture.forward_operator(source, machine, exterior).with_clip_mode(
         "exact"
     )
     target, _centroid, _receipt = certificate._closed_form_current_target(
-        CASE, source, operator, physical
+        case, source, operator, physical
     )
-
     exact_polygons = geometry.analytic_polygons(exact, machine.cell_polygons)
     true_physical = geometry.analytic_moments(source, exact_polygons, centres)
     reference_image = np.asarray(
         operator.current_moment_image(operator.coupling_current_moments(true_physical))
     )
-    partition_fn = jax.jit(lambda state: operator._support_partition(state, BRANCH))
-    legacy_partition = partition_fn(analytic)
-    if arm == "exact":
-        exact_support = geometry.pack(exact_polygons, legacy_partition[3])
-        exact_partition = proto.partition(
+    partition = jax.jit(lambda state: operator._support_partition(state, branch))(
+        analytic
+    )
+    if support_arm is None:
+        exact_support = geometry.pack(exact_polygons, partition[3])
+        active = proto.override(
             operator,
-            analytic,
-            jnp.asarray(fixture._analytic_axis_flux(exact)),
-            jnp.asarray(0.0),
-            fixture._analytic_saddle(exact),
-            exact_support,
+            proto.partition(
+                operator,
+                analytic,
+                jnp.asarray(fixture._analytic_axis_flux(exact)),
+                jnp.asarray(0.0),
+                fixture._analytic_saddle(exact),
+                exact_support,
+            ),
         )
-        active = proto.override(operator, exact_partition)
     else:
         active = operator
+    return {
+        "carrier": carrier,
+        "source": source,
+        "exact": exact,
+        "machine": machine,
+        "analytic": analytic,
+        "operator": operator,
+        "active": active,
+        "target": target,
+        "branch": branch,
+        "span": span,
+        "exterior": exterior,
+        "reference_image": reference_image,
+        "exterior_cache": exterior_cache,
+    }
 
-    value = np.asarray(
-        active.flux_map(requested_class=BRANCH, target_current=target)(analytic)
+
+def measure_arm(
+    case: str, cells: int, machine, arm: str, *, branch=None
+) -> tuple[dict[str, object], dict[str, object]]:
+    """Return one case-rung's booking and closure terms, and its carrier.
+
+    The record is the row this module's gate and the map-fidelity rungs both
+    publish; the carrier comes back too, so a caller that draws the state
+    reuses the build rather than repeating it.
+    """
+    built = build_carrier(
+        case, machine, support_arm=None if arm == "exact" else arm, branch=branch
     )
-    grid = len(machine.node)
+    active = built["active"]
+    operator = built["operator"]
+    analytic = built["analytic"]
+    branch_used = built["branch"]
+    value = np.asarray(
+        active.flux_map(requested_class=branch_used, target_current=built["target"])(
+            analytic
+        )
+    )
+    grid = len(built["machine"].node)
     delta = value[:grid] - np.asarray(analytic)[:grid]
-    raw = active.cell_current_moments(analytic, BRANCH)
+    raw = active.cell_current_moments(analytic, branch_used)
     booked = float(jnp.sum(raw.cell_current))
     scaled = active.scaled_current_moments(
-        raw, active.current_normalisation_amplitude(target, booked)
+        raw, active.current_normalisation_amplitude(built["target"], booked)
     )
-    booking_delta = np.asarray(operator.current_moment_image(scaled) - reference_image)[
-        :grid
-    ]
-    exterior_closure = np.asarray(exterior + reference_image - np.asarray(analytic))[
-        :grid
-    ]
+    booking_delta = np.asarray(
+        operator.current_moment_image(scaled) - built["reference_image"]
+    )[:grid]
+    exterior_closure = np.asarray(
+        built["exterior"] + built["reference_image"] - np.asarray(analytic)
+    )[:grid]
     # The full physical map includes the extension at residual-shadow nodes.
     shadow = np.asarray(
-        jax.jit(lambda state: operator.residual_shadow_mask(state, BRANCH))(analytic)
+        jax.jit(lambda state: operator.residual_shadow_mask(state, branch_used))(
+            analytic
+        )
     )[:grid]
+    span = built["span"]
     result = {
-        "cells": cells,
-        "realised_cells": len(machine.node),
+        "case": case,
+        "requested_cells": cells,
+        "realised_cells": grid,
         "arm": arm,
         "span_wb": span,
         "map_relative_sup": float(np.max(np.abs(delta)) / span),
@@ -154,10 +195,30 @@ def _arm_measurement(cells: int, arm: str) -> dict[str, object]:
         "decomposition_relative_sup": float(
             np.max(np.abs(booking_delta + exterior_closure - delta)) / span
         ),
-        "exterior_cache": exterior_cache,
+        "exterior_cache": built["exterior_cache"],
     }
-    _MEASUREMENTS[key] = result
-    return result
+    return result, built
+
+
+def _arm_measurement(cells: int, arm: str) -> dict[str, object]:
+    """Return the booking and exterior closure terms for one support arm.
+
+    ``arm="exact"`` takes the fixture's default (exact analytic support)
+    exterior, so flipping that default — the declared negative-control
+    mutation — turns the closure clause red.  ``arm="legacy"`` names the
+    legacy spline-support exterior explicitly.
+    """
+    key = (cells, arm)
+    if key in _MEASUREMENTS:
+        return _MEASUREMENTS[key]
+    carrier, source, exact = certificate._case(CASE, clip_mode="exact")
+    wall = certificate._diverted_wall(exact)
+    machine = proto.machine_from_cache(
+        carrier, RUNG_REQUESTS[cells], wall, _cache_dir(cells)
+    )
+    measured, _built = measure_arm(CASE, cells, machine, arm, branch=BRANCH)
+    _MEASUREMENTS[key] = measured
+    return measured
 
 
 @pytest.mark.parametrize("cells", sorted(RUNG_REQUESTS))

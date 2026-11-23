@@ -85,8 +85,15 @@ def _targets(kind):
         else:
             level = polygon[index % len(polygon), 1]
             offset = (0.0, 1e-12, -1e-12, 9e-8, -9e-8)[index % 5]
-            target = np.array([4.4 + random.uniform(0.0, 0.4), level + offset])
-            assert np.min(np.linalg.norm(polygon - target, axis=1)) >= pitch
+            # A full circumscribed diameter bounds the cell pitch from above.
+            # Use that conservative distance even for the non-hexagonal cells.
+            target = np.array(
+                [
+                    polygon[:, 0].max() + 2 * pitch + random.uniform(0.0, 0.4),
+                    level + offset,
+                ]
+            )
+            assert np.min(np.linalg.norm(polygon - target, axis=1)) >= 2 * pitch
             assert np.min(abs(polygon[:, 1] - target[1])) <= 1e-7
         polygons.append(polygon)
         targets.append(target)

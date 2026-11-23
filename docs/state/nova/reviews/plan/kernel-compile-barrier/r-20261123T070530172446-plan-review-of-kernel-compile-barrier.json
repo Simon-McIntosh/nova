@@ -25,7 +25,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 139,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5f424d1f0630541fdf36a9373443bb1c38c0d7bf",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a79 no longer measures \u00a74's fills or the first call from the pinned cache; those remain \u00a74's own clauses, which now run after \u00a79. \u00a79 closes on the read becoming compilable.",
+      "reason": "",
+      "when": "2026-11-23T07:16:22.790428+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5f424d1f0630541fdf36a9373443bb1c38c0d7bf",
+      "commit_basis": "edit",
+      "note": "\u00a79 no longer measures \u00a74's fills or the first call from the pinned cache; those remain \u00a74's own clauses, which now run after \u00a79. \u00a79 closes on the read becoming compilable.",
+      "reason": "",
+      "when": "2026-11-23T07:16:22.790428+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261123T070530172446-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261123T070530172446-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "789717de96b0fa713f9fa05e6785bbde5aea964d",
   "rubric": "content",

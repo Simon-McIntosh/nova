@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T04:21:09.661Z",
+  "dispatched_at": "2026-11-23T04:15:07Z",
+  "findings": [
+    {
+      "disposition": "exempted: the quotient is the measured quantity the section reports and its excess is recoverable by subtracting the bound; the mark already encodes the excess position, so both facts are present on the panel.",
+      "file": "scripts/iron_operator_bound/figure.py",
+      "line": 118,
+      "severity": "non-blocking",
+      "summary": "The value labels print the quotient itself (e.g. '1.0001915') at seven decimal places, while the mark for that row is placed at the excess over the bound (1.915e-4) on a symmetric-log axis labelled 'largest ... minus the bound'. A reader comparing a label with the axis must subtract 1 to reconcile them, and the full-precision quotient reads as though it were an axis position."
+    },
+    {
+      "disposition": "exempted: the value-beyond-bound rule is what colours a mark, and marker position plus the printed value already separate the near-bound uniform readings from the graded and planted-control ones.",
+      "file": "scripts/iron_operator_bound/figure.py",
+      "line": 113,
+      "severity": "non-blocking",
+      "summary": "All four marks are drawn in the limit colour because every reading exceeds the bound by a positive amount, including uniform 80 (excess 1.9e-4) and uniform 40 (1.5e-5). Uniform red presents the two near-bound uniform operators as violations of the same kind as graded 16/80, working against the section's point that the graded excess is some 1700 times the 40 mm one."
+    },
+    {
+      "disposition": "exempted: the signed axis is what lets a reading that falls below the bound sit left of the zero line, which is the comparison the panel exists to support, and the exact readings are printed beside each mark and tabulated in the fragment.",
+      "file": "docs/figures/iron-core-magnetisation/icm-graded-bound-remeasure/operator-bound.png",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The symmetric-log axis spends its left half on negative excess, where no reading falls - all four marks sit right of the bound line - so half the panel width carries no data and the marks crowd the right-hand decades."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T041443718260-review-of-icm-graded-bound-remeasure-bb6c6c8b9dd2-figure",
+  "reviewed_base_sha": "c06ff41029a84805c3be8ee6e9ca9f6b8f0ca35d",
+  "reviewed_figures": [
+    "docs/figures/iron-core-magnetisation/icm-graded-bound-remeasure/operator-bound.png"
+  ],
+  "reviewed_head_sha": "bb6c6c8b9dd2c0b5e606004f18a068b9f349831c",
+  "reviewed_run_id": "r-20261122T141646800999-icm-graded-bound-remeasure",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Pass. The limit red (#c62828) and subject blue (#3b6ea5) both clear white at these sizes, the grey iron population (#929292) and near-black wall outline read as data, and the 'bound' annotation and tick text are dark grey on white.",
+    "data_ink": "Pass. The left panel is four marks and their printed values against one dotted bound rule; the right panel is a flat neutral-grey iron fill with the witness drawn as sized blue markers over it. No gradient, colour map or decorative fill spends ink on cells the witness does not touch.",
+    "decoration": "Pass. No gridlines, no background fill, no gradient, no in-figure title or suptitle. The scalar panel keeps only the bottom and left spines with a dotted bound rule; the cross-section is drawn axis-off.",
+    "label_collision": "Pass. No text is clipped by the canvas edge and no label overlaps another or the data: each value label sits clear above its mark, the 'bound' annotation sits in clear space beside the dotted rule, the axis unit is fully inside the canvas, and the two-entry legend sits above the cross-section clear of the marks.",
+    "legibility": "Pass with a caveat. Axis labels are 16 pt and tick, legend and value labels 14 pt, all readable at the rendered size; the four operator names and the two panels read at a glance. The one thing needing a second look is that each printed value is the quotient itself (e.g. 1.0001915) while its mark is placed at the excess over the bound on a symmetric-log axis titled 'minus the bound', so a reader must subtract 1 to place a label against the axis.",
+    "table_form": "Non-blocking. The left panel is four named operators each carrying one scalar, printed at full precision - information whose natural form is a table, and the fragment already carries exactly that table. What the panel adds over the table is the visual distance to the bound, so it does not stop the reader reading the values."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T04:21:21.055117+00:00",
+  "total": null
+}

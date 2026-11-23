@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="115">
+<meta name="plan-version" content="116">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -402,7 +402,7 @@
     <div class="r-comment-body"><p>Independent review of r-20261122T185009989125-drift-sequences-fit-iteration gained commits b05fa96bd..e1108dadb: goal_fidelity 15, evidence 16, scope_discipline 19, durability 15, fit 15, reuse 12; all five findings non-blocking; the prior review's two blocking findings are answered (the cross-code comparison is withdrawn and each column is stated on its own declared row set).</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261122T185009989125-drift-sequences-fit-iteration" data-who="reckon-build" data-when="2026-11-23T08:19:46Z">
-    <div class="r-comment-body"><p>The record is regenerated from the reduction, the gate log and the panel receipt. It states each column&#x27;s own row set, reports that the 1/f lag-one clause fails for both codes and that no cross-code comparison is therefore read, and names job 1338386 as the row-matched arm that did not complete. The overlay panel now draws the generating field and its nulls beside both codes&#x27; and writes the measured separations on the panel. The gate is captured at the final head e94c73f90 (24 passed, 2 failed, exit 1).</p></div>
+    <div class="r-comment-body"><p>The record is regenerated from the reduction, the gate log and the panel receipt. It states each column's own row set, reports that the 1/f lag-one clause fails for both codes and that no cross-code comparison is therefore read, and names job 1338386 as the row-matched arm that did not complete. The overlay panel now draws the generating field and its nulls beside both codes' and writes the measured separations on the panel. The gate is captured at the final head e94c73f90 (24 passed, 2 failed, exit 1).</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261117T043314861081-review-of-efit-on-nova-rows-86b64c13475d" data-who="reckon-build" data-when="2026-11-17T04:38:15.860Z">
     <div class="r-comment-body"><p>independent review of r-20261115T202050274305-efit-on-nova-rows stored at review-records/r-20261115T202050274305-efit-on-nova-rows.json (and its .at-86b64c13 sibling) with status parsed, scores goal_fidelity 17, evidence 16, scope_discipline 18, durability 6, fit 15, reuse 20 (total 92), reviewed_base_sha 1f788362e8e1ca19bb5691fff8b31d25ed825f0e and reviewed_head_sha 86b64c13475d0d589ff836eaec44affff1ca7d56, added_failure_count 0 over an unarmed reviewed run, and four non-blocking findings.</p></div>
@@ -487,6 +487,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261122T192846734957-magnetics-fit-file-completes-on-cpu" data-who="reckon-build" data-when="2026-11-23T08:30:51Z">
     <div class="r-comment-body"><p>the four known-state recovery cases move to tests/test_equilibrium_magnetics_fit_known_states.py with their slow marks, bodies and assertions byte-identical, because a named test path clears the default fast-lane filter; the five helpers every importer imports live in tests/magnetics_fit_harness.py and each importer reads them there. The measured module completes at fd56bd24a in 6.46 s serially and 10.32 s under -n 8 (44 passed each, EXIT=0), against a base arm cancelled at its ten-minute step limit and single known-state cases at 2346.60 s (MAST) to 3266.66 s (Solovev).</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-landed-r-20261121T205405910971-mast-known-state-carriers-rebuilt" data-who="reckon-build" data-when="2026-11-23T10:52:36.908251+00:00">
+    <div class="r-comment-body"><p>Landed r-20261121T205405910971-mast-known-state-carriers-rebuilt on the measured suite pair; the section stays implementable for 2 other node(s) still to land: fit-iteration-stored-cases-from-main, jax-cpu-native-abort. <a href="/nova/evidence/archive/inverse-equilibrium-baseline-landed.html#mast-known-state-carriers-rebuilt">evidence</a></p></div>
 </div>
 </section>
 </main>

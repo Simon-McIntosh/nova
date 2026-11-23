@@ -10,7 +10,7 @@
     "scripts/prototypes/fit_inside_iteration/probe_step_rule.py:27 imports _Factory, _known_case (unchanged by the diff)",
     "scripts/nova_lane/run.sh launcher that submitted the driver (manifest.md:12)"
   ],
-  "completed_at": "",
+  "completed_at": "2026-11-23T14:38:50.999Z",
   "dimension_dispositions": {
     "durability": {
       "kind": "folded",
@@ -22,21 +22,18 @@
   "findings": [
     {
       "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html",
-      "id": "f5ca4c006b7",
       "line": "5",
       "severity": "non-blocking",
       "text": "non-blocking: the table column \"Stopped-improving pass\" (cells at :6-:8) carries the 0-based receipt field stopped_improving_pass (4/2/9) beside 1-based pass numbers elsewhere in the same table, while the prose at :11-:13 states that field \"is not the pass the map stopped improving\"; a reader taking the table alone concludes the walk stalled at pass 4/2/9, which the record's own text contradicts."
     },
     {
       "file": "manifest.md",
-      "id": "fd4f6cd9b7d",
       "line": "12",
       "severity": "non-blocking",
       "text": "non-blocking: the tests: line is a prose sentence rather than the literal command, and it appends --max-passes 96 --max-update 1.0 --flux-tolerance 1e-10 --relaxation 1.0 that the job's COMMAND line in stored-cases-titan.log does not carry; those values are run.py's defaults, so the measurement is sound but a reader comparing the two sees a mismatch."
     },
     {
       "file": "manifest.md",
-      "id": "f2360dee69e",
       "line": "7",
       "severity": "non-blocking",
       "text": "non-blocking: the checkpoint states the job wall as 11:57:18Z-15:57:18Z, while stored-cases-titan.log records NOVA_LANE_START=2026-11-23T11:57:31+0100 and NOVA_LANE_END=2026-11-23T15:16:12+0100 (3 h 19 m); the stated window is wrong in both zone and duration."
@@ -82,6 +79,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-23T14:53:11.885846+00:00",
+  "timestamp": "2026-11-23T14:54:00.021367+00:00",
   "total": 99
 }

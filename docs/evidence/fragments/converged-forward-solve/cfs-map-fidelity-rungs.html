@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="cfs-map-fidelity-rungs">
+<meta name="plan-title" content="Map fidelity at the certificate rungs and the map derivative">
+<meta name="plan-summary" content="Measured the exact-mode map at the analytic state on both
+analytic cases at the 2,000, 5,000 and 10,000-cell rungs with the certificate exterior
+posed on the exact support, and bound the map's derivative against central differences
+with a restored-clamp negative control">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<meta name="plan-commits" content="edb2d8d09,b27e012a5,9e6024b21,74cf9614d,87b4fdbc9,8e42b4cbe,8f654e2de,706722415,f5979377c,9dee2f8ce,2de405807">
+<meta name="plan-recorded-at" content="2026-11-22">
+<meta name="plan-verdict" content="complete">
+<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) on the rigel and all_debug partitions; six per-rung allocations and one derivative allocation">
+<title>Map fidelity at the certificate rungs and the map derivative | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="cfs-map-fidelity-rungs">Map fidelity at the certificate rungs and the map derivative</h1>
+
+<p>The map is <code>gs.apply</code>: the booked plasma current imaged through the
+booked coupling blocks and added to the exterior flux. Evaluated once at the
+analytic state with no solve, it must reproduce that state within 1e-2 relative
+sup at the analytic-certificate rungs, in exact mode, on both analytic cases.
+The exterior is posed on the exact analytic separatrix support so the exterior's
+own closure residual is at roundoff and the residual the bound measures is the
+map's booking term rather than a fixture mismatch.</p>
+
+<p>The relative sup is the largest absolute difference over the solve grid,
+divided by the flux span between the analytic axis and the analytic zero level.
+The solve grid is the mesh nodes; wall and sample coordinates are carried in the
+same state vector but are not part of the image comparison. Every row below also
+carries the booking term, the exterior closure, and the decomposition residual
+<code>booking + closure - map</code>, which must be zero to roundoff for the
+decomposition to mean anything.</p>
+
+<h2 id="cfs-map-fidelity-rungs-rows">Measured rows</h2>
+
+<table>
+<thead>
+<tr>
+<th>Case</th><th>Requested cells</th><th>Realised cells</th><th>Map relative sup</th>
+<th>Booking image relative sup</th><th>Exterior closure relative sup</th>
+<th>Decomposition residual</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>weak-rotation-reactor-static</td><td>2000</td><td>2105</td><td>6.775e-05</td><td>6.775e-05</td><td>1.9e-14</td><td>0.0e+00</td></tr>
+<tr><td>weak-rotation-reactor-static</td><td>5000</td><td>5167</td><td>2.825e-05</td><td>2.825e-05</td><td>1.3e-14</td><td>0.0e+00</td></tr>
+<tr><td>weak-rotation-reactor-static</td><td>10000</td><td>10238</td><td>2.004e-05</td><td>2.004e-05</td><td>2.6e-14</td><td>0.0e+00</td></tr>
+<tr><td>diverted-single-null</td><td>2000</td><td>2098</td><td>5.780e-03</td><td>5.780e-03</td><td>2.5e-14</td><td>0.0e+00</td></tr>
+<tr><td>diverted-single-null</td><td>5000</td><td>5158</td><td>2.801e-04</td><td>2.801e-04</td><td>6.5e-14</td><td>0.0e+00</td></tr>
+<tr><td>diverted-single-null</td><td>10000</td><td>10229</td><td>9.850e-04</td><td>9.850e-04</td><td>3.6e-14</td><td>0.0e+00</td></tr>
+</tbody>
+</table>
+
+<p>All six rows are under the 1e-2 bound, and the exterior closure is at
+roundoff (1e-14) in every one, so each row's residual is its booking term. The
+bound holds with margin at every rung of both cases: the largest reading is the
+diverted case's 9.850e-04 at 10,229 cells, a tenth of the bound, and the
+limited case never leaves 7e-05.</p>
+
+<p>The rung table is a bound check and not a convergence sequence. The diverted
+case is not monotone in the rung — 5.780e-03, 2.801e-04, 9.850e-04 — because the
+booking term measures how the mesh's cell polygons close on the analytic
+separatrix support, which moves with the rung rather than shrinking under it.
+Every reading stays well inside the bound, and the exterior closure stays at
+roundoff, so no reading is a fixture artefact.</p>
+
+<script type="application/json" id="cfs-map-fidelity-rows">
+[
+ {
+  "booking_image_relative_sup": 6.77474841813445e-05,
+  "case": "weak-rotation-reactor-static",
+  "decomposition_relative_sup": 0.0,
+  "exterior_cache": {
+   "build_seconds": 0.0,
+   "hit": true,
+   "load_seconds": 0.03462140075862408,
+   "lock_wait_seconds": 1.749396324157715e-05,
+   "semantic_key": "93523b861a700e39",
+   "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+  },
+  "exterior_closure_relative_sup": 1.878059382196336e-14,
+  "map_relative_sup": 6.774748417059258e-05,
+  "realised_cells": 2105,
+  "requested_cells": 2000,
+  "span_wb": 49.94072179477446
+ },
+ {
+  "booking_image_relative_sup": 2.825225090092512e-05,
+  "case": "weak-rotation-reactor-static",
+  "decomposition_relative_sup": 0.0,
+  "exterior_cache": {
+   "build_seconds": 5.172490060329437,
+   "hit": false,
+   "load_seconds": 0.0038638152182102203,
+   "lock_wait_seconds": 1.091696321964264e-05,
+   "semantic_key": "844c595d7667d988",
+   "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+  },
+  "exterior_closure_relative_sup": 1.2520395881308908e-14,
+  "map_relative_sup": 2.825225089484277e-05,
+  "realised_cells": 5167,
+  "requested_cells": 5000,
+  "span_wb": 49.94072179477446
+ },
+ {
+  "booking_image_relative_sup": 2.0039303804090316e-05,
+  "case": "weak-rotation-reactor-static",
+  "decomposition_relative_sup": 0.0,
+  "exterior_cache": {
+   "build_seconds": 37.285381654277444,
+   "hit": false,
+   "load_seconds": 3.0201328229159117,
+   "lock_wait_seconds": 0.011016175150871277,
+   "semantic_key": "4ec54320c83a488f",
+   "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+  },
+  "exterior_closure_relative_sup": 2.5609900666313673e-14,
+  "map_relative_sup": 2.00393037957143e-05,
+  "realised_cells": 10238,
+  "requested_cells": 10000,
+  "span_wb": 49.94072179477446
+ },
+ {
+  "booking_image_relative_sup": 0.00578038429677113,
+  "case": "diverted-single-null",
+  "decomposition_relative_sup": 0.0,
+  "exterior_cache": {
+   "build_seconds": 6.686188204213977,
+   "hit": false,
+   "load_seconds": 0.0032350728288292885,
+   "lock_wait_seconds": 1.0008923709392548e-05,
+   "semantic_key": "45d986ab9a1d7d3a",
+   "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+  },
+  "exterior_closure_relative_sup": 2.4761901985507775e-14,
+  "map_relative_sup": 0.005780384296774049,
+  "realised_cells": 2098,
+  "requested_cells": 2000,
+  "span_wb": 0.00570957608082183
+ },
+ {
+  "booking_image_relative_sup": 0.00028014176552398364,
+  "case": "diverted-single-null",
+  "decomposition_relative_sup": 0.0,
+  "exterior_cache": {
+   "build_seconds": 8.783561487682164,
+   "hit": false,
+   "load_seconds": 0.003547294996678829,
+   "lock_wait_seconds": 1.6197562217712402e-05,
+   "semantic_key": "6a67a2e9ef7dc222",
+   "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+  },
+  "exterior_closure_relative_sup": 6.532280891882419e-14,
+  "map_relative_sup": 0.0002801417654969288,
+  "realised_cells": 5158,
+  "requested_cells": 5000,
+  "span_wb": 0.00570957608082183
+ },
+ {
+  "booking_image_relative_sup": 0.0009849985959312125,
+  "case": "diverted-single-null",
+  "decomposition_relative_sup": 0.0,
+  "exterior_cache": {
+   "build_seconds": 22.618797110393643,
+   "hit": false,
+   "load_seconds": 2.176468186080456,
+   "lock_wait_seconds": 0.005896642804145813,
+   "semantic_key": "f9fc681f99e1d401",
+   "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_clipped_exterior.zarr"
+  },
+  "exterior_closure_relative_sup": 3.6307328678137165e-14,
+  "map_relative_sup": 0.0009849985959252334,
+  "realised_cells": 10229,
+  "requested_cells": 10000,
+  "span_wb": 0.00570957608082183
+ }
+]
+</script>
+
+<h2 id="cfs-map-fidelity-rungs-drift">Booking terms against the earlier fixture</h2>
+
+<p>The two diverted rows are directly comparable with the rows recorded before
+the fixture's exact-support arm and the moment-vectorisation work landed: at
+2,098 cells the booking term was 0.005778474116893 and at 5,158 cells
+0.000279365986148. Restated against the current fixture they are
+0.005780384296774049 and 0.0002801417654969288, relative moves of 3.31e-4 and
+2.78e-3. Both moves are far inside the 1e-2 bound, and neither crosses it: the
+measurement is a restatement of the same quantity, not a new regime.</p>
+
+<h2 id="cfs-map-fidelity-rungs-derivative">The map's derivative</h2>
+
+<p>The derivative arms compare the map's own tangent, taken with
+<code>jax.linearize</code> on the map callable, with a central difference of the
+map at 1e-6 of the flux span. The comparison direction is the map's residual
+<code>mapped - psi</code>, normalised, which is the direction the map moves the
+state along towards the fixed point. The boundary-flux arm is the component a
+padded dummy saddle once doubled: the read maximised the wall level against a
+zero-flux dummy saddle, so autodiff returned one branch's slope while a central
+difference returned the average of both.</p>
+
+<table>
+<thead>
+<tr><th>Operator support clip</th><th>Direction</th><th>Map relative sup</th>
+<th>Boundary-flux relative sup</th></tr>
+</thead>
+<tbody>
+<tr><td>production (chord)</td><td>map residual</td><td>2.9e-8</td><td>8.3e-9</td></tr>
+<tr><td>production (chord)</td><td>Newton response step</td><td>2.6e-6</td><td>8.1e-6</td></tr>
+<tr><td>exact support</td><td>map residual</td><td>4.0e-3</td><td>8.5e-9</td></tr>
+<tr><td>exact support</td><td>Newton response step</td><td>3.7e-3</td><td>2.1e-4</td></tr>
+</tbody>
+</table>
+
+<p>Both tests read the production support clip along the map residual, at 1e-6
+relative sup. The exact clip selects cells with a branch that is not
+differentiable where a cell boundary sits on a node, which is why its map
+tangent is 4.0e-3 while the production clip's is 2.9e-8; the response step
+selects a different set of promoted wall nodes, which is why the boundary arm
+reads 8.1e-6 along it and 8.3e-9 along the residual.</p>
+
+<p>The gate readings are <code>MAP_JVP_RELATIVE_SUP=2.8861443945634642e-08</code>
+and <code>BOUNDARY_JVP=0.97246858630808686</code> against
+<code>CENTRAL=0.97246859433637478</code>, a relative difference of
+<code>8.2555755220287577e-09</code>.</p>
+
+<p>The negative control restores the clamp in the boundary-flux read, which
+resolves the wall-level selection at the tie with
+<code>jnp.where(value &gt;= 0, value, 0)</code>. On the state posed exactly at the
+tie the same measurement reads <code>BOUNDARY_JVP=0</code> against
+<code>CENTRAL=0.48623429315398581</code>, a relative difference of
+<code>1.0</code>: the select keeps only the wall branch's slope, so the whole
+boundary-flux response is annihilated instead of averaged. The historical
+symptom of the same select on the padded dummy saddle was the factor-of-two
+doubling (−6.91055e-3 AD against −3.45528e-3 central); here the base sits on the
+kink itself and the loss is total. Either way the run fails by test id
+<code>test_map_boundary_flux_jvp_matches_central_difference</code>, which is what
+the control asserts.</p>
+
+<h2 id="cfs-map-fidelity-rungs-figures">The map image beside the analytic state</h2>
+
+<p>Each panel pair draws one field at the 10,000-cell rung — the map's image of
+the analytic state in the left panel and the analytic state itself in the right —
+on one shared level array, so a mismatch cannot hide behind two colour scales.
+Every panel carries <em>both</em> null sets: the analytic set (solid triangle for
+the axis, filled cross for the admitted saddle) in the default null vocabulary,
+and the map image's set in a second hue (<code>#7a3ea8</code>), drawn larger and
+beneath the analytic set so that both stay visible where they coincide. A direct label on
+each panel names the field it draws, and one figure legend names the two null
+sets, because a solved null drawn alone on a non-converged state reads as the
+answer. The first wall is drawn on both panels. Contours are unfilled lines; the
+panels carry no axes.</p>
+
+<figure>
+<img src="/nova/figures/converged-forward-solve/cfs-map-fidelity-rungs/weak-rotation-reactor-static-map-fidelity-10000.svg"
+     alt="The limited case at the 10,000-cell rung: the map image beside the analytic state">
+<figcaption>The limited case at the 10,000-cell rung (10,238 realised mesh cells): the map image on the left and the analytic state on the right, on one shared level array of fourteen lines spanning the analytic axis and the analytic zero level, with the first wall drawn on both and every panel carrying both null sets: the analytic set in the default null colour and the map image's set in <code>#7a3ea8</code>, the map image's markers drawn larger and beneath so both stay visible where the sets coincide, named by a direct label on each panel and by one figure legend.</figcaption>
+</figure>
+<figure>
+<img src="/nova/figures/converged-forward-solve/cfs-map-fidelity-rungs/diverted-single-null-map-fidelity-10000.svg"
+     alt="The single-null diverted case at the 10,000-cell rung: the map image beside the analytic state">
+<figcaption>The single-null diverted case at the 10,000-cell rung (10,229 realised mesh cells): the map image on the left and the analytic state on the right, on one shared level array of fourteen lines spanning the analytic axis and the analytic zero level, with the first wall drawn on both and every panel carrying both null sets: the analytic set in the default null colour and the map image's set in <code>#7a3ea8</code>, the map image's markers drawn larger and beneath so both stay visible where the sets coincide, named by a direct label on each panel and by one figure legend.</figcaption>
+</figure>
+
+<h2 id="cfs-map-fidelity-rungs-reproduction">How the rows and the derivative are reproduced</h2>
+
+<p>The gate measures the 2,000-cell rung itself, on both cases, from the analytic
+state, so a regression in the map or in the exterior seam turns a collected test
+red. The 5,000- and 10,000-cell rungs each cost a carrier build far beyond a
+gate's budget, so their four rows are read from the JSON block above, which the
+driver at the foot of <code>tests/test_gs_map_fidelity.py</code> publishes; a
+missing or corrupted row fails rather than passing on a stale constant. The
+derivative arms are ordinary collected tests and carry a 550-cell build each.</p>
+
+<pre><code>python -m pytest tests/test_gs_map_fidelity.py -k reproduces -vv
+python tests/test_gs_map_fidelity.py --case diverted-single-null --cells 10000
+python -m pytest tests/test_gs_map_fidelity.py -k jvp -vv -s
+NOVA_DUMMY_SADDLE_CLAMP=1 python -m pytest tests/test_gs_map_fidelity.py \
+    -k boundary_flux_jvp -vv -s</code></pre>
+
+<p>The six row allocations ran on <code>rigel</code> at eight cores and 100 GB
+each; the three gate logs and the figure renders were taken on <code>rigel</code>
+at eight cores and 120 GB. Every wall below is CPU
+(<code>JAX_PLATFORMS=cpu</code>); no GPU rung is claimed for any row. Runtimes
+scale with the carrier: 27:24, 1:56:45 and 6:57:32 at 2,000, 5,000 and 10,000
+requested cells for the limited case, and 23:44, 1:54:31 and 6:45:10 for the
+diverted one, each a separate allocation.</p>
+
+<p>The gate logs were taken at <code>9dee2f8cea678ac9c8234a7a9046864cc0301d53</code>. <code>gate-rows.log</code> reports <code>6 passed, 2 deselected in 3217.52s (0:53:37)</code> and <code>gate-jvp.log</code> reports <code>2 passed, 6 deselected in 121.81s (0:02:01)</code>; <code>gate-negative-control.log</code> reports <code>1 failed, 7 deselected in 60.26s (0:01:00)</code>, and its failure names <code>test_map_boundary_flux_jvp_matches_central_difference</code>.</p><p>The two 2,000-cell rows in the table were read from <code>gate-rows-2000.log</code>, the gate's own run at <code>2de4058071b7</code>, which reports <code>2 passed in 680.11s (0:11:20)</code>; the 5,000- and 10,000-cell rows are quoted from the ladder's row logs, whose builds are hours long and are not repeated by the gate.</p>
+
+<p>Both suite arms run on <code>rigel</code> against the files their own revision holds: the baseline arm at the base this record cites and the after arm at the head it cites. The manifest records each arm's command, revision and summary as the scheduler returned them.</p>
+
+</main>
+</body>
+</html>

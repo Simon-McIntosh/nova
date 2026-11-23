@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed node's suite arms were not armed: verify-gate.json records 'the scoped-gate arm resolves to no command at aaf0f00d4017d810055cf9175f1fb3bb717a06ae', and the manifest carries no baseline_suite/after_suite JSON. There is therefore no suite pair to difference; the count is 0 because no arm exists, not because a pair was read and found equal.",
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T05:54:20.523Z",
+  "dispatched_at": "2026-11-23T05:33:02Z",
+  "findings": [
+    {
+      "file": "nova/imas/io_magnetics.py",
+      "line": 494,
+      "severity": "non-blocking",
+      "text": "diamagnetic_fluxes returns the dedicated diamagnetic_flux rows early (if channels: return tuple(channels)) and never appends the diamagnetic-labelled flux_loop channels, contradicting its own docstring that the loop form is read second; an entry publishing both silently loses the loop channels, and a caller selecting one by name raises 'diamagnetic channels not found' for a channel that exists."
+    },
+    {
+      "file": "nova/imas/io_magnetics.py",
+      "line": 107,
+      "severity": "non-blocking",
+      "text": "require_b0_like_sign recomputes the sense logic already in b0_like_sense (lines 78-104) instead of deriving one from the other; the two can diverge, since one returns None for a sign-changing field and the other raises, so the predicate and the guard are not required to agree."
+    },
+    {
+      "file": "nova/imas/io_magnetics.py",
+      "line": 18,
+      "severity": "non-blocking",
+      "text": "DIAMAGNETIC_FLUX_NAME hard-codes the standard name 'diamagnetic_flux' and writes it as standard_name without checking the Catalog: StandardNameResolver.resolve('diamagnetic_flux') reports provisional=True, and nova/io/ingest.py's contract is to namespace such a name as provisional/ and flag it, so the store row claims a catalog name the resolver says is not in the catalog."
+    },
+    {
+      "file": "nova/io/ingest.py",
+      "line": 71,
+      "severity": "non-blocking",
+      "text": "diamagnetic_flux_dataset assembles an xarray.Dataset with source/units/cocos/calibration/provenance attributes for SignalStore.write, which is the capability IdsIngest.tensorize already owns; the addition does not extend or call that owner, so the attributed-dataset assembly is duplicated rather than shared (the sign verification and channel selection are the only genuinely new capabilities)."
+    },
+    {
+      "file": "docs/evidence/fragments/shafranov-observed-side/sos-diamagnetic-source.html",
+      "line": 35,
+      "severity": "non-blocking",
+      "text": "The MAST census that stands in for done_when (2) under the plan's lead ruling has no committed script or command header: its 131/9,981/713 and 178/179 counts are reproducible only by rewriting the scan, and the WEST table at line 14 has no log at all, so no reader can re-derive either number set from the tree."
+    },
+    {
+      "file": "tests/test_diamagnetic_shot_store.py",
+      "line": 109,
+      "severity": "non-blocking",
+      "text": "The manifest's negative_control_log records a failure at tests/test_diamagnetic_flux_reader.py:114, a path renamed to this file in commit aaf0f00d4; the red log therefore cites a file absent at the reviewed head, so its provenance is stale even though the guard it demonstrates is exercised by the identically named test here."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to carry followup f-sos-diamagnetic-input through the existing magnetics reader; nova/imas/io_magnetics.py:455 diamagnetic_fluxes reads DD4 magnetics.diamagnetic_flux data/time at the entry's own dictionary and returns each channel with its source path, Wb units, COCOS convention and applied calibration, and diamagnetic_flux_dataset turns those rows into a store dataset.\nVERDICT done_when: the node's done_when asks for store attributes (1), a MAST reproduction within its stated error (2) and a sign-flip refusal (3); tests/test_diamagnetic_shot_store.py:78 asserts (1) and :109 asserts (3), while (2) is addressed by the run's mast-diamagnetic-absence.log census under the plan's 2026-11-22 lead ruling rather than by a test.\nVERDICT write_paths: the delivered diff changes nova/imas/io_magnetics.py, tests/test_diamagnetic_shot_store.py and docs/evidence/fragments/shafranov-observed-side/sos-diamagnetic-source.html, all inside the declared write-path list; no path outside it changed and the declared figures directory was not touched.\nVERDICT manifest: read; it records status complete, the literal gate command, gate-diamagnetic-shot-store.log ending '8 passed in 4.39s' with EXIT=0 at aaf0f00d4, negative-control.log, and blockers 'Do-when 2 cannot be met from the MAST store.'\nVERDICT diff: read commit by commit from 06d7280 to 7185961a4: 774470f59 adds the reader, the test and the fragment; aaf0f00d4 renames the test file; 4729e2ed1 and 7185961a4 edit only the evidence fragment, so no implementation changed after the gate ran.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: nova/imas/io_magnetics.py:455 reads the dedicated structure and falls back to the diagnostic table's four diamagnetic loop types, delivering the reader and provenance the followup names, though no production path yet consumes it.\nSCORE evidence: 13\nJUSTIFICATION evidence: tests/test_diamagnetic_shot_store.py:78 and :109 assert done_when (1) and (3), and done_when (2) rests on the uncommitted census in mast-diamagnetic-absence.log:30-42 whose numbers reconcile with the fragment.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the three changed paths of the delivered diff are all inside the declared write paths and nothing the goal does not imply was added.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_diamagnetic_shot_store.py:109 reddens when the sign guard is removed, as negative-control.log shows, but the census and store-attribute assertions are not covered by any negative control and the version-prefix assertion at line 64 only re-reads the version the test passed in.\nSCORE fit: 16\nJUSTIFICATION fit: nova/imas/io_magnetics.py:107 follows the module's dataclass/staticmethod idiom and its local dd_equilibrium_convention import matches nova/io/signalstore.py:60, but the hard-coded provisional standard name is a small departure from nova/io/ingest.py's naming contract.\nSCORE reuse: 14\nJUSTIFICATION reuse: the reader extends io_magnetics, the one owner, and introduces no second formula, but the dataset assembly in nova/io/ingest.py:71 is duplicated rather than extended.\nFINDING nova/imas/io_magnetics.py:494 non-blocking: diamagnetic_fluxes returns the dedicated structure rows early and silently drops diamagnetic-labelled flux_loop channels an entry also publishes, though its docstring says the loop form is read second.\nFINDING nova/imas/io_magnetics.py:107 non-blocking: require_b0_like_sign recomputes b0_like_sense's logic instead of deriving from it, so the predicate and guard can disagree on a sign-changing field.\nFINDING nova/imas/io_magnetics.py:18 non-blocking: the hard-coded standard name 'diamagnetic_flux' is provisional per StandardNameResolver and is written without the provisional/ marker nova/io/ingest.py requires.\nFINDING nova/io/ingest.py:71 non-blocking: diamagnetic_flux_dataset duplicates IdsIngest.tensorize's attributed-dataset assembly for the store instead of extending that owner.\nFINDING docs/evidence/fragments/shafranov-observed-side/sos-diamagnetic-source.html:35 non-blocking: the census standing in for done_when (2), and the WEST table at line 14, have no committed script or log, so neither is reproducible from the tree.\nFINDING tests/test_diamagnetic_shot_store.py:109 non-blocking: the recorded negative control cites tests/test_diamagnetic_flux_reader.py:114, a path renamed to this file, so the red log names a file absent at the reviewed head though the guard it shows is still exercised here.\n",
+  "review_run_id": "r-20261123T045858001331-review-of-sos-diamagnetic-source-7185961a45ae",
+  "reviewed_base_sha": "06d728006cba140ec3cf0670927100f31f8cfce0",
+  "reviewed_head_sha": "7185961a45ae3e0f755ea6d3204b02624cbed3e9",
+  "reviewed_run_id": "r-20261122T135238314086-sos-diamagnetic-source",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T05:54:30.923160+00:00",
+  "total": 93
+}

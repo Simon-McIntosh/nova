@@ -25,7 +25,30 @@
   "plan_slug": "converged-forward-solve",
   "plan_version": 642,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c65bff77fd785d7471a054fa1e9528cb06684ce2",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a710 clause 2's caller test is scoped to the package (nova/); \u00a76's retirement now deletes every test, benchmark and script that only exercised the fixed-design read, rather than porting it, as the superseded followup required.",
+      "reason": "",
+      "when": "2026-11-23T01:12:32.091274+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c65bff77fd785d7471a054fa1e9528cb06684ce2",
+      "commit_basis": "edit",
+      "note": "\u00a710 clause 2's caller test is scoped to the package (nova/); \u00a76's retirement now deletes every test, benchmark and script that only exercised the fixed-design read, rather than porting it, as the superseded followup required.",
+      "reason": "",
+      "when": "2026-11-23T01:12:32.091274+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/converged-forward-solve/r-20261123T010453735113-plan-review-of-converged-forward-solve.json",
   "review_run_id": "r-20261123T010453735113-plan-review-of-converged-forward-solve",
   "reviewed_blob_sha": "7ef29b9aaeae1a501df414d08f3a037848423431",
   "rubric": "content",

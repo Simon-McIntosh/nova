@@ -19,6 +19,13 @@
     }
   },
   "dispatched_at": "2026-11-23T04:55:14Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "magnetics-fit-file-completes-on-cpu",
+      "recorded_at": "2026-11-23T07:27:21.661423+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_equilibrium_magnetics_fit.py",

@@ -43,6 +43,13 @@ while the largest quotient stays below ``1 / (c mu0)``: a linear law of slope
 ``c`` amplifies every metric quotient by ``c mu0`` and the material is what
 sets the distance to the singularity, not the bound.
 
+``c`` is the differential susceptibility ``dM/dB``, the tangent of the law.
+The fitted law's origin value is the reluctivity ``dH/dB``: the law reads
+``M = (1/mu0 - reluctivity) B``, so the two slopes differ by ``1/mu0``.  The
+witness row carries the measured per-cell band of the tangent, so the closed
+form is evaluated against what the differential actually is rather than
+against the origin value.
+
     python scripts/iron_operator_bound/persisted.py --mode bound \
         --label graded-16-80 --output <run-dir>
 """
@@ -188,6 +195,7 @@ def load(label, inputs):
         metric=metric,
         position=layout(len(cells.polygons)),
         root=symmetric_square_root(metric),
+        geometry_digest=interaction.geometry_digest,
         load_seconds=time.monotonic() - began,
     )
     source["inverse"] = np.linalg.inv(source["root"])
@@ -375,12 +383,15 @@ def newton_blocks(source, inputs):
     have refused lands on the root the route would have used.
 
     The differential's eigenvalues against the metric are returned beside the
-    ones against the identity.  For a uniform linear law the material blocks
-    are ``A = c I``, so the generalised spectrum is the susceptibility itself;
-    how far it departs from one repeated value is what makes the seed-state
-    Newton matrix's definiteness a per-cell statement rather than one number.
+    ones against the identity.  The differential is ``dM/dB``, the
+    susceptibility, and the fitted law's origin value is the reluctivity
+    ``dH/dB``; the two differ by ``1/mu0`` and only the susceptibility enters
+    the closed form.  For a uniform linear law the material blocks are ``A = c
+    I`` with ``c`` the susceptibility, so the generalised spectrum is that one
+    repeated value; how far the cells depart from it is what makes the
+    seed-state Newton matrix's definiteness a per-cell statement.
     """
-    local, origin = material_differential(source, inputs)
+    local, origin_reluctivity = material_differential(source, inputs)
     differential = source["metric"] @ local
     differential = (differential + differential.transpose(0, 2, 1)) / 2
     root, minimum = signed_root(differential)
@@ -403,7 +414,7 @@ def newton_blocks(source, inputs):
         root=root,
         transform=transform,
         definite=definite,
-        origin=origin,
+        origin_reluctivity=origin_reluctivity,
     )
 
 
@@ -494,6 +505,52 @@ def newton_identity(count=3, seed=7):
             float(np.linalg.norm(skew(vector) - dense_skew @ vector) / scale),
         )
     return error
+
+
+def seed_relation(count=8, seed=11):
+    """Compare the closed-form seed minimum against the dense symmetric part.
+
+    A uniform differential ``A = alpha I`` makes the route write ``I -
+    alpha Q^1/2 G Q^-1/2``, whose symmetric part is ``I - alpha S`` with ``S =
+    Q^-1/2 sym(Q G) Q^-1/2``.  Its smallest element is ``1 - (alpha mu0) q`` at
+    the operator's largest quotient ``q``, so the closed form a witness row is
+    attributed against is checked here through the same block and action paths
+    that carry the measurement.
+    """
+    rng = np.random.default_rng(seed)
+    gram = np.zeros((count, 3, 3))
+    for cell in range(count):
+        factor = rng.normal(size=(3, 3))
+        gram[cell] = factor @ factor.T + np.eye(3)
+    metric = gram_metric(gram)
+    root_blocks = symmetric_square_root(metric)
+    dimension = 6 * count
+    interaction = rng.normal(size=(dimension, dimension))
+    interaction = (interaction + interaction.T) / 2
+    source = dict(
+        label="seed-relation",
+        metric=metric,
+        root=root_blocks,
+        inverse=np.linalg.inv(root_blocks),
+        count=count,
+        dimension=dimension,
+        position=layout(count),
+        matrix=interaction,
+        load_seconds=0.0,
+    )
+    stage(source)
+    peak = bound(source, ncvec=min(24, 2 * count), seed=seed)
+    alpha = 0.95 / (iron._MU0 * peak["quotient"])
+    differential = metric @ (alpha * np.eye(6))[None, :, :]
+    differential = (differential + differential.transpose(0, 2, 1)) / 2
+    root, _ = signed_root(differential)
+    transform = np.linalg.solve(metric, root)
+    dense = np.eye(dimension) - block_matrix(root, count) @ interaction @ block_matrix(
+        transform, count
+    )
+    minimum = float(np.linalg.eigvalsh((dense + dense.T) / 2)[0])
+    predicted = 1.0 - alpha * iron._MU0 * peak["quotient"]
+    return abs(minimum - predicted) / abs(predicted)
 
 
 def signed_root(blocks):
@@ -627,6 +684,7 @@ def check(size=0.04, *, seed=4):
         relative_difference=abs(peak["quotient"] - owner["maximum"])
         / abs(owner["maximum"]),
         newton_identity_error=newton_identity(),
+        seed_relation_error=seed_relation(),
         regularisation=1e-6,
     )
     return row
@@ -734,9 +792,18 @@ def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, pr
         / blocks["generalised_minimum"],
         material_block_asymmetry=blocks["block_asymmetry"],
         differential_positive_definite=blocks["definite"],
-        origin_coefficient_times_mu0=blocks["origin"] * iron._MU0,
-        seed_limit_quotient=1.0 / (blocks["origin"] * iron._MU0),
-        predicted_newton_minimum=1.0 - blocks["origin"] * iron._MU0 * peak["quotient"],
+        origin_reluctivity_times_mu0=blocks["origin_reluctivity"] * iron._MU0,
+        susceptibility_lower_times_mu0=blocks["generalised_minimum"] * iron._MU0,
+        susceptibility_upper_times_mu0=blocks["generalised_maximum"] * iron._MU0,
+        seed_limit_quotient=1.0 / (blocks["generalised_maximum"] * iron._MU0),
+        seed_definite_quotient_interval=[
+            1.0 / (blocks["generalised_maximum"] * iron._MU0),
+            1.0 / (blocks["generalised_minimum"] * iron._MU0),
+        ],
+        predicted_newton_lower=1.0
+        - blocks["generalised_maximum"] * iron._MU0 * peak["quotient"],
+        predicted_newton_upper=1.0
+        - blocks["generalised_minimum"] * iron._MU0 * peak["quotient"],
         witness_operator_quotient=quotient(source, direction),
         operator_maximum=peak["quotient"],
         operator_rayleigh=peak["rayleigh"],

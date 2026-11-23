@@ -13,6 +13,15 @@
   ],
   "completed_at": "2026-11-22T16:40:57.970Z",
   "dispatched_at": "2026-11-22T16:30:49Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T03:27:48.452841+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T141951224815-icm-cholesky-route-onto-main",
+      "section": "\u00a711"
+    }
+  },
   "findings": [
     {
       "file": "scripts/west_iron_linear/compare_newton_routes.py",

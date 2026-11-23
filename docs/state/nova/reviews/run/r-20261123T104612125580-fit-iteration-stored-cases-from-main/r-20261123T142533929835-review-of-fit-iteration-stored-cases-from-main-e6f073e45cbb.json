@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed node is unarmed (no test file in its write scope) and its manifest carries no baseline_suite or after_suite arm, so there is no suite pair from which to derive added failures; the recorded count is the measured zero of a run with no suite delta, not a waiver.",
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/prototypes/fit_inside_iteration/run.py:590 __main__ -> main",
+    "scripts/prototypes/fit_inside_iteration/probe_step_rule.py:27 imports _Factory, _known_case (unchanged by the diff)",
+    "scripts/nova_lane/run.sh launcher that submitted the driver (manifest.md:12)"
+  ],
+  "completed_at": "",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-fit-iteration-stored-cases-from-main-e6f073e45cbb",
+      "recorded_at": "2026-11-23T14:49:52.342525+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-23T14:26:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html",
+      "id": "f5ca4c006b7",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: the table column \"Stopped-improving pass\" (cells at :6-:8) carries the 0-based receipt field stopped_improving_pass (4/2/9) beside 1-based pass numbers elsewhere in the same table, while the prose at :11-:13 states that field \"is not the pass the map stopped improving\"; a reader taking the table alone concludes the walk stalled at pass 4/2/9, which the record's own text contradicts."
+    },
+    {
+      "file": "manifest.md",
+      "id": "fd4f6cd9b7d",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests: line is a prose sentence rather than the literal command, and it appends --max-passes 96 --max-update 1.0 --flux-tolerance 1e-10 --relaxation 1.0 that the job's COMMAND line in stored-cases-titan.log does not carry; those values are run.py's defaults, so the measurement is sound but a reader comparing the two sees a mismatch."
+    },
+    {
+      "file": "manifest.md",
+      "id": "f2360dee69e",
+      "line": "7",
+      "severity": "non-blocking",
+      "text": "non-blocking: the checkpoint states the job wall as 11:57:18Z-15:57:18Z, while stored-cases-titan.log records NOVA_LANE_START=2026-11-23T11:57:31+0100 and NOVA_LANE_END=2026-11-23T15:16:12+0100 (3 h 19 m); the stated window is wrong in both zone and duration."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified three runtime entry points: the script's __main__ at scripts/prototypes/fit_inside_iteration/run.py:590, scripts/prototypes/fit_inside_iteration/probe_step_rule.py:27 (imports only the unchanged _Factory and _known_case), and scripts/nova_lane/run.sh (the launcher that submitted the driver, per manifest.md:12).",
+    "diff": "Read commit by commit against base 2445485: 6079d92eb's run.py hunks are exactly the union of the pre-main commits 225feaed4 and 38ced6955 applied to main's file (STEP_RULE/STEP_BUDGET, per-pass wall, step_rule and max_update kwargs, --max-update, the _ControlNotJudged skip); e13d17dfc adds the mastu and tcv SVGs; e6f073e45 adds the fragment and the iter SVG.",
+    "done_when": "The done_when needs one job running the three cases in sequence on the study's rows, coefficient basis and locked decisions, each case meeting the section 2 bands or recorded with its terminal misfit, stopped-improving pass, last flux update, ITER axis-loss and a panel, plus the 1.10 control only on converged cases; stored-cases-titan.log records RUN_HEADER step_rule \"coupled\", max_passes 96, x64 true, device cuda:0 and three CASE_INPUT rows (active sensors 364/76/1176, conductors 24/288/117), and result-table.json records terminal_misfit 50.0/6.97791/10.028916, stopped_improving_pass 4/2/9, last_flux_update 4.652e-06/4.660e-04/5.344e-04 and scaled_control_judged false on all three; clause (2) is therefore recorded-not-judged because no case converged, which section 9's recorded alternative for a non-converged case permits.",
+    "goal": "The node was dispatched to run the three stored imas-efit cases (MAST-U 45272, TCV workshop, ITER 135013) at the landed coupled step rule under a 96-pass budget and record each per section 9 done-when (2)-(3); scripts/prototypes/fit_inside_iteration/run.py:492-560 threads step_rule=\"coupled\" and max_passes 96 into FluxIterationFit and the fragment docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html:1-23 delivers the per-case table and the three panels.",
+    "manifest": "Read; status complete, commits 6079d92eb/e13d17dfc/e6f073e45, changed_paths and artifacts carry the per-case metrics and the control's non-judging, but the tests: line (manifest.md:12) is a prose sentence rather than the literal command and names --max-passes/--max-update/--flux-tolerance/--relaxation flags that the job's COMMAND line in stored-cases-titan.log does not carry, because those values came from run.py's defaults.",
+    "write_paths": "The node's fence was scripts/prototypes/fit_inside_iteration/, docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html and docs/figures/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main; git diff --stat 2445485..e6f073e touches exactly run.py (+35 -2), the fragment (+23) and mastu.svg, tcv.svg, iter.svg (+149 each), every one inside that fence."
+  },
+  "justifications": {
+    "durability": "no test covers scripts/prototypes/fit_inside_iteration/run.py (a grep of tests/ finds only nova FluxIterationFit tests), so nothing reddens if the step_rule/max_update recording or the control-skip at run.py:403-405 regresses; the node is unarmed and declares no negative-control log.",
+    "evidence": "every number in the fragment reconciles with stored-cases-titan.log and result-table.json (misfit trio 50.0/6.978/10.029, last updates 4.652e-6/4.660e-4/5.344e-4, sensors 364/76/1176), though the 1.10 control is unexercised and the fragment table column at :5 mislabels a 0-based field its own prose at :11-:13 says is not the done-when quantity.",
+    "fit": "the added code at scripts/prototypes/fit_inside_iteration/run.py:41-47, 210-225 and 400-423 follows the surrounding JSON-emission idiom with mechanism-naming constants and comments and no plan, sprint or ticket identifier.",
+    "goal_fidelity": "scripts/prototypes/fit_inside_iteration/run.py:492-560 runs the three stored cases with step_rule \"coupled\" and max_passes 96, and the fragment tabulates each per section 9 (2)-(3), so the landed change does what the node states.",
+    "reuse": "the driver reuses the imas-efit study's reader and study._panel (tests/test_magnetics_fit_efit_comparison.py:1463-1598 draws one shared level array, both null sets and draw_wall), _gain_error and FluxIterationFit instead of forking any of them.",
+    "scope_discipline": "git diff --stat 2445485..e6f073e lists only scripts/prototypes/fit_inside_iteration/run.py, the evidence fragment and three SVGs under the declared figure directory."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node was dispatched to run the three stored imas-efit cases (MAST-U 45272, TCV workshop, ITER 135013) at the landed coupled step rule under a 96-pass budget and record each per section 9 done-when (2)-(3); scripts/prototypes/fit_inside_iteration/run.py:492-560 threads step_rule=\"coupled\" and max_passes 96 into FluxIterationFit and the fragment docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html:1-23 delivers the per-case table and the three panels.\nVERDICT done_when: The done_when needs one job running the three cases in sequence on the study's rows, coefficient basis and locked decisions, each case meeting the section 2 bands or recorded with its terminal misfit, stopped-improving pass, last flux update, ITER axis-loss and a panel, plus the 1.10 control only on converged cases; stored-cases-titan.log records RUN_HEADER step_rule \"coupled\", max_passes 96, x64 true, device cuda:0 and three CASE_INPUT rows (active sensors 364/76/1176, conductors 24/288/117), and result-table.json records terminal_misfit 50.0/6.97791/10.028916, stopped_improving_pass 4/2/9, last_flux_update 4.652e-06/4.660e-04/5.344e-04 and scaled_control_judged false on all three; clause (2) is therefore recorded-not-judged because no case converged, which section 9's recorded alternative for a non-converged case permits.\nVERDICT write_paths: The node's fence was scripts/prototypes/fit_inside_iteration/, docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html and docs/figures/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main; git diff --stat 2445485..e6f073e touches exactly run.py (+35 -2), the fragment (+23) and mastu.svg, tcv.svg, iter.svg (+149 each), every one inside that fence.\nVERDICT manifest: Read; status complete, commits 6079d92eb/e13d17dfc/e6f073e45, changed_paths and artifacts carry the per-case metrics and the control's non-judging, but the tests: line (manifest.md:12) is a prose sentence rather than the literal command and names --max-passes/--max-update/--flux-tolerance/--relaxation flags that the job's COMMAND line in stored-cases-titan.log does not carry, because those values came from run.py's defaults.\nVERDICT diff: Read commit by commit against base 2445485: 6079d92eb's run.py hunks are exactly the union of the pre-main commits 225feaed4 and 38ced6955 applied to main's file (STEP_RULE/STEP_BUDGET, per-pass wall, step_rule and max_update kwargs, --max-update, the _ControlNotJudged skip); e13d17dfc adds the mastu and tcv SVGs; e6f073e45 adds the fragment and the iter SVG.\nCALL_SITES: verified three runtime entry points: the script's __main__ at scripts/prototypes/fit_inside_iteration/run.py:590, scripts/prototypes/fit_inside_iteration/probe_step_rule.py:27 (imports only the unchanged _Factory and _known_case), and scripts/nova_lane/run.sh (the launcher that submitted the driver, per manifest.md:12).\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/prototypes/fit_inside_iteration/run.py:492-560 runs the three stored cases with step_rule \"coupled\" and max_passes 96, and the fragment tabulates each per section 9 (2)-(3), so the landed change does what the node states.\nSCORE evidence: 16\nJUSTIFICATION evidence: every number in the fragment reconciles with stored-cases-titan.log and result-table.json (misfit trio 50.0/6.978/10.029, last updates 4.652e-6/4.660e-4/5.344e-4, sensors 364/76/1176), though the 1.10 control is unexercised and the fragment table column at :5 mislabels a 0-based field its own prose at :11-:13 says is not the done-when quantity.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 2445485..e6f073e lists only scripts/prototypes/fit_inside_iteration/run.py, the evidence fragment and three SVGs under the declared figure directory.\nSCORE durability: 5\nJUSTIFICATION durability: no test covers scripts/prototypes/fit_inside_iteration/run.py (a grep of tests/ finds only nova FluxIterationFit tests), so nothing reddens if the step_rule/max_update recording or the control-skip at run.py:403-405 regresses; the node is unarmed and declares no negative-control log.\nSCORE fit: 19\nJUSTIFICATION fit: the added code at scripts/prototypes/fit_inside_iteration/run.py:41-47, 210-225 and 400-423 follows the surrounding JSON-emission idiom with mechanism-naming constants and comments and no plan, sprint or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the driver reuses the imas-efit study's reader and study._panel (tests/test_magnetics_fit_efit_comparison.py:1463-1598 draws one shared level array, both null sets and draw_wall), _gain_error and FluxIterationFit instead of forking any of them.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html:5 non-blocking: the table column \"Stopped-improving pass\" (cells at :6-:8) carries the 0-based receipt field stopped_improving_pass (4/2/9) beside 1-based pass numbers elsewhere in the same table, while the prose at :11-:13 states that field \"is not the pass the map stopped improving\"; a reader taking the table alone concludes the walk stalled at pass 4/2/9, which the record's own text contradicts.\nFINDING manifest.md:12 non-blocking: the tests: line is a prose sentence rather than the literal command, and it appends --max-passes 96 --max-update 1.0 --flux-tolerance 1e-10 --relaxation 1.0 that the job's COMMAND line in stored-cases-titan.log does not carry; those values are run.py's defaults, so the measurement is sound but a reader comparing the two sees a mismatch.\nFINDING manifest.md:7 non-blocking: the checkpoint states the job wall as 11:57:18Z-15:57:18Z, while stored-cases-titan.log records NOVA_LANE_START=2026-11-23T11:57:31+0100 and NOVA_LANE_END=2026-11-23T15:16:12+0100 (3 h 19 m); the stated window is wrong in both zone and duration.",
+  "review_run_id": "r-20261123T142533929835-review-of-fit-iteration-stored-cases-from-main-e6f073e45cbb",
+  "reviewed_base_sha": "2445485444b981b790168259704348395a38451f",
+  "reviewed_head_sha": "e6f073e45cbbd4641753d7626c1e05df941daa37",
+  "reviewed_run_id": "r-20261123T104612125580-fit-iteration-stored-cases-from-main",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261123T142533929835-review-of-fit-iteration-stored-cases-from-main-e6f073e45cbb"
+  },
+  "reviewer_run_id": "r-20261123T142533929835-review-of-fit-iteration-stored-cases-from-main-e6f073e45cbb",
+  "scores": {
+    "durability": 5,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T14:53:11.885846+00:00",
+  "total": 99
+}

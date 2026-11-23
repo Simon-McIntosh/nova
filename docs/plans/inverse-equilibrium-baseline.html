@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="117">
+<meta name="plan-version" content="118">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -493,6 +493,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261122T215439012216-multipoint-link-linear-build" data-who="reckon-build" data-when="2026-11-23T14:09:59Z">
     <div class="r-comment-body"><p>Multipoint link resolution is now one indexer pass per column: on all_debug the link sort fell from 1399.5 s of a 1490.7 s stored-case machine build (93.9 %) to 7.0 s, and the insertion phase that had reached 14156 of 29559 rows after 1500 s now completes at 255.8 s, with the frame index and link columns bit-identical to the base revision at every shared checkpoint; the remaining cold wall is the plasma Biot-Savart solve, outside this path.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261123T142605722696-review-of-fit-iteration-stored-cases-from-main-e6f073e45cbb-figure" data-who="reckon-build" data-when="2026-11-23T14:35:01.682Z">
+    <div class="r-comment-body"><p>figure review of r-20261123T104612125580-fit-iteration-stored-cases-from-main (base 2445485444b9, head e6f073e45cbb): parsed rubric with all six items present for each of mastu.svg, tcv.svg and iter.svg; 6 findings, all non-blocking; the panels&#x27; core comparison is legible and the record carries no blocking defect.</p></div>
 </div>
 </section>
 </main>

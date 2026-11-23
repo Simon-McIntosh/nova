@@ -78,6 +78,19 @@ stated as ten times <code>kappa*eps</code> (2.26e-7) at the measured condition
 number, which admits this rounding-level gap while still refusing the planted
 1e-10 route defect. No code, test or interaction value was changed.</p>
 
+<h4>Suite arms</h4>
+<p>The focused subset of <code>tests/test_magnetisation.py</code> that exercises
+the assembly, materials, operand arguments and receipt this measurement uses
+ran at base revision <code>6db36fee4fb17a4c05996dda9bf298ec0a5b02a2</code>
+(<code>1 failed, 12 passed in 50.17s</code>) and at head revision
+<code>930d9566ad3fb18f96932e36f6342c08f47b25b7</code>
+(<code>1 failed, 12 passed in 47.28s</code>), with the same single failure
+(<code>test_control_receipt_refuses_a_revision_it_was_not_told_to_expect</code>,
+a missing evidence file under <code>/work</code>), so the change adds no
+failure. The full test file was attempted at both revisions and was still
+running when its budget expired; those cut-short logs carry no summary and are
+reported rather than cited.</p>
+
 <h4>Limits and follow-up</h4>
 <p>The extended-precision reference covers the first Newton linear system only.
 A nonlinear reference converged in extended precision would require the

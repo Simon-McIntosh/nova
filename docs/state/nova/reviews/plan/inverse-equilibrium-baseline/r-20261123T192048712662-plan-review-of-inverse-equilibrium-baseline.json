@@ -25,7 +25,30 @@
   "plan_slug": "inverse-equilibrium-baseline",
   "plan_version": 131,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8ff796edaa4c57c912ad4595448aa379537bf844",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a710 clause (2) now exempts ITER 135013: it keeps the \u00a72 label same magnetics, different constraints and is reported beside imas-efit without a band verdict.",
+      "reason": "",
+      "when": "2026-11-23T19:51:56.120569+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8ff796edaa4c57c912ad4595448aa379537bf844",
+      "commit_basis": "edit",
+      "note": "\u00a710 clause (2) now exempts ITER 135013: it keeps the \u00a72 label same magnetics, different constraints and is reported beside imas-efit without a band verdict.",
+      "reason": "",
+      "when": "2026-11-23T19:51:56.120569+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/inverse-equilibrium-baseline/r-20261123T192048712662-plan-review-of-inverse-equilibrium-baseline.json",
   "review_run_id": "r-20261123T192048712662-plan-review-of-inverse-equilibrium-baseline",
   "reviewed_blob_sha": "00c519cd97f7103806150046cde3800af090cea2",
   "rubric": "content",

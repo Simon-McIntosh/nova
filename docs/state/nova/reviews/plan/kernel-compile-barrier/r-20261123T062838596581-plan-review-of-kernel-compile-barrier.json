@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T07:01:18.833Z",
+  "dispatched_at": "2026-11-23T06:45:05Z",
+  "findings": [
+    {
+      "anchor": "plan.html:23",
+      "id": "wiring-1",
+      "reason": "a coordinator dispatching the implementable sections one beat would dispatch \u00a74 against its 64 GB clause before the only work that lowers that memory has landed, so \u00a74 fails its own gate on the plan's declared order.",
+      "text": "\u00a78/\u00a79 exist to reduce the read's compile memory, and \u00a74's clause (1) (plan.html:73) requires the read's first call at 132, 300 and 550 cells at most 64 GB of host memory, which the S28 record (data-section s4, job 1337904) says the read exceeds today, yet plan-section-depends-on declares s4:[s2,s3] with no edge to s8/s9 (s9 depends only on s8)",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:90",
+      "id": "evidence_paths-1",
+      "reason": "with no declared durable path the two nodes' compile-memory measurements and lowering-test receipts have no home a later reader can open, and the plan's own convention (as in \u00a73 node (b)-(e) and \u00a74 node (a)) assigns one per node, so the delivered evidence has no declared destination.",
+      "text": "neither \u00a78 (line 90) nor \u00a79 (line 94) names a record document, receipt directory or figure directory",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:94",
+      "id": "reasoning-1",
+      "reason": "a worker reading \u00a79 is told to meet a 64 GB compile bound the rest of the plan explicitly retires, and the two instructions cannot both be satisfied without the plan saying which supersedes; either \u00a70 must record that the read's compile-memory work re-imposes the bound, or \u00a79 must not bind the cold compile.",
+      "text": "\u00a79 clause (2) requires \"the 132-cell read compiles on the CPU backend within 64 GB\", a bound on a cold compile, while \u00a70 (plan.html:48) records that the cold compile \"carries no bound\" after the 2026-11-18 ruling and \u00a74 clause (2) (plan.html:73) calls it \"the cold compile, which this plan no longer bounds\"",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fa1d9b7b93c2d1d6355ecfad5d669fead3628208",
+  "plan_fingerprint": "630874e6d56dbab517daf6913d2ed114776e7cb44d615bc37818f61e28134209",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 137,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T062838596581-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "51f460f251de07d1f7e9a912225c177b534fd24c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a78 and \u00a79 cite no file anchor to resolve, and each section id and data-link target (s4, s8) resolves; extensionless hrefs resolve as `<path>.html`.",
+    "done_when": "pass \u2014 \u00a78 clauses (1)\u2013(3) and \u00a79 clauses (1)\u2013(3) each name a measurable bound and a declared negative control that flips by test id.",
+    "evidence_paths": "a finding \u2014 \u00a78 (plan.html:90) and \u00a79 (plan.html:94) name no evidence fragment, receipt directory or figure directory, unlike every implementable section in this plan.",
+    "naming": "pass \u2014 neither section introduces a plan label, ticket number or version tag into a named symbol or comment.",
+    "reasoning": "a finding \u2014 \u00a79 clause (2) bounds the read's CPU cold compile at 64 GB while \u00a70 (plan.html:48) and \u00a74 (plan.html:73) state the cold compile carries no bound.",
+    "single_goal": "pass \u2014 \u00a78 delivers the kernel's two derivative outputs and \u00a79 delivers the read's assembled Hessian; each has one deliverable, and \u00a79's re-run of \u00a74's fills is verification of that same change.",
+    "wiring": "a finding \u2014 the changed declarations at plan.html:23 leave \u00a74 (implementable, depends only on s2,s3) independent of \u00a78/\u00a79, though \u00a74's 64 GB host-memory clause is reached only through the memory reduction \u00a78/\u00a79 deliver."
+  },
+  "section_digests": {
+    "_document": "8aa2f4e5145f569b0e6cbd810ea4816ca4580ad9e1a7491aebefa7b76a7da11c",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "c0050e9c77ebe6780135151c511e8850c91e7dc99d0cb4fe32c9d032665dd522",
+    "s4": "4b8bf6686dd7741ef6ed148a144b3f512eff3f8ad043c934f568a9feb50f76f8",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea",
+    "s7": "6dfe0a01ad8470c02d38d7e3fa33263ff325b87943f260375c61e09e0cfe5db8",
+    "s8": "04eb2144233a653462f23454617517870d19223708f9834ef95279f85afb9b9c",
+    "s9": "f97885a45d1fd3979e2a165d30d5c5bce91023147f8661bbd68892bbfbb4c0be"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:00:20.076154+00:00",
+  "total": null
+}

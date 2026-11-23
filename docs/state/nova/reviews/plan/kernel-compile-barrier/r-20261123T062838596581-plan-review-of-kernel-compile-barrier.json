@@ -53,6 +53,16 @@
       "note": "\u00a78 and \u00a79 each name their record: docs/evidence/fragments/kernel-compile-barrier/kcb-field-derivative-outputs.html and kcb-assembled-read-hessian.html; receipts larger than a few MB go under the GPFS evidence root.",
       "reason": "",
       "when": "2026-11-23T07:02:50.043552+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fa1d9b7b93c2d1d6355ecfad5d669fead3628208",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a79 clause 2 no longer bounds the cold compile: it requires the 132-cell cold compile to complete inside one 120 GB CPU allocation with its peak recorded and no bound (per the 2026-11-18 ruling), and \u00a74's first-call bounds from the pinned cache to be measured at 132, 300 and 550 cells.",
+      "reason": "",
+      "when": "2026-11-23T07:03:01.130564+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "\u00a78 and \u00a79 each name their record: docs/evidence/fragments/kernel-compile-barrier/kcb-field-derivative-outputs.html and kcb-assembled-read-hessian.html; receipts larger than a few MB go under the GPFS evidence root.",
       "reason": "",
       "when": "2026-11-23T07:02:50.043552+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fa1d9b7b93c2d1d6355ecfad5d669fead3628208",
+      "commit_basis": "edit",
+      "note": "\u00a79 clause 2 no longer bounds the cold compile: it requires the 132-cell cold compile to complete inside one 120 GB CPU allocation with its peak recorded and no bound (per the 2026-11-18 ruling), and \u00a74's first-call bounds from the pinned cache to be measured at 132, 300 and 550 cells.",
+      "reason": "",
+      "when": "2026-11-23T07:03:01.130564+00:00"
     },
     "wiring-1": {
       "action": "acted",

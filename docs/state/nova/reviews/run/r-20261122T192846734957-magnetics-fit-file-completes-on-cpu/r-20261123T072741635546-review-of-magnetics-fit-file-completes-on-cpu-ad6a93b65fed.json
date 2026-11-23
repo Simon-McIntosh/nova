@@ -8,6 +8,13 @@
     "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:156"
   ],
   "completed_at": "2026-11-23T07:55:42.167Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-magnetics-fit-file-completes-on-cpu-ad6a93b65fed",
+      "recorded_at": "2026-11-23T08:31:44.729985+00:00"
+    }
+  },
   "dispatched_at": "2026-11-23T07:28:52Z",
   "findings": [
     {

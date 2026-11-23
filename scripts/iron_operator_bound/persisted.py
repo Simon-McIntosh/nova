@@ -57,11 +57,13 @@ against the origin value.
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 import time
 
 import numpy as np
+import shapely
 from scipy.sparse.linalg import LinearOperator, eigsh
 
 from nova.jax.config import configure_dtypes
@@ -233,6 +235,7 @@ def stage(source):
 
     source["state_action"] = state_action
     source["operator"] = matrix
+    source["metric_blocks"] = metric
     source["root_blocks"] = root
     source["inverse_blocks"] = inverse
     source["action"] = lambda vector: matrix @ vector
@@ -362,6 +365,16 @@ def generalised_spectrum(blocks, metric):
     generalised problem ``D z = l Q z`` into the ordinary one for
     ``C**-1 D C**-T``, which is symmetric and whose signed singular values are
     its eigenvalues.
+
+    ``nova.biot.magnetisation.galerkin_block_spectrum`` is the owner of the
+    global form of this problem: it assembles one ``block_diag`` metric for the
+    whole mesh and returns the extremes of a single assembled energy against
+    it.  What is read here is the batched problem instead, 6632 independent
+    6-by-6 generalised eigenproblems against the per-cell gram block, one per
+    cell, and the owner's signature expresses the global solve rather than the
+    batch.  The conventions are still the owner's: the blocks are the same
+    gram blocks, and the caller multiplies by ``mu0`` to read the band the
+    closed form uses.
     """
     factor = np.linalg.cholesky(metric)
     inverse = np.linalg.inv(factor)
@@ -572,77 +585,86 @@ def signed_root(blocks):
     return root, float(np.min(eigenvalues))
 
 
+def numerator_matrix(source):
+    """Return ``Q G`` materialised, the energy a witness is weighted by."""
+    return cellwise(source["metric_blocks"], source["operator"])
+
+
 def localise(source, vector, *, share=CELL_SHARE, pairs=PAIR_COUNT, rows=PAIR_ROWS):
     """Return the cells and cell pairs that carry a witness's energy.
 
-    A witness ``w`` carries ``w.T Q G w``; cell ``c`` contributes
-    ``(Q w)_c . (G w)_c`` and the pair ``(c, d)`` contributes
-    ``(Q w)_c . (G[c, d] w_d)``, so the split sums to the numerator without a
-    second quadratic form.  Pairs are taken from the cells that carry most of
-    the witness, which is where a direction held by a few near pairs sits.
+    The split is the owner's: ``localise.localise`` reads ``x_i.T E_ij x_j``
+    for the self cells and for every cell pair from a materialised energy
+    matrix, and the energy a witness is weighted by is ``Q G``.  This
+    materialises that one matrix, hands it to the owner and normalises the
+    owner's contributions by the numerator ``w.T Q G w``, so the shares sum to
+    one and the enumeration is the owner's rather than a second copy of it.
     """
-    position = source["position"]
+    from scripts.iron_operator_bound.localise import localise as split
+
     weighted_vector = source["metric_action"](vector)
     product_vector = source["action"](vector)
-    cell_vector = to_cells(vector, position)
-    weighted = to_cells(weighted_vector, position)
-    product = to_cells(product_vector, position)
-    energy = np.einsum("ci,ci->c", weighted, product)
-    total = float(weighted_vector @ product_vector)
-    contribution = energy / total
-    order = np.argsort(-np.abs(contribution))
-    cumulative = np.cumsum(np.abs(contribution[order]))
-    kept = order[: int(np.searchsorted(cumulative, share)) + 1]
+    quadratic = float(weighted_vector @ product_vector)
+    total = quadratic / iron._MU0
+    owner = split(
+        [np.asarray(body) for body in source["cells"].polygons],
+        {0: numerator_matrix(source)},
+        np.asarray(vector, dtype=np.float64),
+    )
     mesh = source["cells"]
     centroids = np.asarray(mesh.centroids)
     areas = np.asarray(mesh.areas)
     carried = []
-    for index in kept:
-        body = np.asarray(mesh.polygons[index])
+    for entry in owner["cells"]:
+        index = entry["cell"]
+        bounds = entry["bounds_m"]
         carried.append(
             dict(
                 cell=int(index),
-                share=float(contribution[index]),
+                share=float(entry["self_contribution"] / total),
                 centroid_m=[float(value) for value in centroids[index]],
-                area_m2=float(areas[index]),
-                radial_extent_m=[float(body[:, 0].min()), float(body[:, 0].max())],
-                vertical_extent_m=[float(body[:, 1].min()), float(body[:, 1].max())],
+                area_m2=float(entry["area_m2"]),
+                radial_extent_m=[float(bounds[0]), float(bounds[2])],
+                vertical_extent_m=[float(bounds[1]), float(bounds[3])],
             )
         )
-    selected = []
-    for first in order[:pairs]:
-        choice = np.zeros(source["dimension"])
-        choice[position[6 * first : 6 * first + 6]] = cell_vector[first]
-        local = to_cells(source["action"](choice), position)
-        share_of = np.einsum("ci,ci->c", weighted, local) / total
-        ranked = [int(i) for i in np.argsort(-np.abs(share_of)) if i != first]
-        for second in ranked[:rows]:
-            selected.append(
-                dict(
-                    first=int(first),
-                    second=second,
-                    share=float(share_of[second]),
-                    centroid_separation_m=float(
-                        np.linalg.norm(centroids[first] - centroids[second])
-                    ),
-                )
-            )
-    selected.sort(key=lambda item: -abs(item["share"]))
+    selected = [
+        dict(
+            first=int(entry["first"]),
+            second=int(entry["second"]),
+            share=float(entry["contribution"] / total),
+            centroid_separation_m=float(entry["spacing_m"]),
+        )
+        for entry in owner["pairs"][: pairs * rows]
+    ]
     return dict(
-        total=total,
-        weight_scale=float(np.sqrt(weighted_vector @ vector)),
+        total=quadratic,
+        weight_scale=float(np.sqrt(quadratic)),
         metric_quadratic=float(weighted_vector @ vector),
         cells=carried,
-        pairs=selected[: pairs * rows],
+        pairs=selected,
+        area_total_m2=float(np.sum(np.asarray(areas))),
     )
 
 
-def check(size=0.04, *, seed=4):
+CHECK_TOLERANCE = dict(
+    relative_difference=1e-12,
+    newton_identity_error=1e-12,
+    seed_relation_error=1e-10,
+)
+
+
+def check(size=0.04, *, seed=4, mutate=None):
     """Compare the Lanczos quotient against the owner's dense spectrum.
 
     The gate shell is small enough for the owner's dense solve, so the
     instrument's largest quotient is read against the owner's answer on the
     same assembled interaction rather than against a second Lanczos run.
+    Each calibration identity carries a stated tolerance in
+    ``CHECK_TOLERANCE`` and :func:`check_verdict` reports the ones that miss
+    it, so ``--mode check`` exits nonzero on a regression instead of printing
+    a fresh reading.  ``mutate`` displaces one identity by a deliberate
+    amount, which is how the guard is shown to fire.
     """
     region = iron.gate_shell()
     cells = iron._mesh(region, size)
@@ -687,7 +709,20 @@ def check(size=0.04, *, seed=4):
         seed_relation_error=seed_relation(),
         regularisation=1e-6,
     )
+    if mutate is not None:
+        if mutate not in CHECK_TOLERANCE:
+            raise SystemExit(f"no calibration identity named {mutate!r}")
+        row[mutate] = row[mutate] + 1000.0 * CHECK_TOLERANCE[mutate]
     return row
+
+
+def check_verdict(row):
+    """Return the calibration identities that exceed their stated tolerance."""
+    return [
+        (name, row[name], tolerance)
+        for name, tolerance in CHECK_TOLERANCE.items()
+        if not abs(row[name]) <= tolerance
+    ]
 
 
 def apply_metric(metric, vector):
@@ -696,14 +731,15 @@ def apply_metric(metric, vector):
 
 
 def skew_norm(skew, dimension, *, tolerance=1e-8, ncvec=48, seed=424242):
-    """Return the spectral norm of an antisymmetric operator, and its residual.
+    """Return the spectral norm of an antisymmetric operator.
 
     The operator's square is negative semidefinite, so the largest singular
     value is the square root of the largest eigenvalue of ``-A A``.  The
-    eigen-solve is converged to a tolerance and its residual returned beside
-    the value: this norm is compared against the smallest eigenvalue of a
-    nearly unit matrix, and an estimate that does not say how converged it is
-    cannot carry that comparison.
+    relative residual of that eigenpair is not reported: the eigenvalue of
+    ``-A A`` is the square of a norm of a matrix that is zero to round-off, so
+    the denominator a relative residual divides by is itself round-off and the
+    ratio says nothing about convergence.  The norm is what is compared against
+    the symmetric matrix's smallest eigenvalue, and it is reported alone.
     """
     operator = LinearOperator(
         (dimension, dimension),
@@ -720,11 +756,7 @@ def skew_norm(skew, dimension, *, tolerance=1e-8, ncvec=48, seed=424242):
         v0=np.random.default_rng(seed).normal(size=dimension),
     )
     value = float(values[-1])
-    acted = operator.matvec(np.asarray(vectors[:, -1]))
-    residual = float(
-        np.linalg.norm(acted - value * np.asarray(vectors[:, -1])) / abs(value)
-    )
-    return float(np.sqrt(max(value, 0.0))), residual
+    return float(np.sqrt(max(value, 0.0)))
 
 
 def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, probes=4):
@@ -772,7 +804,7 @@ def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, pr
         )
     weighted = source["metric_action"](direction)
     top = source["metric_action"](peak["witness"])
-    skew_spectral, skew_residual = skew_norm(skew, dimension)
+    skew_spectral = skew_norm(skew, dimension)
     row = dict(source["row"])
     row.update(
         newton_seconds=time.monotonic() - began,
@@ -784,7 +816,6 @@ def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, pr
         newton_rayleigh=float(direction @ acted / (direction @ direction)),
         newton_skew_fraction=asymmetry,
         newton_skew_norm=skew_spectral,
-        newton_skew_norm_residual=skew_residual,
         differential_minimum=blocks["minimum"],
         material_generalised_minimum=blocks["generalised_minimum"],
         material_generalised_maximum=blocks["generalised_maximum"],
@@ -931,18 +962,167 @@ def record_control(label, inputs, output, *, tolerance=1e-4):
     return row
 
 
+def region_record(label, inputs, output):
+    """Describe the mesh cells a witness receipt names as carrying the energy.
+
+    Three causes are separated by measurement rather than by eye.  A cell on a
+    grading transition has neighbours whose equivalent size differs from its
+    own.  A near-singular cell pair has a non-touching cell closer than its own
+    size, which is where the boundary integral's kernel is steepest.  A
+    distorted cell departs from the mesh's typical compactness, read as
+    ``4 pi area / perimeter^2``, which is 1 for a disc and falls for an
+    elongated or slivered polygon.
+    """
+    receipt = json.loads((output / f"witness-{label}.json").read_text())
+    carried = [entry["cell"] for entry in receipt["localisation"]["cells"]]
+    size = cell_size(label, inputs)
+    cells = iron._mesh(inputs["region"], size)
+    bodies = [shapely.Polygon(p) for p in cells.polygons]
+    areas = np.asarray([body.area for body in bodies])
+    equivalent = np.sqrt(areas)
+    compactness = np.asarray(
+        [4 * np.pi * body.area / body.length**2 for body in bodies]
+    )
+    tree = shapely.STRtree(bodies)
+    rows = []
+    for index in carried:
+        body = bodies[index]
+        own = float(equivalent[index])
+        touching = [
+            int(other)
+            for other in tree.query(body, predicate="intersects")
+            if other != index
+        ]
+        neighbours = (
+            np.asarray([equivalent[other] for other in touching])
+            if touching
+            else np.asarray([])
+        )
+        near = [
+            int(other)
+            for other in tree.query(body, predicate="dwithin", distance=4.0 * own)
+            if other != index
+        ]
+        separated = [
+            (int(other), float(body.distance(bodies[other]))) for other in near
+        ]
+        apart = [(gap, other) for other, gap in separated if gap > 0.0]
+        nearest_gap, nearest_cell = min(apart) if apart else (float("nan"), -1)
+        same_lobe = [
+            (float(body.distance(bodies[other])), int(other))
+            for other in carried
+            if other != index
+        ]
+        lobe_gap, lobe_cell = min(same_lobe) if same_lobe else (float("nan"), -1)
+        bounds = body.bounds
+        rows.append(
+            dict(
+                cell=int(index),
+                centroid_m=[float(value) for value in body.centroid.coords[0]],
+                area_m2=float(areas[index]),
+                equivalent_size_m=own,
+                vertex_count=len(np.asarray(cells.polygons[index])),
+                compactness=float(compactness[index]),
+                mesh_compactness_median=float(np.median(compactness)),
+                neighbours=len(touching),
+                neighbour_size_min_m=float(neighbours.min())
+                if len(neighbours)
+                else float("nan"),
+                neighbour_size_max_m=float(neighbours.max())
+                if len(neighbours)
+                else float("nan"),
+                neighbour_size_ratio=float(neighbours.max() / neighbours.min())
+                if len(neighbours)
+                else float("nan"),
+                closest_separated_cell=nearest_cell,
+                closest_separated_m=nearest_gap,
+                closest_separated_over_size=nearest_gap / own,
+                nearest_carrying_pair_cell=lobe_cell,
+                nearest_carrying_pair_m=lobe_gap,
+                nearest_carrying_pair_over_size=lobe_gap / own,
+                bounds_m=[float(value) for value in bounds],
+            )
+        )
+    return dict(
+        label=label,
+        cells=int(len(bodies)),
+        fine_m=LABELS[label][0],
+        coarse_m=LABELS[label][1],
+        mesh_size_min_m=float(equivalent.min()),
+        mesh_size_median_m=float(np.median(equivalent)),
+        mesh_size_max_m=float(equivalent.max()),
+        distinct_sizes=int(len(np.unique(np.round(equivalent, 9)))),
+        mesh_compactness_median=float(np.median(compactness)),
+        carried=rows,
+    )
+
+
+def provenance_record(output):
+    """Record each persisted operator's digest from its own sidecar.
+
+    The bound and control receipts were written before the loader reported the
+    sidecar's digest and carry the placeholder ``synthetic`` instead, so the
+    digests are recorded here from the ``*-operator.json`` files the persisting
+    job wrote beside each ``*.npy``, beside a table of what every receipt on
+    disk actually reads.
+    """
+    operators = []
+    for label in LABELS:
+        operator = OPERATORS / f"{label}-operator.npy"
+        sidecar = OPERATORS / f"{label}-operator.json"
+        meta = json.loads(sidecar.read_text())
+        stat = operator.stat()
+        receipts = {}
+        for path in sorted(output.glob("*.json")):
+            row = json.loads(path.read_text())
+            if row.get("operator_path") == str(operator) or row.get("label") == label:
+                receipts[path.name] = row.get("geometry_digest", "absent")
+        operators.append(
+            dict(
+                label=label,
+                operator_path=str(operator),
+                operator_bytes=int(stat.st_size),
+                operator_mtime_utc=datetime.fromtimestamp(
+                    stat.st_mtime, tz=timezone.utc
+                ).isoformat(),
+                sidecar_path=str(sidecar),
+                geometry_digest=meta["geometry_digest"],
+                basis=meta["basis"],
+                receipts_and_their_digest_field=receipts,
+            )
+        )
+    return dict(operators=operators)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--mode", choices=("bound", "witness", "control", "check"), required=True
+        "--mode",
+        choices=("bound", "witness", "control", "check", "region", "provenance"),
+        required=True,
     )
     parser.add_argument("--label", choices=tuple(LABELS))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--tolerance", type=float, default=1e-10)
+    parser.add_argument("--mutate", choices=tuple(CHECK_TOLERANCE))
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     if args.mode == "check":
-        write(args.output / "check.json", check())
+        row = check(mutate=args.mutate)
+        write(args.output / "check.json", row)
+        print(json.dumps(row, indent=1), flush=True)
+        missed = check_verdict(row)
+        if missed:
+            raise SystemExit(
+                "calibration identity outside its tolerance: "
+                + "; ".join(
+                    f"{name} {value:.3e} exceeds {tolerance:.1e}"
+                    for name, value, tolerance in missed
+                )
+            )
+        return
+    if args.mode == "provenance":
+        write(args.output / "operator-digests.json", provenance_record(args.output))
         return
     from scripts.iron_graded_refinement.measure import west_inputs
 
@@ -951,6 +1131,11 @@ def main():
         record_bound(args.label, inputs, args.output, tolerance=args.tolerance)
     elif args.mode == "witness":
         record_witness(args.label, inputs, args.output)
+    elif args.mode == "region":
+        write(
+            args.output / f"region-{args.label}.json",
+            region_record(args.label, inputs, args.output),
+        )
     else:
         record_control(args.label, inputs, args.output)
 

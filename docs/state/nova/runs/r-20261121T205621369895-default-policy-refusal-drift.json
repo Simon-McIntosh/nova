@@ -1415,6 +1415,62 @@
   "plan_link": null,
   "promoted_by": "review-acceptance",
   "promoted_revision": "d90cdd78ac7e95af3794e07773df1b89fa443fb8",
+  "release": {
+    "arms_kept": [
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261121T205621369895-default-policy-refusal-drift/input-drift/attribution-fixed",
+        "reason": "outside the node-local temp root /tmp"
+      }
+    ],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 23947,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261121T205621369895-default-policy-refusal-drift",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 23947,
+        "path": "/tmp/reckon-crew-scratch/r-20261121T205621369895-default-policy-refusal-drift"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 1
+      },
+      "worktrees": [
+        {
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "unintegrated",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "d90cdd78ac7e95af3794e07773df1b89fa443fb8",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d2b31d35-d43f-471c-8494-93ef30b1d4b5/default-policy-refusal-drift",
+          "reclaimable": false,
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "its HEAD is not reachable from the integration revision, so removing it would destroy the only copy of that commit; merge it or discard it deliberately"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "its HEAD is not reachable from the integration revision, so removing it would destroy the only copy of that commit; merge it or discard it deliberately"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

@@ -1,0 +1,43 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T09:46:14.289Z",
+  "dispatched_at": "2026-11-23T09:38:36Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/derivative_order_census/variants.py",
+      "line": 20,
+      "severity": "non-blocking",
+      "text": "the 'plain' arm re-implements scripts/prototypes/point_program_attribution/blocks.py::plain_primal inline (and re-does the module-attribute patch that blocks.apply owns, both present at the node's base 3c3bcfa) instead of importing the owner; it adds only the _pole_product_traced unwrap, so the capability is duplicated rather than extended"
+    },
+    {
+      "file": "scripts/prototypes/derivative_order_census/summarise.py",
+      "line": 57,
+      "severity": "non-blocking",
+      "text": "the '1% perturbation control' is computed by hand as |1.01v - v|/|v|, the constant 0.01 that never calls relative(), so 'assert control > 0.009' here and at check_record.py:122 can never fail and does not show the comparator detects a perturbation; it is a tautology, not a positive control"
+    },
+    {
+      "file": "scripts/prototypes/derivative_order_census/summarise.py",
+      "line": 140,
+      "severity": "non-blocking",
+      "text": "for variant 'current' the observed array resolves to the same file as the reference at every order (reference and observed at lines 130 and 140-143), so the Current accuracy rows compare the reference against itself and their zero relative difference is tautological rather than an independent measurement"
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T093748352508-review-of-derivative-order-memory-census-a9f0ee8ba366",
+  "reviewed_base_sha": "3c3bcfa5a67887b317ea2a3e237bfcbb880860fb",
+  "reviewed_head_sha": "a9f0ee8ba3664634b1d78e189c00f8ab8c7715d1",
+  "reviewed_run_id": "r-20261123T045219222369-derivative-order-memory-census",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T09:46:26.035401+00:00",
+  "total": 83
+}

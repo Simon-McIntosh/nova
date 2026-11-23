@@ -2,7 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-23T18:21:39.380Z",
-  "dimension_dispositions": {},
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-unreached-module-delete-5ae605f519c6",
+      "recorded_at": "2026-11-23T18:55:41.236878+00:00"
+    }
+  },
   "dispatched_at": "2026-11-23T18:04:40Z",
   "findings": [
     {

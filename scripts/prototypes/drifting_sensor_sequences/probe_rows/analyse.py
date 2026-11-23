@@ -408,7 +408,7 @@ def main() -> int:
     # like-for-like with imas-efit.
     row_matched = {
         "nova": {
-            sequence: summary.get("nova-%s-200-0.0100-loops" % sequence)
+            sequence: summary.get(declared_stem("nova", sequence) + "-loops")
             for sequence in ("white", "drift")
         },
         "efit": {sequence: pick("efit", sequence) for sequence in ("white", "drift")},

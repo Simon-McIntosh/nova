@@ -46,12 +46,13 @@ def arm_rows(code: str, sequence: str, arm: str | None = None) -> list[dict]:
     """
     if arm is None:
         return analyse.selected_rows(code, sequence, SLICES, FACTOR)
-    paths = sorted(
-        STUDY.glob("%s-%s-%d-%.4f-%s*.jsonl" % (code, sequence, SLICES, FACTOR, arm))
+    stem = analyse.declared_stem(code, sequence, SLICES, FACTOR)
+    if arm != "all" and not stem.endswith("-" + arm):
+        stem = "%s-%s" % (stem, arm)
+    paths = sorted(STUDY.glob("%s.jsonl" % stem)) + sorted(
+        STUDY.glob("%s-shard*.jsonl" % stem)
     )
-    return analyse.grouped(paths).get(
-        "%s-%s-%d-%.4f-%s" % (code, sequence, SLICES, FACTOR, arm), []
-    )
+    return analyse.grouped(paths).get(stem, [])
 
 
 def axis_position(rows: list[dict]) -> np.ndarray:

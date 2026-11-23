@@ -1,0 +1,53 @@
+{
+  "added_failure_basis": "The reviewed run's manifest carries no baseline_suite and after_suite keys and its write paths hold no test file (the suite gate is unarmed), so no suite pair exists to difference. Its only gate is the comparison job recorded in compare.log, which reports '6 entries passed, 0 failed, 3 negative controls fired' and EXIT=0 at revision 85d69cfc5; the committed receipt.json is byte-identical to that run's receipt.json (diff clean). Added failures: none.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T09:58:32.588Z",
+  "dispatched_at": "2026-11-23T09:50:06Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html",
+      "line": 26,
+      "severity": "blocking",
+      "text": "The scan paragraph states the candidate scan used scripts/iron_operator_bound/reuse_check.py's definitions() and callers() and that 'no third scanner was authored', but compare.py:490-616 (_function_bodies, ast_scan, write_ast_scan) re-implement function discovery with their own ast.parse/ast.walk and never import or call reuse_check: a grep for reuse_check/iron_operator across every blob of compare.py at 47eaf8b34, 3cab2a307, ef0aba6f1, 8c5c7433f, 6c669963c and 41e86fb61 returns zero. The record therefore misstates its own method, and the brief's explicit instruction 'Do not author a third scanner' is unmet; a reader handed this register as evidence cannot reproduce the scan by the route it names."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html",
+      "line": 26,
+      "severity": "non-blocking",
+      "text": "_tensor_bernstein is an exact-body duplicate (ast-scan.json digest c05b0ba4f9ac) between two modules the line map records on a route, nova/equilibrium/flux_surface_extraction.py and nova/linalg/tensor_spline.py, yet the register defers it to 'a later node' with no measured agreement and no keep/removable decision record, and the near-identity flags Aphi, _first_residual and for_member are likewise registered but unmeasured; plan s5 asks for every such place to carry an agreement and a keeper, so these four are disclosed gaps in the register's coverage rather than measured declines."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html",
+      "line": 32,
+      "severity": "non-blocking",
+      "text": "8 of the 11 delivered paths (scripts/prototypes/hot_path_duplicates/job.sh, hot-path-duplicates/receipt.json and the six decision records under hot-path-duplicates/) sit outside the declared write paths, which named only compare.py, ast-scan.json, hot-path-duplicates.html and two never-delivered paths; the deliveries are what plan s5 requires, so the defect is the declaration, not the work."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T094925567928-review-of-hot-path-duplicate-register-41e86fb61b2f",
+  "reviewed_base_sha": "7505cdfbc551ac367c977575d4a3d74a9f1bddd2",
+  "reviewed_head_sha": "41e86fb61b2f6e08a98eddc296728802844a97f8",
+  "reviewed_run_id": "r-20261122T202607457728-hot-path-duplicate-register",
+  "rubric": "text",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 7,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T09:58:41.347560+00:00",
+  "total": 76,
+  "verdicts": {
+    "call_sites": "none",
+    "diff": "Read all 14 commits 47eaf8b34..41e86fb61 against base 7505cdf: 11 paths, +4733 lines; compare.py (705 lines) and job.sh (32) plus the fragment, six decision records, receipt.json and ast-scan.json. The later commits 6c669963c..41e86fb61 are the repair: they enforce the negative controls in the exit status, fix the extreme-selection list subtraction, fail plot-columns on a missing implementation, measure topology-read between the two implementations, ship an AST-scan generator, and correct the record's numbers.",
+    "done_when": "The done-when asks each entry to name implementations, per-route execution and agreement within a stated tolerance (or the measured disagreement), and each entry to propose the keeper and removable lines; receipt.json carries tolerance and agrees:true for all six entries, compare.log reports 6 entries passed, 0 failed with EXIT=0 at 85d69cfc5, and three negative controls report disagreement beyond their tolerance, which is the declared negative control.",
+    "goal": "The goal (plan code-reuse-and-hot-path s5 and the run's brief) is a register at hot-path-duplicates.html of places where two or more implementations compute the same quantity; the diff delivers six entries at hot-path-duplicates.html:12-20 (five duplicate pairs and one route resolution), each naming its implementations, the route execution per s1, measured agreement and a keep/removable proposal, plus six JSON decision records under hot-path-duplicates/.",
+    "manifest": "Read the manifest: status complete, tests 'bash scripts/prototypes/hot_path_duplicates/job.sh', test_logs naming the run's compare.log, negative_control_log naming revert-verification.log (which shows three silent controls turning the gate nonzero and ALL PASS for the four repairs), landing naming the six entries and decision records, and no baseline_suite/after_suite keys (suite unarmed).",
+    "write_paths": "The declared write paths are hot-path-duplicate-register.html, the figures dir, scripts/prototypes/hot_path_duplicates/compare.py, hot-path-duplicates/ast-scan.json and hot-path-duplicates.html; only 3 of the 11 delivered paths (hot-path-duplicates.html, ast-scan.json, compare.py) lie inside the declared set, the other 8 (job.sh, receipt.json and six decision records) are outside it though inside the plan section's expected scope."
+  }
+}

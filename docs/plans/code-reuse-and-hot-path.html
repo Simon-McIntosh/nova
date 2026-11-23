@@ -25,7 +25,7 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -244,8 +244,11 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261123T091608198628-review-of-hot-path-duplicate-register-c62046c999c4" data-who="reckon-build" data-when="2026-11-23T09:25:29.164Z">
     <div class="r-comment-body"><p>review of r-20261122T202607457728-hot-path-duplicate-register at base 7505cdfbc551ac367c977575d4a3d74a9f1bddd2 and head c62046c999c4fe117a8501c33bf882354105cad2 scores goal_fidelity 17, evidence 16, scope_discipline 12, durability 7, fit 17, reuse 17, with seven non-blocking findings and a parsed record stored under the reviewed run's review-records directory.</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261123T094925567928-review-of-hot-path-duplicate-register-41e86fb61b2f" data-who="reckon-build" data-when="2026-11-23T09:58:32.588Z">
+    <div class="r-comment-body"><p>review of r-20261122T202607457728-hot-path-duplicate-register at base 7505cdfbc551ac367c977575d4a3d74a9f1bddd2 and head 41e86fb61b2f6e08a98eddc296728802844a97f8: goal_fidelity 16, evidence 15, scope_discipline 13, durability 9, fit 16, reuse 7, one blocking finding (the scan paragraph claims reuse of scripts/iron_operator_bound/reuse_check.py and &quot;no third scanner was authored&quot;, but compare.py never imports reuse_check and no commit ever did) and two non-blocking findings (four duplicate candidates registered but unmeasured; 8 of 11 delivered paths outside the declared write paths).</p></div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261123T092757665687-review-of-bench-scripts-census-aa3e594fb4a3" data-who="reckon-build" data-when="2026-11-23T09:40:12.753Z">
-    <div class="r-comment-body"><p>the census of benchmarks/ and scripts/ is reviewed at aa3e594fb4a363c1db9746b0b1158ec582026e5b and scores goal_fidelity 15, evidence 18, scope_discipline 16, durability 16, fit 16, reuse 19, with one blocking finding: the plan-ownership pass reads plan HTML only and never a plan&#x27;s live crew runs, so scripts/prototypes/h200_levers is classified delete while a queued sub-millisecond-forward-path node declares it a write path.</p></div>
+    <div class="r-comment-body"><p>the census of benchmarks/ and scripts/ is reviewed at aa3e594fb4a363c1db9746b0b1158ec582026e5b and scores goal_fidelity 15, evidence 18, scope_discipline 16, durability 16, fit 16, reuse 19, with one blocking finding: the plan-ownership pass reads plan HTML only and never a plan's live crew runs, so scripts/prototypes/h200_levers is classified delete while a queued sub-millisecond-forward-path node declares it a write path.</p></div>
 </div>
 </section>
 </main>

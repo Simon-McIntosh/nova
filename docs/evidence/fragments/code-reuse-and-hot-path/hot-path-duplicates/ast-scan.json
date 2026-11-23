@@ -1,6 +1,11 @@
 {
   "line_map": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.json",
   "line_map_revision": "09ef90e40148bf724669e8fc2c7c3a823134f5b8",
+  "definitions": {
+    "source": "scripts/iron_operator_bound/reuse_check.py:definitions",
+    "agrees": true,
+    "mismatches": []
+  },
   "route_modules": [
     "nova/__init__.py",
     "nova/biot/__init__.py",
@@ -3575,5 +3580,5 @@
       "ratio": 0.8508
     }
   ],
-  "revision": "6c669963c11d517cc3a613ea1251180062b7f2ef"
+  "revision": "fde60e85ca3335de40ac0a2a746a7b406d1906a0"
 }

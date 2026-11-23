@@ -190,6 +190,58 @@
       "vacuous_cases": [],
       "disagreements": [],
       "agrees": true
+    },
+    {
+      "entry": "candidate-agreements",
+      "pairs": [
+        {
+          "candidate": "tensor-bernstein",
+          "implementation_a": "nova.equilibrium.flux_surface_extraction._tensor_bernstein",
+          "implementation_b": "nova.linalg.tensor_spline._tensor_bernstein",
+          "input": "one 4x4 coefficient block at five paired coordinates, order 3",
+          "tolerance": 0.0,
+          "max_abs_gap": 0.0,
+          "agrees": true,
+          "keeper": "nova.linalg.tensor_spline._tensor_bernstein",
+          "lines_removable": 4
+        },
+        {
+          "candidate": "aphi-axis-zero",
+          "implementation_a": "nova.biot.cylinder.Cylinder.Aphi",
+          "implementation_b": "nova.biot.polysection.PolySection.Aphi",
+          "input": "one 4x2 target grid with a zero-radius cell, mu_0 = 4 pi 1e-7",
+          "tolerance": 0.0,
+          "max_abs_gap": 0.0,
+          "agrees": true,
+          "keeper": "one copy in the shared Matrix base",
+          "lines_removable": 9
+        },
+        {
+          "candidate": "first-residual",
+          "implementation_a": "nova.biot.polygonarc._Vertex._first_residual",
+          "implementation_b": "nova.biot.polygonanalytic._first_residual",
+          "input": "one three-row corner at eight graded nodes",
+          "tolerance": 0.0,
+          "max_abs_gap": 0.0,
+          "agrees": true,
+          "keeper": "the polygonanalytic form (a superset: optional weight)",
+          "lines_removable": 1
+        },
+        {
+          "candidate": "for-member",
+          "implementation_a": "nova.transport.ensemble.EnsembleTransportReceipt.for_member",
+          "implementation_b": "nova.transport.window_batch.WindowBatchReceipt.for_member",
+          "input": "one three-member list addressed by identity, present and absent",
+          "tolerance": "same member selected, KeyError for an absent identity",
+          "selected_same_member": true,
+          "keyerror_both": true,
+          "agrees": true,
+          "keeper": "one loop with a per-class receipt accessor",
+          "lines_removable": 7
+        }
+      ],
+      "tolerance": "each pair states its own; the record agrees when every pair does",
+      "agrees": true
     }
   ],
   "negative_controls": [

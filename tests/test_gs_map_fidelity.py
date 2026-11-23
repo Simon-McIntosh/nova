@@ -72,8 +72,7 @@ CLAMP_ENV = "NOVA_DUMMY_SADDLE_CLAMP"
 IMAGE_NULL_COLOR = "#7a3ea8"
 ROOT = Path(__file__).resolve().parents[1]
 FRAGMENT = (
-    ROOT
-    / "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html"
+    ROOT / "docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html"
 )
 ROWS_ID = "cfs-map-fidelity-rows"
 
@@ -297,6 +296,11 @@ def _figure(case_name: str, cells: int = 10000) -> Path:
     for the axis, filled cross for the admitted saddle — with the analytic set
     in the default marker colour and the map image's in a second hue, so the
     reader sees whether the map's topology matches the state it came from.
+
+    The two sets coincide to within the map's own error at this rung, so the
+    map image's markers are drawn larger and beneath the analytic ones. Drawn
+    at the same size and above, they hide the analytic set entirely and the
+    panel would report one set while claiming two.
     """
     import matplotlib
 
@@ -330,15 +334,26 @@ def _figure(case_name: str, cells: int = 10000) -> Path:
         axis=float(exact_read.axis_flux),
     )
     style = ink.DEFAULT_INK
+    # The two null sets coincide at this rung to within the map's own error, so
+    # the map image's markers are drawn larger and underneath: an identical
+    # marker drawn on top would hide the analytic one, and both sets have to be
+    # visible for the reader to see that the map reproduces the topology.
     image_style = replace(
-        style, axis_color=IMAGE_NULL_COLOR, xpoint_color=IMAGE_NULL_COLOR
+        style,
+        axis_markersize=style.axis_markersize + 5.0,
+        xpoint_markersize=style.xpoint_markersize + 5.5,
+        xpoint_markeredgewidth=1.6,
+        axis_color=IMAGE_NULL_COLOR,
+        xpoint_color=IMAGE_NULL_COLOR,
+        # The larger marker sits behind the analytic one.
+        zorder_markers=style.zorder_markers - 1,
     )
     figure, panels = plt.subplots(1, 2, figsize=(14.0, 7.2))
     figure.patch.set_facecolor(style.figure_facecolor)
     figure.subplots_adjust(left=0.01, right=0.99, bottom=0.01, top=0.93, wspace=0.02)
     for panel, values, label in (
         (panels[0], image[:grid], "map image"),
-        (panels[1], exact_grid, "analytic state")
+        (panels[1], exact_grid, "analytic state"),
     ):
         ink.poloidal_axes(panel, style)
         poloidal.draw_scattered_contours(
@@ -353,8 +368,8 @@ def _figure(case_name: str, cells: int = 10000) -> Path:
         )
         poloidal.draw_wall(panel, radius=wall[:, 0], height=wall[:, 1], style=style)
         for reading, null_style in (
-            (exact_read, style),
             (image_read, image_style),
+            (exact_read, style),
         ):
             poloidal.draw_nulls(
                 panel,
@@ -370,7 +385,8 @@ def _figure(case_name: str, cells: int = 10000) -> Path:
             transform=panel.transAxes,
             ha="left",
             va="top",
-            fontsize=14)
+            fontsize=14,
+        )
     handles = (
         Line2D(
             [],
@@ -384,8 +400,8 @@ def _figure(case_name: str, cells: int = 10000) -> Path:
         Line2D(
             [],
             [],
-            marker=style.xpoint_marker,
-            markersize=style.xpoint_markersize,
+            marker=image_style.axis_marker,
+            markersize=image_style.axis_markersize,
             color=IMAGE_NULL_COLOR,
             linestyle="none",
             label="map-image nulls",

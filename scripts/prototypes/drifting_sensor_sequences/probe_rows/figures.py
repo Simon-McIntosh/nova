@@ -38,9 +38,20 @@ FACTOR = 0.01
 COMPONENTS = ((0, "R [m]"), (1, "Z [m]"))
 
 
-def arm_rows(code: str, sequence: str) -> list[dict]:
-    """The slices of this code's declared arm for this sequence."""
-    return analyse.selected_rows(code, sequence, SLICES, FACTOR)
+def arm_rows(code: str, sequence: str, arm: str | None = None) -> list[dict]:
+    """The slices of this code's declared arm, or the arm a caller names.
+
+    The overlay is drawn on the row-matched pair -- nova from the same 24 flux
+    loops imas-efit reads -- so the two states come from one information set.
+    """
+    if arm is None:
+        return analyse.selected_rows(code, sequence, SLICES, FACTOR)
+    paths = sorted(
+        STUDY.glob("%s-%s-%d-%.4f-%s*.jsonl" % (code, sequence, SLICES, FACTOR, arm))
+    )
+    return analyse.grouped(paths).get(
+        "%s-%s-%d-%.4f-%s" % (code, sequence, SLICES, FACTOR, arm), []
+    )
 
 
 def axis_position(rows: list[dict]) -> np.ndarray:
@@ -189,6 +200,7 @@ def main(argv=None) -> int:
     parser.add_argument("--figure-dir", required=True)
     parser.add_argument("--table", default="")
     parser.add_argument("--html", action="store_true")
+    parser.add_argument("--nova-arm", choices=("all", "loops"), default="all")
     args = parser.parse_args(argv)
     truth = json.loads((STUDY / "generating.json").read_text())
     directory = Path(args.figure_dir)
@@ -199,7 +211,9 @@ def main(argv=None) -> int:
             rows = arm_rows(code, sequence)
             table[code][sequence] = analyse.reduce_arm(rows, truth) if rows else None
         draw_code(code, truth, directory / ("axis-position-%s.svg" % code))
-    worst = disagreement(arm_rows("nova", "drift"), arm_rows("efit", "drift"))
+    worst = disagreement(
+        arm_rows("nova", "drift", args.nova_arm), arm_rows("efit", "drift")
+    )
     payload = dict(
         table=table,
         disagreement_slice=worst,

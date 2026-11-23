@@ -400,9 +400,26 @@ def main() -> int:
         if match:
             spectrum["efit"][(float(match.group(2)), float(match.group(3)))] = value
 
+    # The row-matched pair: nova fitted from the same 24 flux loops imas-efit
+    # reads.  Declared separately from `control`, whose nova column is the
+    # 72-row set, so a reader sees both of nova's arms and the one that is
+    # like-for-like with imas-efit.
+    row_matched = {
+        "nova": {
+            sequence: summary.get("nova-%s-200-0.0100-loops" % sequence)
+            for sequence in ("white", "drift")
+        },
+        "efit": {sequence: pick("efit", sequence) for sequence in ("white", "drift")},
+    }
+    for streams in row_matched.values():
+        for arm in streams.values():
+            if arm is not None:
+                arm["row_set"] = "loops"
+
     payload = dict(
         reference=reference,
         control=control,
+        row_matched=row_matched,
         sizes={
             code: {str(k): v for k, v in points.items()}
             for code, points in sizes.items()

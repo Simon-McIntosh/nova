@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-23T01:15:44.176Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-23T01:07:20Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/stored-case-build-stall-diagnosis.html",
+      "line": "44",
+      "severity": "non-blocking",
+      "text": "the two-arm table gives the 77283793bc arm \"1906\" sort_link calls, but arms2.log holds 1907 completed SORTLINK_END lines (call 0 through 1906) for that arm exactly as for be5ee98f7; the two columns are therefore counted differently and line 46 repeats the 1 907 / 1 906 pair. The load-bearing totals (825.8 s / 814.8 s, 11 756 rows, 634 calls above 0.5 s, exponent 2.085) all reproduce."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T190644382930-stored-case-build-stall-diagnosis/manifest.md",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "the tests: line is still not the literal command a gate receipt can re-run (it embeds prose and appends each arm's result to one command string), and it swaps the arms' times relative to the logs it cites: baseline-suite.log records 74 passed in 4.62s at be5ee98f7 and after-suite.log 74 passed in 6.79s at 981f76784, while the line states 6.79s for baseline and 4.62s for after."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit against be5ee98f7; 62f573bc3 adds the 47-line fragment, 4bb386db4 cites the frame tests, 10749d9a4 qualifies the ordering repair, and the reviewed delta 981f76784 replaces the 242-call/2.06 statistic with 634 calls / exponent 2.085 and names arms2.log, head-sample.log and build_only.py as the recomputation sources.",
+    "done_when": "all three clauses are answered and recorded: a 16-dump stack with file:line (:10-23), a two-arm 900 s measurement at be5ee98f7 and 77283793bc on one CPU partition (:39-46), and an explicit \"No landed change moves this cost\" with the diff scan (:48-49); I recounted arms2.log and it yields 634 calls above 0.5 s (326/308), fitted exponent 2.0853 (2.0488/2.1364), 825.8 s / 814.8 s cumulative and 11 756 rows in both arms, matching the head commit's numbers.",
+    "goal": "the goal asks where the stored MAST-U pre-fit build spends three host-side hours; stored-case-build-stall-diagnosis.html:24-36 names nova/frame/multipoint.py:76,78 sort_link into nova/frame/columnar.py:84 get_loc as the cost, quadratic in accumulated rows, and :6 records that the logged run's ordering is not established, so the goal's \"after the plasma grid\" premise is qualified rather than asserted.",
+    "manifest": "read in full; status is complete and it names commits 62f573bc3, 4bb386db4, 10749d9a4 and 981f76784 and the three gate logs, but its tests: line (:19) is not a literal command and swaps the two arms' recorded times.",
+    "write_paths": "the node declared the fragment path and a figures directory; the delivered range be5ee98f7..981f76784 changes only the fragment file, and the manifest's changed_paths names the same one path."
+  },
+  "justifications": {
+    "durability": "no committed test guards the fragment's claims; the check_fragment_numbers.py behind the negative control lives under ~/.cache and is not versioned or wired into any suite, so a later edit to the counts fails nothing in the repository.",
+    "evidence": "the statistic at stored-case-build-stall-diagnosis.html:36 recomputes exactly from arms2.log (634 above 0.5 s, exponent 2.085, 37.1 s at 30 000 rows, 3.85 h summed), and negative-control-numbers.log records the check failing on the reverted fragment and passing on head.",
+    "fit": "stored-case-build-stall-diagnosis.html:1-2 follows the sibling fragment idiom (section id, h2, h3, tables) and its ids and filename carry no plan or version label.",
+    "goal_fidelity": "stored-case-build-stall-diagnosis.html:24-36 names the insertion path and its quadratic cost, and :6 states the recorded run's ordering is not established rather than claiming it.",
+    "reuse": "the delta adds prose only and introduces no definition, so no capability is forked; the fragment cites the owning modules rather than restating them.",
+    "scope_discipline": "every path in be5ee98f736dcc20393153f8bb6e7bf163ef873e..981f76784b55166bf86d9e98dec206181062d36e is the single declared fragment file."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal asks where the stored MAST-U pre-fit build spends three host-side hours; stored-case-build-stall-diagnosis.html:24-36 names nova/frame/multipoint.py:76,78 sort_link into nova/frame/columnar.py:84 get_loc as the cost, quadratic in accumulated rows, and :6 records that the logged run's ordering is not established, so the goal's \"after the plasma grid\" premise is qualified rather than asserted.\nVERDICT done_when: all three clauses are answered and recorded: a 16-dump stack with file:line (:10-23), a two-arm 900 s measurement at be5ee98f7 and 77283793bc on one CPU partition (:39-46), and an explicit \"No landed change moves this cost\" with the diff scan (:48-49); I recounted arms2.log and it yields 634 calls above 0.5 s (326/308), fitted exponent 2.0853 (2.0488/2.1364), 825.8 s / 814.8 s cumulative and 11 756 rows in both arms, matching the head commit's numbers.\nVERDICT write_paths: the node declared the fragment path and a figures directory; the delivered range be5ee98f7..981f76784 changes only the fragment file, and the manifest's changed_paths names the same one path.\nVERDICT manifest: read in full; status is complete and it names commits 62f573bc3, 4bb386db4, 10749d9a4 and 981f76784 and the three gate logs, but its tests: line (:19) is not a literal command and swaps the two arms' recorded times.\nVERDICT diff: read commit by commit against be5ee98f7; 62f573bc3 adds the 47-line fragment, 4bb386db4 cites the frame tests, 10749d9a4 qualifies the ordering repair, and the reviewed delta 981f76784 replaces the 242-call/2.06 statistic with 634 calls / exponent 2.085 and names arms2.log, head-sample.log and build_only.py as the recomputation sources.\n\nCALL_SITES: none\n\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: stored-case-build-stall-diagnosis.html:24-36 names the insertion path and its quadratic cost, and :6 states the recorded run's ordering is not established rather than claiming it.\nSCORE evidence: 17\nJUSTIFICATION evidence: the statistic at stored-case-build-stall-diagnosis.html:36 recomputes exactly from arms2.log (634 above 0.5 s, exponent 2.085, 37.1 s at 30 000 rows, 3.85 h summed), and negative-control-numbers.log records the check failing on the reverted fragment and passing on head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in be5ee98f736dcc20393153f8bb6e7bf163ef873e..981f76784b55166bf86d9e98dec206181062d36e is the single declared fragment file.\nSCORE durability: 10\nJUSTIFICATION durability: no committed test guards the fragment's claims; the check_fragment_numbers.py behind the negative control lives under ~/.cache and is not versioned or wired into any suite, so a later edit to the counts fails nothing in the repository.\nSCORE fit: 17\nJUSTIFICATION fit: stored-case-build-stall-diagnosis.html:1-2 follows the sibling fragment idiom (section id, h2, h3, tables) and its ids and filename carry no plan or version label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds prose only and introduces no definition, so no capability is forked; the fragment cites the owning modules rather than restating them.\n\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/stored-case-build-stall-diagnosis.html:44 non-blocking: the two-arm table gives the 77283793bc arm \"1906\" sort_link calls, but arms2.log holds 1907 completed SORTLINK_END lines (call 0 through 1906) for that arm exactly as for be5ee98f7, so the two columns are counted differently and line 46 repeats the 1 907 / 1 906 pair.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T190644382930-stored-case-build-stall-diagnosis/manifest.md:19 non-blocking: the tests: line is not the literal command a gate receipt can re-run and swaps the arms' times relative to the logs it cites (baseline-suite.log 4.62s at be5ee98f7, after-suite.log 6.79s at 981f76784; the line states the reverse).",
+  "review_run_id": "r-20261123T010603032802-review-of-stored-case-build-stall-diagnosis-981f76784b55",
+  "reviewed_base_sha": "be5ee98f736dcc20393153f8bb6e7bf163ef873e",
+  "reviewed_head_sha": "981f76784b55166bf86d9e98dec206181062d36e",
+  "reviewed_run_id": "r-20261122T190644382930-stored-case-build-stall-diagnosis",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T01:16:06.462980+00:00",
+  "total": 100
+}

@@ -33,7 +33,30 @@
   "plan_slug": "one-ids-seam",
   "plan_version": 7,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "8951887650703b921eaa2dea90ea56a29f7f84d9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Plan v8 (895188765): \u00a72 now deletes contour_tree_layout.py with the other unreached modules and the deleting node repoints the reuse-map.md citation at the file at the base revision, naming the commit; both gates hold.",
+      "reason": "",
+      "when": "2026-11-23T05:19:22.930656+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "8951887650703b921eaa2dea90ea56a29f7f84d9",
+      "commit_basis": "edit",
+      "note": "Plan v8 (895188765): \u00a72 now deletes contour_tree_layout.py with the other unreached modules and the deleting node repoints the reuse-map.md citation at the file at the base revision, naming the commit; both gates hold.",
+      "reason": "",
+      "when": "2026-11-23T05:19:22.930656+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/one-ids-seam/r-20261123T045102323936-plan-review-of-one-ids-seam.json",
   "review_run_id": "r-20261123T045102323936-plan-review-of-one-ids-seam",
   "reviewed_blob_sha": "d4d3473b48778d67c04f4845d780033c17fe8ca1",
   "rubric": "content",

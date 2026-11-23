@@ -1,0 +1,189 @@
+{
+  "agent": {},
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0
+  },
+  "changed_lines": {
+    "added": 0,
+    "files": 1,
+    "removed": 1206
+  },
+  "clone_matches": {
+    "reason": "the revision pair could not be read",
+    "status": "unmeasured"
+  },
+  "commit_list_shortfall": {
+    "declared": 7,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261122T215439012216-multipoint-link-linear-build' has a passing gate presenting 1 commit(s) of the 7 its manifest declares, and neither the presented commits nor their ancestors above the base cover: 297f8db8308a1fc89fa4374457cc74ee1fff390c, 565494e60535412c98766578cd81f3304290f124, 72d1408d9c1ad04101eb4e2d521e96527a901df1, 82dd19f686a4192d3afb55522b17fb17012d9fc4, de369755399003472e41bf081fea5c6e05d8548c, e54bb43bddeda46fc9a86a9878ae5e5ab9fb2c8c. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present a commit covering the rest, or the boundary check may not cover the node's work",
+    "missing": [
+      "297f8db8308a1fc89fa4374457cc74ee1fff390c",
+      "565494e60535412c98766578cd81f3304290f124",
+      "72d1408d9c1ad04101eb4e2d521e96527a901df1",
+      "82dd19f686a4192d3afb55522b17fb17012d9fc4",
+      "de369755399003472e41bf081fea5c6e05d8548c",
+      "e54bb43bddeda46fc9a86a9878ae5e5ab9fb2c8c"
+    ],
+    "presented": 1
+  },
+  "commit_resolution": null,
+  "commits": [
+    "c7fb9f6eece83e3c7acec0ac6036efdd03a8c1e4"
+  ],
+  "completed_at": "2026-11-23T14:09:59Z",
+  "completed_at_source": "promotion_time",
+  "dispatch_width": null,
+  "dispatched_at": "2026-11-23T00:23:44Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": null,
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_multipoint_link_sort.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T215439012216-multipoint-link-linear-build/scoped-gate-1795399960017085230.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "inverse-equilibrium-baseline",
+    "reason": "role-not-enforced:unknown",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-23T14:09:59Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T215439012216-multipoint-link-linear-build/manifest.md",
+  "member": "",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "no-negative-control-declared",
+    "test_paths": [
+      "tests/test_multipoint_link_sort.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "multipoint-link-linear-build",
+  "node_definition": {
+    "id": "multipoint-link-linear-build",
+    "plan": "inverse-equilibrium-baseline",
+    "section": "§9",
+    "write_paths": [
+      "nova/frame/multipoint.py",
+      "tests/test_multipoint_link_sort.py",
+      "docs/evidence/fragments/inverse-equilibrium-baseline/multipoint-link-linear-build.html",
+      "docs/figures/inverse-equilibrium-baseline/multipoint-link-linear-build/multipoint-link-cost.svg"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1886569.0,
+  "outcome": "",
+  "outside_scope_paths": [
+    "plasmagrid.solve"
+  ],
+  "picker_selection": null,
+  "plan": "inverse-equilibrium-baseline",
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "c7fb9f6eece83e3c7acec0ac6036efdd03a8c1e4",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "bba8365c97f5a0ad06eeab14c0819922e2079a0c",
+    "reviewed_head_sha": "c7fb9f6eece83e3c7acec0ac6036efdd03a8c1e4",
+    "scores": {
+      "durability": 16,
+      "evidence": 17,
+      "fit": 15,
+      "goal_fidelity": 15,
+      "reuse": 12,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 94
+  },
+  "review_tier": "full",
+  "role": "",
+  "route_mode": null,
+  "run_id": "r-20261122T215439012216-multipoint-link-linear-build",
+  "scope_acceptances": [
+    {
+      "path": "docs/figures/inverse-equilibrium-baseline/multipoint-link-cost.svg",
+      "reason": "the run's own cost figure, committed at the topic root before a later commit moved it into the run's figure directory"
+    }
+  ],
+  "scope_changed": false,
+  "section": "§9",
+  "session": null,
+  "session_harness": null,
+  "session_id": null,
+  "session_model": null,
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "",
+  "stalled": false,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "reason": "the reviewed head is already carried by merge fde7cb21f03086b61e400ad7b2e7c3c771395eac on the primary branch, so this recording measures no suite delta",
+    "recorded_merge": "fde7cb21f03086b61e400ad7b2e7c3c771395eac",
+    "status": "not-run",
+    "suite_command": ""
+  },
+  "tests_added": null,
+  "time_budget": "",
+  "tool_steps": 443.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 49575,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-23T02:43:08Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-23T00:23:53Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261122T215439012216-multipoint-link-linear-build",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 43333,
+    "worker_pid": 1418713
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "unavailable",
+  "worktree_retention": null
+}

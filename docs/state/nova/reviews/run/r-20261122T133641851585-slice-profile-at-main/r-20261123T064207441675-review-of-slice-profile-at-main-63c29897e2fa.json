@@ -1,0 +1,65 @@
+{
+  "added_failure_basis": "The reviewed run ran one suite pair from its own archives: baseline_suite at b62734cdf482 (logs suite-base.log, 4 passed, EXIT=0, job 1337821) and after_suite at 63c29897e2fa (suite-head-1338410.log, 4 passed, EXIT=0, job 1338410). Both logs reach their summary line with no FAILED id, so the added-failure set is empty. The pair runs tests/test_operator_bank_compile.py and touches none of the files this node added.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/bank_h200_slice_profile/job.sh",
+    "scripts/prototypes/bank_h200_slice_profile/run.py",
+    "scripts/prototypes/bank_newton_converge/directional.py"
+  ],
+  "completed_at": "2026-11-23T07:05:14.358Z",
+  "dispatched_at": "2026-11-23T06:45:05Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The done_when's third clause requires the record to hold the table, the job id and the log paths. The record names job ids (1337810, 1338227-1338331, 1338319, 1338363, 1338261) but no log path anywhere, so a reader of the published fragment cannot open the evidence it cites without asking the coordinator for the ~/.cache/nova-s28/slice-profile-at-main/ paths."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "No committed script produces this SVG. The only figure producer in the diff, report_arms.py:242-309, draws a latency/throughput two-panel figure, not the cold-solve figure, so the figure the record cites cannot be regenerated from the tree that carries it. Its numbers do reconcile to the job logs (three-revision-*.log, seed-read-1338331.log), so the artifact is not wrong; it is unreproducible."
+    },
+    {
+      "file": "manifest.md",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The reviewed manifest's `tests:` line reads `passed`, a description rather than the literal gate command, and the suite pair is recorded under a non-contract `suite_arms:` prose key with no `baseline_suite:`/`after_suite:` JSON blocks. Promotion fills its gate receipt from `tests:` and derives the suite pair from those two keys, so this record could not supply either."
+    }
+  ],
+  "justifications": {
+    "durability": "The change adds no test: the suite pair runs tests/test_operator_bank_compile.py (4 passed at each arm), which touches neither probe, and 63c29897e's seed_read_probe.py carries no assertion whose failure names a regression of the reported numbers.",
+    "evidence": "The measured claims reconcile: three-revision-pre-repair.log carries the fragment's first read 0.026314305163367635, the step-6 refactor 0.47338129947821983 and terminal 0.003868493624452185, and seed-read-1338331.log reproduces the perturbed/unperturbed read split; but the done_when's width-1/16/64 latency table does not exist in any form and every arm receipt carries complete: false.",
+    "fit": "The probes follow the sibling prototype idiom and reuse its helpers, but run.py:189 and report_arms.py:110 write `except OSError, ValueError:` (valid under Python 3.14 PEP 758) where every surrounding module parenthesises, and job.sh ends without a trailing newline.",
+    "goal_fidelity": "The fragment's closing paragraph states outright that no latency or throughput number is claimed and that the three-arm H200 profile was not submitted; the dispatcher's resume-3-advice.txt:1 rescoped the node to the cold-route diagnosis, but against the dispatched goal the latency measurement is absent.",
+    "reuse": "The new probes import machine() from bank_newton_step.measure, the bank_solve_profile fixture, bank_warm_start streams and bank_solve_profile.plot.save_checked rather than copying them, but cold_solve_probe.py:105-140 re-runs the cold certificate trajectory that bank_jacobian_mismatch/measure.py:381-390 already solves from the same certificate seed.",
+    "scope_discipline": "git diff --stat b62734cd..63c29897 lists nine paths, each inside one of the five declared write paths, and changes no nova/ product source, no test and no pyproject.toml."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T064207441675-review-of-slice-profile-at-main-63c29897e2fa",
+  "review_text": "VERDICT goal: the node's goal is per-slice H200 latency at main beside revision 0d9c8493, and the fragment at docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html:52 states no latency or throughput number is claimed.\nVERDICT done_when: clause 1's width-1/16/64 table with two-process spreads is absent, no H200 arm ran, and every receipt under ~/.cache/nova-s28/slice-profile-at-main/*-slice-*-N/receipt.json reads complete: false; the record does hold the job ids and figure of clause 3 but names no log paths.\nVERDICT write_paths: git diff --stat b62734cd..63c29897 lists nine paths, all inside the declared roots, with no nova/ source, test or pyproject.toml change.\nVERDICT manifest: read in full; it records the rebuilt bank, the job ids, the suite arm results and states plainly that the three-arm profile was not submitted.\nVERDICT diff: read commit by commit from b62734cdf482 to 0d9c8493's successor 63c29897e2fa; all hunks are prototype measurement code, evidence or figure.\nCALL_SITES: scripts/prototypes/bank_h200_slice_profile/job.sh, scripts/prototypes/bank_h200_slice_profile/run.py, scripts/prototypes/bank_newton_converge/directional.py\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html:52 states no latency or throughput number is claimed.\nSCORE evidence: 8\nJUSTIFICATION evidence: three-revision-pre-repair.log corroborates 0.026314305163367635, 0.47338129947821983 and 0.003868493624452185, but no log carries a width-1/16/64 latency table.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat b62734cdf482 63c29897e2fa lists nine paths, each inside the five declared write paths.\nSCORE durability: 4\nJUSTIFICATION durability: the suite pair runs tests/test_operator_bank_compile.py (4 passed per arm) and no test reaches scripts/prototypes/bank_h200_slice_profile/seed_read_probe.py.\nSCORE fit: 15\nJUSTIFICATION fit: run.py:189 writes `except OSError, ValueError:` unparenthesised against the surrounding idiom and job.sh lacks a trailing newline.\nSCORE reuse: 16\nJUSTIFICATION reuse: cold_solve_probe.py:105-140 re-solves the cold certificate trajectory bank_jacobian_mismatch/measure.py:381-390 already solves, though it reuses the fixture and save_checked rather than copying them.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html:52 non-blocking: the record names job ids but no log paths, which done_when clause 3 requires.\nFINDING docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg:1 non-blocking: no committed script produces this SVG; report_arms.py:242-309 draws a different figure, so it cannot be regenerated.\nFINDING manifest.md:1 non-blocking: `tests: passed` is not the literal gate command and the suite pair sits under `suite_arms` prose rather than baseline_suite/after_suite, so promotion cannot fill a gate receipt.\n",
+  "reviewed_base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+  "reviewed_head_sha": "63c29897e2fa0fdab48947f28b2ebffb0aaa8b39",
+  "reviewed_run_id": "r-20261122T133641851585-slice-profile-at-main",
+  "scores": {
+    "durability": 4,
+    "evidence": 8,
+    "fit": 15,
+    "goal_fidelity": 9,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T06:58:00Z",
+  "total": 71,
+  "verdicts": {
+    "diff": "Read commit by commit from b62734cdf482 to 63c29897e2fa: bf692471c/897d759f9 add the multi-arm runner and reporter, 647b5bcd6/642b6eb0c fix its reporting, 4b374175c..7b29fadc5 add the bank-store ensure step, 648441843 drops a wrong re-reference, 2f263124c/de5c188b0/7fdcd0845/63c29897e write the evidence and the probes; every hunk is prototype measurement code, evidence or figure.",
+    "done_when": "Clause 1's three-arm latency table (width-1 latency and width-16/64 batch walls with a two-process spread at most 5%) does not exist: no H200 arm ran and every receipt under ~/.cache/nova-s28/slice-profile-at-main/*-slice-*-N/receipt.json carries complete: false; clause 2's verdict is replaced by a cold-solve trajectory comparison; clause 3's record, figure and job ids are present, but the record does not carry the log paths it was asked to name.",
+    "goal": "The goal was single-pulse per-slice latency on the H200 at main beside revision 0d9c8493; the landed change delivers no latency number, instead a three-revision CPU cold-solve probe (0.026314305163368 first read, step-6 refactor, 3.87e-3 terminal, unconverged at all three) and a seed-perturbation probe, per docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html:52.",
+    "manifest": "Read in full; it states plainly in blockers and resume_brief that no latency number is claimed, records the rebuilt bank digest sha256:15a1abd0, the job ids, the suite arms, and asks the coordinator to promote; its `tests:` field is the word `passed` rather than a command.",
+    "write_paths": "Declared paths are docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html, docs/figures/sub-millisecond-forward-path/slice-profile-at-main, scripts/prototypes/bank_h200_slice_profile, scripts/prototypes/bank_newton_step/measure.py and docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg; git diff --stat b62734cd..63c29897 lists nine files and every one lies inside those roots."
+  }
+}

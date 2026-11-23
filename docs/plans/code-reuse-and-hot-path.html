@@ -25,7 +25,7 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="36">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -275,6 +275,9 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261123T132929959525-review-of-bench-scripts-delete-76a7d44acfbe" data-who="reckon-build" data-when="2026-11-23T13:42:45.610Z">
     <div class="r-comment-body"><p>Independent review of r-20261122T202603608268-bench-scripts-delete at 348ed92c..76a7d44ac scored 15/10/18/5/18/20 (goal_fidelity/evidence/scope_discipline/durability/fit/reuse), zero added failures, with two blocking findings: benchmarks/near_field_elliptic.py:1190 and scripts/prototypes/diiid_xpoint_profile_extent/measure.py:17 still name deleted paths at the head.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261123T172615528628-review-of-bench-scripts-delete-e1bc21735a5b" data-who="reckon-build" data-when="2026-11-23T17:51:42.712Z">
+    <div class="r-comment-body"><p>Reviewed r-20261122T202603608268-bench-scripts-delete at e1bc21735: goal_fidelity 16, evidence 13, scope_discipline 14, durability 5, fit 17, reuse 20, added_failure_count 0, five non-blocking findings (one archived record naming a deleted driver with no revision stamp, one restored-lines cell that does not reconcile, five deletions inside two sibling nodes&#x27; declared write scopes, a malformed orientation write-path expression, and collection parity measured five commits before the head).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261123T124148141242-review-of-unreached-module-delete-dc3a174a7ef3" data-who="reckon-build" data-when="2026-11-23T13:03:40.005Z">
     <div class="r-comment-body"><p>no plan edit; the review is delivered as a stored record on run r-20261122T202605453490-unreached-module-delete at head dc3a174a7 with scores goal_fidelity 19, evidence 14, scope_discipline 18, durability 5, fit 18, reuse 17 and four non-blocking findings.</p></div>

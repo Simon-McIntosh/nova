@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/near_field_elliptic.py:1190",
+    "scripts/prototypes/diiid_xpoint_profile_extent/measure.py:17",
+    "benchmarks/scripts_census.py"
+  ],
+  "completed_at": "2026-11-23T17:51:42.712Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "bench-scripts-delete",
+      "recorded_at": "2026-11-23T17:53:06.206293+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-23T17:26:52Z",
+  "findings": [
+    {
+      "file": "docs/archive/polybow-arc-section-third-kind-landed.html",
+      "line": 48,
+      "severity": "non-blocking",
+      "text": "This archived landed record names benchmarks/incomplete_third_kind.py as the driver of a recorded measurement but carries no revision number, so the fragment's claim at docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html:20 that every docs/ reference carries the revision it ran at is false for this record; the plan's cited-driver decision permits deletion only when the citing record names a revision that resolves, so this driver's deletion is not covered by that decision, although git history retains the file."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html",
+      "line": 39,
+      "severity": "non-blocking",
+      "text": "The summary row restored: cited by kept code or a kept record reads 54 files and 21657 lines, but the two restores at line 56 carry 442 lines, so 54 restores total 22099 lines; the 21657 cell fails to reconcile with the 185431 deletable total (163332+21657=184989), though the file counts and the net total are correct."
+    },
+    {
+      "file": "scripts/iron_limb_production/refinement.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "Four files under scripts/iron_limb_production (comparison.py, figure.py, negative_control_west.py, refinement.py) and scripts/prototypes/polygon_stable_evaluator/production_pair.py were deleted although both directories are the declared write scopes of sibling nodes of this same plan (peer_scopes ilf-control-receipt-rebuild and moment-row-z-gradient); neither node has a live run and no kept file names these paths, but each sibling will find its declared scope partly removed."
+    },
+    {
+      "file": ".config/reckon/crew/runs/r-20261122T202603608268-bench-scripts-delete/manifest.md",
+      "line": 3,
+      "severity": "non-blocking",
+      "text": "orientation_write_paths entry 1 is the unevaluated expression docs/evidence/fragments/code-reuse-and-hot-path/ + bench-scripts-delete + .html rather than a path, so the node's declared write set does not parse as a list of paths."
+    },
+    {
+      "file": ".config/reckon/crew/runs/r-20261122T202603608268-bench-scripts-delete/collect-worktree-e75324fc.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "Collection parity is recorded at e75324fc6, five commits before the reviewed head, and the plan decision's import sweep of every remaining module has no recorded run; the head-level claim that the tree collects rests on the fact that the later commits only restore files, not on a head-level collection pass."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T172615528628-review-of-bench-scripts-delete-e1bc21735a5b",
+  "reviewed_base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+  "reviewed_head_sha": "e1bc21735a5b5cda1ae6edec2d83846c18338b00",
+  "reviewed_run_id": "r-20261122T202603608268-bench-scripts-delete",
+  "scores": {
+    "durability": 5,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T18:07:42.860038+00:00",
+  "total": 85,
+  "verdicts": {
+    "diff": "Read all sixteen commits 348ed92c..e1bc21735: seven deletion batches of 54/54/42/113/197/148/8 files each under 30k lines, two restored siblings, repair rounds of 52 and 5 files, and five record commits; the net is 562 deletions and one added record fragment with zero changes under tests/, nova/, pyproject.toml and uv.lock.",
+    "done_when": "The done_when requires every deleted path absent and unnamed at the head, a zero-added-failure suite delta on all_debug, and an accurate lines-removed record; the plan's deletion-gate decision replaces the full-suite delta with the absence check, collection parity and identical failure ids on a focused set, each of which is recorded, and I reproduced the absence result independently (0 hits for 562 paths across the non-docs tree).",
+    "goal": "The goal is to apply the census delete and merge verdicts to benchmarks/ and scripts/ in reviewable batches with no added suite failures; the landed diff removes 562 of the 718 verdict paths in seven batches and removes all three merge duplicates, which are byte-identical to their merge_into targets at the base, while 102 paths are withheld and 54 restored with stated reasons.",
+    "manifest": "Read; it records status complete with 562 deleted paths and 163332 lines and names four gate logs plus three repair-check logs, but its orientation_write_paths entry 1 is an unevaluated string concatenation rather than a path and the focused arms are carried without baseline_suite/after_suite JSON blocks.",
+    "write_paths": "The declared set is the record fragment, its figures directory and the two repaired sources; every deletion in the diff lies under benchmarks/ or scripts/ and is the goal itself, and five deleted files fall inside two sibling nodes' declared peer write scopes."
+  }
+}

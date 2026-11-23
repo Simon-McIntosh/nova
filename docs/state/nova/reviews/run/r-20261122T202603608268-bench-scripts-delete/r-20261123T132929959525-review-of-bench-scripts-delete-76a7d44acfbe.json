@@ -7,6 +7,13 @@
     "benchmarks/greens_elliptic_route.py"
   ],
   "completed_at": "2026-11-23T13:42:45.610Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-bench-scripts-delete-76a7d44acfbe",
+      "recorded_at": "2026-11-23T14:21:48.930921+00:00"
+    }
+  },
   "dispatched_at": "2026-11-23T13:30:41Z",
   "finding_dispositions": {
     "0": {

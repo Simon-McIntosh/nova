@@ -48,9 +48,28 @@
       "finding": "reasoning-2",
       "reason": "it is motivation only, the plan's other figures reproduce exactly, and nothing in \u00a71\u2013\u00a76 is sized from it.",
       "when": "2026-11-22T21:00:51.101200+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "commit": "03b10519204fa44ab0084cb4fbf2839d19426606",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Each record now has a durable path under docs/evidence/fragments/code-reuse-and-hot-path/: bench-scripts-census.html (s2), bench-scripts-delete- plus batch number (s3), unreached-module-delete.html (s4), hot-path-duplicates.html (s5).",
+      "reason": "",
+      "when": "2026-11-23T04:54:54.519562+00:00"
     }
   ],
   "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "commit": "03b10519204fa44ab0084cb4fbf2839d19426606",
+      "commit_basis": "edit",
+      "note": "Each record now has a durable path under docs/evidence/fragments/code-reuse-and-hot-path/: bench-scripts-census.html (s2), bench-scripts-delete- plus batch number (s3), unreached-module-delete.html (s4), hot-path-duplicates.html (s5).",
+      "reason": "",
+      "when": "2026-11-23T04:54:54.519562+00:00"
+    },
     "reasoning-2": {
       "action": "noted",
       "by": "plan-review-reflex",
@@ -58,7 +77,7 @@
       "when": "2026-11-22T21:00:51.101200+00:00"
     }
   },
-  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-code-reuse-and-hot-path.v3.json",
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/code-reuse-and-hot-path/r-20261122T203309196819-plan-review-of-code-reuse-and-hot-path.json",
   "review_run_id": "r-20261122T203309196819-plan-review-of-code-reuse-and-hot-path",
   "reviewed_blob_sha": "f605b82a3b6f74da2516d8c33c77cce80b729c03",
   "rubric": "content",

@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T13:03:40.005Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "unreached-module-delete",
+      "recorded_at": "2026-11-23T13:04:48.927769+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-23T12:42:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+      "line": "140",
+      "severity": "non-blocking",
+      "text": "non-blocking: the record quotes negative control one as nova/equilibrium/forward.py (union 506 lines), but its committed twin at unreached-module-delete.json:129 records nova/__init__.py (union 19 lines), so the cited control is not the one the receipt carries."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+      "line": "158",
+      "severity": "non-blocking",
+      "text": "non-blocking: done_when clause 2 asks for a suite delta on all_debug; the shipped gate is an import sweep plus collect-only parity, so the node records the clause as unmet rather than measured."
+    },
+    {
+      "file": "benchmarks/scripts_census.py",
+      "line": "124",
+      "severity": "non-blocking",
+      "text": "non-blocking: the node's importer scan re-implements the import-resolution capability owned here instead of extending it, and it is uncommitted, so the 178 refusals and both controls cannot be re-derived from the repository."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T202605453490-unreached-module-delete/manifest.md",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests field is prose rather than the literal command, and test_logs names only focused-head.log whose bare EXIT=1 reports a failing gate, so a promotion cannot re-run the gate or read a passing status from those fields."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call site: the change deletes modules and no runtime code imports them",
+    "diff": "read commit by commit against 348ed92c; 104c8b673 removes 24 files with 3029 deletions and zero insertions, and 1bbcc381d, dd7da6c69 and dc3a174a7 touch only unreached-module-delete.html and its register JSON.",
+    "done_when": "clause 3 is met by the per-package table at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:78-88 (3029 re-summed from the diff); clause 1 is met (independent greps over nova/, tests/, apps/, benchmarks/, scripts/ and imas-ambix at head find no importer and no __init__ re-export); clause 2's suite delta was not run, and the record states so at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:158.",
+    "goal": "plan \u00a74 (docs/plans/code-reuse-and-hot-path.html:133) asks that unreached, unimported modules under nova/ be deleted with a record; the diff deletes exactly the 24 modules listed at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:91, 3029 lines.",
+    "manifest": "read; it records the substituted gate, its jobs and the reason under outside_scope, and names arm jobs 1339201 and 1339213 which gate-base.log and gate-head.log confirm with matching revisions.",
+    "write_paths": "the manifest declares only the two evidence paths, so the 24 nova deletions in commit 104c8b673 lie outside them, although every one is implied by \u00a74 and listed in changed_paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: plan \u00a74 (docs/plans/code-reuse-and-hot-path.html:133) asks that unreached, unimported modules under nova/ be deleted with a record; the diff deletes exactly the 24 modules listed at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:91, 3029 lines.\nVERDICT done_when: clause 3 is met by the per-package table at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:78-88 (3029 re-summed from the diff); clause 1 is met (independent greps over nova/, tests/, apps/, benchmarks/, scripts/ and imas-ambix at head find no importer and no __init__ re-export); clause 2's suite delta was not run, and the record states so at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:158.\nVERDICT write_paths: the manifest declares only the two evidence paths, so the 24 nova deletions in commit 104c8b673 lie outside them, although every one is implied by \u00a74 and listed in changed_paths.\nVERDICT manifest: read; it records the substituted gate, its jobs and the reason under outside_scope, and names arm jobs 1339201 and 1339213 which gate-base.log and gate-head.log confirm with matching revisions.\nVERDICT diff: read commit by commit against 348ed92c; 104c8b673 removes 24 files with 3029 deletions and zero insertions, and 1bbcc381d, dd7da6c69 and dc3a174a7 touch only unreached-module-delete.html and its register JSON.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every deleted path at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:91 is unreached on both routes in docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.json and carries no importer at head.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate-base.json and gate-head.json record 23 versus 14 import failures whose set difference is exactly the nine deleted modules, and collect-base/head.txt differ by only the six thermal-hydraulic parametrisations, but the plan's suite delta was never executed, as stated at unreached-module-delete.html:158.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the landed diff contains only deletions under nova/ plus the evidence pair in docs/evidence/fragments/code-reuse-and-hot-path/, with no incidental edits.\nSCORE durability: 5\nJUSTIFICATION durability: the change adds no committed test, so nothing under tests/ fails if any of the 24 deleted modules is re-added; the only guard is the one-off gate receipt.\nSCORE fit: 18\nJUSTIFICATION fit: the record follows the sibling fragments' idiom and the deletions add no symbol, so no repository naming rule is engaged.\nSCORE reuse: 17\nJUSTIFICATION reuse: the diff adds no definition and removes capability rather than forking it, though the record's importer scan in ~/.cache/nova-s33/unreached-module-delete/scan.py re-implements the capability owned by benchmarks/scripts_census.py:124.\nFINDING docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:140 non-blocking: the record quotes negative control one as nova/equilibrium/forward.py (union 506 lines), but its committed twin at docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.json:129 records nova/__init__.py (union 19 lines), so the control the record cites is not the one its receipt carries and cannot be re-derived from the committed artefacts.\nFINDING docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html:158 non-blocking: clause 2 of the done_when asks for a suite delta on all_debug, but the gate shipped is an import sweep plus collect-only parity, so no test-execution delta exists and the clause is formally unmet; the substitution is declared in the record and in the manifest's outside_scope.\nFINDING benchmarks/scripts_census.py:124 non-blocking: the node's importer scan re-implements the import-resolution capability owned here (imports_of, imports_of_walk, sibling_targets) instead of extending it, and scan.py is not committed, so the 178 refusals and both controls cannot be re-derived from the repository.\nFINDING /home/.../r-20261122T202605453490-unreached-module-delete/manifest.md:12 non-blocking: the tests field is a prose description rather than the literal command and test_logs names only focused-head.log, whose bare EXIT=1 reports a failing gate, so a promotion reading those fields sees a failed gate and cannot re-run what ran.\n",
+  "review_run_id": "r-20261123T124148141242-review-of-unreached-module-delete-dc3a174a7ef3",
+  "reviewed_base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+  "reviewed_head_sha": "dc3a174a7ef3af431fe60bed78133aa7ac73cdc8",
+  "reviewed_run_id": "r-20261122T202605453490-unreached-module-delete",
+  "scores": {
+    "durability": 5,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T13:07:53.846848+00:00",
+  "total": 91
+}

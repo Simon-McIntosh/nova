@@ -25,7 +25,30 @@
   "plan_slug": "converged-forward-solve",
   "plan_version": 634,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8fe1625bdb4f0fe44ded709fdeaddd4510c5995b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a710 clause 2's test now asserts the satisfiable invariant: after the labeller migration, every caller of read_qualification and _fixed_design_read lies in reduced_newton.py, the solver and booking authority of forward_operator.py, or forward.py's solve route, which are exactly what \u00a76 deletes or shrinks; no other module calls them.",
+      "reason": "",
+      "when": "2026-11-23T00:39:01.261451+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8fe1625bdb4f0fe44ded709fdeaddd4510c5995b",
+      "commit_basis": "edit",
+      "note": "\u00a710 clause 2's test now asserts the satisfiable invariant: after the labeller migration, every caller of read_qualification and _fixed_design_read lies in reduced_newton.py, the solver and booking authority of forward_operator.py, or forward.py's solve route, which are exactly what \u00a76 deletes or shrinks; no other module calls them.",
+      "reason": "",
+      "when": "2026-11-23T00:39:01.261451+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/converged-forward-solve/r-20261123T001743034027-plan-review-of-converged-forward-solve.json",
   "review_run_id": "r-20261123T001743034027-plan-review-of-converged-forward-solve",
   "reviewed_blob_sha": "f1cec97af48cb7765993e7c5709b1ce53c99276e",
   "rubric": "content",

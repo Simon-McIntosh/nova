@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="icm-graded-bound-remeasure">
+  <meta name="plan-evidence-for" content="iron-core-magnetisation">
+  <meta name="plan-verifies" content="iron-core-magnetisation#s11">
+  <title>The persisted WEST operators, the demagnetisation bound, and the direction that refuses | nova</title>
+</head>
+<body>
+<main class="plan-doc">
+  <h2 id="icm-graded-bound-remeasure-result">The persisted WEST operators, the demagnetisation bound, and the direction that refuses</h2>
+  <!-- measured-result -->
+  <p>The persisted WEST operators were built on the H200 (<code>1335154</code>)
+  and have now been measured against the demagnetisation energy bound
+  <code>0 &le; x<sup>T</sup>QGx &le; mu0 x<sup>T</sup>Qx</code>. All three
+  exceed it, and grading is not what decides the size.</p>
+  <table>
+    <thead><tr><th>operator</th><th>cells / unknowns</th>
+    <th>largest quotient</th><th>excess over the bound</th><th>eigen-residual</th></tr></thead>
+    <tbody>
+      <tr><td>uniform 80&nbsp;mm</td><td>1&thinsp;695 / 10&thinsp;170</td>
+      <td><strong>1.000191462860167</strong></td><td>+1.91&eacute;&minus;4</td><td>8.6&eacute;&minus;11</td></tr>
+      <tr><td>graded 16/80&nbsp;mm</td><td>5&thinsp;864 / 35&thinsp;184</td>
+      <td><strong>1.0255064121948232</strong></td><td>+2.55&eacute;&minus;2</td><td>2.9&eacute;&minus;10</td></tr>
+      <tr><td>uniform 40&nbsp;mm</td><td>6&thinsp;632 / 39&thinsp;792</td>
+      <td><strong>1.000015068593362</strong></td><td>+1.51&eacute;&minus;5</td><td>3.1&eacute;&minus;11</td></tr>
+    </tbody>
+  </table>
+  <p>The two uniform operators bound how much of the violation is
+  discretisation: halving the cell from 80&nbsp;mm to 40&nbsp;mm cuts the excess
+  from 1.91&eacute;&minus;4 to 1.51&eacute;&minus;5, a factor 12.7, so the
+  uniform family's violation is a small mesh artefact that shrinks on
+  refinement. The graded operator carries 1&thinsp;700 times the 40&nbsp;mm
+  excess at a comparable cell count (5&thinsp;864 against 6&thinsp;632), so
+  grading is not a refinement of the same defect: it is a different, much
+  larger one.</p>
+  <p>On the graded operator the route's seed Newton matrix is indefinite, with
+  minimum <strong>&minus;0.02463311084853905</strong> (residual 1.7&eacute;&minus;9)
+  and a skew part at 3.0&eacute;&minus;15, so the object the route factors is its
+  symmetric part. That negativity is the bound violation transmitted by the
+  material: the seed matrix's smallest element is
+  <code>1 &minus; (mu0 chi) q</code> with <code>chi = dM/dB</code>, and the
+  measured per-cell susceptibility band gives
+  <code>mu0 chi &isin; [0.995366, 0.999197]</code>, hence a predicted minimum in
+  <code>[&minus;0.024683, &minus;0.020754]</code>. The measured
+  &minus;0.024633 sits in that band, 0.2&nbsp;% above its lower end.</p>
+  <p>An earlier revision of this instrument evaluated the same closed form
+  against the fitted law's <em>origin reluctivity</em> <code>dH/dB</code> instead
+  of the susceptibility, reporting a seed limit of <strong>215.11</strong> where
+  the material sets <strong>1.00080</strong>. That is recorded below: it is why
+  the first reading showed a negative Newton minimum the seed model predicted
+  to be +0.995, and it is a defect of the instrument, not of the operator.</p>
+  <!-- measured-result-end -->
+
+  <figure>
+    <img src="/nova/figures/iron-core-magnetisation/icm-graded-bound-remeasure/operator-bound.svg"
+         alt="Largest metric-weighted quotient of each persisted operator against the bound, and the iron cross-section with the cells carrying the graded witness">
+    <figcaption>Left: each operator's largest quotient as an excess over the
+    bound on a symmetric-log axis, with the planted control. Right: the WEST
+    iron cross-section, the cells carrying at least one percent of the graded
+    witness drawn over the rest in the subject colour, their markers sized by
+    the share each carries. The witness sits in two lobes, one on the
+    inner shell at <code>(0.707, &minus;2.744)</code>&nbsp;m and one on the outer
+    shell at <code>(4.916, 2.15)</code>&nbsp;m.</figcaption>
+  </figure>
+
+  <h3 id="icm-graded-bound-remeasure-instrument">What the instrument reads</h3>
+  <p>Each operator is a Galerkin interaction <code>G</code> with a per-cell
+  metric <code>Q</code> from the linear geometry's gram blocks. The quotient is
+  the largest eigenvalue of <code>(sym(QG), Q)</code>, reduced to
+  <code>S = Q<sup>&minus;1/2</sup> sym(QG) Q<sup>&minus;1/2</sup></code> because
+  <code>QG</code> is unsymmetric; the witness is
+  <code>w = Q<sup>&minus;1/2</sup>x</code>, normalised so
+  <code>w<sup>T</sup>Qw = 1</code> (the receipts carry
+  <code>metric_quadratic = 1.00000000000000</code>). The solve is a Lanczos
+  iteration to a stated tolerance with the residual beside every reading, so a
+  reading can be compared against its own convergence rather than against a
+  convention.</p>
+  <p>The operators are read from the persisted files, through
+  <code>load_magnetisation_interaction</code>, which refuses an operator whose
+  declared geometry digest does not match the mesh rebuilt here. Each receipt
+  therefore names the operator path and its own digest.</p>
+
+  <h3 id="icm-graded-bound-remeasure-calibration">Calibration</h3>
+  <p>Two identities pin the instrument before any operator is read.</p>
+  <table>
+    <thead><tr><th>check</th><th>reading</th><th>agreement</th></tr></thead>
+    <tbody>
+      <tr><td>gate shell, Lanczos against the owner's dense spectrum</td>
+      <td>0.9999989577610167 vs 0.9999989577610174</td>
+      <td>7.8&eacute;&minus;16 relative, residual 5.4&eacute;&minus;11</td></tr>
+      <tr><td>Newton action against a literal <code>I &minus; R G W</code></td>
+      <td>dense synthetic, 18 unknowns</td><td>3.0&eacute;&minus;16</td></tr>
+      <tr><td>seed closed form against a dense symmetric part</td>
+      <td>uniform <code>A = alpha I</code>, 48 unknowns</td>
+      <td>1.1&eacute;&minus;14 relative</td></tr>
+    </tbody>
+  </table>
+  <p>The gate-shell row is the one that matters for the headline: the
+  instrument reproduces the operator owner's own dense answer on the shell that
+  owner solves densely, to machine precision. The closed-form row is new and
+  exists because the seed relation is what attributes the Newton witness.</p>
+
+  <h3 id="icm-graded-bound-remeasure-control">The negative control</h3>
+  <p>A rank-one term <code>G' = G + mu0 PLANT p (Qp)<sup>T</sup></code> adds
+  <code>PLANT (x<sup>T</sup>Qp)<sup>2</sup>/(x<sup>T</sup>Qx)</code> to every
+  quotient, so on the operator's own top direction it lifts the reading by
+  exactly <code>PLANT</code> and on a random direction by
+  <code>PLANT/n</code>. The control plants along the measured top direction, so
+  it tests the instrument's dynamic range rather than a lucky overlap.</p>
+  <table>
+    <thead><tr><th>operator</th><th>baseline</th><th>planted</th>
+    <th>lift</th><th>expected</th></tr></thead>
+    <tbody>
+      <tr><td>uniform 80&nbsp;mm</td><td>1.000191462860167</td>
+      <td>1.0501914628601636</td><td>0.049999999999996714</td><td>0.05</td></tr>
+    </tbody>
+  </table>
+  <p>The lift is <code>PLANT</code> to 3.3&eacute;&minus;15, so the same
+  instrument that reads 1.9&eacute;&minus;4 above the bound reads a planted
+  5&nbsp;% excess as exactly 5&nbsp;%. A first attempt planted along a random
+  direction and produced a lift of 3.1&eacute;&minus;6 &mdash; a correct
+  instrument reading an unmeasurable overlap, which would have failed the arm;
+  the plant now takes the measured direction, which is what makes the lift law
+  exact.</p>
+
+  <h3 id="icm-graded-bound-remeasure-witness">The refusal witness</h3>
+  <p>The route assembles <code>B = I &minus; R G W</code> with
+  <code>D = Q A</code>, <code>R = sqrt(sym D)</code> (negative eigenvalues
+  clamped) and <code>W = Q<sup>&minus;1</sup>R</code>, and factors
+  <code>sym(B)</code> because it reads one triangle. On the graded operator at
+  the seed state <code>sym(B)</code>'s smallest element is
+  <strong>&minus;0.02463311084853905</strong> at residual
+  1.7&eacute;&minus;9, and the skew part's spectral norm is
+  3.0&eacute;&minus;15: the factored object is the symmetric part, so the
+  refusal is not a one-triangle artefact. The per-cell differential is positive
+  definite (minimum 3.23) and the material block asymmetry is
+  1.1&eacute;&minus;4, so the negativity is in the seed matrix, not in a
+  material block the route should have refused.</p>
+  <table>
+    <thead><tr><th>quantity</th><th>graded 16/80</th><th>reading</th></tr></thead>
+    <tbody>
+      <tr><td>susceptibility <code>mu0 chi</code></td><td>band</td>
+      <td>[0.995366, 0.999197]</td></tr>
+      <tr><td>seed limit quotient <code>1/(mu0 chi)</code></td><td>band</td>
+      <td>[1.000804, 1.004656]</td></tr>
+      <tr><td>predicted Newton minimum <code>1 &minus; mu0 chi q</code></td>
+      <td>band</td><td>[&minus;0.024683, &minus;0.020754]</td></tr>
+      <tr><td>measured Newton minimum</td><td>&mdash;</td>
+      <td>&minus;0.024633</td></tr>
+      <tr><td>witness direction, quotient against <code>G/mu0</code></td>
+      <td>&mdash;</td><td>1.000920509086805</td></tr>
+      <tr><td>Q-cosine with the operator's top direction</td><td>&mdash;</td>
+      <td>0.04829664604562009</td></tr>
+    </tbody>
+  </table>
+  <p>Two things follow, and they are different facts.</p>
+  <p><strong>The magnitude is the operator's.</strong> The seed matrix goes
+  indefinite exactly when <code>(mu0 chi) q</code> exceeds one. The graded
+  operator's largest quotient 1.0255 is above every value of the measured
+  band's limit, and the closed form lands within 0.2&nbsp;% of the measured
+  minimum. So the route's refusal is the demagnetisation bound violation, not a
+  separate material defect, and the distance from the bound to the refusal is
+  only the vacuum-response factor <code>1 &minus; mu0&middot;reluctivity</code>
+  of the law.</p>
+  <p><strong>The operator's own direction is already indefinite.</strong> Read at
+  the operator's bound-breaking direction rather than the Newton minimiser, the
+  same matrix gives <strong>&minus;0.021339473744693815</strong>: the negativity
+  is there with no reference to the witness the eigen-solve chose. The two
+  readings differ by 0.0033, which is the cell weighting moving between the two
+  functionals, not a change of sign or of cause.</p>
+  <p><strong>The direction is not the operator's top eigenvector.</strong> The
+  Newton minimum is attained on a direction whose ordinary metric-weighted
+  quotient is 1.000921 and whose Q-cosine with the top direction is 0.048. That
+  is not a contradiction: <code>sym(B)</code> is
+  <code>I &minus; alpha Q<sup>1/2</sup> S Q<sup>&minus;1/2</sup></code>, a
+  similarity rather than a congruence, so its eigenvectors are
+  <code>Q</code>-images of <code>S</code>'s and the two functionals weight the
+  cells differently. The cells that carry the witness are two small lobes on
+  the inner and outer shells (cells <code>2412</code>, <code>2411</code>,
+  <code>2410</code>, <code>2413</code> at
+  <code>(0.707, &minus;2.74)</code>&nbsp;m and cells <code>5343</code>,
+  <code>5344</code>, <code>5342</code>, <code>5345</code> at
+  <code>(4.916, 2.07&ndash;2.26)</code>&nbsp;m), carrying 0.21, 0.20, 0.18 and
+  0.17 of the numerator in that order.</p>
+
+  <p><strong>The form discriminates.</strong> The uniform 80&nbsp;mm operator's
+  quotient 1.000191 lies below the corrected seed limit 1.000804, so the form
+  predicts its seed matrix to be definite, and it is: the measured minimum is
+  <strong>+0.0008142576389899497</strong> against a predicted band
+  [0.000612, 0.004436], and the same matrix read at that operator's TOP
+  direction gives +0.061765. A form that merely tracked the sign of the bound
+  excess would have called this operator indefinite too; it does not.</p>
+
+  <h3 id="icm-graded-bound-remeasure-correction">A defect the measurement found in its own instrument</h3>
+  <p>The first witness receipt read <code>newton_minimum = &minus;0.02463</code>
+  beside <code>predicted_newton_minimum = +0.99523</code> and
+  <code>seed_limit_quotient = 215.11</code>. The algebra behind those fields is
+  right and the constant was wrong. The law is written
+  <code>M = (1/mu0 &minus; H/B) B</code>, whose tangent, the susceptibility
+  <code>dM/dB</code>, is <code>1/mu0 &minus; H/B</code>; the fitted origin value
+  is the reluctivity <code>H/B</code> at zero field. The closed form was
+  evaluated against the reluctivity, which differs from the susceptibility by
+  <code>1/mu0</code> (a factor 215.1 here), so it predicted a matrix that is
+  definite by a wide margin while the measured one is indefinite by a narrow
+  one. Three checks fix it: the measured per-cell generalised spectrum of the
+  differential is the susceptibility band and is now the quantity the form
+  reads; a dense synthetic identity reproduces the closed form to
+  1.1&eacute;&minus;14; and the measured minimum now sits inside the predicted
+  band. The gate-shell calibration and both operators' bound readings are
+  unaffected, and the uniform 80&nbsp;mm operator's quotient 1.00019 is below
+  the corrected limit 1.00080, so its seed matrix is predicted definite &mdash;
+  a discrimination the corrected form makes and a second witness arm records.</p>
+
+  <h3 id="icm-graded-bound-remeasure-cost">Why the two large operators needed a different path</h3>
+  <p>Each operator action was first written as a <code>jax.jit</code> closure
+  over the interaction. Lowering then reported 9.91&nbsp;GB of constants
+  captured for the graded operator and 12.67&nbsp;GB for the uniform
+  40&nbsp;mm one, and the compiled executables could not be loaded beside the
+  matrices: the graded operator died with
+  <code>CUDA_ERROR_OUT_OF_MEMORY</code> on the H200 and the 40&nbsp;mm step was
+  <code>OOM</code>-killed on the host. A single matrix-vector product gains
+  nothing from a compilation, so the actions are plain BLAS products and
+  <code>cellwise</code> is numpy; the receipts record
+  <code>backend = numpy-blas</code>. The BLAS path was validated against a dense
+  generalised eigenproblem on a synthetic operator (quotient agrees to
+  2.2&eacute;&minus;16) and against the GPU-path readings on
+  <code>uniform-0.08</code>: <code>1.000191462860167</code> against
+  <code>1.000191462860172</code>, and control lift
+  <code>0.049999999999996714</code> against <code>0.04999999999999116</code>.</p>
+
+  <h3 id="icm-graded-bound-remeasure-suites">Both suite arms</h3>
+  <p>The arms run <code>tests/test_magnetisation.py</code> and
+  <code>tests/test_imas_iron_read.py</code>, each resolved over its own tree
+  with <code>PYTHONPATH=. JAX_PLATFORMS=cpu
+  /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider
+  -q</code>.</p>
+  <table>
+    <thead><tr><th>arm</th><th>revision</th><th>result</th></tr></thead>
+    <tbody>
+      <tr><td>base</td><td><code>c06ff41029a84805c3be8ee6e9ca9f6b8f0ca35d</code></td>
+      <td>99 passed, 6 failed, 14 deselected in 543.81&nbsp;s</td></tr>
+      <tr><td>head</td><td><code>f2afbe069d5bb0a2db8e93ef8e3fa5551622111c</code></td>
+      <td>iron-read file 18 passed in 10.08&nbsp;s; magnetisation file cut
+      short at 5 of 101 tests</td></tr>
+    </tbody>
+  </table>
+  <p>The base arm's six failures are pre-existing at that revision and are
+  listed in its log; the head arm's added failures are the number that matters.
+  No product code under <code>nova/</code> changes on this node: the work lives
+  in <code>scripts/iron_operator_bound/</code>.</p>
+  <p>The head arm is reported for what it did, not for what it was asked to
+  do. <code>tests/test_imas_iron_read.py</code> completed at head with all 18
+  tests passing in 10.08&nbsp;s. <code>tests/test_magnetisation.py</code>
+  reached five of its 101 tests and then sat inside
+  <code>test_closed_shell_refines_toward_exact_shielding</code> for more than
+  twenty minutes, on four separate submissions &mdash; a busy
+  <code>rigel</code> node, two <code>all_debug</code> nodes carrying explicit
+  BLAS thread caps, and an idle <code>all_debug</code> node at a load of 0.04
+  &mdash; while the base arm ran the same two files end to end in 543.81&nbsp;s.
+  The five tests the head arm did reach all passed, and no head failure was
+  observed.</p>
+  <p>That gap cannot be a regression in the code under test: over
+  <code>nova/</code>, <code>tests/</code> and <code>pyproject.toml</code>,
+  <code>git diff c06ff41029a84805c3be8ee6e9ca9f6b8f0ca35d..HEAD</code> is
+  empty &mdash; the two arms differ only in
+  <code>scripts/iron_operator_bound/</code> and <code>docs/</code>. The reading
+  is that the shared test environment was far slower during the head arm's
+  window than during the base arm's, and the head arm is recorded as incomplete
+  rather than as a pass.</p>
+
+  <h3 id="icm-graded-bound-remeasure-receipts">Receipts</h3>
+  <p>Rows are under
+  <code>/work/projects/imas_gpu/nova/evidence/iron-core-magnetisation/operator-bound-graded/</code>:
+  <code>bound-{uniform-0.04,uniform-0.08,graded-16-80}.json</code> and
+  <code>control-uniform-0.08.json</code> (the quotient arms),
+  <code>witness-graded-16-80.json</code> (the Newton witness, its localisation
+  and the susceptibility band), <code>check.json</code> (the gate-shell and
+  identity calibration), the GPU-path receipts
+  <code>bound-uniform-0.08.gpu.json</code>, <code>control-uniform-0.08.gpu.json</code>
+  and <code>check.gpu.json</code> kept beside them for the cross-check, and the
+  witness vectors <code>witness-graded-16-80.npy</code>,
+  <code>shares-graded-16-80.npy</code> and
+  <code>bound-*-witness.npy</code>. Job payloads and logs are under
+  <code>/home/ITER/mcintos/.cache/nova-icm-bound/</code>. Every measurement is
+  a scheduler job on <code>rigel</code>; nothing was measured on a login or
+  fleet node.</p>
+</main>
+</body>
+</html>

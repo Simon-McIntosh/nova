@@ -9,7 +9,7 @@
     "measured_agreement": "The two implementations agree on the analytic diverted field to the tolerances stated for the topology-read entry (axis 8.8e-05 m against 1.35e-02 m, membership area sum 7.8e-04 against 5e-03 relative). So the zero body lines are explained by the routes taking the census, not by a mis-measured trace: support_read's callers belong to the bank-solve arm, whose slice-profile bank fixture is absent from shared storage at this revision, and the device trace measures that arm's compiled program independently.",
     "lines_removable": 0,
     "removal": "None. This entry records which implementation is live on each route so the duplicate pairs above are judged against the arm that actually runs; it proposes no deletion of its own.",
-    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html, entry route-resolution; receipt at hot-path-duplicates/receipt.json; measured at revision 1d30cd50bcfdba834c4587795b37632655802fd2"
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html, entry route-resolution; receipt at hot-path-duplicates/receipt.json; measured at revision 85d69cfc5fd806e4ab45de3d133c38554b5991b7"
   },
   "options": [
     {

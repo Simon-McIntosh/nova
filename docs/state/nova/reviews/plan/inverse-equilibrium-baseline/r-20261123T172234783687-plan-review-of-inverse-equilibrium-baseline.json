@@ -1,0 +1,108 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T17:36:03.392Z",
+  "dispatched_at": "2026-11-23T17:23:43Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:205",
+      "id": "done_when-1",
+      "reason": "clause (1) admits non-convergence as a completed outcome (\"the pass its update stopped falling\"), so a run where zero cases converge satisfies the whole done-when with the control fired on nothing; the plan's own \u00a79 record (docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html) shipped exactly that state (\"no case converged, so each row records why the section 2 bands could not be evaluated: \u2026 not judged: the fit did not converge, so no band reads it\"), and the same record shows MAST-U's reconstructed current already at 2.28 %, outside the 1.5 % band before any perturbation, so the control there could never show the perturbation moved it.",
+      "text": "\u00a710's control \"must move the reconstructed plasma current out of the 1.5 % band on every converged case",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:209",
+      "id": "reasoning-1",
+      "reason": "1,350 s x 400 slices is 540,000 s \u2248 150 card-hours, not 30, and the record \u00a77 landed for this states \"Four hundred converged slices would therefore cost roughly 120 P100 card-hours\" at 1,111.7\u20131,193.3 s per slice on a P100, so the sentence contradicts both its own arithmetic and the cited measurement on the device and the total.",
+      "text": "\u00a711's cost premise reads \"about 1,350 s for 49 passes per slice on an H200, about 30 card-hours for one converged 400-slice arm\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:209",
+      "id": "done_when-2",
+      "reason": "the section's own opening states the MAST and ITER known states converge in one pass, so for two of the three \u00a71 states there is no pass to reduce by a factor and the clause cannot be met as written on every previously-converged case; the clause needs a per-case statement (or an explicit exclusion of one-pass cases) before a node can be judged against it.",
+      "text": "\u00a711 clause (2) requires \"One change to the iteration reduces the passes to tolerance by a stated factor on every case that converged before, loses none of them\"",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:204",
+      "id": "wiring-1",
+      "reason": "without the declaration the queue orders \u00a710 before \u00a79's driver has landed and releases \u00a711 before the pass counts it must beat exist, which is the same gap an earlier review found and the author repaired on \u00a79 (its `depends-on` now names \u00a72).",
+      "text": "\u00a710 and \u00a711 appear in no `plan-section-depends-on` entry (`plan.html:24` lists s2\u2013s9 only), while \u00a710's body and clause (1) reuse \u00a79's stored-case driver, cases, rows, coefficient count and locked decisions, and \u00a711's clause (2) baseline for the stored cases (\"converged before\") exists only in \u00a710's 500-pass run",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:205",
+      "id": "reasoning-2",
+      "reason": "\u00a79's landed record reports that \"The parity scorer refused every terminal map with SurfaceGeometryError: the seeded axis is not an elliptic stationary point of the map\", a refusal \u00a710 does not state as either a convergence property it expects to clear or a case its record must carry, so the node's \"same rows, coefficient count and locked decisions as \u00a79\" starting point may leave its central comparison unmeasurable with no declared outcome.",
+      "text": "\u00a710 clause (2) requires every converged case to be \"scored against the \u00a72 bands\" with no branch for the scorer refusing the map",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:209",
+      "id": "single_goal-1",
+      "reason": "the two clauses can diverge \u2014 a node that identifies the mode correctly and lands a change that misses the factor has met the plan's real purpose but must be closed as failed, and the reverse can pass \u2014 so one node verdict cannot score both, and they are 8 h of work with a measurement apiece.",
+      "text": "\u00a711 spans a diagnostic deliverable (clause (1): identify the rate-limiting mode with its contraction factor) and a separate repair deliverable (clause (2): land one change that cuts the passes, with no loss of cases)",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:204",
+      "id": "evidence_paths-1",
+      "reason": "a dispatched node has no declared durable location to write its per-pass history or panels, and the house convention from the answered \u00a75 finding is that the section names its own fragment and receipt path.",
+      "text": "neither \u00a710 nor \u00a711 names an evidence record, fragment or receipt path for its tables, pass counts and panels, while \u00a71 names `docs/evidence/archive/inverse-equilibrium-baseline-landed.html` and \u00a75 names its fragment `docs/evidence/fragments/inverse-equilibrium-baseline/reduced-reconstructions-scored.html`",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:13",
+      "id": "reasoning-3",
+      "reason": "the document's declared total omits both newly added sections, so any scheduling or capability read off it understates the plan by the work this revision added.",
+      "text": "`plan-effort-hours` reads 47.0 while the eleven declared section efforts sum to 59.0 (8+7+4+3+3+4+6+4+8+4+8), the 12 h gap being exactly \u00a710's 4.0 plus \u00a711's 8.0",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5b7d4d06072edb5b5004d090556404459d5bc21f",
+  "plan_fingerprint": "2430462cfb69f7ca0f08f12b9ff9da1ac6947ab1ba88706d84f8188afb44a625",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 124,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T172234783687-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "c69d2613b7c9e0d9daba6989d3236ce87fb82979",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every section cross-reference in \u00a710 (\u00a79, \u00a72, \u00a71) and \u00a711 (\u00a71, \u00a77, \u00a79) resolves in the snapshot, and neither section cites a file or href.",
+    "done_when": "a finding \u2014 \u00a710's negative control is vacuous when no case converges, and \u00a711 clause (2) demands a factor pass reduction on cases whose baseline is one pass.",
+    "evidence_paths": "a finding \u2014 neither \u00a710 nor \u00a711 names an evidence record, fragment or receipt path, unlike \u00a71's and \u00a75's sections.",
+    "naming": "pass \u2014 the new sections are prose only and carry no plan labels, stage names, ticket numbers or version tags into code.",
+    "reasoning": "a finding \u2014 \u00a711's cost premise is arithmetically inconsistent with its own per-slice wall and with the \u00a77 record it rests on, and \u00a710's clause (2) presumes the \u00a72 band scorer accepts a converged map, which \u00a79's landed record shows it did not.",
+    "single_goal": "a finding \u2014 \u00a711 carries a diagnosis (which candidate sets the rate) and a repair (one change reducing the passes) as one node.",
+    "wiring": "a finding \u2014 \u00a710 declares no depends-on yet reuses \u00a79's stored-case driver and cases, and \u00a711's \"before\" pass counts for the stored cases exist only in \u00a710's run (`plan.html:204`, `:209`)."
+  },
+  "section_digests": {
+    "_document": "637bc3b4bda138809eeda9ee11aecd12482035578682320f181ad8e151b38d0c",
+    "s0": "222214efd929830ab3769e033a76bb2b0b963eee1000f2f8d79d3f78da1ee921",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s10": "a478d20931bdfc5e08b118b90b675fd4a1fd8c4bd04eb469e586a2087814998d",
+    "s11": "9c64e13c66f6c2041d0b4eb9ca4be325c9f469c46a8d279892f4b4a73b7e2d29",
+    "s2": "1d7c7611f002d7765b98531126cc095d6d244b387578c5d44d7284ff93c9e59c",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "95b901a9be71a11db2f0b5f656f0952915a0c3838fafa8e46f0bf5675bd54527",
+    "s5": "29c483a08413dd1159c9231c767d22b4355253776c11cd6ac1fd6286aa327477",
+    "s6": "38673123cc34cb5be04fbd26c1a149df7d18d2adc2937221123fbc79c8308d95",
+    "s7": "46d0b31ae1bfd2347befe820b2b71442fafa724354e9fb3836af929192f8e4d1",
+    "s8": "5f1a44b0fc4688ef69242b46b85666aefaf1d27e32404e14f4874b566bc15a1f",
+    "s9": "6b59708e5b47c987c440323356fb9dd0f2ec4438ce599455f755a5cf0772d5bb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T17:50:42.916710+00:00",
+  "total": null
+}

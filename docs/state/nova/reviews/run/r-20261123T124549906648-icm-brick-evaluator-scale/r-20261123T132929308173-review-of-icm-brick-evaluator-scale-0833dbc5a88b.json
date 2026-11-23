@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/iron_limb_reference/drive.py",
+    "scripts/iron_limb_reference/surface.py",
+    "scripts/iron_limb_reference/negative_control.py"
+  ],
+  "completed_at": "2026-11-23T13:43:27.118Z",
+  "dispatched_at": "2026-11-23T13:30:33Z",
+  "findings": [
+    {
+      "file": "tests/test_brick_evaluator_scale.py",
+      "line": 133,
+      "severity": "non-blocking",
+      "text": "The declared negative control mutates the test's own _rotations reference (the pre-fix variant diffs only _rotations at lines 42-54) rather than the shipped images(), so test_the_shipped_evaluator... was untouched and passed; the two reddened tests fire on the external constant at line 130 and on the reference-only ratio at line 148, so the only assertion that would catch an eleven-image shipped images() (line 136) was never shown to fire."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production module reaches the added test or fragment; the production consumers of the guarded bricks.py are scripts/iron_limb_reference/drive.py, scripts/iron_limb_reference/surface.py and scripts/iron_limb_reference/negative_control.py.",
+    "call_sites_verdict": "No production module reaches the added test or fragment; the production consumers of the guarded bricks.py are scripts/iron_limb_reference/drive.py, scripts/iron_limb_reference/surface.py and scripts/iron_limb_reference/negative_control.py.",
+    "diff": "Read commit by commit (0f14bd50d, 66ef1c504, 0833dbc5a): the test file adds five assertions and the fragment adds the table and the cause; no production module is modified.",
+    "done_when": "The done_when asks for a three-step table and a test pinning steps 1 and 2 with the old expression failing; the fragment table, the five tests, and negative-control-head.log (2 failed, 3 passed, EXIT=1) satisfy it.",
+    "goal": "The node's goal is a three-step table naming where the 1.32 factor appears plus a test pinning steps 1-2; docs/evidence/fragments/iron-core-magnetisation/icm-brick-evaluator-scale.html and tests/test_brick_evaluator_scale.py deliver both.",
+    "manifest": "The manifest records the gate command, the base and after arms (22 and 27 passed, EXIT=0), the negative control and the revision pair; the artefacts it names are present in the tree.",
+    "write_paths": "The declared paths are scripts/prototypes/iron_limb_fill/bricks.py, tests/test_brick_evaluator_scale.py and the fragment; the diff modifies only the latter two and leaves bricks.py untouched."
+  },
+  "justifications": {
+    "durability": "tests/test_brick_evaluator_scale.py:136 asserts len(list(images())) == 2*SECTORS and :133 compares shipped response() against an independent dipole sum, so the shipped evaluator is guarded, but the declared negative control reddened only the reference constant at :130 and the reference-only check at :148, never the shipped-path guard.",
+    "evidence": "The after-arm-head.log records 27 passed at 0833dbc5a and baseline-arm.log records 22 passed at a02cf0423, both EXIT=0, and the negative-control-head.log records a red run, so the done_when's pinned tests and the 'old expression failing it' are both recorded rather than claimed.",
+    "fit": "The added file follows the surrounding test idiom (pytest functions, numpy, from __future__ import annotations as in tests/test_iron_limb_reference.py) and introduces no plan, ticket or version identifier in names, filenames or comments.",
+    "goal_fidelity": "The fragment docs/evidence/fragments/iron-core-magnetisation/icm-brick-evaluator-scale.html carries the three-step table (steps 1, 2, 3) and names the factor's first appearance at step 3 in the inner generator of images(mirror=False) on the unlanded branch, which is the deliverable the goal states.",
+    "reuse": "The only new definitions are test-side helpers; no reusable owner of a vectorised analytic point-dipole tensor exists (the closed form appears inline at scripts/prototypes/iron_limb_fill/bricks.py:213 and tests/test_iron_limb_reference.py:27), so _dipole_tensor is the first reusable definition and a test oracle legitimately restates the closed form.",
+    "scope_discipline": "The diff a02cf0423..0833dbc5a touches only tests/test_brick_evaluator_scale.py and the fragment, both inside the declared write paths; bricks.py is the third declared path and is correctly left unchanged and byte-identical."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T132929308173-review-of-icm-brick-evaluator-scale-0833dbc5a88b",
+  "reviewed_base_sha": "a02cf0423db62d3c96e89617b3757fd870a566f8",
+  "reviewed_head_sha": "0833dbc5a88bc08259014769385b6d14dc7cd54c",
+  "reviewed_run_id": "r-20261123T124549906648-icm-brick-evaluator-scale",
+  "reviewer": "independent review of run r-20261123T124549906648-icm-brick-evaluator-scale",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T13:43:43.444640+00:00",
+  "total": 105
+}

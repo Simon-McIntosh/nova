@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sys
 from dataclasses import dataclass, fields, replace
+from pathlib import Path
 from types import SimpleNamespace
 
 import jax
@@ -78,6 +79,61 @@ def test_comparison_receipts_delegate_to_durable_json_owner(tmp_path, monkeypatc
     assert len(calls) == 1
     assert destination.read_bytes() == before
     print(f"STRICT_JSON_BEFORE_ATOMIC_OWNER_REFUSED {refusal.value}")
+
+
+def test_missing_response_carrier_is_a_named_refusal(tmp_path):
+    from benchmarks import mast_response_carrier_warm as carrier
+    from nova.imas.mast_solve_inputs import SHOT_STORE
+
+    assert SHOT_STORE == Path("/work/projects/imas_gpu/mast/level1/shots")
+    absent = tmp_path / f"{carrier.SEMANTIC_RESPONSE_IDENTITY}.npz"
+    with pytest.raises(carrier.MissingResponseCarrier) as refusal:
+        carrier.load_carrier(absent)
+    message = str(refusal.value)
+    print(f"MISSING_CARRIER_REFUSED {message}")
+    assert str(absent) in message
+    assert carrier.CONSUMER_CARRIER_GRID in message
+    assert "build --grid" in message
+
+
+def test_check_resolves_the_grid_contract_from_the_carrier_name(tmp_path, monkeypatch):
+    from contextlib import nullcontext
+
+    from benchmarks import mast_response_carrier_warm as carrier
+
+    grid = carrier.CARRIER_GRIDS["stored-axis-full"]
+    monkeypatch.setattr(
+        carrier,
+        "_guard_direct_builders",
+        lambda: nullcontext(SimpleNamespace(entered=[])),
+    )
+    warm = {
+        "path": str(grid.path().resolve()),
+        "semantic_response_identity": grid.semantic_identity,
+        "resolved_target_digest": grid.resolved_target_digest,
+        "response_sha256": "response-digest",
+        "response_shape": list(grid.response_shape),
+        "stored_circuit_count": carrier.STORED_CIRCUIT_COUNT,
+        "file_sha256": "file-digest",
+        "size_bytes": 1,
+    }
+    seen = {}
+
+    def load(path, **contract):
+        seen.update(contract)
+        return None, dict(warm)
+
+    monkeypatch.setattr(carrier, "load_carrier", load)
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text(json.dumps({"carrier": warm, "verdict": {"passes": True}}))
+    report = carrier.check(grid.path(), receipt)
+    print(f"CHECK_RESOLVED_CONTRACT {seen}")
+    assert seen == dict(
+        semantic_identity=grid.semantic_identity,
+        resolved_target_digest=grid.resolved_target_digest,
+        response_shape=grid.response_shape,
+    )
+    assert report["direct_builder_modules_entered"] == []
 
 
 def test_passive_zero_turns_remain_zero_response_weights():

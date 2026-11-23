@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-11-23">
 <meta name="plan-blocks" content="">
 <meta name="plan-standalone" content="The plan it unblocked, constraint-augmented-newton-krylov, is superseded; no open plan waits on the Shafranov observed side and it waits on none.">
@@ -66,7 +66,9 @@
     and commit the kernel counter so 76 at build and 0 per evaluation are measured in the tree.</p>
     <p><strong>Done when.</strong> A production solve on a MAST bank row carries the field blocks under the
     same cache path as the flux response, the two-solve test asserts zero kernel evaluations on the second, and
-    the receipt numbers come from the committed counter.</p>
+    the receipt numbers come from the committed counter. The same test shows the counter is live: it reads the
+    nonzero build count (76 on the MAST row) during the operator build, and a second operator built for a changed
+    geometry, where reuse is defeated, records nonzero kernel evaluations.</p>
 
     <h2 id="s2">§2 — The grid route converges at order 1.1 where a fixed-weight cubic stencil should give two</h2>
     <p>Measured by the review at 21, 31 and 41 nodes per axis with 501, 1001 and 2001 contour points: relative
@@ -101,16 +103,18 @@
     still neither prints nor persists the order it fits, by the predicted order.</p>
 
     <h2 id="s3">§3 — The constraint's observed side is the contour integral and the six-row receipt is regenerated</h2>
-    <p>ExternalShafranovConstraint.observed still embeds the large-aspect-ratio identity. Wire it to
-    beta_p_plus_half_internal_inductance on the solved state's boundary with the grid-imaged field from §1, delete
-    the inline inverse of the identity from the constraint module rather than moving it, because diagnostics
-    already owns the formula (<code>shafranov_vertical_field</code>) and a moved copy would duplicate it, make the receipt driver's observed column the
-    integral, and regenerate the six-row MAST receipt and its panels. The commensurability finding stands as the
+    <p>The external Shafranov constraint's observed side still embeds the large-aspect-ratio identity. It
+    becomes the contour integral of beta_p + l_i/2 on the solved state's boundary with the grid-imaged field from
+    §1, the identity formula keeps a single owner in the codebase rather than gaining a second copy, the receipt
+    driver's observed column becomes the integral, and the six-row MAST receipt and its panels are regenerated. The commensurability finding stands as the
     reference for the panel: EFIT's stored scalars are reproduced by a denominator radius near the boundary
     minor radius, so the panel compares on nova's convention and says so.</p>
-    <p><strong>Done when.</strong> The constraint row carries no formula, the six-row receipt states the
-    observed column as the contour integral with the toroidal term's provenance per §4, and the discriminator
-    strip is regenerated on it with both null sets, wall and shared levels.</p>
+    <p><strong>Done when.</strong> The constraint row carries no formula, and on the analytic state of the
+    Shafranov integral certificate the observed side reproduces the certificate's exact beta_p + l_i/2 to within
+    the certificate's own error at the production contour sampling. The six-row receipt states the observed column
+    as the contour integral with the toroidal term's provenance per §4 and, on each row, beside EFIT's archived
+    beta_p + l_i/2 with their difference, and the discriminator strip is regenerated on it with both null sets,
+    wall and shared levels.</p>
 
     <h2 id="s4">§4 — Where the toroidal-field volume term comes from</h2>
     <p>The assembled functional W = -2 μ<sub>0</sub> S<sub>v</sub> - 6 μ<sub>0</sub> P - Z carries the volume
@@ -150,7 +154,7 @@
 <article class="r-fu" data-id="f-fsa-figrepair-shafranov-integral" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="figure-and-solver-audit reviewer fsa-audit-figures-newton-krylov" data-written-at="2026-09-21" data-recommends-skill="/reckon-build shafranov-observed-side" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Regenerate the Shafranov integral certificate: three caption numbers are in no receipt and the panel draws an unnamed positive-control boundary</h4>
     <div class="r-fu-body"><p>Audit anchor: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#figures-newton-krylov</code>; reviewer node <code>fsa-audit-figures-newton-krylov</code>, review lane claude-opus.</p><p>Independent-lane figure audit of docs/figures/constraint-augmented-newton-krylov/shafranov-integral scored 4 figure(s) under 70 or misrepresenting their physics out of 4 in the directory (directory mean 44.5). Regenerate them under the committed nova.media painters and the plotting rules of nova/AGENTS.md; do not recaption. Every deduction, with the file, the receipt JSON path and the repair, is in the reviewer record at crew/reviews/nova/s19-codex-20260916/fsa-audit-figures-newton-krylov/review.md#shafranov-integral. Leading defect per figure:</p><ul><li>shafranov-integral-certificate.png (score 26, MISREPRESENTS PHYSICS): The right panel title states "assembly order 0.35 over 321-1281" and "circular-formula bias 1.40e-01". The receipt carries quadrature_order 2.0643612255761723 and contains no 0.35, no 321, no 1281 and no 0.140 at any path. None of the three is re-derivable. Receipt path: docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json (802 bytes, full key list: exact, grid_resolution, contour_samplings, errors, limit, departure_from_limit, quadrature_order, grid_resolutions, grid_gap, mechanism) Repair: Emit the plotted order, the fitted range and the bias into the receipt, and print them from it.</li><li>shafranov-integral-certificate.svg (score 20, MISREPRESENTS PHYSICS): The right panel title states "assembly order 0.35 over 321-1281" and "circular-formula bias 1.40e-01". The receipt carries quadrature_order 2.0643612255761723 and contains no 0.35, no 321, no 1281 and no 0.140 at any path. None of the three is re-derivable. Receipt path: docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json (802 bytes, full key list: exact, grid_resolution, contour_samplings, errors, limit, departure_from_limit, quadrature_order, grid_resolutions, grid_gap, mechanism) Repair: Emit the plotted order, the fitted range and the bias into the receipt, and print them from it.</li><li>field-response-timing.png (score 69): The whole content is two wall times and their ratio, all three printed as text on the canvas. A two-bar log chart adds no relationship a sentence does not carry, and the repo s representation rule forbids an image of what is naturally a table. Receipt path: n/a Repair: Put the two times and the ratio in the evidence paragraph.</li><li>field-response-timing.svg (score 63): The whole content is two wall times and their ratio, all three printed as text on the canvas. A two-bar log chart adds no relationship a sentence does not carry, and the repo s representation rule forbids an image of what is naturally a table. Receipt path: n/a Repair: Put the two times and the ratio in the evidence paragraph.</li></ul><p>Files: docs/figures/constraint-augmented-newton-krylov/shafranov-integral/field-response-timing.png, docs/figures/constraint-augmented-newton-krylov/shafranov-integral/field-response-timing.svg, docs/figures/constraint-augmented-newton-krylov/shafranov-integral/shafranov-integral-certificate.png, docs/figures/constraint-augmented-newton-krylov/shafranov-integral/shafranov-integral-certificate.svg</p></div>
-    <pre class="r-fu-prompt">/reckon-build shafranov-observed-side</pre>
+    <pre class="r-fu-prompt">/reckon-build shafranov-observed-side — regenerate shafranov-integral-certificate.png and .svg only: the two field-response-timing images were deleted in d4bc41b1e, and the receipt now carries more keys than the body quotes (analytic_route_value, plateau_absolute, quadrature_order_range, grid_gap_max, identity, tick values), so read the receipt rather than the quoted list.</pre>
     </article>
 <article class="r-fu" data-id="f-sos-diamagnetic-input" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="/reckon-build shafranov-observed-side" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Read the MAST diamagnetic flux through the store as the source of the volume term Z</h4>

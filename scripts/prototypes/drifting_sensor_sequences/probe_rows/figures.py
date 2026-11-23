@@ -1,13 +1,15 @@
 """The axis-against-slice figures and the table of both codes' sequences.
 
 Every measure comes from ``analyse.py``'s reduction, so neither code is
-summarised here by a second rule.  What this module adds is the figure the
-study is read from -- the axis error of one code against slice number, one
-trace per noise sequence, one figure per code -- and the slice of largest
-disagreement between the two codes, which the contour panel is drawn at.
+summarised here by a second rule.  The arm selection is that module's too: the
+figure and the gate read the same row set, so a comparison cannot be drawn on
+one information set and gated on another.
 
-The trace colour names the code; within a code the control sequence is drawn in
-neutral grey, so the sequence the study is about (the 1/f draw) carries colour.
+What this module adds is the figure the study is read from -- the reconstructed
+magnetic axis against slice number, one trace per noise sequence, one figure
+per code, radial and vertical position in their own panels -- and the slice of
+largest disagreement between the two codes, which the contour panel is drawn
+at.
 """
 
 from __future__ import annotations
@@ -32,37 +34,26 @@ COLOURS = {"nova": "#1f5fa8", "efit": "#2e8b57"}
 SEQUENCES = ("white", "drift")
 SLICES = 200
 FACTOR = 0.01
+COMPONENTS = ((0, "R [m]"), (1, "Z [m]"))
 
 
 def arm_rows(code: str, sequence: str) -> list[dict]:
-    """The longest 200-slice series of this code and sequence."""
-    pattern = "%s-%s-%d-%.4f" % (code, sequence, SLICES, FACTOR)
-    paths = sorted(STUDY.glob(pattern + "*.jsonl"))
-    runs = analyse.grouped(paths)
-    if not runs:
-        return []
-    # Two row sets can exist for imas-efit; the flux-loop arm is the one the
-    # comparison is stated on, and the tag that names it is the arm's own.
-    return max(
-        runs.items(), key=lambda item: ("-loops" in item[0], len(item[1]))
-    )[1]
+    """The slices of this code and sequence on the row set both codes share."""
+    return analyse.selected_rows(code, sequence, SLICES, FACTOR)
 
 
-def axis_error(rows: list[dict], truth: dict) -> np.ndarray:
-    """Distance of each slice's reconstructed axis from truth, metres."""
+def axis_position(rows: list[dict]) -> np.ndarray:
+    """Each slice's reconstructed axis as a (slice, R/Z) array."""
     if not rows:
-        return np.zeros(0)
-    return analyse.axis_distance(rows, truth["axis"])
+        return np.zeros((0, 2))
+    ordered = sorted(rows, key=lambda row: int(row["slice"]))
+    return np.asarray([row["axis"] for row in ordered], dtype=float)
 
 
 def disagreement(left: list[dict], right: list[dict]) -> int:
     """The slice where the two reconstructions' axes stand furthest apart."""
-    left_axis = {
-        int(row["slice"]): np.asarray(row["axis"], float) for row in left
-    }
-    right_axis = {
-        int(row["slice"]): np.asarray(row["axis"], float) for row in right
-    }
+    left_axis = {int(row["slice"]): np.asarray(row["axis"], float) for row in left}
+    right_axis = {int(row["slice"]): np.asarray(row["axis"], float) for row in right}
     shared = sorted(set(left_axis) & set(right_axis))
     if not shared:
         return 0
@@ -74,7 +65,7 @@ def disagreement(left: list[dict], right: list[dict]) -> int:
 
 
 def draw_code(code: str, truth: dict, output: Path) -> Path:
-    """One code's axis error against slice, one trace per noise sequence."""
+    """One code's axis position against slice, one trace per noise sequence."""
     import matplotlib
 
     matplotlib.use("Agg")
@@ -91,6 +82,7 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
             "legend.fontsize": 14,
             "axes.spines.top": False,
             "axes.spines.right": False,
+            "axes.grid": False,
             "lines.linewidth": 2.6,
             "svg.fonttype": "none",
         }
@@ -98,34 +90,45 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
     # The axes are placed by hand so the strip above them carries the legend
     # and every margin around a tick label is explicit; a layout engine that
     # decides both leaves a label flush with the canvas edge.
-    figure, axes = plt.subplots(figsize=(14.0, 7.2), dpi=100)
-    figure.subplots_adjust(left=0.085, right=0.945, top=0.855, bottom=0.115)
+    figure, panels = plt.subplots(2, 1, figsize=(14.0, 7.2), dpi=100, sharex=True)
+    figure.subplots_adjust(
+        left=0.085, right=0.945, top=0.875, bottom=0.115, hspace=0.16
+    )
+    axis_truth = np.asarray(truth["axis"], dtype=float)
     handles = []
-    tallest = 0.0
-    for sequence in SEQUENCES:
-        error = axis_error(arm_rows(code, sequence), truth) * 1000.0
-        if not error.size:
-            continue
-        tallest = max(tallest, float(np.nanmax(error)))
-        (line,) = axes.plot(
-            np.arange(error.size),
-            error,
-            color=COLOURS[code] if sequence == "drift" else CONTROL,
-            linewidth=3.0 if sequence == "drift" else 2.4,
-            zorder=3 if sequence == "drift" else 2,
-            label="1/f drift" if sequence == "drift" else "white (control)",
+    for panel, (component, label) in zip(panels, COMPONENTS):
+        panel.axhline(
+            float(axis_truth[component]),
+            color=CONTROL,
+            linewidth=1.2,
+            linestyle=":",
+            zorder=1,
         )
-        handles.append(line)
-    axes.set_xlabel("slice")
-    axes.set_ylabel("axis error [mm]")
-    axes.set_xlim(0, SLICES - 1)
-    axes.set_ylim(0.0, tallest * 1.14 if tallest > 0.0 else 1.0)
+        for sequence in SEQUENCES:
+            values = axis_position(arm_rows(code, sequence))
+            if values.shape[0] == 0:
+                continue
+            slices = np.arange(values.shape[0])
+            drift = sequence == "drift"
+            (line,) = panel.plot(
+                slices,
+                values[:, component],
+                color=COLOURS[code] if drift else CONTROL,
+                linewidth=3.0 if drift else 2.4,
+                zorder=3 if drift else 2,
+                label="1/f drift" if drift else "white (control)",
+            )
+            if drift:
+                handles = [line]
+        panel.set_ylabel(label)
+        panel.set_xlim(0, SLICES - 1)
+    panels[-1].set_xlabel("slice")
     if handles:
         figure.legend(
             handles=handles,
             loc="upper center",
             bbox_to_anchor=(0.5, 0.995),
-            ncol=max(1, len(handles)),
+            ncol=1,
             frameon=False,
         )
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -135,11 +138,11 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
 
 
 def html_rows(table: dict) -> str:
-    """The table's rows, so the record quotes the reduction rather than a copy."""
+    """The table's body rows, so the record quotes the reduction."""
     rows = []
     for code in ("nova", "efit"):
         for sequence in SEQUENCES:
-            arm = table[code][sequence]
+            arm = table.get(code, {}).get(sequence)
             if arm is None:
                 rows.append(
                     "<tr><td>%s</td><td>%s</td><td>none</td></tr>"
@@ -147,8 +150,10 @@ def html_rows(table: dict) -> str:
                 )
                 continue
             rows.append(
-                "<tr><td>%s</td><td>%s</td><td>%d</td><td>%.2f</td><td>%.2f</td>"
-                "<td>%.5f</td><td>%.5f</td><td>%.4f</td><td>%.4f</td>"
+                "<tr><td>%s</td><td>%s</td><td>%d</td>"
+                "<td>%.2f</td><td>%.2f</td>"
+                "<td>%.5f</td><td>%.5f</td>"
+                "<td>%.4f</td><td>%.4f</td>"
                 "<td>%.3f</td><td>%.3f</td><td>%.3f</td></tr>"
                 % (
                     code,
@@ -169,6 +174,7 @@ def html_rows(table: dict) -> str:
 
 
 def main(argv=None) -> int:
+    """Reduce both codes, draw each figure, and write the table."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--figure-dir", required=True)
     parser.add_argument("--table", default="")
@@ -183,18 +189,15 @@ def main(argv=None) -> int:
             rows = arm_rows(code, sequence)
             table[code][sequence] = analyse.reduce_arm(rows, truth) if rows else None
         draw_code(code, truth, directory / ("axis-error-%s.svg" % code))
-    worst = disagreement(arm_rows("nova", "drift"), arm_rows("efit", "drift"))
-    payload = {
-        "slices": SLICES,
-        "factor": FACTOR,
-        "arms": table,
-        "largest_disagreement_slice": worst,
-    }
-    print(json.dumps(payload, indent=2))
-    if args.html:
-        print(html_rows(table), flush=True)
+    worst = disagreement(
+        arm_rows("nova", "drift"), arm_rows("efit", "drift")
+    )
+    payload = dict(table=table, disagreement_slice=worst)
     if args.table:
         Path(args.table).write_text(json.dumps(payload, indent=2))
+    if args.html:
+        print(html_rows(table))
+    print("DISAGREEMENT slice=%d" % worst)
     return 0
 
 

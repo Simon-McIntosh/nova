@@ -18,6 +18,8 @@ from pathlib import Path
 
 import numpy as np
 
+import analyse
+
 STUDY = Path(os.environ.get("DRIFT_STUDY", str(Path(__file__).resolve().parent)))
 
 
@@ -84,8 +86,12 @@ def nova_slice(sequence: str, factor: float, index: int) -> tuple:
     A sequence is written as one map stack per shard, so the slice is looked up
     where its index appears; the stacks of one arm share one lattice.
     """
+    pattern = "nova-%s-*-%.4f-%s"
     for path in sorted(
-        (STUDY / "maps").glob("nova-%s-*-%.4f*.npz" % (sequence, factor))
+        (STUDY / "maps").glob(
+            pattern % (sequence, factor, analyse.SELECTED_ROWS)
+            + "*.npz"
+        )
     ):
         stored = np.load(path)
         matches = np.flatnonzero(np.asarray(stored["slice"], dtype=int) == index)
@@ -144,16 +150,30 @@ def main() -> int:
     offset = span_axis - efit_axis
     psi_efit = psi_efit + offset
 
+    # The generating state's own field on this lattice, so the panel shows what
+    # both reconstructions are set against.  It is already in the generating
+    # gauge and orientation, being the state the rows came from.
+    reference_file = STUDY / "reference-grid.npz"
+    if not reference_file.exists():
+        raise SystemExit("%s is missing: run reference.py" % reference_file)
+    reference = np.load(reference_file)
+    psi_ref = np.asarray(reference["psi"], dtype=float)
+    axis_ref = np.asarray(reference["axis"], dtype=float)
+    x_points_ref = np.asarray(reference["x_points"], dtype=float).reshape(-1, 2)
+
     payload = dict(
         radius=radius,
         height=height,
         psi_nova=psi_nova,
         psi_efit=psi_efit,
+        psi_ref=psi_ref,
         levels=levels,
         axis_nova=np.asarray(receipt["axis"], float),
         x_points_nova=(np.asarray(receipt.get("x_points") or [], float).reshape(-1, 2)),
         axis_efit=np.asarray(state.magnetic_axis_m, float),
         x_points_efit=np.asarray(x_efit, float).reshape(-1, 2),
+        axis_ref=axis_ref,
+        x_points_ref=x_points_ref,
         wall_r=wall_r,
         wall_z=wall_z,
         flux_axis_efit=float(state.flux_axis),

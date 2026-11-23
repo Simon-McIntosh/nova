@@ -1,0 +1,101 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "answered": "Read the six checklist items against the artefacts: the source goal from prompt.txt:38, the done_when from node.json, the three declared write paths, the delivered manifest, the six-commit diff 97682d26..26ba1790, and the production entry point submit.sh. Verified the prior blocking finding (no panels) is answered by drawing both series from the six committed SVGs, re-read every headline number in verify-input-drift.log against input-drift/panel-redraw.json and the arm JSONs, and confirmed the one-line suite_arms header is rejected by records.suite_arm_log by running that reader on the cited log.",
+  "call_sites": [
+    "scripts/prototypes/stored_state_refusals/submit.sh:119"
+  ],
+  "completed_at": "2026-11-23T00:32:48.403Z",
+  "dispatched_at": "2026-11-22T23:55:29Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "scripts/prototypes/stored_state_refusals/verify_input_drift.py",
+      "id": "f9a1b2c3d91",
+      "line": 105,
+      "severity": "non-blocking",
+      "text": "The positive-control claim asserts `bool(record_seed[\"within_factor_three\"]) and 1.0/3.0 <= factor <= 3.0`, but `within_factor_three` was written by scripts/prototypes/stored_state_refusals/attribute_input_drift.py:235 as exactly `1.0/3.0 <= factor <= 3.0` over the same `factor` field read at verify_input_drift.py:102, so the first conjunct is the second and the claim cannot fail if the recorded residual constant at attribute_input_drift.py:64 is wrong; the verifier recomputes neither the residual nor the ratio, so the positive control's factor-of-three is not independently checked."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/suite_arms.py",
+      "id": "f9b2c3d4e92",
+      "line": 52,
+      "severity": "non-blocking",
+      "text": "The arm log header is written on one line as `# arm=<label> revision=<sha> tree=<path> command: <cmd>`, but scripts/prototypes/stored_state_refusals/records.py:171-175 requires line one to start `# revision ` and line two `# command: `; running records.suite_arm_log on input-drift/suite-base.log raises `ValueError: first line is not '# revision <sha>'`, so the manifest's baseline_suite and after_suite log_path cannot be read back through the reader the same prototype package owns."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/suite_arms.py",
+      "id": "f9c3d4e5a93",
+      "line": 102,
+      "severity": "non-blocking",
+      "text": "The exported arm trees are created with tempfile.mkdtemp(..., dir=\"/tmp\") and the child environment sets TMPDIR=/tmp, which is a bare /tmp path rather than $TMPDIR; the dispatch and repo rule both say a temporary tree goes under $TMPDIR so it dies with the run's scratch, and the job log shows tree=/tmp/suite-arms-gloomfxa/base. non-blocking because the tree is removed in a finally block, but it is the rule the node was given."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/drift_policy_panels.py",
+      "id": "f9d4e5f6b94",
+      "line": 68,
+      "severity": "non-blocking",
+      "text": "`draw` re-implements the per-arm panel capability that scripts/prototypes/stored_state_refusals/redraw_panels.py:56-114 already owns: it draws one panel per arm terminal state through panels.draw_panel and writes the caption with panels.write_description/redraw_panels.py:56-114 already draws one panel per arm terminal state through panels.draw_panel and writes the caption with panels.write_description; the new driver copies that loop with a hard-coded ARMS table rather than extending redraw_panels.py to load a pickle when no npz terminal_flux exists, so the two drift apart on any change to panels.draw_panel's contract."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/suite_arms.py",
+      "id": "f9e5f6a7c95",
+      "line": 43,
+      "severity": "non-blocking",
+      "text": "`_run_arm` re-implements the arm-runner and log-writer that scripts/prototypes/stored_state_refusals/run_suite_arm.sh:1-45 already owns (shared interpreter, PYTHONPATH=tree, JAX_PLATFORMS=cpu, '# revision' and '# command:' header, EXIT trailer); the addition does not extend that wrapper and instead forks the log format the package's reader rejects (see the finding at suite_arms.py:52), so which of the two writers a future arm uses decides whether its log can be read back."
+    },
+    {
+      "file": "scripts/prototypes/stored_state_refusals/test_panel_visibility.py",
+      "id": "f9f6a7b8d96",
+      "line": 26,
+      "severity": "non-blocking",
+      "text": "PUBLISHED points at docs/figures/forward-solve-near-stored-states/stored-state-refusals, not docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift, so test_published_panels_draw_both_series and test_published_previews_draw_the_blue_series never see the six SVGs this node published; a regression in drift_policy_panels.py that dropped a series would leave the suite green."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html",
+      "id": "fa07b8c90a7",
+      "line": 133,
+      "severity": "non-blocking",
+      "text": "The seed-sensitivity table's nominal run reports residual 0.0042525413742888945 while the same nominal conditions at line 101 and the tcv-input-comparison panel caption report 0.004253522137685281, a 2.3e-4 relative scatter that the record does not remark; this is the prior review's finding f4d5e6f7a04 carried forward and still open, and the gained commits edited this table without addressing it."
+    },
+    {
+      "file": "manifest.md",
+      "id": "fb18c9d1b08",
+      "line": 8,
+      "severity": "non-blocking",
+      "text": "The tests line records the gate as a prose sentence carrying `PYTHONPATH=<tree>` and a `-> 16 passed, EXIT=0` result rather than the literal command a shell was handed, so promotion, which fills its gate receipt from this line, cannot re-run either arm; the baseline_suite and after_suite blocks at manifest.md:14-15 carry a literal command but not the exported tree the arm ran in."
+    }
+  ],
+  "justifications": {
+    "durability": "No test is added by these six commits, and scripts/prototypes/stored_state_refusals/test_panel_visibility.py:26 points PUBLISHED at docs/figures/forward-solve-near-stored-states/stored-state-refusals, so the six new SVGs under default-policy-refusal-drift are guarded by nothing and a dropped nova series there would pass the suite.",
+    "evidence": "scripts/prototypes/stored_state_refusals/verify_input_drift.py:60-97 recomputes the median, L2 and identical-conductor counts from the two current maps independently, and its log input-drift/verify-input-drift.log ends EXIT=1-free with 13 CLAIM PASS lines, though the factor-of-three claim at :103-108 is tautological.",
+    "fit": "scripts/prototypes/stored_state_refusals/drift_policy_panels.py:1-24 and verify_input_drift.py:1-14 follow the sibling prototype modules' module-docstring and plain-function idiom, and the naming checks find no plan, stage or ticket label in any new file or symbol.",
+    "goal_fidelity": "docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html:145-166 now carries six figures whose committed SVGs each draw both series (imas-efit 8-15 and nova 12-15 contoured paths, read from the files), answering the prior blocking finding that the record tabulated six terminal states and published no panel.",
+    "reuse": "scripts/prototypes/stored_state_refusals/drift_policy_panels.py:68-180 re-implements the per-arm panel drawing that scripts/prototypes/stored_state_refusals/redraw_panels.py:56-114 already owns, and suite_arms.py:43-96 re-implements the arm runner and log writer that scripts/prototypes/stored_state_refusals/run_suite_arm.sh:1-45 already owns, forking the two-line header records.suite_arm_log reads.",
+    "scope_discipline": "git diff --stat 97682d26ee88687638188b5a9f03e51ab38bfdfe..26ba1790a7e9b335cdd9053a1eca982dc4d9889c lists only the one fragment, the six SVGs under the declared figures directory, and four files under scripts/prototypes/stored_state_refusals."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261122T204454282522-review-of-default-policy-refusal-drift-26ba1790a7e9",
+  "reviewed_base_sha": "97682d26ee88687638188b5a9f03e51ab38bfdfe",
+  "reviewed_head_sha": "26ba1790a7e9b335cdd9053a1eca982dc4d9889c",
+  "reviewed_run_id": "r-20261121T205621369895-default-policy-refusal-drift",
+  "scores": {
+    "durability": 5,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 4,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T01:40:00Z",
+  "total": 78,
+  "verdicts": {
+    "diff": "Read all six commits 97682d26ee88..26ba1790a7e9 commit by commit: one panel driver, one claim verifier, one two-revision suite runner, a guard added to record_seed_rerun.py, and six SVGs plus the record sections (eleven paths, +1762/-8), all inside the declared scope.",
+    "done_when": "The done_when has three clauses: name the differing input or revision, a positive control within 3x reproducing the reason code, and one standing-cases table; scripts/prototypes/stored_state_refusals/verify_input_drift.py:60-97 recomputes the current drift from the two published maps and :100-160 asserts both positive and negative controls, and the standing-cases table sits at docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html:170-190.",
+    "goal": "prompt.txt:38 asks why today's default-policy solve stops elsewhere than the comparison record on the TCV and ITER stored states; the six gained commits complete the record that answers it rather than adding a new explanation, publishing one panel per terminal state at docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html:155-166 and naming each job at :203-224.",
+    "manifest": "Read r-20261121T205621369895-default-policy-refusal-drift/manifest.md; it records complete, cites two 16-passed arms in both baseline_suite and after_suite blocks, and states the six panels, but its tests line at manifest.md:8 carries an unsubstituted '<tree>' placeholder and a prose description beside the command.",
+    "write_paths": "Declared scripts/prototypes/stored_state_refusals, docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html and docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift; all eleven paths gained in 97682d26..26ba1790 lie inside them and nothing outside is touched."
+  }
+}

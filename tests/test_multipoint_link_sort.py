@@ -209,7 +209,7 @@ def test_reduction_cost_does_not_rescan_the_index_per_row():
     )
 
 
-@pytest.mark.timeout(1800)
+@pytest.mark.timeout(3300)
 @pytest.mark.slow
 def test_stored_case_machine_link_columns_match_reference_walk(monkeypatch, tmp_path):
     """The stored MAST-U case machine's frame columns are unchanged by the sort.

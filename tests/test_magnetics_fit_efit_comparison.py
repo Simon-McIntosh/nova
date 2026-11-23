@@ -830,7 +830,7 @@ def _problem(data, monkeypatch):
 
 
 def _attempt(data, request, label):
-    from tests.test_equilibrium_magnetics_fit import (
+    from tests.magnetics_fit_harness import (
         _persist_forward,
         _persist_forward_failure,
     )
@@ -1226,7 +1226,7 @@ def _probe_response_audit(data, plasma, conductor, total):
 def test_shared_magnetics_reconstruction_observation_replay(name):
     """Image stored plasma and fitted conductors, checking both reference scales."""
     from nova.frame.coilset import CoilSet
-    from tests.test_equilibrium_magnetics_fit import _physical_sensor_rows
+    from tests.magnetics_fit_harness import _physical_sensor_rows
 
     configure_dtypes()
     assert jax.config.jax_enable_x64
@@ -1741,7 +1741,7 @@ def _reference_centroid(data):
 
 
 def _compare_fit(data, forward):
-    from tests.test_equilibrium_magnetics_fit import (
+    from tests.magnetics_fit_harness import (
         _PlasmaDiagnosticSource,
         _physical_sensor_rows,
         _persist_forward,

@@ -173,8 +173,8 @@ def suite_arm_log(path: Path) -> dict:
     that line existed.
     """
     lines = Path(path).read_text().splitlines()
-    if len(lines) < 3:
-        raise ValueError(f"{path}: a suite arm log needs a header and a body")
+    if len(lines) < 2:
+        raise ValueError(f"{path}: a suite arm log needs a header and a command")
     header, command = lines[0], lines[1]
     if not header.startswith("# revision "):
         raise ValueError(f"{path}: first line is not '# revision <sha>'")

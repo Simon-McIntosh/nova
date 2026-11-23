@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T05:11:41.180Z",
+  "dispatched_at": "2026-11-23T04:51:45Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/one-ids-seam.html:71",
+      "id": "done_when-1",
+      "reason": "the node cannot satisfy \u00a72 and preserve the plan's anchors discipline without a disposition for this one module and a named owner for updating the reuse-map, so the endpoint as written is unsatisfiable for it.",
+      "text": "\u00a72 says `contour_tree_layout.py` \"is unreached but is cited as a design sketch in docs/evidence/contour-tree-topology-authority/reuse-map.md, and its census row decides it\"; because the \u00a71 rule deletes every unreached module, the census row would delete it and leave the reuse-map's citation (reuse-map.md:180) dangling, while keeping it violates \u00a72's \"every module the \u00a71 census classes unreached is gone\" \u2014 either outcome fails one of the section's own gates",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/one-ids-seam.html:81",
+      "id": "reasoning-1",
+      "reason": "the reference is a non-executing provenance label, not a code dependency, so a moved module breaks nothing at runtime and the census row for runner.py is an inventory imprecision rather than a wrong mechanism.",
+      "text": "\u00a73 lists `imas_ambix/spine_bench/runner.py` among modules that \"imports several of these modules today\", but the file has no import of a nova module; its only reference is the provenance string `\"nova.imas.mast_block_scale.promoted_block_scales\"` at runner.py:219, which an import-graph census cannot see, so this row may not exist and the consumer would be missed by \u00a73's import-based done-when",
+      "type": "reasoning",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/one-ids-seam.html:105",
+      "id": "done_when-2",
+      "reason": "a competent node measures the base arm first under the repo's delta-against-base rule, so the ordering is recoverable from convention rather than needing plan text.",
+      "text": "\u00a75's done-when compares the member's CORSICA conversion against \"the values today's translate-on-read path returns\", but that same section deletes the DD3 translate-on-read path, so the reference values must be captured from the base revision before the node removes them and the section does not say so",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "63facaad1cb0f9473e6046f199b36785def882e5",
+  "plan_fingerprint": "dd97ee6ba68f16832d044ade644eeb1bb4488d002071e98fe9836b8d83cf13e8",
+  "plan_slug": "one-ids-seam",
+  "plan_version": 7,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T045102323936-plan-review-of-one-ids-seam",
+  "reviewed_blob_sha": "d4d3473b48778d67c04f4845d780033c17fe8ca1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited module path resolves, the `flux-function-sign` anchor resolves as `flux-function-sign.html` under the docs convention, the five named modules exist, and `code-review/213417e86321` resolves to the stored run record `docs/state/nova/runs/r-20261122T133258289141-review-code-213417e86321.json`.",
+    "done_when": "a finding \u2014 \u00a72 leaves `contour_tree_layout.py` to \"its census row\" while that row's unreached class deletes a module a committed evidence document cites.",
+    "evidence_paths": "pass \u2014 the census lands in `docs/research/imas-seam-census.html` and the sign evidence in `docs/evidence/fragments/dd-cocos-ingest/flux-function-sign.html`, both committed and durable, not a scratchpad.",
+    "naming": "pass \u2014 no plan labels, ticket ids, stage names or changelog prose reach any module or symbol; the plan names paths as move/delete deliverables, which is the endpoint for a rehoming plan.",
+    "reasoning": "a finding \u2014 \u00a73's imas-ambix consumer inventory names `spine_bench/runner.py` as importing a moved nova module when it carries only a provenance string, and \u00a72's deletion endpoint collides with a live citation.",
+    "single_goal": "pass \u2014 each section names one deliverable, and \u00a73 explicitly allows cutting along the census's groups, which keeps any single node to one goal.",
+    "wiring": "pass \u2014 the dependency graph (s2,s3,s4\u2190s1; s5\u2190s3,s4; s6\u2190s5,s7; s7\u2190s5) matches the work each section's text requires, every referenced node exists, and the transitive order satisfies \u00a77's dependence on \u00a73/\u00a74 through \u00a75."
+  },
+  "section_digests": {
+    "_document": "a72509674351b1f6c6da6c018f610d8a4b6d279fba4f1c6c3983c4984eaa69d0",
+    "s1": "9940af6b75a415caa5bec296abfe5423208218dfc48059e2e4592701a9c5082b",
+    "s2": "ac3c831e8e3eb29f1c887227a9908231f5cf74e6e3e7f08dec963678fed26c90",
+    "s3": "7a8863c3597b21f5d7818ddb1b676a0845a1ddcd70262330939be14f55c253ff",
+    "s4": "4e7c9afbff46d47d2d199ce6001bb7a3900c9b1841434faccd2ae76cc7b1ebb7",
+    "s5": "1a4165654871e12a0ee4631319f4ca0c4571ecd085a4acff77b5708a0740d913",
+    "s6": "e8683fc2c1f7e0c827c6e7825b90a3907be409c0ebb99a64c29d956ee77e81d3",
+    "s7": "953227931f58fcac68dba80d7a089238e98ad7483629eed3a39e52c94effb2fa"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T05:11:46.363949+00:00",
+  "total": null
+}

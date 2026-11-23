@@ -31,6 +31,11 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--job", required=True)
     parser.add_argument("--log", required=True)
+    parser.add_argument(
+        "--driver-revision",
+        default=None,
+        help="revision HEAD carried when the map driver rendered this record",
+    )
     args = parser.parse_args()
     data = json.loads(args.map.read_text())
     modules = data["modules"]
@@ -53,8 +58,14 @@ def main():
         f'<section id="{NODE}-landing">'
         f"<h2>Line map of the forward and inverse hot paths</h2>"
     )
+    entry_reached = [
+        name
+        for name, key in (("forward", "forward"), ("inverse", "inverse"))
+        if public[key] and public[key]["executed"]
+    ]
     parts.append(
-        f"<p><strong>Both routes reach the public solve entry, and "
+        f"<p><strong>{len(entry_reached)} of the 2 routes reach the public "
+        f"solve entry ({', '.join(entry_reached)}), and "
         f"{len(measured)} of {len(modules)} modules under <code>nova/</code> "
         f"({not_measured} not measured) "
         f"were measured on one <code>all_debug</code> job ({args.job}).</strong> "
@@ -79,8 +90,13 @@ def main():
         f"<code>nova/equilibrium/forward.py</code> reads "
         f"{plain(public, 'forward')}"
         f"on the forward route and {plain(public, 'inverse')}"
-        f"on the inverse route, so the entry both routes must reach is "
-        f"nonzero on each.</p>"
+        f"on the inverse route"
+        + (
+            ", so the entry both routes must reach is nonzero on each.</p>"
+            if len(entry_reached) == 2
+            else ", so the entry both routes must reach is "
+            f"nonzero on only {len(entry_reached)} of them.</p>"
+        )
     )
     control_row = next(
         (row for row in modules if row["module"] == control["module"]), None
@@ -151,8 +167,16 @@ def main():
         f"Measurement revision <code>{data['revision']}</code>, "
         f"tree <code>{html.escape(data['tree'])}</code>, "
         f"job <code>{html.escape(args.job)}</code> on <code>all_debug</code>."
-        f"</p></section>"
+        f"</p>"
     )
+    if args.driver_revision:
+        command = f"git diff --stat {data['revision']} {args.driver_revision} -- nova"
+        parts.append(
+            f"<p>Product source is identical at the driver revision "
+            f"<code>{html.escape(args.driver_revision)}</code>: "
+            f"<code>{html.escape(command)}</code> prints nothing.</p>"
+        )
+    parts.append("</section>")
     args.output.write_text("\n".join(parts) + "\n")
     print(f"WROTE {args.output} {len(modules)} modules", flush=True)
 

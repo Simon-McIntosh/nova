@@ -95,7 +95,8 @@ def main():
     parser.add_argument("--variant", required=True)
     parser.add_argument("--order", type=int, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--compile-instruction-limit", type=int, default=140000)
+    parser.add_argument("--compile-instruction-limit", type=int, default=20000)
+    parser.add_argument("--lower-only", action="store_true")
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument(
         "--mode", choices=("derivative", "curvature", "batch"), default="derivative"
@@ -160,6 +161,8 @@ def main():
     args.output.with_suffix(".hlo").write_text(hlo)
     row["phase"] = "lowered"
     write(args.output, row)
+    if args.lower_only:
+        return
     if len(instructions) > args.compile_instruction_limit:
         row["phase"] = "compile-skipped-size"
         row["compile_skip_reason"] = (

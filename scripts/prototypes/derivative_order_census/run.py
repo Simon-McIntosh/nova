@@ -23,8 +23,11 @@ def main():
     ]
     rows += [("current", 2, "curvature")]
     records = []
-    for variant, order, mode in rows:
-        stem = f"{mode}-{variant}-{order}"
+    # Persist every lowering before any native compilation can exhaust memory.
+    phases = [(True, *row) for row in rows] + [(False, *row) for row in rows]
+    for lower_only, variant, order, mode in phases:
+        prefix = "lower" if lower_only else "compile"
+        stem = f"{prefix}-{mode}-{variant}-{order}"
         command = [
             sys.executable,
             str(script),
@@ -37,6 +40,8 @@ def main():
             "--output",
             str(args.output / f"{stem}.json"),
         ]
+        if lower_only:
+            command.append("--lower-only")
         log = args.output / f"{stem}.log"
         print(f"START {stem} {time.time()}", flush=True)
         with log.open("w") as stream:
@@ -58,6 +63,7 @@ def main():
                 "variant": variant,
                 "order": order,
                 "mode": mode,
+                "lower_only": lower_only,
                 "exit": code,
                 "log": str(log),
             }

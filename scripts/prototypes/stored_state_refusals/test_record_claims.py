@@ -15,6 +15,7 @@ A published panel directory no test looks at.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -104,6 +105,45 @@ def test_control_rejects_a_flag_that_disagrees_with_the_recomputed_factor():
     )
     passed, _ = verify_input_drift.control_claim(_arm(residual=0.2), recorded)
     assert not passed
+
+
+def test_repeat_claims_measure_a_relative_spread(tmp_path):
+    """The spread is relative: 6.6e-6 between residuals near 4e-3 is 1.6e-3.
+
+    An absolute difference reads as negligible at this magnitude, so a repeat
+    guard that divides by one instead of by the residual passes while its two
+    runs disagree by more than the record's own quoted gap.
+    """
+    residuals = {
+        "solve-first": 0.0042536706460974995,
+        "solve-second": 0.004253165075350546,
+        "seed-first": 0.004247072269166507,
+    }
+    for name in ("scatter", "measurement", "attribution-fixed"):
+        (tmp_path / name).mkdir()
+    (tmp_path / "scatter" / "repeat.json").write_text(
+        json.dumps(
+            dict(arms=[dict(name=name, residual=v) for name, v in residuals.items()])
+        )
+    )
+    (tmp_path / "measurement" / "tcv-seed-nominal.json").write_text(
+        json.dumps(dict(residual=0.0042525413742888945))
+    )
+    (tmp_path / "attribution-fixed" / "tcv-input-comparison.json").write_text(
+        json.dumps(dict(residual=0.004253522137685281))
+    )
+    claims = {
+        name: (passed, detail)
+        for name, passed, detail in verify_input_drift._repeat_claims(
+            tmp_path, 0.030364200526436996
+        )
+    }
+    assert claims["repeat_one_construction_agrees_with_itself"][0]
+    assert claims["repeat_two_constructions_agree"][0]
+    assert "0.00155" in claims["repeat_two_constructions_agree"][1]
+    assert claims["repeat_quoted_pair_sits_at_run_to_run_scale"][0]
+    assert "0.000231" in claims["repeat_quoted_pair_sits_at_run_to_run_scale"][1]
+    assert claims["repeat_arms_all_far_outside_factor_three"][0]
 
 
 def test_control_rejects_an_arm_whose_recorded_constant_left_the_published_value():

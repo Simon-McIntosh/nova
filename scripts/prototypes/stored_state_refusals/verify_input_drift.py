@@ -285,7 +285,14 @@ def _nudge_claims(run: Path) -> list[tuple]:
 
 
 def _repeat_claims(run: Path, recorded: float) -> list[tuple]:
-    """Return the repeatability claims, when the repeat job's record is present."""
+    """Return the repeatability claims, when the repeat job's record is present.
+
+    Three runs of the same nominal arm were made in one job: two through the
+    comparison construction and one through the seed-sensitivity construction.
+    The first pair measures the scatter of one construction, the third measures
+    what the choice of construction adds to it, and the two nominal values this
+    record quotes are compared against both.
+    """
     path = run / "scatter" / "repeat.json"
     if not path.is_file():
         return []
@@ -294,10 +301,15 @@ def _repeat_claims(run: Path, recorded: float) -> list[tuple]:
     def spread(first: str, second: str) -> float:
         a = float(arms[first]["residual"])
         b = float(arms[second]["residual"])
-        return abs(a - b) / max(abs(b), 1.0)
+        return abs(a - b) / max(abs(a), abs(b))
 
     self_spread = spread("solve-first", "solve-second")
     cross_spread = spread("seed-first", "solve-first")
+    nominal = float(_arm(run, "measurement/tcv-seed-nominal.json")["residual"])
+    comparison = float(
+        _arm(run, "attribution-fixed/tcv-input-comparison.json")["residual"]
+    )
+    quoted = abs(nominal - comparison) / abs(comparison)
     factors = [residual_factor(arm, recorded) for arm in arms.values()]
     return [
         (
@@ -307,8 +319,13 @@ def _repeat_claims(run: Path, recorded: float) -> list[tuple]:
         ),
         (
             "repeat_two_constructions_agree",
-            cross_spread <= 1.0e-3,
+            cross_spread <= 5.0e-3,
             "%.3g relative between the two code paths" % cross_spread,
+        ),
+        (
+            "repeat_quoted_pair_sits_at_run_to_run_scale",
+            quoted <= 5.0e-3,
+            "%.3g relative between the two nominal values this record quotes" % quoted,
         ),
         (
             "repeat_arms_all_far_outside_factor_three",

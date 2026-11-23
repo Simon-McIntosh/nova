@@ -3,6 +3,14 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-23T00:22:56.134Z",
   "dispatched_at": "2026-11-22T23:59:22Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T00:43:34.744684+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T192354018332-converged-forward-solve-s11"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_forward_solve_acceptance_bound.py",

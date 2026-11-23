@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T07:29:33.333Z",
+  "dispatched_at": "2026-11-23T07:18:41Z",
+  "findings": [
+    {
+      "anchor": "plan.html:94",
+      "id": "done_when-1",
+      "reason": "the gate must state the allocation floor it is measured under (a memory floor, which is a job size rather than a compile bound), otherwise two runs of the same head return opposite verdicts and the node cannot be closed on one reading.",
+      "text": "clause (2) fixes no memory for the \"one CPU job on the cluster's CPU nodes\", while the plan's own census ledger records this compile killed \"at the 450 GB allocation limit\" (docs/research/compile-cost-evidence.html:131 and its topology_read rows report \"killed during compile after 2940 s at memory ceiling\") and cluster CPU nodes range from 125 GB (all_debug) to 500 GB (sirius/vega), so the same code passes on a sirius job and fails on the CPU partition the workstation guidance names by default; the clause's verdict therefore follows the node the worker picks rather than the change, and \"compared with no bound\" names no quantity the peak is compared against",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:94",
+      "id": "reasoning-1",
+      "reason": "if the differentiated read already compiles inside a 500 or 650 GB allocation, clause (2) is satisfied on the unfixed code and cannot show that \u00a79's change made anything compilable; the premise must rest on a measured peak at a ceiling no cluster node can reach, or clause (2) needs that measurement first.",
+      "text": "the premise \"today no allocation on the cluster can compile it\" rests on kills at allocation ceilings, not on a peak above every node: job 1337904 is OUT_OF_MEMORY at a 64.1 GiB peak on the H200 host (sacct), the census topology_read rows the plan cites are \"killed during compile ... at memory ceiling\" under a 450 GB allocation and record the same program compiling on titan in 843.72 s (docs/research/compile-cost-evidence.html:150-151), and \u00a78 records only that one point's Hessian CPU compile \"exceeds 120 GB\", while the largest available allocations are 500 GB CPU nodes and a 650 GB H200 QoS",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "52c201938b18b00db5fd07914745bf6462e18358",
+  "plan_fingerprint": "8f1c50eeca8e4df47cea1fd0c673dd36f946a49efa3e63ece5f097c22a7802b2",
+  "plan_slug": "kernel-compile-barrier",
+  "plan_version": 140,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T071813359583-plan-review-of-kernel-compile-barrier",
+  "reviewed_blob_sha": "fa66a0eced108540fc433d8e581983b71588d3a3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the section's data-links targets (kernel-compile-barrier#s8, #s4) and the plan-section-depends-on entry for s9 resolve to sections that exist.",
+    "done_when": "a finding \u2014 clause (2) requires the 132-cell read's cold compile to complete \"in one CPU job on the cluster's CPU nodes\" while naming no memory for that job, and the cluster's CPU nodes span 125 GB (all/all_debug/rigel) to 500 GB (sirius/vega), with the plan's own census record reporting the same compile killed at a 450 GB allocation ceiling.",
+    "evidence_paths": "pass \u2014 the section names its record at docs/evidence/fragments/kernel-compile-barrier/kcb-assembled-read-hessian.html on the repository's tracked evidence path, with oversized receipts routed to the GPFS evidence root by \u00a78's stated convention.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or changelog prose reach a symbol or comment, and the section names mechanisms (assembled Hessian, packed-kernel instance count) rather than a plan item.",
+    "reasoning": "a finding \u2014 clause (2)'s premise, that \"today no allocation on the cluster can compile it\", is not what the plan's cited evidence shows.",
+    "single_goal": "pass \u2014 \u00a79 delivers one goal, the read's Hessian assembled from \u00a78's kernel outputs so the read compiles, with clause (1) the section's mechanism check and clause (2) its outcome and clause (3) the negative control for clause (1).",
+    "wiring": "pass \u2014 s9's declared depends-on (s8) resolves to a section that exists, and \u00a74's depends-on now lists s9, matching \u00a79's own sentence that measuring the first call against \u00a74's bounds \"is \u00a74's own clause, which runs after this section\"."
+  },
+  "section_digests": {
+    "_document": "8aa2f4e5145f569b0e6cbd810ea4816ca4580ad9e1a7491aebefa7b76a7da11c",
+    "s0": "4ee1e85bfb3401a622a440275fbf7df27306d1a3d66adca44ce0efdf61921d0e",
+    "s1": "fe3f3970ffd3a905ad5310925c387db8656888fac64e17a47eef15da9d3defef",
+    "s2": "54ea06b9533717937b1c38506381d0707942df533a7a42725b8e13c28aa2c313",
+    "s3": "c0050e9c77ebe6780135151c511e8850c91e7dc99d0cb4fe32c9d032665dd522",
+    "s4": "4b8bf6686dd7741ef6ed148a144b3f512eff3f8ad043c934f568a9feb50f76f8",
+    "s5": "4d08e4dd43d1522e62d6f7cb3250b68889f9785e69e190ebee5f8d83827730c7",
+    "s6": "394ac2b5af9fb3afa2af293c77ab9aa551c609db15bd2539fec18b77859618ea",
+    "s7": "6dfe0a01ad8470c02d38d7e3fa33263ff325b87943f260375c61e09e0cfe5db8",
+    "s8": "a4627c2611f0af4743802be210abf766114de0c5c5157b517d571a34443c1377",
+    "s9": "d692773706eed766dd916e352657f55b02706a3df52dac9fddd1b7e5076f2691"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:29:40.226195+00:00",
+  "total": null
+}

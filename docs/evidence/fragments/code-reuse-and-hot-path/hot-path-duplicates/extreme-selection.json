@@ -1,0 +1,28 @@
+{
+  "question": "nova.equilibrium.stencil_nulls and nova.equilibrium.connectivity_boundary each define _arg_extreme with the same reducing rule, and each exports _argmax_exact and _argmin_exact wrappers over it. Should the smaller copy be removed in favour of the larger?",
+  "context": {
+    "implementations": [
+      "nova.equilibrium.stencil_nulls._arg_extreme (stencil_nulls.py:67-88, 22 lines) with _argmax_exact and _argmin_exact (3 lines each): exact index only, no tolerance and no NaN handling",
+      "nova.equilibrium.connectivity_boundary._arg_extreme (connectivity_boundary.py:136-194, 59 lines) with _argmax_exact and _argmin_exact (3 lines each): a superset, adding relative_tolerance, candidate_index and NaN handling"
+    ],
+    "routes": "Both modules are on the equilibrium route and both copies are live: each module's callers use its own local import. Neither is unreachable, so this is a duplicate that both routes carry rather than one dead implementation.",
+    "measured_agreement": "A 64x9 seeded normal array carrying one constant tie row and two all-tie rows, over all four (maximise/minimise, axis 0/1) combinations: identical chosen index in every combination. Both exact wrappers also agree on a 1-D slice (maximum index 6, minimum index 4). Raising one element of the second implementation's input row 7.0 past the previous maximum moves its chosen index and leaves the first unchanged, a gap of 1 against a tolerance of 0.",
+    "lines_removable": 28,
+    "removal": "stencil_nulls' _arg_extreme (22), _argmax_exact (3) and _argmin_exact (3) become removable if stencil_nulls imports the connectivity_boundary owner. The owner is already a strict superset, so the exact-only callers keep their behaviour by calling it without a tolerance.",
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html, entry extreme-selection; receipt at hot-path-duplicates/receipt.json; measured at revision 85d69cfc5fd806e4ab45de3d133c38554b5991b7"
+  },
+  "options": [
+    {
+      "value": "accept-for-s28-node",
+      "label": "Give S28 a node to delete the stencil_nulls copies and call the connectivity_boundary owner, removing 28 duplicated lines"
+    },
+    {
+      "value": "decline",
+      "label": "Keep both: stencil_nulls avoids a cross-module dependency on the connectivity code, and 28 lines are cheaper than the coupling"
+    }
+  ],
+  "recommended": "accept-for-s28-node",
+  "project": "nova",
+  "plan": "code-reuse-and-hot-path",
+  "section": "s5"
+}

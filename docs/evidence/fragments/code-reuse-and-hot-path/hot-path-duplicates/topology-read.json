@@ -1,0 +1,28 @@
+{
+  "question": "Two implementations compute the topology reading on one field: nova.equilibrium.topology.read, which finds stationary points by scanning the flux map, and nova.equilibrium.topology.read_at_stationary_points, which accepts points solved separately. Should the supplied-point implementation be kept beside the census, or removed in favour of it?",
+  "context": {
+    "implementations": [
+      "nova.equilibrium.topology.read (module-level census, reached as Topology.read_qualification): null census over the flux map, returns TopologyRead",
+      "nova.equilibrium.topology.read_at_stationary_points (topology.py:3415-3470, 56 lines): builds the same TopologyRead from stationary points supplied by fixed_points.solve through support_read.read"
+    ],
+    "routes": "Both measured routes run the census: nova/equilibrium/forward.py calls read_qualification once (forward.py:2816) and forward_operator.py twice (3015, 3028), while neither calls read_at_stationary_points. support_read.py calls the supplied-point read twice (388, 470) and read_qualification zero times. The supplied-point path executes zero body lines on both routes because the bank-solve arm's slice-profile fixture is absent from shared storage at this revision.",
+    "measured_agreement": "One analytic Cerfon-Freidberg single-null field, diverted, on a 50-cell realised hexagonal geometry, both implementations run on the same operands in one process. Axis position 8.8e-05 m apart against a 1.35e-02 m tolerance (0.05 cell pitch); boundary class equal; membership area sum within 7.8e-04 relative against 5e-03; largest per-cell membership fraction 1.35e-02 against 0.05. Perturbing the exterior nodal jet by a uniform gradient of 0.1x its median derivative moves the two readings apart beyond both tolerances (per-cell fraction 0.878), so the comparison can fail.",
+    "lines_removable": 56,
+    "removal": "read_at_stationary_points becomes removable if the bank arm reads topology from the census and consumes the solved points as positions only. The operand assembly in support_read.read stays: it supplies rows and exterior jets the census does not compute. Removing the function means the census must accept the solve's already-converged stationary points so the bank arm does not re-scan the flux map.",
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html, entry topology-read; receipt at hot-path-duplicates/receipt.json; measured at revision 85d69cfc5fd806e4ab45de3d133c38554b5991b7"
+  },
+  "options": [
+    {
+      "value": "accept-for-s28-node",
+      "label": "Give S28 a node to read the bank arm through the census and remove read_at_stationary_points, keeping the 56-line duplicate out of the forward path"
+    },
+    {
+      "value": "decline",
+      "label": "Keep both implementations: the supplied-point read serves the bank arm's converged points and the census serves the public routes, and the two are not interchangeable without a census entry point that accepts solved points"
+    }
+  ],
+  "recommended": "accept-for-s28-node",
+  "project": "nova",
+  "plan": "code-reuse-and-hot-path",
+  "section": "s5"
+}

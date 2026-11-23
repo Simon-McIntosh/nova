@@ -1,0 +1,340 @@
+{
+  "revision": "717375353ef1b3fd886dcfb7eb770c56555a1169",
+  "entries": [
+    {
+      "entry": "topology-read",
+      "implementation_a": "nova.equilibrium.topology.read (flux-map null census, Topology.read_qualification on the measured routes)",
+      "implementation_b": "nova.equilibrium.topology.read_at_stationary_points (points solved by fixed_points.solve and supplied by support_read.read)",
+      "input": "analytic Cerfon-Freidberg single-null field, diverted, 50-cell realised hexagonal geometry, both route implementations run on the same operands in one process",
+      "axis_a": [
+        1.7870647018106882,
+        0.04677362656484758
+      ],
+      "axis_b": [
+        1.7870853536782019,
+        0.0466884356119983
+      ],
+      "axis_gap_m": 8.76584170469064e-05,
+      "axis_gap_to_analytic_m": 8.76584170479821e-05,
+      "boundary_class_a": 1,
+      "boundary_class_b": 1,
+      "membership_area_sum_relative": 0.0007829007194638985,
+      "membership_cell_fraction": 0.013532994919771738,
+      "cell_pitch_m": 0.2704856057561504,
+      "tolerance": {
+        "boundary_class": "equal",
+        "axis_position_m": 0.01352428028780752,
+        "membership_area_sum_relative": 0.005,
+        "membership_cell_fraction": 0.05
+      },
+      "agrees": true
+    },
+    {
+      "entry": "extreme-selection",
+      "implementation_a": "nova.equilibrium.stencil_nulls._arg_extreme",
+      "implementation_b": "nova.equilibrium.connectivity_boundary._arg_extreme",
+      "input": "64x9 seeded normal array with one constant tie row and two all-tie rows, maxima over axes 0 and 1",
+      "exact_companions": [
+        {
+          "function": "_argmax_exact",
+          "stencil": 6,
+          "boundary": 6,
+          "agrees": true
+        },
+        {
+          "function": "_argmin_exact",
+          "stencil": 4,
+          "boundary": 4,
+          "agrees": true
+        }
+      ],
+      "index_mismatches": [],
+      "max_index_gap": 0,
+      "tolerance_max_index_gap": 0,
+      "agrees": true
+    },
+    {
+      "entry": "storage-group-mode",
+      "implementation_a": "nova.database.netcdf.netCDF.subgroup/get_mode (is_file)",
+      "implementation_b": "nova.database.zarrstore.ZarrStore.subgroup/get_mode (is_store)",
+      "input": "one temp root holding an existing .nc file and an existing .zarr directory, plus an absent basename, group 'plasma'",
+      "comparisons": [
+        {
+          "quantity": "subgroup_nested",
+          "netcdf": "plasma/equilibrium/flux",
+          "zarr": "plasma/equilibrium/flux",
+          "agrees": true
+        },
+        {
+          "quantity": "subgroup_none",
+          "netcdf": null,
+          "zarr": null,
+          "agrees": true
+        },
+        {
+          "quantity": "subgroup_declared",
+          "netcdf": "plasma/flux",
+          "zarr": "plasma/flux",
+          "agrees": true
+        },
+        {
+          "quantity": "mode_absent",
+          "netcdf": "w",
+          "zarr": "w",
+          "agrees": true
+        },
+        {
+          "quantity": "mode_present",
+          "netcdf": "a",
+          "zarr": "a",
+          "agrees": true
+        },
+        {
+          "quantity": "mode_explicit",
+          "netcdf": "r",
+          "zarr": "r",
+          "agrees": true
+        }
+      ],
+      "disagreements": [],
+      "tolerance": "exact string equality",
+      "agrees": true
+    },
+    {
+      "entry": "level-set-polish",
+      "implementation_a": "nova.equilibrium.forward_operator._polished_level_root",
+      "implementation_b": "nova.equilibrium.separatrix_clip._traced_level_arc polish loop",
+      "input": "three 65-point chords across one fixed quadratic level set, one interior vertex each",
+      "max_point_gap_m": 0.0,
+      "tolerance_m": 1e-12,
+      "agrees": true
+    },
+    {
+      "entry": "route-resolution",
+      "question": "nova/equilibrium/support_read.py read, read_batch, read_and_book and bank_program carry kernels in the device trace and zero body lines on both measured routes. Which topology read does each route run?",
+      "findings": [
+        {
+          "module": "nova/equilibrium/forward.py",
+          "required": "read_qualification",
+          "required_calls": 1,
+          "forbidden": "read_at_stationary_points",
+          "forbidden_calls": 0,
+          "passes": true
+        },
+        {
+          "module": "nova/equilibrium/forward_operator.py",
+          "required": "read_qualification",
+          "required_calls": 2,
+          "forbidden": "read_at_stationary_points",
+          "forbidden_calls": 0,
+          "passes": true
+        },
+        {
+          "module": "nova/equilibrium/support_read.py",
+          "required": "read_at_stationary_points",
+          "required_calls": 2,
+          "forbidden": "read_qualification",
+          "forbidden_calls": 0,
+          "passes": true
+        }
+      ],
+      "conclusion": "both measured routes read topology through Topology.read_qualification, the flux-map null census. The supplied-stationary-point read is reached only from support_read.py, whose callers execute zero body lines on these routes",
+      "agrees": true
+    },
+    {
+      "entry": "plot-columns",
+      "implementation_a": "nova.frame.polyplot.PolyPlot.update_columns",
+      "implementation_b": "nova.frame.vtkplot.VtkPlot.update_columns",
+      "input": "three column states (all present, one missing, all missing) through a stub host carrying required, additional and frame.columns",
+      "comparisons": [
+        {
+          "implementation": "nova.frame.polyplot.PolyPlot.update_columns",
+          "case": "all present",
+          "delegate_calls": 0
+        },
+        {
+          "implementation": "nova.frame.polyplot.PolyPlot.update_columns",
+          "case": "one missing",
+          "delegate_calls": 1
+        },
+        {
+          "implementation": "nova.frame.polyplot.PolyPlot.update_columns",
+          "case": "all missing",
+          "delegate_calls": 1
+        },
+        {
+          "implementation": "nova.frame.vtkplot.VtkPlot.update_columns",
+          "case": "all present",
+          "delegate_calls": 0
+        },
+        {
+          "implementation": "nova.frame.vtkplot.VtkPlot.update_columns",
+          "case": "one missing",
+          "delegate_calls": 1
+        },
+        {
+          "implementation": "nova.frame.vtkplot.VtkPlot.update_columns",
+          "case": "all missing",
+          "delegate_calls": 1
+        }
+      ],
+      "implementations_found": {
+        "nova.frame.polyplot": [
+          "nova.frame.polyplot.PolyPlot.update_columns"
+        ],
+        "nova.frame.vtkplot": [
+          "nova.frame.vtkplot.VtkPlot.update_columns"
+        ]
+      },
+      "tolerance": "exact equality of delegate call counts per column state",
+      "missing_implementations": [],
+      "vacuous_cases": [],
+      "disagreements": [],
+      "agrees": true
+    },
+    {
+      "entry": "candidate-agreements",
+      "pairs": [
+        {
+          "candidate": "tensor-bernstein",
+          "implementation_a": "nova.equilibrium.flux_surface_extraction._tensor_bernstein",
+          "implementation_b": "nova.linalg.tensor_spline._tensor_bernstein",
+          "input": "one 4x4 coefficient block at five paired coordinates, order 3",
+          "tolerance": 0.0,
+          "max_abs_gap": 0.0,
+          "agrees": true,
+          "keeper": "nova.linalg.tensor_spline._tensor_bernstein",
+          "lines_removable": 4
+        },
+        {
+          "candidate": "aphi-axis-zero",
+          "implementation_a": "nova.biot.cylinder.Cylinder.Aphi",
+          "implementation_b": "nova.biot.polysection.PolySection.Aphi",
+          "input": "one 4x2 target grid with a zero-radius cell, mu_0 = 4 pi 1e-7",
+          "tolerance": 0.0,
+          "max_abs_gap": 0.0,
+          "agrees": true,
+          "keeper": "one copy in the shared Matrix base",
+          "lines_removable": 9
+        },
+        {
+          "candidate": "first-residual",
+          "implementation_a": "nova.biot.polygonarc._Vertex._first_residual",
+          "implementation_b": "nova.biot.polygonanalytic._first_residual",
+          "input": "one three-row corner at eight graded nodes",
+          "tolerance": 0.0,
+          "max_abs_gap": 0.0,
+          "agrees": true,
+          "keeper": "the polygonanalytic form (a superset: optional weight)",
+          "lines_removable": 1
+        },
+        {
+          "candidate": "for-member",
+          "implementation_a": "nova.transport.ensemble.EnsembleTransportReceipt.for_member",
+          "implementation_b": "nova.transport.window_batch.WindowBatchReceipt.for_member",
+          "input": "one three-member list addressed by identity, present and absent",
+          "tolerance": "same member selected, KeyError for an absent identity",
+          "selected_same_member": true,
+          "keyerror_both": true,
+          "agrees": true,
+          "keeper": "one loop with a per-class receipt accessor",
+          "lines_removable": 7
+        }
+      ],
+      "decisions": [
+        {
+          "id": "candidate-tensor-bernstein",
+          "entry": "candidate-agreements",
+          "question": "nova.equilibrium.flux_surface_extraction._tensor_bernstein and nova.linalg.tensor_spline._tensor_bernstein compute the same quantity, agreeing on one 4x4 coefficient block at five paired coordinates, order 3. Should the pair share one implementation?",
+          "options": [
+            {
+              "value": "accept-for-s28-node",
+              "label": "Keep nova.linalg.tensor_spline._tensor_bernstein and remove the other copy, 4 line(s)"
+            },
+            {
+              "value": "decline",
+              "label": "Keep both copies: the pair is not on the measured hot path, or the removal is below the cost of the shared abstraction it would need"
+            }
+          ],
+          "recommended": "accept-for-s28-node",
+          "keeper": "nova.linalg.tensor_spline._tensor_bernstein",
+          "lines_removable": 4
+        },
+        {
+          "id": "candidate-aphi-axis-zero",
+          "entry": "candidate-agreements",
+          "question": "nova.biot.cylinder.Cylinder.Aphi and nova.biot.polysection.PolySection.Aphi compute the same quantity, agreeing on one 4x2 target grid with a zero-radius cell, mu_0 = 4 pi 1e-7. Should the pair share one implementation?",
+          "options": [
+            {
+              "value": "accept-for-s28-node",
+              "label": "Keep one copy in the shared Matrix base and remove the other copy, 9 line(s)"
+            },
+            {
+              "value": "decline",
+              "label": "Keep both copies: the pair is not on the measured hot path, or the removal is below the cost of the shared abstraction it would need"
+            }
+          ],
+          "recommended": "accept-for-s28-node",
+          "keeper": "one copy in the shared Matrix base",
+          "lines_removable": 9
+        },
+        {
+          "id": "candidate-first-residual",
+          "entry": "candidate-agreements",
+          "question": "nova.biot.polygonarc._Vertex._first_residual and nova.biot.polygonanalytic._first_residual compute the same quantity, agreeing on one three-row corner at eight graded nodes. Should the pair share one implementation?",
+          "options": [
+            {
+              "value": "accept-for-s28-node",
+              "label": "Keep the polygonanalytic form (a superset: optional weight) and remove the other copy, 1 line(s)"
+            },
+            {
+              "value": "decline",
+              "label": "Keep both copies: the pair is not on the measured hot path, or the removal is below the cost of the shared abstraction it would need"
+            }
+          ],
+          "recommended": "accept-for-s28-node",
+          "keeper": "the polygonanalytic form (a superset: optional weight)",
+          "lines_removable": 1
+        },
+        {
+          "id": "candidate-for-member",
+          "entry": "candidate-agreements",
+          "question": "nova.transport.ensemble.EnsembleTransportReceipt.for_member and nova.transport.window_batch.WindowBatchReceipt.for_member compute the same quantity, agreeing on one three-member list addressed by identity, present and absent. Should the pair share one implementation?",
+          "options": [
+            {
+              "value": "accept-for-s28-node",
+              "label": "Keep one loop with a per-class receipt accessor and remove the other copy, 7 line(s)"
+            },
+            {
+              "value": "decline",
+              "label": "Keep both copies: the pair is not on the measured hot path, or the removal is below the cost of the shared abstraction it would need"
+            }
+          ],
+          "recommended": "accept-for-s28-node",
+          "keeper": "one loop with a per-class receipt accessor",
+          "lines_removable": 7
+        }
+      ],
+      "tolerance": "each pair states its own; the record agrees when every pair does",
+      "agrees": true
+    }
+  ],
+  "negative_controls": [
+    {
+      "entry": "topology-read",
+      "measured_cell_fraction": 0.8781855313025444,
+      "measured_axis_gap_m": 0.051939779834019546,
+      "disagrees_beyond_tolerance": true
+    },
+    {
+      "entry": "extreme-selection",
+      "measured_index_gap": 1,
+      "tolerance_max_index_gap": 0,
+      "disagrees_beyond_tolerance": true
+    },
+    {
+      "entry": "route-resolution",
+      "disagrees_beyond_tolerance": true
+    }
+  ]
+}

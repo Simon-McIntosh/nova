@@ -1,0 +1,28 @@
+{
+  "question": "nova.frame.polyplot.PolyPlot.update_columns and nova.frame.vtkplot.VtkPlot.update_columns have identical bodies: each lists the required and additional attributes missing from the frame's columns and delegates to the frame's own update_columns when any is absent. Should the pair share one implementation?",
+  "context": {
+    "implementations": [
+      "nova.frame.polyplot.PolyPlot.update_columns (polyplot.py:124-130, 7 lines)",
+      "nova.frame.vtkplot.VtkPlot.update_columns (vtkplot.py:26-32, 7 lines)"
+    ],
+    "routes": "Beside the route rather than on it: both modules are plotting indexers reached by tests that touch frame columns, not by the solve. They appear in the line map because those modules executed lines on the measured routes, not because the arithmetic needs them.",
+    "measured_agreement": "Three column states through a stub host carrying required, additional and frame.columns. Delegate call counts identical for every state: all present 0, one missing 1, all missing 1, for both implementations.",
+    "lines_removable": 7,
+    "removal": "Seven lines are removable from one of the two classes if both inherit one method from a shared plotting mixin; the method has no behaviour that differs between the two indexers.",
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html, entry plot-columns; receipt at hot-path-duplicates/receipt.json; measured at revision 85d69cfc5fd806e4ab45de3d133c38554b5991b7"
+  },
+  "options": [
+    {
+      "value": "accept-for-s28-node",
+      "label": "Give S28 a node to move the method to a shared plotting mixin, removing seven duplicated lines"
+    },
+    {
+      "value": "decline",
+      "label": "Keep both: the pair is off the measured hot path, seven lines are below the cost of introducing a mixin both indexer classes share, and the consolidation belongs to the plotting owners rather than a hot-path node"
+    }
+  ],
+  "recommended": "decline",
+  "project": "nova",
+  "plan": "code-reuse-and-hot-path",
+  "section": "s5"
+}

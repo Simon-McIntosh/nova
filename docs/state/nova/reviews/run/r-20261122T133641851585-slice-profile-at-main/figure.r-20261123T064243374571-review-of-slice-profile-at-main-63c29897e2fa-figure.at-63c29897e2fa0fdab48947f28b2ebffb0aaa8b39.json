@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T07:14:22.538Z",
+  "dispatched_at": "2026-11-23T06:57:24Z",
+  "evidence_inputs": {
+    "caption_checked": "The figcaption is substantive, describing both panels with job numbers and lane counts; it does not merely repeat a title, so no caption finding.",
+    "figure_judged": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T064243374571-review-of-slice-profile-at-main-63c29897e2fa-figure/image-0.png (the only attached PNG; 1399x720 px, the 14x7.2 in slide canvas at 100 dpi)",
+    "figure_repository_path": "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
+    "measured_contrast": {
+      "#0b0b0b on white": "19.68:1",
+      "#1f5d92 on white": "6.91:1",
+      "#929292 on white": "3.11:1"
+    },
+    "no_drawing_script_in_diff": "No committed script draws this figure; the only figure producer in the diff, scripts/prototypes/bank_h200_slice_profile/report_arms.py:242-309, draws a latency/throughput panel pair. Findings are therefore anchored to the figure path with line null. This was already recorded as a non-blocking finding by the code review of the same run, so it is not repeated here."
+  },
+  "findings": [
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Right panel: a read that is -Infinity cannot be placed on a log axis, so the sixteen perturbed lanes are drawn as X markers on a dotted row at exactly 1e0, coinciding with a real y-axis tick. A reader scanning the two rows sees 'perturbed about 1.0' against 'unperturbed about 3e-2', i.e. a thirty-fold larger residual, where the measured value is minus infinity. The annotation '-Infinity at the first read' and the caption's 'marked at the top of the panel' do disclose the substitution, so the panel is not misleading to a careful reader; the placement at a labelled tick is still a representation a glance can invert. Offset the sentinel row from the tick or break the axis to remove the ambiguity."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The two explanatory grey annotations ('three revisions coincide within 7e-4 at every step' and 'convergence gate 1e-10') render in #929292, about 3.1:1 against the white background, while the blue and near-black annotation text clears 6.9:1. Both grey lines carry information a reader needs (the coincidence tolerance and the gate the solve misses by seven orders), so the weakest-contrast text is the load-bearing text."
+    },
+    {
+      "file": "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Left panel: the terminal plateau at 3.87e-3 is drawn strictly flat from step 6 to step 60, so a reader of the figure alone concludes the iteration holds a floor. The record states that the last fifty-four updates move the residual upward by 0.3%, and at a ten-decade log scale that rise cannot be shown; the figure therefore supports 'stalled' but not 'rising'. A reader who reads only the picture will not see the distinction the record relies on."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html",
+      "line": 42,
+      "severity": "non-blocking",
+      "summary": "The figure's alternative text on this line says the residual 'falls to 3.86e-3', while the rendered label reads 'terminal 3.87e-3' and the record's own terminal value is 3.868493624452e-3, which rounds to 3.87e-3. The alt text has been truncated rather than rounded, giving a second, slightly smaller terminal figure in the same record."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T064243374571-review-of-slice-profile-at-main-63c29897e2fa-figure",
+  "review_text": "RUBRIC legibility: answered \u2014 both panels readable at a glance; decade log axes with clean 10^n ticks and no offset multiplier; both key features (step-6 refactor, terminal plateau) labelled beside themselves.\nRUBRIC data_ink: answered \u2014 lines and markers only, frameless legend, direct labels; no fills or gradients.\nRUBRIC decoration: answered \u2014 no gridlines, no background fill, top and right spines removed.\nRUBRIC contrast: answered with a defect \u2014 blue 6.9:1 and near-black 19.7:1 clear, but the two grey annotations at #929292 measure about 3.1:1 on white (non-blocking).\nRUBRIC table_form: answered \u2014 two plotted relationships, neither tabular.\nRUBRIC label_collision: answered \u2014 no clipping, no overlap between labels or with data; the right panel's annotation clears the marker row by about 5 px.\nFINDING figure non-blocking: -Infinity sentinels sit at exactly the 1e0 tick, which a glance can read as a residual of 1.0.\nFINDING figure non-blocking: grey annotation text renders at about 3.1:1 contrast, and it carries the tolerance and the gate.\nFINDING figure non-blocking: the left plateau is drawn strictly flat, so the record's 0.3% rise over the last fifty-four updates is not visible in the figure.\nFINDING slice-profile-at-main.html:42 non-blocking: alt text reads 3.86e-3 where the label and the measured value give 3.87e-3.\nNo blocking finding: no clipped or overlapping label, no unreadable text, and no panel that with the data it chooses to show fails to show it.",
+  "reviewed_base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+  "reviewed_head_sha": "63c29897e2fa0fdab48947f28b2ebffb0aaa8b39",
+  "reviewed_run_id": "r-20261122T133641851585-slice-profile-at-main",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Near-black and blue text clear their background (blue #1f5d92 measures about 6.9:1 on white, near-black 19.7:1), but the two grey annotation lines 'three revisions coincide within 7e-4 at every step' and 'convergence gate 1e-10' render at #929292, about 3.1:1 against white. That is legible but below the 4.5:1 an ordinary body-size text label needs; recorded below as a non-blocking finding.",
+    "data_ink": "The data carry the weight. Three coincident residual traces and one convergence-gate reference line in the left panel, sixteen lane reads in each of two rows in the right panel, with frameless legends and direct labels; no fills, no gradients, no shaded bands.",
+    "decoration": "No gridlines, no background fill, no decorative styling. Top and right spines are removed on both panels and the remaining spines render at the base style's 1.2 pt.",
+    "label_collision": "No label is clipped, no label overlaps another, and no label sits on the data. The left panel's three annotations and its frameless legend all sit in clear white space; the right panel's two-line 'perturbed' block clears the marker row by about 5 px and the 'unperturbed' direct label sits above its line. Axis labels are fully within the canvas on all four sides.",
+    "legibility": "Readable at a glance. Two panels, 1399x720 px, axis labels 16 pt and tick/direct labels 14 pt; the left panel's y axis is a decade log scale from 1e-10 to 1e0 with clean 10^n tick labels and no offset multiplier, the right panel's from 1e-3 to above 1e0. The trajectory's saddle refactor at step 6 and the terminal 3.87e-3 plateau are the two features a reader must find, and both are called out in words beside them.",
+    "table_form": "The figure shows two spatial/temporal relationships a table cannot: a residual trajectory against Newton step with an intra-run excursion, and a per-lane read population beside the unperturbed value. Neither panel depicts tabular data."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:20:00Z",
+  "total": null
+}

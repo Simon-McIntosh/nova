@@ -353,6 +353,28 @@ def test_row_matched_arm_is_available_by_name(tmp_path, monkeypatch):
     assert len(figures.arm_rows("nova", "drift", "loops")) == 3
 
 
+def test_grouped_refuses_a_slice_one_arm_carries_twice(tmp_path):
+    """A record left at the arm's own name must not be merged into the arm.
+
+    An independent fit of a slice already carried by a shard of the same stem
+    double-weights that slice in every statistic the arm reports, so the
+    reduction refuses the arm and names both files rather than reducing it.
+    """
+    rows = rows_of([[6.0, 0.5]] * 3)
+    write_rows(tmp_path / "nova-white-200-0.0100-shard0.jsonl", rows)
+    write_rows(tmp_path / "nova-white-200-0.0100.jsonl", rows[:1])
+    with pytest.raises(ValueError, match="repeats slice 0"):
+        analyse.grouped(sorted(tmp_path.glob("nova-white-200-0.0100*.jsonl")))
+
+
+def test_grouped_merges_shards_that_do_not_repeat_a_slice(tmp_path):
+    rows = rows_of([[6.0, 0.5]] * 4)
+    write_rows(tmp_path / "nova-white-200-0.0100-shard0.jsonl", rows[:2])
+    write_rows(tmp_path / "nova-white-200-0.0100-shard1.jsonl", rows[2:])
+    runs = analyse.grouped(sorted(tmp_path.glob("nova-white-200-0.0100*.jsonl")))
+    assert [row["slice"] for row in runs["nova-white-200-0.0100"]] == [0, 1, 2, 3]
+
+
 def test_arm_selection_names_each_code_row_set(tmp_path, monkeypatch):
     assert analyse.arm_row_set("nova-white-200-0.0100") == "all"
     assert analyse.arm_row_set("nova-white-200-0.0100-loops") == "loops"

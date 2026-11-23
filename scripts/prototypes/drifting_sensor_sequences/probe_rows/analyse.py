@@ -295,11 +295,27 @@ def selected_rows(
 
 
 def grouped(paths: list[Path]) -> dict[str, list[dict]]:
-    """Merge shard files of one run into a single slice-ordered series."""
+    """Merge shard files of one run into a single slice-ordered series.
+
+    An arm is one run, so each slice index appears once.  A file that repeats a
+    slice another file of the same stem already carries -- a probe record left
+    at the arm's own name, for instance -- is refused rather than merged, since
+    merging would double-weight that slice in every statistic the arm reports.
+    """
     runs: dict[str, list[dict]] = {}
+    seen: dict[tuple[str, int], Path] = {}
     for path in paths:
         stem = re.sub(r"-shard[0-9]+$", "", path.stem)
-        runs.setdefault(stem, []).extend(load(path))
+        for row in load(path):
+            index = int(row["slice"])
+            key = (stem, index)
+            if key in seen:
+                raise ValueError(
+                    "arm %s repeats slice %d: %s and %s"
+                    % (stem, index, seen[key], path)
+                )
+            seen[key] = path
+            runs.setdefault(stem, []).append(row)
     for rows in runs.values():
         rows.sort(key=lambda row: row["slice"])
     return runs

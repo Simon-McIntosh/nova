@@ -25,7 +25,7 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -231,6 +231,9 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261123T045017595624-review-of-hot-path-map-5f204ba99b54" data-who="reckon-build" data-when="2026-11-23T05:21:17.960Z">
     <div class="r-comment-body"><p>review of r-20261122T202531438845-hot-path-map at head 5f204ba99 scores goal_fidelity 15, evidence 13, scope_discipline 14, durability 4, fit 16, reuse 10, with three non-blocking findings (negative control reported but never asserted, revision label captured from a dirty tree, two paragraphs emitted after &lt;/html&gt;).</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261123T072832554985-review-of-hot-path-map-8e9ae53b47c0" data-who="reckon-build" data-when="2026-11-23T07:46:35.277Z">
+    <div class="r-comment-body"><p>review of r-20261122T202531438845-hot-path-map at 8e9ae53b47c00a6c41282c0d611a38f71ce2a4b3 — scores goal_fidelity 18, evidence 17, scope_discipline 13, durability 16, fit 18, reuse 5; added_failure_count 0; three non-blocking findings (map.py:49 relative() duplicates filepath.repository_relative, render.py:250 arm-log block untested at head, forward_route.py:33 substitutes a stored MAST case for the named bank driver because common-streams.npz is absent)</p></div>
 </div>
 </section>
 </main>

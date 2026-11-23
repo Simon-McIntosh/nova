@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's own arms: suite-baseline-8dde314ac.log ran at 8dde314ac over tests/test_hot_path_map_driver.py (file absent, EXIT=4, no tests ran) and suite-after-09ef90e40.log ran the same command at 09ef90e40 (6 passed, EXIT=0); zero failures were added, so the delta is 0.",
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/prototypes/hot_path_map/job.sh"
+  ],
+  "completed_at": "2026-11-23T07:46:35.277Z",
+  "dispatched_at": "2026-11-23T07:29:15Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/hot_path_map/map.py",
+      "line": 49,
+      "severity": "non-blocking",
+      "text": "non-blocking: relative() duplicates nova/database/filepath.py:397 repository_relative and drops the owner's worktree rewrite, so the same capability has two implementations that can diverge."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_map/render.py",
+      "line": 250,
+      "severity": "non-blocking",
+      "text": "non-blocking: the --arm-log rendering block added at 8e9ae53b4 has no assertion, and the after-suite was recorded at its parent 09ef90e40 before that block existed, so the reviewed head's render code is untested."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_map/forward_route.py",
+      "line": 33,
+      "severity": "non-blocking",
+      "text": "non-blocking: the goal's first route names the slice-profile bank driver, but the record substitutes ForwardProfile.solve on a stored MAST case because common-streams.npz is absent, so the traced read_batch loop is measured by neither route and appears as four contradictions rather than line counts."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 8dde314acacf331db89b0773ce616bdfe930ff85\nreviewed_head_sha: 8e9ae53b47c00a6c41282c0d611a38f71ce2a4b3\nVERDICT goal: the goal is a stored per-module line map of the two hot-path routes; docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html:12 and its hot-path-map.json deliver it for all 472 modules under nova/.\nVERDICT done_when: the gate job 1338366 in gate-all_debug-1338366.log records 472 of 472 modules measured, public entry nova/equilibrium/forward.py at 504/1043 forward and 506/1043 inverse, revision 09ef90e40 stated, assertions.passed true, and nova/utilities/ANSYS.py at 0/150 on both routes; the substitution of a stored MAST case for the absent slice-profile bank fixture is disclosed at hot-path-map.html:13.\nVERDICT write_paths: only hot-path-map.html lies inside the two dispatched declared paths; hot-path-map.json is required by the plan's own done_when, while the six driver files under scripts/prototypes/hot_path_map/ and tests/test_hot_path_map_driver.py lie outside them but are named in the reviewed manifest's changed_paths and scope_note.\nVERDICT manifest: read; status complete, it names job 1338366, the literal job.sh command, the gate and suite logs, the 472/472 module count, the 13/13 and 16/16 package counts, and the four support-read contradictions, which reconcile with the landed hot-path-map.json.\nVERDICT diff: read all seventeen commits 8dde314..8e9ae53b4; nine paths are added (two evidence files, six driver files, one test), no nova/ product source and no plan file is touched, and the headline sums (15560 forward, 19310 inverse, 210 modules reached, 0 not measured) recompute from hot-path-map.json.\nCALL_SITES: scripts/prototypes/hot_path_map/job.sh\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: every done_when clause is met at docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html:12, though the traced read_batch loop is reported only as four contradictions at hot-path-map.html:22 because the bank fixture is absent.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-all_debug-1338366.log records forward/inverse/map exits 0 and EXIT=0 with assertions.passed true, and the product source it measured is identical at head because git diff 09ef90e40 8e9ae53b4 -- nova is empty (the later commits touch only render.py and the evidence files).\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: seven of the nine delivered paths (scripts/prototypes/hot_path_map/* and tests/test_hot_path_map_driver.py) lie outside the two declared write paths, though the reviewed manifest names them in changed_paths and justifies them in scope_note.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_hot_path_map_driver.py asserts the negative-control and public-entry reach checks are refused on failure and revert-control.log shows all six tests failing against the old driver at 5f204ba99, but render.py's --arm-log block added at 8e9ae53b4 has no test.\nSCORE fit: 18\nJUSTIFICATION fit: the driver modules follow the scripts/prototypes/ idiom, carry no plan or ticket identifier and no _v2/_new suffix, and render.py:281 now refuses a fragment that does not close exactly once at </html>.\nSCORE reuse: 5\nJUSTIFICATION reuse: scripts/prototypes/hot_path_map/map.py:49 relative() re-implements the path-to-repository-relative mechanism owned by nova/database/filepath.py:397 repository_relative without extending it, and drops the owner's worktree rewrite.\nFINDING scripts/prototypes/hot_path_map/map.py:49 non-blocking: relative() duplicates nova/database/filepath.py:397 repository_relative and drops the owner's worktree rewrite, so the same capability has two implementations that can diverge.\nFINDING scripts/prototypes/hot_path_map/render.py:250 non-blocking: the --arm-log rendering block added at 8e9ae53b4 has no assertion, and the after-suite was recorded at its parent 09ef90e40 before that block existed, so the reviewed head's render code is untested.\nFINDING scripts/prototypes/hot_path_map/forward_route.py:33 non-blocking: the goal's first route names the slice-profile bank driver, but the record substitutes a direct ForwardProfile.solve on a stored MAST case because common-streams.npz is absent, so the traced read_batch loop is measured by neither route and appears as four contradictions rather than line counts.\n",
+  "review_run_id": "r-20261123T072832554985-review-of-hot-path-map-8e9ae53b47c0",
+  "reviewed_base_sha": "8dde314acacf331db89b0773ce616bdfe930ff85",
+  "reviewed_head_sha": "8e9ae53b47c00a6c41282c0d611a38f71ce2a4b3",
+  "reviewed_run_id": "r-20261122T202531438845-hot-path-map",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:47:01.765409+00:00",
+  "total": 87
+}

@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-23T00:54:03.230Z",
   "dispatched_at": "2026-11-23T00:34:40Z",
   "figures": {
     "docs/figures/converged-forward-solve/cfs-map-fidelity-rungs/diverted-single-null-map-fidelity-10000.svg": {
@@ -26,7 +26,6 @@
       "disposition": "exempted",
       "disposition_note": "The fragment caption under each figure names the left panel as the map image and the right as the analytic state, and the repository poloidal painter keeps the canvas free of labels and axes by rule.",
       "file": "tests/test_gs_map_fidelity.py",
-      "id": "fc67b28207d",
       "line": 374,
       "severity": "non-blocking",
       "summary": "The two panels of each figure carry no on-canvas identification of which is the map image and which the analytic state, and the pair is near-identical by construction (measured null-marker centroids in the diverted render coincide to within 0.3 px). A reader who meets the image without its caption cannot tell the solved map from the reference; a short direct label per panel would remove that dependence. The caption says which is which, so this does not hold the node."
@@ -70,6 +69,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-23T00:54:11.788777+00:00",
+  "timestamp": "2026-11-23T00:57:40.298056+00:00",
   "total": null
 }

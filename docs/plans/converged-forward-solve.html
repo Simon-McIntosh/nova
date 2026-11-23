@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="639">
+<meta name="plan-version" content="640">
 <meta name="plan-modified" content="2026-11-23">
 <meta name="plan-section-depends-on" content="{&quot;s7&quot;:[&quot;converged-forward-solve#s4&quot;],&quot;s8&quot;:[&quot;converged-forward-solve#s5&quot;,&quot;converged-forward-solve#s7&quot;],&quot;s9&quot;:[&quot;converged-forward-solve#s8&quot;],&quot;s10&quot;:[&quot;converged-forward-solve#s8&quot;],&quot;s6&quot;:[&quot;converged-forward-solve#s9&quot;,&quot;converged-forward-solve#s10&quot;,&quot;converged-forward-solve#s11&quot;],&quot;s5&quot;:[&quot;converged-forward-solve#s4&quot;]}">
 </head>
@@ -2226,6 +2226,9 @@ oracle _reference_moments already owns.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261123T003338900377-review-of-cfs-map-fidelity-rungs-f5979377c820" data-who="reckon-build" data-when="2026-11-23T00:52:04.839Z">
     <div class="r-comment-body"><p>Review of cfs-map-fidelity-rungs at f5979377c (base 82a755fd6): all six dimensions scored; five non-blocking findings, no blocking one; added_failure_count 0.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261123T003408880886-review-of-cfs-map-fidelity-rungs-f5979377c820-figure" data-who="reckon-build" data-when="2026-11-23T00:54:03.230Z">
+    <div class="r-comment-body"><p>Figure review of r-20261122T150133906524-cfs-map-fidelity-rungs at head f5979377c: both rendered 10,000-cell panels pass all six rubric items; one non-blocking finding (no on-canvas panel identification, exempted because the caption names each panel); record stored at the declared paths.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-s21-moment-space-ruling" data-who="reckon-build" data-when="2026-10-13T18:40:00Z">
     <div class="r-comment-body"><p>Lead ruling 2026-10-13: the forward solve's unknown is the cell current moments.</p><p>The locked read builds its field from booked moments: the Bell jets at the nodes are the jet coupling rows times m, plus the exterior's jets. So it cannot evaluate an arbitrary trial flux vector, but it can always evaluate a trial m. The solve therefore iterates m = book(read(psi_ext + G m)), and the flux is G m wherever output needs it.</p><ul><li>Newton runs on the device with autograd.</li><li>A dense <code>jax.jacfwd</code> Jacobian with a device LU is measured against a device-side Jacobian-free Krylov, replacing SciPy's host <code>newton_krylov</code>.</li><li>Autograd must be shown to pass through the read and the booking.</li><li><code>current.book</code> is vectorised. Its sequential cell scan costs 0.9 to 8 s per step at 2,000 to 10,000 cells.</li><li>The legacy support partition, the spline-clip read and the chord default are deleted.</li></ul></div>

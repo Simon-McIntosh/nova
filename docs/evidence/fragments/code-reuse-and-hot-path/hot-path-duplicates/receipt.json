@@ -1,4 +1,5 @@
 {
+  "revision": "717375353ef1b3fd886dcfb7eb770c56555a1169",
   "entries": [
     {
       "entry": "topology-read",
@@ -142,8 +143,8 @@
     },
     {
       "entry": "plot-columns",
-      "implementation_a": "nova.frame.polyplot plot indexer update_columns (PolyPlot and PolyPlotChildren)",
-      "implementation_b": "nova.frame.vtkplot plot indexer update_columns",
+      "implementation_a": "nova.frame.polyplot.PolyPlot.update_columns",
+      "implementation_b": "nova.frame.vtkplot.VtkPlot.update_columns",
       "input": "three column states (all present, one missing, all missing) through a stub host carrying required, additional and frame.columns",
       "comparisons": [
         {
@@ -236,6 +237,80 @@
           "selected_same_member": true,
           "keyerror_both": true,
           "agrees": true,
+          "keeper": "one loop with a per-class receipt accessor",
+          "lines_removable": 7
+        }
+      ],
+      "decisions": [
+        {
+          "id": "candidate-tensor-bernstein",
+          "entry": "candidate-agreements",
+          "question": "nova.equilibrium.flux_surface_extraction._tensor_bernstein and nova.linalg.tensor_spline._tensor_bernstein compute the same quantity, agreeing on one 4x4 coefficient block at five paired coordinates, order 3. Should the pair share one implementation?",
+          "options": [
+            {
+              "value": "accept-for-s28-node",
+              "label": "Keep nova.linalg.tensor_spline._tensor_bernstein and remove the other copy, 4 line(s)"
+            },
+            {
+              "value": "decline",
+              "label": "Keep both copies: the pair is not on the measured hot path, or the removal is below the cost of the shared abstraction it would need"
+            }
+          ],
+          "recommended": "accept-for-s28-node",
+          "keeper": "nova.linalg.tensor_spline._tensor_bernstein",
+          "lines_removable": 4
+        },
+        {
+          "id": "candidate-aphi-axis-zero",
+          "entry": "candidate-agreements",
+          "question": "nova.biot.cylinder.Cylinder.Aphi and nova.biot.polysection.PolySection.Aphi compute the same quantity, agreeing on one 4x2 target grid with a zero-radius cell, mu_0 = 4 pi 1e-7. Should the pair share one implementation?",
+          "options": [
+            {
+              "value": "accept-for-s28-node",
+              "label": "Keep one copy in the shared Matrix base and remove the other copy, 9 line(s)"
+            },
+            {
+              "value": "decline",
+              "label": "Keep both copies: the pair is not on the measured hot path, or the removal is below the cost of the shared abstraction it would need"
+            }
+          ],
+          "recommended": "accept-for-s28-node",
+          "keeper": "one copy in the shared Matrix base",
+          "lines_removable": 9
+        },
+        {
+          "id": "candidate-first-residual",
+          "entry": "candidate-agreements",
+          "question": "nova.biot.polygonarc._Vertex._first_residual and nova.biot.polygonanalytic._first_residual compute the same quantity, agreeing on one three-row corner at eight graded nodes. Should the pair share one implementation?",
+          "options": [
+            {
+              "value": "accept-for-s28-node",
+              "label": "Keep the polygonanalytic form (a superset: optional weight) and remove the other copy, 1 line(s)"
+            },
+            {
+              "value": "decline",
+              "label": "Keep both copies: the pair is not on the measured hot path, or the removal is below the cost of the shared abstraction it would need"
+            }
+          ],
+          "recommended": "accept-for-s28-node",
+          "keeper": "the polygonanalytic form (a superset: optional weight)",
+          "lines_removable": 1
+        },
+        {
+          "id": "candidate-for-member",
+          "entry": "candidate-agreements",
+          "question": "nova.transport.ensemble.EnsembleTransportReceipt.for_member and nova.transport.window_batch.WindowBatchReceipt.for_member compute the same quantity, agreeing on one three-member list addressed by identity, present and absent. Should the pair share one implementation?",
+          "options": [
+            {
+              "value": "accept-for-s28-node",
+              "label": "Keep one loop with a per-class receipt accessor and remove the other copy, 7 line(s)"
+            },
+            {
+              "value": "decline",
+              "label": "Keep both copies: the pair is not on the measured hot path, or the removal is below the cost of the shared abstraction it would need"
+            }
+          ],
+          "recommended": "accept-for-s28-node",
           "keeper": "one loop with a per-class receipt accessor",
           "lines_removable": 7
         }

@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-23T03:04:40.056Z",
   "dispatched_at": "2026-11-23T02:59:51Z",
   "figures_reviewed": [
     "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T025904766578-review-of-default-policy-refusal-drift-d90cdd78ac7e-figure/image-0.png",
@@ -20,21 +20,18 @@
   "findings": [
     {
       "file": "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/iter-input-comparison.svg",
-      "id": "f166ef7aa89",
       "line": null,
       "severity": "non-blocking",
       "summary": "The cross-section uses a small fraction of the published canvas, so the comparison draws at about one fifth of the delivered width. The ITER drawing occupies roughly x 560-845 and the TCV box roughly x 600-800 of a 1399 px canvas, leaving 80 to 86 percent of the figure blank margin. The 14 x 7.2 in canvas is the repository's own, so the canvas is not the fault; the cost is that the thin blue subject contour renders about 2 px wide and the offset between the stored state and the terminal iterate is readable only on close inspection. The unused width could carry a second panel per figure (a zoom on the outer contours and X-point region, or the signed difference between the two fields) that would show the comparison at the size the reader is given."
     },
     {
       "file": "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/tcv-input-stored.svg",
-      "id": "ff166723088",
       "line": null,
       "severity": "non-blocking",
       "summary": "The reference series is stroked heavier than the subject, inverting the repository's plot-style rule that the subject reads on top and the reference beneath is thinner and lighter. The stored imas-efit state is drawn at 2.6 pt and the solved terminal iterate at 1.0 pt, and the rendered pixels agree: grey 19188-20541 against blue 7576-14086 across the six panels, a 1.4 to 2.6 times excess for the reference. The eye is drawn to the stored state first and to the solved state the panel is about second. Drawing the reference near 1.2 pt and the solved series near 2.6 pt would keep both visible while giving the subject the weight."
     },
     {
       "file": "docs/figures/forward-solve-near-stored-states/default-policy-refusal-drift/iter-record-seed.svg",
-      "id": "fc635da5003",
       "line": null,
       "severity": "non-blocking",
       "summary": "The in-figure legend keys the two series as line styles only and does not key the marks that carry the result, and one key changes between panels. Every panel draws a solid triangle for an admitted magnetic axis and a filled cross for an admitted saddle in each series' colour, and that vocabulary appears in the caption but nowhere in the legend. The solved entry's marker is also inconsistent across the set: it carries a triangle on the five arms that admitted an axis and a line alone on this refusal panel, which a reader comparing panels can read as a change of series rather than as a change of outcome. A third legend entry naming the axis and saddle marks, drawn in the legend's own grey so it reads as a key, would close the gap without altering the data."
@@ -56,6 +53,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-23T03:04:46.013978+00:00",
+  "timestamp": "2026-11-23T03:14:57.789080+00:00",
   "total": null
 }

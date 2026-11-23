@@ -15,6 +15,15 @@
   "completed_at": "2026-11-23T07:26:20.500Z",
   "dimension_dispositions": {},
   "dispatched_at": "2026-11-23T06:57:27Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T08:04:07.303685+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T185014477588-reduced-reconstructions-scored",
+      "section": "\u00a75"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/inverse-equilibrium-baseline/reduced-reconstructions-scored/emit_states.py",

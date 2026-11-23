@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="146">
+<meta name="plan-version" content="147">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -391,6 +391,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-s28-s8-landed-20261123" data-who="S28 coordinator" data-when="2026-11-23">
     <div class="r-comment-body"><p>Landed at <code>e2bf269df</code> (merge of reviewed head <code>dd5aa7cd5</code>, review 107, no added failures) by a lead-approved hand merge, because reckon's landing population included the new test file, absent at base, and H200-only files. The packed kernel returns ∂<sub>r</sub>B<sub>r</sub> and ∂<sub>z</sub>B<sub>r</sub> per moment order as primal outputs at 1.47 times the nine-row kernel's lowered size (31,719 against 21,605 instructions, 24-cell fixture); against sixth-order central differences of the field rows the worst relative agreement is 2.2e-11 at 200 generic targets and 2.1e-9 at 50 corner-height targets; the sign-flipped control fails by test id. Merged-head gate: all_debug job 1340320, 66 passed at the merge against 56 at main, the difference being the ten new tests. Record: <code>docs/evidence/fragments/kernel-compile-barrier/field-derivative-merged-gate.html</code>.</p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-11-23T21:15:44.577798+00:00">
+    <div class="r-comment-body"><p>Landed r-20261123T062912342648-kcb-field-derivative-outputs on the measured suite pair; <a href="/nova/evidence/archive/kernel-compile-barrier-landed.html#kcb-field-derivative-outputs">evidence</a></p></div>
 </div>
 </section>
 </main>

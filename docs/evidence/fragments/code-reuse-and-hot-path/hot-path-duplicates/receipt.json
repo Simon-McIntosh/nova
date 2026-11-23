@@ -13,7 +13,8 @@
         1.7870853536782019,
         0.0466884356119983
       ],
-      "axis_gap_m": 8.76584170479821e-05,
+      "axis_gap_m": 8.76584170469064e-05,
+      "axis_gap_to_analytic_m": 8.76584170479821e-05,
       "boundary_class_a": 1,
       "boundary_class_b": 1,
       "membership_area_sum_relative": 0.0007829007194638985,
@@ -176,7 +177,17 @@
           "delegate_calls": 1
         }
       ],
+      "implementations_found": {
+        "nova.frame.polyplot": [
+          "nova.frame.polyplot.PolyPlot.update_columns"
+        ],
+        "nova.frame.vtkplot": [
+          "nova.frame.vtkplot.VtkPlot.update_columns"
+        ]
+      },
       "tolerance": "exact equality of delegate call counts per column state",
+      "missing_implementations": [],
+      "vacuous_cases": [],
       "disagreements": [],
       "agrees": true
     }
@@ -185,7 +196,7 @@
     {
       "entry": "topology-read",
       "measured_cell_fraction": 0.8781855313025444,
-      "measured_axis_gap_m": 0.05193977983402063,
+      "measured_axis_gap_m": 0.051939779834019546,
       "disagrees_beyond_tolerance": true
     },
     {

@@ -11,6 +11,13 @@
   ],
   "completed_at": "2026-11-23T05:22:46.118Z",
   "dispatched_at": "2026-11-23T04:51:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-drift-sequences-fit-iteration-b05fa96bdbc0",
+      "recorded_at": "2026-11-23T08:20:05.780325+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html",

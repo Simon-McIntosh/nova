@@ -59,9 +59,8 @@ def main():
         f"({not_measured} not measured) "
         f"were measured on one <code>all_debug</code> job ({args.job}).</strong> "
         f"The forward route executed {total_forward} lines and the inverse "
-        f"route {total_inverse}; {reached} modules were reached by at least one "
-        f"route. Measured at revision <code>{data['revision'][:12]}</code> "
-        f"<code>{data['revision']}</code>.</p>"
+        f"route {total_inverse}; at least one route reached {reached} of them. "
+        f"Measured at revision <code>{data['revision']}</code>.</p>"
     )
     parts.append(
         "<p>The two routes are the public forward solve "

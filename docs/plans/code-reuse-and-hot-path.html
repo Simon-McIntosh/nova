@@ -25,8 +25,8 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
-<meta name="plan-modified" content="2026-11-22">
+<meta name="plan-version" content="12">
+<meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
 <main class="plan-doc">
@@ -88,7 +88,8 @@ reached fails.</p>
 <h2 id="s2">§2 — Census of benchmarks and scripts</h2>
 <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
 <p>Every Python file under <code>benchmarks/</code> and <code>scripts/</code>
-receives one verdict, stored in one record:</p>
+receives one verdict, stored in one record at
+<code>docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.html</code>:</p>
 <ul>
 <li><strong>keep</strong>: imported by kept code or tests, run by a live gate,
 lane or test, or owned by a plan in S28–S32;</li>
@@ -114,7 +115,10 @@ verdict, is refused by the census and named.</p>
 <h2 id="s3">§3 — Delete and merge benchmarks and scripts</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
 <p>Apply the §2 verdicts in batches small enough to review, each batch one
-node. Done when, for each batch:</p>
+node, with its batch record under
+<code>docs/evidence/fragments/code-reuse-and-hot-path/</code>, one file per
+batch named <code>bench-scripts-delete-</code> followed by the batch number.
+Done when, for each batch:</p>
 <ol>
 <li>Every deleted path is absent at the head, and no file at the head imports
 or names it (grep every deleted path, including tests and AGENTS.md).</li>
@@ -130,28 +134,41 @@ absence check in (1) fail and report that path.</p>
 <section data-reckon="section" data-id="s4" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
 <p>Modules under <code>nova/</code> that §1 shows unreached by either
 route, outside <code>nova/imas</code>, not imported by kept tests, and not
-owned by a live or held plan, are deleted. Done when:</p>
+owned by a live or held plan, are deleted, with the record at
+<code>docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html</code>.
+The two routes do not define reachability on their own: transport, assembly,
+media, the bokeh apps and the coupled repositories reach <code>nova/</code>
+through entry points §1 never runs, so a module is a candidate only when a
+static import scan finds no importer of it anywhere a kept caller lives.
+Done when:</p>
 <ol>
-<li>Each deleted module was unreached in §1 and no kept file imports it; a
-module a live run's worktree imports is held back and named.</li>
+<li>Each deleted module was unreached in §1, and an import scan finds no
+importer of it in <code>nova/</code>, <code>tests/</code>,
+<code>apps/</code>, kept scripts and benchmarks, or imas-ambix, and no
+package <code>__init__</code> exports it; a module a live run's worktree
+imports is held back and named.</li>
 <li>The suite delta adds no failures, on <code>all_debug</code>.</li>
 <li>The record states lines removed per package.</li>
 </ol>
 <p>Negative control: a module §1 shows reached, offered for deletion, is
-refused by the check in (1) and named.</p>
+refused by the check in (1) and named; so is a module §1 shows unreached
+whose only importer is imas-ambix.</p>
 
 <h2 id="s5">§5 — Register of duplicates on the hot path</h2>
 <section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>A record, not a code change. It lists every place where two or more
+<p>A record at
+<code>docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html</code>,
+not a code change. It lists every place where two or more
 implementations on or beside the §1 route compute the same quantity (a read,
 a factorisation, a topology query, an operator assembly). Done when:</p>
 <ol>
 <li>Each entry names the implementations, which one each route executes per
 §1, and their agreement on a stated input within a stated tolerance, or the
 measured disagreement.</li>
-<li>Each entry proposes the one to keep and the lines removable, and S28's
-coordinator has answered it: accepted for an S28 node, or declined with a
-reason.</li>
+<li>Each entry proposes the one to keep and the lines removable, and is
+raised to S28's coordinator as one reckon decision naming the entry. S28's
+answer, accepted for an S28 node or declined with a reason, is recorded on
+that decision when it comes; this section does not wait for it.</li>
 </ol>
 <p>Negative control: one entry's comparison rerun with a deliberately
 perturbed input to one implementation reports a disagreement beyond the
@@ -160,8 +177,10 @@ stated tolerance.</p>
 <h2 id="s6">§6 — The hot path, written down</h2>
 <section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
 <p><code>nova/equilibrium/AGENTS.md</code> names the one public forward
-route and the inverse route, module by module, as measured after the §5
-collapses S28 accepted have landed. Done when:</p>
+route and the inverse route, module by module, as measured at this
+section's head. Any §5 entry S28 has accepted but not yet landed is listed
+beside the route as pending, so the document never waits on another
+sprint. Done when:</p>
 <ol>
 <li>The section lists the modules each route executes and matches a fresh §1
 measurement at the head.</li>
@@ -188,6 +207,15 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
       <button class="r-opt chosen" data-value="document-only">Document only</button>
       </p>
     <p class="r-dec-rat">§6 writes the measured route into nova/equilibrium/AGENTS.md with no enforcing test; S28 is still reshaping those files, and a guard would make every collapse edit the document in the same commit.</p>
+    </div>
+<div class="r-dec" data-key="s28-handoff" data-choice="hand-off-measure-head" data-by="Simon McIntosh" data-when="2026-11-23T04:54:25+00:00" data-sections="s5,s6">
+    <p class="r-dec-q">Should §5 wait for S28&#x27;s answers, and §6 for S28&#x27;s accepted collapses to land?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="hand-off-measure-head">Hand off the register; measure the route at the head</button>
+      <button class="r-opt" data-value="wait-for-s28">Keep §5 open until S28 answers, §6 behind it</button>
+      <button class="r-opt" data-value="defer-s6">Defer §6 until S28&#x27;s collapses land</button>
+      </p>
+    <p class="r-dec-rat">No declared relationship carries an S28 answer or landing into this plan, so waiting would stall the sprint on another sprint&#x27;s schedule. §5 closes when each entry is raised as a reckon decision; §6 writes what the head executes and lists accepted collapses still pending.</p>
     </div>
 </section>
 

@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms: baseline_suite (study/logs/suite-base.log, revision 06d7280) reports no tests ran (file not found, suite absent at base) and after_suite (study/logs/suite-head-final.log, revision e94c73f90) reports 16 passed with zero failures, so the head arm adds no failing test id over the base. The base arm's EXIT=0 is the status of the trailing `rm -rf \"$D\"`, not pytest's (the command chains `pytest ...; rm -rf \"$D\"`), so the base arm is not a readable red control; see finding study/logs/suite-base.log:2.",
+  "call_sites": [
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/iteration.py",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/panel.py",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/check.py",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/reference.py"
+  ],
+  "completed_at": "2026-11-23T08:44:58.957Z",
+  "dispatched_at": "2026-11-23T08:22:19Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html",
+      "line": "29",
+      "text": "non-blocking: done_when clause (1) requires `the nested class's two slices per sequence as a cross-check row`, but the record's measures table carries no nested-class row and the fragment never mentions the nested class or a cross-check (grep 'nested|cross-check' over the head fragment returns nothing); clause (1) is therefore only partly delivered."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py",
+      "line": "36",
+      "text": "non-blocking: the overlay stops importing and calling nova.media.poloidal.draw_nulls and hand-draws every null marker inline (paint.py:87-156), duplicating a capability the repository owns in nova/media/poloidal.py:draw_nulls and dropping its vessel-containment filter, which that function's docstring documents as measured against out-of-vessel nulls; the added drawing does not extend the owner."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/iteration.py",
+      "line": "161",
+      "text": "non-blocking: the comment says the `loops` row set 'is the set imas-efit's arm reconstructs from, so the two codes are compared on one information set rather than two', but analyse.DECLARED_ROWS sets nova to `all`, the gate asserts nova's arm is the 72-row set, and the record withdraws any cross-code comparison; the comment contradicts the landed behaviour it sits beside."
+    },
+    {
+      "file": "study/logs/suite-base.log",
+      "line": "2",
+      "text": "non-blocking: the base-arm command chains `pytest ...; rm -rf \"$D\"` so the captured EXIT=0 is the trailing `rm` status, while pytest itself reported `file or directory not found` and collected no test; the base arm therefore cannot serve as a red control and its exit status does not describe the suite."
+    },
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/test_reduction_guards.py",
+      "line": "1",
+      "text": "non-blocking: the guard suite lives under scripts/prototypes/.../probe_rows/, outside pyproject.toml's pytest `testpaths = [\"tests\", ...]`, so the repository's default suite never collects it and a regression in analyse.py's reduction would not be caught by CI, only by re-running this node's own gate command."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the study's runtime modules call the change: study.py -> iteration.py -> analyse.py; figures.py, panel.py and check.py import analyse.py; the gate runs check.py --summary study/summary.json.",
+    "diff": "read the eight gained commits one by one; they add DECLARED_ROWS/declared_stem/selected_rows to analyse.py, a new check.py, figures.py, reference.py and test_reduction_guards.py, redraw paint.py and panel.py, and rewrite the fragment to state each column's row set and withdraw the cross-code comparison.",
+    "done_when": "check.py asserts slices>=200, the declared row set, and both lag-one clauses for all four arms, and the head log (study/logs/suite-head-final.log, 16 passed) plus gate-check.log (24 passed, 2 failed, EXIT=1) record the gate's own result rather than a claim.",
+    "goal": "done_when (node.json) asks for a >=200-slice table of axis/flux/q95 RMS and lag-one with 50-slice means and a nested-class cross-check row, a control clause (white within 0.15 of zero, 1/f above 0.5), and per-code axis-vs-slice figures plus a largest-disagreement overlay; the gained commits deliver the table, the figures and an honest report that clause (2) fails, but the nested-class cross-check row is absent.",
+    "manifest": "read the reviewed run's manifest; it states the 200-slice table, the clause-2 failure as a blocker, the unmeasured row-matched arm (job 1338386), 16 guard tests at the head and the negative-control log.",
+    "write_paths": "all 15 paths in the gained diff lie inside the declared write paths (scripts/prototypes/drifting_sensor_sequences/probe_rows/, the evidence fragment, and the docs/figures/.../drift-sequences-fit-iteration/ directory); two deleted files (axis-error-*.svg) and three added/edited figures are inside the figures directory."
+  },
+  "justifications": {
+    "durability": "test_reduction_guards.py:31-215 exercises lag_one, rms_error/block_error, noise_columns, thresholds, reduce_arm and selected_rows, and study/logs/negative-controls.log shows each answering revision reddening its named check, but the file is outside pytest testpaths so the default suite never runs it.",
+    "evidence": "check.py:100-120 asserts the slices, declared row set and both lag-one clauses and returns 1 on failure; study/logs/gate-check.log ends `24 passed, 2 failed` / EXIT=1, which the fragment quotes at line 44.",
+    "fit": "figures.py and paint.py follow the surrounding probe_rows idiom and use the checked save function (scripts/edge_sheet/figure.py:48) and draw_flux_contours/draw_wall (nova/media/poloidal.py:138), but paint.py:87-156 hand-rolls the null markers the module used to delegate.",
+    "goal_fidelity": "The fragment reports all four arms (drift-sequences-fit-iteration.html:30-37) and withholds the cross-code comparison (line 48), but no nested-class cross-check row exists in the delivered table.",
+    "reuse": "The change reuses analyse.reduce_arm, study.q95_of/nova_flux_map, FluxIterationFit and save_checked, but paint.py:36-156 duplicates nova/media/poloidal.py:draw_nulls rather than extending it.",
+    "scope_discipline": "git diff --stat b05fa96bd..e1108dadb lists 15 paths, each under the declared `scripts/prototypes/drifting_sensor_sequences/probe_rows/` or `docs/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/` or the named evidence fragment."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T082114294507-review-of-drift-sequences-fit-iteration-e1108dadb1f3",
+  "reviewed_base_sha": "b05fa96bdbc009e84f075088241e6a8a1cc8aa0a",
+  "reviewed_head_sha": "e1108dadb1f302431ae3eb39b7bb569f0fd64d53",
+  "reviewed_run_id": "r-20261122T185009989125-drift-sequences-fit-iteration",
+  "scope_note": "Reviewed the eight commits gained since the prior review (b05fa96bd..e1108dadb): 650cebfa4, 0bd329cab, a32e5e144, 9b05ac6db, d941a9598, e94c73f90, 05892cd9b, e1108dadb. The prior review record at review-records/...at-b05fa96bd....json read base 06d7280..b05fa96bd, so b05fa96bd is the base this diff was taken from.",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T08:45:29.053084+00:00",
+  "total": 92,
+  "verdict_lines": [
+    "VERDICT goal: node.json's done_when names a >=200-slice axis/flux/q95 table, a lag-one control and per-code figures; the gained commits deliver all but the nested-class cross-check row.",
+    "VERDICT done_when: check.py asserts slices, declared row set and both lag-one clauses, and gate-check.log records the gate's own result with exit 1.",
+    "VERDICT write_paths: all 15 gained paths are inside the declared scripts/prototypes/.../probe_rows/ and docs/figures/... directories plus the named fragment.",
+    "VERDICT manifest: read; it states the 200-slice table, the clause-2 failure, the unmeasured row-matched arm and the 16-test guard suite.",
+    "CALL_SITES: study.py, iteration.py, figures.py, panel.py, check.py, reference.py (all under scripts/prototypes/drifting_sensor_sequences/probe_rows/)",
+    "VERDICT diff: read the eight gained commits; they add DECLARED_ROWS/declared_stem/selected_rows, check.py, figures.py, reference.py and the guard suite, and rewrite the fragment to withdraw the cross-code comparison."
+  ]
+}

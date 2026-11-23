@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-23T20:37:57.817Z",
+  "dispatched_at": "2026-11-23T20:19:29Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:205",
+      "id": "done_when-1",
+      "reason": "MAST-U's last flux update at 96 passes is 4.652e-6, so a worker reading \"converged\" against a 1e-6 criterion would declare it converged at the current budget and never run the 500 passes the section exists for, and the set of cases clause (2) band-scores turns on that verdict.",
+      "text": "\u00a710 clause (1) requires the record to state \"whether it converged, the pass it reached tolerance\" but states no tolerance, and the plan contains none: zero occurrences of the landed run's 1e-10 tolerance, which exists only in \u00a79's evidence record, while clause (1) names the inherited items as rows, coefficient count and locked decisions only",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/inverse-equilibrium-baseline.html:205",
+      "id": "reasoning-1",
+      "reason": "whatever converges at 500 passes is band-scored as the fit's baseline, so without the misfit trajectory read beside the update a converged TCV is read as the fit's answer while it converged to a map its own objective scores above its starting point.",
+      "text": "\u00a710's opening concludes \"the result is a budget limit, not a verdict on the fit\" from every walk still shrinking its flux update, but the same cited record reports TCV's misfit rising from 5.195 at pass 1 to 6.978 at pass 96, so on that case the walk is settling toward a state its own objective rates 34 % worse than where it began, and a 500-pass run will report that settling as convergence",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "bcbd3d46ccdc24456f261cff6a8dc1e04aa3b323",
+  "plan_fingerprint": "e8a462c8ebdd0f3dbe0dd87cccdb6724e0c83dd4a914d88a40015d0bef74b1f3",
+  "plan_slug": "inverse-equilibrium-baseline",
+  "plan_version": 133,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261123T195331449683-plan-review-of-inverse-equilibrium-baseline",
+  "reviewed_blob_sha": "4681de9e9b3e52f260efc0f7bedb3ed3ccbd6d33",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every figure \u00a710 cites resolves in the record it cites, docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html (a ninety-six-pass budget; last flux updates 4.652e-6, 4.66e-4 and 5.344e-4 of the span, matching 4.7e-6, 4.7e-4 and 5.3e-4; MAST-U at 2.28 %; SurfaceGeometryError with the seeded-axis-not-elliptic reason), and \u00a71, \u00a72, \u00a79 and \u00a712 all exist.",
+    "done_when": "a finding \u2014 \u00a710 clause (1) requires the record to state \"whether it converged, the pass it reached tolerance\" without naming the tolerance, which the plan text states nowhere.",
+    "evidence_paths": "pass \u2014 the fragment docs/evidence/fragments/inverse-equilibrium-baseline/stored-cases-500-passes.html is a durable repository path beside the plan's other fragments, and a history above a few MB is pointed to under the GPFS evidence root.",
+    "naming": "pass \u2014 \u00a710 states no symbol, code path or function to build and carries no plan label, stage name, ticket number or version tag; \"500-pass\" is a budget, not a release marker.",
+    "reasoning": "a finding \u2014 \u00a710 concludes \"the result is a budget limit, not a verdict on the fit\" from every walk's update still falling, but the record it cites has TCV's misfit rising 34 % over the same walk, so on that case the longer budget will report convergence to a state its own objective rates worse than its start.",
+    "single_goal": "pass \u2014 \u00a710 delivers one thing, the three stored cases at a 500-pass budget in one record; the band reading, the scorer-refused branch and the panel are measurements of that run, not separate deliverables.",
+    "wiring": "pass \u2014 plan-section-depends-on carries s10:[s9], s11:[s9] and s12:[s11,s10], each target exists and each section consumes the output it names; \u00a710's other inputs (\u00a71's Solov'ev known state and \u00a72's bands) are landed sections and need no declaration."
+  },
+  "section_digests": {
+    "_document": "35451fe5ea6e096485040dde64a1c075fc6579a695ceb9c7b9e6c2a807328541",
+    "s0": "222214efd929830ab3769e033a76bb2b0b963eee1000f2f8d79d3f78da1ee921",
+    "s1": "e3a082598a63630e13bf545e0689016045bcbe7ed604ec272fee0957b9012a7a",
+    "s10": "11f13093b8772f9827085fd488635ee0cb62b247fd6ac82c42f0147aaa9ee947",
+    "s11": "3ad4d4f9dd13506b6db05524c4cb96e7263fdcfd1c4ff204af39e4f0915edc4e",
+    "s12": "7de72f07db63b8b9b0c38c6ee16a15eb85d09ea542860cfcc0ef8f1792ead24f",
+    "s2": "1d7c7611f002d7765b98531126cc095d6d244b387578c5d44d7284ff93c9e59c",
+    "s3": "ffe1ae40fdd119d382956b68d70b5ac439dfd6ba20fecc88ab8ca5d01fd2a8a5",
+    "s4": "95b901a9be71a11db2f0b5f656f0952915a0c3838fafa8e46f0bf5675bd54527",
+    "s5": "29c483a08413dd1159c9231c767d22b4355253776c11cd6ac1fd6286aa327477",
+    "s6": "38673123cc34cb5be04fbd26c1a149df7d18d2adc2937221123fbc79c8308d95",
+    "s7": "46d0b31ae1bfd2347befe820b2b71442fafa724354e9fb3836af929192f8e4d1",
+    "s8": "5f1a44b0fc4688ef69242b46b85666aefaf1d27e32404e14f4874b566bc15a1f",
+    "s9": "6b59708e5b47c987c440323356fb9dd0f2ec4438ce599455f755a5cf0772d5bb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T20:38:04.133446+00:00",
+  "total": null
+}

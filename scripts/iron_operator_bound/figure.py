@@ -75,29 +75,33 @@ def bound_panel(axis, output):
     planted control sits five percent above it, so a bar from zero draws every
     operator as the same shape and a linear zoom on the operators pushes the
     control off the panel.  The axis therefore carries the excess over the bound
-    on a symmetric-log scale: zero is the bound, the sign says which side of it
-    an operator falls on, and five decades of reading are legible at once.  Each
-    reading is printed at full precision beside its mark, and a mark past the
-    bound is drawn in the limit colour.
+    on a symmetric-log scale: zero is the bound and five decades of reading are
+    legible at once.  Every measured reading falls past the bound, so the
+    non-positive half of the axis is empty and is not drawn.
+    Each mark is labelled with its excess over the bound, which is the quantity
+    the axis states, and the series are told apart by colour and marker: the
+    graded operator under study takes the limit colour, the uniform pair is the
+    neutral population it is read against, and the planted control carries its
+    own open marker because it tests the instrument rather than the operator.
     """
     rows = []
     for label, title in LABELS:
         row = receipt(output, f"bound-{label}.json")
         if row is not None:
-            rows.append((title, float(row["maximum"])))
+            rows.append((title, float(row["maximum"]), label))
     control = receipt(output, "control-uniform-0.08.json")
     if control is not None:
-        rows.append(("planted control", float(control["maximum"])))
-    names = [name for name, _ in rows]
-    values = np.asarray([value for _, value in rows])
+        rows.append(("planted control", float(control["maximum"]), "control"))
+    names = [name for name, _, _ in rows]
+    values = np.asarray([value for _, value, _ in rows])
     excess = values - BOUND
     position = np.arange(len(rows))
     scale = max(float(np.max(np.abs(excess))), 1e-12)
     axis.set_xscale("symlog", linthresh=min(1e-7, scale), linscale=0.6)
-    axis.set_xlim(-1.6 * scale, 1.6 * scale)
+    axis.set_xlim(0.0, 1.6 * scale)
     decade = int(np.floor(np.log10(scale)))
     steps = [10.0**power for power in (decade, decade - 2, decade - 4) if power >= -7]
-    ticks = sorted({0.0} | {-step for step in steps} | {step for step in steps})
+    ticks = sorted({0.0} | set(steps))
     axis.set_xticks(ticks)
     axis.xaxis.set_minor_locator(NullLocator())
 
@@ -105,17 +109,31 @@ def bound_panel(axis, output):
         if tick == 0.0:
             return "0"
         exponent = int(round(np.log10(abs(tick))))
-        return "$%s10^{%d}$" % ("-" if tick < 0 else "", exponent)
+        return "$10^{%d}$" % exponent
 
     axis.set_xticklabels([tick_label(tick) for tick in ticks])
-    axis.axvline(0.0, color="#4d4d4d", linewidth=1.2, linestyle=":", zorder=2)
-    for index, value, offset in zip(position, values, excess):
-        colour = LIMIT if value > BOUND else SUBJECT
-        axis.plot([offset], [index], marker="o", markersize=9, color=colour, zorder=3)
+    for index, offset, kind in zip(position, excess, (row[2] for row in rows)):
+        if kind == "graded-16-80":
+            colour, face, marker = LIMIT, LIMIT, "o"
+        elif kind == "control":
+            colour, face, marker = "#1d1d1d", "none", "s"
+        else:
+            colour, face, marker = POPULATION, POPULATION, "o"
+        axis.plot(
+            [offset],
+            [index],
+            marker=marker,
+            markersize=9,
+            markerfacecolor=face,
+            markeredgecolor=colour,
+            markeredgewidth=1.4,
+            linestyle="none",
+            zorder=3,
+        )
         axis.text(
             offset,
-            index - 0.22,
-            f"{value:.7f}",
+            index - 0.24,
+            f"{offset:+.2e}",
             ha="center",
             va="bottom",
             fontsize=13,
@@ -124,17 +142,7 @@ def bound_panel(axis, output):
     axis.set_yticks(position)
     axis.set_yticklabels(names)
     axis.set_xlabel("largest $x^{T}QGx\\,/\\,(\\mu_0\\,x^{T}Qx)$ minus the bound")
-    axis.set_ylim(len(rows) - 0.5, -0.85)
-    axis.annotate(
-        "bound",
-        xy=(0.0, -0.62),
-        xytext=(6, 0),
-        textcoords="offset points",
-        color="#4d4d4d",
-        fontsize=14,
-        ha="left",
-        va="center",
-    )
+    axis.set_ylim(len(rows) - 0.5, -0.9)
 
 
 def witness_panel(axis, output, inputs):

@@ -12,6 +12,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T190644382930-stored-case-build-stall-diagnosis",
       "section": "\u00a79"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T04:56:51.874936+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T190644382930-stored-case-build-stall-diagnosis",
+      "section": "\u00a79"
     }
   },
   "findings": [

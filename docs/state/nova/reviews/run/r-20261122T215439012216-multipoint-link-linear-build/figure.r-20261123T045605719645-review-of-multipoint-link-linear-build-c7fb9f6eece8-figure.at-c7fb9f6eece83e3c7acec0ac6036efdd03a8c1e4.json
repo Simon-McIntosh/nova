@@ -1,0 +1,32 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T05:46:39.835Z",
+  "dispatched_at": "2026-11-23T05:24:06Z",
+  "findings": [
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/multipoint-link-linear-build/multipoint-link-cost.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The one-pass indexer series is drawn coincident with the bottom spine: its cumulative values sit between 3 and 13 s against a 1500 s axis, so all of its ink lies within the stroke width of the x-axis. After-arm values cannot be read at all, and because the green stroke is thicker than the axis, the axis itself reads as green beneath the series and the reader cannot separate the y=0 reference from the data. It matters because a reader who wants the after arm's actual values (6.3 s over 1,490.7 s of wall) gets no scale from the plot and must leave the figure for the caption or the table; a labelled zero line or an inset scale would let the figure carry the after arm rather than merely indicate it. It does not block: the contrast the figure exists to show \u2014 steep against flat \u2014 reads unambiguously."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T045605719645-review-of-multipoint-link-linear-build-c7fb9f6eece8-figure",
+  "reviewed_base_sha": "bba8365c97f5a0ad06eeab14c0819922e2079a0c",
+  "reviewed_head_sha": "c7fb9f6eece83e3c7acec0ac6036efdd03a8c1e4",
+  "reviewed_run_id": "r-20261122T215439012216-multipoint-link-linear-build",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass \u2014 axis and tick text renders in a mid grey (about #6a6a6a) on white at roughly 5.4:1, and the marked series #2e8b57 clears about 3.6:1 on white, so both text and graphical objects meet their floors.",
+    "data_ink": "pass \u2014 the ink is three thin data lines, their markers, two axis labels and a frameless legend; there is no grid, no fill, no annotation furniture and no unused axis or tick, so the curves carry the visual weight.",
+    "decoration": "pass \u2014 the rendered PNG carries no gradient, shading, background fill, axes frame, drop shadow or theme styling; only the left and bottom spines are drawn and the top and right are despined.",
+    "label_collision": "pass \u2014 no text in the rendered PNG is clipped or overlapping: the rotated y-axis label clears the tick column, the legend sits above the plot area, and the extreme glyph sits 4 px inside the canvas. Nothing is drawn over the data.",
+    "legibility": "pass \u2014 at a glance the figure states its whole claim: the before arm's cumulative link-sort time rises steeply from the origin to about 1400 s at 1490 s of build wall, while the after arm stays flat, so the reader sees the quadratic removed without reading any number. Units are on both axes ('cumulative link-sort time [s]' and 'build wall [s]' in the rendered PNG), the three series are separated by colour and dash, and the reading is confirmed by the caption's 1,399.5 s against 6.3 s.",
+    "table_form": "pass \u2014 the image plots cumulative sort time against build wall, a trajectory whose shape (linear blow-up against flat) the table beside it cannot show; the exact per-arm numbers the fragment reports are already in that table, so the figure is not standing in for tabular information."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T05:46:53.156710+00:00",
+  "total": null
+}

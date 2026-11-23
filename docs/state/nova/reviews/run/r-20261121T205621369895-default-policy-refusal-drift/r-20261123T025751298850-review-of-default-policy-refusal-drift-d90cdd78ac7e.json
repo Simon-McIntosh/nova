@@ -10,6 +10,14 @@
   ],
   "completed_at": "2026-11-23T03:06:16.062Z",
   "dispatched_at": "2026-11-23T02:58:46Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T03:51:11.242431+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261121T205621369895-default-policy-refusal-drift"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/stored_state_refusals/run_suite_arm.sh",

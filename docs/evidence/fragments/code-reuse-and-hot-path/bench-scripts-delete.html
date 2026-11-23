@@ -174,10 +174,12 @@
     commit's own <code>--shortstat</code>. At the reviewed head
     <code>76a7d44ac</code> it reports 32 failures and exits 1; that is the
     negative control, and without the restorations the check the findings name
-    fails. Both runs are logged as <code>repair-check-parent.log</code> and
+    fails. The three runs are logged as <code>repair-check-parent.log</code>,
+    <code>repair-check-head-6790baf7.log</code> and
     <code>repair-check-head.log</code>. At the repaired head
-    <code>6790baf79</code> it reports no failure and exits 0, so each answering
-    commit is what closes the reference its finding names.</p>
+    <code>6790baf79</code>, and again at the record commit
+    <code>c6a9661b0</code> that follows it, it reports no failure and exits 0,
+    so each answering commit is what closes the reference its finding names.</p>
     <p>The worktree arm's five failures are pre-existing. Two are retired
     evidence: the census receipt test cites
     <code>docs/figures/millisecond-converged-solve/program-shapes/program-shape-buckets.svg</code>,

@@ -1,0 +1,59 @@
+{
+  "added_failure_basis": "The reviewed run's manifest declares both baseline_suite and after_suite unarmed because no test file lies in its write scope, so no suite pair exists to difference. Its gate is the route comparison. logs/section-check.log at head bbcc26df6 names revision bbcc26df6 and reports differences=0 with map_current true and EXIT=0; I re-ran the same command from the head copies of the section, the map and the script against --root at the source worktree and reproduced ROUTES forward=182 inverse=210 shared=182 forward_only=0 inverse_only=28 named=210 map_current=true differences=0. I re-derived the counts from route-modules.json itself (182/210/182/0/28) and confirmed all 210 named modules exist in the head tree. I reproduced both controls: --add shared=nova/utilities/ANSYS.py reports differences=2 naming the module and exits 1, and a map pinned to 09ef90e4 reports differences=17 and exits 1 where the pre-guard script (2b363acdd) reports differences=0 and exits 0 on the same input. Added failures: none.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/hot_path_map/job.sh:29 invokes forward_route.py",
+    "scripts/prototypes/hot_path_map/job.sh invokes map.py",
+    "section_route.py has no production caller; its only invocation is the command documented in nova/equilibrium/AGENTS.md:151"
+  ],
+  "completed_at": "2026-11-23T13:46:38.991Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-23T13:32:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down.html",
+      "line": 86,
+      "severity": "non-blocking",
+      "text": "The fragment cites /home/ITER/mcintos/.cache/nova-s33/hot-path-written-down/section-check.log as the log for the head claim 'the check reports ... differences 0'. That file is the pre-guard run at revision 4453b6f67 and its ROUTES line carries no map_current field; the head run at bbcc26df6 (map_current true) and the stale-map control run (differences 17) exist only under the crew run directory, and the stale-map paragraph at :75-79 cites no log path at all. The claim is true -- I reproduced it -- but the cited artifact cannot show it, and a crew run directory is transient, so the guard's evidence has no durable citation."
+    },
+    {
+      "file": "scripts/prototypes/hot_path_map/section_route.py",
+      "line": 79,
+      "severity": "non-blocking",
+      "text": "code_changed_since diffs the map's revision against HEAD rather than against the working tree, while the module docstring at :21 and the section prose state it compares with 'the checked tree'. A .py change under nova/ or tests/ left uncommitted in the checkout the check runs in is therefore invisible: the check prints map_current true and exits 0 while the route may already have moved, which is the exact drift this commit exists to catch."
+    }
+  ],
+  "justifications": {
+    "durability": "No test invokes scripts/prototypes/hot_path_map/section_route.py (document-only under the locked hot-path-guard decision), and the guard that was added is defeated by an uncommitted edit because section_route.py:79 diffs against HEAD.",
+    "evidence": "logs/section-check.log records differences=0 with map_current true at head bbcc26df6 and stale-map-control.log records differences=17 with the guard against differences=0 on the same input without it, but the fragment cites a pre-guard log at :86 so the durable citation does not carry the head result.",
+    "fit": "section_route.py:14-31 follows the prototype driver idiom beside it (docstring, argparse, grep-style marker parsing) and no plan label, ticket number or version suffix appears in the delivered paths or in the three marker block names.",
+    "goal_fidelity": "nova/equilibrium/AGENTS.md:42-175 delivers both routes module by module with the measured 182/210/182/0/28 split and the ten unanswered collapses listed beside them.",
+    "reuse": "No owner for comparing a recorded revision with the changed files exists: nova/database/filepath.py:356 compute_provenance stamps generator identity, and grep over nova/ and scripts/ finds only per-script git rev-parse provenance stamping, so the addition duplicates nothing.",
+    "scope_discipline": "Six of seven delivered paths -- nova/equilibrium/AGENTS.md, scripts/prototypes/hot_path_map/section_route.py and route-modules.json included -- lie outside the two declared write paths, though each is named by the brief's own instruction."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T133138334433-review-of-hot-path-written-down-bbcc26df6aea",
+  "reviewed_base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+  "reviewed_head_sha": "bbcc26df6aea9073102c52049824e0826f5e33f7",
+  "reviewed_run_id": "r-20261122T202611168380-hot-path-written-down",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T14:00:14.298425+00:00",
+  "total": 98,
+  "verdicts": {
+    "diff": "Read all six commits 348ed92c..bbcc26df6: 7 paths, +8709/-3. 8d8b526ae repoints the three driver files at tests/magnetics_fit_harness.py and tests/test_equilibrium_magnetics_fit_known_states.py; a6c0e29c0 adds the route section and section_route.py; 4453b6f67 commits the stripped map; d080f2dd0 removes the plan-section label from the section; 2b363acdd records the delivered paths in the fragment; bbcc26df6 adds the revision-drift comparison, its docstring, the section and fragment prose, and the stale-map control. Every number I re-derived from route-modules.json agrees with the section and fragment.",
+    "done_when": "Clause (1) is measured by scripts/prototypes/hot_path_map/section_route.py, which compares the three marker blocks with the map's executed sets in both directions, both direction cases reported by name before a nonzero exit; logs/section-check.log records differences=0 at head bbcc26df6 and I reproduced it. Clause (2) is measured by --root in the same run (named=210, none absent) and I independently confirmed all 210 modules exist at the head via git ls-tree. The declared negative control (--add shared=nova/utilities/ANSYS.py) makes the check exit 1 naming the module, reproduced from the head tree.",
+    "goal": "The node goal is to write the measured forward and inverse routes into the equilibrium AGENTS.md, matching a fresh measurement; nova/equilibrium/AGENTS.md:42-283 delivers both routes (the forward route as seven solve phases and the inverse route as a 28-module delta), the measured set relations, and the pending-collapses paragraph at :157-175 naming all ten duplicate-register entries as still unanswered -- I checked crew view decisions --project nova and all ten code-reuse-and-hot-path decisions carry choice '' with no answers, so 'none accepted-and-pending' holds.",
+    "manifest": "Read; status complete, the tests line names the literal section_route.py command with absolute interpreter and PYTHONPATH, test_logs name section-check.log, its negative-control log, stale-map-control.log and s1-head2.log, negative_control_log and its note describe the --add control, both suite arms are declared unarmed with a reason, and the checkpoint records the two repair rounds that produced d080f2dd0, 2b363acdd and bbcc26df6.",
+    "write_paths": "The dispatch declared two paths -- docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down.html and docs/figures/code-reuse-and-hot-path/hot-path-written-down -- and six of the seven delivered paths lie outside them: nova/equilibrium/AGENTS.md, scripts/prototypes/hot_path_map/section_route.py, the same directory's forward_route.py/job.sh/map.py, and route-modules.json. The fragment's 'Declared and shared paths' section (:121-148) enumerates each and asks for ratification; a prior review recorded this as exempted and the coordinator ratifies with crew complete --accept-path."
+  }
+}

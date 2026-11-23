@@ -138,3 +138,119 @@ def test_the_harmonic_conversion_writes_the_total_flux():
     assert_common_state(equilibrium, flux_field())
     frame = equilibrium.time_slice[0]
     assert frame.global_quantities.ip == pytest.approx(-1.0e6)
+
+def test_the_harmonic_conversion_adds_the_vacuum_flux():
+    """The conductor term is part of the stored map, not a separate field.
+
+    A constant vacuum term stands in for the conductor flux: if the conversion
+    adds nothing, or subtracts it, the stored map differs from the plasma term
+    alone by exactly that offset.
+    """
+
+    vacuum = np.full_like(flux_field(), 25.0)
+    inversion = SimpleNamespace(
+        config=SimpleNamespace(pole_r=AXIS_R, pole_z=0.0),
+        flux_on_grid=lambda grid_r, grid_z: flux_field(),
+    )
+    equilibrium = harmonic_equilibrium(
+        inversion,
+        GRID_R,
+        GRID_Z,
+        INSIDE,
+        vacuum_flux=vacuum,
+        limiter_r=LIMITER_R,
+        limiter_z=LIMITER_Z,
+        plasma_current=-1.0e6,
+        vacuum_b0=5.3,
+        reference_radius=6.2,
+    )
+    stored = equilibrium.time_slice[0].profiles_2d[0].psi
+    np.testing.assert_allclose(stored, (flux_field() + vacuum).T)
+    assert not np.allclose(stored, flux_field().T)
+
+
+def test_the_harmonic_conversion_withholds_the_map_without_an_elliptic_point(
+    monkeypatch,
+):
+    """A read with no interior extremum stores no map and keeps its levels."""
+
+    import nova.equilibrium.connectivity_boundary as connectivity
+
+    def read(field, grid, seed, lcfs_norm=1.0) -> SimpleNamespace:
+        return SimpleNamespace(
+            found=True,
+            radii=np.full(connectivity.LCFS_ANGLES.size, 0.3),
+            axis_psi=float("nan"),
+            psi_axis=-9.0,
+            psi_bnd=-4.0,
+        )
+
+    monkeypatch.setattr(connectivity, "host_boundary_read", read)
+    inversion = SimpleNamespace(
+        config=SimpleNamespace(pole_r=AXIS_R, pole_z=0.0),
+        flux_on_grid=lambda grid_r, grid_z: flux_field(),
+    )
+    equilibrium = harmonic_equilibrium(
+        inversion,
+        GRID_R,
+        GRID_Z,
+        INSIDE,
+        vacuum_flux=np.zeros_like(flux_field()),
+        limiter_r=LIMITER_R,
+        limiter_z=LIMITER_Z,
+        plasma_current=-1.0e6,
+        vacuum_b0=5.0 + 0.3,
+        reference_radius=6.2,
+    )
+    frame = equilibrium.time_slice[0]
+    assert frame.profiles_2d.size == 0
+    assert frame.global_quantities.psi_axis == pytest.approx(-9.0)
+    assert frame.global_quantities.psi_boundary == pytest.approx(-4.0)
+
+
+def test_the_profile_conversion_writes_the_iterations_own_levels():
+    """Both levels are the reconstruction's, not a second boundary read's."""
+
+    flux2d = flux_field()
+    result = ProfileResult(
+        flux=flux2d.reshape(-1),
+        cell_current=np.array([2.0e6, -1.5e6]),
+        coefficients=np.zeros(2),
+        residual=np.zeros(()),
+        axis=np.array([AXIS_R, 0.0]),
+        boundary_flux=-7.25,
+        core_weight=np.zeros(1),
+        axis_state=np.zeros((), dtype=int),
+        axis_confidence=np.zeros(()),
+        axis_candidate_count=np.zeros((), dtype=int),
+        axis_overflow=np.zeros((), dtype=bool),
+    )
+    equilibrium = profile_equilibrium(
+        result,
+        GRID_R,
+        GRID_Z,
+        INSIDE,
+        limiter_r=LIMITER_R,
+        limiter_z=LIMITER_Z,
+        vacuum_b0=5.3,
+        reference_radius=6.2,
+    )
+    quantities = equilibrium.time_slice[0].global_quantities
+    assert quantities.psi_boundary == pytest.approx(-7.25)
+    # the map's value at the O-point the solve reported, not a re-read extreme
+    assert quantities.psi_axis == pytest.approx(0.0)
+
+
+def test_one_writer_assembles_every_columns_state():
+    """No column keeps its own copy of the IDS assembly."""
+
+    import nova.equilibrium.harmonic as harmonic
+    import nova.equilibrium.moment as moment
+    import nova.equilibrium.profile as profile
+    from nova.equilibrium.reconstruction_state import equilibrium_from_state
+
+    for module in (moment, harmonic, profile):
+        assert not hasattr(module, "_state_equilibrium")
+    assert callable(equilibrium_from_state)
+    for name in ("profile_equilibrium", "write_profile_equilibrium"):
+        assert name in profile.__all__

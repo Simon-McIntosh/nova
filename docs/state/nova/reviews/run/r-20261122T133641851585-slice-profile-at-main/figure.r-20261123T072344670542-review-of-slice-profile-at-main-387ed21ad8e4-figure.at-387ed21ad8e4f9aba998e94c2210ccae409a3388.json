@@ -1,14 +1,13 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-23T07:42:45.020Z",
   "dispatched_at": "2026-11-23T07:24:13Z",
   "findings": [
     {
       "disposition": "exempted",
       "disposition_note": "In the rendered PNG the label does not overlap the markers and both stay legible; recorded for a future redraw only.",
       "file": "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
-      "id": "fbaabfd444c",
       "line": null,
       "severity": "non-blocking",
       "summary": "The 'unperturbed' direct label sits only about 4-5 px above the filled-marker row (its descender ends near row 393 and the marker crowns begin near row 398 at lanes close to 12-15), so at a reduced display scale the label crowds the data it names; a larger vertical offset would keep the clearance unambiguous."
@@ -17,7 +16,6 @@
       "disposition": "exempted",
       "disposition_note": "Both the direct label ('-Infinity at the first read') and the figure caption state the sentinel meaning, so the encoding is disambiguated in text.",
       "file": "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
-      "id": "fbaabfd444c",
       "line": null,
       "severity": "non-blocking",
       "summary": "The perturbed lanes are drawn as cross markers at a sentinel level near 1.3, above the highest labelled tick (1e0), with no axis break or ceiling tick, so a reader who does not read the annotation could mistake the row for a measured value near 1.3 rather than a non-finite (-Infinity) sentinel; an explicit ceiling tick or an axis-break marker would remove the ambiguity."
@@ -40,6 +38,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-23T07:42:51.419629+00:00",
+  "timestamp": "2026-11-23T07:43:18.373763+00:00",
   "total": null
 }

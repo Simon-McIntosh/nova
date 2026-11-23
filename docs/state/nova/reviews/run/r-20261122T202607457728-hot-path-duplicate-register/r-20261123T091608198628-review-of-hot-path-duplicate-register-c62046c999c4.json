@@ -11,6 +11,13 @@
     }
   },
   "dispatched_at": "2026-11-23T09:16:36Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-hot-path-duplicate-register-c62046c999c4",
+      "recorded_at": "2026-11-23T09:43:26.528930+00:00"
+    }
+  },
   "findings": [
     {
       "file": "scripts/prototypes/hot_path_duplicates/compare.py",

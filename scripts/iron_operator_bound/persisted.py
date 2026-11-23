@@ -860,10 +860,10 @@ def write(path, row):
     print(json.dumps(scalars), flush=True)
 
 
-def record_bound(label, inputs, output):
+def record_bound(label, inputs, output, *, tolerance=1e-10):
     """Measure one persisted operator's bound and write its receipt."""
     source = stage(load(label, inputs))
-    peak = bound(source)
+    peak = bound(source, tolerance=tolerance)
     np.save(output / f"bound-{label}-witness.npy", peak["witness"])
     row = dict(source["row"])
     row.update(
@@ -873,6 +873,7 @@ def record_bound(label, inputs, output):
         eigen_residual=peak["residual"],
         eigen_seconds=peak["seconds"],
         metric_quadratic=peak["metric_quadratic"],
+        eigen_tolerance=tolerance,
     )
     write(output / f"bound-{label}.json", row)
     return source, peak
@@ -937,6 +938,7 @@ def main():
     )
     parser.add_argument("--label", choices=tuple(LABELS))
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--tolerance", type=float, default=1e-10)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     if args.mode == "check":
@@ -946,7 +948,7 @@ def main():
 
     inputs = west_inputs()
     if args.mode == "bound":
-        record_bound(args.label, inputs, args.output)
+        record_bound(args.label, inputs, args.output, tolerance=args.tolerance)
     elif args.mode == "witness":
         record_witness(args.label, inputs, args.output)
     else:

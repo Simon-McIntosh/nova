@@ -163,15 +163,17 @@ def witness_panel(axis, output, inputs):
         )
     )
     carrying = np.flatnonzero(np.abs(shares) >= SHARE)
-    axis.add_collection(
-        PolyCollection(
-            [polygons[index] for index in carrying],
-            facecolors=SUBJECT,
-            edgecolors="none",
-            linewidths=0.0,
-            zorder=2,
-            label="carries the witness",
-        )
+    centroids = np.asarray(mesh.centroids)
+    share = np.abs(shares[carrying])
+    axis.scatter(
+        centroids[carrying, 0],
+        centroids[carrying, 1],
+        s=60.0 + 900.0 * share / max(float(share.max()), 1e-12),
+        color=SUBJECT,
+        edgecolors="white",
+        linewidths=0.6,
+        zorder=4,
+        label="carries the witness",
     )
     region = inputs["region"]
     parts = [region] if region.geom_type == "Polygon" else list(region.geoms)

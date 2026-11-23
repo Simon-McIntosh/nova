@@ -49,6 +49,11 @@
     <p>Run <code>r-20261122T215439012216-multipoint-link-linear-build</code> landed after the landing pass measured its suite at base and head.</p>
   </section>
 
+  <section id="s5-reduced-reconstructions-scored" data-evidence-origin="append">
+    <h2>§5 — the reduced reconstructions scored as their own columns</h2>
+    <p>Run <code>r-20261122T185014477588-reduced-reconstructions-scored</code>, head <code>a3aa729f</code>. The harmonic, moment and profile reconstructions are each written as an IMAS equilibrium through one shared writer (<code>equilibrium_from_state</code>) and scored by the section 3 comparator on the section 3 case. Measured verdicts: every column matches the plasma current by construction (at most 4.1e-16); the moment column misses the 0.02 m axis band at 0.041 m with axis and boundary flux 0.85 of a span away; the harmonic column closes no physical interior (its flux diverges toward its focal ring, axis flux 3487 spans away, q95 not supplied); the profile column is closest (axis 0.2725 m, axis flux 0.052 and boundary flux 0.083 of a span, q95 difference 0.50). All three reference-free checks pass on every column. The perturbed copy entered through each conversion fails every band. Merged-head gate (rigel job 1338592) over the run's test file and the ten importers of its changed modules: the same four pre-existing failures at base and head, zero added, 132 passed. Record: <code>docs/evidence/fragments/inverse-equilibrium-baseline/reduced-reconstructions-scored.html</code>.</p>
+  </section>
+
 </main>
 </body>
 </html>

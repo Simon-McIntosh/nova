@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-23T08:35:44.870Z",
+  "dispatched_at": "2026-11-23T08:23:44Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+      "line": 131,
+      "severity": "non-blocking",
+      "summary": "The two axis-position figures autoscale independently, so their vertical ranges differ sharply: the imas-efit Z panel spans about 0.47 to 0.53 m while the nova Z panel spans about 0.492 to 0.498 m, and the R panels likewise differ (nova draws ticks at 6.27/6.30/6.33 where imas-efit draws only 6.30/6.33). The record's clause-2 point is that imas-efit's two sequences separate by several millimetres where nova's coincide, and a reader comparing the two figures by eye will misjudge that separation because the same plotted excursion fills a very different fraction of each panel. The imas-efit caption compounds this by calling the imas-efit column 'on the same axes'; the x axis is shared but the vertical scales are not."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/slice-overlay-drift-88.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The caption describes nova's X-point marker as a 'crossed circle', but the rendered PNG draws it as a filled plus (paint.py's marker 'P'): at the saddle the blue mark reads as four blue squares in a plus, not a circle with a cross through it. The caption's marker vocabulary therefore does not match the figure, so a reader matching caption to picture has no 'crossed circle' to find."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/slice-overlay-drift-88.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "At machine scale the six null markers collapse into two tight clusters: at the magnetic axis the grey open circle, the blue filled triangle and imas-efit's square overlap within a few pixels, and at the X-point the grey X, the blue plus and imas-efit's diamond pile up so that the blue plus and grey X together occlude the green diamond's white interior, making it read as filled rather than the 'open diamond' the caption names. The open-versus-filled distinction the caption offers to tell the two codes apart does not survive the render; only colour and shape do, and shape is hard to read at the X-point where the marks coincide."
+    }
+  ],
+  "notes": "Read-only figure review of the three rendered PNGs attached to this run. Only image-0.png, image-1.png and image-2.png were opened, plus pixel crops and colour/centroid measurements of those same PNGs; no SVG and no other image was opened, and no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The caption text was read from docs/evidence/fragments/inverse-equilibrium-baseline/drift-sequences-fit-iteration.html at the reviewed head only to check it against the rendered figure. Attachment order was established from rendered colours, not assumed: image-0 draws the 1/f trace in #2e8b57 (imas-efit) and image-1 in #1f5fa8 (nova). No suite runs for a figure review. An earlier figure review at head b05fa96 found the overlay carried no reference contours and drew nova's contours thinner than imas-efit's; at this head both are fixed (the grey dashed generating-state contours are drawn, and paint.py sets nova 1.6 / imas-efit 0.9), and those findings are not carried forward.",
+  "project": "nova",
+  "review_run_id": "r-20261123T082249509595-review-of-drift-sequences-fit-iteration-e1108dadb1f3-figure",
+  "reviewed_base_sha": "06d728006cba140ec3cf0670927100f31f8cfce0",
+  "reviewed_figures": [
+    {
+      "drawing_script": "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+      "identified_by": "the 1/f trace is a clean green measuring rgb(46,139,87) = imas-efit's #2e8b57 in figures.py, against the grey #929292 white control",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T082249509595-review-of-drift-sequences-fit-iteration-e1108dadb1f3-figure/image-0.png",
+      "pixels": "1400x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/axis-position-efit.svg"
+    },
+    {
+      "drawing_script": "scripts/prototypes/drifting_sensor_sequences/probe_rows/figures.py",
+      "identified_by": "the 1/f trace is blue measuring rgb(31,95,168) = nova's #1f5fa8 in figures.py, and its two sequences nearly coincide as the nova caption states",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T082249509595-review-of-drift-sequences-fit-iteration-e1108dadb1f3-figure/image-1.png",
+      "pixels": "1400x720",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/axis-position-nova.svg"
+    },
+    {
+      "drawing_script": "scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py",
+      "identified_by": "the only square canvas and the only poloidal contour panel among the three attachments",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T082249509595-review-of-drift-sequences-fit-iteration-e1108dadb1f3-figure/image-2.png",
+      "pixels": "1400x1400",
+      "rendered_from": "docs/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/slice-overlay-drift-88.svg"
+    }
+  ],
+  "reviewed_head_sha": "e1108dadb1f302431ae3eb39b7bb569f0fd64d53",
+  "reviewed_run_id": "r-20261122T185009989125-drift-sequences-fit-iteration",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass for all three. Axis, tick, legend and annotation text is near-black or #4d4d4d on white and clears body-text contrast; the grey #929292 control trace measures 3.0:1 against white, at the house 3:1 data-mark floor.",
+    "data_ink": "pass for all three. The axis panels carry two traces plus one dotted reference line per panel and a two-entry legend; the overlay carries twelve line contours per code, the grey dashed generating-state contours, the limiter ring, and the null markers. No area fill, gradient or shaded band is present in any of the three PNGs.",
+    "decoration": "pass for all three. Background is pure white; the axis panels have no gridlines and no top or right spine; the overlay has its axis off entirely with no grid, frame or shading.",
+    "label_collision": "pass for all three. No label is clipped or overlaps another or the data: the ink bounding box of each PNG leaves margins of 21-38 px at the top, 25-177 px at the left, 76-83 px at the right and 30-70 px at the bottom of the canvas, the legends sit in clear space above the PNG's panels, and the overlay annotation sits in open white to the right of the vessel.",
+    "legibility": "pass overall. The two axis-position PNGs (1400x720) each read at a glance: 16 pt axis labels R [m], Z [m] and slice, 14 pt ticks and a two-entry legend over independent panels, with the blue/green 1/f trace against the grey dashed white control. The overlay (1400x1400) reads clearly as a poloidal contour map with the black limiter ring, but its six null markers at the magnetic axis and at the X-point sit within a few pixels of one another and read as a single cluster; the four distances remain legible in the annotation block beside the vessel.",
+    "table_form": "pass for all three. The two axis PNGs are per-slice series over 200 slices and the overlay is a spatial flux comparison; neither reduces to a table without losing the shape being shown. The overlay's four null-distance numbers annotate positions on the panel rather than replacing it."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T08:35:58.696067+00:00",
+  "total": null
+}

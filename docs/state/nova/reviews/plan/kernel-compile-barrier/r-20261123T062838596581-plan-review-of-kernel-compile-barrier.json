@@ -43,9 +43,28 @@
       "note": "\u00a74 now waits on \u00a79 (plan-section-depends-on s4: s2, s3, s9), since \u00a79 is what brings the read inside \u00a74's first-call bounds.",
       "reason": "",
       "when": "2026-11-23T07:02:37.095161+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fa1d9b7b93c2d1d6355ecfad5d669fead3628208",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a78 and \u00a79 each name their record: docs/evidence/fragments/kernel-compile-barrier/kcb-field-derivative-outputs.html and kcb-assembled-read-hessian.html; receipts larger than a few MB go under the GPFS evidence root.",
+      "reason": "",
+      "when": "2026-11-23T07:02:50.043552+00:00"
     }
   ],
   "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fa1d9b7b93c2d1d6355ecfad5d669fead3628208",
+      "commit_basis": "edit",
+      "note": "\u00a78 and \u00a79 each name their record: docs/evidence/fragments/kernel-compile-barrier/kcb-field-derivative-outputs.html and kcb-assembled-read-hessian.html; receipts larger than a few MB go under the GPFS evidence root.",
+      "reason": "",
+      "when": "2026-11-23T07:02:50.043552+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",

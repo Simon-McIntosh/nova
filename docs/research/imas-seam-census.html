@@ -548,14 +548,14 @@ dl.controls dd { margin: 0; font-size: 0.85em; }
 <tr><td class="path">benchmarks/diiid_corpus_conventions.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
 <tr><td class="path">benchmarks/diiid_ids_machine_description.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
 <tr><td class="path">benchmarks/diiid_root_convention_sweep.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
-<tr><td class="path">imas_ambix/challenge/convention.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">imas_ambix/data/cocos_convention.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
-<tr><td class="path">nova/equilibrium/contour_tree.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">imas_ambix/challenge/convention.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">imas_ambix/data/cocos_convention.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">nova/equilibrium/contour_tree.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>rewired in place by §5</td></tr>
 <tr><td class="path">nova/equilibrium/convention.py</td><td>convention statement</td><td>module-level COCOS assignment</td><td>rewired in place by §5</td></tr>
 <tr><td class="path">nova/equilibrium/steering_frames.py</td><td>convention statement</td><td>module-level COCOS assignment</td><td>rewired in place by §5</td></tr>
-<tr><td class="path">nova/equilibrium/topology.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">nova/equilibrium/topology.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>rewired in place by §5</td></tr>
 <tr><td class="path">nova/imas/equilibrium.py</td><td>convention conversion</td><td>derives a convention through nova.io.sourcemap</td><td>moves under §5</td></tr>
-<tr><td class="path">nova/imas/extrapolate.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">nova/imas/extrapolate.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>rewired in place by §5</td></tr>
 <tr><td class="path">nova/imas/mast_solve_inputs.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
 <tr><td class="path">nova/imas/plasma_source.py</td><td>convention conversion</td><td>derives a convention through nova.io.sourcemap</td><td>moves under §5</td></tr>
 <tr><td class="path">nova/imas/pulsedesign.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
@@ -564,21 +564,21 @@ dl.controls dd { margin: 0; font-size: 0.85em; }
 <tr><td class="path">nova/io/signalstore.py</td><td>convention conversion</td><td>derives a convention through nova.io.sourcemap</td><td>moves under §5</td></tr>
 <tr><td class="path">nova/io/sourcemap.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
 <tr><td class="path">nova/scripts/identify_source_cocos.py</td><td>convention conversion</td><td>imports the COCOS algebra for a transform</td><td>moves under §5</td></tr>
-<tr><td class="path">tests/data/test_cocos_convention.py</td><td>generic writer</td><td>writes IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_contour_tree_conventions.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_dd_translator.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_equilibrium_reader_cocos.py</td><td>generic writer</td><td>writes IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_flux_function_sign.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_internal_cocos_sites.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_io_cocos.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_io_sourcemap.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_mast_solve_inputs.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_mastcocos.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_media.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_pointconstraint.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_pulsedesign_write_convention.py</td><td>generic writer</td><td>writes IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_sample_write_convention.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
-<tr><td class="path">tests/test_transport_cocos.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>stays</td></tr>
+<tr><td class="path">tests/data/test_cocos_convention.py</td><td>generic writer</td><td>writes IDSs through the generic layer</td><td>moves to the ingest member</td></tr>
+<tr><td class="path">tests/test_contour_tree_conventions.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_dd_translator.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_equilibrium_reader_cocos.py</td><td>generic writer</td><td>writes IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_flux_function_sign.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_internal_cocos_sites.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_io_cocos.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_io_sourcemap.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_mast_solve_inputs.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_mastcocos.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_media.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_pointconstraint.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_pulsedesign_write_convention.py</td><td>generic writer</td><td>writes IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_sample_write_convention.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>moves under §5</td></tr>
+<tr><td class="path">tests/test_transport_cocos.py</td><td>generic reader</td><td>reads IDSs through the generic layer</td><td>rewired in place by §5</td></tr>
 </tbody>
 </table>
 <h2>Controls</h2>

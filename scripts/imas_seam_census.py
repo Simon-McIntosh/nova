@@ -37,6 +37,10 @@ CLASS_DESTINATION = {
     "unreached": "deleted by §2",
 }
 
+CONVENTION_REWIRED = "rewired in place by §5"
+CONVENTION_MOVES = "moves under §5"
+CONVENTION_MEMBER = "moves to the ingest member"
+
 CLASS_GLOSSARY = {
     "generic reader": "reads Data Dictionary IDSs, authors nothing",
     "generic writer": "writes Data Dictionary IDSs, authors no machine data",
@@ -58,6 +62,8 @@ DD_HELPER_NAMES = frozenset(
 )
 
 TRANSFORM_CALLS = frozenset(["convention_transform", "identify_convention"])
+
+DD_VERSION_NAMES = frozenset(["DD3_CONVENTION", "DD4_CONVENTION"])
 
 IDS_FACTORY_CALLS = frozenset(["IDSFactory", "ids_factory", "_new_ids", "new_ids"])
 
@@ -421,6 +427,25 @@ def _section(ref, cls):
     return "§3 or §4"
 
 
+def _converts_between_conventions(facts):
+    names = facts.imported_names("nova_cocos")
+    if names - IDENTITY_NAMES:
+        return True
+    if facts.imported_names("nova.io.sourcemap") & DD_VERSION_NAMES:
+        return True
+    return bool(set(facts.calls) & (DD_HELPER_NAMES | TRANSFORM_CALLS))
+
+
+def _convention_destination(ref, facts, cls):
+    if cls == "convention statement":
+        return CONVENTION_REWIRED
+    if ref.tree == "ambix":
+        return CONVENTION_MEMBER
+    if _converts_between_conventions(facts):
+        return CONVENTION_MOVES
+    return CONVENTION_REWIRED
+
+
 def _ambix_coverage(ref):
     stem = ref.path.stem
     if stem.startswith("machine"):
@@ -560,7 +585,7 @@ def build_census(root, ambix_root=None):
                 line=line,
                 cls=cls,
                 basis=basis,
-                destination=CLASS_DESTINATION[cls],
+                destination=_convention_destination(ref, facts, cls),
             )
         )
     convention_rows.sort(key=lambda row: row.path)

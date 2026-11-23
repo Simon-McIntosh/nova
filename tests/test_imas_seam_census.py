@@ -106,6 +106,27 @@ def test_duplicate_capabilities_name_both_implementations(census):
     assert "nova/catalog/mast_geometry.py" in other
 
 
+def test_no_convention_row_stays(census):
+    staying = [row.path for row in census.convention_rows if row.destination == "stays"]
+    assert not staying, staying
+
+
+def test_an_algebra_reader_that_states_the_internal_convention_is_rewired(census):
+    rows = {row.path: row for row in census.convention_rows}
+    for path in (
+        "nova/equilibrium/contour_tree.py",
+        "nova/equilibrium/topology.py",
+        "nova/imas/extrapolate.py",
+    ):
+        assert rows[path].destination == census_module.CONVENTION_REWIRED, path
+
+
+def test_a_converter_that_translates_dd_versions_moves(census):
+    rows = {row.path: row for row in census.convention_rows}
+    row = rows["tests/test_dd_translator.py"]
+    assert row.destination == census_module.CONVENTION_MOVES
+
+
 def test_the_unreached_rows_are_the_modules_nothing_imports(census):
     unreached = {row.path for row in census.rows if row.cls == "unreached"}
     expected = {

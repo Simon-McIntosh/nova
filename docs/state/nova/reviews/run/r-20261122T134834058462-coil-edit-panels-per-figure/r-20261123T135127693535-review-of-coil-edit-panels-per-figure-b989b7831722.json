@@ -13,6 +13,13 @@
   ],
   "completed_at": "2026-11-23T14:12:05.196Z",
   "dispatched_at": "2026-11-23T13:52:39Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "coil-edit-panels-per-figure",
+      "recorded_at": "2026-11-23T18:39:48.013888+00:00"
+    }
+  },
   "findings": [
     {
       "file": "benchmarks/coil_edit_latency.py",

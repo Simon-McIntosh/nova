@@ -35,6 +35,16 @@
       "note": "\u00a79 clause 2 now fixes the allocation: one sirius job at --mem=120G, the size at which the differentiated single-point Hessian was killed (job 1338281), with a paired base arm at the section's base and a head arm, peaks recorded for both.",
       "reason": "",
       "when": "2026-11-23T07:31:22.109238+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "52c201938b18b00db5fd07914745bf6462e18358",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The premise now states the measured kills (single-point Hessian at 120 GB, job 1338281; 132-cell read at the H200 host's 64 GB, job 1337904, at 96 GB on CPU, and at 450 GB in the census) instead of 'no allocation can compile it'; the clause shows the change by the paired arms in one fixed allocation.",
+      "reason": "",
+      "when": "2026-11-23T07:31:30.844825+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "\u00a79 clause 2 now fixes the allocation: one sirius job at --mem=120G, the size at which the differentiated single-point Hessian was killed (job 1338281), with a paired base arm at the section's base and a head arm, peaks recorded for both.",
       "reason": "",
       "when": "2026-11-23T07:31:22.109238+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "52c201938b18b00db5fd07914745bf6462e18358",
+      "commit_basis": "edit",
+      "note": "The premise now states the measured kills (single-point Hessian at 120 GB, job 1338281; 132-cell read at the H200 host's 64 GB, job 1337904, at 96 GB on CPU, and at 450 GB in the census) instead of 'no allocation can compile it'; the clause shows the change by the paired arms in one fixed allocation.",
+      "reason": "",
+      "when": "2026-11-23T07:31:30.844825+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261123T071813359583-plan-review-of-kernel-compile-barrier.json",

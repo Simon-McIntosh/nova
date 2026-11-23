@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="138">
+<meta name="plan-version" content="139">
 <meta name="plan-modified" content="2026-11-24">
 </head>
 <body>
@@ -434,6 +434,9 @@
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261123T225858686954-review-of-drift-control-and-converged-nova-1de85cccc662" data-who="reckon-build" data-when="2026-11-23T23:15:51.137Z">
     <div class="r-comment-body"><p>review record for r-20261123T104800646708-drift-control-and-converged-nova at reviewed base e91a8f9b86b4a3e89b22a135c45a8ea9bac85d03 .. reviewed head 1de85cccc66259cd43e3d7488221f47e8ce8cebb, parsed, scores goal_fidelity 14 evidence 16 scope_discipline 20 durability 15 fit 19 reuse 19, added_failure_count 0, 2 non-blocking findings, stored at the two declared review-records paths and validated by reckon crew check --review.</p></div>
 </div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261123T104800646708-drift-control-and-converged-nova" data-who="reckon-build" data-when="2026-11-23T22:57:55Z">
+    <div class="r-comment-body"><p>node drift-control-and-converged-nova, record at commits 2d9c17673, 1acf2fd5b, 96a88c76b, f8a473e5d, b76c7d054, 257ddf514, e91a8f9b8, fcb3e6973, 1558ed08d and 1de85cccc: docs/evidence/fragments/inverse-equilibrium-baseline/drift-control-and-converged-nova.html with the figures axis-position-nova.svg, axis-position-efit.svg and slice-overlay-drift-101.svg under docs/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/, tested by the guard suite at both revisions of record -- 16 passed at e28db604eee205382f5c7874129eebfe4339cd92 and 23 passed at 1558ed08d77f331d2709a2d35e8fb0c30fe1ea54 -- in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T104800646708-drift-control-and-converged-nova/guard-suite-base.log and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T104800646708-drift-control-and-converged-nova/guard-suite-head-1558ed08d.log</p></div>
+</div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261117T043314861081-review-of-efit-on-nova-rows-86b64c13475d" data-who="reckon-build" data-when="2026-11-17T04:38:15.860Z">
     <div class="r-comment-body"><p>independent review of r-20261115T202050274305-efit-on-nova-rows stored at review-records/r-20261115T202050274305-efit-on-nova-rows.json (and its .at-86b64c13 sibling) with status parsed, scores goal_fidelity 17, evidence 16, scope_discipline 18, durability 6, fit 15, reuse 20 (total 92), reviewed_base_sha 1f788362e8e1ca19bb5691fff8b31d25ed825f0e and reviewed_head_sha 86b64c13475d0d589ff836eaec44affff1ca7d56, added_failure_count 0 over an unarmed reviewed run, and four non-blocking findings.</p></div>
 </div>
@@ -552,7 +555,7 @@
     <div class="r-comment-body">Closed. Done-when (1) was met earlier: the Solov'ev, ITER and MAST 22086 known states converge. Done-when (2) is met by the record docs/evidence/fragments/inverse-equilibrium-baseline/fit-iteration-stored-cases-from-main.html (landed, head 6e71688b1): each of MAST-U 45272, TCV and ITER 135013 is recorded with its terminal misfit, the pass the flux map stopped improving, the last flux update beside the misfit, and its line-contour panel; none converged in 96 passes and every update was still falling (4.7e-6, 4.7e-4 and 5.3e-4 of the span). Done-when (3) applies to converged cases only, so it fired on none here. The comparison against imas-efit at a budget long enough to converge moves to §10, the rate to §11, and the repair to §12.</div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261123T213321969510-review-of-jax-cpu-native-abort-391070b46221" data-who="reckon-build" data-when="2026-11-23T22:47:45.059Z">
-    <div class="r-comment-body"><p>the review of r-20261123T104742924149-jax-cpu-native-abort over the commits it gained since it was reviewed (50200153d..391070b46, five evidence commits to docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html) is stored as parsed on both declared record paths; scores goal_fidelity 16, evidence 20, scope_discipline 20, durability 12, fit 18, reuse 20; added_failure_count 1 (tests/test_equilibrium_magnetics_fit_known_states.py::test_known_state_recovery[iter], the ITER per-test guard timeout, present in the reviewed run&#x27;s after_suite log and absent from its baseline_suite log); one non-blocking finding carried over at tests/test_jax_config.py:116</p></div>
+    <div class="r-comment-body"><p>the review of r-20261123T104742924149-jax-cpu-native-abort over the commits it gained since it was reviewed (50200153d..391070b46, five evidence commits to docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html) is stored as parsed on both declared record paths; scores goal_fidelity 16, evidence 20, scope_discipline 20, durability 12, fit 18, reuse 20; added_failure_count 1 (tests/test_equilibrium_magnetics_fit_known_states.py::test_known_state_recovery[iter], the ITER per-test guard timeout, present in the reviewed run's after_suite log and absent from its baseline_suite log); one non-blocking finding carried over at tests/test_jax_config.py:116</p></div>
 </div>
 </section>
 </main>

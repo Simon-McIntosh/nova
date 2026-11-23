@@ -164,6 +164,19 @@ def test_arm_selection_takes_the_row_set_the_code_declares(tmp_path, monkeypatch
     assert len(analyse.selected_rows("efit", "white", 200, 0.01)) == 3
 
 
+def test_row_matched_arm_is_available_by_name(tmp_path, monkeypatch):
+    import figures
+
+    monkeypatch.setattr(analyse, "STUDY", tmp_path)
+    monkeypatch.setattr(figures, "STUDY", tmp_path)
+    write_rows(tmp_path / "nova-drift-200-0.0100.jsonl", rows_of([[6.0, 0.5]] * 4))
+    write_rows(
+        tmp_path / "nova-drift-200-0.0100-loops.jsonl", rows_of([[6.0, 0.5]] * 3)
+    )
+    assert len(figures.arm_rows("nova", "drift")) == 4
+    assert len(figures.arm_rows("nova", "drift", "loops")) == 3
+
+
 def test_arm_selection_names_each_code_row_set(tmp_path, monkeypatch):
     assert analyse.arm_row_set("nova-white-200-0.0100") == "all"
     assert analyse.arm_row_set("nova-white-200-0.0100-loops") == "loops"

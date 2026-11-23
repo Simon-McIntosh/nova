@@ -25,7 +25,30 @@
   "plan_slug": "kernel-compile-barrier",
   "plan_version": 140,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "52c201938b18b00db5fd07914745bf6462e18358",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a79 clause 2 now fixes the allocation: one sirius job at --mem=120G, the size at which the differentiated single-point Hessian was killed (job 1338281), with a paired base arm at the section's base and a head arm, peaks recorded for both.",
+      "reason": "",
+      "when": "2026-11-23T07:31:22.109238+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "52c201938b18b00db5fd07914745bf6462e18358",
+      "commit_basis": "edit",
+      "note": "\u00a79 clause 2 now fixes the allocation: one sirius job at --mem=120G, the size at which the differentiated single-point Hessian was killed (job 1338281), with a paired base arm at the section's base and a head arm, peaks recorded for both.",
+      "reason": "",
+      "when": "2026-11-23T07:31:22.109238+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/kernel-compile-barrier/r-20261123T071813359583-plan-review-of-kernel-compile-barrier.json",
   "review_run_id": "r-20261123T071813359583-plan-review-of-kernel-compile-barrier",
   "reviewed_blob_sha": "fa66a0eced108540fc433d8e581983b71588d3a3",
   "rubric": "content",

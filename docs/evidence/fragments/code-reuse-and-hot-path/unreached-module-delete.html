@@ -167,9 +167,11 @@
     reached <strong>4%</strong> of its 10937 collected items when the attempt was
     stopped, which is the rate above stated by this node's own run. Second the
     scope: this run is fenced to this record and its figures, which hold no test
-    file, so the suite command armed for it resolves over
-    <code>{node_test_files}</code> to no target and the run records
-    <code>suite_gate: unarmed</code>. A suite delta is therefore not this node's
+    file, so the suite command armed for it &mdash; the lane's own
+    <code>pytest</code> invocation with this run's collectible test files
+    substituted where its test-file list belongs &mdash; resolves to no target:
+    the list is empty, so the resolved command is the empty string, and the run
+    records <code>suite_gate: unarmed</code>. A suite delta is therefore not this node's
     to measure, and claiming one would report a measurement the run never made.
     Rather than leave the deletion ungated, the gate was chosen to test the only
     failure mode a pure file deletion can produce, and it was run as one job per
@@ -265,6 +267,21 @@
     documents, which have to name what they record. The check is
     <code>absence-check.sh</code> in the run directory and its output is
     <code>absence.log</code> beside it.</p>
+    <p id="unreached-module-delete-absence-guard">That check is evidence, not a
+    guard, and the difference is the next thing this record owes. Nothing
+    committed to the repository reddens if a later change imports one of the 24
+    modules or writes one of their names: <code>absence-check.sh</code> and the
+    import sweep both live in the run directory, and the two committed tests
+    that come closest do not cover them &mdash;
+    <code>tests/test_base_install_imports.py</code> imports four named modules
+    through a subprocess that blocks the 3D stack, not every module the package
+    ships, so a deleted module imported from anywhere off those four paths would
+    not reach it. Making the check durable is a committed test: one that walks
+    the package and imports each module, and one that reads the tracked files
+    for the 24 dotted names. Adding a test file is a change outside this round's
+    write scope, which is this record and its figures, so the record names the
+    debt and the shape of its discharge rather than claiming a guard it does not
+    have.</p>
 
     <h3 id="unreached-module-delete-limits">What this record does not claim</h3>
     <p>It does not claim the full test suite is green: that run was not
@@ -284,31 +301,50 @@
     imas-ambix source tree; <code>delete.py</code> reads the scan receipt and
     the map; <code>receipt.py</code> composes the JSON twin from both.</p>
     <p id="unreached-module-delete-import-owner">That overlap is real and is
-    stated rather than waved away, and it is also partial in a way this node
-    measured. The owner's <code>imports_of</code> reads absolute
-    <code>import</code> and <code>from X import y</code> forms; run over a
-    snippet carrying a relative import and a dynamic one it returns
-    <code>['importlib', 'mod', 'mod.thing', 'pkg.sub', 'pkg.sub.name']</code>
-    &mdash; the relative <code>from .mod import thing</code> loses its package
-    prefix, and <code>importlib.import_module("nova.foo")</code> is absent
-    entirely. For a script census that is correct, because a script imports its
-    neighbours by top-level name. For the package graph it is not: a module
-    deleted from <code>nova/</code> is named by its dotted package path, so an
-    unqualified <code>mod</code> would not refuse it and a dynamic import would
-    vanish from its edge set. <code>scan.py</code> resolves both
+    stated rather than waved away, and both halves of the reason this record's
+    driver does not use the owner are measured. First the capability: the
+    owner's <code>imports_of</code> reads absolute <code>import</code> and
+    <code>from X import y</code> forms and nothing else. Run over a snippet
+    carrying a relative import, a package import and two dynamic ones, it
+    returns <code>['importlib', 'mod', 'mod.thing', 'pkg.sub']</code>: the
+    relative <code>from .mod import thing</code> loses its package prefix, and
+    both <code>importlib.import_module("nova.function.export")</code> and
+    <code>__import__("nova.other")</code> are absent entirely. For a script
+    census that is correct, because a script imports its neighbours by top-level
+    name. For the package graph it is not: a module deleted from
+    <code>nova/</code> is named by its dotted package path, so an unqualified
+    <code>mod</code> refuses nothing and a dynamic import vanishes from its edge
+    set. <code>scan.py</code> resolves both
     (<code>resolve(owner, level, module, pkg)</code> and constant-string
     <code>import_module</code>/<code>__import__</code> arguments) for that
-    reason. Folding the two together means teaching the owner relative-prefix
-    resolution and dynamic-import strings, which is a change to
-    <code>benchmarks/</code> and outside this round's write scope; the drivers
-    are therefore published in this record, byte-identical to the copies that
-    produced the receipt, so any reader can extract and re-run them without the
-    run directory.<br><br>
+    reason. Second the file, which settles the question: at revision
+    <code>348ed92c</code> and at this record's head,
+    <code>benchmarks/scripts_census.py</code> does not parse at all.
+    <code>ast.parse</code> stops at line 417, <code>except OSError,
+    ValueError:</code>, with <code>SyntaxError: multiple exception types must be
+    parenthesized</code>; the two-argument <code>except</code> is Python 2
+    syntax, introduced in commit <code>6ac00cda2</code>. A module that does not
+    parse cannot be imported, so no wrapper can call <code>imports_of</code> in
+    either revision, and the duplication cannot be removed from this side. The
+    capability measurement above is therefore taken by lifting the two helper
+    definitions out of the file's own text rather than by importing it. The
+    discharge belongs to the owner: repair the syntax, teach it relative-prefix
+    and dynamic-string resolution, then delete this record's copy. Both are
+    changes to <code>benchmarks/</code>, outside this round's write scope, and
+    the parse failure is reported as a live defect because the census driver
+    cannot run at all in that state. Until then the drivers are published here,
+    byte-identical to the copies that produced the receipt, so any reader can
+    extract and re-run them without the run directory.<br><br>
     <code>python3 scan.py --base &lt;tree&gt; --map &lt;hot-path-map.json&gt; --census
     &lt;bench-scripts-census.json&gt; --ambix &lt;imas-ambix&gt; --plans-dir
     &lt;tree&gt;/docs/plans --live-worktrees &lt;list&gt; --out scan.json</code><br>
     <code>python3 delete.py --base &lt;tree&gt; --scan scan.json --map
-    &lt;hot-path-map.json&gt; --offer nova/equilibrium/forward.py</code></p>
+    &lt;hot-path-map.json&gt; --offer nova/equilibrium/forward.py</code><br>
+    <code>python3 receipt.py --root &lt;run dir&gt; --map &lt;hot-path-map.json&gt;
+    --base-rev &lt;base&gt; --head-rev &lt;head&gt;</code> &mdash; every input is an
+    option and each default is the value this node used, so the composer runs
+    against any copy of the same inputs; run with the defaults against the run
+    directory's own inputs it regenerates the committed twin byte for byte.</p>
     <p id="unreached-module-delete-rederive-run">Run from a source tree at the
     base revision, the extracted drivers reproduce this record's verdicts: the
     re-derived scan reports <strong>203</strong> candidates, <strong>178</strong>
@@ -322,7 +358,11 @@
     importer. The live-worktree input is environmental &mdash; 32 trees existed
     when the deployment scan ran and most have since been removed &mdash; so the
     re-derivation is taken against the base tree alone, which is a member of
-    that list at the time of the scan.</p>
+    that list at the time of the scan. The twin is reproduced the same way: the
+    <code>receipt.py</code> extracted from this record, run with its defaults
+    against the run directory's own inputs, rewrites the committed twin byte for
+    byte, so the composer published here is the one that produced the receipt
+    and not a paraphrase of it.</p>
     <p id="unreached-module-delete-rederive-control">The re-derivation is its own
     negative control. Taken against the record as it stood before these drivers
     were embedded, it fails at extraction: the earlier record carries none of the
@@ -860,18 +900,37 @@ def main():
 if __name__ == &quot;__main__&quot;:
     main()</code></pre>
 <h4 id="unreached-module-delete-appendix-receipt-py">receipt.py &#8212; the receipt composer</h4>
-    <pre><code>&quot;&quot;&quot;Compose the compact evidence receipt from the scan and both gate arms.&quot;&quot;&quot;
+    <pre><code>&quot;&quot;&quot;Compose the compact evidence receipt from the scan and both gate arms.
 
+Every input is an option, and each default is the value this node used, so the
+composer runs unchanged against another copy of the same inputs and can be
+pointed anywhere with --root, --map, --base-rev and --head-rev.
+&quot;&quot;&quot;
+
+import argparse
 import json
+import os
 
-D = &quot;/home/ITER/mcintos/.cache/nova-s33/unreached-module-delete&quot;
+DEFAULT_ROOT = &quot;/home/ITER/mcintos/.cache/nova-s33/unreached-module-delete&quot;
+DEFAULT_MAP = (&quot;/home/ITER/mcintos/Code/nova/docs/evidence/fragments/&quot;
+               &quot;code-reuse-and-hot-path/hot-path-map.json&quot;)
 HOLD = &quot;nova/utilities/ANSYS.py&quot;
-BASE_REV = &quot;348ed92c7ab08a9592a7f997d62bfec41ae687d4&quot;
-HEAD_REV = &quot;dc3a174a7ef3af431fe60bed78133aa7ac73cdc8&quot;
+DEFAULT_BASE = &quot;348ed92c7ab08a9592a7f997d62bfec41ae687d4&quot;
+DEFAULT_HEAD = &quot;dc3a174a7ef3af431fe60bed78133aa7ac73cdc8&quot;
 
+ap = argparse.ArgumentParser()
+ap.add_argument(&quot;--root&quot;,
+                default=os.environ.get(&quot;NOVA_EVIDENCE_ROOT&quot;, DEFAULT_ROOT))
+ap.add_argument(&quot;--map&quot;, default=DEFAULT_MAP)
+ap.add_argument(&quot;--base-rev&quot;, default=DEFAULT_BASE)
+ap.add_argument(&quot;--head-rev&quot;, default=DEFAULT_HEAD)
+args = ap.parse_args()
+
+D = args.root
+BASE_REV = args.base_rev
+HEAD_REV = args.head_rev
 scan = json.load(open(f&quot;{D}/scan.json&quot;))
-hmap = json.load(open(&quot;/home/ITER/mcintos/Code/nova/docs/evidence/fragments/&quot;
-                      &quot;code-reuse-and-hot-path/hot-path-map.json&quot;))
+hmap = json.load(open(args.map))
 base = json.load(open(f&quot;{D}/gate-base.json&quot;))
 head = json.load(open(f&quot;{D}/gate-head.json&quot;))
 
@@ -939,8 +998,8 @@ rec = {
         &quot;suite_delta&quot;: {
             &quot;state&quot;: &quot;unarmed&quot;,
             &quot;resolved_command&quot;: &quot;&quot;,
-            &quot;reason&quot;: &quot;the run&#x27;s fenced write scope holds no test file, so the &quot;
-                      &quot;armed &#x27;{node_test_files}&#x27; resolves to no target&quot;,
+            &quot;reason&quot;: &quot;the run&#x27;s fenced write scope holds no test file, &quot;
+                      &quot;so the armed suite command resolves to no target&quot;,
             &quot;attempted_arms&quot;: {
                 &quot;base&quot;: {&quot;job&quot;: &quot;1339391&quot;, &quot;revision&quot;: BASE_REV,
                          &quot;reached_percent&quot;: 0},

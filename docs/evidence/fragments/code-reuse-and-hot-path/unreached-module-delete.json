@@ -214,7 +214,7 @@
   "suite_delta": {
    "state": "unarmed",
    "resolved_command": "",
-   "reason": "the run's fenced write scope holds no test file, so the armed '{node_test_files}' resolves to no target",
+   "reason": "the run's fenced write scope holds no test file, so the armed suite command resolves to no target",
    "attempted_arms": {
     "base": {
      "job": "1339391",

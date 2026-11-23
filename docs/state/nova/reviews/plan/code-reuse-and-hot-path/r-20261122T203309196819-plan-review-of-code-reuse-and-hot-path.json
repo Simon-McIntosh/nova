@@ -58,6 +58,16 @@
       "note": "Each record now has a durable path under docs/evidence/fragments/code-reuse-and-hot-path/: bench-scripts-census.html (s2), bench-scripts-delete- plus batch number (s3), unreached-module-delete.html (s4), hot-path-duplicates.html (s5).",
       "reason": "",
       "when": "2026-11-23T04:54:54.519562+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "commit": "03b10519204fa44ab0084cb4fbf2839d19426606",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "s4 now treats the two routes as insufficient for reachability: a module is deleted only when it was unreached in s1 AND a static import scan finds no importer in nova/, tests/, apps/, kept scripts and benchmarks, or imas-ambix, and no package __init__ exports it. The negative control adds a module unreached in s1 whose only importer is imas-ambix, which must be refused. The s1 map bears this out: 262 of 472 modules read zero on both routes, including live code such as nova/biot/magnetisation.py.",
+      "reason": "",
+      "when": "2026-11-23T04:55:06.653452+00:00"
     }
   ],
   "responses": {
@@ -69,6 +79,15 @@
       "note": "Each record now has a durable path under docs/evidence/fragments/code-reuse-and-hot-path/: bench-scripts-census.html (s2), bench-scripts-delete- plus batch number (s3), unreached-module-delete.html (s4), hot-path-duplicates.html (s5).",
       "reason": "",
       "when": "2026-11-23T04:54:54.519562+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "commit": "03b10519204fa44ab0084cb4fbf2839d19426606",
+      "commit_basis": "edit",
+      "note": "s4 now treats the two routes as insufficient for reachability: a module is deleted only when it was unreached in s1 AND a static import scan finds no importer in nova/, tests/, apps/, kept scripts and benchmarks, or imas-ambix, and no package __init__ exports it. The negative control adds a module unreached in s1 whose only importer is imas-ambix, which must be refused. The s1 map bears this out: 262 of 472 modules read zero on both routes, including live code such as nova/biot/magnetisation.py.",
+      "reason": "",
+      "when": "2026-11-23T04:55:06.653452+00:00"
     },
     "reasoning-2": {
       "action": "noted",

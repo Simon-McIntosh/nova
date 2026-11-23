@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-23T09:40:12.753Z",
   "dispatched_at": "2026-11-23T09:28:32Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-bench-scripts-census-aa3e594fb4a3",
+      "recorded_at": "2026-11-23T10:17:23.414332+00:00"
+    }
+  },
   "findings": [
     {
       "file": "benchmarks/scripts_census.py",

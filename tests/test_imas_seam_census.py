@@ -1,8 +1,8 @@
 """Contract tests for the IMAS seam census.
 
-The census is the import-graph scan that the seam plan's machine sections read.
+The census is the import-graph scan the one-seam machine record reads.
 These tests hold the properties that make its coverage claim meaningful: every
-censused file carries a row, the classes map to the destinations the plan acts
+censused file carries a row, the classes map to the destinations the record acts
 on, the controls are populated, and the record renders the rows it counted.
 """
 
@@ -44,7 +44,7 @@ def test_every_machine_named_module_outside_imas_carries_a_row(census):
         assert rel in row_paths, rel
 
 
-def test_the_scan_reads_the_trees_the_plan_covers(census):
+def test_the_scan_reads_the_covered_trees(census):
     assert set(census_module.TREE_DIRECTORIES) <= set(census.trees)
     assert census.files_seen > 0
 
@@ -104,6 +104,19 @@ def test_duplicate_capabilities_name_both_implementations(census):
     assert "nova/catalog/mast_geometry.py:169" in row.duplicates
     other = {duplicate.rsplit(":", 1)[0] for duplicate in row.duplicates}
     assert "nova/catalog/mast_geometry.py" in other
+
+
+def test_destinations_name_the_outcome(census):
+    destinations = set(census_module.CLASS_DESTINATION.values())
+    destinations |= {row.destination for row in census.convention_rows}
+    assert destinations
+    assert not [value for value in destinations if "\u00a7" in value]
+
+
+def test_a_machine_row_names_the_machine_it_serves(census):
+    rows = {row.path: row for row in census.rows}
+    assert rows["nova/imas/mast_geometry.py"].machine == "MAST"
+    assert rows["nova/imas/diiid_machine_ids.py"].machine == "DIII-D"
 
 
 def test_no_convention_row_stays(census):

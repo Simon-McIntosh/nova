@@ -31,15 +31,14 @@ CLASS_DESTINATION = {
     "generic reader": "stays",
     "generic writer": "stays",
     "machine authoring or publication": "moves to the ingest member",
-    "machine analysis": "generalised by §3 or §4",
-    "convention conversion": "moves under §5",
-    "convention statement": "rewired in place by §5",
-    "unreached": "deleted by §2",
+    "machine analysis": "generalised when its machine's authoring moves",
+    "convention conversion": "conversion moves to the ingest member",
+    "convention statement": "rewired to the literal COCOS 17 values",
+    "unreached": "deleted",
 }
 
-CONVENTION_REWIRED = "rewired in place by §5"
-CONVENTION_MOVES = "moves under §5"
-CONVENTION_MEMBER = "moves to the ingest member"
+CONVENTION_REWIRED = "rewired to the literal COCOS 17 values"
+CONVENTION_MOVES = "conversion moves to the ingest member"
 
 CLASS_GLOSSARY = {
     "generic reader": "reads Data Dictionary IDSs, authors nothing",
@@ -142,7 +141,7 @@ class Row:
     cls: str
     basis: str
     destination: str
-    section: str
+    machine: str
     importers: tuple = ()
     solver_importers: tuple = ()
     duplicates: tuple = ()
@@ -412,19 +411,15 @@ def _classify(ref, facts, importers, referenced=frozenset()):
     return _generic_class(facts)
 
 
-def _section(ref, cls):
-    if cls == "unreached":
-        return "§2"
-    if cls.startswith("convention"):
-        return "§5"
-    if cls in ("generic reader", "generic writer"):
-        return "—"
+def _machine(ref):
     stem = ref.path.stem
     if stem.startswith("diiid"):
-        return "§4"
-    if stem.startswith("mast") or stem.startswith("machine"):
-        return "§3"
-    return "§3 or §4"
+        return "DIII-D"
+    if stem.startswith("mast"):
+        return "MAST"
+    if stem.startswith("machine"):
+        return "any machine"
+    return "—"
 
 
 def _converts_between_conventions(facts):
@@ -440,7 +435,7 @@ def _convention_destination(ref, facts, cls):
     if cls == "convention statement":
         return CONVENTION_REWIRED
     if ref.tree == "ambix":
-        return CONVENTION_MEMBER
+        return CONVENTION_MOVES
     if _converts_between_conventions(facts):
         return CONVENTION_MOVES
     return CONVENTION_REWIRED
@@ -541,7 +536,7 @@ def build_census(root, ambix_root=None):
                 cls=cls,
                 basis=basis,
                 destination=CLASS_DESTINATION[cls],
-                section=_section(ref, cls),
+                machine=_machine(ref),
                 importers=tuple(sorted(m + ":" + str(n) for m, n in row_importers)),
                 solver_importers=_solver_importers(row_importers),
                 duplicates=duplicates.get(ref.rel, ()),
@@ -640,7 +635,8 @@ def _module_table(rows, caption):
     out = [
         f"<h2>{_esc(caption)}</h2>",
         '<table class="census">',
-        "<thead><tr><th>module</th><th>class</th><th>section</th>"
+        "<thead><tr><th>module</th><th>class</th>"
+        "<th>machine</th>"
         "<th>destination</th><th>basis</th><th>importers</th>"
         "<th>solver importers</th><th>duplicate implementations</th>"
         "<th>upstream machine map</th></tr></thead>",
@@ -651,7 +647,7 @@ def _module_table(rows, caption):
             "<tr>"
             f'<td class="path">{_esc(row.path)}</td>'
             f'<td class="cls">{_esc(row.cls)}</td>'
-            f"<td>{_esc(row.section)}</td>"
+            f"<td>{_esc(row.machine)}</td>"
             f"<td>{_esc(row.destination)}</td>"
             f"<td>{_esc(row.basis)}</td>"
             f"<td>{len(row.importers)}</td>"
@@ -831,7 +827,7 @@ def _shots_html(census):
         [
             "<h2>Reference shots</h2>",
             "<p>The shot per machine whose IDSs the machine-analysis "
-            "sections compare.</p>",
+            "machine comparisons read.</p>",
             '<table class="census">',
             "<thead><tr><th>machine</th><th>shot</th><th>source</th></tr>",
             "</thead>",
@@ -897,7 +893,7 @@ def census_payload(census):
                 "module": row.module,
                 "path": row.path,
                 "class": row.cls,
-                "section": row.section,
+                "machine": row.machine,
                 "destination": row.destination,
                 "basis": row.basis,
                 "importers": list(row.importers),

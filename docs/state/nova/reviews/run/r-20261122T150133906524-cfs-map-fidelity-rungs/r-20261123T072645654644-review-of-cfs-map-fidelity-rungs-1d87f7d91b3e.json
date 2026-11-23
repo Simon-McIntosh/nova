@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:4011",
+    "nova/equilibrium/forward_operator.py:3192",
+    "nova/equilibrium/forward_operator.py:3901"
+  ],
+  "completed_at": "2026-11-23T07:42:04.650Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-23T07:27:26Z",
+  "findings": [
+    {
+      "file": "tests/test_gs_map_fidelity.py",
+      "line": 149,
+      "severity": "non-blocking",
+      "summary": "_measure_map calls _carrier(name, cells), which returns a fully built build_carrier record, then calls measure_arm(...), which calls build_carrier a second time internally and whose returned built is discarded at line 150; the live 2,000-cell rung test therefore repeats the expensive carrier build (analytic state, operator, closed-form current target, reference image) for every row. The published row is correct; the cost is gate wall-clock in the one rung that is measured live."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T150133906524-cfs-map-fidelity-rungs/manifest.md",
+      "line": 5,
+      "severity": "non-blocking",
+      "summary": "orientation_write_paths omits tests/test_certificate_exterior_support.py, and outside_scope describes that file as outside the listed write paths, yet the change edits it and the node's declared write paths include it. The diff is in scope against the declared paths; the manifest record contradicts itself on its own scope."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified three production call sites the test exercises \u2014 nova/equilibrium/forward_operator.py:4011 (flux_map), :3192 (read) and :3901 (current_moment_image) \u2014 all present at the reviewed head; no production code was changed (the diff touches no nova/ path), so these are the runtime seams the node reaches.",
+    "diff": "Read commit by commit from 82a755fd to 1d87f7d91: twelve commits that net six changed paths \u2014 one test file (tests/test_gs_map_fidelity.py, +455), the shared measurement seam in tests/test_certificate_exterior_support.py (+167/-53), the evidence fragment (+304) and two SVGs, plus scripts/certificate_map_fidelity/run_rows.sh (+58) \u2014 every path inside the declared write paths.",
+    "done_when": "done_when asks (1) a test asserting map relative sup at most 1e-2 at 2,000/5,000/10,000 for both cases, (2) a JVP-vs-central test including the boundary-flux component with a negative control failing by test id, and (3) a record fragment with the rung table, restated booking terms and 10,000-cell panels; tests/test_gs_map_fidelity.py:177 measures the 2,000-cell rung live and reads 5k/10k from the fragment, :215 and :252 bind the map and boundary tangents, gate-negative-control.log fails test_map_boundary_flux_jvp_matches_central_difference by id (EXIT=1), and the fragment carries the rows and the panels.",
+    "goal": "The node goal is the brief's three clauses: measure the exact-mode map at the 2,000/5,000/10,000 rungs on both analytic cases with the certificate exterior on the exact support; commit a map-level JVP regression with the boundary-flux component and a restored-clamp negative control; and record the rows and 10,000-cell panels. All three are delivered at 1d87f7d91.",
+    "manifest": "Read; it reports status complete, names the gate logs (gate-rows.log, gate-rows-2000.log, gate-jvp.log, gate-negative-control.log, owner-control*.log), the two suite arms (baseline 3 passed at 82a755fd, after 11 passed at 1d87f7d91, both EXIT=0), and states no field contradicts the artefacts; its orientation_write_paths omits one path the diff edits (see finding).",
+    "write_paths": "Read the six paths in the diff against the declared write paths; every one is inside the set (the two SVG figures fall under the declared docs/figures/converged-forward-solve/cfs-map-fidelity-rungs directory), and no path outside them appears."
+  },
+  "justifications": {
+    "durability": "The 2,000-cell rung is measured live in tests/test_gs_map_fidelity.py:177-192, so a map or exterior-seam regression reddens it; :215 guards the map tangent with a non-triviality check (np.max(np.abs(finite)) > 0) and :288 does the same for the boundary arm, and NOVA_DUMMY_SADDLE_CLAMP=1 reddens test_map_boundary_flux_jvp_matches_central_difference by id (gate-negative-control.log EXIT=1) \u2014 the 5,000- and 10,000-cell rows at :188 are read from the committed fragment, which the brief permits and the docstring states, so a regression confined to those rungs would not redden the gate.",
+    "evidence": "gate-rows.log ends 6 passed in 3217.52s EXIT=0, gate-jvp.log ends 2 passed in 121.81s EXIT=0 with MAP_JVP_RELATIVE_SUP=2.8861443945634642e-08 and BOUNDARY_JVP=0.97246858630808686 against CENTRAL=0.97246859433637478, gate-rows-2000.log ends 2 passed in 680.11s EXIT=0 at 2de405807 measuring the 2,000-cell rows live (limited 6.7747e-05, diverted 5.7804e-03), and the fragment's JSON block reconciles exactly with the ladder rows-*.log (e.g. rows-weak-rotation-reactor-static-10000.log map_relative_sup 2.00393037957143e-05 matches the fragment).",
+    "fit": "tests/test_gs_map_fidelity.py:1-45 and :292-410 follow the surrounding idiom \u2014 configure_dtypes before any array, the nova.media poloidal painters, descriptive names with no plan labels \u2014 and the figure at :341 draws both null sets with a second hue, a per-panel direct label and one figure legend, per nova AGENTS.md Plotting rules.",
+    "goal_fidelity": "tests/test_gs_map_fidelity.py:177 establishes the six case-rung rows of the fixed 1e-2 bound (live at 2,000, receipt at 5k/10k), :215 and :252 bind the map and boundary-flux tangents against central differences, and docs/evidence/fragments/converged-forward-solve/cfs-map-fidelity-rungs.html carries the rung table, the restated booking terms (3.31e-4 and 2.78e-3) and the two 10,000-cell panels, so all three brief clauses land.",
+    "reuse": "tests/test_gs_map_fidelity.py:124 and :144 reuse the certificate-support gate's build_carrier and measure_arm by importing them from tests/test_certificate_exterior_support.py, which now exports that seam; the negative-control answer check reports 0 shared four-line blocks and 0 shared recipe lines at the head (negative-control-answers.log), so the earlier duplication is resolved and the owner is extended rather than forked.",
+    "scope_discipline": "Every path in 82a755fd..1d87f7d91 is inside the declared write paths \u2014 tests/test_gs_map_fidelity.py, tests/test_certificate_exterior_support.py, scripts/certificate_map_fidelity/run_rows.sh, the fragment and the two figures \u2014 and no nova/ file is touched; the declared tests/test_gs_runtime_operands.py is untouched."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T072645654644-review-of-cfs-map-fidelity-rungs-1d87f7d91b3e",
+  "reviewed_base_sha": "82a755fd6433bec11db426918f2c78ba172fd81e",
+  "reviewed_head_sha": "1d87f7d91b3e307eeed1d243f09269cda8581b1f",
+  "reviewed_run_id": "r-20261122T150133906524-cfs-map-fidelity-rungs",
+  "rubric": "landed",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:42:17.934636+00:00",
+  "total": 109
+}

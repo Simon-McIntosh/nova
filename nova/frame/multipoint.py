@@ -71,30 +71,80 @@ class MultiPoint(metamethod.MultiPoint):
         self.build()
 
     def sort_link(self):
-        """Ensure links point to a monotonically earlier row."""
-        for position, link in enumerate(self.frame.link):
-            if link and link in self.frame.index:
-                name = self.frame.index[position]
-                link_index = self.frame.index.get_loc(link)
-                if link_index > position:  # reverse
-                    self.frame.at[link, "link"] = name
-                    self.frame.loc[np.asarray(self.frame.link) == link, "link"] = name
-                    self.frame.at[name, "link"] = ""
+        """Ensure links point to a monotonically earlier row.
+
+        Resolve every link to its first matching row position in one indexer
+        pass. A frame whose links all point backwards is left untouched, so the
+        common case costs one indexer build and no rewrites: the frame is
+        re-sorted after every inserted element, and a per-row label scan would
+        make that rebuild quadratic in the accumulated row count.
+
+        Where a link points forward the reversal is applied in row order,
+        carrying each link group with the row that becomes its new target:
+        the row that named a later label takes its place, every row pointing at
+        that label is re-pointed at it, and its own link is cleared.
+        """
+        link = np.asarray(self.frame.link, dtype=object)
+        index = self.frame.index
+        nonempty = np.array([bool(value) for value in link], dtype=bool)
+        if not nonempty.any():
+            return
+        lookup: dict[object, int] = {}
+        for row, label in enumerate(np.asarray(index, dtype=object)):
+            lookup.setdefault(label, row)
+        rows = np.arange(len(link), dtype=int)
+        forward = nonempty & (
+            np.fromiter(
+                (lookup.get(value, -1) for value in link), dtype=int, count=len(link)
+            )
+            > rows
+        )
+        if not forward.any():
+            return
+        order = link.tolist()
+        groups: dict[object, list[int]] = {}
+        for row in range(int(forward.argmax()), len(order)):
+            if order[row]:
+                groups.setdefault(order[row], []).append(row)
+        for row, target in enumerate(order):
+            if not target:
+                continue
+            target_row = lookup.get(target, -1)
+            if target_row <= row:
+                continue
+            name = index[row]
+            for member in groups.pop(target, ()):
+                if order[member] != target:
+                    continue
+                if member == row:
+                    order[member] = ""
+                else:
+                    order[member] = name
+                    groups.setdefault(name, []).append(member)
+            if order[target_row] != name:
+                order[target_row] = name
+                groups.setdefault(name, []).append(target_row)
+        self.frame.link = np.array(order, dtype=object)
 
     def build(self):
-        """Compute the ref / subref reduction indices from the links."""
+        """Compute the ref / subref reduction indices from the links.
+
+        Labels absent from the index resolve to the first index entry whose
+        name shares the label's leading prefix, and to row 0 when none does.
+        Resolving that per row rescanned the index, which made the reduction
+        quadratic and ran once per inserted element.
+        """
         range_index = np.arange(len(self.frame), dtype=int)
         link = np.asarray(self.frame.link)
         self.indexer = list(range_index[link == ""])
         self.index = self.frame.index[self.indexer]
         ref = self.frame.index.get_indexer(link)
-        if np.any(ref == -1):
-            split = [name.split("_")[0] for name in self.frame.index]
-            ref[ref == -1] = [
-                split.index(value) if value in split else 0
-                for position, value in enumerate(link)
-                if ref[position] == -1
-            ]
+        missing = ref == -1
+        if missing.any():
+            prefix: dict[str, int] = {}
+            for position, name in enumerate(np.asarray(self.frame.index, dtype=object)):
+                prefix.setdefault(str(name).split("_")[0], position)
+            ref[missing] = [prefix.get(value, 0) for value in link[missing]]
         ref[self.indexer] = range_index[self.indexer]
         self.frame.ref = ref
         subref = np.zeros(len(self.frame), dtype=int)

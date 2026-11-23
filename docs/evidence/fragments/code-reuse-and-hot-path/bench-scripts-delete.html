@@ -39,8 +39,9 @@
       <tr><td>deleted after the first repair round</td><td>562</td><td>163332</td></tr>
       <tr><td>restored in the first two rounds, including sibling imports</td><td>54</td><td>22099</td></tr>
       <tr><td>restored: owned scope and an unpinned citation</td><td>6</td><td>1221</td></tr>
-      <tr><td>all restored files</td><td>60</td><td>23320</td></tr>
-      <tr><td>deleted at the final measured head</td><td>556</td><td>162111</td></tr>
+      <tr><td>restored by the kept-reference closure</td><td>86</td><td>49164</td></tr>
+      <tr><td>all restored files</td><td>146</td><td>72484</td></tr>
+      <tr><td>deleted at the final measured head</td><td>470</td><td>112947</td></tr>
     </table>
 
     <h3 id="bench-scripts-delete-batches">Batches</h3>
@@ -61,7 +62,10 @@
       <tr><td>restored in the repair round</td><td>52</td><td>-21657</td><td>163332</td></tr>
       <tr><td>restored owned scripts</td><td>5</td><td>-994</td><td>162338</td></tr>
       <tr><td>restored benchmark with an unpinned citation</td><td>1</td><td>-227</td><td>162111</td></tr>
-      <tr><td>net at final measured head</td><td>556</td><td>162111</td><td>162111</td></tr>
+      <tr><td>kept-reference restore pass 1</td><td>80</td><td>-43342</td><td>118769</td></tr>
+      <tr><td>kept-reference restore pass 2</td><td>4</td><td>-3765</td><td>115004</td></tr>
+      <tr><td>kept-reference restore pass 3</td><td>2</td><td>-2057</td><td>112947</td></tr>
+      <tr><td>net at final measured head</td><td>470</td><td>112947</td><td>112947</td></tr>
     </table>
 
     <h3 id="bench-scripts-delete-withheld">Withheld paths</h3>
@@ -220,23 +224,22 @@
       <tr><td>this repair</td><td>1221</td></tr>
       <tr><td>all restoration rounds</td><td>23320</td></tr>
     </table>
-    <p>The seven deletion batches removed 616 files and 185431 lines. All
-    restoration rounds retain 60 files and 23320 lines, leaving 556 files and
-    162111 lines removed: <code>185431 - 23320 = 162111</code>. The earlier
+    <p>The seven deletion batches removed 616 files and 185431 lines. Before
+    the kept-reference closure, restoration rounds retained 60 files and
+    23320 lines, leaving 556 files and 162111 lines removed: <code>185431 - 23320 = 162111</code>. The earlier
     aggregate restoration row omitted the two sibling imports' 442 lines;
     the corrected total includes them.</p>
-    <h3 id="bench-scripts-delete-repair-final-verification">Final source-head deletion gate</h3>
+    <h3 id="bench-scripts-delete-repair-final-verification">Gate before dependency restoration</h3>
     <p>One <code>all_debug</code> job, <code>1340500</code>, ran the locked
     deletion check at source head <code>ff6b1e5d746f7410f4b050612a9e5e001746c705</code>
     against batch base <code>348ed92c7ab08a9592a7f997d62bfec41ae687d4</code>. The log and
     JSON receipts live under <code>~/.cache/nova-s33/bench-scripts-delete-repair/</code>.
-    This record-only update follows that measured source head; no product,
-    driver or test change follows the measurement.</p>
+    That measurement preceded the kept-reference restorations recorded below.</p>
     <table id="bench-scripts-delete-repair-final-verification-table">
       <tr><th>measure</th><th>base</th><th>head / delta</th></tr>
       <tr><td>fresh-interpreter module imports</td><td>473 modules; 23 failures</td><td>473 modules; 23 failures; 0 new failures</td></tr>
       <tr><td>whole tests tree collection</td><td>10934 tests collected in 28.11s; EXIT=0</td><td>10930 tests collected in 28.44s; EXIT=0; 0 new collection errors</td></tr>
-      <tr><td>focused set</td><td>0 test files</td><td>identical failure ids: []</td></tr>
+      <tr><td>focused set</td><td>initial selector: 0 files</td><td>superseded: directory consumers and population guards are included in the final gate</td></tr>
       <tr><td>whole tracked-tree absence check</td><td>&mdash;</td><td>556 paths remain deleted; 1241 reference candidates not admitted by the conservative evidence exemption</td></tr>
       <tr><td>deletion gate</td><td>&mdash;</td><td><code>FAIL; EXIT=1</code></td></tr>
     </table>
@@ -256,6 +259,145 @@
     focused-test selector. Evidence exemptions require a revision that resolves
     to the cited file, checked through one batched <code>git cat-file</code>
     operation.</p>
+
+    <h3 id="bench-scripts-delete-repair-kept-reference-closure">Kept references retain their drivers</h3>
+    <p>The reference rule is applied to a fixed point: a deleted driver named
+    by a kept tracked file is restored from
+    <code>348ed92c7ab08a9592a7f997d62bfec41ae687d4</code>, and each restored
+    file becomes a kept consumer on the next pass. The only exemption is a
+    historical evidence record with a revision that resolves to its cited
+    driver. Executable consumers remain consumers wherever they are stored;
+    run receipts under <code>docs/state/</code> are historical evidence when
+    their cited revision resolves. Kept files are not edited to hide a
+    reference.</p>
+    <p>The closure restores 86 further files and 49164 lines.
+    Together with the six scoped restorations and the earlier rounds, the
+    total is 146 retained files and 72484 restored lines.
+    The seven deletion batches therefore leave 470 files and 112947
+    lines removed: <code>185431 - 72484 = 112947</code>.</p>
+    <table id="bench-scripts-delete-repair-kept-reference-table">
+      <tr><th>restored path</th><th>lines</th><th>kept consumer or unpinned record</th></tr>
+      <tr><td><code>benchmarks/arc_section_cost.py</code></td><td>251</td><td><code>docs/polybow-arc-section.html</code></td></tr>
+      <tr><td><code>benchmarks/bound_failability_census.py</code></td><td>373</td><td><code>docs/state/nova/manifests/bound-failability-sweep.md</code></td></tr>
+      <tr><td><code>benchmarks/bound_reference_classification.py</code></td><td>423</td><td><code>docs/plans/roundoff-scale-acceptance-bounds.html</code></td></tr>
+      <tr><td><code>benchmarks/census_kernel_timing.py</code></td><td>1297</td><td><code>docs/plans/cut-cell-current-attribution.html</code></td></tr>
+      <tr><td><code>benchmarks/class_coreachability.py</code></td><td>488</td><td><code>docs/state/nova/manifests/class-coreachability.md</code></td></tr>
+      <tr><td><code>benchmarks/clipped_coupling_order.py</code></td><td>399</td><td><code>docs/research/forward-accuracy-reuse-map.html</code></td></tr>
+      <tr><td><code>benchmarks/coil_construction.py</code></td><td>67</td><td><code>docs/nova-spine-refactor.html</code></td></tr>
+      <tr><td><code>benchmarks/compile_host_memory.py</code></td><td>490</td><td><code>docs/state/nova/reviews/plan/cpu-compile-abort/r-20261004T164421269786-plan-review-of-cpu-compile-abort.json</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/compiled_outer_loop_trace.py</code></td><td>1016</td><td><code>docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/run_outer_loop_trace.sbatch</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/constraint_shape_receipt.py</code></td><td>1217</td><td><code>docs/plans/constraint-augmented-newton-krylov.html</code></td></tr>
+      <tr><td><code>benchmarks/cpu_solve_discriminator.py</code></td><td>1194</td><td><code>docs/plans/cpu-solve-viability.html</code></td></tr>
+      <tr><td><code>benchmarks/cs_winding_inductance.py</code></td><td>1211</td><td><code>docs/nova-3d-native.html</code></td></tr>
+      <tr><td><code>benchmarks/diiid_containment_recheck.py</code></td><td>279</td><td><code>docs/state/nova/manifests/diiid-containment-recheck.md</code></td></tr>
+      <tr><td><code>benchmarks/diiid_prescribed_profile_forward.py</code></td><td>312</td><td><code>docs/figures/diiid-vertical-force-balance/prescribed-profile-prototype/run-frame.sh</code></td></tr>
+      <tr><td><code>benchmarks/diiid_residual_decomposition.py</code></td><td>589</td><td><code>docs/plans/diiid-vertical-force-balance.html</code></td></tr>
+      <tr><td><code>benchmarks/diiid_target_current_digest_probe.py</code></td><td>223</td><td><code>docs/plans/diiid-vertical-force-balance.html</code></td></tr>
+      <tr><td><code>benchmarks/diiid_vacuum_from_description.py</code></td><td>507</td><td><code>docs/plans/diiid-vertical-force-balance.html</code></td></tr>
+      <tr><td><code>benchmarks/diiid_vacuum_sensitivity_sweep.py</code></td><td>257</td><td><code>docs/research/diiid-vacuum-gate-diagnosis.html</code></td></tr>
+      <tr><td><code>benchmarks/divergence_floor_scaling.py</code></td><td>457</td><td><code>docs/plans/roundoff-scale-acceptance-bounds.html</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/early_frame_placement_test.py</code></td><td>916</td><td><code>docs/figures/playable-forward-solve/early-frame-placement/run_placement_test.sh</code></td></tr>
+      <tr><td><code>benchmarks/efit_absent_quantity_triage.py</code></td><td>581</td><td><code>docs/plans/equilibrium-metric-parity.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_affine_extraction.py</code></td><td>618</td><td><code>docs/plans/diiid-forward-onboarding.html</code> (+2 more)</td></tr>
+      <tr><td><code>benchmarks/efit_cell_current_representation.py</code></td><td>625</td><td><code>docs/plans/efit-flux-decomposition.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_current_sign_census.py</code></td><td>328</td><td><code>docs/plans/efit-map-inversion.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_derived_quantity_census.py</code></td><td>640</td><td><code>docs/plans/equilibrium-metric-parity.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_filament_truncation_contribution.py</code></td><td>446</td><td><code>docs/plans/efit-flux-decomposition.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_section_shape_zeta_order.py</code></td><td>362</td><td><code>docs/plans/efit-flux-decomposition.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_third_term_separation.py</code></td><td>280</td><td><code>docs/plans/efit-map-inversion.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_xpoint_fit_state.py</code></td><td>406</td><td><code>docs/plans/efit-map-inversion.html</code></td></tr>
+      <tr><td><code>benchmarks/empty_exact_polygon_probe.py</code></td><td>640</td><td><code>docs/figures/cut-cell-current-attribution/empty-exact-polygon/run.log</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/exact_clip_warm_cost.py</code></td><td>1021</td><td><code>docs/plans/exact-clip-moment-quadrature.html</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/flux_surface_flood.py</code></td><td>95</td><td><code>docs/plans/spine-boundary-accelerator.html</code></td></tr>
+      <tr><td><code>benchmarks/force_target_rule.py</code></td><td>241</td><td><code>benchmarks/coil_section_cost.py</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/fork_arming_economics.py</code></td><td>325</td><td><code>docs/plans/dual-branch-selection.html</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/global_surface_clip_rescore.py</code></td><td>502</td><td><code>docs/plans/curved-clip-global-surface.html</code></td></tr>
+      <tr><td><code>benchmarks/inner_solve_accuracy.py</code></td><td>514</td><td><code>docs/state/nova/manifests/inner-solve-accuracy.md</code></td></tr>
+      <tr><td><code>benchmarks/iter_saddle_resolution.py</code></td><td>312</td><td><code>docs/state/nova/manifests/iter-saddle-resolution.md</code></td></tr>
+      <tr><td><code>benchmarks/lane_resource_accumulation.py</code></td><td>679</td><td><code>docs/plans/nova-test-lane-health.html</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/moment_map_derivative_contract.py</code></td><td>252</td><td><code>docs/plans/forward-solver-route-integrity.html</code></td></tr>
+      <tr><td><code>benchmarks/newton_cycle_mask_switch.py</code></td><td>591</td><td><code>docs/state/nova/manifests/newton-cycle-mask-switch.md</code></td></tr>
+      <tr><td><code>benchmarks/null_census_device_benchmark.py</code></td><td>382</td><td><code>docs/state/nova/manifests/dual-sweep-device-lock.md</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/order_vs_mesh_adjudication.py</code></td><td>588</td><td><code>docs/state/nova/reviews/plan/diiid-forward-onboarding/r-20261006T091918405157-plan-review-of-diiid-forward-onboarding.json</code></td></tr>
+      <tr><td><code>benchmarks/passive_closure_mesh_response.py</code></td><td>334</td><td><code>docs/mast-catalog-gpu-solve.html</code></td></tr>
+      <tr><td><code>benchmarks/polish_support_performance.py</code></td><td>1157</td><td><code>docs/figures/polish-support-performance/shared-spline/measure.sh</code> (+2 more)</td></tr>
+      <tr><td><code>benchmarks/polybeam_section_cost.py</code></td><td>653</td><td><code>docs/polybeam-prism-section.html</code></td></tr>
+      <tr><td><code>benchmarks/portfolio_warm_start.py</code></td><td>1383</td><td><code>docs/plans/dual-basin-solve.html</code></td></tr>
+      <tr><td><code>benchmarks/private_region_parallel_kernel.py</code></td><td>494</td><td><code>docs/plans/cut-cell-current-attribution.html</code></td></tr>
+      <tr><td><code>benchmarks/receipt_topology_check.py</code></td><td>251</td><td><code>docs/state/nova/reviews/plan/forward-solver-route-integrity/r-20261019T081156107541-plan-review-of-forward-solver-route-integrity.json</code></td></tr>
+      <tr><td><code>benchmarks/recovery_ladder_telemetry.py</code></td><td>99</td><td><code>docs/plans/forward-solver-route-integrity.html</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/reduced_newton_rows.py</code></td><td>1035</td><td><code>docs/figures/millisecond-converged-solve/adaptive-refresh/run_measurement.sbatch</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/sol_current_demonstration.py</code></td><td>966</td><td><code>docs/plans/sol-current-demonstration.html</code></td></tr>
+      <tr><td><code>benchmarks/solve_profile_kernel_count.py</code></td><td>538</td><td><code>docs/figures/millisecond-converged-solve/solve-profile/run_measurement.sbatch</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/steep_edge_moment_demonstration.py</code></td><td>735</td><td><code>docs/plans/plasma-edge-current-representation.html</code></td></tr>
+      <tr><td><code>benchmarks/tiled_assembly.py</code></td><td>168</td><td><code>benchmarks/gpu_pair_sharding.py</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/vertex_ring_census.py</code></td><td>1887</td><td><code>docs/state/nova/reviews/plan/topology-read-containment-and-rebank/r-20261005T154908754876-plan-review-of-topology-read-containment-and-rebank.json</code></td></tr>
+      <tr><td><code>benchmarks/vertical_force_decomposition.py</code></td><td>1495</td><td><code>docs/plans/solver-convergence-regression.html</code></td></tr>
+      <tr><td><code>benchmarks/wholecell_rows_reposed_fixture.py</code></td><td>319</td><td><code>docs/state/nova/reviews/run/r-20260922T185213450631-fsa-locate-the-renderers-of-the-dark-cut-cell-figure-families/r-20260922T194617097714-review-of-fsa-locate-the-renderers-of-the-dark-cut-cell-figure-families.json</code></td></tr>
+      <tr><td><code>benchmarks/wound_coil_finite_section.py</code></td><td>2190</td><td><code>docs/coil-conductor-fidelity.html</code></td></tr>
+      <tr><td><code>benchmarks/wound_coil_inductance.py</code></td><td>1658</td><td><code>docs/coil-conductor-fidelity.html</code></td></tr>
+      <tr><td><code>benchmarks/zero_residual_check.py</code></td><td>967</td><td><code>docs/state/nova/reviews/plan/figure-and-solver-audit/r-20261004T170538395135-plan-review-of-figure-and-solver-audit.json</code></td></tr>
+      <tr><td><code>scripts/device_kernel_port/measure_unpaired_compile.py</code></td><td>356</td><td><code>docs/state/nova/reviews/plan/converged-forward-solve/r-20261004T172220967085-plan-review-of-converged-forward-solve.json</code></td></tr>
+      <tr><td><code>scripts/mast_reference_evidence/contours.py</code></td><td>824</td><td><code>docs/plans/machine-description-retirement.html</code> (+3 more)</td></tr>
+      <tr><td><code>scripts/mast_slice_census/census.py</code></td><td>370</td><td><code>docs/mast-catalog-gpu-solve.html</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_drive_barrier/plot.py</code></td><td>114</td><td><code>docs/state/nova/reviews/run/r-20261108T051046088854-bank-fold-vertical/r-20261108T061723286814-review-of-bank-fold-vertical-c1cf8bf25ae9.json</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_fold_radial/condition.py</code></td><td>30</td><td><code>scripts/prototypes/bank_fold_radial/measure.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_fold_vertical/condition.py</code></td><td>53</td><td><code>scripts/prototypes/bank_fold_vertical/measure.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_hessian_blowup/geometry.py</code></td><td>55</td><td><code>docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_route_rows/boundary_gap.py</code></td><td>143</td><td><code>docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_solve_trace_four_read/capture.py</code></td><td>44</td><td><code>scripts/prototypes/bank_solve_trace_four_read/device.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_step_batch/fixture.py</code></td><td>74</td><td><code>scripts/prototypes/bank_step_batch/measure.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/diiid_finite_edge_booking/render.py</code></td><td>249</td><td><code>docs/state/nova/runs/r-20261114T103416820235-ilf-true-outline-read.json</code> (+2 more)</td></tr>
+      <tr><td><code>scripts/prototypes/diiid_finite_edge_flux/summarize.py</code></td><td>135</td><td><code>docs/plans/diiid-vertical-force-balance.html</code></td></tr>
+      <tr><td><code>scripts/prototypes/diiid_xpoint_coil_correction/fit.py</code></td><td>91</td><td><code>docs/plans/diiid-vertical-force-balance.html</code></td></tr>
+      <tr><td><code>scripts/prototypes/diiid_xpoint_profile_extent/render.py</code></td><td>505</td><td><code>docs/state/nova/runs/r-20261114T074150540287-ilf-six-limb-reference.json</code> (+3 more)</td></tr>
+      <tr><td><code>scripts/prototypes/lean_map/newton.py</code></td><td>128</td><td><code>scripts/prototypes/lean_map/probe_forward.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/stored_state_refusals/report.py</code></td><td>404</td><td><code>docs/state/nova/runs/r-20261114T174204179431-smfp-autodiff-free-newton.json</code> (+6 more)</td></tr>
+      <tr><td><code>scripts/prototypes/stored_state_refusals/run_cases.py</code></td><td>325</td><td><code>docs/state/nova/runs/r-20261114T174204179431-smfp-autodiff-free-newton.json</code> (+6 more)</td></tr>
+      <tr><td><code>scripts/prototypes/tracked_read_batch/profile_kernels.py</code></td><td>227</td><td><code>scripts/prototypes/tracked_read_steady_batch/measure.py</code></td></tr>
+      <tr><td><code>scripts/reconstructed_plasma_source/baseline_sign.py</code></td><td>49</td><td><code>docs/state/nova/reviews/plan/dd-cocos-ingest/r-20261022T130300161334-plan-review-of-dd-cocos-ingest.json</code></td></tr>
+      <tr><td><code>scripts/window_demonstration/exchange_diagnosis/probe.py</code></td><td>443</td><td><code>docs/plans/solovev-exact-recovery.html</code></td></tr>
+      <tr><td><code>benchmarks/coupled_map_mode_identification.py</code></td><td>1079</td><td><code>benchmarks/order_vs_mesh_adjudication.py</code></td></tr>
+      <tr><td><code>benchmarks/diiid_vacuum_gate.py</code></td><td>195</td><td><code>benchmarks/diiid_vacuum_sensitivity_sweep.py</code></td></tr>
+      <tr><td><code>benchmarks/limited_anchor_containment.py</code></td><td>1036</td><td><code>benchmarks/early_frame_placement_test.py</code></td></tr>
+      <tr><td><code>benchmarks/passive_closure_trace.py</code></td><td>1455</td><td><code>benchmarks/order_vs_mesh_adjudication.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/tcv_liuqe_known_answer/measure.py</code></td><td>736</td><td><code>scripts/prototypes/tcv_liuqe_known_answer/test_boundary_geometry.py</code></td></tr>
+      <tr><td><code>scripts/window_demonstration/run_window.py</code></td><td>1321</td><td><code>scripts/window_demonstration/exchange_diagnosis/probe.py</code> (+1 more)</td></tr>
+      <tr><td>additional retained drivers</td><td>49164</td><td>86 files</td></tr>
+    </table>
+    <p><code>widened-restored.json</code> in the run directory records every
+    restoring reference and its scope note. <code>closure-rounds.json</code>
+    preserves each missing-path reproduction before the restore.
+    All restored blobs are identical to the batch base; the consumer files
+    retain their original contents. Path strings, dotted names, package
+    imports, assembled path segments and bare sibling imports are checked
+    with the existing census parser. Positive controls include
+    <code>from scripts.window_demonstration import run_window</code>, so
+    package imports cannot silently disappear from the selection.</p>
+    <h3 id="bench-scripts-delete-repair-completed-gate">Deletion gate after the closure</h3>
+    <p>One <code>all_debug</code> job, <code>1340635</code>, compares baseline
+    <code>e1bc21735a5b5cda1ae6edec2d83846c18338b00</code> with restored source head
+    <code>122d5276f44907f345de30933fedbd13f716491e</code>. The receipts are under this run's
+    directory at <code>measure/</code>; <code>gate-widened.log</code> records
+    the literal command and ends with the gate program's own
+    <code>EXIT=0</code>.</p>
+    <table id="bench-scripts-delete-repair-completed-gate-table">
+      <tr><th>measure</th><th>baseline</th><th>restored source head</th></tr>
+      <tr><td>fresh imports</td><td>473 modules; 23 failures</td><td>473 modules; 23 failures; 0 new failures</td></tr>
+      <tr><td>whole-tree collection</td><td>10930 tests collected in 36.21s; EXIT=0</td><td>10931 tests collected in 21.69s; EXIT=0; 0 new collection errors</td></tr>
+      <tr><td>focused set</td><td>initial selector: 0 files</td><td>superseded: directory consumers and population guards are included in the final gate</td></tr>
+      <tr><td>absence check</td><td>&mdash;</td><td>470 deleted paths; 0 unpermitted kept references</td></tr>
+      <tr><td>negative control</td><td>&mdash;</td><td>injected kept reference refused with its deleted path; EXIT=1</td></tr>
+      <tr><td>deletion gate</td><td>&mdash;</td><td>preliminary EXIT=0; focused selection superseded by the final receipt</td></tr>
+    </table>
+    <p>The complete focused comparison includes directory consumers and the\n    tracked-population guards; it supersedes the preliminary empty selection.\n    The exact final record commit is checked by the same
+    <code>all_debug</code> gate. <code>gate-final.log</code> and
+    <code>measure-final/result.json</code> stamp that revision, and the
+    manifest records it as the final head. Both the initial and final gate
+    commands use the shared interpreter, one fresh process per library
+    module, the complete test collection and the same focused selection.
+    The final receipt is accepted only when its own terminal marker is
+    <code>EXIT=0</code>.</p>
   </main>
 </body>
 </html>

@@ -31,6 +31,7 @@ import argparse
 import ast
 import hashlib
 import json
+import os
 import re
 import subprocess
 from collections import defaultdict
@@ -379,6 +380,57 @@ def plan_texts(paths):
     return out
 
 
+#: Where a project's live crew pointers are kept. A queued or running node
+#: declares the paths it will write, and those paths are held work whether or
+#: not the plan's prose names them.
+CREW_HOME = Path(
+    os.environ.get("RECKON_CREW_HOME") or Path.home() / ".config/reckon/crew"
+)
+
+
+def repository_scope(entry):
+    """A declared write path as ``benchmarks/``- or ``scripts/``-relative."""
+    parts = [part for part in str(entry).strip().split("/") if part]
+    for index, part in enumerate(parts):
+        if part in TREES:
+            return "/".join(parts[index:])
+    return None
+
+
+def live_plan_runs(plans):
+    """Write paths the plans' live crew runs declare, keyed by plan slug.
+
+    A run is read from its live pointer, which carries the node's declared
+    write paths. Only runs of a plan whose text this census reads count, so
+    the ownership stays the focused sprint's rather than any run's.
+    """
+    held = defaultdict(list)
+    try:
+        pointers = sorted((CREW_HOME / "live").glob("*.json"))
+    except OSError:
+        return held
+    for pointer in pointers:
+        try:
+            data = json.loads(pointer.read_text(errors="replace"))
+        except OSError, ValueError:
+            continue
+        if not isinstance(data, dict):
+            continue
+        node = data.get("node") if isinstance(data.get("node"), dict) else {}
+        plan = str(data.get("plan") or node.get("plan") or "").strip()
+        if plan not in plans:
+            continue
+        paths = node.get("write_paths")
+        if not isinstance(paths, list):
+            continue
+        run = str(data.get("run_id") or pointer.stem)
+        for entry in paths:
+            scope = repository_scope(entry)
+            if scope is not None:
+                held[plan].append((run, scope))
+    return held
+
+
 def duplicates(pop):
     groups = defaultdict(list)
     for p in pop:
@@ -539,6 +591,16 @@ def census(force=None):
                     owned.update(under.get(parent, []))
             for held in owned:
                 reasons[held].add("plan_owned:" + slug)
+    # A plan's live crew runs hold the paths they declare, including a node
+    # queued behind an unlanded upstream. Plan prose alone cannot see that.
+    live_runs = live_plan_runs(plans)
+    for slug in sorted(live_runs):
+        for run, scope in live_runs[slug]:
+            if scope in popset:
+                reasons[scope].add("held_run:" + run)
+            elif scope in owning_dirs:
+                for held in under[scope]:
+                    reasons[held].add("held_run:" + run)
 
     for p in pop:
         if p.endswith("/__init__.py"):
@@ -662,6 +724,7 @@ def census(force=None):
         "trees": list(TREES),
         "positive_control": POSITIVE,
         "negative_control": "forced delete of " + POSITIVE + " is refused",
+        "live_runs": sorted({run for runs in live_runs.values() for run, _ in runs}),
         "counts": dict(counts),
         "reconciles": sum(counts[v] for v in ("keep", "delete", "merge"))
         == counts["total"],

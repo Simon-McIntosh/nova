@@ -35,21 +35,18 @@
     },
     {
      "name": "moment-perturbed",
-     "out": "moment-perturbed",
-     "perturbed_of": "moment-reconstruction",
-     "note": "negative control: the section 3 perturbation of the moment column, written as its own IMAS dataset"
+     "note": "negative control: the section 3 perturbation applied to the moment reconstruction itself and then converted by that column's own conversion, so the control enters through the conversion",
+     "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/moment-perturbed"
     },
     {
      "name": "harmonic-perturbed",
-     "out": "harmonic-perturbed",
-     "perturbed_of": "harmonic-reconstruction",
-     "note": "negative control: the section 3 perturbation of the harmonic column, written as its own IMAS dataset"
+     "note": "negative control: the section 3 perturbation applied to the harmonic reconstruction itself and then converted by that column's own conversion, so the control enters through the conversion",
+     "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/harmonic-perturbed"
     },
     {
      "name": "profile-perturbed",
-     "out": "profile-perturbed",
-     "perturbed_of": "profile-reconstruction",
-     "note": "negative control: the section 3 perturbation of the profile column, written as its own IMAS dataset"
+     "note": "negative control: the section 3 perturbation applied to the profile reconstruction itself and then converted by that column's own conversion, so the control enters through the conversion",
+     "source": "/home/ITER/mcintos/.cache/nova-inverse-equilibrium-baseline/reduced-reconstructions-scored/states/profile-perturbed"
     }
    ]
   }

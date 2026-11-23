@@ -20,7 +20,7 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
   <meta name="plan-blocks" content="efit-baseline-demonstration">
-  <meta name="plan-version" content="211">
+  <meta name="plan-version" content="212">
 <meta name="plan-modified" content="2026-11-23">
 <meta name="plan-commits" content="74f95e41,a8927be3a0fc5fc387a2e64dfc97c6621ce1eb56,e3784a3127d1ca1bc6f07057fb5252d574af3732,130d84e3322a114d7c25f9d675ac23619cf9a640,b5666c5422fb9e708496993a4fe7f2f7e2e31036">
   <meta name="plan-artifacts" content="nova/equilibrium/flux_surface_connectivity.py,tests/test_flux_surface_connectivity.py,docs/evidence/archive/separatrix-spline-extraction-landed.html,benchmarks/stationary_point_polish.py,nova/equilibrium/boundary_comparison.py,tests/test_boundary_comparison.py,benchmarks/diiid_forward_gs_match.py,tests/imas/test_diiid_forward_gs_match.py,docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py,tests/test_efit_topology_corroboration.py">
@@ -724,6 +724,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261123T135127693535-review-of-coil-edit-panels-per-figure-b989b7831722" data-who="reckon-build" data-when="2026-11-23T14:12:05.196Z">
     <div class="r-comment-body"><p>review scored 79, 6 finding(s)</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261123T183957526262-review-of-coil-edit-panels-per-figure-81ba155c8d2a" data-who="reckon-build" data-when="2026-11-23T19:09:56.127Z">
+    <div class="r-comment-body"><p>review complete — the delta b989b783..81ba155c closes the prior blocking finding (the receipt now writes the near-X block its records claimed) with a test that reddens when the key is removed, and the six dimensions score goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18, reuse 17 (total 108) with one non-blocking record defect at docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-per-figure.html:12 where the prose says every solve ran on a P100 while three receipts name the betelgeuse H200 solve.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261105T071819367797-review-of-forward-gs-remeasure-c03d8db6bcdc" data-who="reckon-build" data-when="2026-11-05T16:31:49.364Z">
     <div class="r-comment-body"><p>review parsed for r-20261102T201524817113-forward-gs-remeasure at 3ef818dfaef2a36da8fd0d6e0c34272ec5259218..c03d8db6bcdc553e412e0d4a978645806910f474 — scores goal_fidelity 14, evidence 9, scope_discipline 10, durability 12, fit 16, reuse 5 (total 66 of 120); 9 findings, the blocking one being that forward_gs_receipt.json:255 reports frames_with_separatrix 0 and every fine-map separatrix separation null on all five frames.</p></div>

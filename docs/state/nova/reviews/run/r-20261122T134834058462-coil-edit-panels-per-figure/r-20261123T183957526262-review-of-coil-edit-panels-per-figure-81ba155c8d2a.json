@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "call_site_count": 1,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:main panel subcommand -> receipt record at :3942",
+    "benchmarks/coil_edit_interactive.py:14 (imports only, no main call)",
+    "benchmarks/mast_centroid_solve_panels.py:45 (imports only, no main call)",
+    "benchmarks/raster_flux_target_receipt.py:52 (imports only, no main call)",
+    "benchmarks/traced_current_bitwise.py:18 (imports only, no main call)"
+  ],
+  "completed_at": "2026-11-23T19:09:56.127Z",
+  "dispatched_at": "2026-11-23T18:41:10Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-per-figure.html",
+      "line": "12",
+      "severity": "non-blocking",
+      "text": "the sentence 'so the solve and the drawing are both P100 work' states that every figure's solve ran on a P100, while the three H200 figures' solve blocks (forward-solve, mast and regeneration-row receipts) name betelgeuse job 1337244 on an NVIDIA H200 NVL and only their render blocks name titan and a Tesla P100, so the record misstates the lane provenance the node exists to keep."
+    }
+  ],
+  "head_log_revision": "93e2b0da9ae5eebb1c3509fad799d539d0ef036a",
+  "item_verdicts": {
+    "call_sites": "the only production path reaching the change is benchmarks/coil_edit_latency.py:main's panel branch; the four importers use untouched symbols.",
+    "diff": "seven commits read; one code line, one test, regenerated receipts and figures, and caption/fragment prose.",
+    "done_when": "the two-file command is recorded at base 5c503f9 (1 failed, 53 passed) and head 93e2b0da9 (65 passed, EXIT=0); 93e2b0da9's tree is identical to 81ba155c except the fragment.",
+    "goal": "the delta makes the receipt write the near-X block the node's records claimed; the five receipts now carry their own computed verdicts.",
+    "manifest": "read, including the producer jobs, the green arm and the disclosed control caveat.",
+    "write_paths": "all 21 delta paths lie inside the manifest's declared write paths."
+  },
+  "justifications": {
+    "durability": "tests/test_coil_edit_panel_render.py:852 reads written[\"near_x_geometry\"], so deleting the line at benchmarks/coil_edit_latency.py:3942 raises KeyError and reddens the test, while its threshold assertion at :846 re-derives the producer's own formula, so a semantic change to the two-cell rule is not caught and the solve block has no dedicated guard.",
+    "evidence": "logs/after-arm-producer-receipts-171115Z.log ends '65 passed in 4401.77s (1:13:21)' with EXIT=0 at revision 93e2b0da9 and git diff 93e2b0da9..81ba155c is the fragment alone, so the gate covers the reviewed head's code; the receipt's state_archive_md5 was verified to hold the sha256 c5c0c89d\u2026 that docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html labels sha256.",
+    "fit": "the delta follows the receipt-record idiom at benchmarks/coil_edit_latency.py:3940-3945 and introduces no plan, ticket or version identifier.",
+    "goal_fidelity": "benchmarks/coil_edit_latency.py:3942 places the computed block in the written record, and docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json now reports converged_current_field_certifies_near_x true with nearest 2.571 m where the mast receipt reports false at 0.110 m, so the five receipts differ as their fields do.",
+    "reuse": "no production definition is added \u2014 the change routes the existing owner _near_x_geometry (benchmarks/coil_edit_latency.py:2391) into the receipt \u2014 but the new test at tests/test_coil_edit_panel_render.py:846 carries a second copy of the threshold expression.",
+    "scope_discipline": "every path changed in b989b783..81ba155c lies within the manifest's declared write paths, and the code change is confined to benchmarks/coil_edit_latency.py:3942 and tests/test_coil_edit_panel_render.py."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is that each of the five coil-edit panel figures is redrawn from its own re-solved state; the delta adds `\"near_x_geometry\": panel[\"near_x_geometry\"]` at benchmarks/coil_edit_latency.py:3942 so the published receipt carries the block the node's records claimed, and the five receipts under docs/figures/*/panel-receipt.json now carry their own distinct near-X verdicts.\nVERDICT done_when: the reviewed run's done-when is the two-file scoped pytest command; the manifest records baseline_suite at 5c503f9 (1 failed, 53 passed, EXIT=1) and after_suite at 93e2b0da9 (65 passed, EXIT=0), and logs/after-arm-producer-receipts-171115Z.log carries its '# revision:' header, the '65 passed in 4401.77s (1:13:21)' summary and a bare EXIT=0 line.\nVERDICT write_paths: read the manifest's declared paths; every one of the delta's 21 paths (benchmarks/coil_edit_latency.py, tests/test_coil_edit_panel_render.py, three evidence fragments, five figure artefacts and the forward-solve page) lies inside a declared write path.\nVERDICT manifest: read; it states the five receipts were rewritten by their own producer invocations (titan jobs 1339576 and 1340190), the two-file command green at 93e2b0da9 (65 passed, EXIT=0), and discloses that the perturbed-current control fails at the solved-node pin rather than at the contour-displacement assertion.\nVERDICT diff: read the seven commits b989b783..81ba155c commit by commit (05c004537 code and test, b4d111c9f/15ab6d441/770c650d7/7d2baf66d captions, regenerated receipts and figures, 93e2b0da9/81ba155c8 fragment); the code change is the single receipt key at benchmarks/coil_edit_latency.py:3942 plus one test.\nCALL_SITES: benchmarks/coil_edit_latency.py:main panel subcommand -> receipt record at :3942; importers benchmarks/coil_edit_interactive.py:14, benchmarks/mast_centroid_solve_panels.py:45, benchmarks/raster_flux_target_receipt.py:52 and benchmarks/traced_current_bitwise.py:18 use only untouched symbols and none invokes main()\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/coil_edit_latency.py:3942 places the computed block in the written record, and docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json now reports converged_current_field_certifies_near_x true with nearest 2.571 m where the mast receipt reports false at 0.110 m, so the five receipts differ as their fields do.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/after-arm-producer-receipts-171115Z.log ends '65 passed in 4401.77s (1:13:21)' with EXIT=0 at revision 93e2b0da9 and git diff 93e2b0da9..81ba155c is the fragment alone, so the gate covers the reviewed head's code; the receipt's state_archive_md5 was verified to hold the sha256 c5c0c89d\u2026 that docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html labels sha256.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path changed in b989b783..81ba155c lies within the manifest's declared write paths, and the code change is confined to benchmarks/coil_edit_latency.py:3942 and tests/test_coil_edit_panel_render.py.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:852 reads written[\"near_x_geometry\"], so deleting the line at benchmarks/coil_edit_latency.py:3942 raises KeyError and reddens the test, while its threshold assertion at :846 re-derives the producer's own formula, so a semantic change to the two-cell rule is not caught and the solve block has no dedicated guard.\nSCORE fit: 18\nJUSTIFICATION fit: the delta follows the receipt-record idiom at benchmarks/coil_edit_latency.py:3940-3945 and introduces no plan, ticket or version identifier.\nSCORE reuse: 17\nJUSTIFICATION reuse: no production definition is added \u2014 the change routes the existing owner _near_x_geometry (benchmarks/coil_edit_latency.py:2391) into the receipt \u2014 but the new test at tests/test_coil_edit_panel_render.py:846 carries a second copy of the threshold expression.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-per-figure.html:12 non-blocking: the sentence 'so the solve and the drawing are both P100 work' states that every figure's solve ran on a P100, while the three H200 figures' solve blocks (the forward-solve, mast and regeneration-row receipts) name betelgeuse job 1337244 on an NVIDIA H200 NVL and only their render blocks name titan and a Tesla P100, so the record misstates the lane provenance the node exists to keep.",
+  "review_run_id": "r-20261123T183957526262-review-of-coil-edit-panels-per-figure-81ba155c8d2a",
+  "reviewed_base_sha": "b989b7831722b6abdb9468d92ba168f70af31c41",
+  "reviewed_head_sha": "81ba155c8d2a65ef400a364b6386d6b0a4e364eb",
+  "reviewed_run_id": "r-20261122T134834058462-coil-edit-panels-per-figure",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261123T183957526262-review-of-coil-edit-panels-per-figure-81ba155c8d2a"
+  },
+  "reviewer_run_id": "r-20261123T183957526262-review-of-coil-edit-panels-per-figure-81ba155c8d2a",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T19:10:41.140621+00:00",
+  "total": 108
+}

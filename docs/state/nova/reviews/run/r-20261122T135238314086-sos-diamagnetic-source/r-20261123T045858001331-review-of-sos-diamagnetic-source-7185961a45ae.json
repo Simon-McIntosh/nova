@@ -32,6 +32,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T135238314086-sos-diamagnetic-source",
       "section": "\u00a74"
+    },
+    "4": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T13:55:51.664701+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T135238314086-sos-diamagnetic-source",
+      "section": "\u00a74"
     }
   },
   "findings": [

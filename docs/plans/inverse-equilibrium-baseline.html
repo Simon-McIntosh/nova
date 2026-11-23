@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="111">
+<meta name="plan-version" content="112">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -396,7 +396,7 @@
     <div class="r-comment-body"><p>Independent review of r-20261122T185009989125-drift-sequences-fit-iteration read at base 06d728006cba140ec3cf0670927100f31f8cfce0 and head b05fa96bdbc009e84f075088241e6a8a1cc8aa0a: goal_fidelity 12, evidence 13, scope_discipline 19, durability 7, fit 15, reuse 16 (total 82); 2 blocking findings and 5 non-blocking findings.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261123T082249509595-review-of-drift-sequences-fit-iteration-e1108dadb1f3-figure" data-who="reckon-build" data-when="2026-11-23T08:35:44.870Z">
-    <div class="r-comment-body"><p>Figure review of r-20261122T185009989125-drift-sequences-fit-iteration at e1108dadb (base 06d728006): parsed read-only rubric on the three rendered PNGs, all six rubric items pass, three non-blocking findings — the two axis-position figures autoscale independently so the shared &quot;same axes&quot; claim misleads on the vertical scale (0.47-0.53 m efit vs 0.492-0.498 m nova); the overlay caption calls nova&#x27;s X-point marker a &quot;crossed circle&quot; where the render shows a filled plus; and the overlaid null markers coincide within a few pixels so the caption&#x27;s open/filled distinction is not visible.</p></div>
+    <div class="r-comment-body"><p>Figure review of r-20261122T185009989125-drift-sequences-fit-iteration at e1108dadb (base 06d728006): parsed read-only rubric on the three rendered PNGs, all six rubric items pass, three non-blocking findings — the two axis-position figures autoscale independently so the shared "same axes" claim misleads on the vertical scale (0.47-0.53 m efit vs 0.492-0.498 m nova); the overlay caption calls nova's X-point marker a "crossed circle" where the render shows a filled plus; and the overlaid null markers coincide within a few pixels so the caption's open/filled distinction is not visible.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261117T043314861081-review-of-efit-on-nova-rows-86b64c13475d" data-who="reckon-build" data-when="2026-11-17T04:38:15.860Z">
     <div class="r-comment-body"><p>independent review of r-20261115T202050274305-efit-on-nova-rows stored at review-records/r-20261115T202050274305-efit-on-nova-rows.json (and its .at-86b64c13 sibling) with status parsed, scores goal_fidelity 17, evidence 16, scope_discipline 18, durability 6, fit 15, reuse 20 (total 92), reviewed_base_sha 1f788362e8e1ca19bb5691fff8b31d25ed825f0e and reviewed_head_sha 86b64c13475d0d589ff836eaec44affff1ca7d56, added_failure_count 0 over an unarmed reviewed run, and four non-blocking findings.</p></div>
@@ -475,6 +475,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-s9-reopened-stored-cases" data-who="reckon-build" data-when="2026-11-23T09:10:00Z">
     <div class="r-comment-body"><p><strong>Reopened.</strong> The 07:18 landing of <code>multipoint-link-linear-build</code> ticked this section done, but that run is an unblocking fix: it makes the stored MAST-U machine build cold in 256 s instead of about 3.8 h (merge <code>fde7cb21f</code>). Done-when (1) is met (Solov'ev, ITER and MAST 22086 known states converge); done-when (2) and (3), the three stored imas-efit cases (MAST-U, TCV, ITER) with their 1.10 control, have not been measured, because the build stall stopped the only attempt (run <code>fit-iteration-stored-cases</code>, job 1337162). The stored-case run is re-dispatched from main next.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261123T083109425741-review-of-magnetics-fit-file-completes-on-cpu-09a6167c1634" data-who="reckon-build" data-when="2026-11-23T08:41:26.506Z">
+    <div class="r-comment-body"><p>review of r-20261122T192846734957-magnetics-fit-file-completes-on-cpu at reviewed_head_sha 09a6167c16342ce338ff3de3ef431452304f3f4c, increment ad6a93b65fedacc0738dbc36ede5f50472b1cb81..09a6167c16342ce338ff3de3ef431452304f3f4c; scores goal_fidelity 18, evidence 13, scope_discipline 19, durability 15, fit 16, reuse 20 (total 101); two non-blocking findings (an ungrammatical sentence at the evidence fragment line 29, and the head gate recorded at fd56bd24a while the measured module changed at b7c617ed2).</p></div>
 </div>
 </section>
 </main>

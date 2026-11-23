@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "scripts/prototypes/fit_inside_iteration/run.py:74",
+    "scripts/prototypes/fit_inside_iteration/run.py:112",
+    "scripts/prototypes/fit_inside_iteration/run.py:216",
+    "scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:156"
+  ],
+  "completed_at": "2026-11-23T08:41:26.506Z",
+  "dispatched_at": "2026-11-23T08:31:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/magnetics-fit-file-completes-on-cpu.html",
+      "line": 29,
+      "severity": "non-blocking",
+      "text": "the sentence reads 'which is what stops a measurement of this file names the four of them': the relative clause is ungrammatical and should read 'stops a measurement of this file from selecting the four of them', so the evidence record's closing claim is harder to read than the fact it records."
+    },
+    {
+      "file": "docs/evidence/fragments/inverse-equilibrium-baseline/magnetics-fit-file-completes-on-cpu.html",
+      "line": 20,
+      "severity": "non-blocking",
+      "text": "the fragment and the manifest both attribute the two unit-level gate rows to fd56bd24a, but b7c617ed2 (11 insertions, 19 deletions in tests/test_equilibrium_magnetics_fit.py) changed the measured module's stub wiring. The after_suite arm that resolved at b7c617ed2 was cancelled at its 00:10:00 step limit (job 1338634), so no recorded log shows the delivered head's 44 unit-level tests green; the relinked-stub negative control proves only that the reverted copy fails, not that the repaired head passes."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "read the three import sites in scripts/prototypes/fit_inside_iteration/run.py (74, 112, 216) and the one in scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:156; each now imports the moved helper from tests.magnetics_fit_harness directly, and no other non-test module imports a moved symbol.",
+    "diff": "read be5ee98f..09a6167c commit by commit and read the gained increment ad6a93b65..09a6167c line by line; b7c617ed2 removes the inert re-exports and the now-false comment from tests/test_equilibrium_magnetics_fit.py, repoints the two stub sites to the harness namespace and adds 'assert persisted', while 09a6167c1 adds one paragraph to the fragment describing that relink.",
+    "done_when": "read all three clauses: (1) the fragment names test_known_state_recovery and the native site inside libjax_common.so with both cache settings measured; (2) clause (2) is met at fd56bd24a, where logs/head-serial.log ends '44 passed in 6.46s' and logs/head-n8.log ends '44 passed in 10.32s', each followed by a bare EXIT=0, but no log re-runs tests/test_equilibrium_magnetics_fit.py after b7c617ed2 changed that file's stub wiring and both recorded suite arms were cancelled at their 00:10:00 step limit (baseline job 1338613, after job 1338634); (3) the four known-state functions carry their original slow and timeout(3500) markers and assertions unchanged.",
+    "goal": "read the node goal and the two commits gained since the prior review (b7c617ed2 and 09a6167c1) against head 09a6167c; the run's delivered end state holds: tests/test_equilibrium_magnetics_fit.py collects only the 44 unit-level tests once the known-state cases live in tests/test_equilibrium_magnetics_fit_known_states.py, and b7c617ed2 repairs the prior review's blocking durability defect by patching sys.modules[\"tests.magnetics_fit_harness\"] and asserting the stub was reached (tests/test_equilibrium_magnetics_fit.py:108-118).",
+    "manifest": "read; it names the ten commits, records the fit-module gate at fd56bd24a with EXIT=0, records both suite arms honestly as completed=false with exit_status 3 and no runner summary line, and records the relinked-stub negative control as 1 failed with EXIT=1.",
+    "write_paths": "read the eight declared paths against the seven-path diff be5ee98f..09a6167c: every changed path lies inside the declared set, the declared figures directory is untouched, and the two gained commits touch only tests/test_equilibrium_magnetics_fit.py and this run's evidence fragment."
+  },
+  "justifications": {
+    "durability": "the added assertion at tests/test_equilibrium_magnetics_fit.py:118 fails when the relink is reverted (logs/negative-control-relinked-stub.log reports 'assert []', 1 failed, EXIT=1), so it is an independent guard, but no test fails if the known-state split itself is reverted into the fast module.",
+    "evidence": "logs/head-serial.log and logs/head-n8.log carry 44 passed with EXIT=0 at fd56bd24a, but the measured module changed at b7c617ed2 and the after arm at that revision (after_suite-1795421821916418176.log) was cancelled at its step limit, so the delivered head's own green run is not recorded.",
+    "fit": "the harness and known-states modules follow the surrounding test idiom and carry no plan or version label, but docs/.../magnetics-fit-file-completes-on-cpu.html:29 leaves an ungrammatical closing sentence.",
+    "goal_fidelity": "tests/test_equilibrium_magnetics_fit.py at head holds only unit-level contracts and b7c617ed2 closes the prior review's durability defect at tests/test_equilibrium_magnetics_fit.py:118, so the delivered increment does what the goal states.",
+    "reuse": "a search of tests/, scripts/ and nova/ for receipt-persistence, diagnostic-source, total-observation and known-state case-table capabilities found only these helpers' original home in tests/test_equilibrium_magnetics_fit.py, so tests/magnetics_fit_harness.py is the extracted owner and forks nothing.",
+    "scope_discipline": "all seven changed paths in be5ee98f..09a6167c lie within the eight declared write paths and the declared figures directory is untouched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the node goal and the two commits gained since the prior review (b7c617ed2 and 09a6167c1) against head 09a6167c; the run's delivered end state holds, with tests/test_equilibrium_magnetics_fit.py collecting only the 44 unit-level tests once the known-state cases live in tests/test_equilibrium_magnetics_fit_known_states.py, and b7c617ed2 repairs the prior review's blocking durability defect by patching sys.modules[\"tests.magnetics_fit_harness\"] and asserting the stub was reached (tests/test_equilibrium_magnetics_fit.py:108-118).\nVERDICT done_when: read all three clauses; (1) the fragment names test_known_state_recovery and the native site inside libjax_common.so with both cache settings measured; (2) clause (2) is met at fd56bd24a where logs/head-serial.log ends 44 passed in 6.46s and logs/head-n8.log ends 44 passed in 10.32s, each followed by a bare EXIT=0, but no log re-runs tests/test_equilibrium_magnetics_fit.py after b7c617ed2 changed that file's stub wiring and both recorded suite arms were cancelled at their 00:10:00 step limit (baseline job 1338613, after job 1338634); (3) the four known-state functions carry their original slow and timeout(3500) markers and assertions unchanged.\nVERDICT write_paths: read the eight declared paths against the seven-path diff be5ee98f..09a6167c; every changed path lies inside the declared set, the declared figures directory is untouched, and the two gained commits touch only tests/test_equilibrium_magnetics_fit.py and this run's evidence fragment.\nVERDICT manifest: read; it names the ten commits, records the fit-module gate at fd56bd24a with EXIT=0, records both suite arms honestly as completed=false with exit_status 3 and no runner summary line, and records the relinked-stub negative control as 1 failed with EXIT=1.\nVERDICT diff: read be5ee98f..09a6167c commit by commit and the gained increment ad6a93b65..09a6167c line by line; b7c617ed2 removes the inert re-exports and the now-false comment from tests/test_equilibrium_magnetics_fit.py, repoints the two stub sites to the harness namespace and adds 'assert persisted', while 09a6167c1 adds one paragraph to the fragment describing that relink.\nCALL_SITES: scripts/prototypes/fit_inside_iteration/run.py:74, scripts/prototypes/fit_inside_iteration/run.py:112, scripts/prototypes/fit_inside_iteration/run.py:216, scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py:156\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/test_equilibrium_magnetics_fit.py at head holds only unit-level contracts and b7c617ed2 closes the prior review's durability defect at tests/test_equilibrium_magnetics_fit.py:118.\nSCORE evidence: 13\nJUSTIFICATION evidence: logs/head-serial.log and logs/head-n8.log carry 44 passed with EXIT=0 at fd56bd24a, but the measured module changed at b7c617ed2 and the after arm at that revision (after_suite-1795421821916418176.log) was cancelled at its step limit, so the delivered head's own green run is not recorded.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all seven changed paths in be5ee98f..09a6167c lie within the eight declared write paths and the declared figures directory is untouched.\nSCORE durability: 15\nJUSTIFICATION durability: the added assertion at tests/test_equilibrium_magnetics_fit.py:118 fails when the relink is reverted (logs/negative-control-relinked-stub.log reports assert [], 1 failed, EXIT=1), but no test fails if the known-state split itself is reverted into the fast module.\nSCORE fit: 16\nJUSTIFICATION fit: the harness and known-states modules follow the surrounding test idiom and carry no plan or version label, but docs/evidence/fragments/inverse-equilibrium-baseline/magnetics-fit-file-completes-on-cpu.html:29 leaves an ungrammatical closing sentence.\nSCORE reuse: 20\nJUSTIFICATION reuse: a search of tests/, scripts/ and nova/ for receipt-persistence, diagnostic-source, total-observation and known-state case-table capabilities found only these helpers' original home in tests/test_equilibrium_magnetics_fit.py, so tests/magnetics_fit_harness.py is the extracted owner and forks nothing.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/magnetics-fit-file-completes-on-cpu.html:29 non-blocking: the sentence reads 'which is what stops a measurement of this file names the four of them', an ungrammatical relative clause that should read 'stops a measurement of this file from selecting the four of them'.\nFINDING docs/evidence/fragments/inverse-equilibrium-baseline/magnetics-fit-file-completes-on-cpu.html:20 non-blocking: the fragment and the manifest attribute the two unit-level gate rows to fd56bd24a, but b7c617ed2 changed the measured module's stub wiring and its after_suite arm (job 1338634) was cancelled at its step limit, so no recorded log shows the delivered head's 44 tests green; the relinked-stub control proves only that the reverted copy fails.\n",
+  "review_run_id": "r-20261123T083109425741-review-of-magnetics-fit-file-completes-on-cpu-09a6167c1634",
+  "reviewed_base_sha": "ad6a93b65fedacc0738dbc36ede5f50472b1cb81",
+  "reviewed_head_sha": "09a6167c16342ce338ff3de3ef431452304f3f4c",
+  "reviewed_run_id": "r-20261122T192846734957-magnetics-fit-file-completes-on-cpu",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T08:45:00.892638+00:00",
+  "total": 101
+}

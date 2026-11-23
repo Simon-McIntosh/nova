@@ -87,6 +87,13 @@ def main():
         f"route {total_inverse}; at least one route reached {reached} of them. "
         f"Measured at revision <code>{data['revision']}</code>.</p>"
     )
+
+    def counted(prefix):
+        rows = [row for row in modules if row["module"].startswith(prefix)]
+        return sum(1 for row in rows if row["measured"]), len(rows)
+
+    scripts = counted("nova/scripts/")
+    utilities = counted("nova/utilities/")
     parts.append(
         "<p>The two routes are the public forward solve "
         "<code>ForwardProfile.solve</code> on a stored MAST case, and the "
@@ -94,8 +101,11 @@ def main():
         "<code>test_known_state_recovery[mast]</code>, which drives the fit "
         "inside the equilibrium iteration and calls the same public entry. "
         "Coverage ran under a dedicated rcfile with <code>source=nova</code> and "
-        "an empty <code>omit</code> list, so <code>nova/scripts</code> and "
-        "<code>nova/utilities</code> are measured; the machine-readable copy is "
+        "an empty <code>omit</code> list, which overrides the project's omit of "
+        f"<code>nova/scripts/*</code> and <code>nova/utilities/*</code>: "
+        f"{scripts[0]} of {scripts[1]} modules under <code>nova/scripts</code> "
+        f"and {utilities[0]} of {utilities[1]} under <code>nova/utilities</code> "
+        f"carry a report entry. The machine-readable copy is "
         '<a href="hot-path-map.json">hot-path-map.json</a> beside this '
         "fragment.</p>"
     )

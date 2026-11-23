@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "benchmarks/near_field_elliptic.py:1190",
+    "scripts/prototypes/diiid_xpoint_profile_extent/measure.py:17",
+    "benchmarks/greens_elliptic_route.py"
+  ],
+  "completed_at": "2026-11-23T13:42:45.610Z",
+  "dispatched_at": "2026-11-23T13:30:41Z",
+  "findings": [
+    {
+      "file": "benchmarks/near_field_elliptic.py",
+      "line": 1190,
+      "severity": "blocking",
+      "text": "A kept module builds command = [sys.executable, \"benchmarks/nearfar_error.py\", str(target)] and runs it with subprocess.run(check=True); benchmarks/nearfar_error.py is in the deleted set, so baseline() now fails with FileNotFoundError. This is a kept file naming a deleted path, which the plan's done-when clause 1 forbids, and the absence check recorded 0 code references against it."
+    },
+    {
+      "file": "scripts/prototypes/diiid_xpoint_profile_extent/measure.py",
+      "line": 17,
+      "severity": "blocking",
+      "text": "A kept prototype inserts scripts/prototypes/diiid_xpoint_held_nodes on sys.path and exec_module()s its measure.py at line 23; that whole support directory's measure.py, batch.py, preflight.py, provenance.py and render.py were deleted while cpu.sh, gates.py and job.sh survived, so the prototype raises ModuleNotFoundError at import and the done-when's no-file-names-it clause is unmet."
+    },
+    {
+      "file": "benchmarks/BASELINE.md",
+      "line": 175,
+      "severity": "non-blocking",
+      "text": "A kept markdown file names deleted drivers (benchmarks/analytic_cost_floor.py:175 and benchmarks/polygon_route_cost.py:188, eight hits in all) with no revision stamp, so the done-when's 'no file at the head names it' clause fails for documentation even though no code breaks."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html",
+      "line": 50,
+      "severity": "non-blocking",
+      "text": "The batch table misstates three batches' removed lines: recorded 29926/29946/29685 for batches 4/5/6 against the commits' actual 29931/29959/29691, so the running totals are off by up to 24 lines (final 184989 is correct), which is a record-accuracy defect under done-when clause 3."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261123T132929959525-review-of-bench-scripts-delete-76a7d44acfbe",
+  "reviewed_base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+  "reviewed_head_sha": "76a7d44acfbea7cefb786849eacefa4135dda849",
+  "reviewed_run_id": "r-20261122T202603608268-bench-scripts-delete",
+  "scores": {
+    "durability": 5,
+    "evidence": 10,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T13:59:48.957819+00:00",
+  "total": 86,
+  "verdicts": {
+    "diff": "Read commit by commit 348ed92c..76a7d44ac: seven deletion batches totaling 616 files and 185431 removed lines, two restored siblings (442 lines), three record commits; 614 deletions and one added fragment remain.",
+    "done_when": "The done_when requires every deleted path absent and named by no file at the head, a zero-added-failure suite delta on all_debug, and an accurate lines-removed record; git grep at 76a7d44ac still finds deleted paths named by benchmarks/near_field_elliptic.py, scripts/prototypes/diiid_xpoint_profile_extent/measure.py and benchmarks/BASELINE.md.",
+    "goal": "The node goal is to apply the census delete and merge verdicts to benchmarks/ and scripts/; the diff removes 614 files under those two trees and adds the record fragment, so the bulk delete landed.",
+    "manifest": "The manifest records status complete, 614 deleted paths and 184989 lines, and zero added failures; its absence-check claim of 0 code references is contradicted at the head.",
+    "write_paths": "The declared write paths are the record fragment and its figures directory; the deletions under benchmarks/ and scripts/ are the goal itself and lie outside them, and they are the only out-of-scope writes in the diff."
+  }
+}

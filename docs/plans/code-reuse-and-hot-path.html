@@ -25,7 +25,7 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -279,6 +279,9 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261123T130542192450-review-of-hot-path-written-down-2b363acdd647" data-who="reckon-build" data-when="2026-11-23T13:15:49.982Z">
     <div class="r-comment-body"><p>review of r-20261122T202611168380-hot-path-written-down at base 348ed92c7ab08a9592a7f997d62bfec41ae687d4 and head 2b363acdd64782f02a47f342b979166ae57ba1b7: goal_fidelity 19, goal met; evidence 19, both done-when clauses measured and reproduced; scope_discipline 12, six of seven delivered paths outside the two declared write paths; durability 8, no test fails on regression since the section is document-only; fit 17; reuse 18; added_failure_count 0; three non-blocking findings, no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261123T132929959525-review-of-bench-scripts-delete-76a7d44acfbe" data-who="reckon-build" data-when="2026-11-23T13:42:45.610Z">
+    <div class="r-comment-body"><p>Independent review of r-20261122T202603608268-bench-scripts-delete at 348ed92c..76a7d44ac scored 15/10/18/5/18/20 (goal_fidelity/evidence/scope_discipline/durability/fit/reuse), zero added failures, with two blocking findings: benchmarks/near_field_elliptic.py:1190 and scripts/prototypes/diiid_xpoint_profile_extent/measure.py:17 still name deleted paths at the head.</p></div>
 </div>
 </section>
 </main>

@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="97">
+<meta name="plan-version" content="98">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -429,7 +429,10 @@
     <div class="r-comment-body"><p>Independent review of run r-20261122T190644382930-stored-case-build-stall-diagnosis stored at its review-records path against reviewed base be5ee98f736dcc20393153f8bb6e7bf163ef873e and reviewed head 10749d9a4498ef35c8ce8fdc159233456de51d08: all six dimensions scored, added_failure_count 0 with no added failure ids, two non-blocking findings (the fragment's 242-call/2.06 exponent does not reproduce from arms2.log which gives 326 calls and 2.049; the reviewed manifest's tests: line is not a literal command and it cites no artifacts), and the prior review's blocking ordering finding is answered by the repair commit.</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261123T010603032802-review-of-stored-case-build-stall-diagnosis-981f76784b55" data-who="reckon-build" data-when="2026-11-23T01:15:44.176Z">
-    <div class="r-comment-body"><p>Independent review of run r-20261122T190644382930-stored-case-build-stall-diagnosis stored at its review-records path against reviewed base be5ee98f736dcc20393153f8bb6e7bf163ef873e and reviewed head 981f76784b55166bf86d9e98dec206181062d36e: all six dimensions scored (goal_fidelity 16, evidence 17, scope_discipline 20, durability 10, fit 17, reuse 20), added_failure_count 0 with no added failure ids, two non-blocking findings (the fragment&#x27;s 1906-call arm count does not match the 1907 completed SORTLINK_END lines in arms2.log; the manifest tests: line is not a literal command and swaps the two arms&#x27; times), and the prior review&#x27;s blocking-count finding is answered by the repair commit, whose 634-call / 2.085 exponent recounts exactly from arms2.log.</p></div>
+    <div class="r-comment-body"><p>Independent review of run r-20261122T190644382930-stored-case-build-stall-diagnosis stored at its review-records path against reviewed base be5ee98f736dcc20393153f8bb6e7bf163ef873e and reviewed head 981f76784b55166bf86d9e98dec206181062d36e: all six dimensions scored (goal_fidelity 16, evidence 17, scope_discipline 20, durability 10, fit 17, reuse 20), added_failure_count 0 with no added failure ids, two non-blocking findings (the fragment's 1906-call arm count does not match the 1907 completed SORTLINK_END lines in arms2.log; the manifest tests: line is not a literal command and swaps the two arms' times), and the prior review's blocking-count finding is answered by the repair commit, whose 634-call / 2.085 exponent recounts exactly from arms2.log.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261122T190644382930-stored-case-build-stall-diagnosis" data-who="reckon-build" data-when="2026-11-23T01:05:39Z">
+    <div class="r-comment-body"><p>The cold stored-case build spends its pre-fit window in per-element conductor insertion at both revisions, 92 percent of a 900 s watchdog inside MultiPoint.sort_link to Index.get_loc, and no commit between them changes any file on that stack; the fit is quadratic in the accumulated row count, measured over 634 calls above half a second across both arms (326 and 308 arm by arm, least squares exponent 2.085, 2.049 and 2.136 separately), with 825.8 s over 1907 calls at a largest frame of 11756 of about 30000 rows and about 4.0 h extrapolated over 1200 inserts; 77283793bc lies within 1.3 percent (814.8 s, 1906 calls, same 11756 rows). It does not establish that the recorded stored-case run spends its three hours in this phase, because that log stamps only CASE_INPUT and the cancel and its plasmagrid bar cannot be placed in wall time.</p></div>
 </div>
 </section>
 </main>

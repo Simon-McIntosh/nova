@@ -166,13 +166,12 @@ def _contour_metric(
     rule, which converges faster than any power of the step.  Its accuracy is
     therefore set by the tangent derivative, taken here with the four-point
     central stencil :math:`(x_{i-2} - 8 x_{i-1} + 8 x_{i+1} - x_{i+2}) / 12`,
-    which is fourth order.  A chord-weighted rule is instead second order in
+    which is fourth order.  A chord-weighted rule is second order in
     the sampling, because each chord leaves the curve by its sagitta, and that
-    error is concentrated where the boundary turns sharply (the X-point
-    neighbourhood), which is where the radial moment, a cancellation of
+    error is concentrated where the radial moment, a cancellation of
     contributions several thousand times its own size, is most sensitive.  A
     vertex that coincides with a corner of the boundary carries a tangent
-    error of order one, weighted by a stress that vanishes there.
+    error of order one there, weighted by a stress that vanishes at the null.
     """
     import jax.numpy as jnp
 
@@ -264,8 +263,7 @@ def shafranov_contour_integrals(
     fields enter at the vertices where they are sampled, with no averaging
     onto chord midpoints.  Against the volume-side quadrature of the analytic
     single-null reference the radial moment, whose contour terms cancel to one
-    part in several thousand, departs by 6.3e-4 at 2001 contour points under
-    the second-order chord midpoint rule and by 2.3e-5 under this rule, which
+    part in several thousand, departs by 8.1e-8 at 2001 contour points, which
     is already at the volume-side floor from 501 points.
 
     The combination :math:`\beta_p + l_i/2` is NOT a functional of these

@@ -1,5 +1,6 @@
 {
-  "exact": 1.2325543621162036,
+  "exact": 1.2325543621162165,
+  "analytic_route_value": 1.5106369718687442,
   "grid_resolution": 161,
   "contour_samplings": [
     501,
@@ -8,27 +9,68 @@
     8001
   ],
   "errors": [
-    0.22186989872446414,
-    0.2225852728053199,
-    0.22275965186898267,
-    0.2228137757917001
+    0.2665701585664661,
+    0.23392228684285338,
+    0.22561495153058111,
+    0.22299324161640777
   ],
-  "limit": 0.2228137757917001,
+  "limit": 0.22299324161640777,
+  "plateau_absolute": 0.2748512926767388,
   "departure_from_limit": [
-    0.0009438770672359764,
-    0.00022850298638021904,
-    5.412392271744726e-05
+    0.04357691695005833,
+    0.01092904522644561,
+    0.002621709914173348
   ],
-  "quadrature_order": 2.0643612255761723,
+  "quadrature_order": 2.0296855021130593,
+  "quadrature_order_range": [
+    501,
+    2001
+  ],
   "grid_resolutions": [
     21,
     41,
     81
   ],
   "grid_gap": [
-    2.8701166557253154e-06,
-    2.0145522152266183e-06,
-    6.889626938962701e-07
+    2.8372332765171375e-06,
+    2.018163713383658e-06,
+    6.871325120578111e-07
   ],
-  "mechanism": "the contour quadrature is the midpoint rule on the closed polyline and is second order in the contour sampling; the shared-node stencil is third order and the field imaging is exact on this positive control, so the fitted order is the quadrature's"
+  "grid_gap_max": 2.8372332765171375e-06,
+  "mechanism": "the contour quadrature is the periodic trapezoidal rule over the vertices with a fourth-order tangent, limited to second order in the contour sampling by a vertex on the X-point corner where the central tangent is off by order one; the shared-node stencil is third order and its gap to the analytic route is six orders below the plateau, so the fitted order is the quadrature's.  The route settles onto a plateau rather than onto the exact value because the combination subtracts nearly equal terms: twice the vertical moment is 5.88 against a toroidal volume of 5.87, so the volume side's 2e-4 identity residual in the vertical moment is amplified by 2*mu0*|Sv|/|W| near 7000 and holds the combination 0.223 off exact",
+  "identity": {
+    "resolutions": [
+      321,
+      641,
+      1281
+    ],
+    "contour_sampling": 2001,
+    "vertical_residual": [
+      0.0001399780281351355,
+      8.683470831288266e-05,
+      4.624430721152127e-05
+    ],
+    "radial_residual": [
+      0.00011283064986894168,
+      3.711299208452106e-05,
+      2.2743730463709497e-05
+    ],
+    "stress_residual": [
+      0.00018245443815804484,
+      0.00010718504416265557,
+      5.369345792511965e-05
+    ],
+    "order": 0.8002767115070913,
+    "predicted_order": 1.0,
+    "mechanism": "the volume side integrates on cell centres with the mask flux > 0, which carries no boundary correction, so the mis-measured region is a boundary layer one cell thick and the residual falls at first order in the grid step; the contour side is converged at this sampling"
+  },
+  "grid_tick_values": [
+    1e-06,
+    2e-06
+  ],
+  "contour_tick_values": [
+    0.22,
+    0.24,
+    0.27
+  ]
 }

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <title>Grid route order at the fourth-order contour rule | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css" media="all">
+</head>
+<body>
+<main class="evidence-record">
+  <h1 id="sos-grid-route-current-rule-title">The analytic route at the current contour rule</h1>
+
+  <p id="sos-grid-route-current-rule-revisions">Measured at head
+  <code>d4ac23afce06</code> against the base arm
+  <code>062298ce691b</code>. The scoped gate reports
+  <code>64 passed in 57.12s</code>, the baseline arm <code>64 passed in 57.98s</code>
+  and the head arm <code>64 passed in 61.60s (0:01:01)</code>. The figure is the
+  in-place repair of the certificate
+  the plan names under
+  <code>docs/figures/constraint-augmented-newton-krylov/shafranov-integral/</code>.</p>
+
+  <p id="sos-grid-route-current-rule-order">At the fourth-order contour rule
+  (<code>_contour_metric</code>, commit <code>a5d8a4da1</code>) the grid-imaged
+  analytic route fits a contour-sampling order of <strong>2.03</strong> over
+  samplings 501 to 2001. The figure's right panel is that ladder: the relative
+  error of β<sub>p</sub> + l<sub>i</sub>/2 falls from 2.67e-01 at 501 contour
+  points and settles onto the plateau 2.230e-01 by 8001. The dotted boundary
+  across that panel is that plateau, which is the receipt's <code>limit</code>
+  key and is labelled in the panel; no reference line is left unnamed. The
+  axis ticks on both panels are receipt keys too
+  (<code>grid_tick_values</code>, <code>contour_tick_values</code>), so every
+  number the figure draws is one the receipt carries.</p>
+
+  <figure id="sos-grid-route-current-rule-figure">
+    <img src="/nova/figures/constraint-augmented-newton-krylov/shafranov-integral/shafranov-integral-certificate.svg"
+         alt="Left: relative gap between the grid-imaged and analytic route against grid nodes per axis, falling from 2.84e-06 at 21 nodes to 6.87e-07 at 81. Right: relative error of beta_p + li/2 against contour points, falling from 0.267 at 501 to 0.223 at 8001, above the plateau 0.223.">
+    <figcaption id="sos-grid-route-current-rule-caption">Left: the grid ladder
+    — the grid-imaged route's gap to the analytic route at 21, 41 and 81 nodes
+    per axis, at most 2.84e-06. Right: the contour-sampling ladder, whose
+    departure from the plateau 2.230e-01 fits order 2.03 over 501 to 2001.
+    Every number plotted or labelled, the axis ticks included, is a key in
+    <code>docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json</code>.</figcaption>
+  </figure>
+
+  <h2 id="sos-grid-route-current-rule-mechanism-head">Why the order is two, and why it plateaus</h2>
+
+  <p id="sos-grid-route-current-rule-quadrature">The contour quadrature is the
+  periodic trapezoidal rule over the vertices with a fourth-order tangent. The
+  separatrix sampling places a vertex exactly on the X-point corner, where the
+  central tangent stencil is off by order one, so the vertical moment and the
+  toroidal stress decay at second order in the contour sampling. The
+  shared-node stencil is third order, and its gap to the analytic route
+  (grid ladder above) is at most 2.84e-06 against a plateau of 2.230e-01, six
+  orders below it, so the fitted order is the quadrature's.</p>
+
+  <p id="sos-grid-route-current-rule-plateau">The route settles onto a plateau
+  with a 22.3 percent offset against the exact 1.23255 instead of converging
+  to it. The cause is the combination's own cancellation: twice the vertical
+  moment is 5.88 against a toroidal volume of 5.87, so the volume side's 2e-4
+  identity residual in the vertical moment is amplified by
+  2μ<sub>0</sub>|S<sub>v</sub>|/|W| ≈ 7000 and holds β<sub>p</sub> +
+  l<sub>i</sub>/2 at 0.223. Refining the contour sampling converges the
+  contour side to the plateau rather than to exact, which is why the fitted
+  order is the order of departure from the plateau.</p>
+
+  <h2 id="sos-grid-route-current-rule-identity">The identity rungs at 321, 641 and 1281</h2>
+
+  <p id="sos-grid-route-current-rule-identity-body">The three contour/volume
+  identity rungs pass their bound 5.0e-4. The vertical-moment relative
+  residual is 1.40e-04, 8.68e-05 and 4.62e-05 at resolutions 321, 641 and 1281;
+  the radial moment is 1.13e-04, 3.71e-05 and 2.27e-05; the toroidal stress is
+  1.82e-04, 1.07e-04 and 5.37e-05. The vertical moment fits order 0.80 over
+  321 to 1281, consistent with the first order the volume side predicts: the
+  volume integral uses the cell-centre mask <code>flux &gt; 0</code>, which
+  carries no boundary correction, so the mis-measured region is a boundary
+  layer one cell thick and the residual falls at first order in the grid step.
+  The test prints and persists this order to its own receipt and asserts the
+  predicted first order instead of a bare floor.</p>
+
+  <h2 id="sos-grid-route-current-rule-timing">The removed field-response timing panel</h2>
+
+  <p id="sos-grid-route-current-rule-timing-body">The two-bar wall times and
+  their ratio belong in prose, not in a chart, so the panel is removed. The
+  measured numbers, for the field build and evaluation paragraph: 7.157 s to
+  build the exact responses once, 6.267e-05 s to image changed currents, a
+  ratio of 114199, with 76 kernel calls at build and 0 per evaluation.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-23T08:09:57.041Z",
+  "dispatched_at": "2026-11-23T07:38:28Z",
+  "failure_derivation": "Derived from the reviewed run's own arms: the after arm logs/imas-seam-census-after-suite.log ran tests/test_imas_seam_census.py to its summary line with 22 passed and EXIT=0 (zero failing ids); the base arm logs/imas-seam-census-baseline_sd-suite.log reported exit 4 with no tests collected because the file was absent at base 6cee0faf, so it contributes no failing ids. Added failures = 0 - 0 = 0.",
+  "findings": [
+    {
+      "file": "scripts/imas_seam_census.py",
+      "line": 99,
+      "severity": "non-blocking",
+      "text": "non-blocking: the DIII-D REFERENCE_SHOTS source value has a trailing comma inside its parentheses, making a one-element tuple, so docs/research/imas-seam-census.html:598 renders the record's own source field as the Python repr \"('docs/plans/diiid-forward-onboarding.html, representative forward frame 102',)\" instead of the sentence."
+    },
+    {
+      "file": "tests/test_imas_seam_census.py",
+      "line": 62,
+      "severity": "non-blocking",
+      "text": "non-blocking: this assertion, and the same shape at line 75, compares row.destination against CLASS_DESTINATION[row.cls], the very map scripts/imas_seam_census.py:538 assigned the row's destination from, so the two sides move together and a regression that maps a class to the wrong destination passes; it is not independent of the value under test."
+    },
+    {
+      "file": "tests/test_imas_seam_census.py",
+      "line": 158,
+      "severity": "non-blocking",
+      "text": "non-blocking: the DIII-D half of the reference-shot test asserts only that the shot is truthy, so the done_when's per-machine reference shot is not pinned to the value the forward-solve receipt uses (d3d_shot_00000c4a7b); a regressed or invented DIII-D shot keeps the test green while the MAST half pins 21978."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_imas_seam_census.py:27-32 and the --check mutation (unrowed=1, EXIT=1 in logs/imas-seam-census-mutation.log) fail if a censused module loses its row, but tests/test_imas_seam_census.py:62 compares row.destination against the same CLASS_DESTINATION map that scripts/imas_seam_census.py:538 assigned it from, so it cannot catch a wrong mapping.",
+    "evidence": "I re-ran both recorded gates in the reviewed worktree: scripts/imas_seam_census.py --check reproduced files_seen=3498 module_rows=94 importer_rows=388 convention_rows=35 rows_total=517 unrowed=0 at EXIT=0, regenerated HTML was byte-identical to the committed record, and tests/test_imas_seam_census.py reported 22 passed at EXIT=0, though the gate log names only its command and the baseline arm is recorded under a non-standard key with completed false.",
+    "fit": "Both files are ruff-clean and follow the repository's Python 3.14 idiom (requires-python >=3.14, bare-multi except at scripts/imas_seam_census.py:236), the Row/ImporterRow dataclasses at scripts/imas_seam_census.py:136-168 match the surrounding dataclass style, and no source string carries a plan label.",
+    "goal_fidelity": "All 82 modules under nova/imas carry a row (verified against an independent glob) and the record at docs/research/imas-seam-census.html states the file and row counts, but the DIII-D reference-shot source renders as a Python tuple repr at line 598 of that record.",
+    "reuse": "Searched nova/ and scripts/ for an owner of module-level import-graph scanning (the ast users scripts/iron_operator_bound/reuse_check.py and the per-study prototype helpers); none owns that capability, so no added definition forks one.",
+    "scope_discipline": "Every path in the diff (scripts/imas_seam_census.py, tests/test_imas_seam_census.py, docs/research/imas-seam-census.html) lies outside the declared write paths, a dispatch-side misdeclaration relative to plan section 1 which requires exactly these files and permits the record, and the diff carries nothing the goal does not imply."
+  },
+  "plan_slug": "one-ids-seam",
+  "project": "nova",
+  "review_role": "independent review",
+  "review_run_id": "r-20261123T073759564247-review-of-one-ids-seam-s1-4cb2ac7d365d",
+  "reviewed_base_sha": "6cee0faf5b74a12b1528225d21b2a5df0b04e125",
+  "reviewed_head_sha": "4cb2ac7d365dda588c48806f54bb893a4290dece",
+  "reviewed_node": "one-ids-seam-s1",
+  "reviewed_run_id": "r-20261122T143918823268-one-ids-seam-s1",
+  "reviewed_scope_note": "The reviewed node's own baseline arm key is baseline_sd_suite rather than baseline_suite; it is honestly labelled completed:false/exit 4, and I derived added_failure_count from the two logs directly rather than from the reviewed manifest shape.",
+  "rubric": {
+    "durability": "answered",
+    "evidence": "answered",
+    "fit": "answered",
+    "goal_fidelity": "answered",
+    "reuse": "answered",
+    "scope_discipline": "answered"
+  },
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T08:10:09.382572+00:00",
+  "total": 99,
+  "verdicts": {
+    "call_sites": "scripts/imas_seam_census.py is a standalone CLI (raises SystemExit from main at line 981) and no production module imports it; the only importer in the reviewed tree is the node's own test at tests/test_imas_seam_census.py:16.",
+    "diff": "Read all three commits 2961e79ad, 7bcc9ad16, 4cb2ac7d3 against base 6cee0faf: three new files only (scripts/imas_seam_census.py +981, tests/test_imas_seam_census.py +198, docs/research/imas-seam-census.html +603), with conventional subjects, bodies, no attribution and no plan labels in source.",
+    "done_when": "The done_when's measures are asserted: the committed test tests/test_imas_seam_census.py:27-32 walks the filesystem independently and fails when a nova/imas module has no row, --check at scripts/imas_seam_census.py:975 returns 1 when a censused file is unrowed, and the controls named in the done_when are asserted at tests/test_imas_seam_census.py:78-97.",
+    "goal": "The node goal is the overlap census of nova's IMAS seam; the diff adds scripts/imas_seam_census.py, an AST import-graph scan that rows all 82 modules under nova/imas and 12 machine-named modules elsewhere (including the three the done_when names), 35 convention rows, 388 importer rows and both controls, and renders docs/research/imas-seam-census.html.",
+    "manifest": "Read the reviewed run's manifest.md: it reports the gate python scripts/imas_seam_census.py --check -> EXIT=0 with files_seen=3498 module_rows=94 importer_rows=388 convention_rows=35 rows_total=517 unrowed=0, the 22-test suite, and a mutation negative control; its baseline arm is filed as baseline_sd_suite with completed false and exit 4 because the test file was absent at the base revision.",
+    "write_paths": "The declared write paths were docs/evidence/fragments/one-ids-seam/one-ids-seam-s1.html and docs/figures/one-ids-seam/one-ids-seam-s1; the delivered diff touches none of them and instead adds the three files the plan's \u00a71 requires, so the delivery is outside the declared paths but inside the text of the node's component."
+  }
+}

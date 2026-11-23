@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="One IDS Seam: IMAS Is the Only Interface Between Machine Data and the Solver">
 <meta name="plan-summary" content="A separate ingest member writes DDv4 COCOS 17 IDSs once; nova reads and writes only through its generic IMAS layer and holds one convention">
-<meta name="plan-status" content="draft">
+<meta name="plan-status" content="in-progress">
 <meta name="plan-roi" content="high">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-effort-hours" content="26.0">
@@ -24,7 +24,7 @@
 <meta name="plan-sprint" content="S30">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s3&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s4&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s5&quot;:[&quot;one-ids-seam#s3&quot;,&quot;one-ids-seam#s4&quot;],&quot;s6&quot;:[&quot;one-ids-seam#s5&quot;,&quot;one-ids-seam#s7&quot;],&quot;s7&quot;:[&quot;one-ids-seam#s5&quot;]}">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -187,6 +187,11 @@
     </article>
 </section>
 
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261123T073759564247-review-of-one-ids-seam-s1-4cb2ac7d365d" data-who="reckon-build" data-when="2026-11-23T08:09:57.041Z">
+    <div class="r-comment-body"><p>Review of one-ids-seam-s1 at 4cb2ac7d3 against base 6cee0faf: scores goal_fidelity 18, evidence 16, scope_discipline 13, durability 16, fit 17, reuse 19; added_failure_count 0; three non-blocking findings (DIII-D shot source tuple repr, two non-independent destination assertions, DIII-D shot asserted only for truthiness).</p></div>
+</div>
+</section>
 </main>
 </body>
 </html>

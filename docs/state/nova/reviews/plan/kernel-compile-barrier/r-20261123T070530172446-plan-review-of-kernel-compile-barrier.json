@@ -35,9 +35,28 @@
       "note": "\u00a79 no longer measures \u00a74's fills or the first call from the pinned cache; those remain \u00a74's own clauses, which now run after \u00a79. \u00a79 closes on the read becoming compilable.",
       "reason": "",
       "when": "2026-11-23T07:16:22.790428+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5f424d1f0630541fdf36a9373443bb1c38c0d7bf",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a79 clause 2 now states completion as the requirement, not a memory bound: the 132-cell read's cold compile completes in one CPU job on the cluster's nodes (it cannot be compiled anywhere today), with peak and memory analysis recorded and compared with no bound.",
+      "reason": "",
+      "when": "2026-11-23T07:16:32.506020+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5f424d1f0630541fdf36a9373443bb1c38c0d7bf",
+      "commit_basis": "edit",
+      "note": "\u00a79 clause 2 now states completion as the requirement, not a memory bound: the 132-cell read's cold compile completes in one CPU job on the cluster's nodes (it cannot be compiled anywhere today), with peak and memory analysis recorded and compared with no bound.",
+      "reason": "",
+      "when": "2026-11-23T07:16:32.506020+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",

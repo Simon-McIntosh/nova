@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="separatrix-spline-extraction">
+  <title>The five-frame DIII-D bank at the display-map head: three frames measured | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="fbs-summary">§8 — Boundary separation at the display-map head</h2>
+    <p>The five-frame DIII-D forward bank was measured at committed head
+    <code>655770a13b601f5408c48d3b0ad403cdbe71e084</code> on one H200 card.
+    Three of the five declared frames completed before the job's wall clock
+    ended the run, and their per-frame records are checkpointed. Two further
+    frames — <code>d3d_shot_002495e835.parquet:146</code> and
+    <code>d3d_shot_0040ca9bdc.parquet:137</code> — were not attempted, so this
+    fragment reports three frames and names the two that remain; nothing here
+    is inferred or carried over from another tree.</p>
+
+    <p>Two defects in the benchmark were found by the two earlier attempts at
+    this measurement and repaired before it ran: the achieved class margin is
+    now read from the operator's own accessor when the linear-moment
+    construction leaves the raw partition topology in place
+    (<code>cf1eeed16</code>), and the display target store now grows its
+    conductor response before contracting it
+    (<code>655770a13</code>). Both were fatal at the head they were found on;
+    neither reached a frame's numbers.</p>
+
+    <h2 id="fbs-frames">Per-frame convergence</h2>
+    <p>Every frame is solved at its own terminal current, with the plasma
+    current pinned by the shipped circuit state. The residual is the stored
+    fixed-point relative residual (tolerance
+    <code>1e-5</code>) and the wall is the job log's own per-frame
+    completion line.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>frame</th>
+          <th>time [ms]</th>
+          <th>wall [s]</th>
+          <th>converged</th>
+          <th>residual</th>
+          <th>class</th>
+          <th>terminal current [A]</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>d3d_shot_00000c4a7b:179</code></td>
+          <td>3740.0</td>
+          <td>5806.6</td>
+          <td>no</td>
+          <td>1.53e-4</td>
+          <td>diverted</td>
+          <td>1 279 650.1</td>
+        </tr>
+        <tr>
+          <td><code>d3d_shot_0003ff34e7:44</code></td>
+          <td>1080.0</td>
+          <td>2853.8</td>
+          <td>yes</td>
+          <td>8.47e-11</td>
+          <td>diverted</td>
+          <td>1 182 769.0</td>
+        </tr>
+        <tr>
+          <td><code>d3d_shot_001554e054:144</code></td>
+          <td>3240.0</td>
+          <td>1352.6</td>
+          <td>no</td>
+          <td>nan</td>
+          <td>none</td>
+          <td>none</td>
+        </tr>
+        <tr>
+          <td><code>d3d_shot_002495e835:146</code></td>
+          <td>—</td>
+          <td>—</td>
+          <td colspan="4">not attempted: the wall clock ended the run after three frames</td>
+        </tr>
+        <tr>
+          <td><code>d3d_shot_0040ca9bdc:137</code></td>
+          <td>—</td>
+          <td>—</td>
+          <td colspan="4">not attempted: the wall clock ended the run after three frames</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Frame 179 is finite and diverted but not convergence-qualified: the
+    branch selector found no convergence-qualified diverted root and reports
+    the direct diverted receipt as not qualification-valid, with the limited
+    branch's residual (2.88e-4) above the diverted branch's (1.53e-4) and its
+    topology inconsistent. Its interior fit is nevertheless the strongest of
+    the three (r² 0.9979, fractional rms 0.0456). Frame 44 is convergence-
+    qualified on the diverted branch at 8.47e-11; the limited branch reaches
+    7.25e-11 but with an inconsistent topology, so the diverted root is the one
+    selected. Frame 144 raises <code>NoQualifiedAxisError</code> — "no
+    qualified magnetic-axis candidate has a resolved component" — before any
+    geometry is built, so it is a named solver refusal with no field to
+    assemble, not an assembler overflow.</p>
+
+    <h2 id="fbs-separation">Fine-map boundary separation</h2>
+    <p>The separatrix of each solved frame is assembled from that frame's own
+    persisted display field at that field's own polished saddle, and its
+    distance to the frame's labelled EFIT boundary is measured as a symmetric
+    nearest-contour deviation. The assembler sizes its branch capacity from
+    the 171 × 321 display grid as 1024 slots, so none of the frames below
+    reports an overflow; the capacity is not the limiting refusal here.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>frame</th>
+          <th>closed candidates</th>
+          <th>closed segments</th>
+          <th>separatrix points</th>
+          <th>overflow</th>
+          <th>saddle offset [mm]</th>
+          <th>symmetric rms [mm]</th>
+          <th>symmetric sup [mm]</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>179</td>
+          <td>1</td>
+          <td>637</td>
+          <td>5097</td>
+          <td>none</td>
+          <td>4.207</td>
+          <td>8.966</td>
+          <td>18.266</td>
+        </tr>
+        <tr>
+          <td>44</td>
+          <td>1</td>
+          <td>498</td>
+          <td>3985</td>
+          <td>none</td>
+          <td>5.682</td>
+          <td>191.767</td>
+          <td>520.945</td>
+        </tr>
+        <tr>
+          <td>144</td>
+          <td colspan="7">no display field: the solve refused before geometry</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>Frame 179's assembled separatrix closes against the labelled boundary to
+    9.0 mm r²-weighted, 18.3 mm worst point, with its saddle 4.2 mm from the
+    polished lattice saddle and the assembled curve's own saddle 15.8 mm from
+    the labelled X-point. Frame 44's separatrix closes too, but far outside the
+    labelled boundary (191.8 mm rms, 520.9 mm sup), which the frame's weak
+    interior fit (r² 0.806, fractional rms 0.440) and its missing predicted
+    closed boundary already signal: the two diagnostics agree that this frame's
+    field is not the labelled equilibrium, and the assembler draws the curve it
+    actually has rather than a substitute.</p>
+
+    <h2 id="fbs-pending">What this record does not yet claim</h2>
+    <p>Frames 146 and 137 remain, and the cohort figures —
+    <code>frame_flux_comparison.png</code>, <code>cohort_match_summary.png</code>
+    and the full <code>forward_gs_receipt.json</code> — are rendered only when
+    all five frames have been solved, so this fragment cites no panel at this
+    head. A resumed job restores the checkpointed three-frame prefix:
+    the run restores the prefix, solves the two remaining frames, re-solves the
+    first frame at the sensitivity pseudo-wall expansion, and then publishes the
+    receipt and both figures. The verdict below is therefore a measurement of
+    three frames at this head, not of the cohort.</p>
+
+    <table>
+      <thead>
+        <tr><th>field</th><th>value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>head</td><td><code>655770a13b601f5408c48d3b0ad403cdbe71e084</code></td></tr>
+        <tr><td>checkpoint</td><td><code>forward_gs_partial_receipt.json</code>, 3 of 5 declared frames</td></tr>
+        <tr><td>frames with a measured separatrix</td><td>2 (179, 44)</td></tr>
+        <tr><td>named refusals</td><td>1 (144, no qualified axis)</td></tr>
+        <tr><td>frames not attempted</td><td>2 (146, 137)</td></tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

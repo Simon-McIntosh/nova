@@ -807,19 +807,30 @@ def witness(source, inputs, peak, *, tolerance=1e-8, ncvec=48, seed=20261122, pr
         witness_operator_quotient=quotient(source, direction),
         operator_maximum=peak["quotient"],
         operator_rayleigh=peak["rayleigh"],
-        alignment_with_operator=abs(
-            float(weighted @ top) / (np.linalg.norm(weighted) * np.linalg.norm(top))
+        alignment_euclid=abs(
+            float(direction @ np.asarray(peak["witness"], dtype=np.float64))
+            / (
+                np.linalg.norm(direction)
+                * np.linalg.norm(np.asarray(peak["witness"], dtype=np.float64))
+            )
+        ),
+        alignment_q=abs(
+            float(weighted @ peak["witness"])
+            / np.sqrt(
+                max(float(weighted @ direction) * float(top @ peak["witness"]), 0.0)
+            )
         ),
     )
     row["localisation"] = localise(source, direction)
     position = source["position"]
     weighted_vector = source["metric_action"](direction)
+    product = source["action"](direction)
     energy = np.einsum(
         "ci,ci->c",
         to_cells(weighted_vector, position),
-        to_cells(source["action"](direction), position),
+        to_cells(product, position),
     )
-    return row, direction, energy / float(weighted_vector @ direction)
+    return row, direction, energy / float(weighted_vector @ product)
 
 
 def plant(matrix, source, direction):

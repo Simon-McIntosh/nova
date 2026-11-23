@@ -208,7 +208,7 @@ def check_labels(figure):
     """
     figure.canvas.draw()
     renderer = figure.canvas.get_renderer()
-    canvas = figure.canvas.get_window_extent()
+    canvas = figure.bbox
     boxes = []
     for text in figure.findobj(matplotlib.text.Text):
         if not text.get_visible() or not text.get_text().strip():

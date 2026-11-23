@@ -3,6 +3,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-23T09:25:29.164Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "hot-path-duplicate-register",
+      "recorded_at": "2026-11-23T09:26:42.703117+00:00"
+    }
+  },
   "dispatched_at": "2026-11-23T09:16:36Z",
   "findings": [
     {

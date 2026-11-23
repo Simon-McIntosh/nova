@@ -35,8 +35,8 @@
       <tr><td>withheld: named by kept code</td><td>102</td><td>28590</td></tr>
       <tr><td>deletable by the path-string scan</td><td>616</td><td>185431</td></tr>
       <tr><td>deleted at the head, after restoring two sibling imports</td><td>614</td><td>184989</td></tr>
-      <tr><td>deleted at the head, after the repair round</td><td>567</td><td>166882</td></tr>
-      <tr><td>restored: cited by kept code or a kept record</td><td>49</td><td>18549</td></tr>
+      <tr><td>deleted at the head, after the repair round</td><td>562</td><td>163332</td></tr>
+      <tr><td>restored: cited by kept code or a kept record</td><td>54</td><td>21657</td></tr>
     </table>
 
     <h3 id="bench-scripts-delete-batches">Batches</h3>
@@ -54,8 +54,8 @@
       <tr><td>6</td><td>148</td><td>29691</td><td>178399</td></tr>
       <tr><td>7</td><td>8</td><td>7032</td><td>185431</td></tr>
       <tr><td>restored after verification</td><td>2</td><td>-442</td><td>184989</td></tr>
-      <tr><td>restored in the repair round</td><td>47</td><td>-18107</td><td>166882</td></tr>
-      <tr><td>net at head</td><td>567</td><td>166882</td><td>166882</td></tr>
+      <tr><td>restored in the repair round</td><td>52</td><td>-21657</td><td>163332</td></tr>
+      <tr><td>net at head</td><td>562</td><td>163332</td><td>163332</td></tr>
     </table>
 
     <h3 id="bench-scripts-delete-withheld">Withheld paths</h3>
@@ -113,6 +113,11 @@
       <li>The six <code>scripts/&lt;topic&gt;/report.md</code> receipts named
       twenty more deleted drivers. Each restored driver named four others in
       turn, and the restore ran to a fixed point: 47 files, 18107 lines.</li>
+      <li>Re-running the same scan at that head found twelve more references, all
+      of them in <code>scripts/&lt;topic&gt;/run*.log</code> receipts naming five
+      deleted drivers. Those drivers are restored in a second commit: five
+      files, 3550 lines. The repair round therefore restores 52 files and 21657
+      lines in total.</li>
     </ul>
     <p>The scan that keeps these honest is re-run to a fixed point over the
     whole tracked tree: every deleted path is searched for as a path string in
@@ -136,10 +141,10 @@
     <code>docs/</code> that carry the revision they ran at.</p>
     <table id="bench-scripts-delete-verification-table">
       <tr><th>measure</th><th>revision</th><th>result</th></tr>
-      <tr><td>absence check, 567 paths</td><td><code>e75324fc6</code></td><td>0 code/test/AGENTS references</td></tr>
-      <tr><td>reachable gate, worktree at head</td><td><code>e75324fc6</code></td><td><code>5 failed, 49 passed, 4 xfailed, 1 warning in 204.48s (0:03:24)</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>absence check, 562 paths</td><td><code>6790baf79</code></td><td>0 code/test/AGENTS references</td></tr>
+      <tr><td>reachable gate, worktree at head</td><td><code>6790baf79</code></td><td><code>5 failed, 49 passed, 4 xfailed, 1 warning in 221.12s (0:03:41)</code> (<code>EXIT=1</code>)</td></tr>
       <tr><td>scratch-tree arm at the batch base</td><td><code>348ed92c7ab0</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 31.92s</code> (<code>EXIT=1</code>)</td></tr>
-      <tr><td>scratch-tree arm at the head</td><td><code>e75324fc6</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 33.94s</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>scratch-tree arm at the head</td><td><code>6790baf79</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 42.14s</code> (<code>EXIT=1</code>)</td></tr>
       <tr><td>added failures, base to head</td><td>&mdash;</td><td>0; the two arms report the same nineteen failure and error ids</td></tr>
       <tr><td>fast-lane collection, worktree</td><td><code>e75324fc6</code></td><td><code>9715/10939 tests collected (1224 deselected) in 25.02s</code> (<code>EXIT=0</code>), 0 collection errors</td></tr>
     </table>
@@ -148,9 +153,9 @@
     its log opens with the revision it ran at and the literal
     <code>python -m pytest</code> command, and ends with that command&rsquo;s own
     <code>EXIT=</code> line. The four logs are
-    <code>gate-worktree-e75324fc.log</code>,
+    <code>gate-worktree-6790baf7.log</code>,
     <code>arm-base-348ed92c.log</code>,
-    <code>arm-head-scratch-e75324fc.log</code> and
+    <code>arm-head-scratch-6790baf7.log</code> and
     <code>collect-worktree-e75324fc.log</code>. The full fast lane was started
     and stopped after twenty-eight minutes without completing: its execution
     time on a one-hour partition is not a result, so the record rests on the
@@ -170,7 +175,9 @@
     <code>76a7d44ac</code> it reports 32 failures and exits 1; that is the
     negative control, and without the restorations the check the findings name
     fails. Both runs are logged as <code>repair-check-parent.log</code> and
-    <code>repair-check-head.log</code>.</p>
+    <code>repair-check-head.log</code>. At the repaired head
+    <code>6790baf79</code> it reports no failure and exits 0, so each answering
+    commit is what closes the reference its finding names.</p>
     <p>The worktree arm's five failures are pre-existing. Two are retired
     evidence: the census receipt test cites
     <code>docs/figures/millisecond-converged-solve/program-shapes/program-shape-buckets.svg</code>,

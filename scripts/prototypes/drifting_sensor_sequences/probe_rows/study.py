@@ -367,6 +367,35 @@ def noise_columns(
     return factor * sigma * shaped
 
 
+def current_draw(
+    sequence: str,
+    slices: int,
+    sigma_ip: float,
+    seed: int,
+    corner_cycles: float = CORNER_CYCLES,
+    index: float = 1.0,
+) -> np.ndarray:
+    """The measured plasma current over a sequence, coloured like the rows.
+
+    The plasma current is one row of each code's measurement, so it carries the
+    same noise sequence as the sensors.  A white current draw on the drift
+    sequence is an unmodelled per-slice jump that the axis position follows
+    directly, and it decorrelates the very quantity the control measures, so
+    the draw is taken from the same colouring as the sensor rows rather than
+    from a plain Gaussian.
+    """
+    column = noise_columns(
+        sequence,
+        slices,
+        np.array([float(sigma_ip)]),
+        seed,
+        1.0,
+        corner_cycles=corner_cycles,
+        index=index,
+    )
+    return np.asarray(column, dtype=float)[:, 0]
+
+
 def flux_map_of(radius, height, flux, gradient_psi, gradient, reference_radius):
     from nova.imas.mast_efit_referee import FluxMap
 
@@ -606,9 +635,8 @@ def run_nova(args) -> None:
             "nova-%s-%d-%.4f%s.jsonl" % (sequence, args.slices, args.factor, suffix)
         )
         noise = noise_columns(sequence, args.slices, sigma, args.seed, args.factor)
-        rng = np.random.default_rng(args.seed + 991)
-        current = reference["plasma_current"] + sigma_ip * rng.standard_normal(
-            args.slices
+        current = reference["plasma_current"] + current_draw(
+            sequence, args.slices, sigma_ip, args.seed + 991
         )
         with path.open("w") as stream:
             for index in slice_range(args):
@@ -718,9 +746,13 @@ def run_nova(args) -> None:
             corner_cycles=corner,
             index=index,
         )
-        rng = np.random.default_rng(args.seed + 1992)
-        current = reference["plasma_current"] + sigma_ip * rng.standard_normal(
-            args.sweep_slices
+        current = reference["plasma_current"] + current_draw(
+            "drift",
+            args.sweep_slices,
+            sigma_ip,
+            args.seed + 1992,
+            corner_cycles=corner,
+            index=index,
         )
         with path.open("w") as stream:
             for position in range(args.sweep_slices):
@@ -973,19 +1005,21 @@ def run_efit(args) -> None:
         corner_cycles=args.corner or CORNER_CYCLES,
         index=1.0 if args.index is None else args.index,
     )
-    rng = np.random.default_rng(current_seed)
     sigma_ip = args.factor * abs(reference["plasma_current"])
     totals = totals + noise
-    current = reference["plasma_current"] + sigma_ip * rng.standard_normal(args.slices)
+    current = reference["plasma_current"] + current_draw(
+        args.sequence,
+        args.slices,
+        sigma_ip,
+        current_seed,
+        corner_cycles=args.corner or CORNER_CYCLES,
+        index=1.0 if args.index is None else args.index,
+    )
     times = SLICE_TIME + np.arange(args.slices, dtype=float)
     # "loops" writes the 24 flux loops alone: the probe rows are dropped from
     # the pulse rather than zeroed, which is what the row-convention comparison
     # needs, since a written zero is a row the fit must satisfy.
-    field = (
-        np.zeros((args.slices, 0))
-        if probe_rows == "loops"
-        else totals[:, 24:]
-    )
+    field = np.zeros((args.slices, 0)) if probe_rows == "loops" else totals[:, 24:]
     write_pulse(
         pulse,
         times,

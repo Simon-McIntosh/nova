@@ -87,6 +87,21 @@ def nova_slice(sequence: str, factor: float, index: int) -> tuple:
     where its index appears; the stacks of one arm share one lattice.
     """
     stem = analyse.declared_stem("nova", sequence, 200, factor)
+    pattern = stem + "-slice%05d.npz" % index
+    for path in sorted((STUDY / "maps").glob(pattern)):
+        stored = np.load(path)
+        return (
+            np.asarray(stored["flux"], dtype=float),
+            np.asarray(stored["radius"], dtype=float),
+            np.asarray(stored["height"], dtype=float),
+        )
+    for shard in sorted((STUDY / "maps").glob(stem + "-shard*-slice%05d.npz" % index)):
+        stored = np.load(shard)
+        return (
+            np.asarray(stored["flux"], dtype=float),
+            np.asarray(stored["radius"], dtype=float),
+            np.asarray(stored["height"], dtype=float),
+        )
     for path in sorted((STUDY / "maps").glob(stem + "-shard*.npz")):
         stored = np.load(path)
         matches = np.flatnonzero(np.asarray(stored["slice"], dtype=int) == index)

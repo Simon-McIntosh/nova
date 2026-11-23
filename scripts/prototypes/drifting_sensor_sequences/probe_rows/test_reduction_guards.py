@@ -90,6 +90,19 @@ def test_noise_sequences_carry_the_control_and_the_drift():
     assert np.std(white) == pytest.approx(np.std(drift), rel=0.25)
 
 
+def test_current_draw_carries_the_sequence_colour_and_keeps_its_size():
+    sigma_ip = 1.5e5
+    white = study.current_draw("white", 200, sigma_ip, 7)
+    drift = study.current_draw("drift", 200, sigma_ip, 7)
+    # The current is a measurement row, so it must carry the sequence's own
+    # memory: a white draw on the drift sequence is the unmodelled per-slice
+    # jump that decorrelates the axis position the control measures.
+    assert abs(analyse.lag_one(white)) < 0.15
+    assert analyse.lag_one(drift) > analyse.DRIFT_LAG_ONE_FLOOR
+    assert np.std(drift) == pytest.approx(sigma_ip, rel=0.25)
+    assert np.std(white) == pytest.approx(sigma_ip, rel=0.25)
+
+
 def test_thresholds_refuse_a_sequence_made_from_white():
     rng = np.random.default_rng(3)
     white = rng.standard_normal((600, 2)) * 1e-3

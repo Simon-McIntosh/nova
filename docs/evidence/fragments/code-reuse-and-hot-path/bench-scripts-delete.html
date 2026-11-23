@@ -368,7 +368,7 @@
     <p><code>widened-restored.json</code> in the run directory records every
     restoring reference and its scope note. <code>closure-rounds.json</code>
     preserves each missing-path reproduction before the restore.
-    All restored blobs are identical to the batch base; the consumer files
+    All restored blobs are identical to the batch base; the kept code files
     retain their original contents. Path strings, dotted names, package
     imports, assembled path segments and bare sibling imports are checked
     with the existing census parser. Positive controls include
@@ -398,6 +398,41 @@
     module, the complete test collection and the same focused selection.
     The final receipt is accepted only when its own terminal marker is
     <code>EXIT=0</code>.</p>
+
+    <h3 id="bench-scripts-delete-repair-directory-consumer-gate">Complete focused comparison</h3>
+    <p>Collection adds one case for the restored
+    <code>summarize.py</code> driver in
+    <code>tests/equilibrium/test_finite_edge_flux_function.py</code>; no
+    collected test disappears. That case exposed the preliminary selector's
+    omission of directory consumers. The complete focused set below includes
+    directory enumerators and guards that inspect the tracked driver
+    population. The selector asserts that the real grammar-test consumer is
+    present, alongside its package-import positive control.</p>
+    <ul><li><code>tests/equilibrium/test_finite_edge_flux_function.py</code></li><li><code>tests/test_artifacts_carry_no_worktree_paths.py</code></li><li><code>tests/test_evidence_tooling_paths.py</code></li><li><code>tests/test_material_mask_limiter.py</code></li><li><code>tests/test_scripts_census.py</code></li></ul>
+    <p>Job <code>1340687</code> on <code>all_debug</code> compares
+    <code>e1bc21735a5b5cda1ae6edec2d83846c18338b00</code> with
+    <code>0a4ee9f26f55df04e2bfbe3a8f8a4da9392a8478</code>. The five-file focused commands
+    run in fresh processes at their own revisions; the baseline extraction
+    has its own local git index and HEAD. <code>gate-focused.log</code> and
+    the receipts under <code>measure-focused/</code> carry the actual commands,
+    imported module paths, working directories and complete summaries.</p>
+    <table id="bench-scripts-delete-repair-directory-consumer-gate-table">
+      <tr><th>measure</th><th>baseline</th><th>restored head</th></tr>
+      <tr><td>fresh library imports</td><td>473 modules; 23 failures</td><td>473 modules; 23 failures; 0 new failures</td></tr>
+      <tr><td>collection</td><td>10930 tests collected in 27.95s; EXIT=0</td><td>10931 tests collected in 17.51s; EXIT=0; 0 new errors</td></tr>
+      <tr><td>focused tests</td><td>1 failed, 33 passed, 1 warning in 156.44s (0:02:36); EXIT=1</td><td>1 failed, 34 passed, 1 warning in 193.70s (0:03:13); EXIT=1</td></tr>
+      <tr><td>focused failure ids</td><td>1</td><td>identical; 0 added or removed failure ids</td></tr>
+      <tr><td>absence</td><td>&mdash;</td><td>470 deleted paths; 0 unpermitted references</td></tr>
+      <tr><td>deletion gate</td><td>&mdash;</td><td>PASS; EXIT=0</td></tr>
+    </table>
+    <p>The common focused failure ids are retained explicitly:</p>
+    <ul><li><code>tests/test_evidence_tooling_paths.py::test_scanned_tree_holds_no_crew_or_worktree_literal</code></li></ul>
+    <p>The final record commit is rechecked with this same complete selection.
+    Its exact revision and both arms are in
+    <code>measure-final/result.json</code>, <code>base.json</code>,
+    <code>head.json</code> and <code>gate-final.log</code>, named by the
+    manifest. The preliminary empty-focused result above is historical and
+    does not satisfy the final gate.</p>
   </main>
 </body>
 </html>

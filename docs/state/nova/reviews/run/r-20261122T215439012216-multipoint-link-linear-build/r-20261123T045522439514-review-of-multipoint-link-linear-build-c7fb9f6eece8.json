@@ -4,6 +4,15 @@
   "added_failure_note": "0 readable added failures: the reviewed run records baseline_suite and after_suite as empty objects, and its suite logs (suite-baseline-1338043.log, suite-after-1338043.log) were cut at their job bounds before any summary line, so no readable baseline/after arm pair exists to derive added ids from. Nothing is claimed missing that was measured present, so the count is 0 and the id list empty.",
   "completed_at": "2026-11-23T05:20:16.107Z",
   "dispatched_at": "2026-11-23T04:56:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-23T07:07:27.373032+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T215439012216-multipoint-link-linear-build",
+      "section": "\u00a79"
+    }
+  },
   "findings": [
     "non-blocking: nova/frame/multipoint.py:132 build() docstring says an absent label resolves to \"the first index entry whose name shares the label's leading prefix\", but lines 146-147 key the dictionary by prefix and then look up the whole label (prefix.get(value, 0)), so a multi-token label such as coil_0_9 can never match a prefix key and always resolves to row 0; the behaviour matches the base revision, but the text describes a resolution the code does not implement.",
     "non-blocking: nova/frame/multipoint.py:92 sort_link builds its own first-occurrence label-to-position dictionary and -1 default instead of reusing Index.get_indexer at nova/frame/columnar.py:89, which is exactly that capability and is already called by this module's build() at line 141; the duplicate makes two lookups that must be kept in step.",

@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-23T05:21:07.465Z",
   "dispatched_at": "2026-11-23T04:54:07Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-drift-sequences-fit-iteration-b05fa96bdbc0",
+      "recorded_at": "2026-11-23T08:20:33.690377+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/inverse-equilibrium-baseline/drift-sequences-fit-iteration/slice-overlay-drift-88.svg",

@@ -126,11 +126,9 @@
  "live_worktrees": 32,
  "negative_controls": {
   "reached_offered": {
-   "module": "nova/__init__.py",
-   "verdict": [
-    "refuse",
-    "reached by a route (union 19 lines)"
-   ]
+   "module": "nova/equilibrium/forward.py",
+   "verdict": "refuse",
+   "reason": "reached by a route (union 506 lines)"
   },
   "ambix_only": {
    "module": "nova/datachain/ccfe_uda.py",

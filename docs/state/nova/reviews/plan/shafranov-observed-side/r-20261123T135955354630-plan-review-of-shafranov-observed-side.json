@@ -89,6 +89,13 @@
       "note": "The followup prompt now names the certificate PNG/SVG as the only files to regenerate (timing images deleted in d4bc41b1e) and says to read the receipt, whose key list has grown, rather than the quoted list. The body is in a structured region and keeps its audit text.",
       "reason": "",
       "when": "2026-11-23T19:26:29.502604+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "anchors_resolve-2",
+      "reason": "Historical review-comment citation written by reckon at the time of that review; the base sha lives on an unfetched branch, no node builds from it, and rewriting a review record would falsify what it recorded.",
+      "when": "2026-11-23T19:26:37.913446+00:00"
     }
   ],
   "responses": {
@@ -100,6 +107,12 @@
       "note": "The followup prompt now names the certificate PNG/SVG as the only files to regenerate (timing images deleted in d4bc41b1e) and says to read the receipt, whose key list has grown, rather than the quoted list. The body is in a structured region and keeps its audit text.",
       "reason": "",
       "when": "2026-11-23T19:26:29.502604+00:00"
+    },
+    "anchors_resolve-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "Historical review-comment citation written by reckon at the time of that review; the base sha lives on an unfetched branch, no node builds from it, and rewriting a review record would falsify what it recorded.",
+      "when": "2026-11-23T19:26:37.913446+00:00"
     },
     "done_when-1": {
       "action": "acted",

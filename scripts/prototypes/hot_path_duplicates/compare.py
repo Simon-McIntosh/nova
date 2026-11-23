@@ -466,11 +466,10 @@ def entry_plot_columns(receipt):
     ]
     return dict(
         entry="plot-columns",
-        implementation_a=(
-            "nova.frame.polyplot plot indexer update_columns "
-            "(PolyPlot and PolyPlotChildren)"
-        ),
-        implementation_b="nova.frame.vtkplot plot indexer update_columns",
+        implementation_a=", ".join(sorted(found["nova.frame.polyplot"]))
+        or "none found in nova.frame.polyplot",
+        implementation_b=", ".join(sorted(found["nova.frame.vtkplot"]))
+        or "none found in nova.frame.vtkplot",
         input=(
             "three column states (all present, one missing, all missing) through "
             "a stub host carrying required, additional and frame.columns"
@@ -665,9 +664,55 @@ def entry_candidate_agreements(receipt):
     return dict(
         entry="candidate-agreements",
         pairs=pairs,
+        decisions=candidate_decisions(pairs),
         tolerance="each pair states its own; the record agrees when every pair does",
         agrees=all(pair["agrees"] for pair in pairs),
     )
+
+
+def candidate_decisions(pairs):
+    """One decision per measured candidate, in the shape a coordinator answers.
+
+    The four pairs have no standalone record of their own, so the decision each
+    raises travels with the measurement that raised it: the id names the
+    candidate, the question states what was compared, and the options are the
+    two answers a coordinator can give.
+    """
+    decisions = []
+    for pair in pairs:
+        removable = pair["lines_removable"]
+        decisions.append(
+            dict(
+                id=f"candidate-{pair['candidate']}",
+                entry="candidate-agreements",
+                question=(
+                    f"{pair['implementation_a']} and {pair['implementation_b']} "
+                    f"compute the same quantity, agreeing on {pair['input']}. "
+                    "Should the pair share one implementation?"
+                ),
+                options=[
+                    dict(
+                        value="accept-for-s28-node",
+                        label=(
+                            f"Keep {pair['keeper']} and remove the other copy, "
+                            f"{removable} line(s)"
+                        ),
+                    ),
+                    dict(
+                        value="decline",
+                        label=(
+                            "Keep both copies: the pair is not on the measured "
+                            "hot path, or the removal is below the cost of the "
+                            "shared abstraction it would need"
+                        ),
+                    ),
+                ],
+                recommended="accept-for-s28-node",
+                keeper=pair["keeper"],
+                lines_removable=removable,
+            )
+        )
+    return decisions
 
 
 def _reuse_check(tree):
@@ -821,8 +866,8 @@ def write_ast_scan(path, tree, revision):
         raise SystemExit(1)
 
 
-def compare(receipt_path):
-    receipt = {"entries": [], "negative_controls": []}
+def compare(receipt_path, revision=None):
+    receipt = {"revision": revision, "entries": [], "negative_controls": []}
     for function in (
         entry_topology_read,
         entry_extreme_selection,
@@ -893,7 +938,9 @@ def main():
     assert jax.default_backend() == "cpu"
     if args.scan_ast is not None:
         write_ast_scan(args.scan_ast, args.tree, args.revision)
-    raise SystemExit(1 if args.receipt is not None and compare(args.receipt) else 0)
+    raise SystemExit(
+        1 if args.receipt is not None and compare(args.receipt, args.revision) else 0
+    )
 
 
 if __name__ == "__main__":

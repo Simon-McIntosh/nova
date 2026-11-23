@@ -1,0 +1,51 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/test_equilibrium_magnetics_fit_known_states.py::test_known_state_recovery[iter]"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-23T22:47:45.059Z",
+  "dispatched_at": "2026-11-23T22:23:55Z",
+  "findings": [
+    {
+      "file": "tests/test_jax_config.py",
+      "line": 116,
+      "severity": "non-blocking",
+      "text": "the new unit test asserts release == CompilationRelease(before=3, after=3, collected_objects=11) while _live_executable_count is monkeypatched to the constant 3, so both sides of the before/after pair come from the value the test itself supplied; the assertion cannot fail if the release drops nothing, and 'after' would equal 'before' whatever the code did. The test still guards that jax.clear_caches() is called once and that history is appended and collect's return recorded, but the counts carry no independent evidence. This is the same shape the earlier review recorded at this file, and it is not addressed by the gained evidence commits."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "five evidence commits, all edits to docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html: the declared suite command now records the base abort beside the reproduction, the section that recorded the -n 8 arm as unmeasurable is replaced by the measured arm (3 failed, 1 passed in 3543.31s) and the head declared-suite result (1 failed, 16 passed in 8785.76s) is added; nothing outside the fragment moves.",
+    "done_when": "the done_when asks that tests/test_equilibrium_magnetics_fit_known_states.py run all slow cases in one process and under -n 8 without an abort; the fragment now records -n 8 at head 50200153d as 3 failed, 1 passed in 3543.31s with no Fatal Python error, which I verified in ~/.cache/nova-s29/abort-gate/n8.log, and the single-process declared suite at 1 failed, 16 passed in 8785.76s with no Fatal Python error, verified in fence-head-arm.log.",
+    "goal": "the node's goal is to name the cause of the CPU native abort and fix or contain it; the gained commits record the -n 8 parallel arm and the declared suite command's exit status in docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html, while the release itself lands at nova/jax/config.py:249.",
+    "manifest": "read; the reviewed manifest records the -n 8 arm's summary and log path, the declared suite command's 1 failed/16 passed, the negative-control EXIT=134, and status complete, and every figure I re-read reconciles with the log it cites.",
+    "write_paths": "the five gained commits touch only docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html, one of the node's declared write paths; no gained commit writes outside it."
+  },
+  "justifications": {
+    "durability": "tests/test_jax_config.py:116 draws both before and after from the same constant _live_executable_count stub, so no assertion reddens when the release drops nothing, and the gained docs add no test at all.",
+    "evidence": "every headline in the gained fragment reconciles with its log: n8.log carries 3 failed, 1 passed in 3543.31s, EXIT=1 and zero Fatal Python errors, and fence-head-arm.log carries 1 failed, 16 passed in 8785.76s, EXIT=1.",
+    "fit": "the added prose in docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html follows the surrounding evidence-record idiom and introduces no plan, sprint or ticket label.",
+    "goal_fidelity": "the gained commits complete the goal's -n 8 demonstration in docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html, while nova/jax/config.py:249's release is still invoked only from the test fixture.",
+    "reuse": "nova/jax/config.py:249 release_compilation_caches reuses the existing private _release_compilation_caches it shares with bound_compilation_retention, and a search over nova for jax.clear_caches found no other production owner of the release capability.",
+    "scope_discipline": "the gained diff in docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html adds only evidence prose in the declared path."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to name the cause of the CPU native abort and fix or contain it; the gained commits record the -n 8 parallel arm and the declared suite command's exit status in docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html, while the release itself lands at nova/jax/config.py:249.\nVERDICT done_when: the done_when asks that tests/test_equilibrium_magnetics_fit_known_states.py run all slow cases in one process and under -n 8 without an abort; the fragment now records -n 8 at head 50200153d as 3 failed, 1 passed in 3543.31s with no Fatal Python error, which I verified in ~/.cache/nova-s29/abort-gate/n8.log, and the single-process declared suite at 1 failed, 16 passed in 8785.76s with no Fatal Python error, verified in fence-head-arm.log.\nVERDICT write_paths: the five gained commits touch only docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html, one of the node's declared write paths; no gained commit writes outside it.\nVERDICT manifest: read; the reviewed manifest records the -n 8 arm's summary and log path, the declared suite command's 1 failed/16 passed, the negative-control EXIT=134, and status complete, and every figure I re-read reconciles with the log it cites.\nVERDICT diff: read commit by commit from 50200153d to 391070b46: five evidence commits, all edits to the one fragment, adding the -n 8 arm and its exit status, the declared-suite result at head, the three-worker detail, the earlier EXIT=137 context, and the two-machine mapping figure.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the gained commits complete the goal's -n 8 demonstration in docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html, while nova/jax/config.py:249's release is still invoked only from the test fixture.\nSCORE evidence: 20\nJUSTIFICATION evidence: every headline in the gained fragment reconciles with its log: ~/.cache/nova-s29/abort-gate/n8.log carries 3 failed, 1 passed in 3543.31s, EXIT=1 and zero Fatal Python errors, and fence-head-arm.log carries 1 failed, 16 passed in 8785.76s, EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the gained diff in docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html adds only evidence prose in the declared path.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_jax_config.py:116 draws both before and after from the same constant _live_executable_count stub, so no assertion reddens when the release drops nothing, and the gained docs add no test at all.\nSCORE fit: 18\nJUSTIFICATION fit: the added prose in docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html follows the surrounding evidence-record idiom and introduces no plan, sprint or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/jax/config.py:249 release_compilation_caches reuses the existing private _release_* helper it shares with bound_compilation_retention, and a search over nova for jax.clear_caches found no other production owner of the release capability.\nFINDING tests/test_jax_config.py:116 non-blocking: the new unit test compares the release against CompilationRelease(before=3, after=3, collected_objects=11) while _live_executable_count is monkeypatched to the constant 3, so both halves of the before/after pair come from the value the test supplied and the assertion cannot fail if the release drops nothing; it still guards the clear_caches call and the history append, but not the counts. The earlier review recorded this same shape at this file and the gained commits leave it unaddressed.\n",
+  "review_run_id": "r-20261123T213321969510-review-of-jax-cpu-native-abort-391070b46221",
+  "reviewed_base_sha": "50200153db3b92acf16d07a83eb7fbf00c5d3533",
+  "reviewed_head_sha": "391070b46221d545e0c1ab63c91e1ed8c460b039",
+  "reviewed_run_id": "r-20261123T104742924149-jax-cpu-native-abort",
+  "scores": {
+    "durability": 12,
+    "evidence": 20,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T23:31:02.012920+00:00",
+  "total": 106
+}

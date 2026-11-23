@@ -21,11 +21,11 @@
 <meta name="plan-capability-reasoning" content="standard">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="moderate">
-<meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -61,7 +61,7 @@ here. Code that a plan in held sprint S32 owns is kept: the lead ruled on
 2026-11-21 that held work is parked, never discarded.</p>
 
 <h2 id="s1">§1 — The measured hot path</h2>
-<section data-reckon="section" data-id="s1" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s1" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>A stored record names every module and function the two production routes
 execute, measured rather than read:</p>
 <ul>
@@ -237,6 +237,9 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261122T202531438845-hot-path-map" data-who="reckon-build" data-when="2026-11-23T07:51:12Z">
     <div class="r-comment-body"><p>docs(hot-path-map): repaired record for the measured per-module line map — the driver now asserts its own reach checks (negative control zero on both routes, public solve entry nonzero on both) and refuses to write a map that fails them, the revision is stamped only from a clean tree and re-checked before the map is composed, and the record was re-run and re-rendered at 09ef90e4 in one all_debug job (1338366): 472 of 472 modules under nova/ carry an entry, the forward route executed 15560 lines and the inverse fit 19310, nova/equilibrium/forward.py reads 504/1043 on the forward route and 506/1043 on the inverse, nova/utilities/ANSYS.py reads 0/150 on both, and the four support-read entry points the device trace attributes kernels to have no executed body line on either route</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="coordinator" data-when="2026-11-23">
+    <div class="r-comment-body">§1 landed from run r-20261122T202531438845-hot-path-map (head 8e9ae53b4) after one review round; see the landed record anchor s1-hot-path-map.</div>
 </div>
 </section>
 </main>

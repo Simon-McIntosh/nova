@@ -1,0 +1,1677 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="code-reuse-and-hot-path">
+  <title>Benchmarks and scripts census | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="bench-scripts-census-summary">Census of benchmarks and scripts</h2>
+    <p>Every Python file tracked under <code>benchmarks/</code> and
+    <code>scripts/</code> receives one verdict. The population is enumerated
+    through <code>git ls-files</code>, the tracked-file semantics that
+    <code>nova.database.filepath.worktree_path_candidates</code> owns, not a
+    directory walk. A driver known to be tracked must appear or the census
+    refuses. This record was produced by
+    <code>benchmarks/scripts_census.py</code> at revision <code>f26e4620e17fd7ec8a9b63b8751772e2ade4de4a</code>;
+    its machine-readable twin sits at
+    <code>docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-census.json</code>.</p>
+    <table id="bench-scripts-census-counts">
+      <tr><th>verdict</th><th>files</th></tr>
+      <tr><td>keep</td><td>601</td></tr>
+      <tr><td>delete</td><td>972</td></tr>
+      <tr><td>merge</td><td>1</td></tr>
+      <tr><td><strong>sum</strong></td><td>1574</td></tr>
+    </table>
+    <p>The three verdicts sum to <strong>1574</strong> and the measured population of both trees is <strong>1574</strong>, so the counts reconcile: <strong>yes</strong>.</p>
+    <h3 id="bench-scripts-census-method">How a verdict is reached</h3>
+    <p><strong>keep</strong> &#8212; imported by kept code or tests (<code>nova/</code>, <code>tests/</code>, <code>apps/</code>) or transitively by a kept driver; reached by a live runner (a launcher under <code>scripts/</code>, a test, or the packaging metadata) through a full path, an import statement, or a path assembled from quoted segments; named by a plan in S28&#8211;S32, read from that plan's own text rather than guessed from a filename; a package <code>__init__.py</code>; or this census instrument itself.</p>
+    <p><strong>delete</strong> &#8212; reached by none of those. Each delete names every evidence record that cites it and the revision that evidence record ran at; the revision is proven to resolve by <code>git cat-file -e &lt;revision&gt;:&lt;path&gt;</code>.</p>
+    <p><strong>merge</strong> &#8212; a byte-identical duplicate that folds into a twin classified keep.</p>
+    <p>A driver cited by a record that names no resolvable revision is undeletable under the locked decision <code>cited-driver-deletion: delete-when-revision-resolves</code>, so the 51 such files are kept and named below rather than deleted on an unresolvable citation.</p>
+    <h3 id="bench-scripts-census-controls">Controls</h3>
+    <p><strong>Positive control.</strong> <code>benchmarks/recovery_ladder_census.py</code> is known to be tracked and must appear in the census, or the census refuses; it is present.</p>
+    <p><strong>Negative control.</strong> Forcing <code>benchmarks/recovery_ladder_census.py</code> (a driver a live test imports) to a delete verdict is refused and named: <code>Refused: delete refused: &#8230; is a kept driver (imported_by_core, imported by a live test) and cannot be deleted</code>, exit 1. Forcing an unkept driver succeeds, so the guard is specific rather than blanket. The control log records the revision, the command and the exit status.</p>
+    <h3 id="bench-scripts-census-merges">Merge verdicts (1)</h3>
+    <table id="bench-scripts-census-merge-table">
+      <tr><th>driver</th><th>folds into (kept)</th></tr>
+      <tr><td><code>scripts/prototypes/moment_hessian/analyse.py</code></td><td><code>scripts/prototypes/compile_pass_profile/analyse.py</code></td></tr>
+    </table>
+    <h3 id="bench-scripts-census-refused">Refused deletes: cited without a resolvable revision (51)</h3>
+    <ul>
+      <li><code>benchmarks/backend_divergence_forensics.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/solver-convergence-regression-landed.html @ 0331bb94; docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-guard-follow-ons.html @ 1c023858f; docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29; docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-launch-scripts-and-guard.html @ None</li>
+      <li><code>benchmarks/bank_efit_overlay.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/solver-convergence-regression-landed.html @ 0331bb94; docs/evidence/mast-bank-efit-overlays.html @ None</li>
+      <li><code>benchmarks/chord_booking_operation_trace.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/decomposition/report.json @ 372c604914acda4cf25bfca797a1d95e6afae8ee; docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/decomposition/chord-132.json @ None; docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/decomposition/chord-550.json @ None; docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/decomposition/exact-132.json @ None; docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/decomposition/exact-550.json @ None</li>
+      <li><code>benchmarks/compile_abort_probe.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/cpu-compile-abort-landed.html @ 17bd21d58; docs/evidence/archive/figure-and-solver-audit-landed.html @ 0028295f5ed999d7d8d02d3dfa0fe427e12d2c12; docs/evidence/fragments/cpu-compile-abort/cca-coil-edit-regeneration-row.html @ None</li>
+      <li><code>benchmarks/constraint_centroid_receipt.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/constraint-augmented-newton-krylov-landed.html @ 0081c3e9; docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29; docs/figures/centroid-constrained-oracle-solve/first-moment-consumers/consumer-inventory.md @ 45f5ee8ef; docs/figures/constraint-augmented-newton-krylov/centroid/render-receipt.json @ None</li>
+      <li><code>benchmarks/coupling_moment_order_evaluation.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/cut-cell-attribution-evidence.html @ None</li>
+      <li><code>benchmarks/display_map_promoted_figure.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/separatrix-spline-extraction/display-map-solve-currents.html @ None; docs/evidence/fragments/separatrix-spline-extraction/promoted-node-figure.html @ None</li>
+      <li><code>benchmarks/fieldnull_gpu_throughput.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/nova-jax-dissolution-landed.html @ 170689e2; docs/figures/hex-cell-single-grid/h200-split-batch.json @ 608b94ee; docs/figures/jax-dissolution/fieldnull_gpu_throughput.json @ None</li>
+      <li><code>benchmarks/fixed_point_gpu_throughput.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/nova-jax-dissolution-landed.html @ 170689e2; docs/figures/jax-dissolution/fixed_point_gpu_throughput.json @ None</li>
+      <li><code>benchmarks/fixed_point_ladder.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/spine-boundary-accelerator-landed.html @ 232cf5fa; docs/figures/jax-dissolution/fixed_point_gpu_throughput.json @ None; docs/figures/jax-dissolution/fixed_point_route.json @ None</li>
+      <li><code>benchmarks/fixed_point_route.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/jax-dissolution/fixed_point_gpu_throughput.json @ None</li>
+      <li><code>benchmarks/flux_representation_degree.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/coefficient-space-newton/representation-degree.json @ None</li>
+      <li><code>benchmarks/forward_resolution_default.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/forward-operator-refinement/reference-native-resolution-default.json @ None</li>
+      <li><code>benchmarks/frozen_route_settle_figures.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-route-settle-evidence.html @ None</li>
+      <li><code>benchmarks/late_trip_promotion_timing.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/millisecond-converged-solve/trip-quantum/late-trips/profile.json @ None</li>
+      <li><code>benchmarks/production_solve_host_profile.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/artifacts-carry-no-worktree-paths-landed.html @ 469233f2a; docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-guard-follow-ons.html @ 1c023858f; docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29; docs/figures/millisecond-converged-solve/trip-quantum/host-profile/cprofile-measurement.json @ None; docs/figures/millisecond-converged-solve/trip-quantum/host-profile/profile.json @ None</li>
+      <li><code>benchmarks/program_shape_census.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/exact-clip-moment-quadrature-landed.html @ 05f7cd92; docs/evidence/archive/millisecond-converged-solve-landed.html @ 18287b1b; docs/figures/cut-cell-current-attribution/exact-clip-cost/dimensions-historical.md @ None; docs/figures/millisecond-converged-solve/program-shapes/bank-shape-identity.json @ None</li>
+      <li><code>benchmarks/pure_arm_comparison_figure.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-guard-follow-ons.html @ 1c023858f; docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29; docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-launch-scripts-and-guard.html @ None</li>
+      <li><code>benchmarks/stencil_null_route.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/jax-dissolution/stencil_null_route.json @ None</li>
+      <li><code>benchmarks/trip_remainder_attribution.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/millisecond-converged-solve/trip-quantum/remainder/remainder.json @ None</li>
+      <li><code>scripts/certificate_300_carrier/bin_census.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/converged-forward-solve/certificate-300-device-carrier.html @ None</li>
+      <li><code>scripts/certificate_300_carrier/cell_census.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/converged-forward-solve/certificate-300-device-carrier.html @ None</li>
+      <li><code>scripts/iron_operator_bound/reuse_check.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-graded-operator-bound.html @ None</li>
+      <li><code>scripts/labeller_parallel/smoke.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/playable-forward-solve/labeller-parallel/run-dry-run.txt @ None</li>
+      <li><code>scripts/media/emit_boundary_contact.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/limited-boundary-census/README.md @ None</li>
+      <li><code>scripts/media/emit_census_evidence.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/limited-boundary-census/README.md @ None</li>
+      <li><code>scripts/media/emit_sequence_start_condition.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/limited-boundary-census/README.md @ None</li>
+      <li><code>scripts/media/limited_class_census.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/limited-boundary-census/README.md @ None</li>
+      <li><code>scripts/media/validate_boundary_repair.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/limited-boundary-census/README.md @ None</li>
+      <li><code>scripts/prototypes/bank_limited_contact/measure.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-limited-contact.html @ None</li>
+      <li><code>scripts/prototypes/bank_solve_breakpoint/report.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-prototype-provenance.html @ None</li>
+      <li><code>scripts/prototypes/bank_solve_linesearch/report.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-report-equivalence.html @ None</li>
+      <li><code>scripts/prototypes/bank_step_booking_batch/report.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-report-equivalence.html @ None</li>
+      <li><code>scripts/prototypes/carrier_identity_receipt/check_receipt_table.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html @ None</li>
+      <li><code>scripts/prototypes/contour_tree_overflow/test_overflow.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/converged-forward-solve/tree-capacity-from-carrier.html @ 09f4816d8d; docs/evidence/fragments/converged-forward-solve/contour-tree-overflow.html @ None</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_flux/extract.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-flux.html @ None</li>
+      <li><code>scripts/prototypes/diiid_pinned_reregistration/measure.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-reregistration.html @ None</li>
+      <li><code>scripts/prototypes/diiid_stopping_rule/record_machine_geometry.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html @ None</li>
+      <li><code>scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html @ None</li>
+      <li><code>scripts/prototypes/diiid_support_mask/trace_support.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-support-mask-collapse.html @ None</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/flux_orientation.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html @ None</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/trip_trajectory.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html @ None; docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html @ None</li>
+      <li><code>scripts/prototypes/importer_delta/control.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/kernel-compile-barrier/importer-delta.html @ None</li>
+      <li><code>scripts/prototypes/one_traced_body/check_record.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html @ None</li>
+      <li><code>scripts/prototypes/point_program_attribution/check.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html @ 098010058c0ebc6d3a1c00d144728cea4096a933; docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html @ None</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/arms.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html @ None</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/probe_newton_dense.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/smfp-autodiff-free-newton.html @ None</li>
+      <li><code>scripts/prototypes/stored_state_refusals/drift_policy_panels.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html @ None</li>
+      <li><code>scripts/prototypes/stored_state_refusals/verify_input_drift.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html @ None</li>
+      <li><code>scripts/prototypes/tracked_read_batch/check_table.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html @ None</li>
+      <li><code>scripts/west_iron_galerkin/sphere_bound.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-interaction.html @ None</li>
+    </ul>
+    <h3 id="bench-scripts-census-deletes">Delete verdicts (972)</h3>
+    <ul>
+      <li><code>benchmarks/analytic_cost_floor.py</code> ()</li>
+      <li><code>benchmarks/analytic_truth_gauge.py</code> ()</li>
+      <li><code>benchmarks/analytic_truth_rescore.py</code> ()</li>
+      <li><code>benchmarks/arc_element_class.py</code> ()</li>
+      <li><code>benchmarks/arc_five_rows.py</code> ()</li>
+      <li><code>benchmarks/arc_operator_dispatch.py</code> ()</li>
+      <li><code>benchmarks/arc_section_cost.py</code> ()</li>
+      <li><code>benchmarks/axis_definition_referents.py</code> ()</li>
+      <li><code>benchmarks/axis_flux_departure_projection.py</code> ()</li>
+      <li><code>benchmarks/bound_failability_census.py</code> ()</li>
+      <li><code>benchmarks/bound_reference_classification.py</code> ()</li>
+      <li><code>benchmarks/census_kernel_timing.py</code> ()</li>
+      <li><code>benchmarks/centroid_radius_attribution.py</code> () &#8212; evidence: docs/figures/centroid-constrained-oracle-solve/first-moment-consumers/consumer-inventory.md @ 45f5ee8ef</li>
+      <li><code>benchmarks/circuit_projection_arm.py</code> ()</li>
+      <li><code>benchmarks/class_coreachability.py</code> ()</li>
+      <li><code>benchmarks/clipped_coupling_order.py</code> ()</li>
+      <li><code>benchmarks/coil_construction.py</code> ()</li>
+      <li><code>benchmarks/coil_section_cost.py</code> ()</li>
+      <li><code>benchmarks/compensator_authority.py</code> ()</li>
+      <li><code>benchmarks/compile_host_memory.py</code> ()</li>
+      <li><code>benchmarks/compiled_outer_loop_trace.py</code> () &#8212; evidence: docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/outer-loop.json @ c5e1498a0e435f637f3b1d0c27d1bbea4397cac5; docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/profile.json @ 083036e9310dbd8051f630e9202bc9bd47681acf; docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/outer-loop.json @ aa344960688a871590684f48f2e6b87b987e0955</li>
+      <li><code>benchmarks/conditioned_convergence_observables.py</code> ()</li>
+      <li><code>benchmarks/connectivity_route.py</code> ()</li>
+      <li><code>benchmarks/constants_conditioning.py</code> ()</li>
+      <li><code>benchmarks/constraint_multi_trip_target.py</code> ()</li>
+      <li><code>benchmarks/constraint_shape_receipt.py</code> () &#8212; evidence: docs/evidence/archive/constraint-augmented-newton-krylov-landed.html @ 0318fb6e</li>
+      <li><code>benchmarks/converged_frame_contrast.py</code> ()</li>
+      <li><code>benchmarks/coupled_map_mode_identification.py</code> ()</li>
+      <li><code>benchmarks/cpu_solve_discriminator.py</code> () &#8212; evidence: docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29</li>
+      <li><code>benchmarks/cs_winding_inductance.py</code> ()</li>
+      <li><code>benchmarks/diiid_admissible_step_control.py</code> ()</li>
+      <li><code>benchmarks/diiid_admission_rate_diagnosis.py</code> ()</li>
+      <li><code>benchmarks/diiid_containment_recheck.py</code> ()</li>
+      <li><code>benchmarks/diiid_manifold_advance.py</code> ()</li>
+      <li><code>benchmarks/diiid_prescribed_profile_forward.py</code> ()</li>
+      <li><code>benchmarks/diiid_residual_decomposition.py</code> () &#8212; evidence: docs/evidence/archive/diiid-vertical-force-balance-landed.html @ 0705871ee</li>
+      <li><code>benchmarks/diiid_target_current_digest_probe.py</code> () &#8212; evidence: docs/evidence/archive/diiid-vertical-force-balance-landed.html @ 0705871ee</li>
+      <li><code>benchmarks/diiid_vacuum_from_description.py</code> () &#8212; evidence: docs/evidence/archive/diiid-vertical-force-balance-landed.html @ 0705871ee</li>
+      <li><code>benchmarks/diiid_vacuum_gate.py</code> ()</li>
+      <li><code>benchmarks/diiid_vacuum_sensitivity_sweep.py</code> ()</li>
+      <li><code>benchmarks/dina_pack_current_distribution.py</code> ()</li>
+      <li><code>benchmarks/dina_reference_mapping.py</code> ()</li>
+      <li><code>benchmarks/divergence_floor_scaling.py</code> ()</li>
+      <li><code>benchmarks/diverted_chord_response_attribution.py</code> ()</li>
+      <li><code>benchmarks/diverted_drift_regression.py</code> ()</li>
+      <li><code>benchmarks/diverted_map_error_decomposition.py</code> ()</li>
+      <li><code>benchmarks/domain_participation_jump.py</code> ()</li>
+      <li><code>benchmarks/early_frame_placement_test.py</code> ()</li>
+      <li><code>benchmarks/edge_current_jump_sizing.py</code> ()</li>
+      <li><code>benchmarks/efit_absent_quantity_triage.py</code> () &#8212; evidence: docs/evidence/archive/equilibrium-metric-parity-landed.html @ 225140d1</li>
+      <li><code>benchmarks/efit_affine_extraction.py</code> () &#8212; evidence: docs/evidence/archive/diiid-forward-onboarding-landed.html @ 04cc6df2; docs/evidence/archive/efit-map-inversion-landed.html @ 26c8e9cf</li>
+      <li><code>benchmarks/efit_cell_current_representation.py</code> () &#8212; evidence: docs/evidence/archive/efit-flux-decomposition-landed.html @ 17d14f95</li>
+      <li><code>benchmarks/efit_centroid_offset_attribution.py</code> () &#8212; evidence: docs/evidence/archive/playable-forward-solve-landed.html @ 09276303</li>
+      <li><code>benchmarks/efit_current_sign_census.py</code> () &#8212; evidence: docs/evidence/archive/efit-map-inversion-landed.html @ 26c8e9cf</li>
+      <li><code>benchmarks/efit_derived_quantity_census.py</code> () &#8212; evidence: docs/evidence/archive/equilibrium-metric-parity-landed.html @ 19261655</li>
+      <li><code>benchmarks/efit_filament_truncation_contribution.py</code> () &#8212; evidence: docs/evidence/archive/efit-flux-decomposition-landed.html @ 17d14f95</li>
+      <li><code>benchmarks/efit_interior_stencil_quadrature.py</code> () &#8212; evidence: docs/evidence/archive/efit-flux-decomposition-landed.html @ 1b9fb2bf; docs/figures/scoring-criteria-derivation/reuse-map.md @ e2c20ed8eb30ed11f412c95bc866110aa4e2a11e</li>
+      <li><code>benchmarks/efit_lcfs_outward_offset.py</code> () &#8212; evidence: docs/evidence/archive/efit-map-inversion-landed.html @ 52d83997</li>
+      <li><code>benchmarks/efit_linear_current_urankar.py</code> () &#8212; evidence: docs/evidence/archive/efit-flux-decomposition-landed.html @ 17d14f95</li>
+      <li><code>benchmarks/efit_metric_parity_comparison.py</code> () &#8212; evidence: docs/evidence/archive/equilibrium-metric-parity-landed.html @ 19261655</li>
+      <li><code>benchmarks/efit_section_shape_zeta_order.py</code> () &#8212; evidence: docs/evidence/archive/efit-flux-decomposition-landed.html @ 17d14f95</li>
+      <li><code>benchmarks/efit_third_term_separation.py</code> () &#8212; evidence: docs/evidence/archive/efit-map-inversion-landed.html @ 26c8e9cf</li>
+      <li><code>benchmarks/efit_triangle_refinement_prototype.py</code> () &#8212; evidence: docs/evidence/archive/efit-flux-decomposition-landed.html @ 1b9fb2bf</li>
+      <li><code>benchmarks/efit_xpoint_fit_state.py</code> () &#8212; evidence: docs/evidence/archive/efit-map-inversion-landed.html @ 26c8e9cf</li>
+      <li><code>benchmarks/empty_exact_polygon_probe.py</code> ()</li>
+      <li><code>benchmarks/ensemble_constraint_seam.py</code> ()</li>
+      <li><code>benchmarks/event_resolved_amplification.py</code> () &#8212; evidence: docs/evidence/archive/topology-preserving-continuation-landed.html @ 2f0d439f</li>
+      <li><code>benchmarks/exact_clip_warm_cost.py</code> () &#8212; evidence: docs/evidence/archive/millisecond-converged-solve-landed.html @ 18287b1b</li>
+      <li><code>benchmarks/fieldnull_precision_audit.py</code> () &#8212; evidence: docs/evidence/archive/nova-jax-dissolution-landed.html @ 170689e2</li>
+      <li><code>benchmarks/flux_surface_flood.py</code> () &#8212; evidence: docs/evidence/archive/spine-boundary-accelerator-landed.html @ 232cf5fa</li>
+      <li><code>benchmarks/force_target_rule.py</code> ()</li>
+      <li><code>benchmarks/fork_arming_economics.py</code> ()</li>
+      <li><code>benchmarks/forward_newton_ladder.py</code> () &#8212; evidence: docs/evidence/archive/flux-function-forward-equilibrium-landed.html @ 16bf140e</li>
+      <li><code>benchmarks/forward_solve_memory_ledger.py</code> ()</li>
+      <li><code>benchmarks/forward_solve_throughput.py</code> () &#8212; evidence: docs/figures/solver-trip-orchestration/compile-cadence.json @ 88b0fb610f05a38f63be9dde7764ca76ad751259</li>
+      <li><code>benchmarks/frame_operator_overhead.py</code> ()</li>
+      <li><code>benchmarks/framesetloc.py</code> ()</li>
+      <li><code>benchmarks/framespace.py</code> ()</li>
+      <li><code>benchmarks/frozen_route_fixed_point_rca.py</code> () &#8212; evidence: docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-route-fixed-point-diagnosis.html @ 64fdfe787</li>
+      <li><code>benchmarks/global_default_gpu_rebuild.py</code> ()</li>
+      <li><code>benchmarks/global_surface_clip_rescore.py</code> ()</li>
+      <li><code>benchmarks/gpu_pair_sharding.py</code> ()</li>
+      <li><code>benchmarks/greens_elliptic_route.py</code> () &#8212; evidence: docs/evidence/archive/nova-jax-hygiene-s2-landed.html @ 0f553ebb</li>
+      <li><code>benchmarks/h200_solve_stage_profile.py</code> () &#8212; evidence: docs/figures/single-grid-solver-cutover/h200-solve-profile.json @ aaa1fb1f785e3c69342035a47f1bf6ebc871a9ef</li>
+      <li><code>benchmarks/held_tip_trip_diagnosis.py</code> () &#8212; evidence: docs/evidence/archive/plasma-cell-topology-authority-landed.html @ 08dd0dda16ac938205753234f06a53f4e194dca2; docs/figures/plasma-cell-topology-authority/consumer-migration.json @ 233c56a328ec118bca69041097e2fe9d4940d3f6</li>
+      <li><code>benchmarks/higher_order_contour.py</code> () &#8212; evidence: docs/figures/efit-baseline-demonstration/reuse-map.md @ 8564b05079e6d279ac959b2a9137d5d3c90e203b</li>
+      <li><code>benchmarks/incomplete_third_kind.py</code> ()</li>
+      <li><code>benchmarks/inner_solve_accuracy.py</code> ()</li>
+      <li><code>benchmarks/io_ingest.py</code> ()</li>
+      <li><code>benchmarks/iter_saddle_resolution.py</code> ()</li>
+      <li><code>benchmarks/kernel_cost.py</code> ()</li>
+      <li><code>benchmarks/kernel_cost_table.py</code> ()</li>
+      <li><code>benchmarks/lane_resource_accumulation.py</code> ()</li>
+      <li><code>benchmarks/limited_anchor_containment.py</code> ()</li>
+      <li><code>benchmarks/limited_shadow_before_after.py</code> () &#8212; evidence: docs/evidence/archive/cut-cell-current-attribution-landed.html @ 02a196e94</li>
+      <li><code>benchmarks/loop_structure_audit.py</code> ()</li>
+      <li><code>benchmarks/mast_response_kernel_backends.py</code> ()</li>
+      <li><code>benchmarks/moment_map_derivative_contract.py</code> () &#8212; evidence: docs/evidence/archive/forward-solver-route-integrity-landed.html @ 1ab7d00fd; docs/evidence/fragments/forward-solver-route-integrity/fsri-moment-map-contract-after-first-moments.html @ 200bdeeb5</li>
+      <li><code>benchmarks/near_field_elliptic.py</code> ()</li>
+      <li><code>benchmarks/nearfar_error.py</code> ()</li>
+      <li><code>benchmarks/newton_cycle_mask_switch.py</code> () &#8212; evidence: docs/evidence/archive/plasma-cell-topology-authority-landed.html @ 08dd0dda16ac938205753234f06a53f4e194dca2; docs/figures/plasma-cell-topology-authority/consumer-migration.json @ 233c56a328ec118bca69041097e2fe9d4940d3f6</li>
+      <li><code>benchmarks/null_census_device_benchmark.py</code> ()</li>
+      <li><code>benchmarks/null_stack_route.py</code> ()</li>
+      <li><code>benchmarks/order_vs_mesh_adjudication.py</code> ()</li>
+      <li><code>benchmarks/parallel_components_identity.py</code> ()</li>
+      <li><code>benchmarks/partial_range_primitives.py</code> ()</li>
+      <li><code>benchmarks/passive_closure_mesh_response.py</code> ()</li>
+      <li><code>benchmarks/passive_closure_trace.py</code> ()</li>
+      <li><code>benchmarks/picard_shadow_crossing.py</code> ()</li>
+      <li><code>benchmarks/plasma_cell_seed_policy.py</code> ()</li>
+      <li><code>benchmarks/plasma_coupling_accuracy.py</code> ()</li>
+      <li><code>benchmarks/plot_operator_dispatch.py</code> ()</li>
+      <li><code>benchmarks/polish_accuracy_ladder.py</code> ()</li>
+      <li><code>benchmarks/polish_support_performance.py</code> () &#8212; evidence: docs/evidence/archive/plasma-cell-topology-authority-landed.html @ 08dd0dda16ac938205753234f06a53f4e194dca2; docs/figures/plasma-cell-topology-authority/consumer-migration.json @ 233c56a328ec118bca69041097e2fe9d4940d3f6</li>
+      <li><code>benchmarks/poly_section_routing.py</code> ()</li>
+      <li><code>benchmarks/polybeam_section_cost.py</code> ()</li>
+      <li><code>benchmarks/polygon_route_cost.py</code> ()</li>
+      <li><code>benchmarks/portfolio_warm_start.py</code> () &#8212; evidence: docs/evidence/archive/playable-forward-solve-landed.html @ 03066756; docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html @ 06cc5abe1</li>
+      <li><code>benchmarks/private_region_figures.py</code> ()</li>
+      <li><code>benchmarks/private_region_parallel_kernel.py</code> ()</li>
+      <li><code>benchmarks/private_region_wedge_audit.py</code> ()</li>
+      <li><code>benchmarks/qualified_suffix_census.py</code> ()</li>
+      <li><code>benchmarks/receipt_topology_check.py</code> ()</li>
+      <li><code>benchmarks/recovery_ladder_telemetry.py</code> () &#8212; evidence: docs/evidence/archive/forward-solver-route-integrity-landed.html @ 1119fbc79</li>
+      <li><code>benchmarks/reduced_newton_rows.py</code> () &#8212; evidence: docs/evidence/archive/millisecond-converged-solve-landed.html @ 023f1fc7</li>
+      <li><code>benchmarks/reference_failure_classification.py</code> ()</li>
+      <li><code>benchmarks/scanned_trip_loop_prototype.py</code> ()</li>
+      <li><code>benchmarks/section_average_oracle.py</code> ()</li>
+      <li><code>benchmarks/section_face_continuity.py</code> ()</li>
+      <li><code>benchmarks/seed_alignment_ranking.py</code> ()</li>
+      <li><code>benchmarks/select_precision_contract.py</code> () &#8212; evidence: docs/figures/jax-dissolution/select_precision_contract.json @ 39c98f52c3826954a78b2d8ad60aa8b2a8c04c8c</li>
+      <li><code>benchmarks/select_route.py</code> ()</li>
+      <li><code>benchmarks/settled_exit_throughput.py</code> () &#8212; evidence: docs/figures/solver-trip-orchestration/settled-exit-throughput.json @ c8cd79bf7691a487778fc92da334aa84b1fc8890</li>
+      <li><code>benchmarks/sine_moment_family.py</code> ()</li>
+      <li><code>benchmarks/sol_current_demonstration.py</code> () &#8212; evidence: docs/evidence/archive/sol-current-demonstration-landed.html @ 39555e0f</li>
+      <li><code>benchmarks/solenoid_span_attribution.py</code> ()</li>
+      <li><code>benchmarks/solovev_contour_overlay.py</code> () &#8212; evidence: docs/evidence/archive/plasma-edge-current-representation-landed.html @ 4d8e5cd6</li>
+      <li><code>benchmarks/solovev_off_axis_census.py</code> ()</li>
+      <li><code>benchmarks/solovev_solver_discriminator.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html @ 06cc5abe1</li>
+      <li><code>benchmarks/solve_profile_kernel_count.py</code> ()</li>
+      <li><code>benchmarks/split_fit_conditioning.py</code> ()</li>
+      <li><code>benchmarks/split_fit_measured_maps.py</code> ()</li>
+      <li><code>benchmarks/split_fit_production_validation.py</code> ()</li>
+      <li><code>benchmarks/steep_edge_moment_demonstration.py</code> () &#8212; evidence: docs/evidence/archive/plasma-edge-current-representation-landed.html @ 260ce85b</li>
+      <li><code>benchmarks/support_order_arms.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html @ 06cc5abe1</li>
+      <li><code>benchmarks/support_order_iso_accuracy.py</code> ()</li>
+      <li><code>benchmarks/terminal_state_hash_census.py</code> () &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/sampled-profile-core-hold.html @ 4be441e3a134209df0c41dbdc424a52501234535</li>
+      <li><code>benchmarks/test_biotoperate.py</code> ()</li>
+      <li><code>benchmarks/tiled_assembly.py</code> ()</li>
+      <li><code>benchmarks/tiled_backend.py</code> () &#8212; evidence: docs/figures/solver-trip-orchestration/cache-wiring.json @ 3e8a0b27fec8bb360a4433556991f59c6a12ab3d; docs/figures/solver-trip-orchestration/compile-cadence.json @ 88b0fb610f05a38f63be9dde7764ca76ad751259</li>
+      <li><code>benchmarks/traced_selection_seam.py</code> () &#8212; evidence: docs/evidence/archive/dual-branch-selection-landed.html @ 0bd3af3d; docs/evidence/archive/plasma-cell-topology-authority-landed.html @ 08dd0dda16ac938205753234f06a53f4e194dca2; docs/figures/plasma-cell-topology-authority/consumer-migration.json @ 233c56a328ec118bca69041097e2fe9d4940d3f6</li>
+      <li><code>benchmarks/traced_vector_identity_receipt.py</code> () &#8212; evidence: docs/evidence/archive/forward-solve-api-landed.html @ 0797f64f; docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29; docs/figures/forward-solve-api/traced-identity/traced-vector-identity-confounded-arms.json @ a90f943acea830e304e9431f7839223547aa2e16; docs/figures/forward-solve-api/traced-identity/traced-vector-identity.json @ 14deb6f526f80ec3b5b1c8368d5c2c81a0362d0b</li>
+      <li><code>benchmarks/trip_quantum_profile.py</code> () &#8212; evidence: docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29; docs/figures/millisecond-converged-solve/trip-quantum/hessenberg-reuse/profile.json @ 9a49568c; docs/figures/millisecond-converged-solve/trip-quantum/one-read/profile.json @ 9a49568c; docs/figures/millisecond-converged-solve/trip-quantum/profile.json @ 9a49568c; docs/figures/solver-trip-orchestration/trip-quantum.json @ 5228ffb884c6456d00032ece4e1ffc008743610f</li>
+      <li><code>benchmarks/trip_settlement_census.py</code> ()</li>
+      <li><code>benchmarks/vertex_ring_census.py</code> ()</li>
+      <li><code>benchmarks/vertical_force_decomposition.py</code> () &#8212; evidence: docs/evidence/archive/solver-convergence-regression-landed.html @ 0d88ceab; docs/figures/centroid-constrained-oracle-solve/first-moment-consumers/consumer-inventory.md @ 45f5ee8ef</li>
+      <li><code>benchmarks/wall_at_cell_pitch.py</code> () &#8212; evidence: docs/evidence/archive/cut-cell-current-attribution-landed.html @ 02a196e94; docs/evidence/fragments/converged-forward-solve/cfs-limiter-designed-contact.html @ dcfbaed2a</li>
+      <li><code>benchmarks/wholecell_rows_reposed_fixture.py</code> ()</li>
+      <li><code>benchmarks/wound_coil_finite_section.py</code> ()</li>
+      <li><code>benchmarks/wound_coil_inductance.py</code> ()</li>
+      <li><code>benchmarks/zero_converged_block_census.py</code> ()</li>
+      <li><code>benchmarks/zero_residual_check.py</code> () &#8212; evidence: docs/evidence/archive/converged-forward-solve-landed.html @ 022636d5050045e811809d9479e7bbe8cd3d357b</li>
+      <li><code>scripts/analytic_oracle_fixtures/attribute_diverted_map.py</code> ()</li>
+      <li><code>scripts/analytic_oracle_fixtures/inspect_radial_carrier.py</code> ()</li>
+      <li><code>scripts/analytic_oracle_fixtures/reference_radial_pair.py</code> ()</li>
+      <li><code>scripts/analytic_seed_adjudication/run.py</code> ()</li>
+      <li><code>scripts/bootstrap_inspection/run.py</code> ()</li>
+      <li><code>scripts/build_cache_audit/audit.py</code> ()</li>
+      <li><code>scripts/build_cache_audit/measure_cache.py</code> ()</li>
+      <li><code>scripts/certificate_300_carrier/compare_carrier_stages.py</code> ()</li>
+      <li><code>scripts/certificate_300_carrier/dump_carrier_stages.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/certificate-300-device-carrier.html @ 0f8ce37fe</li>
+      <li><code>scripts/certificate_300_carrier/trace_krylov_action.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/certificate-300-device-carrier.html @ 0f8ce37fe</li>
+      <li><code>scripts/certificate_300_carrier/trace_normalisation.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/cell-moment-derivative-nan.html @ 2967db463</li>
+      <li><code>scripts/clip_audit/audit_hex_clip.py</code> () &#8212; evidence: docs/evidence/archive/boundary-ring-source-completion-landed.html @ 0fc12fad</li>
+      <li><code>scripts/coupling_surface/export_schema.py</code> ()</li>
+      <li><code>scripts/coupling_surface/verify_gentle_receipt.py</code> ()</li>
+      <li><code>scripts/coverage_scaling/measure_coverage.py</code> ()</li>
+      <li><code>scripts/cubic_sample_clip_independent/measure.py</code> ()</li>
+      <li><code>scripts/density_forcing_ladder/measure.py</code> ()</li>
+      <li><code>scripts/density_forcing_ladder/verify.py</code> ()</li>
+      <li><code>scripts/density_moment_projection/measure.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/polygon-moment-owner.html @ 32d463cf7</li>
+      <li><code>scripts/device_kernel_port/diagnose_reduction.py</code> ()</li>
+      <li><code>scripts/device_kernel_port/extended_precision_oracle.py</code> ()</li>
+      <li><code>scripts/device_kernel_port/localize_far_contour.py</code> ()</li>
+      <li><code>scripts/device_kernel_port/measure_cache_provenance.py</code> ()</li>
+      <li><code>scripts/device_kernel_port/measure_jacfwd_probe.py</code> ()</li>
+      <li><code>scripts/device_kernel_port/measure_nine_blocks.py</code> ()</li>
+      <li><code>scripts/device_kernel_port/measure_unpaired_compile.py</code> ()</li>
+      <li><code>scripts/device_kernel_port/test_measure.py</code> ()</li>
+      <li><code>scripts/diiid_map_fidelity/report.py</code> ()</li>
+      <li><code>scripts/dina_profile_routes/measure.py</code> ()</li>
+      <li><code>scripts/dina_profile_routes/measure_controls.py</code> ()</li>
+      <li><code>scripts/dina_profile_routes/verify.py</code> ()</li>
+      <li><code>scripts/dual_basin_audit/audit_diverted_separatrix.py</code> ()</li>
+      <li><code>scripts/dual_basin_fixtures/measure.py</code> ()</li>
+      <li><code>scripts/edge_consistency_table.py</code> ()</li>
+      <li><code>scripts/edge_sheet/sweep.py</code> ()</li>
+      <li><code>scripts/edge_sheet/verify.py</code> ()</li>
+      <li><code>scripts/ensemble_window_throughput/benchmark.py</code> () &#8212; evidence: docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md @ 010f1d5f</li>
+      <li><code>scripts/fine_density_swap/measure.py</code> ()</li>
+      <li><code>scripts/fine_density_swap/verify.py</code> ()</li>
+      <li><code>scripts/forcing_residual_decomposition/measure.py</code> ()</li>
+      <li><code>scripts/forcing_residual_decomposition/verify_results.py</code> ()</li>
+      <li><code>scripts/geometry_service_benchmark/measure.py</code> ()</li>
+      <li><code>scripts/h200_test_lane/cache_reuse_summary.py</code> () &#8212; evidence: docs/evidence/archive/forward-solver-route-integrity-landed.html @ 094b65953e9241a3ed2e05ed1bdd51eb809015fa; docs/evidence/replan-2026-09-24/thin-interfaces.md @ a71934910d2a0835dd9f6ab35576eef5c2f44754</li>
+      <li><code>scripts/h200_test_lane/prewarm_row.py</code> () &#8212; evidence: docs/evidence/replan-2026-09-24/thin-interfaces.md @ a71934910d2a0835dd9f6ab35576eef5c2f44754</li>
+      <li><code>scripts/h200_test_lane/prewarm_rows.py</code> ()</li>
+      <li><code>scripts/h200_test_lane/publish_prewarm_pin.py</code> () &#8212; evidence: docs/evidence/replan-2026-09-24/thin-interfaces.md @ a71934910d2a0835dd9f6ab35576eef5c2f44754</li>
+      <li><code>scripts/imas_efit_closed_shell/case_options.py</code> ()</li>
+      <li><code>scripts/imas_efit_closed_shell/make_pulse.py</code> ()</li>
+      <li><code>scripts/imas_efit_closed_shell/report.py</code> ()</li>
+      <li><code>scripts/imas_efit_closed_shell/score.py</code> ()</li>
+      <li><code>scripts/in_cell_order_study/measure_sample_order.py</code> ()</li>
+      <li><code>scripts/iron_field_source/regen_pin.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-iron-field-source.html @ 6d1132bf4</li>
+      <li><code>scripts/iron_field_source/table.py</code> ()</li>
+      <li><code>scripts/iron_graded_refinement/figure.py</code> ()</li>
+      <li><code>scripts/iron_limb_production/comparison.py</code> ()</li>
+      <li><code>scripts/iron_limb_production/figure.py</code> ()</li>
+      <li><code>scripts/iron_limb_production/negative_control.py</code> ()</li>
+      <li><code>scripts/iron_limb_production/negative_control_west.py</code> ()</li>
+      <li><code>scripts/iron_limb_production/refinement.py</code> ()</li>
+      <li><code>scripts/iron_limb_reference/negative_control.py</code> ()</li>
+      <li><code>scripts/iron_linear_magnetisation/angular_cost.py</code> ()</li>
+      <li><code>scripts/iron_linear_magnetisation/capacity.py</code> ()</li>
+      <li><code>scripts/iron_linear_magnetisation/figure.py</code> ()</li>
+      <li><code>scripts/iron_linear_magnetisation/gate.py</code> ()</li>
+      <li><code>scripts/iron_linear_magnetisation/mesh_limit.py</code> ()</li>
+      <li><code>scripts/iron_linear_magnetisation/operator_check.py</code> ()</li>
+      <li><code>scripts/iron_linear_magnetisation/operator_pin.py</code> ()</li>
+      <li><code>scripts/iron_linear_magnetisation/probe.py</code> ()</li>
+      <li><code>scripts/iron_linear_magnetisation/route_cost.py</code> ()</li>
+      <li><code>scripts/iron_operator_bound/compare.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-graded-operator-bound.html @ 1c2352711</li>
+      <li><code>scripts/iron_operator_bound/localise.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-graded-operator-bound.html @ 1c2352711</li>
+      <li><code>scripts/iron_operator_bound/nearfield.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-graded-operator-bound.html @ 1c2352711</li>
+      <li><code>scripts/iron_operator_bound/pin.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-graded-operator-bound.html @ 1c2352711</li>
+      <li><code>scripts/iron_operator_bound/rebaseline.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-graded-operator-bound.html @ 1c2352711</li>
+      <li><code>scripts/iron_operator_bound/selfcell.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-graded-operator-bound.html @ 1c2352711</li>
+      <li><code>scripts/iron_operator_bound/shells.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-graded-operator-bound.html @ 1c2352711</li>
+      <li><code>scripts/iter_sectioned_conductor_set/figures.py</code> ()</li>
+      <li><code>scripts/iter_vessel_evolution/figures.py</code> ()</li>
+      <li><code>scripts/iter_vessel_evolution/measure.py</code> ()</li>
+      <li><code>scripts/labeller_batch/guard_smoke.py</code> ()</li>
+      <li><code>scripts/magnetisation_high_permeability/directional.py</code> ()</li>
+      <li><code>scripts/magnetisation_high_permeability/figures.py</code> ()</li>
+      <li><code>scripts/magnetisation_high_permeability/geometry.py</code> ()</li>
+      <li><code>scripts/magnetisation_high_permeability/measure.py</code> ()</li>
+      <li><code>scripts/map_forcing_attribution/measure.py</code> ()</li>
+      <li><code>scripts/mast_reference_evidence/contours.py</code> ()</li>
+      <li><code>scripts/mast_slice_census/census.py</code> () &#8212; evidence: docs/evidence/archive/mast-catalog-gpu-solve-landed.html @ 257af9dc; docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md @ 0bd3af3d</li>
+      <li><code>scripts/media/efit_pulse_gif.py</code> ()</li>
+      <li><code>scripts/media/nova_thomson_gif.py</code> ()</li>
+      <li><code>scripts/moment_branch_integration/verify.py</code> ()</li>
+      <li><code>scripts/moment_prediction_confidence/verify.py</code> ()</li>
+      <li><code>scripts/moment_route_adjudication/measure.py</code> ()</li>
+      <li><code>scripts/moment_route_adjudication/verify.py</code> ()</li>
+      <li><code>scripts/normalization_discriminator/measure.py</code> ()</li>
+      <li><code>scripts/normalization_discriminator/verify.py</code> ()</li>
+      <li><code>scripts/observation_clip_rescore/measure.py</code> ()</li>
+      <li><code>scripts/own_node_interior_score/score_interior.py</code> ()</li>
+      <li><code>scripts/portfolio_moment_revisit/run.py</code> ()</li>
+      <li><code>scripts/portfolio_moment_revisit/verify.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_batch_width/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_batch_width/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_booking_cost/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_booking_determinism/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_booking_primal_buckets/cpu_contract.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_booking_primal_buckets/device.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_booking_primal_buckets/matrices.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_booking_primal_buckets/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_booking_primal_buckets/suite.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_booking_primal_buckets/tradeoff.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_booking_primal_buckets/verify.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_candidate_compact/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_candidate_compact/reproduce.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_candidate_loop/capture.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_candidate_loop/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_carried_decision/audit_suites.py</code> () &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-carried-decision.html @ d4bab5fe15e463dcec7831253b5c85f64495b657</li>
+      <li><code>scripts/prototypes/bank_carried_decision/read_sweep.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_carried_decision/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_compact_followups/gates.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_drive_barrier/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_drive_continuation/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_factor_carry/armed_suites.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_factor_carry/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_factor_carry/suites.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_arclength/check_plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_arclength/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_arclength/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_arclength/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_radial/check_contract.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_radial/check_plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_radial/check_repairs.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_radial/check_reuse.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_radial/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_radial/condition.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_radial/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_radial/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_vertical/check_contract.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_vertical/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_vertical/condition.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_vertical/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_fold_vertical/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_h200_slice_profile/measure.py</code> () &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-width-probe.html @ 1159a5787f0fa384917ee5237fe499845a10c152</li>
+      <li><code>scripts/prototypes/bank_h200_slice_profile/provenance_controls.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_h200_slice_profile/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_blowup/attribute.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_blowup/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_blowup/fragment.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_blowup/geometry.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_blowup/jump.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_blowup/kernel.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_blowup/test_fragment.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_diagnosis/cell.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_diagnosis/localize.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_diagnosis/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_diagnosis/projected.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_hessian_diagnosis/terms.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_jacobian_assembly/split.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_jacobian_launches/capture.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_jacobian_launches/certificates.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_jacobian_launches/device.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_jacobian_launches/loops.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_jacobian_launches/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_jacobian_launches/suite.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_jacobian_mismatch/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_jacobian_mismatch/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_lane_drive/integration_suites.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_lane_drive/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_lane_drive/reproduce.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_lane_drive/review_suites.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_lane_drive/verify_retention.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_limited_contact/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_linear_solve/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_linear_solve/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_matrix_free_step/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_matrix_free_step/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_near_root_polish/control.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_near_root_polish/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_converge/column_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_converge/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_converge/directional.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_converge/fresh_diff.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_converge/outer.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_converge/render_panel.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_krylov/negative.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_krylov/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_step/gate.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_step/negative_control.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_step/render.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_step/reversion_control.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_newton_step/suite_arm.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_read_attribution/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_read_count_sensitivity/device.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_read_count_sensitivity/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_residual_noise_floor/contraction.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_residual_noise_floor/field.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_residual_noise_floor/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_reused_scale_krylov/figure.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_route_rows/boundary_gap.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_route_rows/limited_oracle.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_route_rows/measure.py</code> () &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-limited-contact.html @ 9d5a148c8b3015172c850cd4e908739134ffeff8</li>
+      <li><code>scripts/prototypes/bank_route_rows/render_panel.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_saddle_derivatives/decisions.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_saddle_derivatives/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_saddle_guards/derivatives.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_breakpoint/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_breakpoint/endpoint_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_cycle/restart_receipt.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_cycle/restart_report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_driver/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_lanes/fragment_check.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_lanes/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_lanes/plot_check_control.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_profile/control.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_profile/fused.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_profile/marginal.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_profile/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_profile/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_read/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_trace_four_read/capture.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_trace_four_read/device.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_trace_four_read/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_trace_head/device.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_solve_trace_head/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_batch/fixture.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_batch/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_batch/negative_control.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_batch/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking/kernel_profile.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking/negative_control.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking/trace_summary.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_batch/finalize.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_batch/step_profile.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_batch/tune.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_h200/count_cut.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_h200/kernel_table.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_h200/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_once/check_fragment_provenance.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_once/compare_arms.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_once/hlo_census.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_once/hlo_tags.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_booking_once/plot_stage_compare.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_command_buffer/arm.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_cut_buckets/check_review.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_cut_buckets/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_cut_buckets/probe_guards.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_cut_buckets/verify.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_geometry/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_geometry/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_jacobian_split/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_launch_fusion/count_cut.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_launch_fusion/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_launch_fusion/sweep_width.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_occupancy/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_plateau/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_plateau/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_speed/parse_trace.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_step_speed/plot_stage.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_tangent_contract/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_tangent_contract/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_traced_inputs/numerics.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_traced_inputs/run.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_traced_inputs/trace_graph.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_wall_events/capture.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_wall_events/memory.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_wall_events/path_report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_wall_events/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_wall_events/trajectory.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_warm_stall/compact.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_warm_stall/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_warm_stall/render.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_warm_stall/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_warm_start/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_warm_start/report.py</code> ()</li>
+      <li><code>scripts/prototypes/bank_warm_start/verify_receipts.py</code> ()</li>
+      <li><code>scripts/prototypes/batched_factor/render.py</code> ()</li>
+      <li><code>scripts/prototypes/batched_factor/report.py</code> ()</li>
+      <li><code>scripts/prototypes/book_ten_thousand/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/book_ten_thousand/reference.py</code> ()</li>
+      <li><code>scripts/prototypes/book_ten_thousand/render.py</code> ()</li>
+      <li><code>scripts/prototypes/book_ten_thousand/support.py</code> ()</li>
+      <li><code>scripts/prototypes/booking_scalar_tile/measure.py</code> () &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/booking-scalar-tile.html @ 2b6854119cd6f3a29c8ee3bfca838c761f0644bf</li>
+      <li><code>scripts/prototypes/booking_scalar_tile/report.py</code> ()</li>
+      <li><code>scripts/prototypes/booking_scalar_tile/sweep.py</code> ()</li>
+      <li><code>scripts/prototypes/bounded_jets_build/figure_time_per_pass.py</code> ()</li>
+      <li><code>scripts/prototypes/carried_read_refresh/gate.py</code> ()</li>
+      <li><code>scripts/prototypes/carried_read_refresh/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/carried_read_refresh/report.py</code> ()</li>
+      <li><code>scripts/prototypes/carried_read_refresh/run.py</code> ()</li>
+      <li><code>scripts/prototypes/carrier_identity_receipt/summarize_suite.py</code> ()</li>
+      <li><code>scripts/prototypes/carrier_trial_map/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/carrier_trial_map/control.py</code> ()</li>
+      <li><code>scripts/prototypes/carrier_trial_map/direct.py</code> ()</li>
+      <li><code>scripts/prototypes/carrier_trial_map/fixture.py</code> ()</li>
+      <li><code>scripts/prototypes/carrier_trial_map/kernel_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/carrier_trial_map/probe.py</code> ()</li>
+      <li><code>scripts/prototypes/carrier_trial_map/reference.py</code> ()</li>
+      <li><code>scripts/prototypes/certificate_rows_remeasure/certificate_panel.py</code> ()</li>
+      <li><code>scripts/prototypes/certificate_rows_remeasure/repanel.py</code> ()</li>
+      <li><code>scripts/prototypes/certified_carrier_export/panels.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/certified-carrier-export.html @ 055d84935e912083b6a18239da115534c1c381be</li>
+      <li><code>scripts/prototypes/contour_tree_overflow/probe.py</code> ()</li>
+      <li><code>scripts/prototypes/contour_tree_sol_wall_pair/probe.py</code> () &#8212; evidence: docs/evidence/archive/contour-tree-topology-authority-landed.html @ 2669319dd</li>
+      <li><code>scripts/prototypes/contour_tree_sweep_profile/summarize.py</code> ()</li>
+      <li><code>scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_adapter_current_refusal/caller_sweep.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_adapter_current_refusal/inventory_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_adapter_current_refusal/probe.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_axis_identification/capture_refusal.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_axis_identification/conjunct_probe.py</code> () &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-144-axis-identification.html @ 8130772bb</li>
+      <li><code>scripts/prototypes/diiid_axis_identification/local_index.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_axis_identification/render_seed_panel.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_core_hold/analyze_mast.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_core_hold/batch.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_core_hold/continue_regressions.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_core_hold/measure.py</code> () &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/sampled-profile-core-hold.html @ 4be441e3a134209df0c41dbdc424a52501234535</li>
+      <li><code>scripts/prototypes/diiid_core_hold/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_core_hold/serial_regressions.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_core_hold/summarize.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_diverted_branch/analyze.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_diverted_branch/controls.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_diverted_branch/gates.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_diverted_branch/job.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_diverted_branch/recover.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_diverted_branch/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_diverted_branch/smoke.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/analyze.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/check_evidence_guards.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/negative_control.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/transition.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_external_current_propagation/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_booking/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_booking/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_booking/seam_check.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_booking/smoke.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_flux/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_flux/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_flux/suite_arms.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_flux/summarize.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/boundary_competition.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/boundary_readback.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/boundary_readback_control.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/build_receipt.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/check_panels.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/classifier_control.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/measure_branches.py</code> () &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-material-mask-limiter.html @ 04d969738a47a2d5bc31544c03980d1e4afcd94c; docs/evidence/fragments/diiid-vertical-force-balance/sampled-profile-core-hold.html @ 4be441e3a134209df0c41dbdc424a52501234535</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/merge_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/presence_control.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/rederive_promotions.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/run_probe_frames.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/terminal_class.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_inactive_compensator/batch.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_inactive_compensator/cohort.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_inactive_compensator/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_inactive_compensator/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_inactive_compensator/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_material_mask/check_measurement.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_material_mask/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_material_mask/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_pinned_reregistration/registration_check.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_pinned_seed_drift/history.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_pinned_seed_drift/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_pinned_seed_drift/registration_check.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_pinned_seed_drift/replay.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_residual_plateau/analyze.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_residual_plateau/check_capture.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_residual_plateau/inspect_archived.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_residual_plateau/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_residual_plateau/style.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_single_kernel_coupling/batch.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_single_kernel_coupling/gates.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_single_kernel_coupling/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_single_kernel_coupling/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_stopping_rule/diagnose_step_gate.py</code> () &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-material-mask-limiter.html @ 04d969738a47a2d5bc31544c03980d1e4afcd94c</li>
+      <li><code>scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_stopping_rule/run_geometry_dump.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_stopping_rule/run_step_gate_diagnosis.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_support_mask/check_capture.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_support_mask/render_support.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/check_contour_legibility.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/check_orientation.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/check_panel_receipts.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/check_path_mapping_reuse.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/core_stationary_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/maxima_census.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/polish_axis_check.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/render_trip_panels.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/trace_vertical_loss.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_warmup_admission/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_warmup_admission/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_warmup_admission/negative_control.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_warmup_admission/regression.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_warmup_admission/regression_gpu.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_warmup_admission/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_warmup_admission/replay.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_warmup_admission/timing.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_attribution/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_coil_correction/conductor_correction.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_coil_correction/fit.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_coil_correction/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_coil_correction/probe_applied.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_coil_correction/probe_external.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_coil_correction/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_coil_correction/summarize.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_coil_correction/test_conductor_correction.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_coil_correction/verify.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_held_nodes/batch.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_held_nodes/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_held_nodes/preflight.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_held_nodes/provenance.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_held_nodes/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/arms.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/check_axis_markers.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/check_edge_profiles.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/check_profile_table.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/smoke.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/summarize.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/tables.py</code> ()</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/verify.py</code> ()</li>
+      <li><code>scripts/prototypes/dina_flattop_scenario/fields.py</code> ()</li>
+      <li><code>scripts/prototypes/dina_flattop_scenario/inputs.py</code> ()</li>
+      <li><code>scripts/prototypes/dina_flattop_scenario/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/dina_flattop_scenario/render.py</code> ()</li>
+      <li><code>scripts/prototypes/dina_flattop_scenario/run.py</code> ()</li>
+      <li><code>scripts/prototypes/dina_flattop_scenario/verify.py</code> ()</li>
+      <li><code>scripts/prototypes/diverted_300_regression/audit_receipts.py</code> ()</li>
+      <li><code>scripts/prototypes/diverted_300_regression/measure_row.py</code> ()</li>
+      <li><code>scripts/prototypes/diverted_300_regression/report_carrier.py</code> ()</li>
+      <li><code>scripts/prototypes/diverted_stall/render.py</code> ()</li>
+      <li><code>scripts/prototypes/diverted_stall/sweep.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/probe_rows/analyse.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/probe_rows/lag_table.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/probe_rows/paint.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/probe_rows/panel.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/probe_rows/probe_convention.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/probe_rows/resume_read.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/probe_rows/study.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/probe_rows/test_fragment_tables.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/probe_rows/test_probe_rows.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py</code> ()</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/test_spectrum_sweep.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/analyse.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/case_key.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/census.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/field.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/page.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/refresh.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/test_boundary_marks.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/test_escape_overlay.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/test_rebuild.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_escape_comparison/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_escape_comparison/test_compare.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/bisect_tie_island.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/diagnose_seed.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/export_states.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/export_tie_islands.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/negative_control.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/probe_read.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/probe_stencil.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/test_crosscheck.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/test_export_states.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/test_orientation.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/sign-guard-undecidable-span.html @ 375241085; docs/evidence/fragments/converged-forward-solve/tcv-liuqe-corrected-reference.html @ 234be9a8e</li>
+      <li><code>scripts/prototypes/efit_field_swap/test_spline_field.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_field_swap/test_trace_record.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_maximin_certificate/field_identity.py</code> ()</li>
+      <li><code>scripts/prototypes/efit_maximin_certificate/test_certificate.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/baseline.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/candidate.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/census_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/probe_path.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/probe_random.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/probe_stall.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/probe_window.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/render.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/saddle_admission_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/sweep.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/test_carrier_axis.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/read-first-separator.html @ 0b93219842f34c9af02a3a6a66437a8fa91572d6</li>
+      <li><code>scripts/prototypes/fast_map_production/test_qualification.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_map_production/tie_island_figure.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_read/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_read/measure_sweep.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_read/render.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_read/render_contours.py</code> ()</li>
+      <li><code>scripts/prototypes/fast_read/test_ordinary_cut.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/centre_scan.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/cold.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/component_scan.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/context.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/edge_components.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/handoff_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/handoff_scan.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/inspect_terminal.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/jacobian_control.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/jets.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/linearized_factor_control.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/path_weight.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/probe.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/render.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/runtime_solve.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/solution_controls.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/solve_carrier.py</code> ()</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/zero_blend_control.py</code> ()</li>
+      <li><code>scripts/prototypes/fit_inside_iteration/probe_step_rule.py</code> ()</li>
+      <li><code>scripts/prototypes/fit_inside_iteration/run.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/cache.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/capture_replay.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/check_device.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/check_position.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/check_solve.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/latency_gate.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/production_report.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/render.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/tail_gate.py</code> ()</li>
+      <li><code>scripts/prototypes/fixed_points/validate.py</code> ()</li>
+      <li><code>scripts/prototypes/fused_booking_assembly/correctness.py</code> ()</li>
+      <li><code>scripts/prototypes/fused_booking_assembly/profile.py</code> ()</li>
+      <li><code>scripts/prototypes/fused_booking_assembly/report.py</code> ()</li>
+      <li><code>scripts/prototypes/fused_booking_assembly/run.py</code> ()</li>
+      <li><code>scripts/prototypes/fused_convergence/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/fused_convergence/render.py</code> ()</li>
+      <li><code>scripts/prototypes/fused_newton/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/fused_newton/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/fused_newton/negative_control.py</code> ()</li>
+      <li><code>scripts/prototypes/fused_newton/program.py</code> ()</li>
+      <li><code>scripts/prototypes/geometry_reuse/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/geometry_reuse/report.py</code> () &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/geometry-reuse.html @ 3ae11c51a56a5511d4446377422036430913584a</li>
+      <li><code>scripts/prototypes/geometry_reuse/suite.py</code> ()</li>
+      <li><code>scripts/prototypes/graded_residual_compile/count_graph.py</code> ()</li>
+      <li><code>scripts/prototypes/graded_residual_compile/test_graded_map_jacobian.py</code> ()</li>
+      <li><code>scripts/prototypes/h200_levers/audit.py</code> ()</li>
+      <li><code>scripts/prototypes/h200_levers/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/h200_levers/repair.py</code> ()</li>
+      <li><code>scripts/prototypes/h200_levers/report.py</code> ()</li>
+      <li><code>scripts/prototypes/h200_levers/submit.py</code> ()</li>
+      <li><code>scripts/prototypes/h200_levers/suite_pair.py</code> ()</li>
+      <li><code>scripts/prototypes/h200_levers/wait_jobs.py</code> ()</li>
+      <li><code>scripts/prototypes/importer_delta/assemble.py</code> ()</li>
+      <li><code>scripts/prototypes/importer_delta/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/importer_delta/fill.py</code> ()</li>
+      <li><code>scripts/prototypes/importer_delta/verify.py</code> ()</li>
+      <li><code>scripts/prototypes/iron_limb_fill/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/iron_limb_fill/figure.py</code> ()</li>
+      <li><code>scripts/prototypes/iron_magnetisation/figures.py</code> ()</li>
+      <li><code>scripts/prototypes/iron_magnetisation/sphere.py</code> ()</li>
+      <li><code>scripts/prototypes/iter_bank/check_coils.py</code> ()</li>
+      <li><code>scripts/prototypes/iter_bank/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/iter_bank/probe_capacity.py</code> ()</li>
+      <li><code>scripts/prototypes/iter_bank/reload.py</code> ()</li>
+      <li><code>scripts/prototypes/iter_bank/render.py</code> ()</li>
+      <li><code>scripts/prototypes/iter_bank/suite.py</code> ()</li>
+      <li><code>scripts/prototypes/kernel_compile_census/report.py</code> ()</li>
+      <li><code>scripts/prototypes/kernel_compile_census/run_job.py</code> ()</li>
+      <li><code>scripts/prototypes/kernel_compile_census/test_attribution.py</code> ()</li>
+      <li><code>scripts/prototypes/ladder/admission_control.py</code> ()</li>
+      <li><code>scripts/prototypes/ladder/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/ladder/pointer_propagation.py</code> ()</li>
+      <li><code>scripts/prototypes/ladder/report.py</code> ()</li>
+      <li><code>scripts/prototypes/ladder/snapshot.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map/build_carriers.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map/forward.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map/newton.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map/probe_continuity.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map/probe_forward.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map/probe_quadrature.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map/probe_stages.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map/probe_values.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map/render.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map_batched/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/lean_map_batched/render.py</code> ()</li>
+      <li><code>scripts/prototypes/limited_550_carrier/forward_repro.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/limited-550-carrier.html @ 4945d1880</li>
+      <li><code>scripts/prototypes/limited_550_carrier/repro.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/limited-550-carrier.html @ 4945d1880</li>
+      <li><code>scripts/prototypes/membership/booking.py</code> ()</li>
+      <li><code>scripts/prototypes/membership/check_booking.py</code> ()</li>
+      <li><code>scripts/prototypes/membership/check_geometry.py</code> ()</li>
+      <li><code>scripts/prototypes/membership/compose.py</code> ()</li>
+      <li><code>scripts/prototypes/membership/hybrid.py</code> ()</li>
+      <li><code>scripts/prototypes/membership/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/membership/render.py</code> ()</li>
+      <li><code>scripts/prototypes/moment_hessian/build_carrier.py</code> ()</li>
+      <li><code>scripts/prototypes/moment_hessian/profile.py</code> ()</li>
+      <li><code>scripts/prototypes/moment_hessian/render_panel.py</code> ()</li>
+      <li><code>scripts/prototypes/moment_hessian/trial_direct.py</code> ()</li>
+      <li><code>scripts/prototypes/moment_hessian/trial_fixture.py</code> ()</li>
+      <li><code>scripts/prototypes/moment_hessian/trial_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/one_traced_body/lowered_structure.py</code> ()</li>
+      <li><code>scripts/prototypes/one_traced_body/reduced_identity.py</code> ()</li>
+      <li><code>scripts/prototypes/order2/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/order2/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/order2/run_comparison.py</code> ()</li>
+      <li><code>scripts/prototypes/point_program_attribution/figure.py</code> ()</li>
+      <li><code>scripts/prototypes/point_program_attribution/summarise.py</code> () &#8212; evidence: docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html @ 098010058c0ebc6d3a1c00d144728cea4096a933; docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html @ 76e7f19d</li>
+      <li><code>scripts/prototypes/polygon_near_band/confined_arms.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_stable_evaluator/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_stable_evaluator/primal_identity.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_stable_evaluator/production_pair.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/compare.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/crosscheck.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/mutation_control.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/plane.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/scrutiny.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/split.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/test_prototypes.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_trace_miss/archive_job.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_trace_miss/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_trace_miss/height_stencil.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_trace_miss/reference_comparison.py</code> ()</li>
+      <li><code>scripts/prototypes/polygon_trace_miss/report.py</code> ()</li>
+      <li><code>scripts/prototypes/promoted_nodes_near_xpoint/angles_at_null.py</code> ()</li>
+      <li><code>scripts/prototypes/promoted_nodes_near_xpoint/job_state.py</code> ()</li>
+      <li><code>scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py</code> ()</li>
+      <li><code>scripts/prototypes/promoted_nodes_near_xpoint/private_flux_pocket.py</code> ()</li>
+      <li><code>scripts/prototypes/promoted_nodes_near_xpoint/render_angles.py</code> ()</li>
+      <li><code>scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py</code> ()</li>
+      <li><code>scripts/prototypes/promoted_nodes_near_xpoint/run_angles.py</code> ()</li>
+      <li><code>scripts/prototypes/promoted_nodes_near_xpoint/run_round.py</code> ()</li>
+      <li><code>scripts/prototypes/promoted_nodes_near_xpoint/write_fragment.py</code> ()</li>
+      <li><code>scripts/prototypes/read_derivatives/check_fragment.py</code> ()</li>
+      <li><code>scripts/prototypes/read_diverted_wall_skip/guard.py</code> ()</li>
+      <li><code>scripts/prototypes/read_diverted_wall_skip/integration.py</code> ()</li>
+      <li><code>scripts/prototypes/read_diverted_wall_skip/job.py</code> ()</li>
+      <li><code>scripts/prototypes/read_diverted_wall_skip/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/read_diverted_wall_skip/report.py</code> ()</li>
+      <li><code>scripts/prototypes/read_live_candidates/report.py</code> ()</li>
+      <li><code>scripts/prototypes/read_live_candidates/run.py</code> ()</li>
+      <li><code>scripts/prototypes/read_live_candidates/verify_combined.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/census_check.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/census_departure_scan.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/check_window.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/measure_window.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/oracle.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/proposal_compare.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/proposal_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/read.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/report.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/test_census_axes.py</code> ()</li>
+      <li><code>scripts/prototypes/read_robustness/window.py</code> ()</li>
+      <li><code>scripts/prototypes/read_route/check_adapter.py</code> ()</li>
+      <li><code>scripts/prototypes/read_route/check_legacy.py</code> ()</li>
+      <li><code>scripts/prototypes/read_route/check_membership.py</code> ()</li>
+      <li><code>scripts/prototypes/read_route/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/read_route/summarize.py</code> ()</li>
+      <li><code>scripts/prototypes/read_warm_wall/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/read_warm_wall/summarize.py</code> ()</li>
+      <li><code>scripts/prototypes/saddle_expansion/expansion.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/saddle-anchored-expansion.html @ 0a43f10b1; docs/evidence/fragments/converged-forward-solve/saddle-expansion-speed.html @ 0a43f10b1</li>
+      <li><code>scripts/prototypes/saddle_expansion/render_gate.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/saddle-expansion-speed.html @ 0a43f10b1</li>
+      <li><code>scripts/prototypes/saddle_expansion/speed_gate.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/saddle-anchored-expansion.html @ 0a43f10b1; docs/evidence/fragments/converged-forward-solve/saddle-expansion-speed.html @ 0a43f10b1</li>
+      <li><code>scripts/prototypes/saddle_expansion/test_speed_gate_guard.py</code> ()</li>
+      <li><code>scripts/prototypes/shared_root/inventory.py</code> () &#8212; evidence: docs/evidence/fragments/kernel-compile-barrier/shared-root.html @ 0d6b98b3a</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/build.py</code> ()</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/fixture.py</code> ()</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/gate.py</code> ()</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/present.py</code> ()</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/probe_dense.py</code> () &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/smfp-autodiff-free-newton.html @ 78212e86a</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/probe_direction.py</code> ()</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/shift.py</code> () &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/smfp-autodiff-free-newton.html @ 78212e86a</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/stages.py</code> ()</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/timing.py</code> ()</li>
+      <li><code>scripts/prototypes/solve_options/factor_shape.py</code> ()</li>
+      <li><code>scripts/prototypes/solve_options/frozen_iterations.py</code> ()</li>
+      <li><code>scripts/prototypes/solve_options/local_booking_jacobian.py</code> ()</li>
+      <li><code>scripts/prototypes/solve_options/locked_read.py</code> ()</li>
+      <li><code>scripts/prototypes/solve_options/render.py</code> ()</li>
+      <li><code>scripts/prototypes/solve_options/validate_frozen.py</code> ()</li>
+      <li><code>scripts/prototypes/solve_wall_breakdown/check_units.py</code> ()</li>
+      <li><code>scripts/prototypes/solve_wall_breakdown/figure.py</code> ()</li>
+      <li><code>scripts/prototypes/stencil_conditioning/build_carrier.py</code> ()</li>
+      <li><code>scripts/prototypes/stencil_conditioning/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/stencil_conditioning/negative_control.py</code> ()</li>
+      <li><code>scripts/prototypes/stencil_conditioning/plot.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/attribute_input_drift.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/iter_record_seed_rerun.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/nominal_repeat.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/panels.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/record_seed_rerun.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/records.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/report.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/run_cases.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/seed_sensitivity.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/suite_arms.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/test_panel_visibility.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/test_receipt_durability.py</code> ()</li>
+      <li><code>scripts/prototypes/stored_state_refusals/test_record_claims.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_box_mask.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_connectivity.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_contour_reference.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_fixed_graph.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_join_tree.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_launches.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_outline_trace.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_point_window.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_production_seed.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_seeds.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_slice.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_solovev_window.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_tree.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_vmap.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_vmap_alternatives.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_vmap_field.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_vmap_warm.py</code> ()</li>
+      <li><code>scripts/prototypes/sub_millisecond/render_accuracy.py</code> ()</li>
+      <li><code>scripts/prototypes/support/audit.py</code> ()</li>
+      <li><code>scripts/prototypes/support/book_report.py</code> ()</li>
+      <li><code>scripts/prototypes/support/guard.py</code> ()</li>
+      <li><code>scripts/prototypes/support/read_route_panel.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/wire-current-book.html @ 50dfb46dbbb4684abddcbcf78f49599da0d52171</li>
+      <li><code>scripts/prototypes/support/read_route_rows.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/wire-current-book.html @ 50dfb46dbbb4684abddcbcf78f49599da0d52171</li>
+      <li><code>scripts/prototypes/support/report.py</code> ()</li>
+      <li><code>scripts/prototypes/support/test_certificate_fixtures.py</code> ()</li>
+      <li><code>scripts/prototypes/taylor/jet_broadcast_rules.py</code> ()</li>
+      <li><code>scripts/prototypes/tcv_liuqe_known_answer/figures.py</code> ()</li>
+      <li><code>scripts/prototypes/tcv_liuqe_known_answer/measure.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/contour-mesh-capacity.html @ 124ad219f</li>
+      <li><code>scripts/prototypes/tcv_liuqe_known_answer/reference_sign.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/reference-sign-guard.html @ 2379bb36</li>
+      <li><code>scripts/prototypes/tcv_liuqe_known_answer/report.py</code> ()</li>
+      <li><code>scripts/prototypes/tcv_liuqe_known_answer/summarise.py</code> ()</li>
+      <li><code>scripts/prototypes/tcv_liuqe_known_answer/test_boundary_geometry.py</code> ()</li>
+      <li><code>scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py</code> () &#8212; evidence: docs/evidence/fragments/converged-forward-solve/read-first-separator.html @ 0b93219842f34c9af02a3a6a66437a8fa91572d6</li>
+      <li><code>scripts/prototypes/tie_pair_topology/component_check.py</code> ()</li>
+      <li><code>scripts/prototypes/tie_pair_topology/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/tie_pair_topology/read_rule_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/tie_pair_topology/stationary.py</code> ()</li>
+      <li><code>scripts/prototypes/tie_pair_topology/test_stationary.py</code> ()</li>
+      <li><code>scripts/prototypes/tracked_read_batch/diagnose.py</code> ()</li>
+      <li><code>scripts/prototypes/tracked_read_batch/profile_kernels.py</code> ()</li>
+      <li><code>scripts/prototypes/tracked_read_batch/render.py</code> ()</li>
+      <li><code>scripts/prototypes/tracked_read_h200/attribution_check.py</code> ()</li>
+      <li><code>scripts/prototypes/tracked_read_h200/stage.py</code> ()</li>
+      <li><code>scripts/prototypes/tracked_read_steady_batch/measure.py</code> ()</li>
+      <li><code>scripts/prototypes/tracked_read_steady_batch/render.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/analytic_owner_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/batch_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/compare_cells.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/compare_device.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/compare_projection.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/conic_integral.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/containing_owner_map.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/containing_runtime.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/containing_solve.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/critical_scan.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/device_owner.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/device_projection.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/extract_cells.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/limited_map_gate.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/lobe_reference.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/lobe_reference_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/lu_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/owner_attribution.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/owner_map.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/panel_data.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/projected_owner_map.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/projected_runtime.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/projected_solve.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/projection.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/region_audit.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/region_density.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/region_reference.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/render.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/root_checks.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/runtime_solve.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/saddle_probe.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/solve_carrier.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/suite_compare.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/test_conic_integral.py</code> ()</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/test_lobe_partition.py</code> ()</li>
+      <li><code>scripts/reconstructed_plasma_source/baseline_sign.py</code> ()</li>
+      <li><code>scripts/ring_attribution/build_direct_target_bank.py</code> ()</li>
+      <li><code>scripts/ring_attribution/localize_support_limit.py</code> ()</li>
+      <li><code>scripts/ring_attribution/measure_direct_attribution.py</code> ()</li>
+      <li><code>scripts/ring_attribution/probe_cell.py</code> ()</li>
+      <li><code>scripts/ring_quadrature/measure_ring_quadrature.py</code> ()</li>
+      <li><code>scripts/ring_quadrature/verify_results.py</code> ()</li>
+      <li><code>scripts/root_gate_attribution/measure_root_attribution.py</code> ()</li>
+      <li><code>scripts/saddle_gap_check/measure_saddle_gap.py</code> ()</li>
+      <li><code>scripts/sheet_tile_census/verify.py</code> ()</li>
+      <li><code>scripts/sheet_tile_cpu_gate/accuracy_census.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-sheet-axis-limits.html @ 533d59093</li>
+      <li><code>scripts/sheet_tile_cpu_gate/axis_census.py</code> ()</li>
+      <li><code>scripts/sheet_tile_cpu_gate/classify.py</code> ()</li>
+      <li><code>scripts/sheet_tile_cpu_gate/restore_axis_expressions.py</code> ()</li>
+      <li><code>scripts/sheet_tile_cpu_gate/restore_cylinder_projection.py</code> ()</li>
+      <li><code>scripts/sheet_tile_cpu_gate/restore_subtractive_bracket.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-sheet-full-mesh-cpu.html @ 969b3f0e694c901980fe66f90e5990d3e3cc8548</li>
+      <li><code>scripts/startup.py</code> ()</li>
+      <li><code>scripts/west_iron_galerkin/duplication.py</code> ()</li>
+      <li><code>scripts/west_iron_galerkin/figure.py</code> ()</li>
+      <li><code>scripts/west_iron_galerkin/mutant.py</code> ()</li>
+      <li><code>scripts/west_iron_galerkin/negative_asymmetry.py</code> ()</li>
+      <li><code>scripts/west_iron_galerkin/probe.py</code> ()</li>
+      <li><code>scripts/west_iron_galerkin/suite.py</code> ()</li>
+      <li><code>scripts/west_iron_galerkin_pair/figure.py</code> ()</li>
+      <li><code>scripts/west_iron_inputs/pin.py</code> () &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-west-inputs-repin.html @ 2b010f574</li>
+      <li><code>scripts/west_iron_inputs/verify.py</code> ()</li>
+      <li><code>scripts/west_iron_linear/check_mesh.py</code> ()</li>
+      <li><code>scripts/west_iron_linear/compare_newton_routes.py</code> ()</li>
+      <li><code>scripts/west_iron_linear/figure.py</code> ()</li>
+      <li><code>scripts/west_iron_linear/gate.py</code> ()</li>
+      <li><code>scripts/west_picard_control/figure.py</code> ()</li>
+      <li><code>scripts/west_root_branch/record.py</code> ()</li>
+      <li><code>scripts/west_stray_field/field.py</code> ()</li>
+      <li><code>scripts/west_stray_field/plot.py</code> ()</li>
+      <li><code>scripts/window_contraction/measure.py</code> ()</li>
+      <li><code>scripts/window_convergence_study/study.py</code> ()</li>
+      <li><code>scripts/window_demonstration/exchange_diagnosis/probe.py</code> ()</li>
+      <li><code>scripts/window_demonstration/figures.py</code> ()</li>
+      <li><code>scripts/window_demonstration/run_window.py</code> ()</li>
+      <li><code>scripts/window_demonstration/time_traces.py</code> ()</li>
+      <li><code>scripts/window_gpu_benchmark/run_gpu_window.py</code> ()</li>
+      <li><code>scripts/window_gpu_benchmark/sensitivity_probe.py</code> ()</li>
+      <li><code>scripts/window_pint_experiment/experiment.py</code> ()</li>
+      <li><code>scripts/zero_current_audit/audit_zero_current_legs.py</code> ()</li>
+    </ul>
+    <h3 id="bench-scripts-census-keeps">Keep verdicts (601)</h3>
+    <ul>
+      <li><code>benchmarks/__init__.py</code> (imported_by_core, package_init)</li>
+      <li><code>benchmarks/analytic_operator_ladder.py</code> (imported_by_core, plan_owned:gs-absolute-accuracy-gates)</li>
+      <li><code>benchmarks/axis_configuration_attribution.py</code> (plan_owned:playable-forward-solve)</li>
+      <li><code>benchmarks/axis_seed_census.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>benchmarks/backend_divergence_forensics.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/solver-convergence-regression-landed.html @ 0331bb94; docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-guard-follow-ons.html @ 1c023858f; docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29; docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-launch-scripts-and-guard.html @ None</li>
+      <li><code>benchmarks/bank_drift_anchor_bisect.py</code> (imported_by_core, plan_owned:null-identification-authority)</li>
+      <li><code>benchmarks/bank_drift_paired_probe.py</code> (imported_by_core, plan_owned:null-identification-authority)</li>
+      <li><code>benchmarks/bank_drift_support_audit.py</code> (imported_by_core, plan_owned:null-identification-authority)</li>
+      <li><code>benchmarks/bank_efit_overlay.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/solver-convergence-regression-landed.html @ 0331bb94; docs/evidence/mast-bank-efit-overlays.html @ None</li>
+      <li><code>benchmarks/bank_revision_reproduction.py</code> (imported_by_core, plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/batched_labeller_receipt.py</code> (live_runner:tests/test_labeller_receipt_figures.py, plan_owned:converged-forward-solve, plan_owned:playable-forward-solve)</li>
+      <li><code>benchmarks/biotoperate.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/bow_grid_solve.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/carrier_arms.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/carrier_step_attribution.py</code> (imported_by_core, plan_owned:converged-forward-solve)</li>
+      <li><code>benchmarks/centroid_constrained_fixture_receipt.py</code> (imported_by_core, plan_owned:centroid-constrained-oracle-solve, plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/centroid_field_response_probe.py</code> (plan_owned:centroid-constrained-oracle-solve)</li>
+      <li><code>benchmarks/centroid_radius_validation.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/chord_booking_operation_trace.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/decomposition/report.json @ 372c604914acda4cf25bfca797a1d95e6afae8ee; docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/decomposition/chord-132.json @ None; docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/decomposition/chord-550.json @ None; docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/decomposition/exact-132.json @ None; docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/decomposition/exact-550.json @ None</li>
+      <li><code>benchmarks/cocos_ip_like_adjudication.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/coil_edit_interactive.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/coil_edit_latency.py</code> (imported_by_core, plan_owned:forward-solve-api, plan_owned:separatrix-spline-extraction, plan_owned:single-grid-solver-cutover)</li>
+      <li><code>benchmarks/compensator_jacobian_response.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/compile_abort_probe.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/cpu-compile-abort-landed.html @ 17bd21d58; docs/evidence/archive/figure-and-solver-audit-landed.html @ 0028295f5ed999d7d8d02d3dfa0fe427e12d2c12; docs/evidence/fragments/cpu-compile-abort/cca-coil-edit-regeneration-row.html @ None</li>
+      <li><code>benchmarks/compiled_slice_cache_receipt.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/constraint_centroid_receipt.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/constraint-augmented-newton-krylov-landed.html @ 0081c3e9; docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29; docs/figures/centroid-constrained-oracle-solve/first-moment-consumers/consumer-inventory.md @ 45f5ee8ef; docs/figures/constraint-augmented-newton-krylov/centroid/render-receipt.json @ None</li>
+      <li><code>benchmarks/constraint_jacobian_receipt.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/contour_tree_brute_force.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/contour_tree_explanatory_figure.py</code> (imported_by_core, live_runner:tests/test_renderer_wall_scan.py)</li>
+      <li><code>benchmarks/contour_tree_sweep_placement.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>benchmarks/contraction_discriminator.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/coupling_moment_order_evaluation.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/cut-cell-attribution-evidence.html @ None</li>
+      <li><code>benchmarks/demonstration_threshold_score.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/derived_convergence_criterion.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/derived_criterion_family.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/derived_criterion_rescore.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_batched_throughput.py</code> (imported_by_core, plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/diiid_boundary_current_recovery.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_circuit_driven_forward_validation.py</code> (live_runner:tests/imas/test_diiid_circuit_driven_forward_validation.py)</li>
+      <li><code>benchmarks/diiid_circuit_driven_vacuum.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_circuit_ensemble_assessment.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_coil_wiring.py</code> (live_runner:tests/imas/test_diiid_coil_wiring.py)</li>
+      <li><code>benchmarks/diiid_constrained_cold_start.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_corpus_conventions.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_current_pinned_forward.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_current_polarity_audit.py</code> (live_runner:tests/imas/test_diiid_current_polarity_audit.py)</li>
+      <li><code>benchmarks/diiid_current_units.py</code> (live_runner:tests/imas/test_diiid_current_units.py)</li>
+      <li><code>benchmarks/diiid_dataset_recheck.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_diverted_root_full_currents.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_diverted_solve_overlay.py</code> (live_runner:tests/imas/test_diiid_diverted_solve_overlay.py)</li>
+      <li><code>benchmarks/diiid_exact_clipped_tare.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_five_column_residual_adjudication.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_flux_space_adjudication.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_forward_gs_illustration.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_forward_gs_match.py</code> (imported_by_core, live_runner:tests/imas/test_diiid_forward_gs_match.py, live_runner:tests/imas/test_diiid_forward_gs_match_helpers.py, live_runner:tests/test_banked_null_reads.py, live_runner:tests/test_diiid_forward_gs_match.py, live_runner:tests/test_diiid_frame_checkpointing.py, live_runner:tests/test_frame_operand_artifacts.py, plan_owned:forward-solve-api, plan_owned:null-identification-authority, plan_owned:separatrix-spline-extraction)</li>
+      <li><code>benchmarks/diiid_gate_frame_identity.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_geometry_corroboration.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_grid_residual_current_regression.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_ids_machine_description.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_label_resolve_gate.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_machine_description.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_negative_tail_attribution.py</code> (live_runner:tests/imas/test_diiid_negative_tail_attribution.py)</li>
+      <li><code>benchmarks/diiid_netcdf_census.py</code> (live_runner:tests/imas/test_diiid_netcdf_census.py)</li>
+      <li><code>benchmarks/diiid_ohmic_circuit_retest.py</code> (live_runner:tests/imas/test_diiid_ohmic_circuit_retest.py)</li>
+      <li><code>benchmarks/diiid_plasma_subtraction_gate.py</code> (live_runner:tests/imas/test_diiid_plasma_subtraction_gate.py)</li>
+      <li><code>benchmarks/diiid_poloidal_figures.py</code> (imported_by_core, live_runner:tests/imas/test_diiid_poloidal_figures.py, plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/diiid_producer_current_scaling.py</code> (live_runner:tests/imas/test_diiid_producer_current_scaling.py)</li>
+      <li><code>benchmarks/diiid_recovered_current_sign_control.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_repaired_solve_remeasure.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_root_convention_sweep.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_root_existence.py</code> (live_runner:tests/imas/test_diiid_root_existence.py)</li>
+      <li><code>benchmarks/diiid_solenoid_inclusion_ladder.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_state_of_play_figures.py</code> (live_runner:tests/imas/test_diiid_state_of_play_figures.py)</li>
+      <li><code>benchmarks/diiid_unclaimed_current_origin.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_unclaimed_current_patches.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_vacuum_against_exact_tare.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/diiid_vacuum_composition_audit.py</code> (live_runner:tests/imas/test_diiid_vacuum_composition_audit.py)</li>
+      <li><code>benchmarks/diiid_vacuum_quiescent_gate.py</code> (live_runner:tests/imas/test_diiid_quiescent_gate.py)</li>
+      <li><code>benchmarks/diiid_vessel_hex_mesh.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/display_map_promoted_figure.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/separatrix-spline-extraction/display-map-solve-currents.html @ None; docs/evidence/fragments/separatrix-spline-extraction/promoted-node-figure.html @ None</li>
+      <li><code>benchmarks/diverted_basin_probe.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/domain_partition_performance.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/dual_stencil_census.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/edge_constraint_demonstration.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/efit_analytic_roundtrip_floor.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/efit_boundary_method_comparison.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/efit_clipped_area_conservation.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/efit_constant_current_attribution.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/efit_flux_decomposition.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/efit_forward_input_census.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/efit_forward_parity_slice.py</code> (imported_by_core, plan_owned:forward-solve-api, plan_owned:null-identification-authority, plan_owned:playable-forward-solve)</li>
+      <li><code>benchmarks/efit_native_grid_decomposition.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/efit_operator_consistency_order.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/efit_parity_boundary_volume.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/efit_parity_criterion_provenance.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/efit_parity_field_instrument.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/efit_parity_fixed_boundary_seed.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/efit_parity_inductance_partition.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/efit_parity_moment_definitions.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/efit_parity_root_geometry.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/efit_parity_tared_external_field.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/efit_parity_warm_neighbour.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/efit_reproduction_gate.py</code> (plan_owned:gs-absolute-accuracy-gates, plan_owned:null-identification-authority)</li>
+      <li><code>benchmarks/efit_roundtrip_identity.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/efit_roundtrip_linear_moments.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/efit_topology_boundary_score.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/estimator_scoreboard.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/exact_clip_closed_form_floor.py</code> (live_runner:tests/test_exact_clip_closed_form_budget.py)</li>
+      <li><code>benchmarks/exact_clip_low_state_discriminator.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/exact_clip_memory_scaling.py</code> (imported_by_core, live_runner:tests/test_exact_clip_memory_render.py)</li>
+      <li><code>benchmarks/exact_clip_moment_floor.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/exact_clip_seed_amplitude.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/exact_cut_cell_moment_stages.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/exact_placement_discriminator.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/exact_support_floor_attribution.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/fieldnull_candidate_audit.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/fieldnull_gpu_throughput.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/nova-jax-dissolution-landed.html @ 170689e2; docs/figures/hex-cell-single-grid/h200-split-batch.json @ 608b94ee; docs/figures/jax-dissolution/fieldnull_gpu_throughput.json @ None</li>
+      <li><code>benchmarks/fieldnull_production_route.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/fixed_point_gpu_throughput.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/nova-jax-dissolution-landed.html @ 170689e2; docs/figures/jax-dissolution/fixed_point_gpu_throughput.json @ None</li>
+      <li><code>benchmarks/fixed_point_ladder.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/spine-boundary-accelerator-landed.html @ 232cf5fa; docs/figures/jax-dissolution/fixed_point_gpu_throughput.json @ None; docs/figures/jax-dissolution/fixed_point_route.json @ None</li>
+      <li><code>benchmarks/fixed_point_route.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/jax-dissolution/fixed_point_gpu_throughput.json @ None</li>
+      <li><code>benchmarks/fixture_positional_stiffness.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/flux_representation_degree.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/coefficient-space-newton/representation-degree.json @ None</li>
+      <li><code>benchmarks/forward_labeller_throughput.py</code> (plan_owned:playable-forward-solve)</li>
+      <li><code>benchmarks/forward_resolution_default.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/forward-operator-refinement/reference-native-resolution-default.json @ None</li>
+      <li><code>benchmarks/frozen_current_flux_image_gate.py</code> (live_runner:tests/test_frozen_current_flux_image_gate.py)</li>
+      <li><code>benchmarks/frozen_route_settle_figures.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-route-settle-evidence.html @ None</li>
+      <li><code>benchmarks/global_spline_read_on_hex.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/hex_cell_field_feasibility.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/hex_cell_moment_equivalence.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/jacobian_null_direction.py</code> (imported_by_core, plan_owned:null-identification-authority)</li>
+      <li><code>benchmarks/jitted_eager_parity_gate.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/label_seed_residual_field.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/late_trip_promotion_timing.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/millisecond-converged-solve/trip-quantum/late-trips/profile.json @ None</li>
+      <li><code>benchmarks/limited_row_shadow_census.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/limiter_read_resolution_audit.py</code> (imported_by_core, live_runner:tests/test_limiter_read_render.py, plan_owned:null-identification-authority)</li>
+      <li><code>benchmarks/limiter_topology_receipts.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/mast_catalog_input_manifest.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/mast_centroid_solve_panels.py</code> (imported_by_core, live_runner:tests/test_mast_centroid_panel_states.py, plan_owned:converged-forward-solve, plan_owned:separatrix-spline-extraction)</li>
+      <li><code>benchmarks/mast_coil_case_temperature.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/mast_description_equivalence.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/mast_passive_held_out.py</code> (live_runner:tests/test_mast_passive_decay_modes.py)</li>
+      <li><code>benchmarks/mast_response_carrier_warm.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/mast_saddle_admission.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/mast_saddle_voltage_reach.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/mast_saddle_voltage_units.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/mast_tf_average.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/mast_toroidal_probe_orientation.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/measurement_provenance.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/nan_tangent_localisation.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/net_current_scaling_census.py</code> (plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/null_census_assertion.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/observable_batch_acceptance.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/observable_route_discriminator.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/optional_extra_import_census.py</code> (plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/oracle_start_newton_probe.py</code> (plan_owned:centroid-constrained-oracle-solve)</li>
+      <li><code>benchmarks/out_of_vessel_saddle_selection.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/outboard_census_exact_total.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/parallel_components_read.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/parity_divergence_attribution.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/picard_derivative_contract.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/pinned_branch_contrast.py</code> (live_runner:tests/test_pinned_branch_contrast.py)</li>
+      <li><code>benchmarks/plasma_cell_first_step_directions.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/plasma_cell_fixed_point_attribution.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/plasma_cell_map_fidelity.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/plasma_cell_production_ladder.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/plasma_cell_terminal_state.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/plasma_cell_trip_panels.py</code> (live_runner:tests/renderer_wall_scan.py, live_runner:tests/test_renderer_wall_scan.py, plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/playable_keyframe_receipt.py</code> (imported_by_core, plan_owned:playable-forward-solve)</li>
+      <li><code>benchmarks/playable_shape_inverse_receipt.py</code> (imported_by_core, plan_owned:playable-forward-solve)</li>
+      <li><code>benchmarks/playable_shape_response_comparison.py</code> (plan_owned:playable-forward-solve)</li>
+      <li><code>benchmarks/poloidal_convergence_atlas.py</code> (live_runner:tests/test_topology_visual_generator.py, plan_owned:null-identification-authority)</li>
+      <li><code>benchmarks/production_solve_host_profile.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/artifacts-carry-no-worktree-paths-landed.html @ 469233f2a; docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-guard-follow-ons.html @ 1c023858f; docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29; docs/figures/millisecond-converged-solve/trip-quantum/host-profile/cprofile-measurement.json @ None; docs/figures/millisecond-converged-solve/trip-quantum/host-profile/profile.json @ None</li>
+      <li><code>benchmarks/profile_coefficients_recompile_audit.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/program_scope_census.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/program_shape_census.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/archive/exact-clip-moment-quadrature-landed.html @ 05f7cd92; docs/evidence/archive/millisecond-converged-solve-landed.html @ 18287b1b; docs/figures/cut-cell-current-attribution/exact-clip-cost/dimensions-historical.md @ None; docs/figures/millisecond-converged-solve/program-shapes/bank-shape-identity.json @ None</li>
+      <li><code>benchmarks/pure_arm_comparison_figure.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-guard-follow-ons.html @ 1c023858f; docs/evidence/replan-2026-09-24/thin-interfaces.md @ 76906a29; docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-launch-scripts-and-guard.html @ None</li>
+      <li><code>benchmarks/raster_flux_target_receipt.py</code> (plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/real_slice_convergence.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/receipt_locations.py</code> (live_runner:tests/test_evidence_tooling_paths.py)</li>
+      <li><code>benchmarks/receipt_raster_check.py</code> (imported_by_core, plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/recovery_ladder_census.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/reduced_newton_constrained_rows.py</code> (plan_owned:playable-forward-solve)</li>
+      <li><code>benchmarks/reversed_current_guard_diagnosis.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/scripts_census.py</code> (census_mechanism)</li>
+      <li><code>benchmarks/settled_mask_stall.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/shafranov_combination_discriminator.py</code> (imported_by_core, live_runner:tests/test_render_receipt_paths.py)</li>
+      <li><code>benchmarks/shafranov_pair_receipt.py</code> (imported_by_core, live_runner:tests/test_render_receipt_paths.py)</li>
+      <li><code>benchmarks/sol_ledger_current_census.py</code> (imported_by_core, live_runner:tests/test_render_receipt_paths.py, plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/solovev_certificate.py</code> (imported_by_core, live_runner:scripts/prototypes/ladder/run_map.sh, live_runner:scripts/regenerate_solovev_certificate.sh, live_runner:tests/test_certificate_pin.py, plan_owned:converged-forward-solve, plan_owned:gs-absolute-accuracy-gates, plan_owned:null-identification-authority)</li>
+      <li><code>benchmarks/solovev_certificate_current_pin.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/solovev_cut_cell_moments.py</code> (plan_owned:uniform-cell-clip-and-coupling)</li>
+      <li><code>benchmarks/solve_compile_cadence.py</code> (plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/solve_program_size_gate.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/split_fit_jump_field.py</code> (plan_owned:null-identification-authority)</li>
+      <li><code>benchmarks/stagnation_mechanism_probe.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/stationary_point_polish.py</code> (imported_by_core, plan_owned:separatrix-spline-extraction)</li>
+      <li><code>benchmarks/stencil_null_route.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/jax-dissolution/stencil_null_route.json @ None</li>
+      <li><code>benchmarks/strict_exit_incidence.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/topology_batch_probe.py</code> (live_runner:tests/test_topology_batch_render.py, plan_owned:playable-forward-solve)</li>
+      <li><code>benchmarks/topology_boundary_compile.py</code> (live_runner:tests/test_topology_boundary.py)</li>
+      <li><code>benchmarks/topology_disagreement.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/topology_mask_replay.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/topology_parity_harness.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/topology_qualified_mesh_convergence.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/topology_read_resolution_ladder.py</code> (imported_by_core, live_runner:tests/test_forward_census.py)</li>
+      <li><code>benchmarks/traced_current_bitwise.py</code> (plan_owned:forward-solve-api)</li>
+      <li><code>benchmarks/trip_quantum_width_one.py</code> (imported_by_kept)</li>
+      <li><code>benchmarks/trip_remainder_attribution.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/millisecond-converged-solve/trip-quantum/remainder/remainder.json @ None</li>
+      <li><code>benchmarks/two_branch_batch_cost.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/unit_amplitude_current_census.py</code> (imported_by_core, live_runner:tests/test_outboard_hole_census_gate.py)</li>
+      <li><code>benchmarks/wall_resolution_ladder.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/wall_shadow_firing_census.py</code> (plan_owned:null-identification-authority, plan_owned:playable-forward-solve)</li>
+      <li><code>benchmarks/wall_units_render.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/xla_autotune_cache_arms.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/xpoint_cell_allocation_rca.py</code> (imported_by_core)</li>
+      <li><code>benchmarks/xpoint_cell_wedge_oracle.py</code> (imported_by_core)</li>
+      <li><code>scripts/__init__.py</code> (package_init)</li>
+      <li><code>scripts/accuracy_cost_ladder/measure.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/analytic_oracle_fixtures/centroid_row.py</code> (imported_by_core, plan_owned:centroid-constrained-oracle-solve)</li>
+      <li><code>scripts/analytic_oracle_fixtures/compare_cached_radial.py</code> (live_runner:scripts/analytic_oracle_fixtures/run_cached_radial.sh)</li>
+      <li><code>scripts/analytic_oracle_fixtures/coupling_build.py</code> (imported_by_core)</li>
+      <li><code>scripts/analytic_oracle_fixtures/measure.py</code> (imported_by_core, live_runner:scripts/analytic_oracle_fixtures/run-fixture.sh, plan_owned:centroid-constrained-oracle-solve, plan_owned:converged-forward-solve, plan_owned:gs-absolute-accuracy-gates, plan_owned:null-identification-authority, plan_owned:uniform-cell-clip-and-coupling)</li>
+      <li><code>scripts/analytic_oracle_fixtures/reduced_oracle.py</code> (imported_by_core)</li>
+      <li><code>scripts/analytic_oracle_fixtures/requalify_carriers.py</code> (live_runner:scripts/analytic_oracle_fixtures/run_carrier_agreement.sh)</li>
+      <li><code>scripts/certificate_300_carrier/bin_census.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/converged-forward-solve/certificate-300-device-carrier.html @ None</li>
+      <li><code>scripts/certificate_300_carrier/cell_census.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/converged-forward-solve/certificate-300-device-carrier.html @ None</li>
+      <li><code>scripts/device_kernel_port/measure.py</code> (live_runner:scripts/device_kernel_port/run-cpu.sh, live_runner:scripts/device_kernel_port/run-gpu.sh, live_runner:scripts/device_kernel_port/run-numpy.sh)</li>
+      <li><code>scripts/diiid_map_fidelity/audit.py</code> (live_runner:scripts/diiid_map_fidelity/artifacts.sh)</li>
+      <li><code>scripts/diiid_map_fidelity/measure.py</code> (imported_by_core, live_runner:scripts/diiid_map_fidelity/job.sh)</li>
+      <li><code>scripts/diiid_map_fidelity/render.py</code> (live_runner:scripts/diiid_map_fidelity/artifacts.sh)</li>
+      <li><code>scripts/dual_basin_fixtures/build_diverted_fixture.py</code> (plan_owned:null-identification-authority)</li>
+      <li><code>scripts/dual_basin_fixtures/qualify_diverted_root.py</code> (imported_by_core)</li>
+      <li><code>scripts/edge_sheet/figure.py</code> (imported_by_kept)</li>
+      <li><code>scripts/edge_sheet/reference.py</code> (live_runner:tests/test_edge_sheet.py, plan_owned:iron-core-magnetisation)</li>
+      <li><code>scripts/ensemble_twin_truth/__init__.py</code> (imported_by_core, package_init)</li>
+      <li><code>scripts/ensemble_twin_truth/generate.py</code> (imported_by_core)</li>
+      <li><code>scripts/flux_function_sign/measure.py</code> (live_runner:tests/test_flux_function_sign.py)</li>
+      <li><code>scripts/h200_test_lane/cache_guard.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/imas_efit_closed_shell/summarise.py</code> (plan_owned:iron-core-magnetisation)</li>
+      <li><code>scripts/iron_field_source/diagnostics.py</code> (live_runner:scripts/iron_field_source/run_cpu.sh)</li>
+      <li><code>scripts/iron_field_source/figure.py</code> (live_runner:scripts/iron_field_source/run_cpu.sh, live_runner:tests/test_iron_field_source.py)</li>
+      <li><code>scripts/iron_field_source/measure.py</code> (live_runner:scripts/iron_field_source/run_clauses.sh, live_runner:scripts/iron_field_source/run_cpu.sh, live_runner:tests/test_iron_field_source.py)</li>
+      <li><code>scripts/iron_field_source/sampled.py</code> (live_runner:scripts/iron_field_source/run_clauses.sh, plan_owned:iron-core-magnetisation)</li>
+      <li><code>scripts/iron_graded_refinement/gate.py</code> (live_runner:scripts/iron_graded_refinement/gate.sh, live_runner:scripts/iron_graded_refinement/rigel_gate.sh)</li>
+      <li><code>scripts/iron_graded_refinement/measure.py</code> (live_runner:scripts/iron_graded_refinement/pick_coarse.sh, live_runner:scripts/iron_graded_refinement/rigel_measure.sh, live_runner:scripts/iron_graded_refinement/run.sh, live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/iron_graded_refinement/negative_control.py</code> (live_runner:scripts/iron_graded_refinement/negative_control.sh, live_runner:scripts/iron_graded_refinement/rigel_control.sh, live_runner:scripts/iron_graded_refinement/rigel_tests.sh, live_runner:scripts/iron_graded_refinement/tests.sh)</li>
+      <li><code>scripts/iron_limb_production/compatibility.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_limb_production/gate.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_limb_production/measure.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_limb_production/outline.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_limb_reference/comparison.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_limb_reference/controls.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_limb_reference/drive.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_limb_reference/ladder.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_limb_reference/measure.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_limb_reference/sphere.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_limb_reference/surface.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_linear_magnetisation/assembly_cost.py</code> (live_runner:scripts/iron_linear_magnetisation/cost.sh)</li>
+      <li><code>scripts/iron_linear_magnetisation/controls.py</code> (imported_by_core, live_runner:tests/test_magnetisation.py)</li>
+      <li><code>scripts/iron_linear_magnetisation/kernel_cost.py</code> (imported_by_core)</li>
+      <li><code>scripts/iron_linear_magnetisation/measure.py</code> (live_runner:scripts/iron_linear_magnetisation/run.sh)</li>
+      <li><code>scripts/iron_linear_magnetisation/reference.py</code> (imported_by_core, live_runner:tests/test_magnetisation.py, plan_owned:iron-core-magnetisation)</li>
+      <li><code>scripts/iron_operator_bound/__init__.py</code> (package_init)</li>
+      <li><code>scripts/iron_operator_bound/measure.py</code> (live_runner:scripts/iron_operator_bound/west.sh)</li>
+      <li><code>scripts/iron_operator_bound/reuse_check.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-graded-operator-bound.html @ None</li>
+      <li><code>scripts/iter_prescribed_plasma/measure.py</code> (imported_by_core)</li>
+      <li><code>scripts/iter_sectioned_conductor_set/build.py</code> (imported_by_core, live_runner:tests/test_coupled_plant.py, live_runner:tests/test_sectioned_set_geometry_cache.py, live_runner:tests/test_unseen_source_full_plant.py, plan_owned:iter-passive-plasma-circuit)</li>
+      <li><code>scripts/iter_sectioned_conductor_set/compare_refinement.py</code> (imported_by_core)</li>
+      <li><code>scripts/iter_sectioned_conductor_set/validate.py</code> (imported_by_core)</li>
+      <li><code>scripts/iter_vessel_evolution/evolve.py</code> (imported_by_core, live_runner:tests/test_vs3_linkage_repair.py, plan_owned:iter-passive-plasma-circuit)</li>
+      <li><code>scripts/labeller_batch/receipt.py</code> (imported_by_core, plan_owned:playable-forward-solve)</li>
+      <li><code>scripts/labeller_batch/shard.py</code> (imported_by_core, live_runner:scripts/labeller_batch/run.sh, live_runner:tests/test_evidence_tooling_paths.py, plan_owned:null-identification-authority, plan_owned:playable-forward-solve)</li>
+      <li><code>scripts/labeller_parallel/__init__.py</code> (imported_by_core, package_init)</li>
+      <li><code>scripts/labeller_parallel/driver.py</code> (imported_by_core, live_runner:scripts/labeller_parallel/run.sh, plan_owned:playable-forward-solve)</li>
+      <li><code>scripts/labeller_parallel/scheduler.py</code> (imported_by_core, plan_owned:playable-forward-solve)</li>
+      <li><code>scripts/labeller_parallel/smoke.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/playable-forward-solve/labeller-parallel/run-dry-run.txt @ None</li>
+      <li><code>scripts/magnetisation_law/figure.py</code> (live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/media/efit_nova_overlay.py</code> (live_runner:tests/test_evidence_tooling_paths.py)</li>
+      <li><code>scripts/media/emit_boundary_contact.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/limited-boundary-census/README.md @ None</li>
+      <li><code>scripts/media/emit_census_evidence.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/limited-boundary-census/README.md @ None</li>
+      <li><code>scripts/media/emit_sequence_start_condition.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/limited-boundary-census/README.md @ None</li>
+      <li><code>scripts/media/limited_class_census.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/limited-boundary-census/README.md @ None</li>
+      <li><code>scripts/media/mast_pulse_forward.py</code> (imported_by_core)</li>
+      <li><code>scripts/media/validate_boundary_repair.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/figures/limited-boundary-census/README.md @ None</li>
+      <li><code>scripts/moment_branch_integration/measure.py</code> (plan_owned:forward-solve-api)</li>
+      <li><code>scripts/moment_prediction_confidence/measure.py</code> (imported_by_core)</li>
+      <li><code>scripts/oracle_rebaseline/gates.py</code> (imported_by_core, plan_owned:gs-absolute-accuracy-gates)</li>
+      <li><code>scripts/oracle_rebaseline/measure.py</code> (imported_by_core, live_runner:scripts/oracle_rebaseline/run-measure.sh, plan_owned:gs-absolute-accuracy-gates)</li>
+      <li><code>scripts/playable_server/warmup.py</code> (live_runner:scripts/playable_server/payload.sh)</li>
+      <li><code>scripts/prototypes/bank_booking_cost/measure.py</code> (imported_by_core, live_runner:scripts/prototypes/bank_booking_cost/device.sh, live_runner:scripts/prototypes/bank_booking_cost/paired.sh, live_runner:scripts/prototypes/bank_booking_cost/review_controls.sh)</li>
+      <li><code>scripts/prototypes/bank_booking_cost/scatter.py</code> (live_runner:scripts/prototypes/bank_booking_cost/scatter.sh)</li>
+      <li><code>scripts/prototypes/bank_booking_cost/stages.py</code> (live_runner:scripts/prototypes/bank_booking_cost/stages.sh)</li>
+      <li><code>scripts/prototypes/bank_booking_cost/tile_probe.py</code> (live_runner:scripts/prototypes/bank_booking_cost/tile_probe.sh)</li>
+      <li><code>scripts/prototypes/bank_booking_determinism/compare.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_booking_determinism/environments.py</code> (live_runner:scripts/prototypes/bank_booking_determinism/device.sh)</li>
+      <li><code>scripts/prototypes/bank_booking_determinism/measure.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_booking_determinism/suite.py</code> (live_runner:scripts/prototypes/bank_booking_determinism/cpu.sh)</li>
+      <li><code>scripts/prototypes/bank_booking_primal_buckets/pins.py</code> (live_runner:scripts/prototypes/bank_booking_primal_buckets/pins.sh)</li>
+      <li><code>scripts/prototypes/bank_candidate_compact/suite.py</code> (live_runner:scripts/prototypes/bank_candidate_compact/cpu.sh)</li>
+      <li><code>scripts/prototypes/bank_candidate_loop/device.py</code> (live_runner:scripts/prototypes/bank_candidate_loop/gpu.sh)</li>
+      <li><code>scripts/prototypes/bank_candidate_loop/suite.py</code> (live_runner:scripts/prototypes/bank_candidate_loop/cpu.sh)</li>
+      <li><code>scripts/prototypes/bank_carried_decision/measure.py</code> (live_runner:scripts/prototypes/bank_carried_decision/timing.sh)</li>
+      <li><code>scripts/prototypes/bank_drive_barrier/compare.py</code> (live_runner:scripts/prototypes/bank_drive_barrier/run_h200.sh)</li>
+      <li><code>scripts/prototypes/bank_drive_barrier/measure.py</code> (live_runner:scripts/prototypes/bank_drive_barrier/run_h200.sh)</li>
+      <li><code>scripts/prototypes/bank_drive_continuation/measure.py</code> (live_runner:scripts/prototypes/bank_drive_continuation/run_h200.sh, live_runner:scripts/prototypes/bank_drive_continuation/run_titan.sh)</li>
+      <li><code>scripts/prototypes/bank_factor_carry/measure.py</code> (live_runner:scripts/prototypes/bank_factor_carry/run.sh)</li>
+      <li><code>scripts/prototypes/bank_h200_slice_profile/run.py</code> (live_runner:scripts/prototypes/bank_h200_slice_profile/job.sh)</li>
+      <li><code>scripts/prototypes/bank_hessian_boundary/corners.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_hessian_boundary/document.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_hessian_boundary/geometry.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_hessian_boundary/inspect.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_hessian_boundary/limits.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_hessian_boundary/report.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_hessian_boundary/test_measurement.py</code> (live_runner:scripts/prototypes/bank_hessian_boundary/gate.sh)</li>
+      <li><code>scripts/prototypes/bank_hessian_diagnosis/measure.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_hessian_diagnosis/report.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_jacobian_mismatch/measure.py</code> (live_runner:scripts/prototypes/bank_jacobian_mismatch/run_h200.sh)</li>
+      <li><code>scripts/prototypes/bank_lane_drive/measure.py</code> (live_runner:scripts/prototypes/bank_lane_drive/run.sh)</li>
+      <li><code>scripts/prototypes/bank_lane_drive/suites.py</code> (live_runner:scripts/prototypes/bank_lane_drive/suites.sh)</li>
+      <li><code>scripts/prototypes/bank_lane_drive/verify.py</code> (live_runner:scripts/prototypes/bank_lane_drive/run.sh)</li>
+      <li><code>scripts/prototypes/bank_limited_contact/measure.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-limited-contact.html @ None</li>
+      <li><code>scripts/prototypes/bank_matrix_free_step/measure.py</code> (live_runner:scripts/prototypes/bank_matrix_free_step/device.sh)</li>
+      <li><code>scripts/prototypes/bank_near_root_polish/measure.py</code> (live_runner:scripts/prototypes/bank_near_root_polish/device.sh, live_runner:scripts/prototypes/bank_saddle_derivatives/device.sh)</li>
+      <li><code>scripts/prototypes/bank_newton_converge/fresh_gate.py</code> (live_runner:scripts/prototypes/bank_newton_converge/negative_review.sh)</li>
+      <li><code>scripts/prototypes/bank_newton_converge/fresh_solve.py</code> (imported_by_core, live_runner:scripts/prototypes/bank_newton_converge/negative_oracle.sh, live_runner:scripts/prototypes/bank_newton_converge/negative_review.sh)</li>
+      <li><code>scripts/prototypes/bank_newton_krylov/measure.py</code> (live_runner:scripts/prototypes/bank_newton_krylov/device.sh)</li>
+      <li><code>scripts/prototypes/bank_newton_step/measure.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/bank_read_attribution/measure.py</code> (live_runner:scripts/prototypes/bank_read_attribution/run.sh)</li>
+      <li><code>scripts/prototypes/bank_read_count_sensitivity/capture.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_residual_noise_floor/attribute.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_residual_noise_floor/measure.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_residual_noise_floor/propagate.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_reused_scale_krylov/measure.py</code> (live_runner:scripts/prototypes/bank_reused_scale_krylov/device.sh)</li>
+      <li><code>scripts/prototypes/bank_saddle_derivatives/floor.py</code> (live_runner:scripts/prototypes/bank_saddle_derivatives/device.sh)</li>
+      <li><code>scripts/prototypes/bank_saddle_derivatives/inspect.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/bank_saddle_guards/suite.py</code> (live_runner:scripts/prototypes/bank_saddle_guards/suite.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_breakpoint/measure.py</code> (live_runner:scripts/prototypes/bank_solve_breakpoint/device.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_breakpoint/report.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-prototype-provenance.html @ None</li>
+      <li><code>scripts/prototypes/bank_solve_cycle/measure.py</code> (live_runner:scripts/prototypes/bank_solve_cycle/device.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_cycle/observe.py</code> (imported_by_core, live_runner:scripts/prototypes/bank_solve_cycle/restart.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_cycle/receipts.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_solve_cycle/report.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/bank_solve_cycle/trace.py</code> (live_runner:scripts/prototypes/bank_solve_cycle/device.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_driver/fragment_negative_control.py</code> (live_runner:scripts/prototypes/bank_solve_driver/run_fragment_negative.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_driver/measure.py</code> (live_runner:scripts/prototypes/bank_solve_driver/run_h200.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_driver/negative_control.py</code> (live_runner:scripts/prototypes/bank_solve_driver/run_negative.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_driver/suite_arms.py</code> (live_runner:scripts/prototypes/bank_solve_driver/run_suite_arms.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_driver/trajectory_probe.py</code> (live_runner:scripts/prototypes/bank_solve_driver/run_trajectory.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_lanes/trace.py</code> (live_runner:scripts/prototypes/bank_solve_lanes/run_h200.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_linesearch/measure.py</code> (live_runner:scripts/prototypes/bank_solve_linesearch/device.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_linesearch/negative.py</code> (live_runner:scripts/prototypes/bank_solve_linesearch/cpu.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_linesearch/report.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-report-equivalence.html @ None</li>
+      <li><code>scripts/prototypes/bank_solve_profile/fixture.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/bank_solve_profile/plot.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_solve_profile/receipts.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_solve_read/measure.py</code> (imported_by_core, live_runner:scripts/prototypes/bank_solve_read/run_h200.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_trace/analyse.py</code> (live_runner:scripts/prototypes/bank_solve_trace/report.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_trace/capture.py</code> (live_runner:scripts/prototypes/bank_solve_trace/run.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_trace/groups.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_solve_trace/plot.py</code> (live_runner:scripts/prototypes/bank_solve_trace/report.sh)</li>
+      <li><code>scripts/prototypes/bank_solve_trace/provenance.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_step_booking/check_plot.py</code> (live_runner:scripts/prototypes/bank_step_booking/run_plot_check.sh)</li>
+      <li><code>scripts/prototypes/bank_step_booking/diagnose.py</code> (live_runner:scripts/prototypes/bank_step_booking/run_diagnostic.sh)</li>
+      <li><code>scripts/prototypes/bank_step_booking/measure.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_step_booking/plot.py</code> (live_runner:scripts/prototypes/bank_step_booking/run_plot_check.sh)</li>
+      <li><code>scripts/prototypes/bank_step_booking_batch/control.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_step_booking_batch/measure.py</code> (imported_by_core, live_runner:scripts/prototypes/bank_step_booking_batch/cpu.sh, live_runner:scripts/prototypes/bank_step_booking_batch/device.sh, live_runner:scripts/prototypes/bank_step_booking_batch/verify.sh)</li>
+      <li><code>scripts/prototypes/bank_step_booking_batch/report.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/bank-report-equivalence.html @ None</li>
+      <li><code>scripts/prototypes/bank_step_command_buffer/compare.py</code> (live_runner:scripts/prototypes/bank_step_command_buffer/run_arms.sh)</li>
+      <li><code>scripts/prototypes/bank_step_geometry/reference.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/bank_step_jacobian_split/measure.py</code> (live_runner:scripts/prototypes/bank_step_jacobian_split/run.sh)</li>
+      <li><code>scripts/prototypes/bank_step_launch_fusion/base_solve.py</code> (live_runner:scripts/prototypes/bank_step_launch_fusion/h200_compare.sh, live_runner:scripts/prototypes/bank_step_launch_fusion/measure_base.sh)</li>
+      <li><code>scripts/prototypes/bank_step_occupancy/arm.py</code> (live_runner:scripts/prototypes/bank_step_occupancy/run.sh)</li>
+      <li><code>scripts/prototypes/bank_step_occupancy/timeline.py</code> (live_runner:scripts/prototypes/bank_step_occupancy/run.sh)</li>
+      <li><code>scripts/prototypes/bank_step_plateau/check_mutation.py</code> (live_runner:scripts/prototypes/bank_step_plateau/run_control_check.sh)</li>
+      <li><code>scripts/prototypes/bank_step_plateau/measure.py</code> (live_runner:scripts/prototypes/bank_step_plateau/run_control_check.sh, live_runner:scripts/prototypes/bank_step_plateau/run_flux.sh, live_runner:scripts/prototypes/bank_step_plateau/run_refine.sh, live_runner:scripts/prototypes/bank_step_plateau/run_titan.sh)</li>
+      <li><code>scripts/prototypes/bank_step_speed/profile.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_test_repin/compare.py</code> (live_runner:scripts/prototypes/bank_test_repin/sirius_measure.sh, plan_owned:sub-millisecond-forward-path)</li>
+      <li><code>scripts/prototypes/bank_test_repin/measure.py</code> (live_runner:scripts/prototypes/bank_test_repin/sirius_measure.sh)</li>
+      <li><code>scripts/prototypes/bank_test_repin/suite_summary.py</code> (live_runner:scripts/prototypes/bank_test_repin/sirius_suites.sh)</li>
+      <li><code>scripts/prototypes/bank_wall_events/device.py</code> (live_runner:scripts/prototypes/bank_wall_events/gpu.sh)</li>
+      <li><code>scripts/prototypes/bank_wall_events/resume.py</code> (live_runner:scripts/prototypes/bank_wall_events/resume.sh)</li>
+      <li><code>scripts/prototypes/bank_wall_events/suite.py</code> (live_runner:scripts/prototypes/bank_wall_events/cpu.sh)</li>
+      <li><code>scripts/prototypes/bank_warm_predictor/measure.py</code> (live_runner:scripts/prototypes/bank_warm_predictor/run.sh)</li>
+      <li><code>scripts/prototypes/bank_warm_predictor/program.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_warm_predictor/receipts.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_warm_predictor/report.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_warm_predictor/suites.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_warm_stall/measure.py</code> (live_runner:scripts/prototypes/bank_warm_stall/run_h200.sh)</li>
+      <li><code>scripts/prototypes/bank_warm_stall/observed.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_warm_start/measure.py</code> (live_runner:scripts/prototypes/bank_warm_start/run_h200.sh)</li>
+      <li><code>scripts/prototypes/bank_warm_start/streams.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_width_probe/report.py</code> (plan_owned:sub-millisecond-forward-path)</li>
+      <li><code>scripts/prototypes/bank_width_probe/run.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/bank_width_probe/test_contracts.py</code> (live_runner:scripts/prototypes/bank_width_probe/job.sh, live_runner:scripts/prototypes/bank_width_probe/report_job.sh)</li>
+      <li><code>scripts/prototypes/batched_factor/measure.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/booking_scalar_tile/run.py</code> (live_runner:scripts/prototypes/booking_scalar_tile/job.sh)</li>
+      <li><code>scripts/prototypes/cached_point_remeasure/arms.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/cached_point_remeasure/measure.py</code> (live_runner:scripts/h200_test_lane/prewarm.sh, plan_owned:kernel-compile-barrier)</li>
+      <li><code>scripts/prototypes/carrier_identity_receipt/check_receipt_table.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/converged-forward-solve/carrier-identity-receipt.html @ None</li>
+      <li><code>scripts/prototypes/carrier_identity_receipt/measure_carrier.py</code> (live_runner:scripts/prototypes/carrier_identity_receipt/run_carrier_receipt.sh)</li>
+      <li><code>scripts/prototypes/certificate_rows_remeasure/row.py</code> (live_runner:scripts/prototypes/certificate_rows_remeasure/run_rows.sh)</li>
+      <li><code>scripts/prototypes/certified_carrier_export/export_records.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/certified_carrier_export/test_export_records.py</code> (live_runner:scripts/prototypes/certified_carrier_export/gate.sh)</li>
+      <li><code>scripts/prototypes/compile_pass_profile/analyse.py</code> (live_runner:scripts/prototypes/compile_pass_profile/run.sh, live_runner:scripts/prototypes/point_program_attribution/attribution_job.sh)</li>
+      <li><code>scripts/prototypes/compile_pass_profile/figure.py</code> (live_runner:scripts/prototypes/compile_pass_profile/job.sh)</li>
+      <li><code>scripts/prototypes/compile_pass_profile/lowered_size.py</code> (plan_owned:kernel-compile-barrier)</li>
+      <li><code>scripts/prototypes/compile_pass_profile/profile.py</code> (live_runner:scripts/prototypes/compile_pass_profile/run.sh)</li>
+      <li><code>scripts/prototypes/compile_pass_profile/summarise.py</code> (imported_by_core, live_runner:scripts/prototypes/compile_pass_profile/job.sh)</li>
+      <li><code>scripts/prototypes/contour_tree_overflow/test_overflow.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/converged-forward-solve/tree-capacity-from-carrier.html @ 09f4816d8d; docs/evidence/fragments/converged-forward-solve/contour-tree-overflow.html @ None</li>
+      <li><code>scripts/prototypes/contour_tree_sweep_profile/diagnose.py</code> (live_runner:scripts/prototypes/contour_tree_sweep_profile/run.sh)</li>
+      <li><code>scripts/prototypes/contour_tree_sweep_profile/profile.py</code> (imported_by_core, live_runner:scripts/prototypes/contour_tree_sweep_profile/run.sh)</li>
+      <li><code>scripts/prototypes/contour_tree_sweep_profile/test_profile.py</code> (live_runner:scripts/prototypes/contour_tree_sweep_profile/run.sh)</li>
+      <li><code>scripts/prototypes/diiid_adapter_current_refusal/refusal_arms.py</code> (live_runner:scripts/prototypes/diiid_adapter_current_refusal/job_arms.sh, live_runner:scripts/prototypes/diiid_adapter_current_refusal/job_solve.sh)</li>
+      <li><code>scripts/prototypes/diiid_axis_identification/census.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/diiid_axis_selection/check_field_orientation.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/diiid_core_hold/check_core_zoom.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/diiid_core_hold/regressions.py</code> (imported_by_core, live_runner:scripts/prototypes/diiid_core_hold/cpu.sh)</li>
+      <li><code>scripts/prototypes/diiid_diverted_branch/measure.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/diiid_diverted_branch/refresh.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/audit.py</code> (live_runner:scripts/prototypes/diiid_edge_current_refusal/publish.sh)</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/batch.py</code> (live_runner:scripts/prototypes/diiid_edge_current_refusal/job.sh)</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/control.py</code> (live_runner:scripts/prototypes/diiid_edge_current_refusal/control.sh)</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/jumps.py</code> (live_runner:scripts/prototypes/diiid_edge_current_refusal/publish.sh)</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/marker_visibility.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/measure.py</code> (live_runner:scripts/prototypes/diiid_edge_current_refusal/reference.sh)</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/render.py</code> (live_runner:scripts/prototypes/diiid_edge_current_refusal/publish.sh)</li>
+      <li><code>scripts/prototypes/diiid_edge_current_refusal/verify.py</code> (live_runner:scripts/prototypes/diiid_edge_current_refusal/publish.sh)</li>
+      <li><code>scripts/prototypes/diiid_external_current_propagation/measure.py</code> (live_runner:scripts/prototypes/diiid_external_current_propagation/job.sh)</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_booking/batch.py</code> (live_runner:scripts/prototypes/diiid_finite_edge_booking/job.sh)</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_booking/discriminate.py</code> (live_runner:scripts/prototypes/diiid_finite_edge_booking/read.sh)</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_flux/batch.py</code> (live_runner:scripts/prototypes/diiid_finite_edge_flux/job.sh)</li>
+      <li><code>scripts/prototypes/diiid_finite_edge_flux/extract.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-finite-edge-flux.html @ None</li>
+      <li><code>scripts/prototypes/diiid_forward_convergence/render_panels.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/diiid_hollow_current/recover.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/diiid_hollow_current/render.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/diiid_hollow_current/trace.py</code> (imported_by_core, live_runner:scripts/prototypes/diiid_edge_current_refusal/control.sh, live_runner:scripts/prototypes/diiid_edge_current_refusal/job.sh, live_runner:scripts/prototypes/diiid_edge_current_refusal/reference.sh, live_runner:scripts/prototypes/diiid_finite_edge_booking/job.sh, live_runner:scripts/prototypes/diiid_xpoint_coil_correction/job.sh, live_runner:scripts/prototypes/diiid_xpoint_coil_correction/resolve.sh, live_runner:scripts/prototypes/diiid_xpoint_profile_extent/job.sh)</li>
+      <li><code>scripts/prototypes/diiid_inactive_compensator/gate.py</code> (imported_by_core, live_runner:scripts/prototypes/diiid_inactive_compensator/gate.sh)</li>
+      <li><code>scripts/prototypes/diiid_pinned_reregistration/measure.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-pinned-reregistration.html @ None</li>
+      <li><code>scripts/prototypes/diiid_residual_plateau/measure.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/diiid_stopping_rule/record_machine_geometry.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html @ None</li>
+      <li><code>scripts/prototypes/diiid_stopping_rule/test_terminal_panel_geometry.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-stopping-rule-fix.html @ None</li>
+      <li><code>scripts/prototypes/diiid_support_mask/trace_support.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-support-mask-collapse.html @ None</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/flux_orientation.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html @ None</li>
+      <li><code>scripts/prototypes/diiid_vertical_loss/trip_trajectory.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/diiid-vertical-force-balance/diiid-axis-selection-fix.html @ None; docs/evidence/fragments/diiid-vertical-force-balance/diiid-frame-146-vertical-loss.html @ None</li>
+      <li><code>scripts/prototypes/diiid_xpoint_attribution/attribute.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/diiid_xpoint_attribution/native_reference.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/diiid_xpoint_attribution/operator_probe.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/diiid_xpoint_attribution/sensitivity.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/diiid_xpoint_coil_correction/batch.py</code> (live_runner:scripts/prototypes/diiid_xpoint_coil_correction/job.sh)</li>
+      <li><code>scripts/prototypes/diiid_xpoint_held_nodes/gates.py</code> (live_runner:scripts/prototypes/diiid_xpoint_held_nodes/cpu.sh)</li>
+      <li><code>scripts/prototypes/diiid_xpoint_offset/decompose.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/diiid_xpoint_offset/render.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/diiid_xpoint_offset/style.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/diiid_xpoint_profile_extent/batch.py</code> (live_runner:scripts/prototypes/diiid_xpoint_profile_extent/job.sh)</li>
+      <li><code>scripts/prototypes/diverted_stall/kernel.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/diverted_stall/measure.py</code> (live_runner:tests/test_solve_operand_capture.py, plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/diverted_stall/program.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/sweep.py</code> (live_runner:scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/gate.sh)</li>
+      <li><code>scripts/prototypes/efit_axis_adjudication/records.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/efit_field_swap/crosscheck.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/efit_field_swap/orientation.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/efit_field_swap/spline_field.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/efit_field_swap/trace_record.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/efit_maximin_certificate/adapter_probe.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/efit_maximin_certificate/bounds.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/efit_maximin_certificate/certificate.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/efit_maximin_certificate/cuts.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/efit_maximin_certificate/external_paths.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/efit_maximin_certificate/run.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/fast_map_production/kernel.py</code> (imported_by_core, plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/fast_map_production/program.py</code> (imported_by_core, plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/fast_map_production/qualification.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/fast_map_production/solver.py</code> (imported_by_core, live_runner:scripts/prototypes/carrier_trial_map/launch.sh, live_runner:scripts/prototypes/moment_hessian/trial.sh, live_runner:tests/test_solve_operand_capture.py, plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/fast_map_production/test_axis_ranking.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/fast_map_production/test_bottleneck_level.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/fast_map_production/tie_probe.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/fast_read/kernel.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/fast_read/measure_fused.py</code> (plan_owned:kernel-compile-barrier)</li>
+      <li><code>scripts/prototypes/fast_read/ordinary_cut.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/fast_read/program.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/fine_grid_convergence/handoff.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/fixed_points/solve.py</code> (plan_owned:kernel-compile-barrier)</li>
+      <li><code>scripts/prototypes/fused_convergence/roots.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/geometry_reuse/reproduce.py</code> (live_runner:scripts/prototypes/geometry_reuse/probe.sh)</li>
+      <li><code>scripts/prototypes/geometry_reuse/run.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/h200_levers/run.py</code> (imported_by_core, live_runner:scripts/prototypes/h200_levers/job.sh)</li>
+      <li><code>scripts/prototypes/importer_delta/control.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/kernel-compile-barrier/importer-delta.html @ None</li>
+      <li><code>scripts/prototypes/iron_limb_fill/axisymmetric.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/iron_limb_fill/bricks.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/iron_magnetisation/magnetisation.py</code> (plan_owned:iron-core-magnetisation)</li>
+      <li><code>scripts/prototypes/iron_magnetisation/shell.py</code> (plan_owned:iron-core-magnetisation)</li>
+      <li><code>scripts/prototypes/iron_magnetisation/west.py</code> (live_runner:tests/test_imas_iron_read.py, plan_owned:iron-core-magnetisation)</li>
+      <li><code>scripts/prototypes/iter_bank/derive_rows.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/iter_bank/inspect.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/iter_bank/measure.py</code> (imported_by_core, live_runner:tests/test_iter_bank.py)</li>
+      <li><code>scripts/prototypes/iter_bank/recertify.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/kernel_compile_census/row.py</code> (plan_owned:kernel-compile-barrier)</li>
+      <li><code>scripts/prototypes/ladder/map.py</code> (live_runner:scripts/prototypes/ladder/run_map.sh)</li>
+      <li><code>scripts/prototypes/ladder/measure.py</code> (live_runner:scripts/prototypes/ladder/resume_read.sh, live_runner:scripts/prototypes/ladder/run.sh, live_runner:scripts/prototypes/ladder/run_read.sh)</li>
+      <li><code>scripts/prototypes/ladder/quadratic.py</code> (live_runner:scripts/prototypes/ladder/run_quadratic.sh)</li>
+      <li><code>scripts/prototypes/ladder/reference_propagation.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/lean_map/jets.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/lean_map/probe_bias.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/lean_map/quadrature.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/lean_map/values.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/moment_hessian/certificate_row.py</code> (live_runner:scripts/prototypes/moment_hessian/certificate_job.sh)</li>
+      <li><code>scripts/prototypes/one_traced_body/check_record.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html @ None</li>
+      <li><code>scripts/prototypes/operator_bank/measure.py</code> (live_runner:scripts/prototypes/operator_bank/run_h200.sh)</li>
+      <li><code>scripts/prototypes/order2/attribution.py</code> (plan_owned:kernel-compile-barrier)</li>
+      <li><code>scripts/prototypes/order2/read.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/pivot_figures.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/point_program_attribution/blocks.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/point_program_attribution/bodies.py</code> (live_runner:scripts/prototypes/point_program_attribution/cpu_arms.sh)</li>
+      <li><code>scripts/prototypes/point_program_attribution/check.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/kernel-compile-barrier/one-traced-body.html @ 098010058c0ebc6d3a1c00d144728cea4096a933; docs/evidence/fragments/kernel-compile-barrier/point-program-attribution.html @ None</li>
+      <li><code>scripts/prototypes/point_program_attribution/lowering_arm.py</code> (live_runner:scripts/prototypes/point_program_attribution/cpu_arms.sh)</li>
+      <li><code>scripts/prototypes/point_program_attribution/profile_arm.py</code> (live_runner:scripts/prototypes/point_program_attribution/attribution_job.sh)</li>
+      <li><code>scripts/prototypes/polygon_near_band/compile_ratio_arms.py</code> (live_runner:scripts/prototypes/polygon_near_band/compile_ratio.sh)</li>
+      <li><code>scripts/prototypes/polygon_near_band/identity_gate.py</code> (live_runner:scripts/prototypes/polygon_near_band/identity_gate.sh)</li>
+      <li><code>scripts/prototypes/polygon_near_band/identity_rows.py</code> (live_runner:scripts/prototypes/polygon_near_band/identity_rows.sh)</li>
+      <li><code>scripts/prototypes/polygon_near_band/jacobian_equivalence.py</code> (live_runner:scripts/prototypes/polygon_near_band/jacobian_equivalence.sh)</li>
+      <li><code>scripts/prototypes/polygon_near_band/measure.py</code> (live_runner:scripts/prototypes/polygon_near_band/compare_after.sh, live_runner:scripts/prototypes/polygon_near_band/negative_control.sh)</li>
+      <li><code>scripts/prototypes/polygon_near_band/run_gate.py</code> (live_runner:scripts/prototypes/polygon_near_band/gate.sh)</li>
+      <li><code>scripts/prototypes/polygon_near_band/weighted_files_gate.py</code> (live_runner:scripts/prototypes/polygon_near_band/weighted_files_gate.sh)</li>
+      <li><code>scripts/prototypes/polygon_stable_evaluator/controls.py</code> (live_runner:scripts/prototypes/polygon_stable_evaluator/job.sh)</li>
+      <li><code>scripts/prototypes/polygon_stable_evaluator/program_identity.py</code> (live_runner:scripts/prototypes/polygon_stable_evaluator/job.sh)</li>
+      <li><code>scripts/prototypes/polygon_stable_evaluator/suite_files.py</code> (live_runner:scripts/prototypes/polygon_stable_evaluator/job.sh)</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/arms.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/polygon-symmetry-violation.html @ None</li>
+      <li><code>scripts/prototypes/polygon_symmetry_violation/probe.py</code> (live_runner:scripts/prototypes/polygon_symmetry_violation/run_probe.sh)</li>
+      <li><code>scripts/prototypes/polygon_trace_miss/measure.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/read_derivatives/measure.py</code> (live_runner:scripts/prototypes/read_derivatives/run.sh)</li>
+      <li><code>scripts/prototypes/read_robustness/census.py</code> (imported_by_core, plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/read_robustness/census_base_step.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/read_robustness/census_negative_control.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/read_route/bell.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/read_route/check_element.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/read_route/conforming.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/read_route/jets.py</code> (imported_by_core, plan_owned:converged-forward-solve, plan_owned:kernel-compile-barrier, plan_owned:sub-millisecond-forward-path)</li>
+      <li><code>scripts/prototypes/read_route/measure.py</code> (imported_by_core, live_runner:scripts/prototypes/read_route/run.sh, plan_owned:kernel-compile-barrier)</li>
+      <li><code>scripts/prototypes/read_route/render.py</code> (live_runner:scripts/prototypes/read_route/run.sh)</li>
+      <li><code>scripts/prototypes/smfp_autodiff_step/probe_newton_dense.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/smfp-autodiff-free-newton.html @ None</li>
+      <li><code>scripts/prototypes/solve_options/colored_jet_locality.py</code> (live_runner:scripts/prototypes/solve_options/run_colored_jet.sh)</li>
+      <li><code>scripts/prototypes/solve_options/derivative_cost.py</code> (live_runner:scripts/prototypes/solve_options/run_derivative.sh)</li>
+      <li><code>scripts/prototypes/solve_options/global_root_tangent.py</code> (live_runner:scripts/prototypes/solve_options/run_global_root.sh)</li>
+      <li><code>scripts/prototypes/solve_options/global_structured_factor.py</code> (live_runner:scripts/prototypes/solve_options/run_global_factor.sh)</li>
+      <li><code>scripts/prototypes/solve_options/isolated_jet_cost.py</code> (live_runner:scripts/prototypes/solve_options/run_isolated_jet.sh)</li>
+      <li><code>scripts/prototypes/solve_options/jet_component_dependency.py</code> (live_runner:scripts/prototypes/solve_options/run_jet_component.sh)</li>
+      <li><code>scripts/prototypes/solve_options/live_iterations.py</code> (live_runner:scripts/prototypes/solve_options/run_live.sh)</li>
+      <li><code>scripts/prototypes/solve_options/local_jet_factor.py</code> (live_runner:scripts/prototypes/solve_options/run_local_jet_factor.sh)</li>
+      <li><code>scripts/prototypes/solve_options/partial_structured_factor.py</code> (live_runner:scripts/prototypes/solve_options/run_partial_factor.sh)</li>
+      <li><code>scripts/prototypes/solve_options/point_bias.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/solve_options/profile.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/solve_options/relaxed_live.py</code> (live_runner:scripts/prototypes/solve_options/run_relaxed.sh)</li>
+      <li><code>scripts/prototypes/solve_options/support_dependency.py</code> (live_runner:scripts/prototypes/solve_options/run_support_dependency.sh)</li>
+      <li><code>scripts/prototypes/solve_options/warm_factor_sequence.py</code> (live_runner:scripts/prototypes/solve_options/run_warm_factor.sh)</li>
+      <li><code>scripts/prototypes/solve_wall_breakdown/measure.py</code> (live_runner:scripts/prototypes/solve_wall_breakdown/job.sh, live_runner:scripts/prototypes/solve_wall_breakdown/job_profile.sh)</li>
+      <li><code>scripts/prototypes/stored_state_refusals/drift_policy_panels.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html @ None</li>
+      <li><code>scripts/prototypes/stored_state_refusals/redraw_panels.py</code> (live_runner:scripts/prototypes/stored_state_refusals/redraw_panels.sh)</li>
+      <li><code>scripts/prototypes/stored_state_refusals/run_recorded_cases.py</code> (live_runner:tests/test_stored_state_refusals.py)</li>
+      <li><code>scripts/prototypes/stored_state_refusals/verify_input_drift.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/forward-solve-near-stored-states/default-policy-refusal-drift.html @ None</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_bell_cut.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_cuts.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_saddle_frame.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/sub_millisecond/measure_wall_march.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/sub_millisecond/parse_launch_trace.py</code> (imported_by_kept)</li>
+      <li><code>scripts/prototypes/support/book.py</code> (imported_by_core, plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/support/certificate_fixtures.py</code> (imported_by_core, plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/support/geometry.py</code> (imported_by_core, plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/prototypes/support/ladder.py</code> (live_runner:scripts/prototypes/support/run.sh)</li>
+      <li><code>scripts/prototypes/support/measure.py</code> (imported_by_core)</li>
+      <li><code>scripts/prototypes/taylor/point_jet_taylor.py</code> (live_runner:scripts/prototypes/taylor/run_h200_job.sh)</li>
+      <li><code>scripts/prototypes/tracked_read/measure.py</code> (imported_by_core, live_runner:scripts/prototypes/tracked_read/run_h200.sh, live_runner:scripts/prototypes/tracked_read/run_titan.sh)</li>
+      <li><code>scripts/prototypes/tracked_read_batch/check_table.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/sub-millisecond-forward-path/tracked-read-batch.html @ None</li>
+      <li><code>scripts/prototypes/tracked_read_batch/measure.py</code> (imported_by_core, live_runner:scripts/prototypes/tracked_read_batch/run_h200.sh)</li>
+      <li><code>scripts/prototypes/tracked_read_batch/reference.py</code> (imported_by_core, live_runner:scripts/prototypes/tracked_read_batch/run_boundary_mutant.sh)</li>
+      <li><code>scripts/prototypes/tracked_read_h200/figures.py</code> (live_runner:scripts/prototypes/tracked_read_h200/run_h200_accuracy.sh)</li>
+      <li><code>scripts/prototypes/tracked_read_h200/measure.py</code> (live_runner:scripts/prototypes/tracked_read_h200/run_h200.sh, live_runner:scripts/prototypes/tracked_read_h200/run_h200_accuracy.sh, live_runner:scripts/prototypes/tracked_read_h200/run_reference_gate.sh)</li>
+      <li><code>scripts/prototypes/xpoint_cell_owner/lobe_booking.py</code> (plan_owned:converged-forward-solve)</li>
+      <li><code>scripts/reconstructed_plasma_source/measure.py</code> (imported_by_core)</li>
+      <li><code>scripts/reconstructed_plasma_source/reconstruction.py</code> (imported_by_core)</li>
+      <li><code>scripts/sheet_tile_census/measure.py</code> (live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/west_iron_galerkin/measure.py</code> (live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/west_iron_galerkin/sphere_bound.py</code> (cited_without_resolvable_revision) &#8212; evidence: docs/evidence/fragments/iron-core-magnetisation/icm-galerkin-interaction.html @ None</li>
+      <li><code>scripts/west_iron_galerkin_pair/measure.py</code> (imported_by_core, live_runner:scripts/west_iron_galerkin_pair/run.sh, live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/west_iron_inputs/committed.py</code> (imported_by_core)</li>
+      <li><code>scripts/west_iron_linear/constant_control.py</code> (live_runner:scripts/west_iron_linear/run.sh)</li>
+      <li><code>scripts/west_iron_linear/diagnose.py</code> (live_runner:scripts/west_iron_linear/run.sh)</li>
+      <li><code>scripts/west_iron_linear/measure.py</code> (imported_by_core, live_runner:scripts/west_iron_linear/refinement.sh, live_runner:scripts/west_iron_linear/run.sh)</li>
+      <li><code>scripts/west_iron_linear/negative_control.py</code> (live_runner:scripts/west_iron_linear/control.sh)</li>
+      <li><code>scripts/west_iron_linear/prepare.py</code> (live_runner:scripts/west_iron_linear/prepare.sh)</li>
+      <li><code>scripts/west_iron_solve/diagnose.py</code> (live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/west_iron_solve/diagnostic_figure.py</code> (live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/west_iron_solve/figure.py</code> (imported_by_kept)</li>
+      <li><code>scripts/west_iron_solve/measure.py</code> (live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/west_iron_solve/probe.py</code> (live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/west_picard_control/measure.py</code> (live_runner:scripts/west_picard_control/run.sh, live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/west_root_branch/figure.py</code> (live_runner:scripts/west_root_branch/render.sh, live_runner:scripts/west_root_branch/run.sh)</li>
+      <li><code>scripts/west_root_branch/measure.py</code> (live_runner:scripts/west_root_branch/run.sh, live_runner:tests/test_imas_iron_read.py)</li>
+      <li><code>scripts/west_root_branch/origin.py</code> (imported_by_kept)</li>
+      <li><code>scripts/west_stray_field/solve.py</code> (live_runner:tests/test_imas_iron_read.py, plan_owned:iron-core-magnetisation)</li>
+    </ul>
+  </main>
+</body>
+</html>

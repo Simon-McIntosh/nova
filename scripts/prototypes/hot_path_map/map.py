@@ -251,7 +251,7 @@ def main():
                 "nova.equilibrium.forward.ForwardProfile.solve on a stored MAST case"
             ),
             "inverse": (
-                "tests/test_equilibrium_magnetics_fit.py"
+                "tests/test_equilibrium_magnetics_fit_known_states.py"
                 "::test_known_state_recovery[mast]"
             ),
         },

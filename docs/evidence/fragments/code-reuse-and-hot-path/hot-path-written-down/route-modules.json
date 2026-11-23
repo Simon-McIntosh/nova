@@ -1,0 +1,8128 @@
+{
+ "revision": "8d8b526ae1d315945ed603b8f15477382559cb27",
+ "tree": ".",
+ "routes": {
+  "forward": "nova.equilibrium.forward.ForwardProfile.solve on a stored MAST case",
+  "inverse": "tests/test_equilibrium_magnetics_fit_known_states.py::test_known_state_recovery[mast]"
+ },
+ "negative_control": {
+  "module": "nova/utilities/ANSYS.py",
+  "measured": true,
+  "forward": {
+   "executed": 0,
+   "percent": 0.0
+  },
+  "inverse": {
+   "executed": 0,
+   "percent": 0.0
+  }
+ },
+ "device_trace_entries": [
+  {
+   "module": "nova/equilibrium/support_read.py",
+   "function": "read",
+   "executed": 0,
+   "body_lines": 96,
+   "reason": "device trace attributes kernels to read, and no route executed a line of its body"
+  },
+  {
+   "module": "nova/equilibrium/support_read.py",
+   "function": "read_batch",
+   "executed": 0,
+   "body_lines": 208,
+   "reason": "device trace attributes kernels to read_batch, and no route executed a line of its body"
+  },
+  {
+   "module": "nova/equilibrium/support_read.py",
+   "function": "read_and_book",
+   "executed": 0,
+   "body_lines": 27,
+   "reason": "device trace attributes kernels to read_and_book, and no route executed a line of its body"
+  },
+  {
+   "module": "nova/equilibrium/support_read.py",
+   "function": "bank_program",
+   "executed": 0,
+   "body_lines": 11,
+   "reason": "device trace attributes kernels to bank_program, and no route executed a line of its body"
+  }
+ ],
+ "device_trace_contradictions": [
+  {
+   "module": "nova/equilibrium/support_read.py",
+   "function": "read",
+   "executed": 0,
+   "body_lines": 96,
+   "reason": "device trace attributes kernels to read, and no route executed a line of its body"
+  },
+  {
+   "module": "nova/equilibrium/support_read.py",
+   "function": "read_batch",
+   "executed": 0,
+   "body_lines": 208,
+   "reason": "device trace attributes kernels to read_batch, and no route executed a line of its body"
+  },
+  {
+   "module": "nova/equilibrium/support_read.py",
+   "function": "read_and_book",
+   "executed": 0,
+   "body_lines": 27,
+   "reason": "device trace attributes kernels to read_and_book, and no route executed a line of its body"
+  },
+  {
+   "module": "nova/equilibrium/support_read.py",
+   "function": "bank_program",
+   "executed": 0,
+   "body_lines": 11,
+   "reason": "device trace attributes kernels to bank_program, and no route executed a line of its body"
+  }
+ ],
+ "assertions": {
+  "passed": true,
+  "failures": []
+ },
+ "modules": [
+  {
+   "module": "nova/__init__.py",
+   "total": 40,
+   "measured": true,
+   "forward": {
+    "executed": 19,
+    "percent": 47.5
+   },
+   "inverse": {
+    "executed": 19,
+    "percent": 47.5
+   },
+   "union": {
+    "executed": 19,
+    "percent": 47.5
+   }
+  },
+  {
+   "module": "nova/biot/__init__.py",
+   "total": 30,
+   "measured": true,
+   "forward": {
+    "executed": 17,
+    "percent": 56.67
+   },
+   "inverse": {
+    "executed": 17,
+    "percent": 56.67
+   },
+   "union": {
+    "executed": 17,
+    "percent": 56.67
+   }
+  },
+  {
+   "module": "nova/biot/arc.py",
+   "total": 348,
+   "measured": true,
+   "forward": {
+    "executed": 147,
+    "percent": 42.24
+   },
+   "inverse": {
+    "executed": 147,
+    "percent": 42.24
+   },
+   "union": {
+    "executed": 147,
+    "percent": 42.24
+   }
+  },
+  {
+   "module": "nova/biot/arcamplitude.py",
+   "total": 38,
+   "measured": true,
+   "forward": {
+    "executed": 18,
+    "percent": 47.37
+   },
+   "inverse": {
+    "executed": 18,
+    "percent": 47.37
+   },
+   "union": {
+    "executed": 18,
+    "percent": 47.37
+   }
+  },
+  {
+   "module": "nova/biot/arcbandedcoupling.py",
+   "total": 200,
+   "measured": true,
+   "forward": {
+    "executed": 26,
+    "percent": 13.0
+   },
+   "inverse": {
+    "executed": 26,
+    "percent": 13.0
+   },
+   "union": {
+    "executed": 26,
+    "percent": 13.0
+   }
+  },
+  {
+   "module": "nova/biot/array.py",
+   "total": 19,
+   "measured": true,
+   "forward": {
+    "executed": 9,
+    "percent": 47.37
+   },
+   "inverse": {
+    "executed": 9,
+    "percent": 47.37
+   },
+   "union": {
+    "executed": 9,
+    "percent": 47.37
+   }
+  },
+  {
+   "module": "nova/biot/bandedcoupling.py",
+   "total": 70,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/beam.py",
+   "total": 93,
+   "measured": true,
+   "forward": {
+    "executed": 48,
+    "percent": 51.61
+   },
+   "inverse": {
+    "executed": 48,
+    "percent": 51.61
+   },
+   "union": {
+    "executed": 48,
+    "percent": 51.61
+   }
+  },
+  {
+   "module": "nova/biot/biot.py",
+   "total": 125,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 100,
+    "percent": 80.0
+   },
+   "union": {
+    "executed": 100,
+    "percent": 80.0
+   }
+  },
+  {
+   "module": "nova/biot/biotframe.py",
+   "total": 64,
+   "measured": true,
+   "forward": {
+    "executed": 30,
+    "percent": 46.88
+   },
+   "inverse": {
+    "executed": 55,
+    "percent": 85.94
+   },
+   "union": {
+    "executed": 55,
+    "percent": 85.94
+   }
+  },
+  {
+   "module": "nova/biot/boundary.py",
+   "total": 45,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/bow.py",
+   "total": 82,
+   "measured": true,
+   "forward": {
+    "executed": 38,
+    "percent": 46.34
+   },
+   "inverse": {
+    "executed": 38,
+    "percent": 46.34
+   },
+   "union": {
+    "executed": 38,
+    "percent": 46.34
+   }
+  },
+  {
+   "module": "nova/biot/circle.py",
+   "total": 110,
+   "measured": true,
+   "forward": {
+    "executed": 35,
+    "percent": 31.82
+   },
+   "inverse": {
+    "executed": 35,
+    "percent": 31.82
+   },
+   "union": {
+    "executed": 35,
+    "percent": 31.82
+   }
+  },
+  {
+   "module": "nova/biot/completeelliptic.py",
+   "total": 291,
+   "measured": true,
+   "forward": {
+    "executed": 97,
+    "percent": 33.33
+   },
+   "inverse": {
+    "executed": 97,
+    "percent": 33.33
+   },
+   "union": {
+    "executed": 97,
+    "percent": 33.33
+   }
+  },
+  {
+   "module": "nova/biot/constants.py",
+   "total": 168,
+   "measured": true,
+   "forward": {
+    "executed": 86,
+    "percent": 51.19
+   },
+   "inverse": {
+    "executed": 86,
+    "percent": 51.19
+   },
+   "union": {
+    "executed": 86,
+    "percent": 51.19
+   }
+  },
+  {
+   "module": "nova/biot/contour.py",
+   "total": 131,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/coupling.py",
+   "total": 169,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/crosssection.py",
+   "total": 18,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 16,
+    "percent": 88.89
+   },
+   "union": {
+    "executed": 16,
+    "percent": 88.89
+   }
+  },
+  {
+   "module": "nova/biot/cylinder.py",
+   "total": 44,
+   "measured": true,
+   "forward": {
+    "executed": 26,
+    "percent": 59.09
+   },
+   "inverse": {
+    "executed": 38,
+    "percent": 86.36
+   },
+   "union": {
+    "executed": 38,
+    "percent": 86.36
+   }
+  },
+  {
+   "module": "nova/biot/data.py",
+   "total": 18,
+   "measured": true,
+   "forward": {
+    "executed": 12,
+    "percent": 66.67
+   },
+   "inverse": {
+    "executed": 17,
+    "percent": 94.44
+   },
+   "union": {
+    "executed": 17,
+    "percent": 94.44
+   }
+  },
+  {
+   "module": "nova/biot/elliptic.py",
+   "total": 486,
+   "measured": true,
+   "forward": {
+    "executed": 83,
+    "percent": 17.08
+   },
+   "inverse": {
+    "executed": 135,
+    "percent": 27.78
+   },
+   "union": {
+    "executed": 135,
+    "percent": 27.78
+   }
+  },
+  {
+   "module": "nova/biot/error.py",
+   "total": 3,
+   "measured": true,
+   "forward": {
+    "executed": 2,
+    "percent": 66.67
+   },
+   "inverse": {
+    "executed": 2,
+    "percent": 66.67
+   },
+   "union": {
+    "executed": 2,
+    "percent": 66.67
+   }
+  },
+  {
+   "module": "nova/biot/field.py",
+   "total": 91,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/fieldnull.py",
+   "total": 175,
+   "measured": true,
+   "forward": {
+    "executed": 57,
+    "percent": 32.57
+   },
+   "inverse": {
+    "executed": 57,
+    "percent": 32.57
+   },
+   "union": {
+    "executed": 57,
+    "percent": 32.57
+   }
+  },
+  {
+   "module": "nova/biot/flux.py",
+   "total": 21,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 11,
+    "percent": 52.38
+   },
+   "union": {
+    "executed": 11,
+    "percent": 52.38
+   }
+  },
+  {
+   "module": "nova/biot/fluxcoupling.py",
+   "total": 94,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/force.py",
+   "total": 95,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/geometryparameters.py",
+   "total": 202,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/geometrysolve.py",
+   "total": 242,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/gradedresidual.py",
+   "total": 203,
+   "measured": true,
+   "forward": {
+    "executed": 27,
+    "percent": 13.3
+   },
+   "inverse": {
+    "executed": 91,
+    "percent": 44.83
+   },
+   "union": {
+    "executed": 91,
+    "percent": 44.83
+   }
+  },
+  {
+   "module": "nova/biot/greens.py",
+   "total": 426,
+   "measured": true,
+   "forward": {
+    "executed": 249,
+    "percent": 58.45
+   },
+   "inverse": {
+    "executed": 258,
+    "percent": 60.56
+   },
+   "union": {
+    "executed": 258,
+    "percent": 60.56
+   }
+  },
+  {
+   "module": "nova/biot/grid.py",
+   "total": 197,
+   "measured": true,
+   "forward": {
+    "executed": 63,
+    "percent": 31.98
+   },
+   "inverse": {
+    "executed": 63,
+    "percent": 31.98
+   },
+   "union": {
+    "executed": 63,
+    "percent": 31.98
+   }
+  },
+  {
+   "module": "nova/biot/groupset.py",
+   "total": 57,
+   "measured": true,
+   "forward": {
+    "executed": 23,
+    "percent": 40.35
+   },
+   "inverse": {
+    "executed": 46,
+    "percent": 80.7
+   },
+   "union": {
+    "executed": 46,
+    "percent": 80.7
+   }
+  },
+  {
+   "module": "nova/biot/hexgrid.py",
+   "total": 28,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/incompleteelliptic.py",
+   "total": 82,
+   "measured": true,
+   "forward": {
+    "executed": 10,
+    "percent": 12.2
+   },
+   "inverse": {
+    "executed": 10,
+    "percent": 12.2
+   },
+   "union": {
+    "executed": 10,
+    "percent": 12.2
+   }
+  },
+  {
+   "module": "nova/biot/incompletemoments.py",
+   "total": 149,
+   "measured": true,
+   "forward": {
+    "executed": 18,
+    "percent": 12.08
+   },
+   "inverse": {
+    "executed": 18,
+    "percent": 12.08
+   },
+   "union": {
+    "executed": 18,
+    "percent": 12.08
+   }
+  },
+  {
+   "module": "nova/biot/inductance.py",
+   "total": 31,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/levelset.py",
+   "total": 28,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/limiter.py",
+   "total": 33,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/line.py",
+   "total": 117,
+   "measured": true,
+   "forward": {
+    "executed": 39,
+    "percent": 33.33
+   },
+   "inverse": {
+    "executed": 39,
+    "percent": 33.33
+   },
+   "union": {
+    "executed": 39,
+    "percent": 33.33
+   }
+  },
+  {
+   "module": "nova/biot/loop.py",
+   "total": 24,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 17,
+    "percent": 70.83
+   },
+   "union": {
+    "executed": 17,
+    "percent": 70.83
+   }
+  },
+  {
+   "module": "nova/biot/magnetisation.py",
+   "total": 676,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/matrix.py",
+   "total": 168,
+   "measured": true,
+   "forward": {
+    "executed": 70,
+    "percent": 41.67
+   },
+   "inverse": {
+    "executed": 96,
+    "percent": 57.14
+   },
+   "union": {
+    "executed": 96,
+    "percent": 57.14
+   }
+  },
+  {
+   "module": "nova/biot/momentchannel.py",
+   "total": 291,
+   "measured": true,
+   "forward": {
+    "executed": 44,
+    "percent": 15.12
+   },
+   "inverse": {
+    "executed": 98,
+    "percent": 33.68
+   },
+   "union": {
+    "executed": 98,
+    "percent": 33.68
+   }
+  },
+  {
+   "module": "nova/biot/null.py",
+   "total": 113,
+   "measured": true,
+   "forward": {
+    "executed": 86,
+    "percent": 76.11
+   },
+   "inverse": {
+    "executed": 86,
+    "percent": 76.11
+   },
+   "union": {
+    "executed": 86,
+    "percent": 76.11
+   }
+  },
+  {
+   "module": "nova/biot/operate.py",
+   "total": 318,
+   "measured": true,
+   "forward": {
+    "executed": 108,
+    "percent": 33.96
+   },
+   "inverse": {
+    "executed": 206,
+    "percent": 64.78
+   },
+   "union": {
+    "executed": 206,
+    "percent": 64.78
+   }
+  },
+  {
+   "module": "nova/biot/overlap.py",
+   "total": 117,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/pairedfloat.py",
+   "total": 77,
+   "measured": true,
+   "forward": {
+    "executed": 17,
+    "percent": 22.08
+   },
+   "inverse": {
+    "executed": 18,
+    "percent": 23.38
+   },
+   "union": {
+    "executed": 18,
+    "percent": 23.38
+   }
+  },
+  {
+   "module": "nova/biot/plasma.py",
+   "total": 191,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/plasmagap.py",
+   "total": 81,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/plasmagrid.py",
+   "total": 287,
+   "measured": true,
+   "forward": {
+    "executed": 64,
+    "percent": 22.3
+   },
+   "inverse": {
+    "executed": 64,
+    "percent": 22.3
+   },
+   "union": {
+    "executed": 64,
+    "percent": 22.3
+   }
+  },
+  {
+   "module": "nova/biot/plasmavtk.py",
+   "total": 27,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/plasmawall.py",
+   "total": 49,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/plot.py",
+   "total": 15,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/point.py",
+   "total": 27,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 22,
+    "percent": 81.48
+   },
+   "union": {
+    "executed": 22,
+    "percent": 81.48
+   }
+  },
+  {
+   "module": "nova/biot/polybeam.py",
+   "total": 110,
+   "measured": true,
+   "forward": {
+    "executed": 37,
+    "percent": 33.64
+   },
+   "inverse": {
+    "executed": 37,
+    "percent": 33.64
+   },
+   "union": {
+    "executed": 37,
+    "percent": 33.64
+   }
+  },
+  {
+   "module": "nova/biot/polybow.py",
+   "total": 66,
+   "measured": true,
+   "forward": {
+    "executed": 36,
+    "percent": 54.55
+   },
+   "inverse": {
+    "executed": 37,
+    "percent": 56.06
+   },
+   "union": {
+    "executed": 37,
+    "percent": 56.06
+   }
+  },
+  {
+   "module": "nova/biot/polygon.py",
+   "total": 203,
+   "measured": true,
+   "forward": {
+    "executed": 128,
+    "percent": 63.05
+   },
+   "inverse": {
+    "executed": 155,
+    "percent": 76.35
+   },
+   "union": {
+    "executed": 155,
+    "percent": 76.35
+   }
+  },
+  {
+   "module": "nova/biot/polygonanalytic.py",
+   "total": 1689,
+   "measured": true,
+   "forward": {
+    "executed": 164,
+    "percent": 9.71
+   },
+   "inverse": {
+    "executed": 780,
+    "percent": 46.18
+   },
+   "union": {
+    "executed": 780,
+    "percent": 46.18
+   }
+  },
+  {
+   "module": "nova/biot/polygonarc.py",
+   "total": 269,
+   "measured": true,
+   "forward": {
+    "executed": 31,
+    "percent": 11.52
+   },
+   "inverse": {
+    "executed": 31,
+    "percent": 11.52
+   },
+   "union": {
+    "executed": 31,
+    "percent": 11.52
+   }
+  },
+  {
+   "module": "nova/biot/polysection.py",
+   "total": 285,
+   "measured": true,
+   "forward": {
+    "executed": 93,
+    "percent": 32.63
+   },
+   "inverse": {
+    "executed": 172,
+    "percent": 60.35
+   },
+   "union": {
+    "executed": 172,
+    "percent": 60.35
+   }
+  },
+  {
+   "module": "nova/biot/rangefunction.py",
+   "total": 379,
+   "measured": true,
+   "forward": {
+    "executed": 124,
+    "percent": 32.72
+   },
+   "inverse": {
+    "executed": 226,
+    "percent": 59.63
+   },
+   "union": {
+    "executed": 226,
+    "percent": 59.63
+   }
+  },
+  {
+   "module": "nova/biot/reduce.py",
+   "total": 38,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 23,
+    "percent": 60.53
+   },
+   "union": {
+    "executed": 23,
+    "percent": 60.53
+   }
+  },
+  {
+   "module": "nova/biot/second_moment_kernel.py",
+   "total": 69,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/sectionaverage.py",
+   "total": 126,
+   "measured": true,
+   "forward": {
+    "executed": 19,
+    "percent": 15.08
+   },
+   "inverse": {
+    "executed": 19,
+    "percent": 15.08
+   },
+   "union": {
+    "executed": 19,
+    "percent": 15.08
+   }
+  },
+  {
+   "module": "nova/biot/shape.py",
+   "total": 19,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 19,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 19,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/biot/sheet.py",
+   "total": 818,
+   "measured": true,
+   "forward": {
+    "executed": 105,
+    "percent": 12.84
+   },
+   "inverse": {
+    "executed": 105,
+    "percent": 12.84
+   },
+   "union": {
+    "executed": 105,
+    "percent": 12.84
+   }
+  },
+  {
+   "module": "nova/biot/solve.py",
+   "total": 227,
+   "measured": true,
+   "forward": {
+    "executed": 56,
+    "percent": 24.67
+   },
+   "inverse": {
+    "executed": 155,
+    "percent": 68.28
+   },
+   "union": {
+    "executed": 155,
+    "percent": 68.28
+   }
+  },
+  {
+   "module": "nova/biot/space.py",
+   "total": 161,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 81,
+    "percent": 50.31
+   },
+   "union": {
+    "executed": 81,
+    "percent": 50.31
+   }
+  },
+  {
+   "module": "nova/biot/symmetricelliptic.py",
+   "total": 76,
+   "measured": true,
+   "forward": {
+    "executed": 10,
+    "percent": 13.16
+   },
+   "inverse": {
+    "executed": 10,
+    "percent": 13.16
+   },
+   "union": {
+    "executed": 10,
+    "percent": 13.16
+   }
+  },
+  {
+   "module": "nova/biot/target.py",
+   "total": 319,
+   "measured": true,
+   "forward": {
+    "executed": 100,
+    "percent": 31.35
+   },
+   "inverse": {
+    "executed": 104,
+    "percent": 32.6
+   },
+   "union": {
+    "executed": 104,
+    "percent": 32.6
+   }
+  },
+  {
+   "module": "nova/biot/tiledassembly.py",
+   "total": 1001,
+   "measured": true,
+   "forward": {
+    "executed": 119,
+    "percent": 11.89
+   },
+   "inverse": {
+    "executed": 240,
+    "percent": 23.98
+   },
+   "union": {
+    "executed": 240,
+    "percent": 23.98
+   }
+  },
+  {
+   "module": "nova/biot/toroidalaverage.py",
+   "total": 44,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/toroidalharmonic.py",
+   "total": 372,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/biot/zeta.py",
+   "total": 158,
+   "measured": true,
+   "forward": {
+    "executed": 95,
+    "percent": 60.13
+   },
+   "inverse": {
+    "executed": 95,
+    "percent": 60.13
+   },
+   "union": {
+    "executed": 95,
+    "percent": 60.13
+   }
+  },
+  {
+   "module": "nova/calibrate/__init__.py",
+   "total": 1,
+   "measured": true,
+   "forward": {
+    "executed": 1,
+    "percent": 100.0
+   },
+   "inverse": {
+    "executed": 1,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 1,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/calibrate/correction_model.py",
+   "total": 179,
+   "measured": true,
+   "forward": {
+    "executed": 156,
+    "percent": 87.15
+   },
+   "inverse": {
+    "executed": 156,
+    "percent": 87.15
+   },
+   "union": {
+    "executed": 156,
+    "percent": 87.15
+   }
+  },
+  {
+   "module": "nova/calibrate/correction_set.py",
+   "total": 198,
+   "measured": true,
+   "forward": {
+    "executed": 47,
+    "percent": 23.74
+   },
+   "inverse": {
+    "executed": 47,
+    "percent": 23.74
+   },
+   "union": {
+    "executed": 47,
+    "percent": 23.74
+   }
+  },
+  {
+   "module": "nova/calibrate/corrections.py",
+   "total": 161,
+   "measured": true,
+   "forward": {
+    "executed": 46,
+    "percent": 28.57
+   },
+   "inverse": {
+    "executed": 46,
+    "percent": 28.57
+   },
+   "union": {
+    "executed": 46,
+    "percent": 28.57
+   }
+  },
+  {
+   "module": "nova/calibrate/coupling.py",
+   "total": 127,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/gain.py",
+   "total": 247,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/gain_check.py",
+   "total": 145,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/instrument.py",
+   "total": 151,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/inversion.py",
+   "total": 130,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/localize.py",
+   "total": 90,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/noise.py",
+   "total": 174,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/pair_state.py",
+   "total": 70,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/partial.py",
+   "total": 58,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/scale_step.py",
+   "total": 237,
+   "measured": true,
+   "forward": {
+    "executed": 120,
+    "percent": 50.63
+   },
+   "inverse": {
+    "executed": 120,
+    "percent": 50.63
+   },
+   "union": {
+    "executed": 120,
+    "percent": 50.63
+   }
+  },
+  {
+   "module": "nova/calibrate/sweep.py",
+   "total": 393,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/transition.py",
+   "total": 159,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/calibrate/windows.py",
+   "total": 146,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/catalog/__init__.py",
+   "total": 2,
+   "measured": true,
+   "forward": {
+    "executed": 2,
+    "percent": 100.0
+   },
+   "inverse": {
+    "executed": 2,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 2,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/catalog/mast_geometry.py",
+   "total": 585,
+   "measured": true,
+   "forward": {
+    "executed": 210,
+    "percent": 35.9
+   },
+   "inverse": {
+    "executed": 210,
+    "percent": 35.9
+   },
+   "union": {
+    "executed": 210,
+    "percent": 35.9
+   }
+  },
+  {
+   "module": "nova/circuit/__init__.py",
+   "total": 5,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/circuit/conductor.py",
+   "total": 179,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/circuit/coupled_plant.py",
+   "total": 182,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/circuit/linkage.py",
+   "total": 137,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/circuit/passive.py",
+   "total": 447,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/circuit/propagate.py",
+   "total": 81,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/circuit/resistance.py",
+   "total": 290,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/circuit/screening.py",
+   "total": 222,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/control/__init__.py",
+   "total": 6,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 5,
+    "percent": 83.33
+   },
+   "union": {
+    "executed": 5,
+    "percent": 83.33
+   }
+  },
+  {
+   "module": "nova/control/circuit.py",
+   "total": 138,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/control/control.py",
+   "total": 34,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 24,
+    "percent": 70.59
+   },
+   "union": {
+    "executed": 24,
+    "percent": 70.59
+   }
+  },
+  {
+   "module": "nova/database/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/database/connect.py",
+   "total": 13,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/database/connectssh.py",
+   "total": 15,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/database/connectuda.py",
+   "total": 16,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/database/content_store.py",
+   "total": 446,
+   "measured": true,
+   "forward": {
+    "executed": 48,
+    "percent": 10.76
+   },
+   "inverse": {
+    "executed": 48,
+    "percent": 10.76
+   },
+   "union": {
+    "executed": 48,
+    "percent": 10.76
+   }
+  },
+  {
+   "module": "nova/database/datafile.py",
+   "total": 18,
+   "measured": true,
+   "forward": {
+    "executed": 9,
+    "percent": 50.0
+   },
+   "inverse": {
+    "executed": 9,
+    "percent": 50.0
+   },
+   "union": {
+    "executed": 9,
+    "percent": 50.0
+   }
+  },
+  {
+   "module": "nova/database/filepath.py",
+   "total": 325,
+   "measured": true,
+   "forward": {
+    "executed": 105,
+    "percent": 32.31
+   },
+   "inverse": {
+    "executed": 157,
+    "percent": 48.31
+   },
+   "union": {
+    "executed": 157,
+    "percent": 48.31
+   }
+  },
+  {
+   "module": "nova/database/layer_fetch.py",
+   "total": 105,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/database/netcdf.py",
+   "total": 82,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 16,
+    "percent": 19.51
+   },
+   "union": {
+    "executed": 16,
+    "percent": 19.51
+   }
+  },
+  {
+   "module": "nova/database/scripts.py",
+   "total": 38,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/database/zarrstore.py",
+   "total": 93,
+   "measured": true,
+   "forward": {
+    "executed": 30,
+    "percent": 32.26
+   },
+   "inverse": {
+    "executed": 30,
+    "percent": 32.26
+   },
+   "union": {
+    "executed": 30,
+    "percent": 32.26
+   }
+  },
+  {
+   "module": "nova/datachain/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/datachain/ccfe_uda.py",
+   "total": 10,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/datachain/diagnostic.py",
+   "total": 33,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/datachain/magnetic_signals.py",
+   "total": 167,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/datachain/uda.py",
+   "total": 169,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/datachain/uda_benchmark.py",
+   "total": 26,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/dataset/__init__.py",
+   "total": 2,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/dataset/access.py",
+   "total": 19,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/dataset/extensions.py",
+   "total": 9,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/dataset/geometry.py",
+   "total": 8,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/definitions.py",
+   "total": 3,
+   "measured": true,
+   "forward": {
+    "executed": 3,
+    "percent": 100.0
+   },
+   "inverse": {
+    "executed": 3,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 3,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/diagnostics/__init__.py",
+   "total": 2,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/diagnostics/thomson.py",
+   "total": 205,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/diagnostics/thomson_edge.py",
+   "total": 73,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/__init__.py",
+   "total": 33,
+   "measured": true,
+   "forward": {
+    "executed": 12,
+    "percent": 36.36
+   },
+   "inverse": {
+    "executed": 12,
+    "percent": 36.36
+   },
+   "union": {
+    "executed": 12,
+    "percent": 36.36
+   }
+  },
+  {
+   "module": "nova/equilibrium/analytic_single_null.py",
+   "total": 270,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/batched_labeller.py",
+   "total": 270,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/boundary_comparison.py",
+   "total": 124,
+   "measured": true,
+   "forward": {
+    "executed": 14,
+    "percent": 11.29
+   },
+   "inverse": {
+    "executed": 14,
+    "percent": 11.29
+   },
+   "union": {
+    "executed": 14,
+    "percent": 11.29
+   }
+  },
+  {
+   "module": "nova/equilibrium/branch_selection.py",
+   "total": 225,
+   "measured": true,
+   "forward": {
+    "executed": 111,
+    "percent": 49.33
+   },
+   "inverse": {
+    "executed": 111,
+    "percent": 49.33
+   },
+   "union": {
+    "executed": 111,
+    "percent": 49.33
+   }
+  },
+  {
+   "module": "nova/equilibrium/cell_partition.py",
+   "total": 99,
+   "measured": true,
+   "forward": {
+    "executed": 21,
+    "percent": 21.21
+   },
+   "inverse": {
+    "executed": 21,
+    "percent": 21.21
+   },
+   "union": {
+    "executed": 21,
+    "percent": 21.21
+   }
+  },
+  {
+   "module": "nova/equilibrium/clip_quadrature.py",
+   "total": 478,
+   "measured": true,
+   "forward": {
+    "executed": 80,
+    "percent": 16.74
+   },
+   "inverse": {
+    "executed": 80,
+    "percent": 16.74
+   },
+   "union": {
+    "executed": 80,
+    "percent": 16.74
+   }
+  },
+  {
+   "module": "nova/equilibrium/coefficient_carrier.py",
+   "total": 160,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/cold_seed.py",
+   "total": 97,
+   "measured": true,
+   "forward": {
+    "executed": 64,
+    "percent": 65.98
+   },
+   "inverse": {
+    "executed": 64,
+    "percent": 65.98
+   },
+   "union": {
+    "executed": 64,
+    "percent": 65.98
+   }
+  },
+  {
+   "module": "nova/equilibrium/conductor_current.py",
+   "total": 260,
+   "measured": true,
+   "forward": {
+    "executed": 90,
+    "percent": 34.62
+   },
+   "inverse": {
+    "executed": 90,
+    "percent": 34.62
+   },
+   "union": {
+    "executed": 90,
+    "percent": 34.62
+   }
+  },
+  {
+   "module": "nova/equilibrium/connectivity_boundary.py",
+   "total": 895,
+   "measured": true,
+   "forward": {
+    "executed": 617,
+    "percent": 68.94
+   },
+   "inverse": {
+    "executed": 713,
+    "percent": 79.66
+   },
+   "union": {
+    "executed": 713,
+    "percent": 79.66
+   }
+  },
+  {
+   "module": "nova/equilibrium/conservation.py",
+   "total": 145,
+   "measured": true,
+   "forward": {
+    "executed": 140,
+    "percent": 96.55
+   },
+   "inverse": {
+    "executed": 140,
+    "percent": 96.55
+   },
+   "union": {
+    "executed": 140,
+    "percent": 96.55
+   }
+  },
+  {
+   "module": "nova/equilibrium/constraint.py",
+   "total": 901,
+   "measured": true,
+   "forward": {
+    "executed": 322,
+    "percent": 35.74
+   },
+   "inverse": {
+    "executed": 322,
+    "percent": 35.74
+   },
+   "union": {
+    "executed": 322,
+    "percent": 35.74
+   }
+  },
+  {
+   "module": "nova/equilibrium/continuation.py",
+   "total": 208,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/contour_tree.py",
+   "total": 294,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/contour_tree_mesh.py",
+   "total": 223,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/convention.py",
+   "total": 19,
+   "measured": true,
+   "forward": {
+    "executed": 18,
+    "percent": 94.74
+   },
+   "inverse": {
+    "executed": 18,
+    "percent": 94.74
+   },
+   "union": {
+    "executed": 18,
+    "percent": 94.74
+   }
+  },
+  {
+   "module": "nova/equilibrium/current.py",
+   "total": 403,
+   "measured": true,
+   "forward": {
+    "executed": 42,
+    "percent": 10.42
+   },
+   "inverse": {
+    "executed": 42,
+    "percent": 10.42
+   },
+   "union": {
+    "executed": 42,
+    "percent": 10.42
+   }
+  },
+  {
+   "module": "nova/equilibrium/diagnostics.py",
+   "total": 123,
+   "measured": true,
+   "forward": {
+    "executed": 31,
+    "percent": 25.2
+   },
+   "inverse": {
+    "executed": 31,
+    "percent": 25.2
+   },
+   "union": {
+    "executed": 31,
+    "percent": 25.2
+   }
+  },
+  {
+   "module": "nova/equilibrium/display_flux.py",
+   "total": 159,
+   "measured": true,
+   "forward": {
+    "executed": 49,
+    "percent": 30.82
+   },
+   "inverse": {
+    "executed": 49,
+    "percent": 30.82
+   },
+   "union": {
+    "executed": 49,
+    "percent": 30.82
+   }
+  },
+  {
+   "module": "nova/equilibrium/domain.py",
+   "total": 66,
+   "measured": true,
+   "forward": {
+    "executed": 58,
+    "percent": 87.88
+   },
+   "inverse": {
+    "executed": 58,
+    "percent": 87.88
+   },
+   "union": {
+    "executed": 58,
+    "percent": 87.88
+   }
+  },
+  {
+   "module": "nova/equilibrium/drive_continuation.py",
+   "total": 132,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/extraction_lattice.py",
+   "total": 116,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/fixed_point.py",
+   "total": 1739,
+   "measured": true,
+   "forward": {
+    "executed": 1167,
+    "percent": 67.11
+   },
+   "inverse": {
+    "executed": 1167,
+    "percent": 67.11
+   },
+   "union": {
+    "executed": 1167,
+    "percent": 67.11
+   }
+  },
+  {
+   "module": "nova/equilibrium/fixed_points.py",
+   "total": 295,
+   "measured": true,
+   "forward": {
+    "executed": 68,
+    "percent": 23.05
+   },
+   "inverse": {
+    "executed": 68,
+    "percent": 23.05
+   },
+   "union": {
+    "executed": 68,
+    "percent": 23.05
+   }
+  },
+  {
+   "module": "nova/equilibrium/flux_iteration.py",
+   "total": 371,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/flux_surface_connectivity.py",
+   "total": 628,
+   "measured": true,
+   "forward": {
+    "executed": 440,
+    "percent": 70.06
+   },
+   "inverse": {
+    "executed": 440,
+    "percent": 70.06
+   },
+   "union": {
+    "executed": 440,
+    "percent": 70.06
+   }
+  },
+  {
+   "module": "nova/equilibrium/flux_surface_extraction.py",
+   "total": 901,
+   "measured": true,
+   "forward": {
+    "executed": 60,
+    "percent": 6.66
+   },
+   "inverse": {
+    "executed": 60,
+    "percent": 6.66
+   },
+   "union": {
+    "executed": 60,
+    "percent": 6.66
+   }
+  },
+  {
+   "module": "nova/equilibrium/flux_surface_geometry.py",
+   "total": 358,
+   "measured": true,
+   "forward": {
+    "executed": 120,
+    "percent": 33.52
+   },
+   "inverse": {
+    "executed": 120,
+    "percent": 33.52
+   },
+   "union": {
+    "executed": 120,
+    "percent": 33.52
+   }
+  },
+  {
+   "module": "nova/equilibrium/forward.py",
+   "total": 1043,
+   "measured": true,
+   "forward": {
+    "executed": 504,
+    "percent": 48.32
+   },
+   "inverse": {
+    "executed": 506,
+    "percent": 48.51
+   },
+   "union": {
+    "executed": 506,
+    "percent": 48.51
+   }
+  },
+  {
+   "module": "nova/equilibrium/forward_operator.py",
+   "total": 1659,
+   "measured": true,
+   "forward": {
+    "executed": 999,
+    "percent": 60.22
+   },
+   "inverse": {
+    "executed": 1006,
+    "percent": 60.64
+   },
+   "union": {
+    "executed": 1006,
+    "percent": 60.64
+   }
+  },
+  {
+   "module": "nova/equilibrium/gs.py",
+   "total": 11,
+   "measured": true,
+   "forward": {
+    "executed": 7,
+    "percent": 63.64
+   },
+   "inverse": {
+    "executed": 7,
+    "percent": 63.64
+   },
+   "union": {
+    "executed": 7,
+    "percent": 63.64
+   }
+  },
+  {
+   "module": "nova/equilibrium/harmonic.py",
+   "total": 235,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/internal_inductance.py",
+   "total": 33,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/inverse.py",
+   "total": 193,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/labels.py",
+   "total": 9,
+   "measured": true,
+   "forward": {
+    "executed": 9,
+    "percent": 100.0
+   },
+   "inverse": {
+    "executed": 9,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 9,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/magnetics_fit.py",
+   "total": 220,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 167,
+    "percent": 75.91
+   },
+   "union": {
+    "executed": 167,
+    "percent": 75.91
+   }
+  },
+  {
+   "module": "nova/equilibrium/manifold_advance.py",
+   "total": 44,
+   "measured": true,
+   "forward": {
+    "executed": 20,
+    "percent": 45.45
+   },
+   "inverse": {
+    "executed": 20,
+    "percent": 45.45
+   },
+   "union": {
+    "executed": 20,
+    "percent": 45.45
+   }
+  },
+  {
+   "module": "nova/equilibrium/map_extraction.py",
+   "total": 211,
+   "measured": true,
+   "forward": {
+    "executed": 59,
+    "percent": 27.96
+   },
+   "inverse": {
+    "executed": 59,
+    "percent": 27.96
+   },
+   "union": {
+    "executed": 59,
+    "percent": 27.96
+   }
+  },
+  {
+   "module": "nova/equilibrium/measurement.py",
+   "total": 98,
+   "measured": true,
+   "forward": {
+    "executed": 29,
+    "percent": 29.59
+   },
+   "inverse": {
+    "executed": 62,
+    "percent": 63.27
+   },
+   "union": {
+    "executed": 62,
+    "percent": 63.27
+   }
+  },
+  {
+   "module": "nova/equilibrium/moment.py",
+   "total": 406,
+   "measured": true,
+   "forward": {
+    "executed": 129,
+    "percent": 31.77
+   },
+   "inverse": {
+    "executed": 129,
+    "percent": 31.77
+   },
+   "union": {
+    "executed": 129,
+    "percent": 31.77
+   }
+  },
+  {
+   "module": "nova/equilibrium/morphology.py",
+   "total": 6,
+   "measured": true,
+   "forward": {
+    "executed": 6,
+    "percent": 100.0
+   },
+   "inverse": {
+    "executed": 6,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 6,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/observable_acceptance.py",
+   "total": 99,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/observation.py",
+   "total": 252,
+   "measured": true,
+   "forward": {
+    "executed": 162,
+    "percent": 64.29
+   },
+   "inverse": {
+    "executed": 162,
+    "percent": 64.29
+   },
+   "union": {
+    "executed": 162,
+    "percent": 64.29
+   }
+  },
+  {
+   "module": "nova/equilibrium/observation_kernels.py",
+   "total": 129,
+   "measured": true,
+   "forward": {
+    "executed": 50,
+    "percent": 38.76
+   },
+   "inverse": {
+    "executed": 84,
+    "percent": 65.12
+   },
+   "union": {
+    "executed": 84,
+    "percent": 65.12
+   }
+  },
+  {
+   "module": "nova/equilibrium/parallel_components.py",
+   "total": 96,
+   "measured": true,
+   "forward": {
+    "executed": 51,
+    "percent": 53.12
+   },
+   "inverse": {
+    "executed": 51,
+    "percent": 53.12
+   },
+   "union": {
+    "executed": 51,
+    "percent": 53.12
+   }
+  },
+  {
+   "module": "nova/equilibrium/profile.py",
+   "total": 304,
+   "measured": true,
+   "forward": {
+    "executed": 92,
+    "percent": 30.26
+   },
+   "inverse": {
+    "executed": 92,
+    "percent": 30.26
+   },
+   "union": {
+    "executed": 92,
+    "percent": 30.26
+   }
+  },
+  {
+   "module": "nova/equilibrium/reconstruction_state.py",
+   "total": 47,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/reduced_newton.py",
+   "total": 1002,
+   "measured": true,
+   "forward": {
+    "executed": 215,
+    "percent": 21.46
+   },
+   "inverse": {
+    "executed": 215,
+    "percent": 21.46
+   },
+   "union": {
+    "executed": 215,
+    "percent": 21.46
+   }
+  },
+  {
+   "module": "nova/equilibrium/rotation.py",
+   "total": 69,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/seed_alignment.py",
+   "total": 14,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/separatrix_branches.py",
+   "total": 178,
+   "measured": true,
+   "forward": {
+    "executed": 18,
+    "percent": 10.11
+   },
+   "inverse": {
+    "executed": 18,
+    "percent": 10.11
+   },
+   "union": {
+    "executed": 18,
+    "percent": 10.11
+   }
+  },
+  {
+   "module": "nova/equilibrium/separatrix_clip.py",
+   "total": 1022,
+   "measured": true,
+   "forward": {
+    "executed": 120,
+    "percent": 11.74
+   },
+   "inverse": {
+    "executed": 120,
+    "percent": 11.74
+   },
+   "union": {
+    "executed": 120,
+    "percent": 11.74
+   }
+  },
+  {
+   "module": "nova/equilibrium/shape_inverse.py",
+   "total": 638,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/sol_closure.py",
+   "total": 91,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/solve.py",
+   "total": 77,
+   "measured": true,
+   "forward": {
+    "executed": 23,
+    "percent": 29.87
+   },
+   "inverse": {
+    "executed": 23,
+    "percent": 29.87
+   },
+   "union": {
+    "executed": 23,
+    "percent": 29.87
+   }
+  },
+  {
+   "module": "nova/equilibrium/solve_request.py",
+   "total": 403,
+   "measured": true,
+   "forward": {
+    "executed": 227,
+    "percent": 56.33
+   },
+   "inverse": {
+    "executed": 231,
+    "percent": 57.32
+   },
+   "union": {
+    "executed": 231,
+    "percent": 57.32
+   }
+  },
+  {
+   "module": "nova/equilibrium/source.py",
+   "total": 320,
+   "measured": true,
+   "forward": {
+    "executed": 215,
+    "percent": 67.19
+   },
+   "inverse": {
+    "executed": 215,
+    "percent": 67.19
+   },
+   "union": {
+    "executed": 215,
+    "percent": 67.19
+   }
+  },
+  {
+   "module": "nova/equilibrium/steering_frames.py",
+   "total": 592,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/equilibrium/stencil_mesh.py",
+   "total": 452,
+   "measured": true,
+   "forward": {
+    "executed": 152,
+    "percent": 33.63
+   },
+   "inverse": {
+    "executed": 152,
+    "percent": 33.63
+   },
+   "union": {
+    "executed": 152,
+    "percent": 33.63
+   }
+  },
+  {
+   "module": "nova/equilibrium/stencil_nulls.py",
+   "total": 625,
+   "measured": true,
+   "forward": {
+    "executed": 594,
+    "percent": 95.04
+   },
+   "inverse": {
+    "executed": 594,
+    "percent": 95.04
+   },
+   "union": {
+    "executed": 594,
+    "percent": 95.04
+   }
+  },
+  {
+   "module": "nova/equilibrium/support_read.py",
+   "total": 839,
+   "measured": true,
+   "forward": {
+    "executed": 93,
+    "percent": 11.08
+   },
+   "inverse": {
+    "executed": 93,
+    "percent": 11.08
+   },
+   "union": {
+    "executed": 93,
+    "percent": 11.08
+   }
+  },
+  {
+   "module": "nova/equilibrium/topology.py",
+   "total": 1594,
+   "measured": true,
+   "forward": {
+    "executed": 518,
+    "percent": 32.5
+   },
+   "inverse": {
+    "executed": 518,
+    "percent": 32.5
+   },
+   "union": {
+    "executed": 518,
+    "percent": 32.5
+   }
+  },
+  {
+   "module": "nova/equilibrium/wall_mask.py",
+   "total": 213,
+   "measured": true,
+   "forward": {
+    "executed": 55,
+    "percent": 25.82
+   },
+   "inverse": {
+    "executed": 55,
+    "percent": 25.82
+   },
+   "union": {
+    "executed": 55,
+    "percent": 25.82
+   }
+  },
+  {
+   "module": "nova/field/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/field/elm_3d_field.py",
+   "total": 14,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/field/elm_inductance.py",
+   "total": 18,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/field/errorfield.py",
+   "total": 136,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/field/gpec_benchmark.py",
+   "total": 77,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/__init__.py",
+   "total": 16,
+   "measured": true,
+   "forward": {
+    "executed": 10,
+    "percent": 62.5
+   },
+   "inverse": {
+    "executed": 10,
+    "percent": 62.5
+   },
+   "union": {
+    "executed": 10,
+    "percent": 62.5
+   }
+  },
+  {
+   "module": "nova/frame/arraylocindexer.py",
+   "total": 42,
+   "measured": true,
+   "forward": {
+    "executed": 12,
+    "percent": 28.57
+   },
+   "inverse": {
+    "executed": 16,
+    "percent": 38.1
+   },
+   "union": {
+    "executed": 16,
+    "percent": 38.1
+   }
+  },
+  {
+   "module": "nova/frame/coil.py",
+   "total": 52,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 50,
+    "percent": 96.15
+   },
+   "union": {
+    "executed": 50,
+    "percent": 96.15
+   }
+  },
+  {
+   "module": "nova/frame/coilset.py",
+   "total": 110,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 72,
+    "percent": 65.45
+   },
+   "union": {
+    "executed": 72,
+    "percent": 65.45
+   }
+  },
+  {
+   "module": "nova/frame/coilsetattrs.py",
+   "total": 67,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 65,
+    "percent": 97.01
+   },
+   "union": {
+    "executed": 65,
+    "percent": 97.01
+   }
+  },
+  {
+   "module": "nova/frame/columnar.py",
+   "total": 165,
+   "measured": true,
+   "forward": {
+    "executed": 39,
+    "percent": 23.64
+   },
+   "inverse": {
+    "executed": 128,
+    "percent": 77.58
+   },
+   "union": {
+    "executed": 128,
+    "percent": 77.58
+   }
+  },
+  {
+   "module": "nova/frame/dataarray.py",
+   "total": 28,
+   "measured": true,
+   "forward": {
+    "executed": 20,
+    "percent": 71.43
+   },
+   "inverse": {
+    "executed": 23,
+    "percent": 82.14
+   },
+   "union": {
+    "executed": 23,
+    "percent": 82.14
+   }
+  },
+  {
+   "module": "nova/frame/dataframe.py",
+   "total": 409,
+   "measured": true,
+   "forward": {
+    "executed": 83,
+    "percent": 20.29
+   },
+   "inverse": {
+    "executed": 281,
+    "percent": 68.7
+   },
+   "union": {
+    "executed": 281,
+    "percent": 68.7
+   }
+  },
+  {
+   "module": "nova/frame/energize.py",
+   "total": 8,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 8,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 8,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/frame/error.py",
+   "total": 15,
+   "measured": true,
+   "forward": {
+    "executed": 10,
+    "percent": 66.67
+   },
+   "inverse": {
+    "executed": 11,
+    "percent": 73.33
+   },
+   "union": {
+    "executed": 11,
+    "percent": 73.33
+   }
+  },
+  {
+   "module": "nova/frame/ferritic.py",
+   "total": 292,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/firstwall.py",
+   "total": 81,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/frame.py",
+   "total": 48,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 38,
+    "percent": 79.17
+   },
+   "union": {
+    "executed": 38,
+    "percent": 79.17
+   }
+  },
+  {
+   "module": "nova/frame/framedata.py",
+   "total": 74,
+   "measured": true,
+   "forward": {
+    "executed": 24,
+    "percent": 32.43
+   },
+   "inverse": {
+    "executed": 43,
+    "percent": 58.11
+   },
+   "union": {
+    "executed": 43,
+    "percent": 58.11
+   }
+  },
+  {
+   "module": "nova/frame/framelink.py",
+   "total": 220,
+   "measured": true,
+   "forward": {
+    "executed": 39,
+    "percent": 17.73
+   },
+   "inverse": {
+    "executed": 146,
+    "percent": 66.36
+   },
+   "union": {
+    "executed": 146,
+    "percent": 66.36
+   }
+  },
+  {
+   "module": "nova/frame/frameset.py",
+   "total": 96,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 54,
+    "percent": 56.25
+   },
+   "union": {
+    "executed": 54,
+    "percent": 56.25
+   }
+  },
+  {
+   "module": "nova/frame/framesetloc.py",
+   "total": 177,
+   "measured": true,
+   "forward": {
+    "executed": 80,
+    "percent": 45.2
+   },
+   "inverse": {
+    "executed": 129,
+    "percent": 72.88
+   },
+   "union": {
+    "executed": 129,
+    "percent": 72.88
+   }
+  },
+  {
+   "module": "nova/frame/framespace.py",
+   "total": 75,
+   "measured": true,
+   "forward": {
+    "executed": 24,
+    "percent": 32.0
+   },
+   "inverse": {
+    "executed": 60,
+    "percent": 80.0
+   },
+   "union": {
+    "executed": 60,
+    "percent": 80.0
+   }
+  },
+  {
+   "module": "nova/frame/indexer.py",
+   "total": 111,
+   "measured": true,
+   "forward": {
+    "executed": 30,
+    "percent": 27.03
+   },
+   "inverse": {
+    "executed": 72,
+    "percent": 64.86
+   },
+   "union": {
+    "executed": 72,
+    "percent": 64.86
+   }
+  },
+  {
+   "module": "nova/frame/iron.py",
+   "total": 47,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/itergeom.py",
+   "total": 70,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/machinedata.py",
+   "total": 209,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/metadata.py",
+   "total": 48,
+   "measured": true,
+   "forward": {
+    "executed": 15,
+    "percent": 31.25
+   },
+   "inverse": {
+    "executed": 37,
+    "percent": 77.08
+   },
+   "union": {
+    "executed": 37,
+    "percent": 77.08
+   }
+  },
+  {
+   "module": "nova/frame/metaframe.py",
+   "total": 64,
+   "measured": true,
+   "forward": {
+    "executed": 33,
+    "percent": 51.56
+   },
+   "inverse": {
+    "executed": 54,
+    "percent": 84.38
+   },
+   "union": {
+    "executed": 54,
+    "percent": 84.38
+   }
+  },
+  {
+   "module": "nova/frame/metamethod.py",
+   "total": 112,
+   "measured": true,
+   "forward": {
+    "executed": 83,
+    "percent": 74.11
+   },
+   "inverse": {
+    "executed": 110,
+    "percent": 98.21
+   },
+   "union": {
+    "executed": 110,
+    "percent": 98.21
+   }
+  },
+  {
+   "module": "nova/frame/multipoint.py",
+   "total": 139,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 83,
+    "percent": 59.71
+   },
+   "union": {
+    "executed": 83,
+    "percent": 59.71
+   }
+  },
+  {
+   "module": "nova/frame/plasmaloc.py",
+   "total": 59,
+   "measured": true,
+   "forward": {
+    "executed": 36,
+    "percent": 61.02
+   },
+   "inverse": {
+    "executed": 36,
+    "percent": 61.02
+   },
+   "union": {
+    "executed": 36,
+    "percent": 61.02
+   }
+  },
+  {
+   "module": "nova/frame/poloidalgrid.py",
+   "total": 40,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 36,
+    "percent": 90.0
+   },
+   "union": {
+    "executed": 36,
+    "percent": 90.0
+   }
+  },
+  {
+   "module": "nova/frame/polygeo.py",
+   "total": 44,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 24,
+    "percent": 54.55
+   },
+   "union": {
+    "executed": 24,
+    "percent": 54.55
+   }
+  },
+  {
+   "module": "nova/frame/polygrid.py",
+   "total": 203,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 156,
+    "percent": 76.85
+   },
+   "union": {
+    "executed": 156,
+    "percent": 76.85
+   }
+  },
+  {
+   "module": "nova/frame/polyplot.py",
+   "total": 71,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 37,
+    "percent": 52.11
+   },
+   "union": {
+    "executed": 37,
+    "percent": 52.11
+   }
+  },
+  {
+   "module": "nova/frame/select.py",
+   "total": 85,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 82,
+    "percent": 96.47
+   },
+   "union": {
+    "executed": 82,
+    "percent": 96.47
+   }
+  },
+  {
+   "module": "nova/frame/shell.py",
+   "total": 26,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/shellgrid.py",
+   "total": 122,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/subspace.py",
+   "total": 49,
+   "measured": true,
+   "forward": {
+    "executed": 16,
+    "percent": 32.65
+   },
+   "inverse": {
+    "executed": 48,
+    "percent": 97.96
+   },
+   "union": {
+    "executed": 48,
+    "percent": 97.96
+   }
+  },
+  {
+   "module": "nova/frame/timeseries.py",
+   "total": 66,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/turn.py",
+   "total": 55,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/vde.py",
+   "total": 251,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/frame/vtkgeo.py",
+   "total": 56,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 28,
+    "percent": 50.0
+   },
+   "union": {
+    "executed": 28,
+    "percent": 50.0
+   }
+  },
+  {
+   "module": "nova/frame/vtkplot.py",
+   "total": 41,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 18,
+    "percent": 43.9
+   },
+   "union": {
+    "executed": 18,
+    "percent": 43.9
+   }
+  },
+  {
+   "module": "nova/frame/winding.py",
+   "total": 68,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/centerline.py",
+   "total": 154,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/curve.py",
+   "total": 241,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/frenet.py",
+   "total": 107,
+   "measured": true,
+   "forward": {
+    "executed": 37,
+    "percent": 34.58
+   },
+   "inverse": {
+    "executed": 37,
+    "percent": 34.58
+   },
+   "union": {
+    "executed": 37,
+    "percent": 34.58
+   }
+  },
+  {
+   "module": "nova/geometry/geoframe.py",
+   "total": 18,
+   "measured": true,
+   "forward": {
+    "executed": 13,
+    "percent": 72.22
+   },
+   "inverse": {
+    "executed": 14,
+    "percent": 77.78
+   },
+   "union": {
+    "executed": 14,
+    "percent": 77.78
+   }
+  },
+  {
+   "module": "nova/geometry/hexstencil.py",
+   "total": 8,
+   "measured": true,
+   "forward": {
+    "executed": 8,
+    "percent": 100.0
+   },
+   "inverse": {
+    "executed": 8,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 8,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/geometry/kdtree.py",
+   "total": 51,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/line.py",
+   "total": 50,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/plasmapoints.py",
+   "total": 290,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/plasmaprofile.py",
+   "total": 97,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/pointloop.py",
+   "total": 38,
+   "measured": true,
+   "forward": {
+    "executed": 11,
+    "percent": 28.95
+   },
+   "inverse": {
+    "executed": 11,
+    "percent": 28.95
+   },
+   "union": {
+    "executed": 11,
+    "percent": 28.95
+   }
+  },
+  {
+   "module": "nova/geometry/polyframe.py",
+   "total": 79,
+   "measured": true,
+   "forward": {
+    "executed": 43,
+    "percent": 54.43
+   },
+   "inverse": {
+    "executed": 55,
+    "percent": 69.62
+   },
+   "union": {
+    "executed": 55,
+    "percent": 69.62
+   }
+  },
+  {
+   "module": "nova/geometry/polygen.py",
+   "total": 68,
+   "measured": true,
+   "forward": {
+    "executed": 28,
+    "percent": 41.18
+   },
+   "inverse": {
+    "executed": 32,
+    "percent": 47.06
+   },
+   "union": {
+    "executed": 32,
+    "percent": 47.06
+   }
+  },
+  {
+   "module": "nova/geometry/polygeom.py",
+   "total": 98,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 76,
+    "percent": 77.55
+   },
+   "union": {
+    "executed": 76,
+    "percent": 77.55
+   }
+  },
+  {
+   "module": "nova/geometry/polygon.py",
+   "total": 82,
+   "measured": true,
+   "forward": {
+    "executed": 17,
+    "percent": 20.73
+   },
+   "inverse": {
+    "executed": 53,
+    "percent": 64.63
+   },
+   "union": {
+    "executed": 53,
+    "percent": 64.63
+   }
+  },
+  {
+   "module": "nova/geometry/polyline.py",
+   "total": 404,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/polyshape.py",
+   "total": 17,
+   "measured": true,
+   "forward": {
+    "executed": 9,
+    "percent": 52.94
+   },
+   "inverse": {
+    "executed": 14,
+    "percent": 82.35
+   },
+   "union": {
+    "executed": 14,
+    "percent": 82.35
+   }
+  },
+  {
+   "module": "nova/geometry/quadrant.py",
+   "total": 58,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/rdp.py",
+   "total": 57,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/rotate.py",
+   "total": 97,
+   "measured": true,
+   "forward": {
+    "executed": 11,
+    "percent": 11.34
+   },
+   "inverse": {
+    "executed": 11,
+    "percent": 11.34
+   },
+   "union": {
+    "executed": 11,
+    "percent": 11.34
+   }
+  },
+  {
+   "module": "nova/geometry/section.py",
+   "total": 113,
+   "measured": true,
+   "forward": {
+    "executed": 29,
+    "percent": 25.66
+   },
+   "inverse": {
+    "executed": 49,
+    "percent": 43.36
+   },
+   "union": {
+    "executed": 49,
+    "percent": 43.36
+   }
+  },
+  {
+   "module": "nova/geometry/select.py",
+   "total": 216,
+   "measured": true,
+   "forward": {
+    "executed": 57,
+    "percent": 26.39
+   },
+   "inverse": {
+    "executed": 57,
+    "percent": 26.39
+   },
+   "union": {
+    "executed": 57,
+    "percent": 26.39
+   }
+  },
+  {
+   "module": "nova/geometry/strike.py",
+   "total": 49,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/volume.py",
+   "total": 225,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/geometry/vtkgen.py",
+   "total": 13,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/graphics/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/graphics/addtext.py",
+   "total": 108,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/graphics/bokeh.py",
+   "total": 146,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/graphics/line.py",
+   "total": 22,
+   "measured": true,
+   "forward": {
+    "executed": 15,
+    "percent": 68.18
+   },
+   "inverse": {
+    "executed": 15,
+    "percent": 68.18
+   },
+   "union": {
+    "executed": 15,
+    "percent": 68.18
+   }
+  },
+  {
+   "module": "nova/graphics/plot.py",
+   "total": 456,
+   "measured": true,
+   "forward": {
+    "executed": 151,
+    "percent": 33.11
+   },
+   "inverse": {
+    "executed": 151,
+    "percent": 33.11
+   },
+   "union": {
+    "executed": 151,
+    "percent": 33.11
+   }
+  },
+  {
+   "module": "nova/graphics/png_tools.py",
+   "total": 253,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/graphics/polyfill.py",
+   "total": 24,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/graphics/pyplot.py",
+   "total": 148,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/__init__.py",
+   "total": 8,
+   "measured": true,
+   "forward": {
+    "executed": 4,
+    "percent": 50.0
+   },
+   "inverse": {
+    "executed": 4,
+    "percent": 50.0
+   },
+   "union": {
+    "executed": 4,
+    "percent": 50.0
+   }
+  },
+  {
+   "module": "nova/imas/autocomplete.py",
+   "total": 57,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/callstate.py",
+   "total": 18,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/coil.py",
+   "total": 46,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/coils_non_axisymmetric.py",
+   "total": 158,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/connect.py",
+   "total": 139,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/contour_tree.py",
+   "total": 16,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/contour_tree_layout.py",
+   "total": 17,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/current.py",
+   "total": 52,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/database.py",
+   "total": 89,
+   "measured": true,
+   "forward": {
+    "executed": 30,
+    "percent": 33.71
+   },
+   "inverse": {
+    "executed": 50,
+    "percent": 56.18
+   },
+   "union": {
+    "executed": 50,
+    "percent": 56.18
+   }
+  },
+  {
+   "module": "nova/imas/dataset.py",
+   "total": 292,
+   "measured": true,
+   "forward": {
+    "executed": 119,
+    "percent": 40.75
+   },
+   "inverse": {
+    "executed": 177,
+    "percent": 60.62
+   },
+   "union": {
+    "executed": 177,
+    "percent": 60.62
+   }
+  },
+  {
+   "module": "nova/imas/datasource.py",
+   "total": 66,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/decimate.py",
+   "total": 95,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/diiid_current.py",
+   "total": 88,
+   "measured": true,
+   "forward": {
+    "executed": 27,
+    "percent": 30.68
+   },
+   "inverse": {
+    "executed": 27,
+    "percent": 30.68
+   },
+   "union": {
+    "executed": 27,
+    "percent": 30.68
+   }
+  },
+  {
+   "module": "nova/imas/diiid_description.py",
+   "total": 598,
+   "measured": true,
+   "forward": {
+    "executed": 194,
+    "percent": 32.44
+   },
+   "inverse": {
+    "executed": 194,
+    "percent": 32.44
+   },
+   "union": {
+    "executed": 194,
+    "percent": 32.44
+   }
+  },
+  {
+   "module": "nova/imas/diiid_machine_ids.py",
+   "total": 389,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/diiid_passive.py",
+   "total": 266,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/edge_consistency.py",
+   "total": 60,
+   "measured": true,
+   "forward": {
+    "executed": 21,
+    "percent": 35.0
+   },
+   "inverse": {
+    "executed": 21,
+    "percent": 35.0
+   },
+   "union": {
+    "executed": 21,
+    "percent": 35.0
+   }
+  },
+  {
+   "module": "nova/imas/ensemble.py",
+   "total": 58,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/equilibrium.py",
+   "total": 450,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/extrapolate.py",
+   "total": 168,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/flux.py",
+   "total": 28,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/fuse.py",
+   "total": 7,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/getslice.py",
+   "total": 103,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/ids_entry.py",
+   "total": 14,
+   "measured": true,
+   "forward": {
+    "executed": 10,
+    "percent": 71.43
+   },
+   "inverse": {
+    "executed": 10,
+    "percent": 71.43
+   },
+   "union": {
+    "executed": 10,
+    "percent": 71.43
+   }
+  },
+  {
+   "module": "nova/imas/ids_index.py",
+   "total": 196,
+   "measured": true,
+   "forward": {
+    "executed": 44,
+    "percent": 22.45
+   },
+   "inverse": {
+    "executed": 44,
+    "percent": 22.45
+   },
+   "union": {
+    "executed": 44,
+    "percent": 22.45
+   }
+  },
+  {
+   "module": "nova/imas/io_magnetics.py",
+   "total": 102,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/machine.py",
+   "total": 1158,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/machine_artifact.py",
+   "total": 343,
+   "measured": true,
+   "forward": {
+    "executed": 118,
+    "percent": 34.4
+   },
+   "inverse": {
+    "executed": 118,
+    "percent": 34.4
+   },
+   "union": {
+    "executed": 118,
+    "percent": 34.4
+   }
+  },
+  {
+   "module": "nova/imas/machine_drive.py",
+   "total": 136,
+   "measured": true,
+   "forward": {
+    "executed": 52,
+    "percent": 38.24
+   },
+   "inverse": {
+    "executed": 52,
+    "percent": 38.24
+   },
+   "union": {
+    "executed": 52,
+    "percent": 38.24
+   }
+  },
+  {
+   "module": "nova/imas/machine_evidence.py",
+   "total": 222,
+   "measured": true,
+   "forward": {
+    "executed": 81,
+    "percent": 36.49
+   },
+   "inverse": {
+    "executed": 81,
+    "percent": 36.49
+   },
+   "union": {
+    "executed": 81,
+    "percent": 36.49
+   }
+  },
+  {
+   "module": "nova/imas/magnetic_diagnostics.py",
+   "total": 41,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/magnetics.py",
+   "total": 49,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_acquisition_scale.py",
+   "total": 2,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_array_amplitude.py",
+   "total": 111,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_block_scale.py",
+   "total": 292,
+   "measured": true,
+   "forward": {
+    "executed": 134,
+    "percent": 45.89
+   },
+   "inverse": {
+    "executed": 134,
+    "percent": 45.89
+   },
+   "union": {
+    "executed": 134,
+    "percent": 45.89
+   }
+  },
+  {
+   "module": "nova/imas/mast_calibration_cohort.py",
+   "total": 200,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_chain_factory.py",
+   "total": 162,
+   "measured": true,
+   "forward": {
+    "executed": 49,
+    "percent": 30.25
+   },
+   "inverse": {
+    "executed": 49,
+    "percent": 30.25
+   },
+   "union": {
+    "executed": 49,
+    "percent": 30.25
+   }
+  },
+  {
+   "module": "nova/imas/mast_channel_drive.py",
+   "total": 144,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_corrections.py",
+   "total": 27,
+   "measured": true,
+   "forward": {
+    "executed": 15,
+    "percent": 55.56
+   },
+   "inverse": {
+    "executed": 15,
+    "percent": 55.56
+   },
+   "union": {
+    "executed": 15,
+    "percent": 55.56
+   }
+  },
+  {
+   "module": "nova/imas/mast_efit_referee.py",
+   "total": 520,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_error_field_screen.py",
+   "total": 318,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_fitted_parameters.py",
+   "total": 264,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_flux_loop_adjudication.py",
+   "total": 554,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_geometry.py",
+   "total": 292,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_misfit_harmonics.py",
+   "total": 468,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_parity_chain.py",
+   "total": 285,
+   "measured": true,
+   "forward": {
+    "executed": 108,
+    "percent": 37.89
+   },
+   "inverse": {
+    "executed": 108,
+    "percent": 37.89
+   },
+   "union": {
+    "executed": 108,
+    "percent": 37.89
+   }
+  },
+  {
+   "module": "nova/imas/mast_parity_gate.py",
+   "total": 514,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_passive_decay_modes.py",
+   "total": 459,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_passive_inductance.py",
+   "total": 180,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_passive_response.py",
+   "total": 270,
+   "measured": true,
+   "forward": {
+    "executed": 67,
+    "percent": 24.81
+   },
+   "inverse": {
+    "executed": 67,
+    "percent": 24.81
+   },
+   "union": {
+    "executed": 67,
+    "percent": 24.81
+   }
+  },
+  {
+   "module": "nova/imas/mast_probe_calibration.py",
+   "total": 379,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_probe_discriminant.py",
+   "total": 106,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_seed_parameters.py",
+   "total": 144,
+   "measured": true,
+   "forward": {
+    "executed": 77,
+    "percent": 53.47
+   },
+   "inverse": {
+    "executed": 77,
+    "percent": 53.47
+   },
+   "union": {
+    "executed": 77,
+    "percent": 53.47
+   }
+  },
+  {
+   "module": "nova/imas/mast_sensor_noise.py",
+   "total": 2,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/mast_solve_input_ids.py",
+   "total": 167,
+   "measured": true,
+   "forward": {
+    "executed": 50,
+    "percent": 29.94
+   },
+   "inverse": {
+    "executed": 50,
+    "percent": 29.94
+   },
+   "union": {
+    "executed": 50,
+    "percent": 29.94
+   }
+  },
+  {
+   "module": "nova/imas/mast_solve_inputs.py",
+   "total": 426,
+   "measured": true,
+   "forward": {
+    "executed": 124,
+    "percent": 29.11
+   },
+   "inverse": {
+    "executed": 124,
+    "percent": 29.11
+   },
+   "union": {
+    "executed": 124,
+    "percent": 29.11
+   }
+  },
+  {
+   "module": "nova/imas/mast_vacuum_cohort.py",
+   "total": 508,
+   "measured": true,
+   "forward": {
+    "executed": 173,
+    "percent": 34.06
+   },
+   "inverse": {
+    "executed": 173,
+    "percent": 34.06
+   },
+   "union": {
+    "executed": 173,
+    "percent": 34.06
+   }
+  },
+  {
+   "module": "nova/imas/mast_vacuum_response.py",
+   "total": 547,
+   "measured": true,
+   "forward": {
+    "executed": 203,
+    "percent": 37.11
+   },
+   "inverse": {
+    "executed": 203,
+    "percent": 37.11
+   },
+   "union": {
+    "executed": 203,
+    "percent": 37.11
+   }
+  },
+  {
+   "module": "nova/imas/mast_winding_lattice.py",
+   "total": 422,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/matrix.py",
+   "total": 79,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/metadata.py",
+   "total": 113,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/operate.py",
+   "total": 40,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/parity_tolerances.py",
+   "total": 119,
+   "measured": true,
+   "forward": {
+    "executed": 85,
+    "percent": 71.43
+   },
+   "inverse": {
+    "executed": 85,
+    "percent": 71.43
+   },
+   "union": {
+    "executed": 85,
+    "percent": 71.43
+   }
+  },
+  {
+   "module": "nova/imas/pf_active.py",
+   "total": 32,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/pf_passive.py",
+   "total": 21,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/plasma_source.py",
+   "total": 109,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/prescribed_plasma.py",
+   "total": 52,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/profiles.py",
+   "total": 160,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/pulsedesign.py",
+   "total": 330,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/pulseprofile.py",
+   "total": 89,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/pulseschedule.py",
+   "total": 149,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/sample.py",
+   "total": 260,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/scenario.py",
+   "total": 74,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/scripts.py",
+   "total": 50,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/test_ssh.py",
+   "total": 19,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/test_utilities.py",
+   "total": 17,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 14,
+    "percent": 82.35
+   },
+   "union": {
+    "executed": 14,
+    "percent": 82.35
+   }
+  },
+  {
+   "module": "nova/imas/toroidal_field_coil.py",
+   "total": 44,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/transient.py",
+   "total": 12,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/uri.py",
+   "total": 52,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/validator_case.py",
+   "total": 123,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/imas/waveform.py",
+   "total": 84,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/io/__init__.py",
+   "total": 6,
+   "measured": true,
+   "forward": {
+    "executed": 6,
+    "percent": 100.0
+   },
+   "inverse": {
+    "executed": 6,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 6,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/io/egress.py",
+   "total": 42,
+   "measured": true,
+   "forward": {
+    "executed": 13,
+    "percent": 30.95
+   },
+   "inverse": {
+    "executed": 13,
+    "percent": 30.95
+   },
+   "union": {
+    "executed": 13,
+    "percent": 30.95
+   }
+  },
+  {
+   "module": "nova/io/geqdsk.py",
+   "total": 179,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/io/ingest.py",
+   "total": 51,
+   "measured": true,
+   "forward": {
+    "executed": 21,
+    "percent": 41.18
+   },
+   "inverse": {
+    "executed": 21,
+    "percent": 41.18
+   },
+   "union": {
+    "executed": 21,
+    "percent": 41.18
+   }
+  },
+  {
+   "module": "nova/io/json.py",
+   "total": 24,
+   "measured": true,
+   "forward": {
+    "executed": 7,
+    "percent": 29.17
+   },
+   "inverse": {
+    "executed": 7,
+    "percent": 29.17
+   },
+   "union": {
+    "executed": 7,
+    "percent": 29.17
+   }
+  },
+  {
+   "module": "nova/io/signalstore.py",
+   "total": 61,
+   "measured": true,
+   "forward": {
+    "executed": 22,
+    "percent": 36.07
+   },
+   "inverse": {
+    "executed": 22,
+    "percent": 36.07
+   },
+   "union": {
+    "executed": 22,
+    "percent": 36.07
+   }
+  },
+  {
+   "module": "nova/io/sourcemap.py",
+   "total": 343,
+   "measured": true,
+   "forward": {
+    "executed": 118,
+    "percent": 34.4
+   },
+   "inverse": {
+    "executed": 118,
+    "percent": 34.4
+   },
+   "union": {
+    "executed": 118,
+    "percent": 34.4
+   }
+  },
+  {
+   "module": "nova/io/standardname.py",
+   "total": 59,
+   "measured": true,
+   "forward": {
+    "executed": 34,
+    "percent": 57.63
+   },
+   "inverse": {
+    "executed": 34,
+    "percent": 57.63
+   },
+   "union": {
+    "executed": 34,
+    "percent": 57.63
+   }
+  },
+  {
+   "module": "nova/io/streaming.py",
+   "total": 16,
+   "measured": true,
+   "forward": {
+    "executed": 11,
+    "percent": 68.75
+   },
+   "inverse": {
+    "executed": 11,
+    "percent": 68.75
+   },
+   "union": {
+    "executed": 11,
+    "percent": 68.75
+   }
+  },
+  {
+   "module": "nova/jax/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/jax/config.py",
+   "total": 97,
+   "measured": true,
+   "forward": {
+    "executed": 66,
+    "percent": 68.04
+   },
+   "inverse": {
+    "executed": 67,
+    "percent": 69.07
+   },
+   "union": {
+    "executed": 67,
+    "percent": 69.07
+   }
+  },
+  {
+   "module": "nova/jax/tree_util.py",
+   "total": 10,
+   "measured": true,
+   "forward": {
+    "executed": 9,
+    "percent": 90.0
+   },
+   "inverse": {
+    "executed": 9,
+    "percent": 90.0
+   },
+   "union": {
+    "executed": 9,
+    "percent": 90.0
+   }
+  },
+  {
+   "module": "nova/limits/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/limits/central_solinoid_limit.py",
+   "total": 23,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/limits/poloidal.py",
+   "total": 87,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/limits/tieplate.py",
+   "total": 38,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/linalg/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/linalg/basis.py",
+   "total": 86,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/linalg/decompose.py",
+   "total": 36,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/linalg/fista.py",
+   "total": 9,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/linalg/interpolant.py",
+   "total": 139,
+   "measured": true,
+   "forward": {
+    "executed": 93,
+    "percent": 66.91
+   },
+   "inverse": {
+    "executed": 93,
+    "percent": 66.91
+   },
+   "union": {
+    "executed": 93,
+    "percent": 66.91
+   }
+  },
+  {
+   "module": "nova/linalg/lops.py",
+   "total": 18,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/linalg/regression.py",
+   "total": 106,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/linalg/split_spline.py",
+   "total": 204,
+   "measured": true,
+   "forward": {
+    "executed": 32,
+    "percent": 15.69
+   },
+   "inverse": {
+    "executed": 32,
+    "percent": 15.69
+   },
+   "union": {
+    "executed": 32,
+    "percent": 15.69
+   }
+  },
+  {
+   "module": "nova/linalg/tensor_spline.py",
+   "total": 114,
+   "measured": true,
+   "forward": {
+    "executed": 107,
+    "percent": 93.86
+   },
+   "inverse": {
+    "executed": 107,
+    "percent": 93.86
+   },
+   "union": {
+    "executed": 107,
+    "percent": 93.86
+   }
+  },
+  {
+   "module": "nova/media/__init__.py",
+   "total": 2,
+   "measured": true,
+   "forward": {
+    "executed": 2,
+    "percent": 100.0
+   },
+   "inverse": {
+    "executed": 2,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 2,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/media/gif.py",
+   "total": 77,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/media/ink.py",
+   "total": 79,
+   "measured": true,
+   "forward": {
+    "executed": 64,
+    "percent": 81.01
+   },
+   "inverse": {
+    "executed": 64,
+    "percent": 81.01
+   },
+   "union": {
+    "executed": 64,
+    "percent": 81.01
+   }
+  },
+  {
+   "module": "nova/media/layout.py",
+   "total": 64,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/media/poloidal.py",
+   "total": 240,
+   "measured": true,
+   "forward": {
+    "executed": 23,
+    "percent": 9.58
+   },
+   "inverse": {
+    "executed": 23,
+    "percent": 9.58
+   },
+   "union": {
+    "executed": 23,
+    "percent": 9.58
+   }
+  },
+  {
+   "module": "nova/media/sources/__init__.py",
+   "total": 5,
+   "measured": true,
+   "forward": {
+    "executed": 5,
+    "percent": 100.0
+   },
+   "inverse": {
+    "executed": 5,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 5,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/media/sources/diiid_efit.py",
+   "total": 68,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/media/sources/frame.py",
+   "total": 120,
+   "measured": true,
+   "forward": {
+    "executed": 59,
+    "percent": 49.17
+   },
+   "inverse": {
+    "executed": 59,
+    "percent": 49.17
+   },
+   "union": {
+    "executed": 59,
+    "percent": 49.17
+   }
+  },
+  {
+   "module": "nova/media/sources/mast_efit.py",
+   "total": 50,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/media/sources/mast_thomson.py",
+   "total": 87,
+   "measured": true,
+   "forward": {
+    "executed": 27,
+    "percent": 31.03
+   },
+   "inverse": {
+    "executed": 27,
+    "percent": 31.03
+   },
+   "union": {
+    "executed": 27,
+    "percent": 31.03
+   }
+  },
+  {
+   "module": "nova/media/sources/nova_labels.py",
+   "total": 54,
+   "measured": true,
+   "forward": {
+    "executed": 11,
+    "percent": 20.37
+   },
+   "inverse": {
+    "executed": 11,
+    "percent": 20.37
+   },
+   "union": {
+    "executed": 11,
+    "percent": 20.37
+   }
+  },
+  {
+   "module": "nova/media/sources/plasma_mesh.py",
+   "total": 59,
+   "measured": true,
+   "forward": {
+    "executed": 6,
+    "percent": 10.17
+   },
+   "inverse": {
+    "executed": 6,
+    "percent": 10.17
+   },
+   "union": {
+    "executed": 6,
+    "percent": 10.17
+   }
+  },
+  {
+   "module": "nova/media/sources/pulse_forward.py",
+   "total": 151,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/media/traces.py",
+   "total": 94,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/benchmark.py",
+   "total": 12,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/configure.py",
+   "total": 22,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/diiid_machine_artifact.py",
+   "total": 164,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/identify_source_cocos.py",
+   "total": 646,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/mast_acquisition_sweep.py",
+   "total": 459,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/mast_calibration_experiments.py",
+   "total": 389,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/mast_catalog_geometry.py",
+   "total": 2,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/mast_machine_artifact.py",
+   "total": 35,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/mast_passive_calibration.py",
+   "total": 422,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/mast_vacuum_refinement.py",
+   "total": 278,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/mast_winding_lattice.py",
+   "total": 320,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/scripts/render_misfit_figures.py",
+   "total": 473,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/structural/catenary.py",
+   "total": 102,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/structural/finiteframe.py",
+   "total": 1159,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/structural/properties.py",
+   "total": 138,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/attributes.py",
+   "total": 52,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/cold_test.py",
+   "total": 484,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/frequencyresponse.py",
+   "total": 28,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/lumpedparameter.py",
+   "total": 30,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/naka/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/naka/database.py",
+   "total": 151,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/naka/localdata.py",
+   "total": 14,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/naka/nakadata.py",
+   "total": 59,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/naka/nakaserver.py",
+   "total": 51,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/naka/pipeline.py",
+   "total": 15,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/naka/sampledata.py",
+   "total": 52,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/plotimport.py",
+   "total": 14,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/spectrum.py",
+   "total": 12,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/campaign.py",
+   "total": 276,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/clear.py",
+   "total": 11,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/database.py",
+   "total": 79,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/ensemble.py",
+   "total": 10,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/field.py",
+   "total": 32,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/fitfluid.py",
+   "total": 96,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/fluidmodel.py",
+   "total": 50,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/fluidprofile.py",
+   "total": 176,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/heatindex.py",
+   "total": 46,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/localdata.py",
+   "total": 9,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/model.py",
+   "total": 98,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/phase.py",
+   "total": 51,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/profile.py",
+   "total": 222,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/remotedata.py",
+   "total": 78,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/sample.py",
+   "total": 94,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/sampledata.py",
+   "total": 115,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/sourcedata.py",
+   "total": 73,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/sultandata.py",
+   "total": 57,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/sultanspectrum.py",
+   "total": 46,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/trial.py",
+   "total": 43,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/waveform.py",
+   "total": 186,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/twente/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/thermalhydralic/twente/twentedata.py",
+   "total": 204,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/transport/__init__.py",
+   "total": 9,
+   "measured": true,
+   "forward": {
+    "executed": 9,
+    "percent": 100.0
+   },
+   "inverse": {
+    "executed": 9,
+    "percent": 100.0
+   },
+   "union": {
+    "executed": 9,
+    "percent": 100.0
+   }
+  },
+  {
+   "module": "nova/transport/coupled_window.py",
+   "total": 727,
+   "measured": true,
+   "forward": {
+    "executed": 247,
+    "percent": 33.98
+   },
+   "inverse": {
+    "executed": 247,
+    "percent": 33.98
+   },
+   "union": {
+    "executed": 247,
+    "percent": 33.98
+   }
+  },
+  {
+   "module": "nova/transport/current_diffusion.py",
+   "total": 248,
+   "measured": true,
+   "forward": {
+    "executed": 77,
+    "percent": 31.05
+   },
+   "inverse": {
+    "executed": 77,
+    "percent": 31.05
+   },
+   "union": {
+    "executed": 77,
+    "percent": 31.05
+   }
+  },
+  {
+   "module": "nova/transport/ensemble.py",
+   "total": 98,
+   "measured": true,
+   "forward": {
+    "executed": 44,
+    "percent": 44.9
+   },
+   "inverse": {
+    "executed": 44,
+    "percent": 44.9
+   },
+   "union": {
+    "executed": 44,
+    "percent": 44.9
+   }
+  },
+  {
+   "module": "nova/transport/evolved_state.py",
+   "total": 133,
+   "measured": true,
+   "forward": {
+    "executed": 26,
+    "percent": 19.55
+   },
+   "inverse": {
+    "executed": 26,
+    "percent": 19.55
+   },
+   "union": {
+    "executed": 26,
+    "percent": 19.55
+   }
+  },
+  {
+   "module": "nova/transport/forward.py",
+   "total": 426,
+   "measured": true,
+   "forward": {
+    "executed": 119,
+    "percent": 27.93
+   },
+   "inverse": {
+    "executed": 119,
+    "percent": 27.93
+   },
+   "union": {
+    "executed": 119,
+    "percent": 27.93
+   }
+  },
+  {
+   "module": "nova/transport/parity_flux_ledger.py",
+   "total": 106,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/transport/torax_geometry.py",
+   "total": 88,
+   "measured": true,
+   "forward": {
+    "executed": 14,
+    "percent": 15.91
+   },
+   "inverse": {
+    "executed": 14,
+    "percent": 15.91
+   },
+   "union": {
+    "executed": 14,
+    "percent": 15.91
+   }
+  },
+  {
+   "module": "nova/transport/window_batch.py",
+   "total": 275,
+   "measured": true,
+   "forward": {
+    "executed": 92,
+    "percent": 33.45
+   },
+   "inverse": {
+    "executed": 92,
+    "percent": 33.45
+   },
+   "union": {
+    "executed": 92,
+    "percent": 33.45
+   }
+  },
+  {
+   "module": "nova/utilities/ANSYS.py",
+   "total": 150,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/Bezier.py",
+   "total": 32,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/IO.py",
+   "total": 367,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/__init__.py",
+   "total": 0,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/axes.py",
+   "total": 19,
+   "measured": true,
+   "forward": {
+    "executed": 16,
+    "percent": 84.21
+   },
+   "inverse": {
+    "executed": 16,
+    "percent": 84.21
+   },
+   "union": {
+    "executed": 16,
+    "percent": 84.21
+   }
+  },
+  {
+   "module": "nova/utilities/geom.py",
+   "total": 802,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/importmanager.py",
+   "total": 67,
+   "measured": true,
+   "forward": {
+    "executed": 36,
+    "percent": 53.73
+   },
+   "inverse": {
+    "executed": 48,
+    "percent": 71.64
+   },
+   "union": {
+    "executed": 48,
+    "percent": 71.64
+   }
+  },
+  {
+   "module": "nova/utilities/localdata.py",
+   "total": 63,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/mesh.py",
+   "total": 13,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/pandasdata.py",
+   "total": 32,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/polybezier.py",
+   "total": 102,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/qdafile.py",
+   "total": 149,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/stat.py",
+   "total": 146,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/stress.py",
+   "total": 42,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/surface.py",
+   "total": 35,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  },
+  {
+   "module": "nova/utilities/time.py",
+   "total": 212,
+   "measured": true,
+   "forward": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "inverse": {
+    "executed": 0,
+    "percent": 0.0
+   },
+   "union": {
+    "executed": 0,
+    "percent": 0.0
+   }
+  }
+ ],
+ "line_numbers": "omitted from this copy"
+}

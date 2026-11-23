@@ -28,7 +28,7 @@ def main():
     assert jax.config.jax_enable_x64 is True
     assert jax.default_backend() == "cpu"
 
-    from tests.test_equilibrium_magnetics_fit import _physical_problem
+    from tests.magnetics_fit_harness import _physical_problem
 
     profile, request, coordinate, wall, sections, known = _physical_problem("mast")
     assert isinstance(profile, ForwardProfile)

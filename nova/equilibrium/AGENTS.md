@@ -39,6 +39,257 @@ not comparable with any production receipt.
   kernel) and `tests/test_default_wiring.py` (every production entry point
   resolves the defaults on and its launcher leaves them to the public seam).
 
+## The measured forward and inverse routes
+
+Two production routes are measured, not read. `scripts/prototypes/hot_path_map/job.sh`
+drives each in a fresh process under `coverage` on CPU, in one `all_debug` job,
+and `map.py` composes a per-module line map. The map this section describes was
+measured at revision 8d8b526ae1d315945ed603b8f15477382559cb27 (job 1339132) and is stored with its line numbers
+in that job's output; the comparison basis this section is checked against is
+`docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down/route-modules.json`,
+the stripped copy of the same map; the measurement's own record is
+`docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down.html`.
+The earlier line-map record is
+`docs/evidence/fragments/code-reuse-and-hot-path/hot-path-map.html`; its map was
+measured at revision 09ef90e4 and the tree has moved since, so read the record
+for how the route was measured rather than for the module lists.
+
+The two routes:
+
+- **Forward** — `nova.equilibrium.forward.ForwardProfile.solve` driven by a
+  `ForwardSolveRequest` on a stored MAST case
+  (`scripts/prototypes/hot_path_map/forward_route.py`). This is the one public
+  forward route; every other forward solve, the fit's included, enters the map
+  through it.
+- **Inverse** — `tests/test_equilibrium_magnetics_fit_known_states.py::test_known_state_recovery[mast]`,
+  which fits flux-function coefficients inside the equilibrium iteration
+  (`MagneticsFit` in `nova/equilibrium/magnetics_fit.py`) and calls the same
+  public entry on every proposal it evaluates.
+
+At this revision the forward route executed 182 modules and the inverse route
+210. The forward set is a strict subset of the inverse set: 182 modules
+are executed by both, none by the forward route alone, and 28 only by
+the inverse route, so every module the public forward solve executes is also
+executed by the fit inside the iteration. A module is listed when the route
+executed at least one of its lines, and that includes a line executed when the
+module was imported, so a module carrying single-digit lines was reached
+through an import chain rather than by the solve's own calls. The full lists are
+the three blocks at the end of this section; the check below holds them to the
+measurement in both directions, so a module cannot be added to a list without
+being measured on the route it is filed under.
+
+`nova/equilibrium/forward.py` — the entry both routes reach — reads
+504/1043 on the forward route and 506/1043 on the inverse route. The
+modules the forward route spends its execution on are
+`fixed_point.py` (1167 lines), `forward_operator.py` (999),
+`connectivity_boundary.py` (617), `stencil_nulls.py` (594), `topology.py`
+(518), `forward.py` (504 of 1043), `flux_surface_connectivity.py` (440) and
+`constraint.py` (322), with the Biot-Savart kernels beneath them in
+`nova/biot/`.
+
+### The forward route, phase by phase
+
+1. **Seam** — `nova/equilibrium/solve_request.py` builds the typed request,
+   resolves the declared defaults and assembles the receipt.
+2. **Seed and source** — `cold_seed.py`, `source.py` and `profile.py` produce
+   the initial flux and the declared profile; `stencil_mesh.py`,
+   `cell_partition.py`, `domain.py` and `wall_mask.py` lay out the cells.
+3. **Operator** — `forward_operator.py` assembles the map from the Biot-Savart
+   operands: `nova/biot/greens.py`, `polygonanalytic.py`, `elliptic.py`,
+   `completeelliptic.py` and the per-geometry kernels (`arc.py`, `bow.py`,
+   `polybow.py`, `polygon.py`, `polysection.py`, `cylinder.py`, `line.py`,
+   `beam.py`, `target.py` and their siblings), over the containers in
+   `nova/frame/`, `nova/biot/biotframe.py` and `nova/biot/matrix.py`.
+4. **Solve** — `solve.py` factors the Jacobian and runs one correction;
+   `fixed_point.py` supplies `newton_krylov`, `anderson` and `picard`, and
+   `reduced_newton.py` the reduced routes and their active sets.
+5. **Topology and qualification** — `topology.py` reads the null census on the
+   flux map; `stencil_nulls.py` and `connectivity_boundary.py` classify the
+   cells around it; `fixed_points.py`, `flux_surface_connectivity.py`,
+   `separatrix_clip.py`, `separatrix_branches.py`, `clip_quadrature.py` and
+   `branch_selection.py` trace and qualify the separatrix.
+6. **Observation and moments** — `observation.py`, `observation_kernels.py`,
+   `moment.py`, `map_extraction.py`, `measurement.py`, `conservation.py`,
+   `current.py`, `conductor_current.py` and `constraint.py`.
+7. **Machine, corrections and evidence** — the MAST machine's own chain
+   (`nova/imas/mast_*.py`, `machine_*.py`, `ids_*.py`, `dataset.py`,
+   `database.py`), which reaches `nova/transport/` through
+   `nova/imas/mast_chain_factory.py` and the measurement corrections in
+   `nova/calibrate/` through `nova/imas/mast_corrections.py` and
+   `mast_block_scale.py`; plotting in `nova/equilibrium/display_flux.py`,
+   `nova/media/` and `nova/graphics/`; arrays and splines in `nova/linalg/`,
+   `nova/geometry/`, `nova/frame/` and `nova/database/`; and
+   `nova/jax/config.py` for the dtype and compilation-cache policy.
+
+### The inverse route
+
+The inverse route runs the public forward entry on every fit proposal, so it
+executes every module the forward route does and 28 besides. Those
+28 are the fit itself (`nova/equilibrium/magnetics_fit.py`), the frame,
+coil and geometry containers its own machine construction reaches
+(`nova/frame/coil.py`, `coilset.py`, `polyplot.py`, `vtkplot.py` and their
+siblings, `nova/geometry/polygeom.py`), the Biot-Savart entry points it reaches directly
+(`nova/biot/biot.py`, `reduce.py`, `loop.py`, `point.py`, `shape.py`,
+`space.py`, `crosssection.py`, `flux.py`), its reconstruction store
+(`nova/database/netcdf.py`), `nova/control/`, and
+`nova/imas/test_utilities.py`. The block below lists them exactly.
+
+### Keeping this section true
+
+`scripts/prototypes/hot_path_map/section_route.py` reads the three blocks below
+out of their markers and compares each route's set with the modules the map
+measured as executed, naming every difference in both directions — a module
+named but not executed on its route, a module executed but not named, a module
+named but absent from the tree, and a Python file under `nova/` or `tests/`
+changed since the map's recorded revision. The last of these is why the check
+cannot rest on the lists alone: a change that makes a route execute another
+module leaves the map's measured sets untouched, so a stale map would compare
+clean while this section had drifted. When code has moved since the measurement
+the remedy is a fresh `job.sh` run, not an edit here.
+
+```
+python scripts/prototypes/hot_path_map/section_route.py \
+  --section nova/equilibrium/AGENTS.md \
+  --map docs/evidence/fragments/code-reuse-and-hot-path/hot-path-written-down/route-modules.json \
+  --root .
+```
+
+Its `--add BLOCK=MODULE` files one extra module into a block of a temporary copy
+and shows the check reporting it, which is the control for a comparison that
+would otherwise only ever pass. Re-measure with `job.sh` before changing a list,
+and run the check in the same commit that changes one.
+
+### Pending collapses from the duplicate register
+
+`docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicates.html`
+proposes ten collapses on or beside this route. All ten are raised as reckon
+decisions (`crew view decisions --project nova`) and every one is still
+`ready`, so no collapse is accepted-and-pending: when an answer accepts one, the
+module a route stops executing moves between the blocks below in the same commit
+as the code change. The ten are: topology-read (`read_at_stationary_points`
+removed in favour of the census), extreme-selection (`stencil_nulls`'s three
+`_arg_extrem*` wrappers), storage-group-mode (`netCDF` and `ZarrStore` `subgroup`/`get_mode`), level-set-polish (`separatrix_clip`'s inline polish loop),
+plot-columns (`PolyPlot.update_columns` against `VtkPlot.update_columns`),
+route-resolution (which topology read each route executes), and the four
+scan-flagged pairs `_tensor_bernstein`, `Aphi`, `_first_residual` and
+`for_member`.
+
+#### Modules both routes execute
+
+<!-- hot-route:shared -->
+**biot/** `nova/biot/__init__.py` `nova/biot/arc.py` `nova/biot/arcamplitude.py`
+  `nova/biot/arcbandedcoupling.py` `nova/biot/array.py` `nova/biot/beam.py`
+  `nova/biot/biotframe.py` `nova/biot/bow.py` `nova/biot/circle.py`
+  `nova/biot/completeelliptic.py` `nova/biot/constants.py` `nova/biot/cylinder.py`
+  `nova/biot/data.py` `nova/biot/elliptic.py` `nova/biot/error.py`
+  `nova/biot/fieldnull.py` `nova/biot/gradedresidual.py` `nova/biot/greens.py`
+  `nova/biot/grid.py` `nova/biot/groupset.py` `nova/biot/incompleteelliptic.py`
+  `nova/biot/incompletemoments.py` `nova/biot/line.py` `nova/biot/matrix.py`
+  `nova/biot/momentchannel.py` `nova/biot/null.py` `nova/biot/operate.py`
+  `nova/biot/pairedfloat.py` `nova/biot/plasmagrid.py` `nova/biot/polybeam.py`
+  `nova/biot/polybow.py` `nova/biot/polygon.py` `nova/biot/polygonanalytic.py`
+  `nova/biot/polygonarc.py` `nova/biot/polysection.py` `nova/biot/rangefunction.py`
+  `nova/biot/sectionaverage.py` `nova/biot/sheet.py` `nova/biot/solve.py`
+  `nova/biot/symmetricelliptic.py` `nova/biot/target.py` `nova/biot/tiledassembly.py`
+  `nova/biot/zeta.py`
+**calibrate/** `nova/calibrate/__init__.py` `nova/calibrate/correction_model.py`
+  `nova/calibrate/correction_set.py` `nova/calibrate/corrections.py`
+  `nova/calibrate/scale_step.py`
+**catalog/** `nova/catalog/__init__.py` `nova/catalog/mast_geometry.py`
+**database/** `nova/database/content_store.py` `nova/database/datafile.py`
+  `nova/database/filepath.py` `nova/database/zarrstore.py`
+**equilibrium/** `nova/equilibrium/__init__.py`
+  `nova/equilibrium/boundary_comparison.py` `nova/equilibrium/branch_selection.py`
+  `nova/equilibrium/cell_partition.py` `nova/equilibrium/clip_quadrature.py`
+  `nova/equilibrium/cold_seed.py` `nova/equilibrium/conductor_current.py`
+  `nova/equilibrium/connectivity_boundary.py` `nova/equilibrium/conservation.py`
+  `nova/equilibrium/constraint.py` `nova/equilibrium/convention.py`
+  `nova/equilibrium/current.py` `nova/equilibrium/diagnostics.py`
+  `nova/equilibrium/display_flux.py` `nova/equilibrium/domain.py`
+  `nova/equilibrium/fixed_point.py` `nova/equilibrium/fixed_points.py`
+  `nova/equilibrium/flux_surface_connectivity.py`
+  `nova/equilibrium/flux_surface_extraction.py`
+  `nova/equilibrium/flux_surface_geometry.py` `nova/equilibrium/forward.py`
+  `nova/equilibrium/forward_operator.py` `nova/equilibrium/gs.py`
+  `nova/equilibrium/labels.py` `nova/equilibrium/manifold_advance.py`
+  `nova/equilibrium/map_extraction.py` `nova/equilibrium/measurement.py`
+  `nova/equilibrium/moment.py` `nova/equilibrium/morphology.py`
+  `nova/equilibrium/observation.py` `nova/equilibrium/observation_kernels.py`
+  `nova/equilibrium/parallel_components.py` `nova/equilibrium/profile.py`
+  `nova/equilibrium/reduced_newton.py` `nova/equilibrium/separatrix_branches.py`
+  `nova/equilibrium/separatrix_clip.py` `nova/equilibrium/solve.py`
+  `nova/equilibrium/solve_request.py` `nova/equilibrium/source.py`
+  `nova/equilibrium/stencil_mesh.py` `nova/equilibrium/stencil_nulls.py`
+  `nova/equilibrium/support_read.py` `nova/equilibrium/topology.py`
+  `nova/equilibrium/wall_mask.py`
+**frame/** `nova/frame/__init__.py` `nova/frame/arraylocindexer.py`
+  `nova/frame/columnar.py` `nova/frame/dataarray.py` `nova/frame/dataframe.py`
+  `nova/frame/error.py` `nova/frame/framedata.py` `nova/frame/framelink.py`
+  `nova/frame/framesetloc.py` `nova/frame/framespace.py` `nova/frame/indexer.py`
+  `nova/frame/metadata.py` `nova/frame/metaframe.py` `nova/frame/metamethod.py`
+  `nova/frame/plasmaloc.py` `nova/frame/subspace.py`
+**geometry/** `nova/geometry/frenet.py` `nova/geometry/geoframe.py`
+  `nova/geometry/hexstencil.py` `nova/geometry/pointloop.py`
+  `nova/geometry/polyframe.py` `nova/geometry/polygen.py` `nova/geometry/polygon.py`
+  `nova/geometry/polyshape.py` `nova/geometry/rotate.py` `nova/geometry/section.py`
+  `nova/geometry/select.py`
+**graphics/** `nova/graphics/line.py` `nova/graphics/plot.py`
+**imas/** `nova/imas/__init__.py` `nova/imas/database.py` `nova/imas/dataset.py`
+  `nova/imas/diiid_current.py` `nova/imas/diiid_description.py`
+  `nova/imas/edge_consistency.py` `nova/imas/ids_entry.py` `nova/imas/ids_index.py`
+  `nova/imas/machine_artifact.py` `nova/imas/machine_drive.py`
+  `nova/imas/machine_evidence.py` `nova/imas/mast_block_scale.py`
+  `nova/imas/mast_chain_factory.py` `nova/imas/mast_corrections.py`
+  `nova/imas/mast_parity_chain.py` `nova/imas/mast_passive_response.py`
+  `nova/imas/mast_seed_parameters.py` `nova/imas/mast_solve_input_ids.py`
+  `nova/imas/mast_solve_inputs.py` `nova/imas/mast_vacuum_cohort.py`
+  `nova/imas/mast_vacuum_response.py` `nova/imas/parity_tolerances.py`
+**io/** `nova/io/__init__.py` `nova/io/egress.py` `nova/io/ingest.py` `nova/io/json.py`
+  `nova/io/signalstore.py` `nova/io/sourcemap.py` `nova/io/standardname.py`
+  `nova/io/streaming.py`
+**jax/** `nova/jax/config.py` `nova/jax/tree_util.py`
+**linalg/** `nova/linalg/interpolant.py` `nova/linalg/split_spline.py`
+  `nova/linalg/tensor_spline.py`
+**media/** `nova/media/__init__.py` `nova/media/ink.py` `nova/media/poloidal.py`
+  `nova/media/sources/__init__.py` `nova/media/sources/frame.py`
+  `nova/media/sources/mast_thomson.py` `nova/media/sources/nova_labels.py`
+  `nova/media/sources/plasma_mesh.py`
+**nova/ (top level)** `nova/__init__.py` `nova/definitions.py`
+**transport/** `nova/transport/__init__.py` `nova/transport/coupled_window.py`
+  `nova/transport/current_diffusion.py` `nova/transport/ensemble.py`
+  `nova/transport/evolved_state.py` `nova/transport/forward.py`
+  `nova/transport/torax_geometry.py` `nova/transport/window_batch.py`
+**utilities/** `nova/utilities/axes.py` `nova/utilities/importmanager.py`
+<!-- /hot-route:shared -->
+
+#### Modules only the forward route executes
+
+None at this revision, and the check below enforces the block being empty: a
+module moved here that the forward route does not execute is detected as another
+route's module, and a module moved here that the inverse route also executes is
+reported as executed but not named.
+
+<!-- hot-route:forward -->
+<!-- /hot-route:forward -->
+
+#### Modules only the inverse route executes
+
+<!-- hot-route:inverse -->
+**biot/** `nova/biot/biot.py` `nova/biot/crosssection.py` `nova/biot/flux.py`
+  `nova/biot/loop.py` `nova/biot/point.py` `nova/biot/reduce.py` `nova/biot/shape.py`
+  `nova/biot/space.py`
+**control/** `nova/control/__init__.py` `nova/control/control.py`
+**database/** `nova/database/netcdf.py`
+**equilibrium/** `nova/equilibrium/magnetics_fit.py`
+**frame/** `nova/frame/coil.py` `nova/frame/coilset.py` `nova/frame/coilsetattrs.py`
+  `nova/frame/energize.py` `nova/frame/frame.py` `nova/frame/frameset.py`
+  `nova/frame/multipoint.py` `nova/frame/poloidalgrid.py` `nova/frame/polygeo.py`
+  `nova/frame/polygrid.py` `nova/frame/polyplot.py` `nova/frame/select.py`
+  `nova/frame/vtkgeo.py` `nova/frame/vtkplot.py`
+**geometry/** `nova/geometry/polygeom.py`
+**imas/** `nova/imas/test_utilities.py`
+<!-- /hot-route:inverse -->
+
 ## Fit coefficients inside the iteration
 
 `FluxIterationFit` in `flux_iteration.py` solves the least-squares fit on every

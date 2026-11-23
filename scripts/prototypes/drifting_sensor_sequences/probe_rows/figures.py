@@ -103,7 +103,7 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
     # decides both leaves a label flush with the canvas edge.
     figure, panels = plt.subplots(2, 1, figsize=(14.0, 7.2), dpi=100, sharex=True)
     figure.subplots_adjust(
-        left=0.085, right=0.945, top=0.875, bottom=0.115, hspace=0.42
+        left=0.085, right=0.945, top=0.875, bottom=0.115, hspace=0.58
     )
     axis_truth = np.asarray(truth["axis"], dtype=float)
     handles = {}
@@ -136,10 +136,13 @@ def draw_code(code: str, truth: dict, output: Path) -> Path:
             handles["1/f drift" if drift else "white (control)"] = line
         panel.set_ylabel(label)
         panel.set_xlim(0, SLICES - 1)
-        panel.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(3))
-        # A tick at the axes boundary would meet the neighbouring panel's
-        # own label, so each panel keeps a margin above and below its data.
-        panel.margins(y=0.18)
+        # Ticks are placed at fixed fractions of each panel's own range: an
+        # automatic locator puts one at the boundary, where it meets the
+        # neighbouring panel's label across the gap.
+        panel.margins(y=0.26)
+        low, high = panel.get_ylim()
+        panel.set_yticks([low + 0.28 * (high - low), low + 0.72 * (high - low)])
+        panel.yaxis.set_major_formatter(matplotlib.ticker.FormatStrFormatter("%.3f"))
     panels[-1].set_xlabel("slice")
     if handles:
         figure.legend(

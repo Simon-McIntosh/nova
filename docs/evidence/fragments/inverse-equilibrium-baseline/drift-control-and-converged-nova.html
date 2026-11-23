@@ -1,0 +1,66 @@
+<section id="drift-control-and-converged-nova-record">
+<h2>The 1/f control repaired: a coloured plasma-current draw, and the fit run to convergence</h2>
+<p>Plan &sect;7 cannot be read until its control holds: the white sequence's lag-one correlation must sit within 0.15 of zero for both codes and the 1/f sequence's must exceed 0.5. The prior node measured the white control holding but the 1/f control failing for both codes (nova 0.047/0.085/0.105, imas-efit 0.462/0.544/0.606). This node names the cause and repairs it, then re-measures both codes on the repaired pipeline.</p>
+</section>
+
+<section id="drift-control-and-converged-nova-generator">
+<h3>The generator first: the injected stream is strongly correlated</h3>
+<p>The brief's order is to measure the generated noise before the reconstruction. On the committed generator over 200 slices and 72 sensors, one draw per seed:</p>
+<table id="drift-control-and-converged-nova-noise-table">
+<tr><th>sequence</th><th>lag-one of the sensor noise itself</th><th>shape</th></tr>
+<tr><td>1/f drift</td><td>0.590 mean over sensors (analytic 0.619)</td><td>flat below four cycles per sequence, falling as f<sup>-1</sup> above it</td></tr>
+<tr><td>white</td><td>&minus;0.010 mean over sensors</td><td>flat</td></tr>
+</table>
+<p>The injected 1/f stream is therefore already strongly correlated slice to slice, so the corner frequency and normalisation are not the defect, and the control is 0.09 above its floor before any reconstruction reads it. The failure had to be in the pipeline.</p>
+</section>
+
+<section id="drift-control-and-converged-nova-cause">
+<h3>The cause: an unmodelled white plasma-current draw</h3>
+<p>Both codes carry the measured plasma current as one row of the fit &mdash; nova through the measurement's current row and its weight, imas-efit through the current written into the IMAS pulse. That draw was an <strong>independent white Gaussian on every slice</strong> at 0.01 of the plasma current, while the sensor rows carried the sequence's colouring. On the 1/f sequence that white current draw is a per-slice jump the axis position follows directly: it is white by construction, so it decorrelates the axis, boundary flux and q95 that the control measures and it dominates the coloured sensor signal. That is why both codes failed the same clause on the same quantities, and why imas-efit &mdash; whose sensor noise contributes relatively more &mdash; came nearest the floor (0.462) while nova, also capped at two passes, fell to 0.047.</p>
+<p>The repair takes the current from the same coloured generator: <code>study.current_draw</code> shapes the draw with the sequence's own index and corner, so the measured current carries the sequence's memory and only its colouring changed, not its marginal size. The guard suite pins the white draw within 0.15 of zero and the 1/f draw above the floor, so a repair that correlates white noise fails the same test.</p>
+</section>
+
+<section id="drift-control-and-converged-nova-result">
+<h3>The repaired arms: the 1/f memory reaches both codes</h3>
+<p>Both codes were re-measured over the same 200 slices per sequence at the cap the failing run used, so the repair is isolated from the fit depth. The fit depth is the separate question below.</p>
+<table id="drift-control-and-converged-nova-control-table">
+<tr><th>code</th><th>rows</th><th>sequence</th><th>slices</th><th>axis RMS [mm]</th><th>axis lag-one</th><th>flux lag-one</th><th>q95 lag-one</th><th>control</th></tr>
+<tr><td>nova</td><td>72 magnetics</td><td>white</td><td>200</td><td>10.37</td><td>&minus;0.056</td><td>0.083</td><td>0.083</td><td>passes</td></tr>
+<tr><td>nova</td><td>72 magnetics</td><td>1/f drift</td><td>200</td><td>10.36</td><td>0.342</td><td>0.626</td><td>0.613</td><td><strong>axis below 0.5</strong></td></tr>
+<tr><td>imas-efit</td><td>24 flux loops</td><td>white</td><td>200</td><td>38.34</td><td>0.047</td><td>0.118</td><td>0.058</td><td>passes</td></tr>
+<tr><td>imas-efit</td><td>24 flux loops</td><td>1/f drift</td><td>200</td><td>31.10</td><td>0.577</td><td>0.682</td><td>0.634</td><td>passes</td></tr>
+</table>
+<p>Read against the prior run, the repair moves every 1/f quantity the control measures: nova from 0.047/0.085/0.105 to 0.342/0.626/0.613 and imas-efit from 0.462/0.544/0.606 to 0.577/0.682/0.634. The white control is unchanged within its own scatter, so the repair coloured the drift draw rather than correlating everything.</p>
+<p><strong>imas-efit now passes both controls; nova passes two of its three.</strong> Its boundary flux and q95 lag-one sit well above the floor and its white arm stays within 0.15 of zero, but its axis lag-one is 0.342, short of 0.5. The gate reads <code>CHECK-FAILED nova: the 1/f lag-one clause failed</code>, 1 of 26 checks. The 0.5 floor is a property of the reference spectrum at this colouring and was not lowered.</p>
+<p>One candidate explanation for nova's axis gap is the two-pass cap: if a large part of the axis movement were the fit's own per-slice convergence noise, that white scatter would dilute the injected memory. The converged arm below tests it directly, and the test does not support it: over the twelve white slices measured at both depths, the converged and two-pass arms have the same radial axis scatter (11.71 mm against 11.68 mm) and the same lag-one (&minus;0.051 against &minus;0.077); the vertical scatter is larger when converged (0.66 mm against 0.26 mm), not smaller. Convergence is therefore not the explanation for the axis clause, and the cause remains open for the next node rather than being reported as solved.</p>
+</section>
+
+<section id="drift-control-and-converged-nova-convergence">
+<h3>The converged arm: the fit's own tolerance, and what 96 passes costs</h3>
+<p>nova's held-map pass was run at the fit's own tolerance (<code>flux_tolerance=1.0e-10</code>) under a 96-pass budget, with each slice's record landed as it finishes. The table is every slice measured in the window; a slice is converged when the fit's own stop rule fires before the cap.</p>
+<table id="drift-control-and-converged-nova-convergence-table">
+<tr><th>slice</th><th>passes</th><th>wall [s]</th><th>converged</th><th>terminal misfit</th></tr>
+<tr><td>0</td><td>49</td><td>1667</td><td>yes</td><td>0.0716</td></tr>
+<tr><td>1</td><td>62</td><td>1803</td><td>yes</td><td>0.0299</td></tr>
+<tr><td>2</td><td>96</td><td>835</td><td><strong>no</strong> (cap)</td><td>0.0395</td></tr>
+<tr><td>3</td><td>35</td><td>308</td><td>yes</td><td>0.0273</td></tr>
+<tr><td>4</td><td>88</td><td>745</td><td>yes</td><td>0.0305</td></tr>
+<tr><td>5</td><td>45</td><td>371</td><td>yes</td><td>0.0430</td></tr>
+<tr><td>6</td><td>56</td><td>475</td><td>yes</td><td>0.0293</td></tr>
+<tr><td>7</td><td>96</td><td>816</td><td><strong>no</strong> (cap)</td><td>0.0401</td></tr>
+<tr><td>8</td><td>64</td><td>550</td><td>yes</td><td>0.0250</td></tr>
+<tr><td>9</td><td>96</td><td>819</td><td><strong>no</strong> (cap)</td><td>0.0520</td></tr>
+<tr><td>10</td><td>49</td><td>561</td><td>yes</td><td>0.0245</td></tr>
+<tr><td>11</td><td>75</td><td>757</td><td>yes</td><td>0.0521</td></tr>
+</table>
+<p>Nine of twelve slices converge inside the budget (35&ndash;88 passes, terminal misfit 0.0245&ndash;0.0716); three reach the 96-pass cap at misfit 0.040&ndash;0.052 and are reported unconverged rather than trimmed out of the arm. The arm continues to append on the same two cards, and the record above is what had landed at the end of this node's window; the row-matched arm below is the same shape of measurement and is likewise reported by coverage.</p>
+<p>The row-matched arm &mdash; nova fitted from the same 24 flux loops imas-efit reads &mdash; was dispatched on the same H200 run and is reported by coverage for the same reason. It writes one record per slice per stripe into the two-pass study directory, so the next reader can count what landed rather than trusting a summary; at the end of this window it had covered part of the white sequence and none of the 1/f sequence, and it is not presented as a complete row-matched comparison. The figures below are drawn on nova's complete 72-row arm and imas-efit's loops arm, and the overlay says so.</p>
+<p><strong>The cost is what makes the full converged arm unaffordable inside this window, and the number is measured rather than estimated.</strong> A converged slice costs 300&ndash;1800 s on a P100 card, and the first slice on an H200 cost 1352.8 s for 49 passes. Two arms of 200 slices each over both sequences is 800 such fits: roughly 30 card-hours at the measured rate, against a window of a few hours on one card with the node's eight H200s held by other work through the day. The two-pass arms above are therefore the complete 200-slice measurement, and the converged arm is reported slice by slice as it lands. Nothing here is a converged 200-slice arm, and the record does not present it as one.</p>
+</section>
+
+<section id="drift-control-and-converged-nova-figures">
+<h3>The figures</h3>
+<figure><img src="/nova/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/axis-position-nova.svg" alt="nova axis position against slice for the white and 1/f sequences"><figcaption>nova's reconstructed axis over the 200 slices of both sequences, radial and vertical, fitted from the 72-row magnetics set. The blue trace is the 1/f draw, the dashed grey the white control, the dotted line the generating state's own axis (6.288633, 0.498205). The two sequences no longer coincide: the 1/f trace carries the slow swings the control measures, and the single vertical excursion near slice 40 is one slice's reconstruction, not a feature of the draw.</figcaption></figure>
+<figure><img src="/nova/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/axis-position-efit.svg" alt="imas-efit axis position against slice for the white and 1/f sequences"><figcaption>The imas-efit column on the same axes, fitted from the 24 flux loops. The green 1/f trace separates from the dashed white control over the same slices, which is the clause the imas-efit arm now passes on all three quantities.</figcaption></figure>
+<figure><img src="/nova/figures/inverse-equilibrium-baseline/drift-control-and-converged-nova/slice-overlay-drift-0.svg" alt="both codes' poloidal flux at slice 0 with the generating state and both null sets"><figcaption>Slice 0 of the 1/f sequence, the slice where the two codes' axes stand furthest apart. nova's contours are the thicker blue, imas-efit's the green, the generating state's the grey dashed lines on one shared physical level array; the wall is the machine's limiter ring. Both null sets are drawn. Distance from the generating nulls, measured on the same lattice: nova axis 26.1 mm, imas-efit axis 45.5 mm. The two states are fitted from different row sets, so this is a state overlay, not a like-for-like comparison.</figcaption></figure>
+</section>

@@ -42,7 +42,14 @@ def _text_artists(fig):
     legend = fig.legends[0] if fig.legends else None
     if legend is not None:
         artists.extend(legend.get_texts())
-    return [artist for artist in artists if artist.get_text().strip()]
+    # A tick outside the view keeps its label object with stale text and a
+    # position at the axis boundary, and matplotlib draws neither; reading it
+    # would report a collision no reader can see.
+    return [
+        artist
+        for artist in artists
+        if artist.get_text().strip() and artist.get_visible()
+    ]
 
 
 def save_checked(fig, path: str, png: str | None = None) -> list[str]:

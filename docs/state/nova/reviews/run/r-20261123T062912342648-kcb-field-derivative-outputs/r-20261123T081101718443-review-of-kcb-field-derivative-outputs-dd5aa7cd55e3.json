@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arm logs under existing-regression/: baseline-suite.log at 3dbf01a8d2ef and after-suite.log at dd5aa7cd55e3 each carry ten completed FILE_RECEIPT lines and a SUITE_RECEIPT with failure_count 2 and the identical pair ['tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound','tests/test_biotpolygonmoments.py::test_flux_moment_expansion_point_translation_identity']; the ten JUnit files per arm each contain exactly two failing testcases. The after-minus-baseline set difference is empty (0).",
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2514 (BiotMomentCoupling.value_gradient)",
+    "nova/equilibrium/fixed_points.py:327 (_source_jets.value_gradient)",
+    "nova/biot/tiledassembly.py:1383 (one_moment_block)"
+  ],
+  "completed_at": "2026-11-23T08:24:14.876Z",
+  "dispatched_at": "2026-11-23T08:11:57Z",
+  "findings": [
+    {
+      "file": "nova/biot/polygonanalytic.py",
+      "line": "3798",
+      "severity": "non-blocking",
+      "text": "non-blocking: `if xp is jnp and not field_derivatives` bypasses `_packed_moments_with_stable_height` whenever a JAX caller also requests the derivative outputs, so such a call silently loses the stable-pole tangents and the sixth-order corner-height Richardson samples that custom_jvp exists to supply; no shipped call site passes the flag today and test_compiled_field_derivative_outputs uses generic far-from-corner targets, so the combination is unguarded."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/kcb-field-derivative-outputs.html",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: plan section 8 names this file as the section's record and the node declared it as a write path, but it is absent from the delivered diff, so the plan-facing record of the measurements does not exist; the numbers themselves are durably held in the gate logs and the manifest."
+    },
+    {
+      "file": "tests/biot/test_field_derivative_outputs.py",
+      "line": "223",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert relative < 1e-10` compares the jitted evaluation against an eager call of the same function, so both sides move together and any error in the derivative arithmetic passes; it guards compilation parity only, which is its stated purpose, but it contributes no coverage of the values under test."
+    },
+    {
+      "file": "tests/biot/test_field_derivative_outputs.py",
+      "line": "141",
+      "severity": "non-blocking",
+      "text": "non-blocking: `np.testing.assert_array_equal(rows[:9], _rows(points, geometry))` compares the same function with the flag on against the flag off, so it can only hold that the new flag leaves rows 0:9 untouched and cannot catch a wrong base row, because both sides would be wrong together."
+    },
+    {
+      "file": "tests/biot/test_field_derivative_outputs.py",
+      "line": "144",
+      "severity": "non-blocking",
+      "text": "non-blocking: the shipped test mutates its own output through the ambient environment variable NOVA_FIELD_DERIVATIVE_SIGN_FLIP, so any process or CI job that carries that variable set runs a deliberately false assertion and reports a red gate that names no defect in the code."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call sites, all of which call packed_analytic_moments without field_derivatives and so keep the nine-row path unchanged",
+    "diff": "read 2b721b6ad, 2ee8f45e8 and dd5aa7cd5 against base 3dbf01a8d2ef; two files, +453/-3, being the new _field_line_integral/_field_line_moments boundary reduction plus the field_derivatives branch in _packed_analytic_moments_primal and a new 255-line test module.",
+    "done_when": "the done_when's three clauses map one-to-one onto tests/biot/test_field_derivative_outputs.py:226 (lowering ratio bound with a counts[0] > 1000 known-present control), :195-:209 (200 generic and 50 corner-height targets against sixth-order central differences) and the NOVA_FIELD_DERIVATIVE_SIGN_FLIP arm at :144, and scoped-gate-1795419223220932605.log records 10 passed EXIT=0 with ratio 1.468, generic 2.17e-11 and corner-height 2.06e-9.",
+    "goal": "plan section 8 asks the packed kernel to return d_r Br and d_z Br per moment order as primal outputs of the same edge contour reduction; nova/biot/polygonanalytic.py:3626-3640 appends the two triplets from the existing contour accumulation inside _packed_analytic_moments_primal, and nova/biot/polygonanalytic.py:3624 returns the original nine rows untouched when the flag is off.",
+    "manifest": "read; it reports status complete at head dd5aa7cd5, 15-row/9-row instruction counts 31719/21605, generic 2.1738626871940731e-11 and corner-height 2.0643076666778661e-9 worst agreement, and a sign-flip negative control red at EXIT=1; every one of those figures matches the log files it names.",
+    "write_paths": "the declared paths are nova/biot/polygonanalytic.py, tests/biot/test_field_derivative_outputs.py, the evidence fragment under docs/evidence/fragments/kernel-compile-barrier/ and a figures directory; the diff touches only the first two and both are inside the fence, so the change stays within scope while leaving the named evidence fragment undelivered."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_field_derivative_outputs.py:209 compares the new derivative rows against a sixth-order central difference of the existing field rows, an independent quantity, and negative-control.log shows that assertion red by id at EXIT=1 with maximum_relative=2.0000000000002442 when the output sign is flipped.",
+    "evidence": "scoped-gate-1795419223220932605.log records 10 passed EXIT=0 at revision dd5aa7cd5 with FIELD_DERIVATIVE_LOWERING nine_rows=21605 fifteen_rows=31719 ratio=1.46813238 and the per-cohort agreement bounds, while the paired arms record 190 passed, 2 failed, 13 skipped and 1 xfailed in each arm with identical failing ids.",
+    "fit": "the additions follow the module's own idiom as set by horizontal_flux_line_moments at nova/biot/polygonanalytic.py:925 (untyped nested helpers, mechanism docstrings, vertex.across/plain primitives) and introduce no version, plan or stage label, though the test carries an environment-variable mutation hook.",
+    "goal_fidelity": "nova/biot/polygonanalytic.py:3626-3640 appends d_r Br and d_z Br as three rows each, in the same unit/radial/vertical order as the field rows, from the same boundary-reduction pass rather than by differentiating the kernel.",
+    "reuse": "the diff extends the packed primal reduction instead of forking it, reusing range_function/total/scaled/product, vertex.plain, vertex.across, vertex.against_first_arsinh, edge._second_residual, _oscillatory_primitive and _edge_residual_band; a search of nova/biot for prior analytic primal field-derivative machinery found none, since _central_field_moments_direct and polygon_analytic_field_moments are the NumPy reference path, not the packed JAX reduction.",
+    "scope_discipline": "the two paths in the diff, nova/biot/polygonanalytic.py and tests/biot/test_field_derivative_outputs.py, are both inside the declared write paths and nothing else was touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: plan section 8 asks the packed kernel to return d_r Br and d_z Br per moment order as primal outputs of the same edge contour reduction; nova/biot/polygonanalytic.py:3626-3640 appends the two triplets from the existing contour accumulation inside _packed_analytic_moments_primal, and nova/biot/polygonanalytic.py:3624 returns the original nine rows untouched when the flag is off.\nVERDICT done_when: the done_when's three clauses map one-to-one onto tests/biot/test_field_derivative_outputs.py:226 (lowering ratio bound with a counts[0] > 1000 known-present control), :195-:209 (200 generic and 50 corner-height targets against sixth-order central differences) and the NOVA_FIELD_DERIVATIVE_SIGN_FLIP arm at :144, and scoped-gate-1795419223220932605.log records 10 passed EXIT=0 with ratio 1.468, generic 2.17e-11 and corner-height 2.06e-9.\nVERDICT write_paths: the declared paths are nova/biot/polygonanalytic.py, tests/biot/test_field_derivative_outputs.py, the evidence fragment under docs/evidence/fragments/kernel-compile-barrier/ and a figures directory; the diff touches only the first two and both are inside the fence, so the change stays within scope while leaving the named evidence fragment undelivered.\nVERDICT manifest: read; it reports status complete at head dd5aa7cd5, 15-row/9-row instruction counts 31719/21605, generic 2.1738626871940731e-11 and corner-height 2.0643076666778661e-9 worst agreement, and a sign-flip negative control red at EXIT=1; every one of those figures matches the log files it names.\nVERDICT diff: read 2b721b6ad, 2ee8f45e8 and dd5aa7cd5 against base 3dbf01a8d2ef; two files, +453/-3, being the new _field_line_integral/_field_line_moments boundary reduction plus the field_derivatives branch in _packed_analytic_moments_primal and a new 255-line test module.\nCALL_SITES: nova/equilibrium/topology.py:2514 (BiotMomentCoupling.value_gradient), nova/equilibrium/fixed_points.py:327 (_source_jets.value_gradient), nova/biot/tiledassembly.py:1383 (one_moment_block)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:3626-3640 appends d_r Br and d_z Br as three rows each, in the same unit/radial/vertical order as the field rows, from the same boundary-reduction pass rather than by differentiating the kernel.\nSCORE evidence: 17\nJUSTIFICATION evidence: scoped-gate-1795419223220932605.log records 10 passed EXIT=0 at revision dd5aa7cd5 with FIELD_DERIVATIVE_LOWERING nine_rows=21605 fifteen_rows=31719 ratio=1.46813238 and the per-cohort agreement bounds, while the paired arms record 190 passed, 2 failed, 13 skipped and 1 xfailed in each arm with identical failing ids.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: the two paths in the diff, nova/biot/polygonanalytic.py and tests/biot/test_field_derivative_outputs.py, are both inside the declared write paths and nothing else was touched.\nSCORE durability: 17\nJUSTIFICATION durability: tests/biot/test_field_derivative_outputs.py:209 compares the new derivative rows against a sixth-order central difference of the existing field rows, an independent quantity, and negative-control.log shows that assertion red by id at EXIT=1 with maximum_relative=2.0000000000002442 when the output sign is flipped.\nSCORE fit: 17\nJUSTIFICATION fit: the additions follow the module's own idiom as set by horizontal_flux_line_moments at nova/biot/polygonanalytic.py:925 (untyped nested helpers, mechanism docstrings, vertex.across/plain primitives) and introduce no version, plan or stage label, though the test carries an environment-variable mutation hook.\nSCORE reuse: 19\nJUSTIFICATION reuse: the diff extends the packed primal reduction instead of forking it, reusing range_function/total/scaled/product, vertex.plain, vertex.across, vertex.against_first_arsinh, edge._second_residual, _oscillatory_primitive and _edge_residual_band; a search of nova/biot for prior analytic primal field-derivative machinery found none, since _central_field_moments_direct and polygon_analytic_field_moments are the NumPy reference path, not the packed JAX reduction.\nFINDING nova/biot/polygonanalytic.py:3798 non-blocking: `if xp is jnp and not field_derivatives` bypasses `_packed_moments_with_stable_height` whenever a JAX caller also requests the derivative outputs, so such a call silently loses the stable-pole tangents and the sixth-order corner-height Richardson samples that custom_jvp exists to supply; no shipped call site passes the flag today and test_compiled_field_derivative_outputs uses generic far-from-corner targets, so the combination is unguarded.\nFINDING docs/evidence/fragments/kernel-compile-barrier/kcb-field-derivative-outputs.html:1 non-blocking: plan section 8 names this file as the section's record and the node declared it as a write path, but it is absent from the delivered diff, so the plan-facing record of the measurements does not exist; the numbers themselves are durably held in the gate logs and the manifest.\nFINDING tests/biot/test_field_derivative_outputs.py:223 non-blocking: `assert relative < 1e-10` compares the jitted evaluation against an eager call of the same function, so both sides move together and any error in the derivative arithmetic passes; it guards compilation parity only, which is its stated purpose, but it contributes no coverage of the values under test.\nFINDING tests/biot/test_field_derivative_outputs.py:141 non-blocking: `np.testing.assert_array_equal(rows[:9], _rows(points, geometry))` compares the same function with the flag on against the flag off, so it can only hold that the new flag leaves rows 0:9 untouched and cannot catch a wrong base row, because both sides would be wrong together.\nFINDING tests/biot/test_field_derivative_outputs.py:144 non-blocking: the shipped test mutates its own output through the ambient environment variable NOVA_FIELD_DERIVATIVE_SIGN_FLIP, so any process or CI job that carries that variable set runs a deliberately false assertion and reports a red gate that names no defect in the code.",
+  "review_node": "review-of-kcb-field-derivative-outputs-dd5aa7cd55e3",
+  "review_run_id": "r-20261123T081101718443-review-of-kcb-field-derivative-outputs-dd5aa7cd55e3",
+  "reviewed_base_sha": "3dbf01a8d2ef0303ce2c9fda7eb939dfca408f2e",
+  "reviewed_head_sha": "dd5aa7cd55e3d536f53ac0518be85b1a043e14f0",
+  "reviewed_run_id": "r-20261123T062912342648-kcb-field-derivative-outputs",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261123T081101718443-review-of-kcb-field-derivative-outputs-dd5aa7cd55e3"
+  },
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T08:24:33.045308+00:00",
+  "total": 107
+}

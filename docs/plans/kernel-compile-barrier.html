@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="143">
+<meta name="plan-version" content="144">
 <meta name="plan-modified" content="2026-11-23">
 </head>
 <body>
@@ -385,6 +385,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20261120T200749156849" data-who="reckon-build" data-when="">
     <div class="r-comment-body"><p><strong>§7 landed on main at <code>00016d35e</code> (2026-11-20).</strong> 88 shared-storage default references across 82 tracked files now name <code>/work/projects/imas_gpu/nova</code>; the 29 DIII-D corpus references under <code>sophelio/raw</code> are unchanged, and the path check with its negative control is recorded. Reviewed head <code>23fa51437</code>: no blocking finding. Base (<code>789479f7d</code>) and head suite arms fail the same six test ids with none new. Two files are cut short for memory in both arms and are not claimed: <code>tests/test_operand_cache.py</code> (killed in <code>test_jet_matrix_persists_by_default</code> at 32 GB and at 120 GB, at base and at head) and <code>tests/equilibrium/test_topology_read.py</code> (one-hour limit, then 64 GB). The merge was made by hand on the lead's choice, because the landing gate reads only the last process of a per-file suite log and refuses a red suite; that defect is reported to reckon. One reference added on main after this node's base remains: <code>scripts/iron_operator_bound/west.sh</code>, lines 9 and 15, owned by the iron-core session. <a href="/nova/evidence/fragments/kernel-compile-barrier/shared-root.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-run-r-20261123T081101718443-review-of-kcb-field-derivative-outputs-dd5aa7cd55e3" data-who="reckon-build" data-when="2026-11-23T08:24:14.876Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261123T062912342648-kcb-field-derivative-outputs at base 3dbf01a8d2ef0303ce2c9fda7eb939dfca408f2e and head dd5aa7cd55e3d536f53ac0518be85b1a043e14f0; produced a parsed record scoring all six dimensions (goal_fidelity 19, evidence 17, scope_discipline 18, durability 17, fit 17, reuse 19; total 107) with zero added failing ids across the two suite arms and five non-blocking findings.</p></div>
 </div>
 </section>
 </main>

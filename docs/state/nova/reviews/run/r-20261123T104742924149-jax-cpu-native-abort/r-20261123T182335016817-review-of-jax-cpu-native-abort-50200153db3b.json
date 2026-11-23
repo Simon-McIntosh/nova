@@ -5,6 +5,13 @@
   "call_sites": [],
   "completed_at": "2026-11-23T18:40:53.230Z",
   "dispatched_at": "2026-11-23T18:24:39Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "jax-cpu-native-abort",
+      "recorded_at": "2026-11-23T21:33:18.498171+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T104742924149-jax-cpu-native-abort/manifest.md",

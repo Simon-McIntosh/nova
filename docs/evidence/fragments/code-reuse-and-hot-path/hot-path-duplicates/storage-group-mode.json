@@ -9,7 +9,7 @@
     "measured_agreement": "One temporary root holding an existing .nc file and an existing .zarr directory, plus an absent basename and group 'plasma'. Six of six exact string equalities: nested group 'plasma/equilibrium/flux', empty group None, declared group 'plasma/flux', absent mode 'w', present mode 'a', explicit mode 'r'.",
     "lines_removable": 15,
     "removal": "The duplicated subgroup (8) and get_mode (7) bodies are removable from one of the two classes once the shared method resolves presence through a single overridable predicate, which is the only difference between them.",
-    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry storage-group-mode; receipt at hot-path-duplicates/receipt.json; measured at revision ef0aba6f1454248ee592e51b35d4c84c3028a543"
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry storage-group-mode; receipt at hot-path-duplicates/receipt.json; measured at revision 1d30cd50bcfdba834c4587795b37632655802fd2"
   },
   "options": [
     {

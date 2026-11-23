@@ -9,7 +9,7 @@
     "measured_agreement": "A 64x9 seeded normal array carrying one constant tie row and two all-tie rows, over all four (maximise/minimise, axis 0/1) combinations: identical chosen index in every combination. Both exact wrappers also agree on a 1-D slice (maximum index 6, minimum index 4). Raising one element of the second implementation's input row 7.0 past the previous maximum moves its chosen index and leaves the first unchanged, a gap of 1 against a tolerance of 0.",
     "lines_removable": 28,
     "removal": "stencil_nulls' _arg_extreme (22), _argmax_exact (3) and _argmin_exact (3) become removable if stencil_nulls imports the connectivity_boundary owner. The owner is already a strict superset, so the exact-only callers keep their behaviour by calling it without a tolerance.",
-    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry extreme-selection; receipt at hot-path-duplicates/receipt.json; measured at revision ef0aba6f1454248ee592e51b35d4c84c3028a543"
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry extreme-selection; receipt at hot-path-duplicates/receipt.json; measured at revision 1d30cd50bcfdba834c4587795b37632655802fd2"
   },
   "options": [
     {

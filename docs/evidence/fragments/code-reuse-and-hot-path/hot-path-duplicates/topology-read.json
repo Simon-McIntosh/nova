@@ -9,7 +9,7 @@
     "measured_agreement": "One analytic Cerfon-Freidberg single-null field, diverted, on a 50-cell realised hexagonal geometry, both implementations run on the same operands in one process. Axis position 8.8e-05 m apart against a 1.35e-02 m tolerance (0.05 cell pitch); boundary class equal; membership area sum within 7.8e-04 relative against 5e-03; largest per-cell membership fraction 1.35e-02 against 0.05. Perturbing the exterior nodal jet by a uniform gradient of 0.1x its median derivative moves the two readings apart beyond both tolerances (per-cell fraction 0.878), so the comparison can fail.",
     "lines_removable": 56,
     "removal": "read_at_stationary_points becomes removable if the bank arm reads topology from the census and consumes the solved points as positions only. The operand assembly in support_read.read stays: it supplies rows and exterior jets the census does not compute. Removing the function means the census must accept the solve's already-converged stationary points so the bank arm does not re-scan the flux map.",
-    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry topology-read; receipt at hot-path-duplicates/receipt.json; measured at revision ef0aba6f1454248ee592e51b35d4c84c3028a543"
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry topology-read; receipt at hot-path-duplicates/receipt.json; measured at revision 1d30cd50bcfdba834c4587795b37632655802fd2"
   },
   "options": [
     {

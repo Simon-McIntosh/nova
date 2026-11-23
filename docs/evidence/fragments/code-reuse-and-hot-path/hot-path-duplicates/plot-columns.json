@@ -9,7 +9,7 @@
     "measured_agreement": "Three column states through a stub host carrying required, additional and frame.columns. Delegate call counts identical for every state: all present 0, one missing 1, all missing 1, for both implementations.",
     "lines_removable": 7,
     "removal": "Seven lines are removable from one of the two classes if both inherit one method from a shared plotting mixin; the method has no behaviour that differs between the two indexers.",
-    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry plot-columns; receipt at hot-path-duplicates/receipt.json; measured at revision ef0aba6f1454248ee592e51b35d4c84c3028a543"
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry plot-columns; receipt at hot-path-duplicates/receipt.json; measured at revision 1d30cd50bcfdba834c4587795b37632655802fd2"
   },
   "options": [
     {

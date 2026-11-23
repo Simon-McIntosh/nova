@@ -9,7 +9,7 @@
     "measured_agreement": "Three 65-point chords across one fixed quadratic level set, one interior vertex each, through the same evaluator. Largest point gap exactly 0.0 against a stated 1e-12 tolerance.",
     "lines_removable": 16,
     "removal": "The 16-line inline loop is removable if separatrix_clip imports the owner. The owner currently lives in forward_operator, so the node has to place it where both modules can import it without a cycle (a level-set module, or the separatrix module owning it and forward_operator importing back).",
-    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry level-set-polish; receipt at hot-path-duplicates/receipt.json; measured at revision ef0aba6f1454248ee592e51b35d4c84c3028a543"
+    "evidence": "docs/evidence/fragments/code-reuse-and-hot-path/hot-path-duplicate-register.html, entry level-set-polish; receipt at hot-path-duplicates/receipt.json; measured at revision 1d30cd50bcfdba834c4587795b37632655802fd2"
   },
   "options": [
     {

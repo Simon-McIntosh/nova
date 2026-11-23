@@ -45,50 +45,57 @@ def row(code: str, sequence: str, arm: dict) -> str:
 
 
 def check(payload: dict) -> tuple[list[str], int, list[str]]:
-    failures = []
+    """Run every assertion once, counting only the assertions themselves.
+
+    A count that moves where no assertion does overstates the gate, so each
+    assertion is written as one :func:`judge` call and nothing else increments
+    the total.
+    """
+    failures: list[str] = []
     performed = 0
-    lines = []
+    lines: list[str] = []
+
+    def judge(holds: bool, message: str) -> None:
+        nonlocal performed
+        performed += 1
+        if not holds:
+            failures.append(message)
+
     for code in ("nova", "efit"):
         streams = payload["control"].get(code, {})
         for sequence in ("white", "drift"):
             arm = streams.get(sequence)
-            performed += 1
+            judge(arm is not None, "%s: no %s arm was reduced" % (code, sequence))
             if arm is None:
-                failures.append("%s: no %s arm was reduced" % (code, sequence))
                 continue
             lines.append(row(code, sequence, arm))
-            performed += 1
-            if arm["slices"] < SLICES:
-                failures.append(
-                    "%s %s: %d slices is short of %d"
-                    % (code, sequence, arm["slices"], SLICES)
-                )
-            performed += 1
-            if arm["slices_with_boundary"] < SLICES // 2:
-                failures.append(
-                    "%s %s: a boundary on only %d slices"
-                    % (code, sequence, arm["slices_with_boundary"])
-                )
-        performed += 1
-        if streams.get("white_lag1_pass") is not True:
-            failures.append("%s: the white lag-one control failed" % code)
-        performed += 1
-        if streams.get("drift_lag1_pass") is not True:
-            failures.append("%s: the 1/f lag-one clause failed" % code)
-    for code in ("nova", "efit"):
-        streams = payload["control"].get(code, {})
-        for sequence in ("white", "drift"):
-            arm = streams.get(sequence)
-            if arm is None:
-                continue
+            judge(
+                arm["slices"] >= SLICES,
+                "%s %s: %d slices is short of %d"
+                % (code, sequence, arm["slices"], SLICES),
+            )
+            judge(
+                arm["slices_with_boundary"] >= SLICES // 2,
+                "%s %s: a boundary on only %d slices"
+                % (code, sequence, arm["slices_with_boundary"]),
+            )
+        judge(
+            streams.get("white_lag1_pass") is True,
+            "%s: the white lag-one control failed" % code,
+        )
+        judge(
+            streams.get("drift_lag1_pass") is True,
+            "%s: the 1/f lag-one clause failed" % code,
+        )
+        white = streams.get("white")
+        if white is not None:
             for stream in STREAMS:
-                value = arm[stream + "_lag1"]
-                performed += 1
-                if not abs(value) <= analyse.LAG_ONE_LIMIT and sequence == "white":
-                    failures.append(
-                        "%s %s %s lag-one %.3f outside +/-%.2f"
-                        % (code, sequence, stream, value, analyse.LAG_ONE_LIMIT)
-                    )
+                value = white[stream + "_lag1"]
+                judge(
+                    abs(value) <= analyse.LAG_ONE_LIMIT,
+                    "%s white %s lag-one %.3f outside +/-%.2f"
+                    % (code, stream, value, analyse.LAG_ONE_LIMIT),
+                )
     return failures, performed, lines
 
 

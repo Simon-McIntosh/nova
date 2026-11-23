@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-modified" content="2026-11-23">
 <meta name="plan-blocks" content="">
 <meta name="plan-standalone" content="The plan it unblocked, constraint-augmented-newton-krylov, is superseded; no open plan waits on the Shafranov observed side and it waits on none.">
@@ -188,6 +188,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-11-23T13:57:22.495965+00:00">
     <div class="r-comment-body"><p>Landed r-20261122T135238314086-sos-diamagnetic-source on the measured suite pair; <a href="/nova/evidence/archive/shafranov-observed-side-landed.html#sos-diamagnetic-source">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261122T135238314086-sos-diamagnetic-source" data-who="reckon-build" data-when="2026-11-23T14:11:08Z">
+    <div class="r-comment-body"><p>The magnetics reader publishes a diamagnetic loop with its archive path, weber units, COCOS convention and applied calibration on the toroidal volume term row, verifies each stored channel b0_like sense against the toroidal field and refuses a reversed one; the MAST level1 store carries the loop raw signals with no calibration to weber and its archived EFIT constraint value is zero or absent, so no MAST row is written and no solved-state value is substituted.</p></div>
 </div>
 </section>
 </main>

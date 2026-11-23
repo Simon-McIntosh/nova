@@ -1,0 +1,178 @@
+{
+  "agent": {},
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0
+  },
+  "changed_lines": {
+    "added": 1,
+    "files": 1,
+    "removed": 1
+  },
+  "clone_matches": {
+    "reason": "the revision pair could not be read",
+    "status": "unmeasured"
+  },
+  "commit_list_shortfall": {
+    "declared": 4,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261122T135238314086-sos-diamagnetic-source' has a passing gate presenting 1 commit(s) of the 4 its manifest declares, and neither the presented commits nor their ancestors above the base cover: 4729e2ed15e1155fe36fb16f70cbdc6e297eb130, 774470f59ade5ce468993ddb37f6989de9a3a32d, aaf0f00d4017d810055cf9175f1fb3bb717a06ae. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present a commit covering the rest, or the boundary check may not cover the node's work",
+    "missing": [
+      "4729e2ed15e1155fe36fb16f70cbdc6e297eb130",
+      "774470f59ade5ce468993ddb37f6989de9a3a32d",
+      "aaf0f00d4017d810055cf9175f1fb3bb717a06ae"
+    ],
+    "presented": 1
+  },
+  "commit_resolution": null,
+  "commits": [
+    "7185961a45ae3e0f755ea6d3204b02624cbed3e9"
+  ],
+  "completed_at": "2026-11-23T14:11:08Z",
+  "completed_at_source": "promotion_time",
+  "dispatch_width": null,
+  "dispatched_at": "2026-11-22T18:57:39Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": null,
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d05cb1ec-4ff4-4522-a11b-c1ba0f43b533/sos-diamagnetic-source JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -q -p no:cacheprovider tests/test_diamagnetic_shot_store.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T135238314086-sos-diamagnetic-source/gate-diamagnetic-shot-store.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "shafranov-observed-side",
+    "reason": "role-not-enforced:unknown",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-23T14:11:08Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T135238314086-sos-diamagnetic-source/manifest.md",
+  "member": "",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "no-negative-control-declared",
+    "test_paths": [
+      "tests/test_diamagnetic_shot_store.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sos-diamagnetic-source",
+  "node_definition": {
+    "id": "sos-diamagnetic-source",
+    "plan": "shafranov-observed-side",
+    "section": "§4",
+    "write_paths": [
+      "nova/imas/io_magnetics.py",
+      "tests/test_diamagnetic_shot_store.py",
+      "docs/evidence/fragments/shafranov-observed-side/sos-diamagnetic-source.html"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 8116194.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "picker_selection": null,
+  "plan": "shafranov-observed-side",
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "7185961a45ae3e0f755ea6d3204b02624cbed3e9",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "06d728006cba140ec3cf0670927100f31f8cfce0",
+    "reviewed_head_sha": "7185961a45ae3e0f755ea6d3204b02624cbed3e9",
+    "scores": {
+      "durability": 15,
+      "evidence": 13,
+      "fit": 16,
+      "goal_fidelity": 16,
+      "reuse": 14,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 93
+  },
+  "review_tier": "full",
+  "role": "",
+  "route_mode": null,
+  "run_id": "r-20261122T135238314086-sos-diamagnetic-source",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": null,
+  "session_harness": null,
+  "session_id": null,
+  "session_model": null,
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "",
+  "stalled": false,
+  "suite_delta": {
+    "added_failure_ids": [],
+    "reason": "the reviewed head is already carried by merge ff5aa1cb5f961bb8f96e0bddff2a6180beb8ce71 on the primary branch, so this recording measures no suite delta",
+    "recorded_merge": "ff5aa1cb5f961bb8f96e0bddff2a6180beb8ce71",
+    "status": "not-run",
+    "suite_command": ""
+  },
+  "tests_added": null,
+  "time_budget": "",
+  "tool_steps": 226.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 69209,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-22T21:35:48Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-22T18:57:45Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261122T135238314086-sos-diamagnetic-source",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 17634,
+    "worker_pid": 3363292
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "unavailable",
+  "worktree_retention": null
+}

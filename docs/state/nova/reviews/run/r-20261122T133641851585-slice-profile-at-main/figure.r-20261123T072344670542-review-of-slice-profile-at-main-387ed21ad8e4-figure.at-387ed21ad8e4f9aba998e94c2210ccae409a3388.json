@@ -1,0 +1,45 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-23T07:24:13Z",
+  "findings": [
+    {
+      "disposition": "exempted",
+      "disposition_note": "In the rendered PNG the label does not overlap the markers and both stay legible; recorded for a future redraw only.",
+      "file": "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
+      "id": "fbaabfd444c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 'unperturbed' direct label sits only about 4-5 px above the filled-marker row (its descender ends near row 393 and the marker crowns begin near row 398 at lanes close to 12-15), so at a reduced display scale the label crowds the data it names; a larger vertical offset would keep the clearance unambiguous."
+    },
+    {
+      "disposition": "exempted",
+      "disposition_note": "Both the direct label ('-Infinity at the first read') and the figure caption state the sentinel meaning, so the encoding is disambiguated in text.",
+      "file": "docs/figures/sub-millisecond-forward-path/slice-profile-at-main-cold-seed.svg",
+      "id": "fbaabfd444c",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The perturbed lanes are drawn as cross markers at a sentinel level near 1.3, above the highest labelled tick (1e0), with no axis break or ceiling tick, so a reader who does not read the annotation could mistake the row for a measured value near 1.3 rather than a non-finite (-Infinity) sentinel; an explicit ceiling tick or an axis-break marker would remove the ambiguity."
+    }
+  ],
+  "notes": "Reviewed only the attached rendered PNG (image-0.png); no SVG, script line, or other image was opened for the verdict. The reviewed figure maps to the sole figure cited in docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html. The figure depicts residual diagnostics rather than the latency/throughput figure the node's brief clause 3 named, which is consistent with the record's stated absence of any measurement; that is a content matter, not a visual defect, and is not raised as a finding.",
+  "project": "nova",
+  "review_run_id": "r-20261123T072344670542-review-of-slice-profile-at-main-387ed21ad8e4-figure",
+  "reviewed_base_sha": "b62734cdf482fa9bf8963412ef0bd5505f84b668",
+  "reviewed_head_sha": "387ed21ad8e4f9aba998e94c2210ccae409a3388",
+  "reviewed_run_id": "r-20261122T133641851585-slice-profile-at-main",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Dark axis and label text and the blue direct annotations clear the white background; the secondary grey annotations (#929292) render at roughly 3:1 and remain legible.",
+    "data_ink": "Data carry the visual weight: three coincident residual trajectories and one shared per-lane marker row, with no gradients, fills or decorative art.",
+    "decoration": "No background fill, gradient or gridlines; top and right spines are removed; the only non-data strokes are the labelled 1e-10 convergence-gate reference line and the -Infinity ceiling row.",
+    "label_collision": "No label is clipped at any edge; the left-edge y-axis label sits about 2 px from the frame but is fully drawn, annotations sit in clear space, and the 'unperturbed' label clears the marker row by a few pixels without overlapping it.",
+    "legibility": "Readable at a glance: two side-by-side panels with log residual axes, a held-out legend on the left and direct annotations on both; text and markers are legible at rendered size.",
+    "table_form": "Neither panel depicts information that is naturally a table; both are plotted relationships (residual against Newton step, first read against lane)."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:42:51.419629+00:00",
+  "total": null
+}

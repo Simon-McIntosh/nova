@@ -1,0 +1,61 @@
+{
+  "added_failure_basis": "Derived from the reviewed run's own suite arms on disk: baseline_suite at b62734cdf482 (/home/ITER/mcintos/.cache/nova-s28/slice-profile-at-main/suite-base.log, '4 passed in 6.62s', EXIT=0) and after_suite at the reviewed head 387ed21ad (/home/ITER/mcintos/.cache/nova-s28/slice-profile-at-main/suite-head-repair-1338522.log, '9 passed in 13.78s', EXIT=0). Neither log carries a FAILED id, so the added-failure set is empty. The earlier after arm at 63c29897e (suite-head-1338410.log, 4 passed, EXIT=0) is also green.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-23T07:42:50.444Z",
+  "dispatched_at": "2026-11-23T07:23:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html",
+      "line": 25,
+      "severity": "non-blocking",
+      "summary": "the 0d9c8493 width-64 row prints measured compile '41.0 / 41.0', but evidence/arm-receipts.json records process 2 at 41.055 s (41.1), so the published table does not reconcile to its own fixture for that cell."
+    },
+    {
+      "file": "docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html",
+      "line": 20,
+      "severity": "non-blocking",
+      "summary": "the record names job ids (1337810, 1338319, 1338331, 1338363, 1338261) but still names no log paths, which done_when clause 3 requires; the repair round did not add them, leaving the prior review's first finding unaddressed."
+    },
+    {
+      "file": "scripts/prototypes/bank_h200_slice_profile/test_cold_route_evidence.py",
+      "line": 18,
+      "severity": "non-blocking",
+      "summary": "the assertions pin the committed cold-route-records.json against literal constants but never re-run cold_solve_probe.py or run.py, so a regression in the producing code that leaves the fixture untouched is not caught; the guard covers the record, not the instrument that writes it."
+    }
+  ],
+  "justifications": {
+    "durability": "test_cold_route_evidence.py:28-94 recomputes the first read, step-6 refactor and factor, terminal residual, cross-revision spread and seed-read split from the committed fixture against independent literal constants (verified: 5 passed), so it reddens if evidence/cold-route-records.json or the constants move, though it does not execute the probe itself.",
+    "evidence": "The repair tabulates the twenty-seven receipts and they reconcile to evidence/arm-receipts.json to one decimal (one cell off by 0.1 s at line 25), but done_when clause 1's latency table is absent and clause 3's log paths are still missing at line 20.",
+    "fit": "The added module follows the sibling prototype-test idiom (plain pytest functions, pathlib, %-formatted failure messages) seen in scripts/prototypes/certified_carrier_export/test_export_records.py:1-40, and introduces no plan, ticket or version label.",
+    "goal_fidelity": "The reviewed run's goal is single-pulse H200 latency at main beside 0d9c8493, and docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html:33 still states no latency or throughput number is claimed.",
+    "reuse": "Search over scripts/prototypes for an evidence-claim assertion owner found only bespoke per-prototype tests (certified_carrier_export/test_export_records.py, contour_tree_sweep_profile/test_brute_receipt_identity.py) with no shared helper, so the new test extends the convention rather than duplicating an owner.",
+    "scope_discipline": "git diff --stat 63c29897e..387ed21ad lists exactly four paths, each inside the declared write paths (fragment html, scripts/prototypes/bank_h200_slice_profile root), with no nova/ source, no pyproject.toml and no test touched outside the prototype root."
+  },
+  "project": "nova",
+  "review_run_id": "r-20261123T072242614656-review-of-slice-profile-at-main-387ed21ad8e4",
+  "review_text": "VERDICT goal: the reviewed run's goal is per-slice H200 latency at main beside revision 0d9c8493; the commit gained since review, 387ed21ad, commits the twenty-seven arm receipts and a cold-route evidence test but claims no latency, and docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html:33 states no latency or throughput number is claimed.\nVERDICT done_when: clause 1's width-1/16/64 latency table with two-process spreads is still absent (every arm died on the convergence assert), the repair tabulates receipts as compile seconds, exit status and completeness per configuration, and clause 3's record holds job 1337810 but names no log paths.\nVERDICT write_paths: git diff --stat 63c29897e2fa..387ed21ad8e4 lists four paths, each inside the declared roots, with no nova/ source, no pyproject.toml and no test outside the prototype directory.\nVERDICT manifest: read in full; it records the repair suite arm (job 1338522, 9 passed in 13.78 s, EXIT=0) and the cold-route numbers, but its `tests:` line still reads `passed` rather than a literal command.\nVERDICT diff: read commit by commit from 63c29897e2fa to 387ed21ad8e4; the single commit 387ed21ad adds +15 lines to the fragment, commits evidence/arm-receipts.json and evidence/cold-route-records.json, and adds test_cold_route_evidence.py, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html:33 states no latency or throughput number is claimed.\nSCORE evidence: 11\nJUSTIFICATION evidence: the twenty-seven receipts reconcile to evidence/arm-receipts.json, but done_when clause 1's latency table is absent and clause 3's log paths are missing at line 20.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 63c29897e..387ed21ad lists exactly four paths, each inside the declared write paths and with no nova/ source or test change.\nSCORE durability: 15\nJUSTIFICATION durability: test_cold_route_evidence.py:28-94 recomputes the recorded numbers from the committed fixture against independent literal constants (5 passed), so it reddens on a fixture edit but does not execute the probe itself.\nSCORE fit: 17\nJUSTIFICATION fit: the added module follows the plain-pytest prototype idiom of scripts/prototypes/certified_carrier_export/test_export_records.py:1-40 and introduces no plan, ticket or version label.\nSCORE reuse: 19\nJUSTIFICATION reuse: a search over scripts/prototypes found only bespoke per-prototype evidence tests and no shared assertion owner, so the new test extends the convention.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html:25 non-blocking: the 0d9c8493 width-64 row prints '41.0 / 41.0' while evidence/arm-receipts.json records process 2 at 41.055 s (41.1), so the published table does not reconcile to its fixture for that cell.\nFINDING docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html:20 non-blocking: the record names job ids but no log paths, which done_when clause 3 requires; the repair round did not add them.\nFINDING scripts/prototypes/bank_h200_slice_profile/test_cold_route_evidence.py:18 non-blocking: the assertions pin the committed fixture against literal constants but never re-run the probe, so a regression in cold_solve_probe.py or run.py that leaves the fixture untouched is not caught.",
+  "reviewed_base_sha": "63c29897e2fa0fdab48947f28b2ebffb0aaa8b39",
+  "reviewed_head_sha": "387ed21ad8e4f9aba998e94c2210ccae409a3388",
+  "reviewed_run_id": "r-20261122T133641851585-slice-profile-at-main",
+  "scores": {
+    "durability": 15,
+    "evidence": 11,
+    "fit": 17,
+    "goal_fidelity": 9,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-23T07:35:00Z",
+  "total": 90,
+  "verdicts": {
+    "diff": "Read commit by commit from 63c29897e2fa to 387ed21ad8e4: the single commit 387ed21ad adds the arm-receipt tabulation to the fragment (+15 lines), commits evidence/arm-receipts.json (247 lines) and evidence/cold-route-records.json (422 lines), and adds test_cold_evidence.py (94 lines); every hunk is evidence, fixture or test.",
+    "done_when": "Clause 1's width-1/16/64 latency table with two-process spreads is still absent (every arm died on the convergence assert), and the repair tabulates the receipts in the form they support \u2014 compile seconds, exit status and completeness per configuration; clause 2's verdict is the cold-route comparison already present; clause 3's record holds the job id 1337810 but no log paths.",
+    "goal": "The reviewed run's goal is per-slice H200 latency at main beside revision 0d9c8493; the commit gained since review, 387ed21ad, commits the twenty-seven arm receipts and a cold-route evidence test but claims no latency, and docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html:33 states outright that no latency or throughput number is claimed.",
+    "manifest": "Read in full; it records the repair round's suite arm (job 1338522, 9 passed in 13.78 s, EXIT=0), the cold-route numbers and the explicit decision to mark status complete for the coordinator to promote; its `tests:` line still reads `passed` rather than a literal gate command.",
+    "write_paths": "git diff --stat 63c29897e2fa..387ed21ad8e4 lists four paths \u2014 docs/evidence/fragments/sub-millisecond-forward-path/slice-profile-at-main.html, scripts/prototypes/bank_h200_slice_profile/evidence/arm-receipts.json, .../evidence/cold-route-records.json and .../test_cold_route_evidence.py \u2014 all inside the declared roots."
+  }
+}

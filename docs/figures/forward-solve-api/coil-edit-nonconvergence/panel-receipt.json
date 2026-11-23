@@ -39,9 +39,9 @@
   "figure": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
   "figure_vector": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.svg",
   "near_x_geometry": {
-    "converged_current_field_certifies_near_x": false,
-    "converged_promoted_within_two_cells": true,
-    "non_converged_promoted_within_two_cells": false,
+    "converged_current_field_certifies_near_x": true,
+    "converged_promoted_within_two_cells": false,
+    "non_converged_promoted_within_two_cells": true,
     "two_cell_threshold_m": 0.12125000008381903
   },
   "render": {

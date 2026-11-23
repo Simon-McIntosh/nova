@@ -39,8 +39,8 @@
   "figure": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
   "figure_vector": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.svg",
   "near_x_geometry": {
-    "converged_current_field_certifies_near_x": false,
-    "converged_promoted_within_two_cells": true,
+    "converged_current_field_certifies_near_x": true,
+    "converged_promoted_within_two_cells": false,
     "non_converged_promoted_within_two_cells": false,
     "two_cell_threshold_m": 0.12125000008381903
   },

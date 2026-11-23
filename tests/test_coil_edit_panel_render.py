@@ -798,6 +798,43 @@ COIL_EDIT_PANEL_SETS = tuple(
 )
 
 
+def _near_x_geometry_agrees(archive: Path, recorded: dict[str, Any]) -> bool:
+    """Whether a receipt's near_x_geometry follows from its own display map.
+
+    The block states two facts per panel: whether the panel promotes a lattice
+    node within two cells of its polished X-point, and whether that lets the
+    converged field certify the near-X geometry.  Both are recomputed here from
+    the archive's node spacings and the distances the receipt records, so a
+    block that was copied from another figure rather than computed fails.
+    """
+    block = recorded.get("near_x_geometry")
+    if not isinstance(block, dict):
+        return False
+    with np.load(archive, allow_pickle=False) as data:
+        threshold = 2.0 * min(
+            float(np.min(np.diff(np.asarray(data[axis], dtype=float))))
+            for axis in ("radius", "height")
+        )
+    if float(block["two_cell_threshold_m"]) != threshold:
+        return False
+    panels = recorded["display_map"]["panels"]
+    converged_within = None
+    for label, key in (
+        ("converged", "converged_promoted_within_two_cells"),
+        ("failed", "non_converged_promoted_within_two_cells"),
+    ):
+        panel = panels.get(label)
+        nearest = None if panel is None else panel["nearest_promoted_to_xpoint_m"]
+        expected = None if nearest is None else bool(float(nearest) <= threshold)
+        if block[key] != expected:
+            return False
+        if label == "converged":
+            converged_within = expected
+    if converged_within is None:
+        return block["converged_current_field_certifies_near_x"] is None
+    return block["converged_current_field_certifies_near_x"] == (not converged_within)
+
+
 @pytest.mark.parametrize(
     ("label", "tag", "archive", "receipt"),
     COIL_EDIT_PANEL_SETS,
@@ -830,6 +867,10 @@ def test_each_published_figure_records_the_solve_it_draws(
     assert (
         "the non-converged panel draws the field of its terminal currents on a "
         "10 mm map" in recorded["caption"]
+    )
+    assert _near_x_geometry_agrees(archive, recorded), (
+        f"{label}: the receipt's near_x_geometry contradicts its own display "
+        "map, so it does not describe the re-solved field the figure draws"
     )
     assert "largest node mismatch" in recorded["caption"]
 

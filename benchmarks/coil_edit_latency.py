@@ -2388,6 +2388,46 @@ def _constraint_note(centroid: dict[str, Any] | None) -> str:
     )
 
 
+def _near_x_geometry(loaded: dict[str, Any]) -> dict[str, Any] | None:
+    """Summarise how close the drawn panels' promotions sit to their X-points.
+
+    A promoted node is one the closing trip kept at its trial state, so the
+    drawn field there is not one a current distribution reproduces.  Within
+    two lattice cells of the polished X-point that is the geometry the panel
+    exists to show, so a converged field whose promotions stay outside that
+    band certifies the near-X geometry while one that promotes inside it does
+    not.  The cell is the finer of the archive's own node spacings, so the
+    threshold follows each figure's lattice rather than assuming one.
+    """
+    panels = {label: loaded[label].get("display") for label in ("converged", "failed")}
+    converged = panels["converged"]
+    non_converged = panels["failed"]
+    if converged is None:
+        return None
+    threshold = 2.0 * min(
+        float(np.min(np.diff(np.asarray(loaded[axis], dtype=float))))
+        for axis in ("radius", "height")
+    )
+
+    def within_two_cells(display: Any) -> bool | None:
+        if display is None:
+            return None
+        nearest = float(display.nearest_promoted_to_xpoint_m)
+        if not np.isfinite(nearest):
+            return None
+        return bool(nearest <= threshold)
+
+    converged_within = within_two_cells(converged)
+    return {
+        "two_cell_threshold_m": threshold,
+        "converged_promoted_within_two_cells": converged_within,
+        "non_converged_promoted_within_two_cells": within_two_cells(non_converged),
+        "converged_current_field_certifies_near_x": (
+            None if converged_within is None else not converged_within
+        ),
+    }
+
+
 def _panel_display_note(loaded: dict[str, Any]) -> str:
     """Return the caption clause a panel drawn from a display map carries.
 
@@ -2752,6 +2792,7 @@ def _render_panel(
         "vertical_centroid": loaded.get("vertical_centroid"),
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
+        "near_x_geometry": _near_x_geometry(loaded),
         "display_map": {
             "moments_route": ("stored terminal moments at the solve's target current"),
             "panels": {

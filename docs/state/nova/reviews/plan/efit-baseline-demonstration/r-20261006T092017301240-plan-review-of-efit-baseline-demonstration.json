@@ -24,7 +24,30 @@
   "plan_slug": "efit-baseline-demonstration",
   "plan_version": 57,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f43d7fc5425fde4269d7961012fddda2db077662",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "carried into section 3 node ebd-rescore-at-head: its brief makes both cohorts consume the comparator's typed topology_class_agreement, one agreement owner, pinned on one MAST and one DIII-D row",
+      "reason": "",
+      "when": "2026-11-24T05:49:26.707557+00:00"
+    }
+  ],
+  "responses": {
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f43d7fc5425fde4269d7961012fddda2db077662",
+      "commit_basis": "edit",
+      "note": "carried into section 3 node ebd-rescore-at-head: its brief makes both cohorts consume the comparator's typed topology_class_agreement, one agreement owner, pinned on one MAST and one DIII-D row",
+      "reason": "",
+      "when": "2026-11-24T05:49:26.707557+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/efit-baseline-demonstration/r-20261006T092017301240-plan-review-of-efit-baseline-demonstration.json",
   "review_run_id": "r-20261006T092017301240-plan-review-of-efit-baseline-demonstration",
   "reviewed_blob_sha": "78538e0bf3b4c7abab85d9bdcf16fafce2fd35d3",
   "rubric": "design",

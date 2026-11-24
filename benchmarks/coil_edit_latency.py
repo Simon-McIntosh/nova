@@ -836,6 +836,27 @@ def _vertical_centroid_row(result: Any) -> dict[str, Any] | None:
     }
 
 
+def _finite_tree(value: Any) -> Any:
+    """Return a document with every non-finite float persisted as null."""
+    if isinstance(value, dict):
+        return {key: _finite_tree(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_finite_tree(item) for item in value]
+    if isinstance(value, float):
+        return value if np.isfinite(value) else None
+    return value
+
+
+def _strict_json(document: Any) -> str:
+    """Serialise a receipt as strict JSON, with an unevaluated value as null.
+
+    A non-finite float is not a number a reader can use, and the sweep's
+    remaining edits are still sound, so it is persisted as null rather than
+    aborting the run on a strict dump.
+    """
+    return json.dumps(_finite_tree(document), indent=2, sort_keys=True, allow_nan=False)
+
+
 def _achieved_class(profile: Any, state: Any) -> dict[str, Any]:
     """Read the saddle-aware class the read derives, or its refusal."""
     try:
@@ -1229,7 +1250,7 @@ def _write_diagnostics(
         document["display_map"] = panel["display_map"]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        json.dumps(document, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        _strict_json(document) + "\n",
         encoding="utf-8",
     )
 
@@ -1443,6 +1464,7 @@ def _panel_display_map(
     coupling: Any = None,
     target_current: Any = None,
     compensation: Any = None,
+    extent: tuple[float, float, float, float] | None = None,
 ):
     """Return one stored panel state's field evaluated on the display grid.
 
@@ -1508,6 +1530,7 @@ def _panel_display_map(
         requested_class=requested_class,
         axis_rz=np.asarray(panel["axis"], dtype=np.float64),
         xpoint_rz=np.asarray(seed, dtype=np.float64),
+        extent=extent,
         promoted=panel.get("promoted_mask"),
         compensation=compensation,
     )
@@ -2288,6 +2311,32 @@ def _branch_terms(branches: dict[str, Any] | None) -> dict[str, Any] | None:
     }
 
 
+def _assembly_drawn(loaded: dict[str, Any]) -> dict[str, Any]:
+    """Return how each of the three branch sets was drawn, and why.
+
+    A set the assembler rejects carries zero geometry, so it is drawn from its
+    own scan-order crossings as separate marks, which reads on the panel like
+    an assembled boundary unless the record says otherwise.  The drawn counts
+    and the assembler's verdict terms therefore travel together, so a reader
+    can hold the caption against what the figure was actually drawn from.
+    """
+
+    def entry(panel: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "drawn": dict(panel.get("branches_drawn") or {}),
+            "assembled": _branch_terms(panel.get("branches")),
+        }
+
+    return {
+        "reference": {
+            "drawn": dict(loaded.get("reference_branches_drawn") or {}),
+            "assembled": _branch_terms(loaded.get("reference_branches")),
+        },
+        "converged": entry(loaded["converged"]),
+        "non_converged": entry(loaded["failed"]),
+    }
+
+
 def _panel_summary(panel: dict[str, Any]) -> dict[str, Any]:
     """Return the json-safe scalars the panel caption reports."""
     return {
@@ -2363,6 +2412,46 @@ def _constraint_note(centroid: dict[str, Any] | None) -> str:
         centroid["target_m"],
         centroid["tolerance_m"],
     )
+
+
+def _near_x_geometry(loaded: dict[str, Any]) -> dict[str, Any] | None:
+    """Summarise how close the drawn panels' promotions sit to their X-points.
+
+    A promoted node is one the closing trip kept at its trial state, so the
+    drawn field there is not one a current distribution reproduces.  Within
+    two lattice cells of the polished X-point that is the geometry the panel
+    exists to show, so a converged field whose promotions stay outside that
+    band certifies the near-X geometry while one that promotes inside it does
+    not.  The cell is the finer of the archive's own node spacings, so the
+    threshold follows each figure's lattice rather than assuming one.
+    """
+    panels = {label: loaded[label].get("display") for label in ("converged", "failed")}
+    converged = panels["converged"]
+    non_converged = panels["failed"]
+    if converged is None:
+        return None
+    threshold = 2.0 * min(
+        float(np.min(np.diff(np.asarray(loaded[axis], dtype=float))))
+        for axis in ("radius", "height")
+    )
+
+    def within_two_cells(display: Any) -> bool | None:
+        if display is None:
+            return None
+        nearest = float(display.nearest_promoted_to_xpoint_m)
+        if not np.isfinite(nearest):
+            return None
+        return bool(nearest <= threshold)
+
+    converged_within = within_two_cells(converged)
+    return {
+        "two_cell_threshold_m": threshold,
+        "converged_promoted_within_two_cells": converged_within,
+        "non_converged_promoted_within_two_cells": within_two_cells(non_converged),
+        "converged_current_field_certifies_near_x": (
+            None if converged_within is None else not converged_within
+        ),
+    }
 
 
 def _panel_display_note(loaded: dict[str, Any]) -> str:
@@ -2461,16 +2550,21 @@ def _merge_receipt(path: Path, record: dict[str, Any]) -> dict[str, Any]:
     does not own is kept, and a mapping present on both sides is merged rather
     than overwritten.
 
-    The ``render`` block is the exception: it describes one run of one command,
-    so a re-render replaces it.  The block it displaces is kept once under
-    ``superseded`` with any ``superseded`` it already carried removed, because
-    merging the two as mappings would nest a predecessor under a predecessor
-    and a reader could no longer tell which run produced the file.
+    The ``render`` and ``solve`` blocks are the exceptions: each describes one
+    run of one command, so a re-run replaces it.  The block a re-render
+    displaces is kept once under ``superseded`` with any ``superseded`` it
+    already carried removed, because merging the two as mappings would nest a
+    predecessor under a predecessor and a reader could no longer tell which run
+    produced the file.
     """
     if not path.exists():
         return record
     try:
-        existing = json.loads(path.read_text(encoding="utf-8"))
+        nested = path.read_text(encoding="utf-8")
+    except OSError:
+        return record
+    try:
+        existing = json.loads(nested)
     except json.JSONDecodeError:
         return record
     if not isinstance(existing, dict):
@@ -2479,7 +2573,7 @@ def _merge_receipt(path: Path, record: dict[str, Any]) -> dict[str, Any]:
         if key not in record:
             record[key] = value
         elif (
-            key == "render"
+            key in ("render", "solve")
             and isinstance(value, dict)
             and isinstance(record[key], dict)
         ):
@@ -2490,6 +2584,33 @@ def _merge_receipt(path: Path, record: dict[str, Any]) -> dict[str, Any]:
         elif isinstance(value, dict) and isinstance(record[key], dict):
             record[key] = {**value, **record[key]}
     return record
+
+
+def _solve_block(receipt_path: Path) -> dict[str, Any]:
+    """Return the solve provenance a panel render carries beside its figure.
+
+    A panel receipt says which command the state it draws was solved with.
+    That is not rediscoverable from the state archive, so the render reads it
+    from the sweep's own receipt where the solve wrote its command, scheduler
+    and device.
+    """
+    solved = json.loads(receipt_path.read_text(encoding="utf-8"))
+    scheduler = solved.get("scheduler") or {}
+    runtime = solved.get("runtime") or {}
+    edits = solved.get("edits") or []
+    return {
+        "command": solved.get("command"),
+        "job_id": scheduler.get("job_id"),
+        "partition": scheduler.get("partition"),
+        "reservation": scheduler.get("reservation"),
+        "node": scheduler.get("node") or runtime.get("host"),
+        "device": runtime.get("device"),
+        "host": runtime.get("host"),
+        "platform": runtime.get("platform"),
+        "source_revision": solved.get("source_revision"),
+        "measurement_state": solved.get("measurement_state"),
+        "sweep_completed_edits": len(edits),
+    }
 
 
 def _render_panel(
@@ -2649,8 +2770,8 @@ def _render_panel(
         "flux (%.4f to %.4f Wb)  |  every solved state imposes the "
         "vertical current-centre row %s  |  reference is the unedited "
         "equilibrium, its admitted saddle %s (blue set: %s, admitted %s)  |  "
-        "solved sets orange: %s, admitted %s %s in the converged panel "
-        "and %s %s in the failed panel  |  the reference nulls are drawn "
+        "solved sets orange in the converged panel: %s, admitted %s %s; in the "
+        "failed panel: %s, admitted %s %s  |  the reference nulls are drawn "
         "larger and beneath the solved ones, so a coincident axis or saddle "
         "reads as both  |  other qualified nulls hollow in both sets  |  "
         "wall drawn"
@@ -2665,9 +2786,10 @@ def _render_panel(
             ),
             _branch_style_note(loaded.get("reference_branches_drawn", {})),
             reference_note,
-            _branch_style_note(loaded["failed"].get("branches_drawn", {})),
+            _branch_style_note(loaded["converged"].get("branches_drawn", {})),
             solved_notes[0],
             solved_orderings[0],
+            _branch_style_note(loaded["failed"].get("branches_drawn", {})),
             solved_notes[1],
             solved_orderings[1],
         )
@@ -2694,9 +2816,11 @@ def _render_panel(
         },
         "reference_branches": _branch_terms(loaded["reference_branches"]),
         "reference_branches_drawn": dict(loaded.get("reference_branches_drawn", {})),
+        "assembly_drawn": _assembly_drawn(loaded),
         "vertical_centroid": loaded.get("vertical_centroid"),
         "converged": _panel_summary(loaded["converged"]),
         "non_converged": _panel_summary(loaded["failed"]),
+        "near_x_geometry": _near_x_geometry(loaded),
         "display_map": {
             "moments_route": ("stored terminal moments at the solve's target current"),
             "panels": {
@@ -2848,6 +2972,7 @@ def _receipt_document(
         "schema": "nova.coil-edit-latency",
         "measurement_state": measurement_state,
         "verdict": verdict,
+        "command": " ".join([sys.argv[0], *sys.argv[1:]]),
         "gates": gates,
         "gate_notes": _gate_notes(rows),
         "vertical_centroid_constraint": {
@@ -3365,7 +3490,7 @@ def run(
             )
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(
-                json.dumps(landing, indent=2, sort_keys=True, allow_nan=False) + "\n",
+                _strict_json(landing) + "\n",
                 encoding="utf-8",
             )
             _write_diagnostics(diagnostics, prepared=prepared, rows=rows)
@@ -3422,7 +3547,7 @@ def run(
         )
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(
-            json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n",
+            _strict_json(receipt) + "\n",
             encoding="utf-8",
         )
         exit_marker = int(receipt["runtime"]["exit_marker"])
@@ -3766,6 +3891,15 @@ def main() -> None:
         default=None,
         help="write the render's host, command and map spacing beside the figure",
     )
+    panel_parser.add_argument(
+        "--solve-receipt",
+        type=Path,
+        default=None,
+        help=(
+            "the sweep receipt whose command, lane and device solved the state "
+            "this figure draws"
+        ),
+    )
     check_parser = subparsers.add_parser("checkcase")
     check_parser.add_argument(
         "--carrier", type=Path, default=response_carrier.DEFAULT_CARRIER
@@ -3810,33 +3944,38 @@ def main() -> None:
         )
         if arguments.receipt is not None:
             arguments.receipt.parent.mkdir(parents=True, exist_ok=True)
+            record: dict[str, Any] = {
+                "schema": "nova.coil-edit-panel-render",
+                "command": " ".join([sys.argv[0], *sys.argv[1:]]),
+                "scheduler": _scheduler(),
+                "render": {
+                    "command": " ".join([sys.argv[0], *sys.argv[1:]]),
+                    "host": platform.node(),
+                    "device": jax.devices()[0].device_kind,
+                    "platform": jax.devices()[0].platform,
+                    **_scheduler(),
+                },
+                "runtime": {
+                    "host": platform.node(),
+                    "device": jax.devices()[0].device_kind,
+                    "platform": jax.devices()[0].platform,
+                    "jax_platforms": os.environ.get("JAX_PLATFORMS"),
+                },
+                "caption": panel["caption"],
+                "visual_inspection": {
+                    **panel["visual_inspection"],
+                    "inspected_render": str(arguments.panel_figure),
+                },
+                "display_map": panel["display_map"],
+                "near_x_geometry": panel["near_x_geometry"],
+                "assembly_drawn": panel["assembly_drawn"],
+                "state_archive": _declared_path(arguments.panel_data),
+                "state_archive_md5": _sha256(arguments.panel_data),
+            }
+            if arguments.solve_receipt is not None:
+                record["solve"] = _solve_block(arguments.solve_receipt)
             arguments.receipt.write_text(
-                json.dumps(
-                    _merge_receipt(
-                        arguments.receipt,
-                        {
-                            "schema": "nova.coil-edit-panel-render",
-                            "command": " ".join([sys.argv[0], *sys.argv[1:]]),
-                            "scheduler": _scheduler(),
-                            "runtime": {
-                                "host": platform.node(),
-                                "device": jax.devices()[0].device_kind,
-                                "platform": jax.devices()[0].platform,
-                                "jax_platforms": os.environ.get("JAX_PLATFORMS"),
-                            },
-                            "caption": panel["caption"],
-                            "visual_inspection": {
-                                **panel["visual_inspection"],
-                                "inspected_render": str(arguments.panel_figure),
-                            },
-                            "display_map": panel["display_map"],
-                        },
-                    ),
-                    indent=2,
-                    sort_keys=True,
-                    allow_nan=False,
-                )
-                + "\n",
+                _strict_json(_merge_receipt(arguments.receipt, record)) + "\n",
                 encoding="utf-8",
             )
         print(json.dumps(panel, indent=2, sort_keys=True))

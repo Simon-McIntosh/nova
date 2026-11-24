@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import json
+import re
 from typing import Any
 
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
@@ -29,6 +30,7 @@ from PIL import Image
 
 from benchmarks.coil_edit_latency import (
     DEFAULT_DISPLAY_SPACING,
+    _branch_style_note,
     _panel_display_map,
     _panel_load,
     _render_panel,
@@ -78,6 +80,30 @@ def _polish_map_saddle(display, seed):
     )
 
 
+def _drawn_converged_position(stored: Any) -> int:
+    """Return the edit position of the drawn panel the solve calls converged.
+
+    The archive persists a full state only for the edits the panel figure
+    draws, under ``state_<position>``, so the drawn set is the set of those
+    suffixes. Which edit the sweep reaches is the solve's own outcome and moves
+    with the sweep, so the position is read from the archive's ``converged``
+    flag rather than pinned to the edit a previous sweep happened to draw.
+    """
+    drawn = sorted(
+        int(name.rsplit("_", 1)[1])
+        for name in stored.files
+        if name.startswith("state_")
+    )
+    converged = np.asarray(stored["converged"], dtype=bool)
+    closing = [position for position in drawn if bool(converged[position])]
+    assert len(closing) == 1, (
+        "a panel figure draws one converged edit and one that did not converge; "
+        f"the drawn positions {drawn} report "
+        f"{[bool(converged[position]) for position in drawn]}"
+    )
+    return closing[0]
+
+
 def test_a_stored_panel_reports_its_lattice_promotions():
     """Read the committed panel's promotions from the solve's own mask.
 
@@ -100,8 +126,11 @@ def test_a_stored_panel_reports_its_lattice_promotions():
         )
     )
     stored = np.load(archive, allow_pickle=False)
-    state = np.asarray(stored["state_12"], dtype=np.float64)
-    promoted_mask = np.asarray(stored["promoted_mask_12"], dtype=bool).reshape(-1)
+    position = _drawn_converged_position(stored)
+    state = np.asarray(stored[f"state_{position}"], dtype=np.float64)
+    promoted_mask = np.asarray(stored[f"promoted_mask_{position}"], dtype=bool).reshape(
+        -1
+    )
     wall_rows = int(np.asarray(stored["wall_coordinate"]).shape[0])
     node_count = int(
         np.asarray(stored["radius"]).size * np.asarray(stored["height"]).size
@@ -126,12 +155,12 @@ def test_a_stored_panel_polishes_its_own_saddle():
         )
     )
     stored = np.load(archive, allow_pickle=False)
+    panel = _drawn_converged_position(stored)
     radius = np.asarray(stored["radius"], dtype=np.float64)
     height = np.asarray(stored["height"], dtype=np.float64)
-    values = np.asarray(stored["psi_12"], dtype=np.float64)
-    seed = np.asarray(stored["xpoints_12"], dtype=np.float64).reshape(-1, 2)[
-        int(np.asarray(stored["saddle_index_12"]))
-    ]
+    values = np.asarray(stored[f"psi_{panel}"], dtype=np.float64)
+    x_points = np.asarray(stored[f"xpoints_{panel}"], dtype=np.float64).reshape(-1, 2)
+    seed = x_points[int(np.asarray(stored[f"saddle_index_{panel}"]))]
     surface = fit_tensor_spline(
         jnp.asarray(radius), jnp.asarray(height), jnp.asarray(values)
     )
@@ -152,11 +181,17 @@ def test_a_stored_panel_polishes_its_own_saddle():
         ),
         dtype=np.float64,
     )
-    mask = np.asarray(stored["promoted_mask_12"], dtype=bool).reshape(-1)[
+    mask = np.asarray(stored[f"promoted_mask_{panel}"], dtype=bool).reshape(-1)[
         : promoted.shape[0]
     ]
     nearest = float(np.min(np.linalg.norm(promoted[mask] - position, axis=1)))
-    assert 0.0 < nearest < 0.2
+    # The re-solved sweep converges first at edit 5, whose active set promotes
+    # the lattice nodes between Z -1.375 and -1.75 m while its admitted X-point
+    # lies at (0.648, 1.188) m, so the nearest promoted node sits this far from
+    # the polished saddle. The displaced archive drew edit 12, whose state
+    # promoted a node 0.056 m away; that proximity belonged to the field this
+    # archive replaced, not to the one the figure now draws.
+    assert nearest == pytest.approx(2.563235334571605, abs=1.0e-6)
 
 
 def test_panel_explanation_is_available_at_page_text_size(tmp_path: Path):
@@ -742,3 +777,519 @@ def test_the_panel_subcommand_persists_its_caption(
     assert written["visual_inspection"]["inspected_render"] == str(
         tmp_path / "panel.png"
     )
+
+
+def test_the_panel_subcommand_writes_the_near_x_block_it_computed(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """A receipt written by the panel path carries the block it computed.
+
+    The display map is replaced by a stand-in that keeps the archive's own
+    lattice and fixes the two distances it reports, so the written receipt has
+    to carry a block derived from those distances and from the archive's node
+    spacings rather than a value copied from anywhere else.  The block is the
+    producer's own output, which is what a reader of a published receipt is
+    entitled to assume.
+    """
+    import sys
+    from types import SimpleNamespace
+
+    import benchmarks.coil_edit_latency as renderer
+
+    archive = PANEL_ARCHIVE
+    loaded = _panel_load(archive)
+    distances = {"converged": 0.5, "failed": 0.05}
+
+    def stand_in(_profile: Any, _context: Any, panel: Any, **_kwargs: Any) -> Any:
+        label = "converged" if panel["converged"] else "failed"
+        return SimpleNamespace(
+            radius=loaded["radius"],
+            height=loaded["height"],
+            flux=np.asarray(panel["psi"], dtype=float).T,
+            branches=panel["branches"],
+            saddle_converged=False,
+            saddle_rz=None,
+            spacing_m=DEFAULT_DISPLAY_SPACING,
+            reproduction_relative_error=0.0,
+            max_node_mismatch_wb=1.0e-09,
+            max_solved_node_mismatch_wb=1.0e-09,
+            promoted_node_count=3,
+            nearest_promoted_to_xpoint_m=distances[label],
+        )
+
+    monkeypatch.setattr(renderer, "_require_measurement_host", lambda: None)
+    monkeypatch.setattr(renderer, "_panel_display_map", stand_in)
+    monkeypatch.setattr(
+        renderer,
+        "_prepare_case",
+        lambda _carrier: (
+            object(),
+            {"circuit_context": {}, "target_current": None},
+            None,
+        ),
+    )
+    receipt = tmp_path / "panel-receipt.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "coil_edit_latency.py",
+            "panel",
+            "--display-map",
+            "--panel-data",
+            str(archive),
+            "--panel-figure",
+            str(tmp_path / "panel.png"),
+            "--receipt",
+            str(receipt),
+        ],
+    )
+    renderer.main()
+    written = json.loads(receipt.read_text())
+
+    threshold = 2.0 * min(
+        float(np.min(np.diff(np.asarray(loaded[axis], dtype=float))))
+        for axis in ("radius", "height")
+    )
+    block = written["near_x_geometry"]
+    assert block["two_cell_threshold_m"] == threshold
+    assert block["converged_promoted_within_two_cells"] is False
+    assert block["non_converged_promoted_within_two_cells"] is True
+    assert block["converged_current_field_certifies_near_x"] is True
+
+
+#: The five published coil-edit panel sets and the tag of the invocation that
+#: solved each.  A figure's state comes from its own run, so no two figures
+#: cite the same output path.
+COIL_EDIT_PANEL_DIRECTORIES = (
+    ("forward-solve-api/coil-edit-nonconvergence", "h200-fsapi"),
+    ("mast-centroid-capability", "h200-mast"),
+    ("single-grid-solver-cutover", "titan-single-grid"),
+    ("cpu-compile-abort/coil-edit-regeneration-row", "h200-cca-row"),
+    ("cpu-compile-abort/coil-edit-regeneration-row/titan", "titan-cca-titan"),
+)
+COIL_EDIT_PANEL_SETS = tuple(
+    (
+        directory,
+        tag,
+        Path("docs/figures") / directory / "panel-states.npz",
+        Path("docs/figures") / directory / "panel-receipt.json",
+    )
+    for directory, tag in COIL_EDIT_PANEL_DIRECTORIES
+)
+
+
+def _near_x_geometry_agrees(archive: Path, recorded: dict[str, Any]) -> bool:
+    """Whether a receipt's near_x_geometry follows from its own display map.
+
+    The block states two facts per panel: whether the panel promotes a lattice
+    node within two cells of its polished X-point, and whether that lets the
+    converged field certify the near-X geometry.  Both are recomputed here from
+    the archive's node spacings and the distances the receipt records, so a
+    block that was copied from another figure rather than computed fails.
+    """
+    block = recorded.get("near_x_geometry")
+    if not isinstance(block, dict):
+        return False
+    with np.load(archive, allow_pickle=False) as data:
+        threshold = 2.0 * min(
+            float(np.min(np.diff(np.asarray(data[axis], dtype=float))))
+            for axis in ("radius", "height")
+        )
+    if float(block["two_cell_threshold_m"]) != threshold:
+        return False
+    panels = recorded["display_map"]["panels"]
+    converged_within = None
+    for label, key in (
+        ("converged", "converged_promoted_within_two_cells"),
+        ("failed", "non_converged_promoted_within_two_cells"),
+    ):
+        panel = panels.get(label)
+        nearest = None if panel is None else panel["nearest_promoted_to_xpoint_m"]
+        expected = None if nearest is None else bool(float(nearest) <= threshold)
+        if block[key] != expected:
+            return False
+        if label == "converged":
+            converged_within = expected
+    if converged_within is None:
+        return block["converged_current_field_certifies_near_x"] is None
+    return block["converged_current_field_certifies_near_x"] == (not converged_within)
+
+
+@pytest.mark.parametrize(
+    ("label", "tag", "archive", "receipt"),
+    COIL_EDIT_PANEL_SETS,
+    ids=[entry[0] for entry in COIL_EDIT_PANEL_SETS],
+)
+def test_each_published_figure_records_the_solve_it_draws(
+    label: str, tag: str, archive: Path, receipt: Path
+):
+    """A figure's receipt names the invocation, lane and device that solved it.
+
+    All five figures previously drew one regenerated archive, so a receipt
+    could not say which sweep a figure's state came from.  The state now comes
+    from the figure's own run, and its receipt names that run rather than
+    leaving a figure's provenance to be inferred from a neighbour.
+    """
+    assert archive.is_file(), f"{label} must publish its own state archive"
+    assert archive.stat().st_size <= 300_000
+    recorded = json.loads(receipt.read_text(encoding="utf-8"))
+    solve = recorded["solve"]
+    command = solve["command"]
+    assert "benchmarks/coil_edit_latency.py run" in command
+    assert f"/solve/{tag}/" in command, (
+        f"{label} must cite its own invocation's output path, got {command}"
+    )
+    assert solve["partition"] in {"betelgeuse", "titan"}
+    assert solve["device"]
+    assert solve["source_revision"]
+    for panel_label in ("converged", "failed"):
+        assert recorded["display_map"]["panels"][panel_label]["spacing_m"] <= 0.010
+    assert (
+        "the non-converged panel draws the field of its terminal currents on a "
+        "10 mm map" in recorded["caption"]
+    )
+    assert _near_x_geometry_agrees(archive, recorded), (
+        f"{label}: the receipt's near_x_geometry contradicts its own display "
+        "map, so it does not describe the re-solved field the figure draws"
+    )
+    assert "largest node mismatch" in recorded["caption"]
+
+
+def _contour_points(display: Any, levels: Any) -> np.ndarray:
+    """Return the vertices of the contours drawn on one display map."""
+    figure, axis = plt.subplots()
+    contour = axis.contour(
+        display.radius,
+        display.height,
+        display.flux.T,
+        levels=np.asarray(levels, dtype=float),
+    )
+    segments = [
+        np.asarray(segment, dtype=float)
+        for collection in contour.allsegs
+        for segment in collection
+    ]
+    plt.close(figure)
+    if not segments:
+        return np.zeros((0, 2))
+    return np.concatenate(segments)
+
+
+def _directed_distance(one: np.ndarray, other: np.ndarray) -> float:
+    """Return the largest distance from a point of ``one`` to ``other`` [m]."""
+    if not one.size or not other.size:
+        return float("inf")
+    distances = np.linalg.norm(one[:, None, :] - other[None, :, :], axis=2)
+    return float(np.max(np.min(distances, axis=1)))
+
+
+def _panel_extent(panel: dict[str, Any]) -> tuple[float, float, float, float]:
+    """Return a display extent holding the plotted nulls with a 0.2 m margin.
+
+    The published lattice box is about 2 m by 4 m while the plasma and the
+    plotted nulls occupy a fraction of it, so a redraw keeps the 10 mm spacing
+    the builder enforces and evaluates far fewer points.  The receipt's
+    node-level pins are measured on the lattice nodes, so they do not depend on
+    this extent.
+    """
+    points = [np.asarray(panel["axis"], dtype=float).reshape(1, 2)]
+    xpoints = np.atleast_2d(np.asarray(panel["xpoints"], dtype=float))
+    if xpoints.size:
+        points.append(xpoints)
+    coordinates = np.vstack(points)
+    low = coordinates.min(axis=0) - 0.20
+    high = coordinates.max(axis=0) + 0.20
+    return (float(low[0]), float(high[0]), float(low[1]), float(high[1]))
+
+
+@pytest.mark.slow
+@pytest.mark.timeout(3300)
+@pytest.mark.parametrize(
+    ("label", "tag", "archive", "receipt"),
+    COIL_EDIT_PANEL_SETS,
+    ids=[entry[0] for entry in COIL_EDIT_PANEL_SETS],
+)
+def test_each_published_panel_redraws_from_its_own_state_file(
+    label: str, tag: str, archive: Path, receipt: Path
+):
+    """Redraw one figure from its state file alone; a 1 % current move lands.
+
+    The figure is drawn from this panel's own archive with no solve in the
+    loop, so the field on the panel is the stored terminal currents and moments
+    or nothing.  Perturbing one stored conductor current by 1 % must move the
+    contour paths, which is what shows the redraw reads the current rather than
+    printing the receipt's numbers back.
+    """
+    del tag
+    loaded = _panel_load(archive)
+    recorded = json.loads(receipt.read_text(encoding="utf-8"))
+    profile, prepared, _carrier = _prepare_case(response_carrier.DEFAULT_CARRIER)
+    panel = loaded["converged"]
+    assert panel["converged"]
+    extent = _panel_extent(panel)
+    display = _panel_display_map(
+        profile,
+        prepared["circuit_context"],
+        panel,
+        spacing=DEFAULT_DISPLAY_SPACING,
+        target_current=prepared["target_current"],
+        extent=extent,
+    )
+    step = float(display.radius[1] - display.radius[0])
+    assert step == pytest.approx(DEFAULT_DISPLAY_SPACING, abs=1.0e-12)
+    assert float(display.radius[-1] - display.radius[0]) < 1.6
+    reported = recorded["display_map"]["panels"]["converged"]
+    assert reported["spacing_m"] <= step
+    assert display.promoted_node_count == reported["promoted_node_count"]
+    assert display.max_solved_node_mismatch_wb == pytest.approx(
+        reported["max_solved_node_mismatch_wb"], abs=1.0e-12
+    )
+    # ``nearest_promoted_to_xpoint_m`` is measured to the polished saddle of the
+    # map the published figure is drawn on, which spans the whole lattice box.
+    # This redraw evaluates a tighter window at the same 10 mm spacing so the
+    # population stays affordable, and a windowed map's polished saddle sits a
+    # fraction of a millimetre away from the full-window one; the two distances
+    # are therefore not comparable, while every pin above is, because those are
+    # measured on lattice nodes.  What this test controls is the redraw's own
+    # field, so it requires a finite distance from its own polished saddle.
+    assert float(reported["nearest_promoted_to_xpoint_m"]) > 0.0
+    assert display.nearest_promoted_to_xpoint_m > 0.0
+    assert np.isfinite(display.nearest_promoted_to_xpoint_m)
+    levels = np.asarray(loaded["levels"], dtype=float)
+    drawn = _contour_points(display, levels)
+    assert drawn.shape[0] > 0
+    perturbed = dict(panel)
+    perturbed["current"] = np.asarray(panel["current"], dtype=float) * 1.01
+    moved_display = _panel_display_map(
+        profile,
+        prepared["circuit_context"],
+        perturbed,
+        spacing=DEFAULT_DISPLAY_SPACING,
+        target_current=prepared["target_current"],
+        extent=extent,
+    )
+    moved = _contour_points(moved_display, levels)
+    displacement = _directed_distance(drawn, moved)
+    assert displacement > 1.0e-4, (
+        f"{label}: a 1 % conductor-current perturbation left the contour paths "
+        f"in place (largest displacement {displacement:.3e} m), so the redraw "
+        "does not read the stored current"
+    )
+
+
+#: The record that publishes, per figure, what a figure's own display map
+#: measured and how each of its three separatrix sets was drawn.
+PANEL_DRAWING_RECORD = Path(
+    "docs/evidence/fragments/separatrix-spline-extraction/"
+    "coil-edit-panels-per-figure.html"
+)
+
+#: The documents that show a published figure, so each has to say how that
+#: figure draws its separatrix sets.  A figure without a page of its own is
+#: covered by the record above, which carries a row for every figure.
+PANEL_FIGURE_DOCUMENTS = {
+    "forward-solve-api": (
+        Path(
+            "docs/figures/forward-solve-api/coil-edit-nonconvergence/"
+            "coil-edit-nonconvergence.html"
+        ),
+        PANEL_DRAWING_RECORD,
+    ),
+    "mast-centroid-capability": (
+        Path(
+            "docs/evidence/fragments/separatrix-spline-extraction/"
+            "coil-edit-fine-panels.html"
+        ),
+    ),
+    "cpu-compile-abort": (PANEL_DRAWING_RECORD,),
+    "cpu-compile-abort-titan": (PANEL_DRAWING_RECORD,),
+    "single-grid-solver-cutover": (PANEL_DRAWING_RECORD,),
+}
+
+
+def _flat_text(document: str) -> str:
+    """Return a document's visible words, markup removed and runs collapsed."""
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", document))
+
+
+def _drawing_style_order(record: dict[str, Any]) -> str:
+    """Return the three set styles a caption reports, in the caption's order.
+
+    A set the assembler rejected is drawn from its own scan-order crossings,
+    which reads on the panel like an assembled boundary, so a page that shows
+    the figure states which of the two drawings each set carries.
+    """
+    block = record["assembly_drawn"]
+    return "blue reference %s; orange converged %s; orange failed %s" % (
+        _branch_style_note(block["reference"]["drawn"]),
+        _branch_style_note(block["converged"]["drawn"]),
+        _branch_style_note(block["non_converged"]["drawn"]),
+    )
+
+
+def _caption_states_the_drawing(
+    caption: str, block: dict[str, Any], seen_in: str
+) -> None:
+    """Require a caption to name the drawing it describes.
+
+    Each of the three sets gets its own clause, because the two solved panels
+    need not draw the same way and one clause covering both would be false for
+    whichever one it did not measure.
+    """
+    notes = {
+        "reference": "blue set: %s," % _branch_style_note(block["reference"]["drawn"]),
+        "converged": "in the converged panel: %s, admitted"
+        % _branch_style_note(block["converged"]["drawn"]),
+        "non_converged": "in the failed panel: %s, admitted"
+        % _branch_style_note(block["non_converged"]["drawn"]),
+    }
+    for name, note in notes.items():
+        assert note in caption, (
+            f"{seen_in}: the caption does not say how the {name} set is drawn"
+        )
+
+
+def test_the_panel_subcommand_writes_how_each_branch_set_was_drawn(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """A receipt the panel path writes says how each set was drawn, and why.
+
+    The caption is not enough on its own: a set the assembler rejected is drawn
+    from its own crossings, and only the drawn tallies beside the assembler's
+    verdict let a reader hold the caption against the drawing.
+    """
+    import sys
+    from types import SimpleNamespace
+
+    import benchmarks.coil_edit_latency as renderer
+
+    archive = PANEL_ARCHIVE
+    loaded = _panel_load(archive)
+
+    def stand_in(_profile: Any, _context: Any, panel: Any, **_kwargs: Any) -> Any:
+        return SimpleNamespace(
+            radius=loaded["radius"],
+            height=loaded["height"],
+            flux=np.asarray(panel["psi"], dtype=float).T,
+            branches=panel["branches"],
+            saddle_converged=False,
+            saddle_index=panel["saddle_index"],
+            saddle_rz=None,
+            spacing_m=DEFAULT_DISPLAY_SPACING,
+            reproduction_relative_error=0.0,
+            max_node_mismatch_wb=1.0e-09,
+            max_solved_node_mismatch_wb=1.0e-09,
+            promoted_node_count=3,
+            nearest_promoted_to_xpoint_m=0.2,
+        )
+
+    monkeypatch.setattr(renderer, "_require_measurement_host", lambda: None)
+    monkeypatch.setattr(renderer, "_panel_display_map", stand_in)
+    monkeypatch.setattr(
+        renderer,
+        "_prepare_case",
+        lambda _carrier: (
+            object(),
+            {"circuit_context": {}, "target_current": None},
+            None,
+        ),
+    )
+    receipt = tmp_path / "panel-receipt.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "coil_edit_latency.py",
+            "panel",
+            "--display-map",
+            "--panel-data",
+            str(archive),
+            "--panel-figure",
+            str(tmp_path / "panel.png"),
+            "--receipt",
+            str(receipt),
+        ],
+    )
+    renderer.main()
+    written = json.loads(receipt.read_text())
+
+    block = written["assembly_drawn"]
+    assert set(block) == {"reference", "converged", "non_converged"}
+    for name, entry in block.items():
+        assert {"closed_drawn", "open_drawn", "unassembled"} <= set(entry["drawn"]), (
+            name
+        )
+        assert entry["assembled"] is not None, (
+            f"{name}: the drawn tallies must travel beside the assembler verdict"
+        )
+    _caption_states_the_drawing(written["caption"], block, "the written receipt")
+
+
+@pytest.mark.parametrize(
+    ("label", "tag", "archive", "receipt"),
+    COIL_EDIT_PANEL_SETS,
+    ids=[entry[0] for entry in COIL_EDIT_PANEL_SETS],
+)
+def test_each_published_figure_states_how_its_branches_are_drawn(
+    label: str, tag: str, archive: Path, receipt: Path
+):
+    """A published figure's receipt and every page showing it agree.
+
+    A set the assembler rejected is drawn from its own scan-order crossings as
+    separate marks, which reads on the panel like an assembled boundary.  A
+    receipt that leaves a reader guessing which drawing it faces describes a
+    figure other than the one it carries, so each page states the same three
+    styles the receipt measured, beside the numbers the display map gave.
+    """
+    del tag, archive
+    record = json.loads(receipt.read_text(encoding="utf-8"))
+    block = record["assembly_drawn"]
+    assert set(block) == {"reference", "converged", "non_converged"}, label
+    for name, entry in block.items():
+        assert {"closed_drawn", "open_drawn", "unassembled"} <= set(entry["drawn"]), (
+            name
+        )
+        assert entry["assembled"] is not None, name
+    _caption_states_the_drawing(record["caption"], block, label)
+
+    styles = _drawing_style_order(record)
+    raw_record = PANEL_DRAWING_RECORD.read_text(encoding="utf-8")
+    row = None
+    for candidate in re.findall(r"<tr[^>]*>.*?</tr>", raw_record, flags=re.S):
+        if 'data-branches="%s"' % record["set"] in candidate:
+            row = _flat_text(candidate)
+            break
+    assert row is not None, (
+        f"{label}: the drawing record carries no row for {record['set']}"
+    )
+    assert styles in row
+    for measured in (
+        record["display_map"]["panels"]["converged"],
+        record["display_map"]["panels"]["failed"],
+    ):
+        assert "%d promoted" % measured["promoted_node_count"] in row
+        assert "%.3f m" % measured["nearest_promoted_to_xpoint_m"] in row
+
+    for document in PANEL_FIGURE_DOCUMENTS[record["set"]]:
+        text = _flat_text(document.read_text(encoding="utf-8"))
+        assert styles in text, f"{label}: {document} states no drawing for this figure"
+
+
+def test_the_shared_forward_solve_caption_withdraws_the_superseded_draw() -> None:
+    """No measurement of the superseded draw survives beside the caption.
+
+    The caption on the fragment was written from an earlier draw, and the
+    values it carried read as current until they were withdrawn, so the page
+    that replaces them must not still show them.
+    """
+    document = Path(
+        "docs/evidence/fragments/separatrix-spline-extraction/"
+        "coil-edit-panels-on-solve-currents.html"
+    )
+    text = _flat_text(document.read_text(encoding="utf-8"))
+    for stale in ("56.218", "2.451193", "7.4683", "6.4321e-4"):
+        assert stale not in text, (
+            f"{document} still carries the superseded draw's {stale}"
+        )
+    assert "superseded" in text

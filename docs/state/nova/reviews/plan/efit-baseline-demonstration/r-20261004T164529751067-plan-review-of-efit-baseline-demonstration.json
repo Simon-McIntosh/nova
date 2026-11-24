@@ -43,6 +43,16 @@
       "note": "carried into the section 3 re-score node (ebd-rescore-at-head): its brief routes benchmarks/demonstration_threshold_score.py through nova/imas/mast_efit_referee.py:compare_reference_geometry and pins one stored row equal across both",
       "reason": "",
       "when": "2026-11-24T05:47:00.565133+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f43d7fc5425fde4269d7961012fddda2db077662",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "carried into the section 3 re-score node ebd-rescore-at-head, whose brief routes the scorer through compare_reference_geometry",
+      "reason": "",
+      "when": "2026-11-24T05:48:26.728037+00:00"
     }
   ],
   "responses": {
@@ -51,9 +61,9 @@
       "by": "",
       "commit": "f43d7fc5425fde4269d7961012fddda2db077662",
       "commit_basis": "edit",
-      "note": "carried into the section 3 re-score node (ebd-rescore-at-head): its brief routes benchmarks/demonstration_threshold_score.py through nova/imas/mast_efit_referee.py:compare_reference_geometry and pins one stored row equal across both",
+      "note": "carried into the section 3 re-score node ebd-rescore-at-head, whose brief routes the scorer through compare_reference_geometry",
       "reason": "",
-      "when": "2026-11-24T05:47:00.565133+00:00"
+      "when": "2026-11-24T05:48:26.728037+00:00"
     },
     "duplicate_owner-2": {
       "action": "noted",

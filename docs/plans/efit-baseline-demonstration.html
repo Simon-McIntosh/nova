@@ -19,10 +19,10 @@
   <meta name="plan-sprint" content="S29">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,topology,efit,mast,diii-d">
-  <meta name="plan-depends-on" content="separatrix-spline-extraction">
+  <meta name="plan-depends-on" content="separatrix-spline-extraction#s1,separatrix-spline-extraction#s2,separatrix-spline-extraction#s3,separatrix-spline-extraction#s4,separatrix-spline-extraction#s5,separatrix-spline-extraction#s6,separatrix-spline-extraction#s7,separatrix-spline-extraction#s8,separatrix-spline-extraction#s9">
   <meta name="plan-impl" content="0.6667">
-<meta name="plan-version" content="59">
-<meta name="plan-modified" content="2026-11-21">
+<meta name="plan-version" content="60">
+<meta name="plan-modified" content="2026-11-24">
 <title>EFIT Baseline Demonstration | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -402,6 +402,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260827T231356858629-ebd-endpoint-rescore" data-who="receipt-semantics" data-when="2026-08-27T23:18:46Z">
     <div class="r-comment-body"><p>Endpoint FAIL on the repaired stack, measured not asserted: class agreement 9/12 PASS unchanged, worst eligible RMS improves 0.029447 to 0.029164 m PASS, worst declared-row saddle 2.6217 m still FAILS the 0.04 m bound; the failing quantity remains solver convergence on unconverged rows, unchanged in kind by the whole repair campaign</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-narrow-separatrix-dependency" data-who="coordinator" data-when="2026-11-24">
+    <div class="r-comment-body">Lead ruling 2026-11-24: the dependency on separatrix-spline-extraction is narrowed from the whole plan to its nine sections, all of which are done (section 8 closed at 365e6e6b9). The separatrix plan stays open for its four followups (the polish-termination dissent, the polish-exit-pattern measurement, the DIII-D descent direction and the wall-height exclusion removal), and the demonstration gate no longer waits on them. profile-owned-solve-domain has shipped.</div>
 </div>
 </section>
 </main>

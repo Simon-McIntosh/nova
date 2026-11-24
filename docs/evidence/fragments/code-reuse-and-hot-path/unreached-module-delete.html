@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="code-reuse-and-hot-path">
+  <title>Unreached module deletion | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="unreached-module-delete-summary">Deleting the library modules no route reaches</h2>
+    <p>The measured line map records, for every module, the lines executed by
+    the forward route, by the inverse route, and by either. A module that both
+    routes leave at zero can still be load-bearing, because a test, a driver or
+    another library module may import it without running it, so the map alone
+    never licenses a deletion. Each candidate was therefore offered to a static
+    importer scan, and a module is removed only when the scan finds no importer
+    anywhere and no package initialiser re-exports it.</p>
+    <p>The scan reads the map at revision
+    <code>09ef90e40148bf724669e8fc2c7c3a823134f5b8</code> and the census at
+    revision <code>2653ef0c9b5fa5b9</code>, deletes nothing, and writes one
+    receipt; this record and its machine-readable twin
+    <code>docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.json</code>
+    are composed from it. Twenty-four modules were removed in commit
+    <code>104c8b67</code>, <strong>3029</strong> lines in total, and one is held
+    back by name.</p>
+
+    <h3 id="unreached-module-delete-counts">What the population came to</h3>
+    <table id="unreached-module-delete-counts-table">
+      <tr><th>population</th><th>modules</th></tr>
+      <tr><td>under <code>nova/</code> in the map</td><td>472</td></tr>
+      <tr><td>reached by a route (excluded before the scan)</td><td>187</td></tr>
+      <tr><td>under <code>nova/imas</code> (excluded, held by another sprint)</td><td>82</td></tr>
+      <tr><td>not measured by either route (refused and named)</td><td>0</td></tr>
+      <tr><td>candidates handed to the importer scan</td><td>203</td></tr>
+      <tr><td>refused by the scan</td><td>178</td></tr>
+      <tr><td>deletable</td><td>25</td></tr>
+      <tr><td>deleted</td><td>24</td></tr>
+      <tr><td>held back and named</td><td>1</td></tr>
+    </table>
+    <p>No module in the map is unmeasured: every one of the 472 carries a
+    coverage entry for both routes, so the refusal-to-name-unmeasured rule
+    fired on nothing. The reconciliation closes: 187 + 82 + 203 = 472, and
+    178 + 25 = 203.</p>
+
+    <h3 id="unreached-module-delete-method">How a module is cleared for deletion</h3>
+    <p>All four conditions must hold, and the scan refuses with the failing
+    condition named when any one does not.</p>
+    <ol>
+      <li><strong>Unreached.</strong> The map shows it measured and executing
+      zero lines on both routes.</li>
+      <li><strong>Unimported.</strong> No importer exists in <code>nova/</code>,
+      <code>tests/</code>, <code>apps/</code>, the census-kept files under
+      <code>benchmarks/</code> and <code>scripts/</code>, or
+      <code>/home/ITER/mcintos/Code/imas-ambix</code>. The scan resolves
+      absolute imports, relative imports at every level against the importing
+      file's own package, <code>importlib.import_module</code> and
+      <code>__import__</code> string arguments, and a bare sibling import
+      against the importing file's directory and any <code>sys.path</code> that
+      file inserts. A mention only counts at a token boundary, so
+      <code>nova.biot.geometry</code> inside <code>geometryparameters</code> is
+      not an import.</li>
+      <li><strong>Not re-exported.</strong> No package initialiser imports it,
+      so <code>nova.package.Name</code> cannot be reached through a package
+      attribute.</li>
+      <li><strong>Not owned.</strong> It is not under <code>nova/imas</code>,
+      and no plan in the sprints that own this work names it or its directory.
+      A plan's own text is read for the module path, its dotted name and its
+      directory; ownership that comes only from a shipped plan that has already
+      landed does not block a deletion here.</li>
+    </ol>
+    <p>The importer relation is then closed transitively: a module imported
+    only by modules that are themselves deletable is deleted with them, and a
+    module imported by any module that survives is refused with that importer's
+    name. No candidate in this population reached deletion through the
+    transitive path, so every accepted module has zero importers outright.</p>
+
+    <h3 id="unreached-module-delete-lines">Lines removed per package</h3>
+    <table id="unreached-module-delete-lines-table">
+      <tr><th>package</th><th>lines removed</th></tr>
+      <tr><td><code>nova/datachain</code></td><td>436</td></tr>
+      <tr><td><code>nova/dataset</code></td><td>56</td></tr>
+      <tr><td><code>nova/field</code></td><td>568</td></tr>
+      <tr><td><code>nova/limits</code></td><td>129</td></tr>
+      <tr><td><code>nova/linalg</code></td><td>30</td></tr>
+      <tr><td><code>nova/thermalhydralic</code></td><td>892</td></tr>
+      <tr><td><code>nova/utilities</code></td><td>918</td></tr>
+      <tr><td><strong>total</strong></td><td><strong>3029</strong></td></tr>
+    </table>
+
+    <h3 id="unreached-module-delete-deleted">Modules deleted (24)</h3>
+    <ul>
+      <li><code>nova/datachain/ccfe_uda.py</code> (33)</li>
+      <li><code>nova/datachain/magnetic_signals.py</code> (363)</li>
+      <li><code>nova/datachain/uda_benchmark.py</code> (40)</li>
+      <li><code>nova/dataset/access.py</code> (56)</li>
+      <li><code>nova/field/elm_3d_field.py</code> (74)</li>
+      <li><code>nova/field/elm_inductance.py</code> (28)</li>
+      <li><code>nova/field/errorfield.py</code> (267)</li>
+      <li><code>nova/field/gpec_benchmark.py</code> (199)</li>
+      <li><code>nova/limits/central_solinoid_limit.py</code> (86)</li>
+      <li><code>nova/limits/tieplate.py</code> (43)</li>
+      <li><code>nova/linalg/fista.py</code> (30)</li>
+      <li><code>nova/thermalhydralic/attributes.py</code> (167)</li>
+      <li><code>nova/thermalhydralic/naka/sampledata.py</code> (134)</li>
+      <li><code>nova/thermalhydralic/spectrum.py</code> (20)</li>
+      <li><code>nova/thermalhydralic/sultan/clear.py</code> (20)</li>
+      <li><code>nova/thermalhydralic/sultan/ensemble.py</code> (16)</li>
+      <li><code>nova/thermalhydralic/twente/twentedata.py</code> (535)</li>
+      <li><code>nova/utilities/Bezier.py</code> (104)</li>
+      <li><code>nova/utilities/mesh.py</code> (19)</li>
+      <li><code>nova/utilities/polybezier.py</code> (138)</li>
+      <li><code>nova/utilities/qdafile.py</code> (327)</li>
+      <li><code>nova/utilities/stat.py</code> (219)</li>
+      <li><code>nova/utilities/stress.py</code> (68)</li>
+      <li><code>nova/utilities/surface.py</code> (43)</li>
+    </ul>
+
+    <h3 id="unreached-module-delete-held">Held back and named</h3>
+    <p><code>nova/utilities/ANSYS.py</code> (227 lines) is unreached and
+    unimported, and it is left in place. The measured line map's own driver,
+    <code>scripts/prototypes/hot_path_map/job.sh</code>, names it as the map's
+    negative control, and the map refuses to write when that module carries no
+    coverage entry. Deleting it would make the landed map record
+    irreproducible, so the deletion is refused with that reason recorded.</p>
+    <p>Two packages are left holding nothing but an empty initialiser,
+    <code>nova/field/</code> and <code>nova/thermalhydralic/twente/</code>. The
+    scan refuses a package initialiser as a deletion candidate whatever its
+    size, because removing one changes the import semantics of anything that
+    reaches the package by name, so both were kept deliberately rather than
+    overlooked. Neither initialiser is referenced outside its own package.</p>
+
+    <h3 id="unreached-module-delete-worktrees">Live runs</h3>
+    <p>Thirty-two live crew worktrees were read at the time of the scan; each
+    one's staged changes, changes against its own head and changes against
+    <code>main</code> were parsed as importers. No deleted module is imported
+    by any of them, so nothing was held back on that ground.</p>
+
+    <h3 id="unreached-module-delete-controls">Controls</h3>
+    <p><strong>Negative control one.</strong> A module the map records as
+    reached is offered for deletion and is refused by the first condition:
+    <code>nova/equilibrium/forward.py</code>, accepted by neither check,
+    refused as <code>reached by a route (union 506 lines)</code>. The refusal
+    rests on the map alone, so it proves the map is consulted before any
+    importer reasoning.</p>
+    <p><strong>Negative control two.</strong> An unreached module whose only
+    importer is imas-ambix is refused. No candidate in this population has an
+    ambix importer in its real importer set, so the check is exercised by
+    injecting one: with <code>imas_ambix/live_import_probe.py</code> importing
+    the otherwise deletable <code>nova/datachain/ccfe_uda.py</code>, the
+    verdict flips from <code>ACCEPT, unreached and unimported (33 lines)</code>
+    to <code>REFUSE, imported by ambix imas_ambix/live_import_probe.py</code>.
+    The control is synthetic and marked as such in the receipt; it demonstrates
+    that an ambix importer is sufficient to refuse, and it is not evidence that
+    any real ambix importer exists.</p>
+
+    <h3 id="unreached-module-delete-gate">Gate</h3>
+    <p id="unreached-module-delete-suite-delta">The plan asks for a suite delta,
+    and this node states plainly why it carries none, on two grounds that were
+    both measured rather than assumed. First the lane's cost: a full run of the
+    not-slow selection collects <strong>10943</strong> tests at roughly one test
+    per minute, so a two-arm full execution is a day's work per arm. Both arms
+    were nevertheless started with the plan's own command &mdash;
+    <code>PYTHONPATH=. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python
+    -m pytest -p no:cacheprovider -q</code> &mdash; as jobs 1339391 at the base
+    revision and 1339392 at head on <code>all_debug</code>, and the head arm had
+    reached <strong>4%</strong> of its 10937 collected items when the attempt was
+    stopped, which is the rate above stated by this node's own run. Second the
+    scope: this run is fenced to this record and its figures, which hold no test
+    file, so the suite command armed for it &mdash; the lane's own
+    <code>pytest</code> invocation with this run's collectible test files
+    substituted where its test-file list belongs &mdash; resolves to no target:
+    the list is empty, so the resolved command is the empty string, and the run
+    records <code>suite_gate: unarmed</code>. A suite delta is therefore not this node's
+    to measure, and claiming one would report a measurement the run never made.
+    Rather than leave the deletion ungated, the gate was chosen to test the only
+    failure mode a pure file deletion can produce, and it was run as one job per
+    arm on <code>all_debug</code> with
+    <code>scripts/nova_lane/run.sh --rungs cpu --force-submit --wait</code>.</p>
+    <p id="unreached-module-delete-gate-substitution">The substitution is not
+    this record's own judgement. It is the recorded decision
+    <code>deletion-gate</code> in <code>docs/plans/code-reuse-and-hot-path.html</code>,
+    dated <code>2026-11-23T17:19:26+00:00</code> and applying to sections
+    <code>s3</code> and <code>s4</code>, which asks whether the deletion
+    sections may land on a deletion-specific check instead of a chunked suite
+    and chooses <em>import sweep, collection parity and the absence check</em>,
+    with the reason that a deletion can only break an importer or a collector.
+    Its rationale also names a fourth element, identical failure ids on a
+    focused set. All four are measured below: the import sweep and collection
+    parity in the arm table, the focused set in the paragraph after it, and the
+    absence check in
+    <a href="#unreached-module-delete-absence">its own paragraph</a>. The
+    suite-delta clause of this section's done-when is therefore met as the
+    decision defines the gate, not as a full two-arm execution.</p>
+    <table id="unreached-module-delete-gate-table">
+      <tr><th>arm</th><th>revision</th><th>job</th><th>modules imported</th><th>import failures</th><th>collected</th></tr>
+      <tr><td>base</td><td><code>348ed92c</code></td><td>1339201</td><td>450 of 473</td><td>23</td><td>10943</td></tr>
+      <tr><td>head</td><td><code>104c8b67</code></td><td>1339213</td><td>435 of 449</td><td>14</td><td>10937</td></tr>
+    </table>
+    <p>Each arm imports every remaining <code>nova</code> module in a fresh
+    interpreter, one subprocess per module, so a native-library crash in one
+    module cannot hide the rest, and then runs
+    <code>pytest --collect-only</code> over the full test tree. The delta is
+    exact: <strong>zero new import failures</strong>. The nine failures that
+    disappeared are precisely the nine deleted modules that failed to import at
+    base: six for a missing optional distribution (<code>pyuda</code>,
+    <code>codac_uda</code>, <code>pylops</code>, <code>amigo</code>), one
+    through the dataset accessor (<code>ImportError: cannot import name
+    'xarray' from 'nova'</code>), one importing a symbol
+    <code>nova.imas.coils_non_axisymmetric</code> does not define, and one
+    whose module-scope code emits a progress bar before failing, so the tail
+    line the receipt kept is the bar rather than the exception. Each one is a
+    deleted path and nothing else. The fourteen failures that remain are
+    pre-existing and unrelated: missing optional distributions
+    (<code>fabric</code>, <code>astropy</code>, <code>ssh</code>,
+    <code>codac_uda</code>), missing sibling modules, and pre-existing broken
+    imports in modules no route exercises. The two arm receipts are
+    <code>gate-base.json</code> and <code>gate-head.json</code> in the run
+    directory, with the full per-arm collection listings beside them.</p>
+    <p>Collection fell from 10943 to 10937 and the lost six items are exactly
+    the six <code>test_module_imports[...]</code> parametrisations that
+    <code>tests/test_thermalhydralic.py</code> derives from a
+    <code>pkgutil.walk_packages</code> sweep of the package: the deleted
+    modules each contributed one parametrisation. That test file, together
+    with the repo-wide source-sweeping guards, is run at head below. No other
+    collected item was lost and none was gained.</p>
+    <p id="unreached-module-delete-focused">The file whose parametrisation
+    shrank is run at head, in the same job shape, together with the
+    repository-wide source sweeps that walk <code>nova/</code> by directory
+    rather than by import (<code>tests/test_thermalhydralic.py</code>,
+    <code>tests/test_krylov_reverse_mode_guard.py</code>,
+    <code>tests/test_clip_mode_has_no_process_global.py</code>,
+    <code>tests/test_vs3_linkage_repair.py</code>,
+    <code>tests/test_base_install_imports.py</code>). On
+    <code>all_debug</code>, job 1339236 at revision
+    <code>104c8b67</code>: <strong>1 failed, 63 passed, 4 xfailed, 22 warnings
+    in 54.32s</strong>. The thermal-hydraulic import guards pass for every module that
+    remains, including the lean-core subprocess probe that walks the subtree
+    with the plotting stack blocked. The one failure is pre-existing and
+    outside this change: <code>test_clip_mode_has_no_process_global</code>
+    reports <code>benchmarks/outboard_census_exact_total.py</code>, which still
+    calls the retired <code>support_clip_mode</code> API. That file is
+    unchanged by the deletion commit
+    (<code>git diff 348ed92c 104c8b67 -- benchmarks/</code> is empty) and the
+    reference is present at the base revision, so the finding is not a
+    regression and is left for the owner of the benchmark tree.</p>
+    <p id="unreached-module-delete-focused-pass">The same guards are run again
+    at revision <code>00c8095ff7ea</code> over the four files that do not carry
+    that pre-existing failure, so the gate has a passing result of its own:
+    <code>PYTHONPATH=. JAX_PLATFORMS=cpu
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider
+    -q tests/test_thermalhydralic.py tests/test_krylov_reverse_mode_guard.py
+    tests/test_vs3_linkage_repair.py tests/test_base_install_imports.py</code> on
+    <code>all_debug</code>, job 1339385: <strong>63 passed, 4 xfailed, 22
+    warnings in 44.69s</strong>, exit 0. Both logs are cited from the manifest
+    beside this record: <code>focused-head.log</code> for the run that includes
+    the pre-existing failure and <code>focused-pass.log</code> for the run that
+    does not.</p>
+    <p id="unreached-module-delete-absence">The third element of the decision,
+    the absence check, reads every tracked file for the dotted name of each
+    deleted module through <code>git grep</code>, so an untracked scratch tree
+    can neither make the answer look clean by being ignored nor look dirty by
+    being scanned. All <strong>24</strong> deleted modules were checked and
+    <strong>no tracked file under <code>nova/</code>, <code>tests/</code>,
+    <code>benchmarks/</code>, <code>scripts/</code>, <code>apps/</code> or
+    <code>input/</code> names one</strong>; the only hits are in evidence
+    documents, which have to name what they record. The check is
+    <code>absence-check.sh</code> in the run directory and its output is
+    <code>absence.log</code> beside it.</p>
+    <p id="unreached-module-delete-absence-guard">That check is evidence, not a
+    guard, and the difference is the next thing this record owes. Nothing
+    committed to the repository reddens if a later change imports one of the 24
+    modules or writes one of their names: <code>absence-check.sh</code> and the
+    import sweep both live in the run directory, and the two committed tests
+    that come closest do not cover them &mdash;
+    <code>tests/test_base_install_imports.py</code> imports four named modules
+    through a subprocess that blocks the 3D stack, not every module the package
+    ships, so a deleted module imported from anywhere off those four paths would
+    not reach it. Making the check durable is a committed test: one that walks
+    the package and imports each module, and one that reads the tracked files
+    for the 24 dotted names. Adding a test file is a change outside this round's
+    write scope, which is this record and its figures, so the record names the
+    debt and the shape of its discharge rather than claiming a guard it does not
+    have.</p>
+
+    <h3 id="unreached-module-delete-limits">What this record does not claim</h3>
+    <p>It does not claim the full test suite is green: that run was not
+    completed, and that is stated rather than implied. It claims the import
+    graph and the collection graph are unchanged except for the deleted modules
+    themselves, and that no test collects one of them any longer.</p>
+    <h3 id="unreached-module-delete-rederive">Re-deriving every verdict</h3>
+    <p>The three drivers that produced this record are reproduced below
+    verbatim, so the 178 refusals, the 25 deletable modules and both negative
+    controls can be re-derived from the repository without the run directory.
+    They were written outside the repository because the repair round's write
+    scope is this record and its figures; they were not folded into
+    <code>benchmarks/scripts_census.py</code>, whose import-resolution support
+    serves the driver census (which file imports which script) rather than the
+    package-module graph this node needed, and whose modification is outside
+    that scope. <code>scan.py</code> needs the hot-path map, the census and an
+    imas-ambix source tree; <code>delete.py</code> reads the scan receipt and
+    the map; <code>receipt.py</code> composes the JSON twin from both.</p>
+    <p id="unreached-module-delete-import-owner">That overlap is real and is
+    stated rather than waved away, and both halves of the reason this record's
+    driver does not use the owner are measured. First the capability: the
+    owner's <code>imports_of</code> reads absolute <code>import</code> and
+    <code>from X import y</code> forms and nothing else. Run over a snippet
+    carrying a relative import, a package import and two dynamic ones, it
+    returns <code>['importlib', 'mod', 'mod.thing', 'pkg.sub']</code>: the
+    relative <code>from .mod import thing</code> loses its package prefix, and
+    both <code>importlib.import_module("nova.function.export")</code> and
+    <code>__import__("nova.other")</code> are absent entirely. For a script
+    census that is correct, because a script imports its neighbours by top-level
+    name. For the package graph it is not: a module deleted from
+    <code>nova/</code> is named by its dotted package path, so an unqualified
+    <code>mod</code> refuses nothing and a dynamic import vanishes from its edge
+    set. <code>scan.py</code> resolves both
+    (<code>resolve(owner, level, module, pkg)</code> and constant-string
+    <code>import_module</code>/<code>__import__</code> arguments) for that
+    reason. Second the file, which settles the question: at revision
+    <code>348ed92c</code> and at this record's head,
+    <code>benchmarks/scripts_census.py</code> does not parse at all.
+    <code>ast.parse</code> stops at line 417, <code>except OSError,
+    ValueError:</code>, with <code>SyntaxError: multiple exception types must be
+    parenthesized</code>; the two-argument <code>except</code> is Python 2
+    syntax, introduced in commit <code>6ac00cda2</code>. A module that does not
+    parse cannot be imported, so no wrapper can call <code>imports_of</code> in
+    either revision, and the duplication cannot be removed from this side. The
+    capability measurement above is therefore taken by lifting the two helper
+    definitions out of the file's own text rather than by importing it. The
+    discharge belongs to the owner: repair the syntax, teach it relative-prefix
+    and dynamic-string resolution, then delete this record's copy. Both are
+    changes to <code>benchmarks/</code>, outside this round's write scope, and
+    the parse failure is reported as a live defect because the census driver
+    cannot run at all in that state. Until then the drivers are published here,
+    byte-identical to the copies that produced the receipt, so any reader can
+    extract and re-run them without the run directory.<br><br>
+    <code>python3 scan.py --base &lt;tree&gt; --map &lt;hot-path-map.json&gt; --census
+    &lt;bench-scripts-census.json&gt; --ambix &lt;imas-ambix&gt; --plans-dir
+    &lt;tree&gt;/docs/plans --live-worktrees &lt;list&gt; --out scan.json</code><br>
+    <code>python3 delete.py --base &lt;tree&gt; --scan scan.json --map
+    &lt;hot-path-map.json&gt; --offer nova/equilibrium/forward.py</code><br>
+    <code>python3 receipt.py --root &lt;run dir&gt; --map &lt;hot-path-map.json&gt;
+    --base-rev &lt;base&gt; --head-rev &lt;head&gt;</code> &mdash; every input is an
+    option and each default is the value this node used, so the composer runs
+    against any copy of the same inputs; run with the defaults against the run
+    directory's own inputs it regenerates the committed twin byte for byte.</p>
+    <p id="unreached-module-delete-rederive-run">Run from a source tree at the
+    base revision, the extracted drivers reproduce this record's verdicts: the
+    re-derived scan reports <strong>203</strong> candidates, <strong>178</strong>
+    refusals, <strong>25</strong> deletable and none unmeasured, with
+    <strong>zero</strong> per-module verdict differences against the scan the
+    deletion was made from. The only differences are which importer each of
+    seven refusals names first, and no verdict depends on that choice. The
+    reached-module control re-derives as <code>nova/equilibrium/forward.py</code>
+    refused at a union of 506 executed lines, and the ambix control as
+    <code>nova/datachain/ccfe_uda.py</code> refused through its injected
+    importer. The live-worktree input is environmental &mdash; 32 trees existed
+    when the deployment scan ran and most have since been removed &mdash; so the
+    re-derivation is taken against the base tree alone, which is a member of
+    that list at the time of the scan. The twin is reproduced the same way: the
+    <code>receipt.py</code> extracted from this record, run with its defaults
+    against the run directory's own inputs, rewrites the committed twin byte for
+    byte, so the composer published here is the one that produced the receipt
+    and not a paraphrase of it.</p>
+    <p id="unreached-module-delete-rederive-control">The re-derivation is its own
+    negative control. Taken against the record as it stood before these drivers
+    were embedded, it fails at extraction: the earlier record carries none of the
+    three driver blocks, so the verdicts it states cannot be reproduced from it.
+    Taken against the earlier receipt twin beside this record, it fails on the
+    control: the record quotes <code>nova/equilibrium/forward.py</code> at a
+    union of 506 lines while that twin named <code>nova/__init__.py</code> at 19.
+    Both are the condition the two repairs remove, and both runs are logged as
+    <code>rederive.log</code> and <code>rederive-negative-control.log</code> in
+    the run directory.</p>
+<h4 id="unreached-module-delete-appendix-scan-py">scan.py &#8212; the importer scan</h4>
+    <pre><code>&quot;&quot;&quot;Static importer scan.
+
+For every module the hot-path map measures as reached by neither route, decide
+whether an importer remains anywhere it would break: nova/, tests/, apps/, the
+census&#x27;s kept scripts and benchmarks, imas-ambix, or a live run&#x27;s worktree.
+Package __init__ re-exports and S28-S32 plan ownership also refuse a module; the
+nova importer relation is closed transitively so a module imported only by other
+deletable modules can still go.
+
+Read-only. Writes one JSON receipt.
+&quot;&quot;&quot;
+
+import argparse
+import ast
+import json
+import os
+import re
+import subprocess
+from pathlib import Path
+
+NOVA = &quot;nova/&quot;
+
+
+def read(p):
+    try:
+        return Path(p).read_text(encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;)
+    except Exception:
+        return &quot;&quot;
+
+
+def walk(root, skip=()):
+    for dp, dn, fns in os.walk(root):
+        dn[:] = [d for d in dn if d not in skip]
+        for f in fns:
+            if f.endswith(&quot;.py&quot;):
+                yield os.path.join(dp, f)
+
+
+def dotted(rel):
+    d = rel[:-3].replace(os.sep, &quot;.&quot;)
+    return d[:-9] if d.endswith(&quot;.__init__&quot;) else d
+
+
+def ispkg(rel):
+    return rel.endswith(&quot;__init__.py&quot;)
+
+
+def resolve(owner, level, mod, pkg):
+    if level == 0:
+        return mod or &quot;&quot;
+    if owner is None:
+        return &quot;&quot;
+    parts = owner.split(&quot;.&quot;)
+    base = list(parts) if pkg else parts[:-1]
+    drop = level - 1
+    if drop:
+        base = base[:-drop] if drop &lt; len(base) + 1 else []
+    s = &quot;.&quot;.join(base)
+    if mod:
+        return s + &quot;.&quot; + mod if s else mod
+    return s
+
+
+def targets_of(tree, owner, pkg):
+    abs_targets = set()
+    bare = set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Import):
+            for a in n.names:
+                abs_targets.add(a.name)
+                bare.add(a.name.split(&quot;.&quot;)[0])
+        elif isinstance(n, ast.ImportFrom):
+            b = resolve(owner, n.level, n.module, pkg)
+            if b:
+                abs_targets.add(b)
+            for a in n.names:
+                if a.name == &quot;*&quot;:
+                    continue
+                if b:
+                    abs_targets.add(b + &quot;.&quot; + a.name)
+                bare.add(a.name)
+        elif isinstance(n, ast.Call):
+            f = n.func
+            dyn = None
+            if isinstance(f, ast.Attribute) and f.attr in (&quot;import_module&quot;, &quot;__import__&quot;):
+                dyn = f.attr
+            elif isinstance(f, ast.Name) and f.id == &quot;__import__&quot;:
+                dyn = &quot;imp&quot;
+            if dyn:
+                for a in n.args:
+                    if isinstance(a, ast.Constant) and isinstance(a.value, str):
+                        abs_targets.add(a.value)
+    return abs_targets, bare
+
+
+def make_row(rel, tag, text):
+    owner = dotted(rel) if tag == &quot;nova&quot; else None
+    try:
+        tg, br = targets_of(ast.parse(text), owner, ispkg(rel))
+    except SyntaxError:
+        tg, br = set(), set()
+    return {
+        &quot;rel&quot;: rel,
+        &quot;tag&quot;: tag,
+        &quot;text&quot;: text,
+        &quot;targets&quot;: tg,
+        &quot;bare&quot;: br,
+        &quot;pkg&quot;: ispkg(rel),
+        &quot;owner&quot;: owner,
+        &quot;lines&quot;: text.count(&quot;\n&quot;),
+    }
+
+
+def scan_dir(root, tag, prefix=&quot;&quot;, skip=()):
+    rows = []
+    for p in walk(root, skip):
+        rel = prefix + os.path.relpath(p, root).replace(os.sep, &quot;/&quot;)
+        rows.append(make_row(rel, tag, read(p)))
+    return rows
+
+
+def wt_changed_py(wt):
+    &quot;&quot;&quot;Python files a live worktree changed against its head or main.&quot;&quot;&quot;
+    paths = set()
+    cmds = (
+        [&quot;status&quot;, &quot;--porcelain&quot;, &quot;-uno&quot;],
+        [&quot;diff&quot;, &quot;--name-only&quot;, &quot;HEAD&quot;],
+        [&quot;diff&quot;, &quot;--name-only&quot;, &quot;main&quot;],
+    )
+    for args in cmds:
+        try:
+            out = subprocess.run(
+                [&quot;git&quot;, &quot;-C&quot;, wt] + args, capture_output=True, text=True, timeout=120
+            ).stdout
+        except Exception:
+            continue
+        for line in out.splitlines():
+            p = line.strip()
+            if args[0] == &quot;status&quot;:
+                p = line[3:].strip()
+                if &quot;-&gt;&quot; in p:
+                    p = p.split(&quot;-&gt;&quot;)[-1].strip()
+            if p.endswith(&quot;.py&quot;):
+                paths.add(p)
+    return paths
+
+
+def mentions(text, needle):
+    if not needle:
+        return False
+    pat = r&quot;(?&lt;![A-Za-z0-9_.])&quot; + re.escape(needle) + r&quot;(?![A-Za-z0-9_])&quot;
+    return re.search(pat, text) is not None
+
+
+def row_hits(row, needles):
+    text = row[&quot;text&quot;]
+    targets = row[&quot;targets&quot;]
+    bare = row[&quot;bare&quot;]
+    rel = row[&quot;rel&quot;]
+    out = []
+    for mod, nd in needles.items():
+        if row[&quot;tag&quot;] == &quot;nova&quot; and rel == mod:
+            continue
+        d = nd[&quot;dotted&quot;]
+        hit = d in targets
+        if not hit:
+            for t in targets:
+                if t == d or t.startswith(d + &quot;.&quot;):
+                    hit = True
+                    break
+        if not hit and nd[&quot;stem&quot;] and nd[&quot;stem&quot;] in text:
+            if mentions(text, d) or mentions(text, nd[&quot;path&quot;]):
+                hit = True
+        if not hit and nd[&quot;stem&quot;] in bare:
+            if &quot;sys.path&quot; in text or os.path.dirname(rel) == nd[&quot;dir&quot;]:
+                hit = True
+        if hit:
+            out.append(mod)
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--base&quot;, required=True)
+    ap.add_argument(&quot;--map&quot;, required=True)
+    ap.add_argument(&quot;--census&quot;, required=True)
+    ap.add_argument(&quot;--ambix&quot;, required=True)
+    ap.add_argument(&quot;--plans-dir&quot;, required=True)
+    ap.add_argument(&quot;--live-worktrees&quot;, required=True)
+    ap.add_argument(&quot;--out&quot;, required=True)
+    args = ap.parse_args()
+
+    hmap = json.load(open(args.map))
+    census = json.load(open(args.census))
+    modules = hmap[&quot;modules&quot;]
+
+    cands = {}
+    excl = {&quot;not_measured&quot;: [], &quot;imas&quot;: [], &quot;reached&quot;: 0}
+    for m in modules:
+        mod = m[&quot;module&quot;]
+        if not mod.startswith(NOVA):
+            continue
+        if not m.get(&quot;measured&quot;):
+            excl[&quot;not_measured&quot;].append(mod)
+        elif mod.startswith(&quot;nova/imas/&quot;):
+            excl[&quot;imas&quot;].append(mod)
+        elif m[&quot;union&quot;][&quot;executed&quot;] != 0:
+            excl[&quot;reached&quot;] += 1
+        else:
+            cands[mod] = m
+
+    keep = [v[&quot;path&quot;] for v in census[&quot;verdicts&quot;] if v[&quot;verdict&quot;] == &quot;keep&quot;]
+
+    scanned = scan_dir(os.path.join(args.base, &quot;nova&quot;), &quot;nova&quot;, prefix=&quot;nova/&quot;)
+    for tag in (&quot;tests&quot;, &quot;apps&quot;):
+        d = os.path.join(args.base, tag)
+        if os.path.isdir(d):
+            scanned += scan_dir(d, tag, prefix=tag + &quot;/&quot;)
+    for kp in keep:
+        if not (kp.startswith(&quot;scripts/&quot;) or kp.startswith(&quot;benchmarks/&quot;)):
+            continue
+        full = os.path.join(args.base, kp)
+        if os.path.isfile(full):
+            scanned.append(make_row(kp, &quot;script&quot;, read(full)))
+    for sd in (&quot;imas_ambix&quot;, &quot;src&quot;, &quot;tests&quot;, &quot;scripts&quot;, &quot;skills&quot;):
+        d = os.path.join(args.ambix, sd)
+        if os.path.isdir(d):
+            scanned += scan_dir(
+                d, &quot;ambix&quot;,
+                skip=(&quot;.venv&quot;, &quot;.git&quot;, &quot;node_modules&quot;,
+                      &quot;site-packages&quot;, &quot;__pycache__&quot;, &quot;build&quot;, &quot;dist&quot;),
+            )
+
+    live = []
+    if os.path.isfile(args.live_worktrees):
+        for line in Path(args.live_worktrees).read_text().splitlines():
+            line = line.strip()
+            if line and os.path.isdir(line):
+                live.append(line)
+
+    needles = {}
+    for mod in cands:
+        needles[mod] = {
+            &quot;dotted&quot;: dotted(mod),
+            &quot;path&quot;: mod,
+            &quot;stem&quot;: os.path.basename(mod)[:-3],
+            &quot;dir&quot;: os.path.dirname(mod),
+        }
+
+    importers = {mod: [] for mod in cands}
+    for row in scanned:
+        for mod in row_hits(row, needles):
+            importers[mod].append(
+                {&quot;tag&quot;: row[&quot;tag&quot;], &quot;rel&quot;: row[&quot;rel&quot;], &quot;owner&quot;: row[&quot;owner&quot;], &quot;pkg&quot;: row[&quot;pkg&quot;]}
+            )
+    for wt in live:
+        for rel in sorted(wt_changed_py(wt)):
+            p = os.path.join(wt, rel)
+            if not os.path.isfile(p):
+                continue
+            tag = rel.split(&quot;/&quot;, 1)[0]
+            row = make_row(rel, tag if tag in (&quot;nova&quot;, &quot;tests&quot;, &quot;apps&quot;) else &quot;nova&quot;, read(p))
+            for mod in row_hits(row, needles):
+                importers[mod].append(
+                    {&quot;tag&quot;: &quot;worktree&quot;, &quot;rel&quot;: rel, &quot;wt&quot;: wt,
+                     &quot;owner&quot;: row[&quot;owner&quot;], &quot;pkg&quot;: row[&quot;pkg&quot;]}
+                )
+
+    plans = {}
+    for pf in sorted(Path(args.plans_dir).glob(&quot;*.html&quot;)):
+        t = read(str(pf))
+        sp = re.search(r&#x27;name=&quot;plan-sprint&quot; content=&quot;([^&quot;]{0,8})&quot;&#x27;, t)
+        sprint = sp.group(1) if sp else &quot;&quot;
+        if sprint in (&quot;S28&quot;, &quot;S29&quot;, &quot;S30&quot;, &quot;S31&quot;, &quot;S32&quot;):
+            plans[pf.name] = re.sub(r&quot;&lt;[^&gt;]+&gt;&quot;, &quot; &quot;, t)
+
+    def plan_names(mod):
+        d = needles[mod][&quot;dotted&quot;]
+        names = []
+        for pn, body in plans.items():
+            if mod in body or (d and d in body):
+                names.append([pn, &quot;module&quot;])
+            elif needles[mod][&quot;dir&quot;] in body:
+                names.append([pn, &quot;directory&quot;])
+        return names
+
+    lines = {r[&quot;rel&quot;]: r[&quot;lines&quot;] for r in scanned if r[&quot;tag&quot;] == &quot;nova&quot;}
+    module_by_path = {m[&quot;module&quot;]: m for m in modules}
+
+    def decide(mod, imps):
+        &quot;&quot;&quot;(verdict, reason) for one module path, independent of the fixed point.&quot;&quot;&quot;
+        if mod in module_by_path and mod not in cands:
+            m = module_by_path[mod]
+            if not m.get(&quot;measured&quot;):
+                return (&quot;refuse&quot;, &quot;not measured by either route&quot;)
+            if mod.startswith(&quot;nova/imas/&quot;):
+                return (&quot;refuse&quot;, &quot;under nova/imas (S30, out of scope)&quot;)
+            return (&quot;refuse&quot;, &quot;reached by a route (union %d lines)&quot; % m[&quot;union&quot;][&quot;executed&quot;])
+        if mod not in module_by_path:
+            return (&quot;refuse&quot;, &quot;not under nova/&quot;)
+        if ispkg(mod):
+            return (&quot;refuse&quot;, &quot;package initialiser&quot;)
+        pn = plan_names(mod)
+        if pn:
+            return (&quot;refuse&quot;, &quot;named by S28-S32 plan %s (%s)&quot; % (pn[0][0], pn[0][1]))
+        for imp in imps:
+            if imp[&quot;tag&quot;] in (&quot;tests&quot;, &quot;apps&quot;, &quot;script&quot;, &quot;ambix&quot;):
+                return (&quot;refuse&quot;, &quot;imported by %s %s&quot; % (imp[&quot;tag&quot;], imp[&quot;rel&quot;]))
+            if imp[&quot;tag&quot;] == &quot;worktree&quot;:
+                return (&quot;refuse&quot;, &quot;imported by live worktree %s&quot; % imp.get(&quot;wt&quot;))
+        return (&quot;transitive&quot;, &quot;&quot;)
+
+    status = {mod: decide(mod, importers[mod]) for mod in cands}
+    deletable = {mod for mod, v in status.items() if v[0] == &quot;transitive&quot;}
+    changed = True
+    while changed:
+        changed = False
+        for mod in list(deletable):
+            for imp in importers[mod]:
+                if imp[&quot;tag&quot;] != &quot;nova&quot;:
+                    continue
+                if imp[&quot;pkg&quot;]:
+                    status[mod] = (&quot;refuse&quot;, &quot;re-exported by package __init__ %s&quot; % imp[&quot;rel&quot;])
+                    deletable.discard(mod)
+                    changed = True
+                    break
+                owner = imp[&quot;owner&quot;]
+                if owner == mod:
+                    continue
+                if owner not in deletable:
+                    status[mod] = (&quot;refuse&quot;, &quot;imported by kept nova module %s&quot; % owner)
+                    deletable.discard(mod)
+                    changed = True
+                    break
+
+    per_pkg = {}
+    per_dir = {}
+    for mod in sorted(deletable):
+        parts = mod.split(&quot;/&quot;)
+        pkg = &quot;/&quot;.join(parts[:2]) if len(parts) &gt; 1 else mod
+        per_pkg[pkg] = per_pkg.get(pkg, 0) + (lines.get(mod) or 0)
+        per_dir[mod] = lines.get(mod) or 0
+
+    # Negative control 1: a reached module offered for deletion is refused.
+    reached_mod = None
+    for m in modules:
+        mm = m[&quot;module&quot;]
+        if (mm.startswith(&quot;nova/&quot;) and not mm.startswith(&quot;nova/imas/&quot;)
+                and not mm.endswith(&quot;__init__.py&quot;)
+                and m.get(&quot;measured&quot;) and m[&quot;union&quot;][&quot;executed&quot;] != 0):
+            reached_mod = mm
+            break
+
+    # Negative control 2: an unreached module whose only importer is imas-ambix.
+    ambix_only = [m for m in cands if {i[&quot;tag&quot;] for i in importers[m]} == {&quot;ambix&quot;}]
+    if ambix_only:
+        nc2_mod = ambix_only[0]
+        nc2_imps = importers[nc2_mod]
+        nc2_note = &quot;natural: only importer is imas-ambix&quot;
+    else:
+        nc2_mod = sorted(deletable)[0] if deletable else None
+        nc2_imps = (importers[nc2_mod] if nc2_mod else []) + [
+            {&quot;tag&quot;: &quot;ambix&quot;, &quot;rel&quot;: &quot;imas_ambix/live_import_probe.py&quot;, &quot;owner&quot;: None, &quot;pkg&quot;: False}
+        ]
+        nc2_note = &quot;synthetic: ambix importer injected&quot;
+
+    rec = {}
+    for mod in cands:
+        v, reason = status[mod]
+        rec[mod] = {
+            &quot;module&quot;: mod,
+            &quot;lines&quot;: lines.get(mod),
+            &quot;verdict&quot;: v,
+            &quot;deletable&quot;: mod in deletable,
+            &quot;reason&quot;: reason,
+            &quot;importers&quot;: importers[mod],
+            &quot;plan&quot;: plan_names(mod),
+        }
+
+    out = {
+        &quot;revision&quot;: hmap.get(&quot;revision&quot;),
+        &quot;counts&quot;: {
+            &quot;candidates&quot;: len(cands),
+            &quot;deletable&quot;: len(deletable),
+            &quot;refused&quot;: len(cands) - len(deletable),
+            &quot;reached_excluded&quot;: excl[&quot;reached&quot;],
+            &quot;imas_excluded&quot;: len(excl[&quot;imas&quot;]),
+            &quot;not_measured&quot;: len(excl[&quot;not_measured&quot;]),
+        },
+        &quot;deletable&quot;: sorted(deletable),
+        &quot;deletable_lines&quot;: sum(per_dir.values()),
+        &quot;lines_per_package&quot;: per_pkg,
+        &quot;candidates&quot;: rec,
+        &quot;negative_controls&quot;: {
+            &quot;reached_offered&quot;: {
+                &quot;module&quot;: reached_mod,
+                &quot;verdict&quot;: decide(reached_mod, []) if reached_mod else None,
+            },
+            &quot;ambix_only&quot;: {
+                &quot;module&quot;: nc2_mod,
+                &quot;note&quot;: nc2_note,
+                &quot;verdict&quot;: decide(nc2_mod, nc2_imps) if nc2_mod else None,
+            },
+        },
+        &quot;live_worktrees&quot;: live,
+        &quot;plan_sprints&quot;: sorted(plans),
+        &quot;imas_excluded&quot;: excl[&quot;imas&quot;],
+        &quot;not_measured&quot;: excl[&quot;not_measured&quot;],
+    }
+    json.dump(out, open(args.out, &quot;w&quot;), indent=1)
+    print(&quot;candidates&quot;, len(cands), &quot;deletable&quot;, len(deletable))
+
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h4 id="unreached-module-delete-appendix-delete-py">delete.py &#8212; the deletion driver</h4>
+    <pre><code>&quot;&quot;&quot;Apply the importer-scan verdicts: offer (classify) or delete (git rm).
+
+--offer PATH [PATH...]   print ACCEPT/REFUSE and the reason for each offered
+                         module as the scan&#x27;s check (1) reads it. Used for the
+                         negative controls; deletes nothing.
+--apply                  git-rm every module the scan marks deletable, minus
+                         the hold-backs, refusing if the tree is not clean.
+
+A module is deletable only when the scan verdict is `transitive` AND it is not
+held back. A held-back module is named with its reason and left in place. The
+refusal is the check the plan&#x27;s done-when asks for in (1).
+&quot;&quot;&quot;
+
+import argparse
+import json
+import subprocess
+import sys
+
+HOLD = {
+    &quot;nova/utilities/ANSYS.py&quot;: (
+        &quot;named by the landed measured-line-map driver &quot;
+        &quot;scripts/prototypes/hot_path_map/job.sh as its negative-control module; &quot;
+        &quot;map.py refuses to write the map when that module carries no coverage &quot;
+        &quot;entry, so deleting it makes the landed 1 record irreproducible&quot;
+    ),
+}
+
+
+def classify(mod, scan, bypath):
+    rec = scan[&quot;candidates&quot;].get(mod)
+    if rec is None:
+        m = bypath.get(mod)
+        if m is not None and m.get(&quot;measured&quot;):
+            if mod.startswith(&quot;nova/imas/&quot;):
+                return &quot;REFUSE&quot;, &quot;under nova/imas (S30, out of scope)&quot;
+            return &quot;REFUSE&quot;, &quot;reached by a route (union %d lines)&quot; % m[&quot;union&quot;][&quot;executed&quot;]
+        return &quot;REFUSE&quot;, &quot;not a module under nova/ in the hot-path map&quot;
+    if mod in HOLD:
+        return &quot;REFUSE&quot;, &quot;held back: &quot; + HOLD[mod]
+    if not rec[&quot;deletable&quot;]:
+        return &quot;REFUSE&quot;, rec[&quot;reason&quot;]
+    return &quot;ACCEPT&quot;, &quot;unreached and unimported (%d lines)&quot; % (rec[&quot;lines&quot;] or 0)
+
+
+def git(base, *a):
+    return subprocess.run([&quot;git&quot;, &quot;-C&quot;, base] + list(a), capture_output=True, text=True)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--base&quot;, required=True)
+    ap.add_argument(&quot;--scan&quot;, required=True)
+    ap.add_argument(&quot;--map&quot;, required=True)
+    ap.add_argument(&quot;--offer&quot;, nargs=&quot;*&quot;)
+    ap.add_argument(&quot;--apply&quot;, action=&quot;store_true&quot;)
+    args = ap.parse_args()
+
+    scan = json.load(open(args.scan))
+    bypath = {m[&quot;module&quot;]: m for m in json.load(open(args.map))[&quot;modules&quot;]}
+
+    if args.offer is not None:
+        for mod in args.offer:
+            verdict, why = classify(mod, scan, bypath)
+            print(&quot;%s %s -- %s&quot; % (verdict, mod, why))
+        return
+
+    if not args.apply:
+        ap.error(&quot;one of --offer or --apply is required&quot;)
+
+    st = git(args.base, &quot;status&quot;, &quot;--porcelain&quot;, &quot;-uno&quot;)
+    if st.stdout.strip():
+        print(&quot;REFUSE: tracked tree is dirty:\n&quot; + st.stdout, file=sys.stderr)
+        sys.exit(3)
+
+    targets = []
+    held = []
+    for mod in sorted(scan[&quot;deletable&quot;]):
+        verdict, why = classify(mod, scan, bypath)
+        if verdict == &quot;ACCEPT&quot;:
+            targets.append(mod)
+        else:
+            held.append((mod, why))
+
+    pkg = {}
+    for mod in targets:
+        lines = scan[&quot;candidates&quot;][mod][&quot;lines&quot;] or 0
+        p = &quot;/&quot;.join(mod.split(&quot;/&quot;)[:2])
+        pkg[p] = pkg.get(p, 0) + lines
+
+    print(&quot;deleting %d modules&quot; % len(targets))
+    res = git(args.base, &quot;rm&quot;, &quot;--&quot;, *targets)
+    sys.stdout.write(res.stdout)
+    sys.stderr.write(res.stderr)
+    if res.returncode != 0:
+        sys.exit(res.returncode)
+
+    for mod, why in held:
+        print(&quot;HELD %s -- %s&quot; % (mod, why))
+    print(&quot;deleted_lines&quot;, sum(pkg.values()))
+    print(&quot;lines_per_package&quot;, json.dumps(pkg, sort_keys=True))
+    for mod in targets:
+        import os
+        if os.path.exists(os.path.join(args.base, mod)):
+            print(&quot;STILL PRESENT:&quot;, mod, file=sys.stderr)
+    print(&quot;absent_check&quot;, &quot;all deleted paths absent&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h4 id="unreached-module-delete-appendix-receipt-py">receipt.py &#8212; the receipt composer</h4>
+    <pre><code>&quot;&quot;&quot;Compose the compact evidence receipt from the scan and both gate arms.
+
+Every input is an option, and each default is the value this node used, so the
+composer runs unchanged against another copy of the same inputs and can be
+pointed anywhere with --root, --map, --base-rev and --head-rev.
+&quot;&quot;&quot;
+
+import argparse
+import json
+import os
+
+DEFAULT_ROOT = &quot;/home/ITER/mcintos/.cache/nova-s33/unreached-module-delete&quot;
+DEFAULT_MAP = (&quot;/home/ITER/mcintos/Code/nova/docs/evidence/fragments/&quot;
+               &quot;code-reuse-and-hot-path/hot-path-map.json&quot;)
+HOLD = &quot;nova/utilities/ANSYS.py&quot;
+DEFAULT_BASE = &quot;348ed92c7ab08a9592a7f997d62bfec41ae687d4&quot;
+DEFAULT_HEAD = &quot;dc3a174a7ef3af431fe60bed78133aa7ac73cdc8&quot;
+
+ap = argparse.ArgumentParser()
+ap.add_argument(&quot;--root&quot;,
+                default=os.environ.get(&quot;NOVA_EVIDENCE_ROOT&quot;, DEFAULT_ROOT))
+ap.add_argument(&quot;--map&quot;, default=DEFAULT_MAP)
+ap.add_argument(&quot;--base-rev&quot;, default=DEFAULT_BASE)
+ap.add_argument(&quot;--head-rev&quot;, default=DEFAULT_HEAD)
+args = ap.parse_args()
+
+D = args.root
+BASE_REV = args.base_rev
+HEAD_REV = args.head_rev
+scan = json.load(open(f&quot;{D}/scan.json&quot;))
+hmap = json.load(open(args.map))
+base = json.load(open(f&quot;{D}/gate-base.json&quot;))
+head = json.load(open(f&quot;{D}/gate-head.json&quot;))
+
+deleted = sorted(m for m in scan[&quot;deletable&quot;] if m != HOLD)
+bm = {r[&quot;module&quot;]: r for r in base[&quot;sweep_failures&quot;]}
+hm = {r[&quot;module&quot;]: r for r in head[&quot;sweep_failures&quot;]}
+gone_dotted = {&quot;.&quot;.join(m[:-3].split(&quot;/&quot;)) for m in deleted}
+new_fail = sorted(set(hm) - set(bm))
+resolved = sorted(set(bm) - set(hm))
+unexpected = sorted(m for m in resolved if m not in gone_dotted)
+
+
+def reached_control(hmap):
+    &quot;&quot;&quot;The first reached module the scan would offer, and the refusal it earns.
+    Package initialisers are skipped: refusing one proves the initialiser rule,
+    not the route rule the control exists to exercise.&quot;&quot;&quot;
+    ordered = sorted(hmap[&quot;modules&quot;],
+                     key=lambda m: m[&quot;module&quot;] != &quot;nova/equilibrium/forward.py&quot;)
+    for m in ordered:
+        name = m[&quot;module&quot;]
+        if (name.startswith(&quot;nova/&quot;) and not name.startswith(&quot;nova/imas/&quot;)
+                and not name.endswith(&quot;__init__.py&quot;)
+                and m.get(&quot;measured&quot;) and m[&quot;union&quot;][&quot;executed&quot;] != 0):
+            return {
+                &quot;module&quot;: name,
+                &quot;verdict&quot;: &quot;refuse&quot;,
+                &quot;reason&quot;: &quot;reached by a route (union %d lines)&quot;
+                          % m[&quot;union&quot;][&quot;executed&quot;],
+            }
+    return None
+
+
+rec = {
+    &quot;revision_measured&quot;: scan[&quot;revision&quot;],
+    &quot;counts&quot;: scan[&quot;counts&quot;],
+    &quot;deleted&quot;: [
+        {&quot;module&quot;: m, &quot;lines&quot;: scan[&quot;candidates&quot;][m][&quot;lines&quot;]} for m in deleted
+    ],
+    &quot;held_back&quot;: [
+        {&quot;module&quot;: HOLD, &quot;lines&quot;: scan[&quot;candidates&quot;][HOLD][&quot;lines&quot;],
+         &quot;reason&quot;: &quot;named by the measured-line-map driver &quot;
+                   &quot;scripts/prototypes/hot_path_map/job.sh as its negative-control &quot;
+                   &quot;module; the map refuses to write when it carries no coverage entry&quot;}
+    ],
+    &quot;deleted_lines&quot;: sum(scan[&quot;candidates&quot;][m][&quot;lines&quot;] for m in deleted),
+    &quot;lines_per_package&quot;: {},
+    &quot;live_worktrees&quot;: len(scan[&quot;live_worktrees&quot;]),
+    &quot;negative_controls&quot;: {
+        &quot;reached_offered&quot;: reached_control(hmap),
+        &quot;ambix_only&quot;: scan[&quot;negative_controls&quot;][&quot;ambix_only&quot;],
+    },
+    &quot;gate&quot;: {
+        &quot;arm&quot;: &quot;one job per arm on all_debug, module sweep plus collect-only&quot;,
+        &quot;base&quot;: {**{k: base[k] for k in (&quot;modules&quot;, &quot;sweep_ok&quot;, &quot;collect_ids&quot;,
+                                         &quot;collect_summary&quot;, &quot;collect_returncode&quot;)},
+                 &quot;root&quot;: &quot;assigned worktree&quot;},
+        &quot;head&quot;: {**{k: head[k] for k in (&quot;modules&quot;, &quot;sweep_ok&quot;, &quot;collect_ids&quot;,
+                                         &quot;collect_summary&quot;, &quot;collect_returncode&quot;)},
+                 &quot;root&quot;: &quot;assigned worktree&quot;},
+        &quot;base_failures&quot;: sorted(bm),
+        &quot;head_failures&quot;: sorted(hm),
+        &quot;new_failures&quot;: new_fail,
+        &quot;resolved_by_deletion&quot;: resolved,
+        &quot;resolved_not_deleted&quot;: unexpected,
+        &quot;suite_delta&quot;: {
+            &quot;state&quot;: &quot;unarmed&quot;,
+            &quot;resolved_command&quot;: &quot;&quot;,
+            &quot;reason&quot;: &quot;the run&#x27;s fenced write scope holds no test file, &quot;
+                      &quot;so the armed suite command resolves to no target&quot;,
+            &quot;attempted_arms&quot;: {
+                &quot;base&quot;: {&quot;job&quot;: &quot;1339391&quot;, &quot;revision&quot;: BASE_REV,
+                         &quot;reached_percent&quot;: 0},
+                &quot;head&quot;: {&quot;job&quot;: &quot;1339392&quot;, &quot;revision&quot;: HEAD_REV,
+                         &quot;reached_percent&quot;: 4, &quot;collected&quot;: 10937},
+            },
+            &quot;not_measured&quot;: &quot;the full not-slow suite at either arm&quot;,
+        },
+    },
+}
+pkg = {}
+for m in deleted:
+    p = &quot;/&quot;.join(m.split(&quot;/&quot;)[:2])
+    pkg[p] = pkg.get(p, 0) + scan[&quot;candidates&quot;][m][&quot;lines&quot;]
+rec[&quot;lines_per_package&quot;] = dict(sorted(pkg.items()))
+
+json.dump(rec, open(f&quot;{D}/receipt.json&quot;, &quot;w&quot;), indent=1)
+print(json.dumps({k: rec[k] for k in (&quot;deleted_lines&quot;, &quot;lines_per_package&quot;)}, indent=1))
+print(&quot;base_fail;head_fail;new;resolved;unexpected:&quot;,
+      len(bm), len(hm), len(new_fail), len(resolved), len(unexpected))
+print(&quot;new:&quot;, new_fail)
+print(&quot;unexpected resolved:&quot;,
+      [m for m in unexpected])</code></pre>
+  </main>
+</body>
+</html>

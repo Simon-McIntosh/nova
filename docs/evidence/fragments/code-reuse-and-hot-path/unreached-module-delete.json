@@ -1,0 +1,234 @@
+{
+ "revision_measured": "09ef90e40148bf724669e8fc2c7c3a823134f5b8",
+ "counts": {
+  "candidates": 203,
+  "deletable": 25,
+  "refused": 178,
+  "reached_excluded": 187,
+  "imas_excluded": 82,
+  "not_measured": 0
+ },
+ "deleted": [
+  {
+   "module": "nova/datachain/ccfe_uda.py",
+   "lines": 33
+  },
+  {
+   "module": "nova/datachain/magnetic_signals.py",
+   "lines": 363
+  },
+  {
+   "module": "nova/datachain/uda_benchmark.py",
+   "lines": 40
+  },
+  {
+   "module": "nova/dataset/access.py",
+   "lines": 56
+  },
+  {
+   "module": "nova/field/elm_3d_field.py",
+   "lines": 74
+  },
+  {
+   "module": "nova/field/elm_inductance.py",
+   "lines": 28
+  },
+  {
+   "module": "nova/field/errorfield.py",
+   "lines": 267
+  },
+  {
+   "module": "nova/field/gpec_benchmark.py",
+   "lines": 199
+  },
+  {
+   "module": "nova/limits/central_solinoid_limit.py",
+   "lines": 86
+  },
+  {
+   "module": "nova/limits/tieplate.py",
+   "lines": 43
+  },
+  {
+   "module": "nova/linalg/fista.py",
+   "lines": 30
+  },
+  {
+   "module": "nova/thermalhydralic/attributes.py",
+   "lines": 167
+  },
+  {
+   "module": "nova/thermalhydralic/naka/sampledata.py",
+   "lines": 134
+  },
+  {
+   "module": "nova/thermalhydralic/spectrum.py",
+   "lines": 20
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/clear.py",
+   "lines": 20
+  },
+  {
+   "module": "nova/thermalhydralic/sultan/ensemble.py",
+   "lines": 16
+  },
+  {
+   "module": "nova/thermalhydralic/twente/twentedata.py",
+   "lines": 535
+  },
+  {
+   "module": "nova/utilities/Bezier.py",
+   "lines": 104
+  },
+  {
+   "module": "nova/utilities/mesh.py",
+   "lines": 19
+  },
+  {
+   "module": "nova/utilities/polybezier.py",
+   "lines": 138
+  },
+  {
+   "module": "nova/utilities/qdafile.py",
+   "lines": 327
+  },
+  {
+   "module": "nova/utilities/stat.py",
+   "lines": 219
+  },
+  {
+   "module": "nova/utilities/stress.py",
+   "lines": 68
+  },
+  {
+   "module": "nova/utilities/surface.py",
+   "lines": 43
+  }
+ ],
+ "held_back": [
+  {
+   "module": "nova/utilities/ANSYS.py",
+   "lines": 227,
+   "reason": "named by the measured-line-map driver scripts/prototypes/hot_path_map/job.sh as its negative-control module; the map refuses to write when it carries no coverage entry"
+  }
+ ],
+ "deleted_lines": 3029,
+ "lines_per_package": {
+  "nova/datachain": 436,
+  "nova/dataset": 56,
+  "nova/field": 568,
+  "nova/limits": 129,
+  "nova/linalg": 30,
+  "nova/thermalhydralic": 892,
+  "nova/utilities": 918
+ },
+ "live_worktrees": 32,
+ "negative_controls": {
+  "reached_offered": {
+   "module": "nova/equilibrium/forward.py",
+   "verdict": "refuse",
+   "reason": "reached by a route (union 506 lines)"
+  },
+  "ambix_only": {
+   "module": "nova/datachain/ccfe_uda.py",
+   "note": "synthetic: ambix importer injected",
+   "verdict": [
+    "refuse",
+    "imported by ambix imas_ambix/live_import_probe.py"
+   ]
+  }
+ },
+ "gate": {
+  "arm": "one job per arm on all_debug, module sweep plus collect-only",
+  "base": {
+   "modules": 473,
+   "sweep_ok": 450,
+   "collect_ids": 10967,
+   "collect_summary": "10943 tests collected in 19.51s",
+   "collect_returncode": 0,
+   "root": "assigned worktree"
+  },
+  "head": {
+   "modules": 449,
+   "sweep_ok": 435,
+   "collect_ids": 10961,
+   "collect_summary": "10937 tests collected in 34.31s",
+   "collect_returncode": 0,
+   "root": "assigned worktree"
+  },
+  "base_failures": [
+   "nova.biot.boundary",
+   "nova.biot.plasmavtk",
+   "nova.database.connectssh",
+   "nova.database.connectuda",
+   "nova.datachain.ccfe_uda",
+   "nova.datachain.uda",
+   "nova.datachain.uda_benchmark",
+   "nova.dataset.access",
+   "nova.field.elm_3d_field",
+   "nova.field.elm_inductance",
+   "nova.frame.vde",
+   "nova.geometry.centerline",
+   "nova.imas.connect",
+   "nova.imas.contour_tree",
+   "nova.imas.decimate",
+   "nova.imas.ensemble",
+   "nova.imas.test_ssh",
+   "nova.limits.poloidal",
+   "nova.linalg.fista",
+   "nova.linalg.lops",
+   "nova.utilities.mesh",
+   "nova.utilities.polybezier",
+   "nova.utilities.stat"
+  ],
+  "head_failures": [
+   "nova.biot.boundary",
+   "nova.biot.plasmavtk",
+   "nova.database.connectssh",
+   "nova.database.connectuda",
+   "nova.datachain.uda",
+   "nova.frame.vde",
+   "nova.geometry.centerline",
+   "nova.imas.connect",
+   "nova.imas.contour_tree",
+   "nova.imas.decimate",
+   "nova.imas.ensemble",
+   "nova.imas.test_ssh",
+   "nova.limits.poloidal",
+   "nova.linalg.lops"
+  ],
+  "new_failures": [],
+  "resolved_by_deletion": [
+   "nova.datachain.ccfe_uda",
+   "nova.datachain.uda_benchmark",
+   "nova.dataset.access",
+   "nova.field.elm_3d_field",
+   "nova.field.elm_inductance",
+   "nova.linalg.fista",
+   "nova.utilities.mesh",
+   "nova.utilities.polybezier",
+   "nova.utilities.stat"
+  ],
+  "resolved_not_deleted": [],
+  "suite_delta": {
+   "state": "unarmed",
+   "resolved_command": "",
+   "reason": "the run's fenced write scope holds no test file, so the armed suite command resolves to no target",
+   "attempted_arms": {
+    "base": {
+     "job": "1339391",
+     "revision": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+     "reached_percent": 0
+    },
+    "head": {
+     "job": "1339392",
+     "revision": "dc3a174a7ef3af431fe60bed78133aa7ac73cdc8",
+     "reached_percent": 4,
+     "collected": 10937
+    }
+   },
+   "not_measured": "the full not-slow suite at either arm"
+  }
+ }
+}

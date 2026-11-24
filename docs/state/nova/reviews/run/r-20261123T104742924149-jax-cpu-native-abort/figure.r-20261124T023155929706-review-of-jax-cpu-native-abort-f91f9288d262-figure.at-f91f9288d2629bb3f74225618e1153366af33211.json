@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-24T02:33:03Z",
+  "findings": [
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
+      "id": "f9eaf616eba",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The limit reference is the faintest ink in a figure whose subject is that limit. Measured from the rendered PNG, the dotted vm.max_map_count line sits near ~#c8c8c8 (~1.6:1 against white at its median pixels) and its 'vm.max_map_count / 65,530' label at (146,146,146) ~3.1:1 - both materially paler than every other element (axis title ~19.7:1, value labels ~12.6:1, stage labels ~7.9:1). A reader scanning for the threshold the caption says the process dies against finds the least visible mark on the page. Darkening the line and its label toward the existing body-text greys would fix it without changing any data."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
+      "id": "f9eaf616eba",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The plot shows only the release run, so no bar approaches the limit and the truncated bar reads as a settled value. The final bar 'MAST solving, run stopped' at 31,476 is, per its caption and the adjacent table, a reading taken while the count was climbing when the driver was stopped - yet it is drawn at a fixed length indistinguishable from the settled bars such as 'Solov'ev solved' at 28,552. More significantly, neither the no-release run's 40,883 nor the 65,271-at-limit reading that motivate the whole figure are plotted, so the picture shows headroom (the largest bar is ~48% of the 65,530 line) where the caption describes a process that exhausts the limit. The caption and table carry the missing numbers so a careful reader recovers them and this does not block, but rendering the truncated bar as unfinished, or plotting the no-release run beside it, would let the figure show the danger it argues."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
+      "id": "f9eaf616eba",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The caption names a different number for the dotted line than the figure does. The rendered figure labels the line 'vm.max_map_count 65,530', which is the kernel's per-process mapping limit; the figure's caption in the evidence fragment says the line is 'the kernel's per-process mapping limit, which the earlier node's sampler recorded at 65,271 while a worker was compiling'. 65,271 was the measured mapping count the sampler observed approaching that limit, not the limit itself (the evidence text states 65,271 mappings against a limit of 65,530). The picture is internally consistent, so this does not block, but a reader who checks the caption sees two different values for one line; stating 65,530 as the limit and 65,271 as the peak usage would remove the ambiguity."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261124T023155929706-review-of-jax-cpu-native-abort-f91f9288d262-figure",
+  "reviewed_base_sha": "e28db604eee205382f5c7874129eebfe4339cd92",
+  "reviewed_figures": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261124T023155929706-review-of-jax-cpu-native-abort-f91f9288d262-figure/image-0.png"
+  ],
+  "reviewed_head_sha": "f91f9288d2629bb3f74225618e1153366af33211",
+  "reviewed_run_id": "r-20261123T104742924149-jax-cpu-native-abort",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Defect, non-blocking. Body text clears white strongly: axis title at (11,11,11) ~19.7:1, value labels at (51,51,51) ~12.6:1, stage labels at (82,81,78) ~7.9:1. But the reference annotation 'vm.max_map_count / 65,530' is rendered at (146,146,146), ~3.1:1 - below the 4.5:1 floor for normal text and only just at the 3:1 large-text floor - and the dotted limit line is fainter still (~#c8c8c8, ~1.6:1 at its median pixels). The figure's subject is that limit, and it is the palest ink on the page.",
+    "data_ink": "Pass. The grey bars carry almost all the ink; the value labels are the only text on the bars, and there is no gradient, fill band or shadow. The one green bar on 'cache cleared' spends colour on the release, which is the figure's subject, and it is redundant with the bar's own label so colour is not the sole carrier of that meaning.",
+    "decoration": "Pass. No gradient, background fill, shading, drop shadow or themed styling. Only the bottom axis spine and its ticks are drawn (top, right and left spines are absent), so the chart is despined. The green highlight bar is a data mark, not decoration.",
+    "label_collision": "Pass. No label is clipped and none overlaps another or the data. Stage labels fit inside the margin ('MAST solving, run stopped' wraps cleanly to two lines); value labels sit just to the right of their bars, clear of each bar and of the next row; the annotation's rightmost glyph stops short of the dotted line, leaving a clear gap; the axis title and tick labels are clear of the plot.",
+    "legibility": "Pass. At a glance the rendered PNG reads as five horizontally labelled bars, each direct-labelled at its bar end (6,809; 28,552; 3,031; 6,695; 31,476), over an x axis titled 'mapped regions [thousands]' with ticks 0-70, plus one dotted vertical reference line labelled 'vm.max_map_count 65,530'. Stage names are legible and the sequence reads top to bottom as the process timeline: Solov'ev built, Solov'ev solved, cache cleared, MAST built, MAST solving (run stopped). The accumulation and the drop to 3,031 are readable without the table.",
+    "table_form": "Borderline pass. The six counts also sit in the evidence table beside the figure, so the bars partly duplicate tabular data; what the chart adds that a table cannot show at a glance is the comparison of each stage against the dotted limit line. On that ground the plot is justified and is not merely a picture of a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T02:38:43.522760+00:00",
+  "total": null
+}

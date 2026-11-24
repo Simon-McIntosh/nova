@@ -25,7 +25,7 @@
   <title>Inverse Equilibrium Baseline | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="139">
+<meta name="plan-version" content="140">
 <meta name="plan-modified" content="2026-11-24">
 </head>
 <body>
@@ -556,6 +556,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261123T213321969510-review-of-jax-cpu-native-abort-391070b46221" data-who="reckon-build" data-when="2026-11-23T22:47:45.059Z">
     <div class="r-comment-body"><p>the review of r-20261123T104742924149-jax-cpu-native-abort over the commits it gained since it was reviewed (50200153d..391070b46, five evidence commits to docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html) is stored as parsed on both declared record paths; scores goal_fidelity 16, evidence 20, scope_discipline 20, durability 12, fit 18, reuse 20; added_failure_count 1 (tests/test_equilibrium_magnetics_fit_known_states.py::test_known_state_recovery[iter], the ITER per-test guard timeout, present in the reviewed run's after_suite log and absent from its baseline_suite log); one non-blocking finding carried over at tests/test_jax_config.py:116</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261124T023100183738-review-of-jax-cpu-native-abort-f91f9288d262" data-who="reckon-build" data-when="2026-11-24T02:38:36.631Z">
+    <div class="r-comment-body"><p>independent review of r-20261123T104742924149-jax-cpu-native-abort over the commits gained since its last stored review (391070b46..f91f9288d) is stored as parsed on both declared record paths; scores goal_fidelity 18, evidence 17, scope_discipline 20, durability 13, fit 18, reuse 20; added_failure_count 1 (tests/test_equilibrium_magnetics_fit_known_states.py::test_known_state_recovery[iter], the ITER per-test guard timeout present in after_suite and absent from baseline_suite); three non-blocking findings, none carried over from the prior round, whose only finding at tests/test_jax_config.py:116 is answered by the iter((3, 0)) stub at :111.</p></div>
 </div>
 </section>
 </main>

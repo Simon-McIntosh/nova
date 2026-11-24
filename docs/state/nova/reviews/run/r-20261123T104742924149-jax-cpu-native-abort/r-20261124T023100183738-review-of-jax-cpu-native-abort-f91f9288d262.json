@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 1,
+  "added_failure_ids": [
+    "tests/test_equilibrium_magnetics_fit_known_states.py::test_known_state_recovery[iter]"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-24T02:38:36.631Z",
+  "dispatched_at": "2026-11-24T02:32:10Z",
+  "findings": [
+    {
+      "file": "nova/jax/config.py",
+      "line": 272,
+      "severity": "non-blocking",
+      "text": "_mapped_region_count is monkeypatched in every test that exercises the trigger (tests/test_jax_config.py:126 and :141), so the one function the containment depends on is never run against a real /proc/self/maps; a regression in it (a wrong path, counting bytes instead of lines, returning 0 as it already does on any OSError) leaves tests/test_jax_config.py fully green while release_compilation_caches_when_mapped silently never fires."
+    },
+    {
+      "file": "tests/test_equilibrium_magnetics_fit_known_states.py",
+      "line": 141,
+      "severity": "non-blocking",
+      "text": "the autouse fixture is the containment itself and nothing asserts it is registered or applied to this module's tests, so deleting it reddens no test short of the multi-hour arm; an assertion collected from this module (for example that the fixture name is in the item's fixturenames) would make the regression visible in the fast lane."
+    },
+    {
+      "file": "tests/test_jax_config.py",
+      "line": 149,
+      "severity": "non-blocking",
+      "text": "the before/after counts in the release assertion still come from the test's own stub iterator, so they pin the wiring (a re-read after the clear) rather than a measured reduction; the assertion reddens if the code stops re-reading the count, which is the regression it was added for, but it cannot show that a release drops anything."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from 391070b46; 5ef04ca1e adds release_compilation_caches/release_compilation_caches_when_mapped and the shared _release_compilation_caches in nova/jax/config.py, replaces the case-name release with an autouse mapping-count fixture in tests/test_equilibrium_magnetics_fit_known_states.py:141, adds four unit tests in tests/test_jax_config.py, and 1f7b2826d and f91f9288d rewrite the fragment's fix and failure paragraphs to the measured mapping-count account.",
+    "done_when": "the done_when asks for the abort reproduced with two known-state cases in one process, all slow cases running in one process and under -n 8 with no abort, and the fast default selection still green; fence-base-arm.log carries the base abort (Fatal Python error, EXIT=134) under the declared suite command, mapped-release-head-arm.log carries 1 failed, 19 passed in 9364.48s with no Fatal Python error and the displaced case passing, ~/.cache/nova-s29/abort-gate/n8.log carries 3 failed, 1 passed in 3543.31s with zero Fatal Python errors, and fast-base-arm.log/fast-head-arm.log carry 46 passed either side.",
+    "goal": "the node's goal is to name the cause of the CPU native abort and fix or contain it so the known-states slow cases run in one process and under -n 8; the gained fix at 5ef04ca1e replaces the case-name release with release_compilation_caches_when_mapped (nova/jax/config.py:281) and the gained commits record the arm that shows it, so the goal is met for the containment the brief allowed.",
+    "manifest": "read; it records the 9364.48s single-process arm at 5ef04ca1e, the negative control at EXIT=134, the baseline and after suite arms with their log paths and failure ids, and status complete; every figure I re-read reconciles with the log it cites, though the baseline_suite and after_suite arms run different file sets.",
+    "write_paths": "the commits gained since the last review at 391070b46 (5ef04ca1e, 1f7b2826d, f91f9288d) touch nova/jax/config.py, tests/test_equilibrium_magnetics_fit_known_states.py, tests/test_jax_config.py and docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html, all inside the declared write paths, and the full node diff adds only the declared docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort directory."
+  },
+  "justifications": {
+    "durability": "tests/test_jax_config.py:126 and :141 both stub _mapped_region_count, so nova/jax/config.py:272's real mapping read and the fixture registration at tests/test_equilibrium_magnetics_fit_known_states.py:141 have no assertion that reddens if they regress.",
+    "evidence": "the headline in docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html reconciles with mapped-release-head-arm.log (1 failed, 19 passed in 9364.48s, EXIT=1, one FAILED id) and with n8.log (3 failed, 1 passed in 3543.31s, zero Fatal Python errors), though the baseline_suite log runs a different file set from the after_suite log.",
+    "fit": "the new functions in nova/jax/config.py:250 and :281 follow the module's existing CompilationRelease/receipt idiom and introduce no plan, sprint, ticket or version label.",
+    "goal_fidelity": "nova/jax/config.py:281 release_compilation_caches_when_mapped plus the autouse fixture at tests/test_equilibrium_magnetics_fit_known_states.py:141 contains the abort on the measured mapping count, which is the option the node's brief allowed, and mapped-release-head-arm.log shows the displaced case passing.",
+    "reuse": "nova/jax/config.py:234 _release_compilation_caches is the same private release refactored out of bound_compilation_retention, and a search over nova is jax.clear_caches and /proc/self/maps found no other owner of a cache-release or mapping-count capability.",
+    "scope_discipline": "every path in the diff from 391070b46 to f91f9288d is one of the node's five declared write paths, and no gained commit edits a plan, state or unrelated source file."
+  },
+  "notes": "base for this round is the head of the previous stored review (391070b46), per the dispatch's scope of commits gained since review. added_failure_ids is derived as after_suite minus baseline_suite as the record contract asks; the single id is the ITER case's own pytest-timeout(3500) guard, and the two arms run different file sets (baseline selects tests/test_equilibrium_magnetics_fit.py, after selects the known-states module plus tests/test_jax_config.py), so the id is a case the baseline arm never ran rather than a regression the change introduced. The prior round's only finding, the non-independent before/after assertion at tests/test_jax_config.py:116, is answered by the iter((3, 0)) stub at :111.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to name the cause of the CPU native abort and fix or contain it; the gained commit 5ef04ca1e lands release_compilation_caches_when_mapped at nova/jax/config.py:281 and the fragment at docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html records the arm that shows the containment.\nVERDICT done_when: the done_when's abort reproduction is in fence-base-arm.log (Fatal Python error, EXIT=134), its one-process and -n 8 clauses are in mapped-release-head-arm.log (1 failed, 19 passed in 9364.48s, no Fatal Python error, displaced case passing) and ~/.cache/nova-s29/abort-gate/n8.log (3 failed, 1 passed in 3543.31s, zero Fatal Python errors), and the fast default selection is 46 passed either side in fast-base-arm.log and fast-head-arm.log.\nVERDICT write_paths: the gained commits 5ef04ca1e, 1f7b2826d and f91f9288d touch only nova/jax/config.py, tests/test_equilibrium_magnetics_fit_known_states.py, tests/test_jax_config.py and docs/evidence/fragments/inverse-equilibrium-baseline/jax-cpu-native-abort.html, every one a declared write path.\nVERDICT manifest: read; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T104742924149-jax-cpu-native-abort/manifest.md records the 9364.48s arm, the EXIT=134 negative control and both suite arms with their log paths, and its figures reconcile with those logs.\nVERDICT diff: read commit by commit from 391070b46; the fix adds two public releases and the shared private _release_compilation_caches in nova/jax/config.py, an autouse mapping-count fixture at tests/test_equilibrium_magnetics_fit_known_states.py:141, and four unit tests at tests/test_jax_config.py:106-158, with the two evidence commits correcting the fragment's account.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/jax/config.py:281 release_compilation_caches_when_mapped and the fixture at tests/test_equilibrium_magnetics_fit_known_states.py:141 contain the abort on the measured mapping count, the containment the brief allowed.\nSCORE evidence: 17\nJUSTIFICATION evidence: the fragment's headline reconciles with mapped-release-head-arm.log's 1 failed, 19 passed in 9364.48s and EXIT=1, but the baseline_suite and after_suite arms in the manifest run different file sets.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff from 391070b46 to f91f9288d is one of the node's five declared write paths.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_jax_config.py:126 and :141 stub _mapped_region_count, so nova/jax/config.py:272's real mapping read and the fixture at tests/test_equilibrium_magnetics_fit_known_states.py:141 have no assertion that reddens on a regression.\nSCORE fit: 18\nJUSTIFICATION fit: nova/jax/config.py:250 and :281 follow the module's existing CompilationRelease and receipt idiom and carry no plan, ticket or version label.\nSCORE reuse: 20\nJUSTIFICATION reuse: nova/jax/config.py:234 _release_compilation_caches is the release refactored out of bound_compilation_retention, and no other production owner of a cache release or mapping-count trigger exists in nova.\nFINDING nova/jax/config.py:272 non-blocking: _mapped_region_count is stubbed in every test that exercises the trigger, so a regression in the real /proc/self/maps read leaves the unit file green while the release silently never fires.\nFINDING tests/test_equilibrium_magnetics_fit_known_states.py:141 non-blocking: the autouse fixture is the containment and no test asserts it is registered, so deleting it reddens nothing short of the multi-hour arm.\nFINDING tests/test_jax_config.py:149 non-blocking: the before/after counts come from the test's own stub iterator, so the assertion pins the re-read wiring but cannot show that a release drops anything.",
+  "review_run_id": "r-20261124T023100183738-review-of-jax-cpu-native-abort-f91f9288d262",
+  "reviewed_base_sha": "391070b46221d545e0c1ab63c91e1ed8c460b039",
+  "reviewed_head_sha": "f91f9288d2629bb3f74225618e1153366af33211",
+  "reviewed_run_id": "r-20261123T104742924149-jax-cpu-native-abort",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T03:00:19.047731+00:00",
+  "total": 106
+}

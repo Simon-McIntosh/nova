@@ -24,7 +24,7 @@
 <meta name="plan-sprint" content="S30">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s3&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s4&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s5&quot;:[&quot;one-ids-seam#s3&quot;,&quot;one-ids-seam#s4&quot;],&quot;s6&quot;:[&quot;one-ids-seam#s5&quot;,&quot;one-ids-seam#s7&quot;],&quot;s7&quot;:[&quot;one-ids-seam#s5&quot;]}">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-11-24">
 </head>
 <body>
@@ -184,6 +184,11 @@
     <h4 class="r-fu-title">Build the IDS seam</h4>
     <div class="r-fu-body"><p>§1 and §2 start at once; §3 and §4 wait on the census.</p></div>
     <pre class="r-fu-prompt">/reckon-build one-ids-seam</pre>
+    </article>
+<article class="r-fu" data-id="f-ois-002" data-status="open" data-written-by="coordinator" data-written-at="2026-11-24" data-recommends-skill="/reckon-build one-ids-seam §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Tighten the census test and record</h4>
+    <div class="r-fu-body"><p>The independent review of the census raised three non-blocking findings:</p><ul><li>The DIII-D reference-shot source in <code>scripts/imas_seam_census.py</code> is a one-element tuple, so the record renders its repr.</li><li>The destination assertions in <code>tests/test_imas_seam_census.py</code> compare against the same map that assigns them.</li><li>The DIII-D reference shot is not pinned to <code>d3d_shot_00000c4a7b</code>.</li></ul><p>§6's import guard reads the census, so its node fixes them.</p></div>
+    <pre class="r-fu-prompt">/reckon-build one-ids-seam §6</pre>
     </article>
 </section>
 

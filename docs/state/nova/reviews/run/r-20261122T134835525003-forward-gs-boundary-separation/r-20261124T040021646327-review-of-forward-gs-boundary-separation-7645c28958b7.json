@@ -3,6 +3,15 @@
   "added_failure_ids": [],
   "completed_at": "2026-11-24T04:07:18.021Z",
   "dispatched_at": "2026-11-24T04:01:05Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-24T05:08:59.085714+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T134835525003-forward-gs-boundary-separation",
+      "section": "\u00a78"
+    }
+  },
   "findings": [
     {
       "file": "benchmarks/diiid_forward_gs_match.py",

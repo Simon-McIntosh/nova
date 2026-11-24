@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-24T07:13:42.225Z",
+  "dispatched_at": "2026-11-24T07:07:20Z",
+  "findings": [
+    {
+      "file": "tests/test_joint_acceptance.py",
+      "line": 346,
+      "severity": "non-blocking",
+      "text": "the map-fidelity assertions compare the predicate's echoed measured and bound back to the same receipt fields the test used to build the clause, and no test supplies an over-bound MAP_FIDELITY on an ANALYTIC row, so the analytic-only judging path is not shown to refuse and a regression that stopped judging it would leave the suite green."
+    },
+    {
+      "file": "tests/test_joint_acceptance.py",
+      "line": 333,
+      "severity": "non-blocking",
+      "text": "support_stability and boundary_class on an air-core row are tested only for absence (incomplete); no test supplies an over-bound value and expects a refusal, so their judging path is unguarded."
+    },
+    {
+      "file": "nova/equilibrium/joint_acceptance.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the delivered source module and test lie outside the node's docs-only declared write paths; the fence permitted it and plan section 7 implies a source module, so this records an under-specified declaration rather than an out-of-section edit."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit against 1e86c41ed; three commits add the predicate module and its test, tighten the null-position ceiling to one pitch, and remove an env-var residual-only path from the production module; 830 insertions across two files.",
+    "done_when": "the done_when requires a per-clause predicate, strong-1000 refused by test id naming the failing clause, and a residual-only control; tests/test_joint_acceptance.py:278 asserts state refused with constraint_row.boundary_level in failing_clauses, and the recorded control log reddens that test by id.",
+    "goal": "the goal is one predicate that evaluates the clauses applying to a row and returns a per-clause verdict; nova/equilibrium/joint_acceptance.py:306 evaluate fixes applicability by row kind (_REQUIRED at :96, _EXCLUDED at :133) and returns RowAcceptance.verdicts, so the goal is met.",
+    "manifest": "read; it records status complete, three commits (cd59e2bda, 9686881f1, 111380e5b), changed_paths matching the diff, gate 11 passed EXIT=0, baseline 0 tests EXIT=4, and the residual-only control red by id EXIT=1.",
+    "write_paths": "declared paths are docs/evidence/fragments/converged-forward-solve/converged-forward-solve-s7.html and docs/figures/converged-forward-solve/converged-forward-solve-s7; the diff touches only nova/equilibrium/joint_acceptance.py and tests/test_joint_acceptance.py, outside the declared paths but inside the section's expected source scope."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is one predicate that evaluates the clauses applying to a row and returns a per-clause verdict; nova/equilibrium/joint_acceptance.py:306 evaluate fixes applicability by row kind (_REQUIRED at :96, _EXCLUDED at :133) and returns RowAcceptance.verdicts, so the goal is met.\nVERDICT done_when: the done_when requires a per-clause predicate, strong-1000 refused by test id naming the failing clause, and a residual-only control; tests/test_joint_acceptance.py:278 asserts state refused with constraint_row.boundary_level in failing_clauses, and the recorded control log reddens that test by id.\nVERDICT write_paths: declared paths are docs/evidence/fragments/converged-forward-solve/converged-forward-solve-s7.html and docs/figures/converged-forward-solve/converged-forward-solve-s7; the diff touches only nova/equilibrium/joint_acceptance.py and tests/test_joint_acceptance.py, outside the declared paths but inside the section's expected source scope.\nVERDICT manifest: read; it records status complete, three commits (cd59e2bda, 9686881f1, 111380e5b), changed_paths matching the diff, gate 11 passed EXIT=0, baseline 0 tests EXIT=4, and the residual-only control red by id EXIT=1.\nVERDICT diff: read commit by commit against 1e86c41ed; three commits add the predicate module and its test, tighten the null-position ceiling to one pitch, and remove an env-var residual-only path from the production module; 830 insertions across two files.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/joint_acceptance.py:96 and :133 fix each row kind's required and excluded families, so a caller cannot admit a row by declaring fewer clauses.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/test_joint_acceptance.py:278 asserts the refusal by id and clause, and the gate log records 11 passed EXIT=0 while the control log records that test failing by id.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: the diff adds only nova/equilibrium/joint_acceptance.py and tests/test_joint_acceptance.py, which is what plan section 7 implies, though both lie outside the docs-only declared write paths.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_joint_acceptance.py:368 fails if the one-pitch ceiling is removed and :390 fails if a global tolerance replaces per-row scales, but no test supplies an over-bound analytic map-fidelity value expecting a refusal.\nSCORE fit: 17\nJUSTIFICATION fit: nova/equilibrium/joint_acceptance.py:153 uses frozen dataclasses, __all__ exports and mechanism-named constants in the package idiom, with no plan, version or ticket labels.\nSCORE reuse: 18\nJUSTIFICATION reuse: no existing module owns per-row forward-solve clause acceptance; nova/equilibrium/observable_acceptance.py:203 compares array observables against a reference and does not overlap this capability, so the addition forks nothing.",
+  "review_run_id": "r-20261124T070625946456-review-of-converged-forward-solve-s7-111380e5bcc3",
+  "reviewed_base_sha": "1e86c41ed7e14f44c87d2cfb84408182cc709cb6",
+  "reviewed_head_sha": "111380e5bcc3f97da4dd5a6e103247573ef6e236",
+  "reviewed_run_id": "r-20261122T192250673466-converged-forward-solve-s7",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T07:40:29.251654+00:00",
+  "total": 100
+}

@@ -25,8 +25,8 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="38">
-<meta name="plan-modified" content="2026-11-23">
+<meta name="plan-version" content="39">
+<meta name="plan-modified" content="2026-11-24">
 </head>
 <body>
 <main class="plan-doc">
@@ -290,6 +290,9 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261123T190127982655-review-of-unreached-module-delete-2d281377afd2" data-who="reckon-build" data-when="2026-11-23T19:17:13.999Z">
     <div class="r-comment-body"><p>review at head 2d281377afd2debd64841346796bb83ab79c2a9b scores goal_fidelity 19, evidence 16, scope_discipline 16, durability 7, fit 18, reuse 14; three non-blocking findings and no blocking finding; added_failure_count 0 with no added failure ids.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261122T202605453490-unreached-module-delete" data-who="reckon-build" data-when="2026-11-23T18:55:20Z">
+    <div class="r-comment-body"><p>landing: the importer scan deleted 24 unreached, unimported library modules (3029 lines) and held back nova/utilities/ANSYS.py by name; base and head arms on all_debug show zero new import failures and collection reduced only by the six parametrisations the thermal-hydraulic guard derives from a package walk</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261123T091608198628-review-of-hot-path-duplicate-register-c62046c999c4" data-who="reckon-build" data-when="2026-11-23T09:25:29.164Z">
     <div class="r-comment-body"><p>review of r-20261122T202607457728-hot-path-duplicate-register at base 7505cdfbc551ac367c977575d4a3d74a9f1bddd2 and head c62046c999c4fe117a8501c33bf882354105cad2 scores goal_fidelity 17, evidence 16, scope_discipline 12, durability 7, fit 17, reuse 17, with seven non-blocking findings and a parsed record stored under the reviewed run's review-records directory.</p></div>

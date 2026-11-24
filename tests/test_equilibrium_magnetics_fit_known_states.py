@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from nova.equilibrium import MagneticsFit
+from nova.jax.config import release_compilation_caches_when_mapped
 from tests.magnetics_fit_harness import (
     _draw_recovery_panels,
     _persist_forward,
@@ -135,6 +136,21 @@ def _recover_physical(case, displacement=0.0):
         / span
     )
     return fitted, error
+
+
+@pytest.fixture(autouse=True)
+def release_accumulated_mappings():
+    """Drop finished problems' executables before a test compiles, when needed.
+
+    A CPU process retains a finished machine's loaded executable until JAX's
+    dispatch caches are cleared, and one free-boundary solve maps about 28,500
+    address-space regions against a kernel bound near 65,530.  A release keyed
+    on the case name misses a program compiled from a case that is already
+    built, so the trigger here is the measured mapping count: it accumulates
+    across tests whichever problem produced it.  One release leaves a few
+    thousand regions, so the next problem's accumulation stays below the bound.
+    """
+    release_compilation_caches_when_mapped()
 
 
 @pytest.fixture(scope="module")

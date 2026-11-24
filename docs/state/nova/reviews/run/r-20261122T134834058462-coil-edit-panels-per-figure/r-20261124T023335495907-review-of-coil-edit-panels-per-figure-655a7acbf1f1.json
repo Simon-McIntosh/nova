@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-24T02:41:09.332Z",
+  "dispatched_at": "2026-11-24T02:35:09Z",
+  "findings": [
+    {
+      "file": "tests/test_coil_edit_panel_render.py",
+      "line": "1226",
+      "severity": "non-blocking",
+      "text": "test_the_panel_subcommand_writes_how_each_branch_set_was_drawn derives its expected style strings from written[\"assembly_drawn\"] and asserts them against written[\"caption\"], so both sides are outputs of the same producer call and a _draw_branch_set that computed the tallies wrongly would agree on both sides and pass; the assertion catches only a caption/block slot mismatch, not a wrong tally."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "the only production paths reaching the change are benchmarks/coil_edit_latency.py:2819 and :3971; the four importers use untouched symbols.",
+    "diff": "seven commits read (81ba155c8..655a7acbf): one producer helper, three caption slots, 219 lines of tests, regenerated receipts and figures, and record prose.",
+    "done_when": "the two-file command is recorded at base 5c503f9a (1 failed, 53 passed) and head 04852309c (72 passed, lane EXIT=1 on its cache guard); the delta to 655a7acbf is docs-only.",
+    "goal": "the reviewed run's goal is that each figure is drawn from its own re-solved state and that every page states what it carries; the delta adds the assembly_drawn block at benchmarks/coil_edit_latency.py:2314 and writes it into every receipt at :3971.",
+    "manifest": "read; it records the drawing tests, both negative controls and the head arm, and discloses the perturbed-current control's assertion order.",
+    "write_paths": "all seven delta commits touch only paths inside the manifest's declared write paths."
+  },
+  "justifications": {
+    "durability": "tests/test_coil_edit_panel_render.py:1266 asserts each receipt's style string appears in the record's data-branches row, so changing a receipt or the row reddens it, and logs/negative-control-docs-revert.log shows 6 failed when the documents are restored.",
+    "evidence": "logs/after-arm-head-h200.log ends '72 passed in 2050.61s (0:34:10)' at 04852309c, and the three later commits edit only paragraphs of coil-edit-panels-per-figure.html outside the rows the tests parse.",
+    "fit": "the helper at benchmarks/coil_edit_latency.py:2314 follows the receipt-block idiom of _branch_terms and _panel_summary and introduces no plan, ticket or version identifier.",
+    "goal_fidelity": "benchmarks/coil_edit_latency.py:2314 computes each set's drawn tallies beside the assembler verdict and :3971 writes them into the receipt, so each figure's page states the drawing it carries.",
+    "reuse": "_assembly_drawn at benchmarks/coil_edit_latency.py:2314 composes the existing owners _branch_terms (:2267) and _branch_style_note (:2328) rather than duplicating them.",
+    "scope_discipline": "every path in git diff 81ba155c8..655a7acbf is a declared write path, and the code change is confined to benchmarks/coil_edit_latency.py:2314 and tests/test_coil_edit_panel_render.py:1153."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed run's goal is that each of the five coil-edit panel figures is drawn from its own re-solved state and that every page/record states what it carries; the delta 81ba155c8..655a7acbf adds an assembly_drawn block at benchmarks/coil_edit_latency.py:2314 written into every receipt at :3971, and the five docs/figures/*/panel-receipt.json now each carry their own drawn-tally and assembler-verdict block.\nVERDICT done_when: the run's done-when includes the two-file render/connectivity command and inspected figures; the manifest records baseline_suite at 5c503f9a (1 failed, 53 passed, EXIT=1, timeout) and after_suite at 04852309c (72 passed, lane EXIT=1 on its cache guard), and logs/after-arm-head-h200.log carries the '# revision: 04852309c' header and the '72 passed in 2050.61s' summary line.\nVERDICT write_paths: read the manifest's declared paths; all seven delta commits touch only benchmarks/coil_edit_latency.py, tests/test_coil_edit_panel_render.py, the three named evidence fragments, and figure artefacts under docs/figures/{forward-solve-api/coil-edit-nonconvergence,cpu-compile-abort/coil-edit-regeneration-row,mast-centroid-capability,single-grid-solver-cutover}, each inside a declared write path.\nVERDICT manifest: read; it records the drawing tests at 3441656be (6 passed), both negative controls (producer reverted 6 failed; documents restored 6 failed), the head arm at 04852309c (72 passed, cache-guard EXIT=1), and discloses that the earlier perturbed-current control failed at the solved-node pin rather than at the contour-displacement assertion.\nVERDICT diff: read the seven commits 81ba155c8..655a7acbf commit by commit; one producer helper plus three caption slots (5a701bd6d), 219 lines of tests, and regenerated receipts/figures plus record prose (bd3b52dd6, 08f428688, 3441656be, ca3cef479, 04852309c, 655a7acbf).\nCALL_SITES: benchmarks/coil_edit_latency.py:2819 (_render_panel calls _assembly_drawn), benchmarks/coil_edit_latency.py:3971 (main panel subcommand writes assembly_drawn into the receipt), benchmarks/coil_edit_interactive.py:14, benchmarks/mast_centroid_solve_panels.py:45, benchmarks/raster_flux_target_receipt.py:52, benchmarks/traced_current_bitwise.py:18\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/coil_edit_latency.py:2314 computes each set's drawn tallies beside the assembler verdict and :3971 writes them into the receipt, so each figure's page states the drawing it carries; docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-receipt.json shows converged lobe-solid/non-converged unassembled while the mast receipt shows both lobe-solid, as their maps differ.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/after-arm-head-h200.log ends '72 passed in 2050.61s (0:34:10)' at revision 04852309c, and the three commits to the reviewed head 655a7acbf (ca3cef479, 04852309c, 655a7acbf) only add or edit paragraphs in coil-edit-panels-per-figure.html outside the <tr data-branches> rows the tests parse, so the gate covers the reviewed code though not the exact head tree.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 81ba155c8..655a7acbf is a declared write path, and the code change is confined to benchmarks/coil_edit_latency.py:2314 and tests/test_coil_edit_panel_render.py:1153.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_coil_edit_panel_render.py:1266 asserts each receipt's style string appears in the record's data-branches row, so changing a receipt or the row reddens it, and logs/negative-control-docs-revert.log shows 6 failed when the documents are restored to 3441656be's parent; the producer-path assertion at :1226 is weaker because caption and block are both outputs of the same call.\nSCORE fit: 19\nJUSTIFICATION fit: the helper at benchmarks/coil_edit_latency.py:2314 follows the receipt-block idiom of the surrounding _branch_terms/_panel_summary helpers and introduces no plan, ticket or version identifier.\nSCORE reuse: 19\nJUSTIFICATION reuse: _assembly_drawn at benchmarks/coil_edit_latency.py:2314 composes the existing owners _branch_terms (:2267) and _branch_style_note (:2328) rather than duplicating them, and the test helpers are the only new definitions.\nFINDING tests/test_coil_edit_panel_render.py:1226 non-blocking: test_the_panel_subcommand_writes_how_each_branch_set_was_drawn derives its expected style strings from written[\"assembly_drawn\"] and asserts them against written[\"caption\"], so both sides are outputs of the same producer call and a _draw_branch_set that computed the tallies wrongly would agree on both sides and pass; the assertion catches only a caption/block slot mismatch, not a wrong drawn tally.\n",
+  "review_run_id": "r-20261124T023335495907-review-of-coil-edit-panels-per-figure-655a7acbf1f1",
+  "reviewed_base_sha": "81ba155c8d2a65ef400a364b6386d6b0a4e364eb",
+  "reviewed_head_sha": "655a7acbf1f16810bb866733f55b6e83a315e2a2",
+  "reviewed_run_id": "r-20261122T134834058462-coil-edit-panels-per-figure",
+  "reviewer_run_id": "r-20261124T023335495907-review-of-coil-edit-panels-per-figure-655a7acbf1f1",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T03:01:38.549955+00:00",
+  "total": 111
+}

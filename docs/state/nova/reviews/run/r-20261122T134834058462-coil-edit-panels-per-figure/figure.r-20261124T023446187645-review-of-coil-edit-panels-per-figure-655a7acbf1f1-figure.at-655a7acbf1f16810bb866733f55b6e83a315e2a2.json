@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-24T02:35:35Z",
+  "findings": [
+    {
+      "file": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
+      "id": "fa32200c767",
+      "line": null,
+      "rubric": "legibility",
+      "severity": "non-blocking",
+      "summary": "Two unconnected crossing-mark families are drawn on this panel, blue and orange plus marks of roughly two hundred strokes, and the eight-entry legend names neither. No page in docs/ embeds this path, so a reader who meets the image in the figure listing has no caption at all saying that both separatrix sets are drawn as scan-order crossings rather than assembled boundaries. The titles and residuals are correct: edit 15 (+12%, converged, 4.526e-09 Wb, three active-set iterations) beside edit 3 (-12%, not converged, 7.112e-03 Wb, four). The fragment's drawing table states both styles for this path, but the statement lives in a different document from the image."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+      "id": "f1b1f99cf6c",
+      "line": null,
+      "rubric": "legibility",
+      "severity": "non-blocking",
+      "summary": "This file is byte-identical to the cpu-compile-abort titan PNG (sha256 e7af0c5b92f7b4a8), so the two published paths serve one image and the crossing-mark defect above is the same on both. Its live caption, docs/evidence/archive/single-grid-solver-cutover-landed.html:66, still gives the converged residual as 4.13e-09 and the non-converged one as 6.51e-03 Wb after sixteen trips, where the figure beside it draws edit 15 at 4.526e-09 Wb after three active-set iterations and edit 3 at 7.112e-03 Wb after four; the caption also says both boundary branches are assembled, where this figure draws the non-converged set as unconnected crossings. The archive is outside this node's declared write paths and the node's own fragment leaves it to its owner, so the finding is recorded rather than answered here."
+    },
+    {
+      "file": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+      "id": "ff9459de8e4",
+      "line": null,
+      "rubric": "legibility",
+      "severity": "non-blocking",
+      "summary": "This file is byte-identical to the mast-centroid-capability PNG (sha256 e4e699ca6f5d791d), so the regeneration row and the mast page publish one drawing and a reader cannot tell the two figures apart, although each is stated to come from its own solve output. No page embeds this path, so the blue crossing chain on both panels is unlabelled here as well: the image alone does not say that the reference set is unassembled. The titles and residuals match the receipt (edit 19 / edit 2, 1.972e-09 and 9.879e-03 Wb)."
+    },
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+      "id": "f79289581dc",
+      "line": null,
+      "rubric": "legibility",
+      "severity": "non-blocking",
+      "summary": "The five figure blocks in docs/evidence/archive/forward-solve-api-landed.html (lines 331, 431, 497, 699 and 910) all embed this file and all caption it with a superseded draw: edit 12 (+6%, converged, 5.730e-09 Wb, three active-set iterations) beside edit 9 (+0%, not converged, 6.612e-03 Wb, three), with 'the boundary branch drawn from the assembled set in both cases - lobe solid, saddle legs dashed'. The PNG they sit beside draws edit 5 (-8%, converged, 5.366e-09 Wb, five iterations) beside edit 4 (-10%, not converged, 4.339e-02 Wb, four), and its non-converged orange set is drawn as unconnected crossings, not an assembled lobe with legs. The archive is outside this node's write paths; the node records the discrepancy in its own fragment and does not rewrite another node's landing record."
+    },
+    {
+      "file": "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+      "id": "f94af14caf9",
+      "line": null,
+      "rubric": "data_ink",
+      "severity": "non-blocking",
+      "summary": "On all five figures the crossing marks that replace an unassembled separatrix set are drawn in the same blue and orange as the nulls and the dashed legs, and the eight-entry legend has no entry for them and none for the hollow 'other qualified nulls' convention, so within the picture alone a reader cannot tell that the blue chain along the outermost contour is a set of scan-order crossings rather than a second contour or a scatter of nulls. The caption on the page that embeds this file (docs/evidence/fragments/separatrix-spline-extraction/coil-edit-fine-panels.html:78-84) now states the three drawing styles, so the defect is confined to the image rather than the page; the earlier the caption the less a reader has to go on, and the two regeneration-row paths have none."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-on-solve-currents.html",
+      "id": "f288bc1a59e",
+      "line": 6,
+      "rubric": "legibility",
+      "severity": "non-blocking",
+      "summary": "The live caption for the forward-solve figure now carries the correct numbers (27 promoted at 2.571 m and certifying on the converged panel; 3 promoted at 0.087 m and uncertified on the non-converged one, matching the figure's receipt), which closes the blocking finding at 81ba155c. It ends, however, on the clause 'so this page's earlier caption, written from the archive this node replaced, is superseded', which is bookkeeping about a previous caption rather than a statement about the figure, and the 'so' joins it to the non-converged panel's measurement as though the measurement implied it. A reader is handed a retraction where the caption should simply state what the panel shows."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261124T023446187645-review-of-coil-edit-panels-per-figure-655a7acbf1f1-figure",
+  "reviewed_base_sha": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "reviewed_brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T134834058462-coil-edit-panels-per-figure/brief.md",
+  "reviewed_figures": [
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
+    "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
+    "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
+    "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png"
+  ],
+  "reviewed_head_sha": "655a7acbf1f16810bb866733f55b6e83a315e2a2",
+  "reviewed_note": "Read-only figure review of the five rendered PNGs attached to this node. No SVG and no image other than the named PNGs was opened, rendered or inspected. Captions and receipts are cited only as evidence about the picture a reader is given, never as the basis of a visual verdict. The five PNGs are byte-identical to those the review at 81ba155c judged (mast and cpu-compile-abort sha256 e4e699ca..., the two titan figures e7af0c5b..., forward-solve b6906db4...); what changed between that head and this one is the receipts and the captions.",
+  "reviewed_plan": "nova:separatrix-spline-extraction \u00a77",
+  "reviewed_run_id": "r-20261122T134834058462-coil-edit-panels-per-figure",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Pass on all five. Title and legend text renders near-black on white, far above any body-text ratio, and the null markers are saturated blue and orange against white; no text sits on a coloured fill because there is no fill. The grey reference contours are recessive data rather than text.",
+    "data_ink": "Pass on all five. The ink is the grey reference contour family, the orange solved contour family, the dashed saddle legs, the oversized reference nulls, the filled solved nulls and the black first-wall outline; roughly ninety percent of each canvas is empty white. No fill, band or wash competes with the contours. In the titan pair the unconnected crossing marks add a dense second family outside the plasma, which is ink where little is contoured, but the contour families still carry the weight.",
+    "decoration": "Pass on all five. No gradient, no background fill, no shading, no gridline, no frame and no axis furniture; the poloidal axes are off and scale is carried by the machine outline drawn in the panel. The legend is frameless and sits in clear space below the panels, and the only styling is line dash and marker shape, which encode data.",
+    "label_collision": "Pass on all five. No ink lies within two pixels of any canvas edge on any of the five (measured on the rendered pixels), so no title or legend entry is clipped; the two title lines occupy separate row bands (7-24 and 30-43) with a clear gap, the two legend rows likewise (658-675 and 684-702), and the legend sits wholly below the plotted data. No direct label sits over a contour, and no two text artists overlap.",
+    "legibility": "Pass on all five. Each figure is a two-panel poloidal map whose panels carry a two-line title naming the edit index, the circuit-current fraction, the converged/not-converged word, the terminal residual and the active-set iteration count, so the two states are told apart without a caption: 'edit 19 P4-UPPER circuit 8 current +20% of the seed converged / residual 1.972e-09 Wb 5 active-set iterations' beside 'edit 2 ... -14% ... not converged / residual 9.879e-03 Wb 7 active-set iterations', and the same shape for edits 15/3 and 5/4. The frameless two-row legend below the panels names the contour families, the dashed saddle legs and both null sets, and every label reads at page width on a 1400x720 canvas. One mark family present in all five figures is not in the legend (finding 1).",
+    "table_form": "Pass on all five. Each is a spatial artifact, a poloidal flux field with reference and solved level sets on one shared physical level array, and none depicts information that is naturally a table: the residuals, iteration counts and promoted-node distances are printed as title text and carried in the prose beside the figures, not drawn as bars or boxes."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T02:43:02.083308+00:00",
+  "total": null
+}

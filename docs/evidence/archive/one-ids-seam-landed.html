@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="one-ids-seam-landed">
+  <meta name="plan-title" content="One IDS Seam: IMAS Is the Only Interface Between Machine Data and the Solver — landed record">
+  <meta name="plan-summary" content="Landing record for One IDS Seam: IMAS Is the Only Interface Between Machine Data and the Solver: evidence appended by section.">
+  <meta name="plan-evidence-for" content="one-ids-seam">
+  <title>One IDS Seam: IMAS Is the Only Interface Between Machine Data and the Solver — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>One IDS Seam: IMAS Is the Only Interface Between Machine Data and the Solver — landed record</h1>
+  <p>Landing record for One IDS Seam: IMAS Is the Only Interface Between Machine Data and the Solver: evidence appended by section.</p>
+
+
+   <section id="s1-census" data-evidence-origin="append">
+    <h2>§1 — The overlap census landed</h2>
+    <p>Run <code>r-20261122T143918823268-one-ids-seam-s1</code> landed by hand merge <code>eb82ba1fd</code> on 2026-11-24, merging the reviewed head <code>4cb2ac7d3</code> (commits <code>2961e79ad</code>, <code>7bcc9ad16</code>, <code>4cb2ac7d3</code>). The lead ruled the hand merge because the automatic landing measure could not run a base arm for a node that adds both the census module and the test that imports it: the base arm fails to collect the test with exit 4.</p><p>The scan is <code>scripts/imas_seam_census.py</code>. Its test is <code>tests/test_imas_seam_census.py</code>, and the record it renders is <a href="/nova/research/imas-seam-census.html">docs/research/imas-seam-census.html</a>. It reads 3498 files and writes 94 module rows, 388 importer rows and 35 convention rows, with 0 censused files unrowed.</p><ul><li>Unreached: decimate, fuse, transient, toroidal_field_coil, waveform, contour_tree, contour_tree_layout, current and scripts. The review named the first five; the scan finds four more.</li><li>Convention rows: 26 move to the ingest member as conversion, 6 are rewired to the literal COCOS 17 values and 3 imas-ambix sites move to the member. None stays.</li><li><code>steering_frames.py</code> is a second <code>COCOS = 17</code> statement beside <code>nova/equilibrium/convention.py</code>.</li><li>The reference shots are MAST 21978 and DIII-D <code>d3d_shot_00000c4a7b</code>.</li></ul><p>Gate: <code>pytest tests/test_imas_seam_census.py</code> passes 22 of 22 at the merged head, EXIT=0 (log <code>~/.cache/nova-one-ids-seam/s1-merged-head.log</code>). The mutation control works: a row loop that skips <code>mast_geometry.py</code> gives unrowed=1 and EXIT=1. The independent review scores 13–19 of 20, with 0 added failures and three non-blocking findings: the DIII-D reference-shot source renders as a one-element tuple, two destination assertions are not independent of the map under test, and the DIII-D shot is not pinned in the test.</p>
+  </section>
+
+</main>
+</body>
+</html>

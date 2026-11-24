@@ -22,10 +22,10 @@
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-tags" content="machine-description,mast,diii-d,efit">
 <meta name="plan-sprint" content="S30">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s3&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s4&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s5&quot;:[&quot;one-ids-seam#s3&quot;,&quot;one-ids-seam#s4&quot;],&quot;s6&quot;:[&quot;one-ids-seam#s5&quot;,&quot;one-ids-seam#s7&quot;],&quot;s7&quot;:[&quot;one-ids-seam#s5&quot;]}">
-<meta name="plan-version" content="9">
-<meta name="plan-modified" content="2026-11-23">
+<meta name="plan-version" content="10">
+<meta name="plan-modified" content="2026-11-24">
 </head>
 <body>
 <main class="plan-doc">
@@ -57,7 +57,7 @@
 </figure>
 
 <h2 id="s1">§1 — The overlap census</h2>
-<section data-reckon="section" data-id="s1" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s1" data-effort-hours="2.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>The stored code review of <code>nova/imas</code> on 2026-11-22 (report <code>code-review/213417e86321</code>) found five modules nothing imports and one triplicated boundary comparison. It did not map the machine-specific modules against the generic layer. This section does. The census is a committed, executable import-graph scan, not a hand-written list. It recomputes each module's class and importers from the tree, carries each row's destination, and renders the research record <code>docs/research/imas-seam-census.html</code> that §2 to §4 read. §6's import guard reads the same scan.</p><p>Destinations are by class, not by name, and every class has exactly one:</p><ul><li><strong>Machine authoring or publication</strong> moves to the ingest member, whatever its name. That includes the machine-generic publication path and the DDv4 publication floor in <code>machine_artifact.py</code>, which move with their refusal test. The content-addressed cache primitives in that module, which describe no machine, stay in nova.</li><li><strong>Generic reader or generic writer</strong> stays in nova.</li><li><strong>Convention conversion</strong> moves to the ingest member under §5. A module converts when it maps between conventions or DD versions: it imports the COCOS algebra for a transform, derives a COCOS value from a DD version (directly or through a helper such as <code>nova.io.sourcemap</code>'s DD-to-COCOS mapping), or translates DD3 data.</li><li><strong>Convention statement</strong> is the one module where nova states its own convention, COCOS 17. It converts nothing, so it stays in nova; §5 rewires it in place to literal values and removes its algebra import.</li><li><strong>Machine analysis</strong> (adjudications, screens, comparisons) stays on the solver side of the seam but carries no machine name. The §3 or §4 node that moves its machine generalises it: it reads through the generic readers and is named by what it does. Where it reads a machine source directly, that read moves to the member, which writes the quantity into the IDS the analysis then reads. A machine-named module that does generic work is generalised the same way.</li><li><strong>Unreached</strong> modules are deleted by §2.</li></ul>
 <p>Done when:</p>
 <ul>
@@ -190,6 +190,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261123T073759564247-review-of-one-ids-seam-s1-4cb2ac7d365d" data-who="reckon-build" data-when="2026-11-23T08:09:57.041Z">
     <div class="r-comment-body"><p>Review of one-ids-seam-s1 at 4cb2ac7d3 against base 6cee0faf: scores goal_fidelity 18, evidence 16, scope_discipline 13, durability 16, fit 17, reuse 19; added_failure_count 0; three non-blocking findings (DIII-D shot source tuple repr, two non-independent destination assertions, DIII-D shot asserted only for truthiness).</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20261124T054722052720" data-who="coordinator" data-when="2026-11-24">
+    <div class="r-comment-body">§1 landed by hand merge eb82ba1fd, as the lead ruled. 22/22 census tests pass at the merged head. The three non-blocking review findings are left to §2, which edits the census. §2, §3 and §4 are released.</div>
 </div>
 </section>
 </main>

@@ -1,26 +1,23 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-24T05:12:13.907Z",
   "dispatched_at": "2026-11-24T05:08:56Z",
   "findings": [
     {
       "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
-      "id": "f9eaf616eba",
       "line": null,
       "severity": "non-blocking",
       "summary": "The label naming the limit the process dies against is the palest text in the figure. Measured from the rendered PNG the 'vm.max_map_count / 65,530' annotation renders at (146,146,146), about 3.1:1 against white, against 7.7:1 for the stage labels and 12.6:1 for the value labels. That is under the 4.5:1 floor for normal text; it is readable but a reader scanning for the threshold the caption describes finds the least visible words on the page. Darkening the label toward the existing body-text grey would fix it without changing data."
     },
     {
       "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
-      "id": "f9eaf616eba",
       "line": null,
       "severity": "non-blocking",
       "summary": "The final bar, 'MAST solving, run stopped' at 31,476, was a reading still climbing when the driver was stopped, but it is drawn at a fixed length indistinguishable from settled bars such as 'Solov'ev solved' at 28,552 - so a reader sees a final measurement where the run was truncated. Its row label says 'run stopped', which recovers the caveat, but the bar geometry alone does not. An unfinished bar (hatched end, or a direction marker) would let the shape show what the label says."
     },
     {
       "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
-      "id": "f9eaf616eba",
       "line": null,
       "severity": "non-blocking",
       "summary": "The figure plots only the release arm, so no bar approaches the dotted limit and the picture reads as comfortable headroom (largest bar 31,476 of 65,530, ~48%). The evidence table's no-release arm - MAST built on top of Solov'ev at 30,246 and MAST solving without a release at 40,883 - is what shows the count climbing toward the limit, and the earlier sampler's 65,271-at-limit reading is the motivation named in the caption; none of these is drawn. A reader who takes the figure alone sees a mechanism that stays well clear of its own danger. Plotting the no-release arm beside the release arm, or the 65,271 near-limit point, would let the picture carry the argument the caption makes."
@@ -45,6 +42,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-24T05:12:16.474094+00:00",
+  "timestamp": "2026-11-24T05:23:10.572505+00:00",
   "total": null
 }

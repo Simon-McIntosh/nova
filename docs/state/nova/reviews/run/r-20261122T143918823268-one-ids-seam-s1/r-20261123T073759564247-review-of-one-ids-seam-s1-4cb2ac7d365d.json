@@ -5,6 +5,15 @@
   "completed_at": "2026-11-23T08:09:57.041Z",
   "dispatched_at": "2026-11-23T07:38:28Z",
   "failure_derivation": "Derived from the reviewed run's own arms: the after arm logs/imas-seam-census-after-suite.log ran tests/test_imas_seam_census.py to its summary line with 22 passed and EXIT=0 (zero failing ids); the base arm logs/imas-seam-census-baseline_sd-suite.log reported exit 4 with no tests collected because the file was absent at base 6cee0faf, so it contributes no failing ids. Added failures = 0 - 0 = 0.",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-24T05:46:31.643954+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T143918823268-one-ids-seam-s1",
+      "section": "\u00a71"
+    }
+  },
   "findings": [
     {
       "file": "scripts/imas_seam_census.py",

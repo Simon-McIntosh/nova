@@ -11,6 +11,15 @@
   "completed_at": "2026-11-23T07:42:04.650Z",
   "dimension_dispositions": {},
   "dispatched_at": "2026-11-23T07:27:26Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-24T05:47:37.176189+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T150133906524-cfs-map-fidelity-rungs",
+      "section": "\u00a74"
+    }
+  },
   "findings": [
     {
       "file": "tests/test_gs_map_fidelity.py",

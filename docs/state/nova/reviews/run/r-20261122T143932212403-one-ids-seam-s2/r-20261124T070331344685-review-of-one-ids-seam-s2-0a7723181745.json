@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "the reviewed run's manifest records baseline_suite and after_suite as unarmed because no test file lay in its declared write scope, so no suite pair exists to diff. The only suite evidence is tests/test_imas_seam_census.py (26 passed, EXIT=0, logs/head-census.log) and a --collect-only run (11017 collected, EXIT=0, logs/head-collect.log); neither adds a failure, so the count is 0 with an empty id list.",
+  "call_sites": "none",
+  "call_sites_note": "no runtime module imports any of the eight deleted modules at head (the census's own deleted_module_references=0 and an independent git grep over nova/ tests/ scripts/ apps/ benchmarks/ agree), and nothing imports scripts/imas_seam_census.py except its own test, so the added functions have no production caller.",
+  "completed_at": "2026-11-24T07:12:49.536Z",
+  "dispatched_at": "2026-11-24T07:04:15Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-one-ids-seam-s2-0a7723181745",
+      "recorded_at": "2026-11-24T07:27:48.395021+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "repair-of-one-ids-seam-s2-0a7723181745",
+      "recorded_at": "2026-11-24T07:27:48.545842+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "nova/imas/ensemble.py",
+      "line": 1,
+      "severity": "blocking",
+      "text": "nova/imas/ensemble.py and nova/imas/pulseprofile.py are classed unreached by the census at head (docs/research/imas-seam-census.html reports unreached=2 for exactly these two) yet both remain in the tree, so \u00a72's done_when 'every module the \u00a71 census classes unreached is gone' is unmet. They became unreached because the node deleted their only importers (decimate.py imported ensemble, waveform.py imported pulseprofile); the two should be deleted in the same change."
+    },
+    {
+      "file": "docs/evidence/fragments/one-ids-seam/one-ids-seam-s2.html",
+      "line": 47,
+      "severity": "blocking",
+      "text": "the fragment states 'After the correction the census classes exactly the eight deleted modules unreached, and every module it classes unreached is gone, so \u00a72's first clause holds', which is false: the very census record the same commit regenerated reports two unreached modules (ensemble.py, pulseprofile.py) that are still present. A landed evidence record asserting a completed done-when that the code contradicts."
+    },
+    {
+      "file": "scripts/imas_seam_census.py",
+      "line": 106,
+      "severity": "non-blocking",
+      "text": "DELETED_MODULE_STEMS is a hand-maintained list of eight names, so --check-deleted and the durability tests cannot detect a module that becomes unreached as a consequence of the deletion, which is how the two modules above passed the gate; the census already computes the unreached set, so the check and test should read that set rather than the static list."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from 7a93be400 to 0a7723181: 8079d648c deletes eight modules and adds the --check-deleted scan and entry-point reader plus tests; 0a7723181 adds the evidence fragment; the census HTML and the reuse-map citation are regenerated/repointed.",
+    "done_when": "the done_when's first clause requires every module the census classes unreached to be gone; the committed docs/research/imas-seam-census.html at head reports unreached=2 (ensemble.py, pulseprofile.py) and both files exist, so the gate does not assert that clause and the clause is false.",
+    "goal": "the node's goal is \u00a72: delete every module the \u00a71 census classes unreached; commit 8079d648c deletes eight under nova/imas (938 lines at base) and the census at head classes two further modules, nova/imas/ensemble.py and nova/imas/pulseprofile.py, unreached while both remain on disk.",
+    "manifest": "read; status complete, commits 8079d648c and 0a7723181, tests names 'uv run --no-sync pytest tests/test_imas_seam_census.py -q', and every cited log ends EXIT=0, but the manifest does not report the two modules the census classes unreached at head.",
+    "write_paths": "the declared write paths are docs/evidence/fragments/one-ids-seam/one-ids-seam-s2.html and docs/figures/one-ids-seam/one-ids-seam-s2; the diff's source deletions, census and test edits are outside that literal list but are exactly the work \u00a72 defines, and pyproject.toml was correctly left untouched."
+  },
+  "node": "one-ids-seam-s2",
+  "plan": "one-ids-seam",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is \u00a72, delete every module the \u00a71 census classes unreached; commit 8079d648c deletes eight under nova/imas (938 lines at base) and the census at head classes two further modules, nova/imas/ensemble.py and nova/imas/pulseprofile.py, unreached while both remain on disk.\nVERDICT done_when: the done_when's first clause requires every module the census classes unreached to be gone; the committed docs/research/imas-seam-census.html at head reports unreached=2 (ensemble.py, pulseprofile.py) and both exist, so the gate does not assert that clause and the clause is false.\nVERDICT write_paths: the declared write paths are docs/evidence/fragments/one-ids-seam/one-ids-seam-s2.html and docs/figures/one-ids-seam/one-ids-seam-s2; the diff's source deletions, census and test edits are outside that literal list but are exactly the work \u00a72 defines, and pyproject.toml was correctly left untouched.\nVERDICT manifest: read; status complete, commits 8079d648c and 0a7723181, tests names 'uv run --no-sync pytest tests/test_imas_seam_census.py -q', and every cited log ends EXIT=0, but it does not report the two modules the census classes unreached at head.\nVERDICT diff: read commit by commit from 7a93be400 to 0a7723181: 8079d648c deletes eight modules and adds the --check-deleted scan and entry-point reader plus tests; 0a7723181 adds the evidence fragment; the census HTML and reuse-map citation are regenerated and repointed.\nCALL_SITES: none\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: nova/imas/ensemble.py and nova/imas/pulseprofile.py remain on disk though docs/research/imas-seam-census.html classes them unreached and destination deleted.\nSCORE evidence: 10\nJUSTIFICATION evidence: scripts/imas_seam_census.py:106 checks only the static eight-name list, so the gate passes while nova/imas/ensemble.py:1 and docs/evidence/fragments/one-ids-seam/one-ids-seam-s2.html:47 assert a done-when the tree contradicts.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every changed path in 7a93be400..0a7723181 is the deletion, census or evidence work \u00a72 defines, and pyproject.toml is untouched as the manifest states.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_imas_seam_census.py:161 and :171 reinstate a planted import and redden if the no-reference check or --check-deleted stops firing, but no assertion reddens when an unreached module is left behind, the defect this change introduced.\nSCORE fit: 17\nJUSTIFICATION fit: scripts/imas_seam_census.py:492 follows the module's existing helper style, including the Python 3.14 parenthesis-free except form already at line 250, and no added name carries a plan label.\nSCORE reuse: 19\nJUSTIFICATION reuse: scripts/imas_seam_census.py:517 reuses the census's _walk_tree, _raw_imports and _resolve_base walkers, and no existing pyproject or entry-point reader was found in nova/ or scripts/.\nFINDING nova/imas/ensemble.py:1 blocking: nova/imas/ensemble.py and nova/imas/pulseprofile.py are classed unreached by the census at head yet both remain in the tree, so \u00a72's done_when 'every module the \u00a71 census classes unreached is gone' is unmet; they were orphaned when their only importers decimate.py and waveform.py were deleted.\nFINDING docs/evidence/fragments/one-ids-seam/one-ids-seam-s2.html:47 blocking: the fragment asserts every module the census classes unreached is gone, while the census record the same commit regenerated reports unreached=2 with ensemble.py and pulseprofile.py still present.\nFINDING scripts/imas_seam_census.py:106 non-blocking: DELETED_MODULE_STEMS is a static eight-name list so --check-deleted and the tests cannot see a module that becomes unreached as a consequence of the deletion, which is how the two modules above passed the gate.\n",
+  "reuse_note": "searched nova/ and scripts/ for an existing pyproject or entry-point reader (tomllib, project.scripts, entry_points) and found no owner, so _entry_point_targets is a first implementation; deleted_module_references extends the census's own _walk_tree, _raw_imports, _resolve_base and TOKEN helpers rather than adding a second scanner.",
+  "review_run_id": "r-20261124T070331344685-review-of-one-ids-seam-s2-0a7723181745",
+  "reviewed_base_sha": "7a93be4008dadfdcb5879caabdfc5388f2259b2b",
+  "reviewed_head_sha": "0a77231817459e2446f7340be16b049000e55cc6",
+  "reviewed_run_id": "r-20261122T143932212403-one-ids-seam-s2",
+  "scores": {
+    "durability": 12,
+    "evidence": 10,
+    "fit": 17,
+    "goal_fidelity": 11,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T07:39:55.676704+00:00",
+  "total": 87
+}

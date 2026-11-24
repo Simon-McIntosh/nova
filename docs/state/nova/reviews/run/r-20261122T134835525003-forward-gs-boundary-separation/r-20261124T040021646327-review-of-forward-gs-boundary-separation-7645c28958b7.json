@@ -1,0 +1,52 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-24T04:07:18.021Z",
+  "dispatched_at": "2026-11-24T04:01:05Z",
+  "findings": [
+    {
+      "file": "benchmarks/diiid_forward_gs_match.py",
+      "line": 2664,
+      "severity": "non-blocking",
+      "text": "the class-margin repair has no test; reverting the call to `float(topology.class_margin)` reproduces the AttributeError only in the multi-hour bank run, so no fast gate reddens on its regression."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/forward-gs-boundary-separation.html",
+      "line": 141,
+      "severity": "non-blocking",
+      "text": "frame 44's \"separatrix points\" cell reads 3986 while the receipt it presents (forward_gs_receipt.json) records separatrix_closed_points 3985 for that frame; the headline rms/sup values reconcile."
+    },
+    {
+      "file": "docs/evidence/fragments/separatrix-spline-extraction/forward-gs-boundary-separation.html",
+      "line": 176,
+      "severity": "non-blocking",
+      "text": "cohort_match_summary.png's last panel overlays each frame's red assembled boundary with no legend entry identifying the red series, so a reader of that panel alone cannot tell which curve is which; the fragment discloses the limitation."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_diiid_forward_gs_match.py:465 fails on the pre-fix benchmark (suite-red3.log IndexError at benchmarks/diiid_forward_gs_match.py:1899) but the class-margin repair at benchmarks/diiid_forward_gs_match.py:2664 has no test, so only one of the two code changes is guarded.",
+    "evidence": "the done-when's measure is the receipt docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json, whose per-frame rms/sup/convergence I cross-checked against the fragment tables and which reconciles for every headline value.",
+    "fit": "_achieved_class_margin at benchmarks/diiid_forward_gs_match.py:2664 follows the module's private-helper idiom and the in-line comment at :1899 states the mechanism, and no plan or ticket identifier appears in the added code or test.",
+    "goal_fidelity": "docs/evidence/fragments/separatrix-spline-extraction/forward-gs-boundary-separation.html records every done_when clause against the receipt, though the separatrix-point count at line 141 disagrees with the receipt by one.",
+    "reuse": "_achieved_class_margin wraps the operator's own nova/equilibrium/forward_operator.py:3180 topology_margin accessor rather than re-deriving the comparator, and a search for an existing achieved-margin helper found none.",
+    "scope_discipline": "all eight changed paths are inside the declared write paths, and the two benchmark edits (benchmarks/diiid_forward_gs_match.py:1899 and :2664) are harness repairs needed to run the measurement in the declared file."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal (re-run the five-frame DIII-D bank at HEAD so the receipt reports per-frame convergence and the fine-map boundary separation) is met; docs/evidence/fragments/separatrix-spline-extraction/forward-gs-boundary-separation.html:1 records the run and the receipt docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json carries frames_with_separatrix 4 with per-frame symmetric rms/sup non-null.\nVERDICT done_when: the done_when's three clauses are asserted by the artefacts, not just claimed; (1) the dated directory holds the receipt and the three PNGs from one run at head 0205c75ab and the fragment's \"Figures, inspected\" section names each; (2) `git diff --stat 5c503f9a8 7645c2895 -- docs/figures/diiid-forward-onboarding/forward-gs/` is empty; (3) per-frame convergence and non-null separatrix separation are in the receipt, with frame 144's NoQualifiedAxisError named.\nVERDICT write_paths: every path in the diff (benchmarks/diiid_forward_gs_match.py, tests/test_diiid_forward_gs_match.py, the fragment, and the five files under docs/figures/diiid-forward-onboarding/forward-gs-2026-11/) lies inside the declared write paths; nothing outside them changed.\nVERDICT manifest: read; it states the suite command, records the base/red/after arms, the job 1339248 result EXIT=0, and the per-frame measurements, and its negative_control names the IndexError at benchmarks/diiid_forward_gs_match.py:1899.\nVERDICT diff: read commit by commit (cf1eeed16, 655770a13, 72a05688e, f5ed50853, 0205c75ab, 7645c2895) against base 5c503f9a8; two benchmark repairs, one test, and the evidence/receipt/figure publication, 8 paths total.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py:_ConductorTargets.flux, benchmarks/diiid_forward_gs_match.py:solve_frame\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/separatrix-spline-extraction/forward-gs-boundary-separation.html records every done_when clause against the receipt, though the separatrix-point count at line 141 disagrees with the receipt by one.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done-when's measure is the receipt docs/figures/diiid-forward-onboarding/forward-gs-2026-11/forward_gs_receipt.json, whose per-frame rms/sup/convergence I cross-checked against the fragment tables and which reconciles for every headline value.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all eight changed paths are inside the declared write paths, and the two benchmark edits (benchmarks/diiid_forward_gs_match.py:1899 and :2664) are harness repairs needed to run the measurement in the declared file.\nSCORE durability: 12\nJUSTIFICATION durability: tests/test_diiid_forward_gs_match.py:465 fails on the pre-fix benchmark (suite-red3.log IndexError at benchmarks/diiid_forward_gs_match.py:1899) but the class-margin repair at benchmarks/diiid_forward_gs_match.py:2664 has no test, so only one of the two code changes is guarded.\nSCORE fit: 18\nJUSTIFICATION fit: _achieved_class_margin at benchmarks/diiid_forward_gs_match.py:2664 follows the module's private-helper idiom and the in-line comment at :1899 states the mechanism, and no plan or ticket identifier appears in the added code or test.\nSCORE reuse: 19\nJUSTIFICATION reuse: _achieved_class_margin wraps the operator's own nova/equilibrium/forward_operator.py:3180 topology_margin accessor rather than re-deriving the comparator, and a search for an existing achieved-margin helper found none.\nFINDING benchmarks/diiid_forward_gs_match.py:2664 non-blocking: the class-margin repair has no test; reverting the call to `float(topology.class_margin)` reproduces the AttributeError only in the multi-hour bank run, so no fast gate reddens on its regression.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/forward-gs-boundary-separation.html:141 non-blocking: frame 44's \"separatrix points\" cell reads 3986 while the receipt it presents (forward_gs_receipt.json) records separatrix_closed_points 3985 for that frame; the headline rms/sup values reconcile.\nFINDING docs/evidence/fragments/separatrix-spline-extraction/forward-gs-boundary-separation.html:176 non-blocking: cohort_match_summary.png's last panel overlays each frame's red assembled boundary with no legend entry identifying the red series, so a reader of that panel alone cannot tell which curve is which; the fragment discloses the limitation.\n",
+  "review_run_id": "r-20261124T040021646327-review-of-forward-gs-boundary-separation-7645c28958b7",
+  "reviewed_base_sha": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "reviewed_head_sha": "7645c28958b78de9ba7000c5c5f209ceb6e4c902",
+  "reviewed_run_id": "r-20261122T134835525003-forward-gs-boundary-separation",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T04:09:37.975581+00:00",
+  "total": 104
+}

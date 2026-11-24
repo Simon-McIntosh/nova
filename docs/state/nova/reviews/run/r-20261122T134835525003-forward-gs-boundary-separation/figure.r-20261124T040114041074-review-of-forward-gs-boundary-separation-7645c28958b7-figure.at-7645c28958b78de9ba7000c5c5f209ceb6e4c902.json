@@ -1,0 +1,40 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-24T04:01:39Z",
+  "findings": [
+    {
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/frame_flux_comparison.png",
+      "id": "f0f5eece419",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "In the frame 44 panel (shot 03ff34e7) the filled red Nova X-point marker is drawn about 0.2 m above the vessel top, detached from the closed red Nova separatrix it is supposed to belong to, while the receipt reports that frame's assembled-saddle offset as 5.682 mm. A reader sees a saddle floating in vacuum, cannot tell whether the plotted X-point is the saddle of the plotted separatrix, and reads a spatial gap far larger than the 5.7 mm the receipt states. The panel is still legible; the defect is that the two drawn elements are mutually inconsistent, so it is non-blocking but should be folded into a figure-defect node that plots the same null the separatrix was assembled from."
+    },
+    {
+      "file": "docs/figures/diiid-forward-onboarding/forward-gs-2026-11/cohort_match_summary.png",
+      "id": "f18fff5311d",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The bottom-right 'EFIT boundary and limiter' panel overlays the black vessel/limiter, one grey closed boundary and several red closed boundaries with red null markers, and carries no legend naming any of them; its title mentions only EFIT boundary and limiter, so the red curves (the assembled closed boundaries) are unlabelled and a reader cannot tell which curve is which frame or which is EFIT against Nova. The evidence fragment states this openly and directs the reader to the per-frame figures; the panel is legible as a cohort overlay only, so it is non-blocking, but the missing series identification should be folded into the figure-defect node."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261124T040114041074-review-of-forward-gs-boundary-separation-7645c28958b7-figure",
+  "reviewed_base_sha": "5c503f9a8b37036f39f5a074757751b821a6e481",
+  "reviewed_head_sha": "7645c28958b78de9ba7000c5c5f209ceb6e4c902",
+  "reviewed_run_id": "r-20261122T134835525003-forward-gs-boundary-separation",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass. Text is near-black on white. The grey 'unavailable: 144' annotation was sampled at RGB #595959, a contrast of 7.0:1 against white, comfortably clearing normal-text contrast.",
+    "data_ink": "pass. The data carry the visual weight: thin grey EFIT contours and blue Nova contours on shared levels, a single red separatrix, and small markers. The metric panels are single-colour points with a labelled bar; no ink is spent on decoration.",
+    "decoration": "pass. No gradients, no background fills, no shading bands, no shadowed themes. Axes are despined to left and bottom on the scatter panels; the poloidal panels carry no axis furniture, consistent with the project plotting rules.",
+    "label_collision": "pass. No label is clipped, overlapping another label, or overlapping data. Verified at all three canvas edges: the rotated R-squared axis label, the 'frame' x labels and the longest displacement captions all sit inside the canvas with margin. The only coincidence is marker-on-marker at the plasma axis in displacement_decomposition, which is the axis displacement the figure exists to show, and filled/hollow shapes stay distinguishable.",
+    "legibility": "pass. All three rendered PNGs are readable at a glance. frame_flux_comparison: five poloidal panels, four-column legend naming field, boundary, separatrix and both null sets, per-panel shot/frame/conv/solved-node caption. displacement_decomposition: five panels with a fully labelled marker legend and per-frame axis offsets. cohort_match_summary: five metric scatters plus one geometry panel, each titled and axis-labelled. Captions at the frame_flux and displacement panels are distinct per frame and do not merely repeat a title.",
+    "table_form": "pass. Nothing here is naturally a table: the poloidal panels show a spatial field and null geometry, and the cohort panels are scatter plots of a metric per frame. The one tabular artefact in this section (per-frame convergence) lives in the evidence fragment, not as an image."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T04:06:32.557635+00:00",
+  "total": null
+}

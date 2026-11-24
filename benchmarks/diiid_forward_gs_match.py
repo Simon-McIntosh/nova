@@ -1896,7 +1896,10 @@ class _ConductorTargets:
         key = (block.tobytes(), carry.tobytes())
         cached = self._flux.get(key)
         if cached is None:
-            cached = self._matrix[self.rows(block)] @ carry
+            # rows() extends the matrix, so the rows are read before the
+            # subscription binds it.
+            rows = self.rows(block)
+            cached = self._matrix[rows] @ carry
             self._flux[key] = cached
         return cached
 
@@ -2658,6 +2661,21 @@ def _solve_registered(
     )
 
 
+def _achieved_class_margin(profile: ForwardProfile, equilibrium: Any) -> float:
+    """Return the achieved class margin of one terminal equilibrium.
+
+    A saddle-aware topology read carries the comparator itself. The
+    linear-moment construction keeps the raw partition topology, which records
+    no margin, so the comparator is evaluated on that same terminal flux
+    through the operator's own accessor.
+    """
+
+    margin = getattr(equilibrium.topology, "class_margin", None)
+    if margin is None:
+        margin = profile.operator.topology_margin(equilibrium.flux)
+    return float(margin)
+
+
 def solve_frame(
     row: dict[str, Any], frame: int, expansion: float
 ) -> tuple[FrameResult, dict[str, np.ndarray]]:
@@ -2760,7 +2778,7 @@ def solve_frame(
     boundary_comparison = compare_closed_boundaries(
         predicted_closed_boundary,
         labelled_closed_boundary,
-        class_margin=float(topology.class_margin),
+        class_margin=_achieved_class_margin(profile, equilibrium),
         reference_mode=BoundaryMode.DIVERTED,
         predicted_saddle_rz_m=np.asarray(topology.x_point, dtype=float),
         reference_x_points_rz_m=labelled_x_point[None, :],
@@ -2860,7 +2878,7 @@ def solve_frame(
         display_comparison = compare_closed_boundaries(
             display_closed,
             labelled_closed_boundary,
-            class_margin=float(topology.class_margin),
+            class_margin=_achieved_class_margin(profile, equilibrium),
             reference_mode=BoundaryMode.DIVERTED,
             predicted_saddle_rz_m=np.asarray(display.saddle_rz, dtype=float),
             reference_x_points_rz_m=labelled_x_point[None, :],

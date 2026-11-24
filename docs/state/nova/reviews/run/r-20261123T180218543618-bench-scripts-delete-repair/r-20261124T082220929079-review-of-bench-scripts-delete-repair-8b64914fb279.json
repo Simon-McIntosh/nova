@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "call_sites": [],
   "completed_at": "2026-11-24T08:40:34.598Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "The plan asks section 3 to delete benchmarks and scripts under a measured deletion gate; it requires no committed guard against re-deleting a restored driver. The kept-reference closure is evidence for this batch, not a standing check, and building one is out of this plan's scope.",
+      "recorded_at": "2026-11-24T08:43:58.446852+00:00"
+    }
+  },
   "dispatched_at": "2026-11-24T08:23:09Z",
   "findings": [
     {

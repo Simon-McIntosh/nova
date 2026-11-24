@@ -25,7 +25,7 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-modified" content="2026-11-24">
 </head>
 <body>
@@ -278,6 +278,9 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261123T172615528628-review-of-bench-scripts-delete-e1bc21735a5b" data-who="reckon-build" data-when="2026-11-23T17:51:42.712Z">
     <div class="r-comment-body"><p>Reviewed r-20261122T202603608268-bench-scripts-delete at e1bc21735: goal_fidelity 16, evidence 13, scope_discipline 14, durability 5, fit 17, reuse 20, added_failure_count 0, five non-blocking findings (one archived record naming a deleted driver with no revision stamp, one restored-lines cell that does not reconcile, five deletions inside two sibling nodes' declared write scopes, a malformed orientation write-path expression, and collection parity measured five commits before the head).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279" data-who="reckon-build" data-when="2026-11-24T08:40:34.598Z">
+    <div class="r-comment-body"><p>Review of r-20261123T180218543618-bench-scripts-delete-repair at 8b64914fb over base e1bc21735a5b5cda1ae6edec2d83846c18338b00: goal_fidelity 17, evidence 16, scope_discipline 13, durability 8, fit 18, reuse 20; added_failure_count 0; three non-blocking findings (scope widening outside declared paths, done_when gate-log path stale, no committed durability guard); record stored parsed.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261123T124148141242-review-of-unreached-module-delete-dc3a174a7ef3" data-who="reckon-build" data-when="2026-11-23T13:03:40.005Z">
     <div class="r-comment-body"><p>no plan edit; the review is delivered as a stored record on run r-20261122T202605453490-unreached-module-delete at head dc3a174a7 with scores goal_fidelity 19, evidence 14, scope_discipline 18, durability 5, fit 18, reuse 17 and four non-blocking findings.</p></div>

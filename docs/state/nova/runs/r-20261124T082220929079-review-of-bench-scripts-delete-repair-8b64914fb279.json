@@ -1,0 +1,1653 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "read-only",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "ef7df11ab44d07c80036291382867e264685f7ec",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279/brief.md",
+    "sha256": "52069dcaf8eb2617d0c31369fc093c53f3dd150df9af3793287d03bae59a3fe8"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6409363,
+      "input_tokens_cumulative": 6409363,
+      "output_tokens": 31204,
+      "output_tokens_cumulative": 31204,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-11-24T08:40:34.598Z",
+  "completed_at_source": "terminal_event",
+  "dispatch_width": "section",
+  "dispatched_at": "2026-11-24T08:23:09Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.5714285714285714,
+    "plan": "code-reuse-and-hot-path",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-24T10:22:21.123824+00:00",
+    "horizon_seconds": 7200,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-24T08:22:21Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 13713,
+    "binding_observed": "unknown",
+    "detail": "reading is 13713s old, older than its 45s shelf life",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "reading is 13713s old, older than its 45s shelf life",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-24T08:40:34.598Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279/manifest.md",
+  "member": "disposable-r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-of-bench-scripts-delete-repair-8b64914fb279",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T180218543618-bench-scripts-delete-repair/review-brief.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279/brief.md",
+    "brief_sha256": "52069dcaf8eb2617d0c31369fc093c53f3dd150df9af3793287d03bae59a3fe8",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "standard",
+        "risk": "moderate",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 665,
+          "cached_input_tokens": 165029,
+          "input_tokens": 165696,
+          "output_tokens": 404,
+          "reasoning_output_tokens": 62,
+          "total_tokens": 166100,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "0891697d-eba7-4e66-96ff-e563938502e0",
+      "session_id": "0891697d-eba7-4e66-96ff-e563938502e0"
+    },
+    "done_when": "the review for r-20261123T180218543618-bench-scripts-delete-repair stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261123T180218543618-bench-scripts-delete-repair, and never in the worktree; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": null,
+    "goal": "attach an independent review to run r-20261123T180218543618-bench-scripts-delete-repair",
+    "id": "review-of-bench-scripts-delete-repair-8b64914fb279",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-24T08:22:21Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 13713,
+      "binding_observed": "unknown",
+      "detail": "reading is 13713s old, older than its 45s shelf life",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "reading is 13713s old, older than its 45s shelf life",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279/manifest.md",
+    "mcp_set": "",
+    "negative_control": "a kept file that still names one deleted path makes the absence check in (1) fail and report that path.",
+    "node_body": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279/node.json",
+    "over_fence_note": "",
+    "over_fence_reason": "",
+    "peer_scopes": {},
+    "plan": "code-reuse-and-hot-path",
+    "regenerate_paths": [],
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "2h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T180218543618-bench-scripts-delete-repair/review-records/r-20261123T180218543618-bench-scripts-delete-repair.json",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T180218543618-bench-scripts-delete-repair/review-records/r-20261123T180218543618-bench-scripts-delete-repair.at-8b64914fb2795911c56a9b46684179e20e0acc24.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "review-of-bench-scripts-delete-repair-8b64914fb279",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-24T08:22:42.748570+00:00",
+    "score": 0.55,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "refuse",
+    "answering_model": null,
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "decision_source": "refused",
+    "effort": null,
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 514.809576,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 123.1279,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 0.5909143428563778,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 4.275369052905093,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-fable-5-1",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.04673886755522711,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": 2.0,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-28T15:00:00.199271+00:00",
+        "stale": false,
+        "suits": "The most capable and most expensive Claude model, about two and a half times Opus's token price. Reserve it for the very hardest nodes.",
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 514.809576,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 123.1279,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 0.5909143428563778,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 4.275369052905093,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.04673886755522711,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": 2.0,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-28T15:00:00.199271+00:00",
+        "stale": false,
+        "suits": "The lane's fastest and cheapest model, about a twentieth of Sonnet's token price. Suits light, well-defined work.",
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 514.809576,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 123.1279,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 0.5909143428563778,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 4.275369052905093,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.04673886755522711,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": 2.0,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-28T15:00:00.199271+00:00",
+        "stale": false,
+        "suits": "A strong general model for deep or open-ended work, about twice Sonnet's token price.",
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_age_s": 514.809576,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 123.1279,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 0.5909143428563778,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 4.275369052905093,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.04673886755522711,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": 2.0,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": "2026-11-28T15:00:00.199271+00:00",
+        "stale": false,
+        "suits": "The lane default, an everyday coding model at about half of Opus's token price. Suits guided implementation and full reviews.",
+        "utilisation_pct": 23.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 0,
+          "slots_state": "measured",
+          "stale": true,
+          "waiting": 0
+        },
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 393,
+          "passed": 7,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 400,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        ],
+        "reservation": {
+          "attempts": 0,
+          "attempts_threshold": 2,
+          "ceiling_pct": 60.0,
+          "family": "claude",
+          "floor": [
+            "reasoning",
+            "risk",
+            "verification"
+          ],
+          "intent": "the orchestrators' own shared capacity, spent on work a wrong answer would make expensive: open-ended, multi-file or diagnostic work, and work that has grown hard by failing elsewhere",
+          "lift": null,
+          "lift_in_force": false,
+          "window_utilisation_pct": null,
+          "withheld": "reserved-lane: claude is offered at its hardest tier ['reasoning', 'risk', 'verification'] or after 2 attempts; this node declares neither (attempts 0)"
+        },
+        "reserved": true,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 83.5811,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.9344,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 0.48520888953389496,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 5.845818135416667,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.18136518497123008,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-30T04:41:27+00:00",
+        "stale": false,
+        "suits": "The lane's frontier model, strongest and slowest, about five times sol's token price. Suits deep or open-ended design, elevated or critical risk, and nodes that already failed on another model.",
+        "utilisation_pct": 8.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 83.5811,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.9344,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 0.48520888953389496,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 5.845818135416667,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.18136518497123008,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-30T04:41:27+00:00",
+        "stale": false,
+        "suits": "The lane's fast, affordable model, about a twentieth of sol's token price. Suits well-defined, less difficult work: reviews, exact-spec implementation, tests and documentation.",
+        "utilisation_pct": 8.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "codex",
+        "budget_age_s": 83.5811,
+        "budget_reason": null,
+        "budget_source": "document",
+        "burn": {
+          "runway_hours": null,
+          "window_even_share_pct": 3.9344,
+          "window_rate_pct_per_hour": null
+        },
+        "burn_multiple": 0.48520888953389496,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": 5.845818135416667,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6.1-sol",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 26,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 26,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": 0.18136518497123008,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": "2026-11-30T04:41:27+00:00",
+        "stale": false,
+        "suits": "The lane default, the current-generation general model. Suits guided implementation, tests and full reviews at standard or deep reasoning and moderate risk. About twenty times luna's token price and a fifth of astra's.",
+        "utilisation_pct": 8.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 0,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "review-excluded-backend",
+          "in-harness-backend"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "omp-local",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "budget_source": null,
+        "burn": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 0,
+          "slots_state": "measured",
+          "stale": true,
+          "waiting": 0
+        },
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "omp",
+        "local": false,
+        "model": "local/deepseek-v4.1-flash",
+        "moved_in": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "moved_off": 0,
+        "note": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 148,
+          "passed": 3,
+          "unknown": 0
+        },
+        "outcomes_at_requirement": {
+          "attempts_median": null,
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "passed_first_attempt": 0,
+          "review_dimensions_median": null,
+          "review_total_median": null,
+          "reviewed": 0,
+          "unknown": 0,
+          "unrecorded": 151,
+          "wall_seconds_median": null
+        },
+        "pace_allowance": null,
+        "preferences": [],
+        "prior_outcomes": null,
+        "reasons": [
+          "local-backend: local work is offered through clive"
+        ],
+        "reservation": null,
+        "reserved": false,
+        "resets_at": null,
+        "stale": null,
+        "suits": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": "no-eligible-candidates; default-backend-ineligible",
+    "family": null,
+    "jev_latency_ms": 0.0,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 371.017,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "questions": {},
+    "rendered_state": "{\"node\":{\"role\":\"review\",\"spec_level\":\"exact\",\"capability\":{\"version\":\"1.0\",\"class\":\"general\",\"requirements\":{\"reasoning\":\"standard\",\"verification\":\"strict\",\"risk\":\"moderate\"}},\"goal\":\"attach an independent review to run r-20261123T180218543618-bench-scripts-delete-repair\",\"done_when\":\"the review for r-20261123T180218543618-bench-scripts-delete-repair stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the record is written at one of this run's declared write paths, under review-records/ inside the directory of run r-20261123T180218543618-bench-scripts-delete-repair, and never in the worktree; the turn ends once that record is stored and the manifest reads complete\",\"urgency\":{\"due\":null,\"seconds_to_due\":null,\"reason\":null},\"estimated_context\":50392,\"estimated_hours\":8.0,\"estimated_hours_source\":\"request\",\"attempts\":0,\"write_path_count\":2,\"negative_control_declared\":true,\"serving_lanes\":[],\"serving_lane_count\":0,\"hold_waits_for\":null,\"lift_preference\":null},\"orchestrator_comment\":\"\",\"candidates\":{},\"return_times\":{},\"lanes\":{},\"local_lane\":{\"admission\":\"unavailable\",\"expected_wait_s\":845.5,\"expected_wait_profile_age_s\":6557.935836,\"running\":0,\"waiting\":0,\"queue_position\":1,\"headroom\":12,\"worker_slots\":11,\"tokens_per_second\":null,\"read_at\":\"2026-11-24T08:23:28.649033+00:00\"}}",
+    "rendered_token_estimate": 380,
+    "stage_ms": {
+      "budget-snapshot": 1739.943,
+      "context-estimate": 50.903,
+      "records": 1186.929,
+      "verdict-inputs": 376.73
+    },
+    "template_digest": "5ea6c8844f959f84293c0d2c90c1db0de4375d09e641cca7be7c360603b00202",
+    "usage": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.5714285714285714,
+  "plan_link": null,
+  "promoted_by": "review-self",
+  "promoted_revision": "ef7df11ab44d07c80036291382867e264685f7ec",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "id": "r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279",
+    "reviewed_base_sha": "e1bc21735a5b5cda1ae6edec2d83846c18338b00",
+    "reviewed_head_sha": "8b64914fb2795911c56a9b46684179e20e0acc24",
+    "scores": {
+      "durability": 8,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 17,
+      "reuse": 20,
+      "scope_discipline": 13
+    },
+    "status": "parsed",
+    "total": 92
+  },
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "0891697d-eba7-4e66-96ff-e563938502e0",
+  "session_harness": "claude",
+  "session_id": "9df5de2b-7e11-4680-aa44-5e0a28a41f20",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 6409363,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1026.528,
+    "generated_tokens": 31204,
+    "generation_seconds": 985.304,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 70.9,
+    "machine_seconds": 41.224,
+    "peak_input_tokens": 163244,
+    "tokens_per_second": 31.67,
+    "wall_tokens_per_second": 30.4
+  },
+  "time_budget": "2h",
+  "tool_steps": 68.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "source": "coordinator",
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 21600,
+        "classification": "blocked",
+        "commits_beyond_base": 16,
+        "delivery": {},
+        "detail": "the worker manifest reports blocked: the manifest reports a blocker",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 10,
+        "ended_during_launch": false,
+        "exit_record": {
+          "attempt": 4,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-23T17:59:08Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-23T17:58:58Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261122T202603608268-bench-scripts-delete",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 46671,
+          "worker_pid": 2233334
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "the manifest reports a blocker",
+          "lifting_condition": null,
+          "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T202603608268-bench-scripts-delete/manifest.md; resolve the blocker before resuming the run",
+          "promotion_recorded": false,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-23T17:59:08Z",
+        "lane_event": null,
+        "launch_error": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 51798,
+        "log_fresh": false,
+        "manifest_commits": [
+          "62f9c6eca0dfc84ca96ca8f48609670ceb9392a8",
+          "5cd165998460733fee0c243ea5480436673a5cde",
+          "5d0dadbcca0aa1c0b301de4ef5f0b0b6b2397108",
+          "784964d799e8b5798a0246c5db8391bcae1f56ad",
+          "575e8dc62ecf968c2b40936ebdcea715582699b0",
+          "53afe126ea349d5e83e09b348ef4e670044e2919",
+          "47644cb021fcfd4c3c645a94085c00f4338edde4",
+          "f38f5fc1f85f353cf7aac722b3cc8d39c09c8756",
+          "ba0fe4eb89e68d54c7a8885880ec92d886ea3f2c",
+          "c9af10eedc510a1c8ea1e4b3d658e482761a66c0",
+          "76a7d44acfbea7cefb786849eacefa4135dda849",
+          "e75324fc6e0b6e8e6786146e991cc2d34ea98ac5",
+          "901496f3c0484e1ba89a13ca4b750b2cbb5c94e8",
+          "6790baf7969546382a3149fe8bd93bdd68285fa1",
+          "c6a9661b071580aafed24df9b7a83b5970f8ac8d",
+          "e1bc21735a5b5cda1ae6edec2d83846c18338b00"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "418ccef1f5f00950958bebc42fcea4c32c6ae32a5d3851dea6590fe8ea9dde6c",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T202603608268-bench-scripts-delete/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "flash",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T202603608268-bench-scripts-delete/manifest.md; resolve the blocker before resuming the run",
+        "node": "bench-scripts-delete",
+        "orientation_check": {
+          "checked_at": "2026-11-23T18:03:26Z",
+          "detail": "committed path outside declared scope: benchmarks/analytic_cost_floor.py; committed path outside declared scope: benchmarks/analytic_truth_gauge.py; committed path outside declared scope: benchmarks/analytic_truth_rescore.py; committed path outside declared scope: benchmarks/arc_element_class.py; committed path outside declared scope: benchmarks/arc_five_rows.py; committed path outside declared scope: benchmarks/arc_operator_dispatch.py; committed path outside declared scope: benchmarks/arc_section_cost.py; committed path outside declared scope: benchmarks/axis_definition_referents.py; committed path outside declared scope: benchmarks/axis_flux_departure_projection.py; committed path outside declared scope: benchmarks/bound_failability_census.py; committed path outside declared scope: benchmarks/bound_reference_classification.py; committed path outside declared scope: benchmarks/census_kernel_timing.py; committed path outside declared scope: benchmarks/centroid_radius_attribution.py; committed path outside declared scope: benchmarks/circuit_projection_arm.py; committed path outside declared scope: benchmarks/class_coreachability.py; committed path outside declared scope: benchmarks/clipped_coupling_order.py; committed path outside declared scope: benchmarks/coil_construction.py; committed path outside declared scope: benchmarks/compensator_authority.py; committed path outside declared scope: benchmarks/compile_host_memory.py; committed path outside declared scope: benchmarks/compiled_outer_loop_trace.py; committed path outside declared scope: benchmarks/conditioned_convergence_observables.py; committed path outside declared scope: benchmarks/connectivity_route.py; committed path outside declared scope: benchmarks/constants_conditioning.py; committed path outside declared scope: benchmarks/constraint_multi_trip_target.py; committed path outside declared scope: benchmarks/constraint_shape_receipt.py; committed path outside declared scope: benchmarks/converged_frame_contrast.py; committed path outside declared scope: benchmarks/coupled_map_mode_identification.py; committed path outside declared scope: benchmarks/cpu_solve_discriminator.py; committed path outside declared scope: benchmarks/cs_winding_inductance.py; committed path outside declared scope: benchmarks/diiid_admissible_step_control.py; committed path outside declared scope: benchmarks/diiid_admission_rate_diagnosis.py; committed path outside declared scope: benchmarks/diiid_containment_recheck.py; committed path outside declared scope: benchmarks/diiid_manifold_advance.py; committed path outside declared scope: benchmarks/diiid_prescribed_profile_forward.py; committed path outside declared scope: benchmarks/diiid_residual_decomposition.py; committed path outside declared scope: benchmarks/diiid_target_current_digest_probe.py; committed path outside declared scope: benchmarks/diiid_vacuum_from_description.py; committed path outside declared scope: benchmarks/diiid_vacuum_gate.py; committed path outside declared scope: benchmarks/diiid_vacuum_sensitivity_sweep.py; committed path outside declared scope: benchmarks/dina_pack_current_distribution.py; committed path outside declared scope: benchmarks/dina_reference_mapping.py; committed path outside declared scope: benchmarks/divergence_floor_scaling.py; committed path outside declared scope: benchmarks/diverted_drift_regression.py; committed path outside declared scope: benchmarks/diverted_map_error_decomposition.py; committed path outside declared scope: benchmarks/domain_participation_jump.py; committed path outside declared scope: benchmarks/early_frame_placement_test.py; committed path outside declared scope: benchmarks/edge_current_jump_sizing.py; committed path outside declared scope: benchmarks/efit_absent_quantity_triage.py; committed path outside declared scope: benchmarks/efit_affine_extraction.py; committed path outside declared scope: benchmarks/efit_cell_current_representation.py; committed path outside declared scope: benchmarks/efit_centroid_offset_attribution.py; committed path outside declared scope: benchmarks/efit_current_sign_census.py; committed path outside declared scope: benchmarks/efit_derived_quantity_census.py; committed path outside declared scope: benchmarks/efit_filament_truncation_contribution.py; committed path outside declared scope: benchmarks/efit_interior_stencil_quadrature.py; committed path outside declared scope: benchmarks/efit_lcfs_outward_offset.py; committed path outside declared scope: benchmarks/efit_linear_current_urankar.py; committed path outside declared scope: benchmarks/efit_metric_parity_comparison.py; committed path outside declared scope: benchmarks/efit_section_shape_zeta_order.py; committed path outside declared scope: benchmarks/efit_third_term_separation.py; committed path outside declared scope: benchmarks/efit_triangle_refinement_prototype.py; committed path outside declared scope: benchmarks/efit_xpoint_fit_state.py; committed path outside declared scope: benchmarks/empty_exact_polygon_probe.py; committed path outside declared scope: benchmarks/ensemble_constraint_seam.py; committed path outside declared scope: benchmarks/event_resolved_amplification.py; committed path outside declared scope: benchmarks/exact_clip_warm_cost.py; committed path outside declared scope: benchmarks/flux_surface_flood.py; committed path outside declared scope: benchmarks/force_target_rule.py; committed path outside declared scope: benchmarks/fork_arming_economics.py; committed path outside declared scope: benchmarks/forward_newton_ladder.py; committed path outside declared scope: benchmarks/forward_solve_memory_ledger.py; committed path outside declared scope: benchmarks/frame_operator_overhead.py; committed path outside declared scope: benchmarks/framesetloc.py; committed path outside declared scope: benchmarks/framespace.py; committed path outside declared scope: benchmarks/frozen_route_fixed_point_rca.py; committed path outside declared scope: benchmarks/global_default_gpu_rebuild.py; committed path outside declared scope: benchmarks/global_surface_clip_rescore.py; committed path outside declared scope: benchmarks/gpu_pair_sharding.py; committed path outside declared scope: benchmarks/h200_solve_stage_profile.py; committed path outside declared scope: benchmarks/held_tip_trip_diagnosis.py; committed path outside declared scope: benchmarks/higher_order_contour.py; committed path outside declared scope: benchmarks/incomplete_third_kind.py; committed path outside declared scope: benchmarks/inner_solve_accuracy.py; committed path outside declared scope: benchmarks/io_ingest.py; committed path outside declared scope: benchmarks/iter_saddle_resolution.py; committed path outside declared scope: benchmarks/kernel_cost_table.py; committed path outside declared scope: benchmarks/lane_resource_accumulation.py; committed path outside declared scope: benchmarks/limited_anchor_containment.py; committed path outside declared scope: benchmarks/limited_shadow_before_after.py; committed path outside declared scope: benchmarks/loop_structure_audit.py; committed path outside declared scope: benchmarks/mast_response_kernel_backends.py; committed path outside declared scope: benchmarks/moment_map_derivative_contract.py; committed path outside declared scope: benchmarks/nearfar_error.py; committed path outside declared scope: benchmarks/newton_cycle_mask_switch.py; committed path outside declared scope: benchmarks/null_census_device_benchmark.py; committed path outside declared scope: benchmarks/order_vs_mesh_adjudication.py; committed path outside declared scope: benchmarks/parallel_components_identity.py; committed path outside declared scope: benchmarks/partial_range_primitives.py; committed path outside declared scope: benchmarks/passive_closure_mesh_response.py; committed path outside declared scope: benchmarks/passive_closure_trace.py; committed path outside declared scope: benchmarks/picard_shadow_crossing.py; committed path outside declared scope: benchmarks/plasma_cell_seed_policy.py; committed path outside declared scope: benchmarks/plot_operator_dispatch.py; committed path outside declared scope: benchmarks/polish_accuracy_ladder.py; committed path outside declared scope: benchmarks/polish_support_performance.py; committed path outside declared scope: benchmarks/poly_section_routing.py; committed path outside declared scope: benchmarks/polybeam_section_cost.py; committed path outside declared scope: benchmarks/polygon_route_cost.py; committed path outside declared scope: benchmarks/portfolio_warm_start.py; committed path outside declared scope: benchmarks/private_region_figures.py; committed path outside declared scope: benchmarks/private_region_parallel_kernel.py; committed path outside declared scope: benchmarks/private_region_wedge_audit.py; committed path outside declared scope: benchmarks/qualified_suffix_census.py; committed path outside declared scope: benchmarks/receipt_topology_check.py; committed path outside declared scope: benchmarks/recovery_ladder_telemetry.py; committed path outside declared scope: benchmarks/reduced_newton_rows.py; committed path outside declared scope: benchmarks/reference_failure_classification.py; committed path outside declared scope: benchmarks/scanned_trip_loop_prototype.py; committed path outside declared scope: benchmarks/section_face_continuity.py; committed path outside declared scope: benchmarks/seed_alignment_ranking.py; committed path outside declared scope: benchmarks/select_route.py; committed path outside declared scope: benchmarks/settled_exit_throughput.py; committed path outside declared scope: benchmarks/sine_moment_family.py; committed path outside declared scope: benchmarks/sol_current_demonstration.py; committed path outside declared scope: benchmarks/solenoid_span_attribution.py; committed path outside declared scope: benchmarks/solovev_contour_overlay.py; committed path outside declared scope: benchmarks/solovev_off_axis_census.py; committed path outside declared scope: benchmarks/solovev_solver_discriminator.py; committed path outside declared scope: benchmarks/solve_profile_kernel_count.py; committed path outside declared scope: benchmarks/split_fit_conditioning.py; committed path outside declared scope: benchmarks/split_fit_measured_maps.py; committed path outside declared scope: benchmarks/split_fit_production_validation.py; committed path outside declared scope: benchmarks/steep_edge_moment_demonstration.py; committed path outside declared scope: benchmarks/support_order_arms.py; committed path outside declared scope: benchmarks/support_order_iso_accuracy.py; committed path outside declared scope: benchmarks/terminal_state_hash_census.py; committed path outside declared scope: benchmarks/test_biotoperate.py; committed path outside declared scope: benchmarks/tiled_assembly.py; committed path outside declared scope: benchmarks/traced_vector_identity_receipt.py; committed path outside declared scope: benchmarks/trip_settlement_census.py; committed path outside declared scope: benchmarks/vertex_ring_census.py; committed path outside declared scope: benchmarks/vertical_force_decomposition.py; committed path outside declared scope: benchmarks/wall_at_cell_pitch.py; committed path outside declared scope: benchmarks/wholecell_rows_reposed_fixture.py; committed path outside declared scope: benchmarks/wound_coil_finite_section.py; committed path outside declared scope: benchmarks/wound_coil_inductance.py; committed path outside declared scope: benchmarks/zero_converged_block_census.py; committed path outside declared scope: benchmarks/zero_residual_check.py; committed path outside declared scope: scripts/analytic_seed_adjudication/run.py; committed path outside declared scope: scripts/bootstrap_inspection/run.py; committed path outside declared scope: scripts/build_cache_audit/audit.py; committed path outside declared scope: scripts/build_cache_audit/measure_cache.py; committed path outside declared scope: scripts/certificate_300_carrier/compare_carrier_stages.py; committed path outside declared scope: scripts/certificate_300_carrier/dump_carrier_stages.py; committed path outside declared scope: scripts/certificate_300_carrier/trace_krylov_action.py; committed path outside declared scope: scripts/certificate_300_carrier/trace_normalisation.py; committed path outside declared scope: scripts/clip_audit/audit_hex_clip.py; committed path outside declared scope: scripts/coupling_surface/export_schema.py; committed path outside declared scope: scripts/coupling_surface/verify_gentle_receipt.py; committed path outside declared scope: scripts/coverage_scaling/measure_coverage.py; committed path outside declared scope: scripts/cubic_sample_clip_independent/measure.py; committed path outside declared scope: scripts/density_forcing_ladder/measure.py; committed path outside declared scope: scripts/density_forcing_ladder/verify.py; committed path outside declared scope: scripts/density_moment_projection/measure.py; committed path outside declared scope: scripts/device_kernel_port/diagnose_reduction.py; committed path outside declared scope: scripts/device_kernel_port/extended_precision_oracle.py; committed path outside declared scope: scripts/device_kernel_port/localize_far_contour.py; committed path outside declared scope: scripts/device_kernel_port/measure_cache_provenance.py; committed path outside declared scope: scripts/device_kernel_port/measure_jacfwd_probe.py; committed path outside declared scope: scripts/device_kernel_port/measure_nine_blocks.py; committed path outside declared scope: scripts/device_kernel_port/measure_unpaired_compile.py; committed path outside declared scope: scripts/device_kernel_port/test_measure.py; committed path outside declared scope: scripts/diiid_map_fidelity/report.py; committed path outside declared scope: scripts/dina_profile_routes/measure.py; committed path outside declared scope: scripts/dina_profile_routes/measure_controls.py; committed path outside declared scope: scripts/dina_profile_routes/verify.py; committed path outside declared scope: scripts/dual_basin_audit/audit_diverted_separatrix.py; committed path outside declared scope: scripts/edge_consistency_table.py; committed path outside declared scope: scripts/fine_density_swap/measure.py; committed path outside declared scope: scripts/fine_density_swap/verify.py; committed path outside declared scope: scripts/forcing_residual_decomposition/measure.py; committed path outside declared scope: scripts/forcing_residual_decomposition/verify_results.py; committed path outside declared scope: scripts/in_cell_order_study/measure_sample_order.py; committed path outside declared scope: scripts/iron_limb_production/comparison.py; committed path outside declared scope: scripts/iron_limb_production/figure.py; committed path outside declared scope: scripts/iron_limb_production/negative_control_west.py; committed path outside declared scope: scripts/iron_limb_production/refinement.py; committed path outside declared scope: scripts/iron_limb_reference/negative_control.py; committed path outside declared scope: scripts/magnetisation_high_permeability/directional.py; committed path outside declared scope: scripts/magnetisation_high_permeability/geometry.py; committed path outside declared scope: scripts/magnetisation_high_permeability/measure.py; committed path outside declared scope: scripts/map_forcing_attribution/measure.py; committed path outside declared scope: scripts/mast_reference_evidence/contours.py; committed path outside declared scope: scripts/mast_slice_census/census.py; committed path outside declared scope: scripts/media/efit_pulse_gif.py; committed path outside declared scope: scripts/media/nova_thomson_gif.py; committed path outside declared scope: scripts/moment_prediction_confidence/verify.py; committed path outside declared scope: scripts/moment_route_adjudication/measure.py; committed path outside declared scope: scripts/moment_route_adjudication/verify.py; committed path outside declared scope: scripts/normalization_discriminator/measure.py; committed path outside declared scope: scripts/normalization_discriminator/verify.py; committed path outside declared scope: scripts/observation_clip_rescore/measure.py; committed path outside declared scope: scripts/own_node_interior_score/score_interior.py; committed path outside declared scope: scripts/portfolio_moment_revisit/run.py; committed path outside declared scope: scripts/portfolio_moment_revisit/verify.py; committed path outside declared scope: scripts/prototypes/bank_batch_width/report.py; committed path outside declared scope: scripts/prototypes/bank_booking_cost/report.py; committed path outside declared scope: scripts/prototypes/bank_booking_determinism/report.py; committed path outside declared scope: scripts/prototypes/bank_booking_primal_buckets/matrices.py; committed path outside declared scope: scripts/prototypes/bank_booking_primal_buckets/report.py; committed path outside declared scope: scripts/prototypes/bank_booking_primal_buckets/tradeoff.py; committed path outside declared scope: scripts/prototypes/bank_candidate_compact/report.py; committed path outside declared scope: scripts/prototypes/bank_candidate_compact/reproduce.py; committed path outside declared scope: scripts/prototypes/bank_candidate_loop/report.py; committed path outside declared scope: scripts/prototypes/bank_carried_decision/audit_suites.py; committed path outside declared scope: scripts/prototypes/bank_carried_decision/read_sweep.py; committed path outside declared scope: scripts/prototypes/bank_carried_decision/report.py; committed path outside declared scope: scripts/prototypes/bank_drive_barrier/plot.py; committed path outside declared scope: scripts/prototypes/bank_drive_continuation/plot.py; committed path outside declared scope: scripts/prototypes/bank_factor_carry/armed_suites.py; committed path outside declared scope: scripts/prototypes/bank_factor_carry/report.py; committed path outside declared scope: scripts/prototypes/bank_factor_carry/suites.py; committed path outside declared scope: scripts/prototypes/bank_fold_radial/condition.py; committed path outside declared scope: scripts/prototypes/bank_fold_vertical/check_contract.py; committed path outside declared scope: scripts/prototypes/bank_fold_vertical/condition.py; committed path outside declared scope: scripts/prototypes/bank_hessian_blowup/attribute.py; committed path outside declared scope: scripts/prototypes/bank_hessian_blowup/diagnose.py; committed path outside declared scope: scripts/prototypes/bank_hessian_blowup/fragment.py; committed path outside declared scope: scripts/prototypes/bank_hessian_blowup/geometry.py; committed path outside declared scope: scripts/prototypes/bank_hessian_blowup/jump.py; committed path outside declared scope: scripts/prototypes/bank_hessian_blowup/kernel.py; committed path outside declared scope: scripts/prototypes/bank_hessian_blowup/test_fragment.py; committed path outside declared scope: scripts/prototypes/bank_hessian_diagnosis/cell.py; committed path outside declared scope: scripts/prototypes/bank_hessian_diagnosis/localize.py; committed path outside declared scope: scripts/prototypes/bank_hessian_diagnosis/projected.py; committed path outside declared scope: scripts/prototypes/bank_hessian_diagnosis/terms.py; committed path outside declared scope: scripts/prototypes/bank_jacobian_launches/loops.py; committed path outside declared scope: scripts/prototypes/bank_jacobian_launches/report.py; committed path outside declared scope: scripts/prototypes/bank_jacobian_mismatch/plot.py; committed path outside declared scope: scripts/prototypes/bank_jacobian_mismatch/report.py; committed path outside declared scope: scripts/prototypes/bank_lane_drive/integration_suites.py; committed path outside declared scope: scripts/prototypes/bank_lane_drive/report.py; committed path outside declared scope: scripts/prototypes/bank_lane_drive/reproduce.py; committed path outside declared scope: scripts/prototypes/bank_lane_drive/review_suites.py; committed path outside declared scope: scripts/prototypes/bank_lane_drive/verify_retention.py; committed path outside declared scope: scripts/prototypes/bank_linear_solve/measure.py; committed path outside declared scope: scripts/prototypes/bank_linear_solve/report.py; committed path outside declared scope: scripts/prototypes/bank_matrix_free_step/plot.py; committed path outside declared scope: scripts/prototypes/bank_near_root_polish/control.py; committed path outside declared scope: scripts/prototypes/bank_near_root_polish/report.py; committed path outside declared scope: scripts/prototypes/bank_newton_krylov/report.py; committed path outside declared scope: scripts/prototypes/bank_newton_step/gate.py; committed path outside declared scope: scripts/prototypes/bank_newton_step/negative_control.py; committed path outside declared scope: scripts/prototypes/bank_newton_step/render.py; committed path outside declared scope: scripts/prototypes/bank_newton_step/reversion_control.py; committed path outside declared scope: scripts/prototypes/bank_newton_step/suite_arm.py; committed path outside declared scope: scripts/prototypes/bank_read_attribution/report.py; committed path outside declared scope: scripts/prototypes/bank_read_count_sensitivity/report.py; committed path outside declared scope: scripts/prototypes/bank_reused_scale_krylov/figure.py; committed path outside declared scope: scripts/prototypes/bank_route_rows/boundary_gap.py; committed path outside declared scope: scripts/prototypes/bank_route_rows/limited_oracle.py; committed path outside declared scope: scripts/prototypes/bank_route_rows/render_panel.py; committed path outside declared scope: scripts/prototypes/bank_solve_breakpoint/diagnose.py; committed path outside declared scope: scripts/prototypes/bank_solve_breakpoint/endpoint_probe.py; committed path outside declared scope: scripts/prototypes/bank_solve_cycle/restart_receipt.py; committed path outside declared scope: scripts/prototypes/bank_solve_cycle/restart_report.py; committed path outside declared scope: scripts/prototypes/bank_solve_driver/plot.py; committed path outside declared scope: scripts/prototypes/bank_solve_lanes/fragment_check.py; committed path outside declared scope: scripts/prototypes/bank_solve_lanes/plot_check_control.py; committed path outside declared scope: scripts/prototypes/bank_solve_profile/control.py; committed path outside declared scope: scripts/prototypes/bank_solve_profile/fused.py; committed path outside declared scope: scripts/prototypes/bank_solve_profile/marginal.py; committed path outside declared scope: scripts/prototypes/bank_solve_profile/measure.py; committed path outside declared scope: scripts/prototypes/bank_solve_profile/report.py; committed path outside declared scope: scripts/prototypes/bank_solve_trace_four_read/capture.py; committed path outside declared scope: scripts/prototypes/bank_step_batch/fixture.py; committed path outside declared scope: scripts/prototypes/bank_step_batch/plot.py; committed path outside declared scope: scripts/prototypes/bank_step_booking/kernel_profile.py; committed path outside declared scope: scripts/prototypes/bank_step_booking/negative_control.py; committed path outside declared scope: scripts/prototypes/bank_step_booking/trace_summary.py; committed path outside declared scope: scripts/prototypes/bank_step_booking_batch/finalize.py; committed path outside declared scope: scripts/prototypes/bank_step_booking_batch/step_profile.py; committed path outside declared scope: scripts/prototypes/bank_step_booking_batch/tune.py; committed path outside declared scope: scripts/prototypes/bank_step_booking_h200/kernel_table.py; committed path outside declared scope: scripts/prototypes/bank_step_booking_h200/plot.py; committed path outside declared scope: scripts/prototypes/bank_step_booking_once/check_fragment_provenance.py; committed path outside declared scope: scripts/prototypes/bank_step_booking_once/compare_arms.py; committed path outside declared scope: scripts/prototypes/bank_step_booking_once/hlo_census.py; committed path outside declared scope: scripts/prototypes/bank_step_booking_once/plot_stage_compare.py; committed path outside declared scope: scripts/prototypes/bank_step_cut_buckets/check_review.py; committed path outside declared scope: scripts/prototypes/bank_step_cut_buckets/plot.py; committed path outside declared scope: scripts/prototypes/bank_step_cut_buckets/probe_guards.py; committed path outside declared scope: scripts/prototypes/bank_step_geometry/diagnose.py; committed path outside declared scope: scripts/prototypes/bank_step_jacobian_split/plot.py; committed path outside declared scope: scripts/prototypes/bank_step_launch_fusion/plot.py; committed path outside declared scope: scripts/prototypes/bank_step_occupancy/plot.py; committed path outside declared scope: scripts/prototypes/bank_step_plateau/plot.py; committed path outside declared scope: scripts/prototypes/bank_step_plateau/report.py; committed path outside declared scope: scripts/prototypes/bank_step_speed/plot_stage.py; committed path outside declared scope: scripts/prototypes/bank_tangent_contract/plot.py; committed path outside declared scope: scripts/prototypes/bank_traced_inputs/numerics.py; committed path outside declared scope: scripts/prototypes/bank_traced_inputs/run.py; committed path outside declared scope: scripts/prototypes/bank_traced_inputs/trace_graph.py; committed path outside declared scope: scripts/prototypes/bank_wall_events/path_report.py; committed path outside declared scope: scripts/prototypes/bank_wall_events/report.py; committed path outside declared scope: scripts/prototypes/bank_warm_stall/compact.py; committed path outside declared scope: scripts/prototypes/bank_warm_stall/plot.py; committed path outside declared scope: scripts/prototypes/bank_warm_stall/render.py; committed path outside declared scope: scripts/prototypes/bank_warm_stall/report.py; committed path outside declared scope: scripts/prototypes/bank_warm_start/plot.py; committed path outside declared scope: scripts/prototypes/bank_warm_start/report.py; committed path outside declared scope: scripts/prototypes/bank_warm_start/verify_receipts.py; committed path outside declared scope: scripts/prototypes/book_ten_thousand/measure.py; committed path outside declared scope: scripts/prototypes/book_ten_thousand/reference.py; committed path outside declared scope: scripts/prototypes/book_ten_thousand/render.py; committed path outside declared scope: scripts/prototypes/book_ten_thousand/support.py; committed path outside declared scope: scripts/prototypes/booking_scalar_tile/report.py; committed path outside declared scope: scripts/prototypes/booking_scalar_tile/sweep.py; committed path outside declared scope: scripts/prototypes/bounded_jets_build/figure_time_per_pass.py; committed path outside declared scope: scripts/prototypes/carried_read_refresh/gate.py; committed path outside declared scope: scripts/prototypes/carried_read_refresh/measure.py; committed path outside declared scope: scripts/prototypes/carried_read_refresh/report.py; committed path outside declared scope: scripts/prototypes/carried_read_refresh/run.py; committed path outside declared scope: scripts/prototypes/carrier_identity_receipt/summarize_suite.py; committed path outside declared scope: scripts/prototypes/certificate_rows_remeasure/repanel.py; committed path outside declared scope: scripts/prototypes/certified_carrier_export/panels.py; committed path outside declared scope: scripts/prototypes/contour_tree_sol_wall_pair/probe.py; committed path outside declared scope: scripts/prototypes/contour_tree_sweep_profile/summarize.py; committed path outside declared scope: scripts/prototypes/contour_tree_sweep_profile/test_brute_receipt_identity.py; committed path outside declared scope: scripts/prototypes/diiid_adapter_current_refusal/caller_sweep.py; committed path outside declared scope: scripts/prototypes/diiid_adapter_current_refusal/inventory_probe.py; committed path outside declared scope: scripts/prototypes/diiid_adapter_current_refusal/probe.py; committed path outside declared scope: scripts/prototypes/diiid_axis_identification/capture_refusal.py; committed path outside declared scope: scripts/prototypes/diiid_axis_identification/conjunct_probe.py; committed path outside declared scope: scripts/prototypes/diiid_axis_identification/local_index.py; committed path outside declared scope: scripts/prototypes/diiid_axis_identification/render_seed_panel.py; committed path outside declared scope: scripts/prototypes/diiid_core_hold/analyze_mast.py; committed path outside declared scope: scripts/prototypes/diiid_core_hold/batch.py; committed path outside declared scope: scripts/prototypes/diiid_core_hold/continue_regressions.py; committed path outside declared scope: scripts/prototypes/diiid_core_hold/render.py; committed path outside declared scope: scripts/prototypes/diiid_core_hold/serial_regressions.py; committed path outside declared scope: scripts/prototypes/diiid_core_hold/summarize.py; committed path outside declared scope: scripts/prototypes/diiid_diverted_branch/analyze.py; committed path outside declared scope: scripts/prototypes/diiid_diverted_branch/controls.py; committed path outside declared scope: scripts/prototypes/diiid_diverted_branch/gates.py; committed path outside declared scope: scripts/prototypes/diiid_diverted_branch/job.py; committed path outside declared scope: scripts/prototypes/diiid_diverted_branch/recover.py; committed path outside declared scope: scripts/prototypes/diiid_diverted_branch/render.py; committed path outside declared scope: scripts/prototypes/diiid_diverted_branch/smoke.py; committed path outside declared scope: scripts/prototypes/diiid_edge_current_refusal/check_evidence_guards.py; committed path outside declared scope: scripts/prototypes/diiid_edge_current_refusal/negative_control.py; committed path outside declared scope: scripts/prototypes/diiid_external_current_propagation/render.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_booking/measure.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_booking/render.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_booking/seam_check.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_booking/smoke.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_flux/measure.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_flux/render.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_flux/suite_arms.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_flux/summarize.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/boundary_competition.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/boundary_readback.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/boundary_readback_control.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/build_receipt.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/check_panels.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/classifier_control.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/merge_probe.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/presence_control.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/rederive_promotions.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/run_probe_frames.py; committed path outside declared scope: scripts/prototypes/diiid_forward_convergence/terminal_class.py; committed path outside declared scope: scripts/prototypes/diiid_inactive_compensator/batch.py; committed path outside declared scope: scripts/prototypes/diiid_inactive_compensator/cohort.py; committed path outside declared scope: scripts/prototypes/diiid_inactive_compensator/compare.py; committed path outside declared scope: scripts/prototypes/diiid_inactive_compensator/measure.py; committed path outside declared scope: scripts/prototypes/diiid_inactive_compensator/render.py; committed path outside declared scope: scripts/prototypes/diiid_material_mask/check_measurement.py; committed path outside declared scope: scripts/prototypes/diiid_material_mask/render.py; committed path outside declared scope: scripts/prototypes/diiid_pinned_reregistration/registration_check.py; committed path outside declared scope: scripts/prototypes/diiid_pinned_seed_drift/history.py; committed path outside declared scope: scripts/prototypes/diiid_pinned_seed_drift/measure.py; committed path outside declared scope: scripts/prototypes/diiid_pinned_seed_drift/registration_check.py; committed path outside declared scope: scripts/prototypes/diiid_pinned_seed_drift/replay.py; committed path outside declared scope: scripts/prototypes/diiid_residual_plateau/analyze.py; committed path outside declared scope: scripts/prototypes/diiid_residual_plateau/check_capture.py; committed path outside declared scope: scripts/prototypes/diiid_residual_plateau/inspect_archived.py; committed path outside declared scope: scripts/prototypes/diiid_residual_plateau/render.py; committed path outside declared scope: scripts/prototypes/diiid_residual_plateau/style.py; committed path outside declared scope: scripts/prototypes/diiid_single_kernel_coupling/batch.py; committed path outside declared scope: scripts/prototypes/diiid_single_kernel_coupling/gates.py; committed path outside declared scope: scripts/prototypes/diiid_single_kernel_coupling/measure.py; committed path outside declared scope: scripts/prototypes/diiid_single_kernel_coupling/render.py; committed path outside declared scope: scripts/prototypes/diiid_stopping_rule/render_terminal_panels.py; committed path outside declared scope: scripts/prototypes/diiid_stopping_rule/run_geometry_dump.py; committed path outside declared scope: scripts/prototypes/diiid_stopping_rule/run_step_gate_diagnosis.py; committed path outside declared scope: scripts/prototypes/diiid_support_mask/check_capture.py; committed path outside declared scope: scripts/prototypes/diiid_support_mask/render_support.py; committed path outside declared scope: scripts/prototypes/diiid_warmup_admission/diagnose.py; committed path outside declared scope: scripts/prototypes/diiid_warmup_admission/measure.py; committed path outside declared scope: scripts/prototypes/diiid_warmup_admission/negative_control.py; committed path outside declared scope: scripts/prototypes/diiid_warmup_admission/regression.py; committed path outside declared scope: scripts/prototypes/diiid_warmup_admission/regression_gpu.py; committed path outside declared scope: scripts/prototypes/diiid_warmup_admission/render.py; committed path outside declared scope: scripts/prototypes/diiid_warmup_admission/replay.py; committed path outside declared scope: scripts/prototypes/diiid_warmup_admission/timing.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_attribution/render.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/conductor_correction.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/fit.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/measure.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/probe_applied.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/probe_external.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/render.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/summarize.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/test_conductor_correction.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/verify.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_held_nodes/batch.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_held_nodes/measure.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_held_nodes/preflight.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_held_nodes/provenance.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_held_nodes/render.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/check_axis_markers.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/check_edge_profiles.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/check_profile_table.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/render.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/smoke.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/summarize.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/tables.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/verify.py; committed path outside declared scope: scripts/prototypes/diverted_300_regression/audit_receipts.py; committed path outside declared scope: scripts/prototypes/diverted_300_regression/measure_row.py; committed path outside declared scope: scripts/prototypes/diverted_300_regression/report_carrier.py; committed path outside declared scope: scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/series.py; committed path outside declared scope: scripts/prototypes/drifting_sensor_sequences/spectrum_sweep/test_spectrum_sweep.py; committed path outside declared scope: scripts/prototypes/efit_axis_adjudication/analyse.py; committed path outside declared scope: scripts/prototypes/efit_axis_adjudication/case_key.py; committed path outside declared scope: scripts/prototypes/efit_axis_adjudication/census.py; committed path outside declared scope: scripts/prototypes/efit_axis_adjudication/field.py; committed path outside declared scope: scripts/prototypes/efit_axis_adjudication/page.py; committed path outside declared scope: scripts/prototypes/efit_axis_adjudication/plot.py; committed path outside declared scope: scripts/prototypes/efit_axis_adjudication/refresh.py; committed path outside declared scope: scripts/prototypes/efit_axis_adjudication/test_boundary_marks.py; committed path outside declared scope: scripts/prototypes/efit_axis_adjudication/test_escape_overlay.py; committed path outside declared scope: scripts/prototypes/efit_axis_adjudication/test_rebuild.py; committed path outside declared scope: scripts/prototypes/efit_escape_comparison/compare.py; committed path outside declared scope: scripts/prototypes/efit_escape_comparison/test_compare.py; committed path outside declared scope: scripts/prototypes/efit_maximin_certificate/field_identity.py; committed path outside declared scope: scripts/prototypes/efit_maximin_certificate/test_certificate.py; committed path outside declared scope: scripts/prototypes/fused_booking_assembly/correctness.py; committed path outside declared scope: scripts/prototypes/fused_booking_assembly/profile.py; committed path outside declared scope: scripts/prototypes/fused_booking_assembly/report.py; committed path outside declared scope: scripts/prototypes/fused_booking_assembly/run.py; committed path outside declared scope: scripts/prototypes/fused_convergence/measure.py; committed path outside declared scope: scripts/prototypes/fused_convergence/render.py; committed path outside declared scope: scripts/prototypes/fused_newton/diagnose.py; committed path outside declared scope: scripts/prototypes/fused_newton/negative_control.py; committed path outside declared scope: scripts/prototypes/geometry_reuse/report.py; committed path outside declared scope: scripts/prototypes/geometry_reuse/suite.py; committed path outside declared scope: scripts/prototypes/graded_residual_compile/count_graph.py; committed path outside declared scope: scripts/prototypes/graded_residual_compile/test_graded_map_jacobian.py; committed path outside declared scope: scripts/prototypes/importer_delta/assemble.py; committed path outside declared scope: scripts/prototypes/importer_delta/compare.py; committed path outside declared scope: scripts/prototypes/importer_delta/fill.py; committed path outside declared scope: scripts/prototypes/importer_delta/verify.py; committed path outside declared scope: scripts/prototypes/iron_limb_fill/compare.py; committed path outside declared scope: scripts/prototypes/iron_limb_fill/figure.py; committed path outside declared scope: scripts/prototypes/iter_bank/check_coils.py; committed path outside declared scope: scripts/prototypes/iter_bank/diagnose.py; committed path outside declared scope: scripts/prototypes/iter_bank/probe_capacity.py; committed path outside declared scope: scripts/prototypes/iter_bank/reload.py; committed path outside declared scope: scripts/prototypes/iter_bank/suite.py; committed path outside declared scope: scripts/prototypes/ladder/admission_control.py; committed path outside declared scope: scripts/prototypes/ladder/diagnose.py; committed path outside declared scope: scripts/prototypes/ladder/pointer_propagation.py; committed path outside declared scope: scripts/prototypes/ladder/report.py; committed path outside declared scope: scripts/prototypes/ladder/snapshot.py; committed path outside declared scope: scripts/prototypes/lean_map/newton.py; committed path outside declared scope: scripts/prototypes/lean_map/render.py; committed path outside declared scope: scripts/prototypes/lean_map_batched/measure.py; committed path outside declared scope: scripts/prototypes/lean_map_batched/render.py; committed path outside declared scope: scripts/prototypes/limited_550_carrier/forward_repro.py; committed path outside declared scope: scripts/prototypes/limited_550_carrier/repro.py; committed path outside declared scope: scripts/prototypes/membership/booking.py; committed path outside declared scope: scripts/prototypes/membership/check_booking.py; committed path outside declared scope: scripts/prototypes/membership/check_geometry.py; committed path outside declared scope: scripts/prototypes/membership/compose.py; committed path outside declared scope: scripts/prototypes/membership/hybrid.py; committed path outside declared scope: scripts/prototypes/membership/measure.py; committed path outside declared scope: scripts/prototypes/membership/render.py; committed path outside declared scope: scripts/prototypes/moment_hessian/analyse.py; committed path outside declared scope: scripts/prototypes/moment_hessian/profile.py; committed path outside declared scope: scripts/prototypes/moment_hessian/render_panel.py; committed path outside declared scope: scripts/prototypes/moment_hessian/trial_direct.py; committed path outside declared scope: scripts/prototypes/moment_hessian/trial_fixture.py; committed path outside declared scope: scripts/prototypes/moment_hessian/trial_probe.py; committed path outside declared scope: scripts/prototypes/one_traced_body/lowered_structure.py; committed path outside declared scope: scripts/prototypes/one_traced_body/reduced_identity.py; committed path outside declared scope: scripts/prototypes/point_program_attribution/figure.py; committed path outside declared scope: scripts/prototypes/polygon_near_band/confined_arms.py; committed path outside declared scope: scripts/prototypes/polygon_stable_evaluator/production_pair.py; committed path outside declared scope: scripts/prototypes/polygon_trace_miss/archive_job.py; committed path outside declared scope: scripts/prototypes/polygon_trace_miss/diagnose.py; committed path outside declared scope: scripts/prototypes/polygon_trace_miss/height_stencil.py; committed path outside declared scope: scripts/prototypes/polygon_trace_miss/reference_comparison.py; committed path outside declared scope: scripts/prototypes/polygon_trace_miss/report.py; committed path outside declared scope: scripts/prototypes/promoted_nodes_near_xpoint/angles_at_null.py; committed path outside declared scope: scripts/prototypes/promoted_nodes_near_xpoint/job_state.py; committed path outside declared scope: scripts/prototypes/promoted_nodes_near_xpoint/measure_promoted_nodes.py; committed path outside declared scope: scripts/prototypes/promoted_nodes_near_xpoint/private_flux_pocket.py; committed path outside declared scope: scripts/prototypes/promoted_nodes_near_xpoint/render_angles.py; committed path outside declared scope: scripts/prototypes/promoted_nodes_near_xpoint/render_panel.py; committed path outside declared scope: scripts/prototypes/promoted_nodes_near_xpoint/run_angles.py; committed path outside declared scope: scripts/prototypes/promoted_nodes_near_xpoint/run_round.py; committed path outside declared scope: scripts/prototypes/promoted_nodes_near_xpoint/write_fragment.py; committed path outside declared scope: scripts/prototypes/read_derivatives/check_fragment.py; committed path outside declared scope: scripts/prototypes/read_diverted_wall_skip/guard.py; committed path outside declared scope: scripts/prototypes/read_diverted_wall_skip/integration.py; committed path outside declared scope: scripts/prototypes/read_diverted_wall_skip/job.py; committed path outside declared scope: scripts/prototypes/read_diverted_wall_skip/measure.py; committed path outside declared scope: scripts/prototypes/read_diverted_wall_skip/report.py; committed path outside declared scope: scripts/prototypes/read_live_candidates/report.py; committed path outside declared scope: scripts/prototypes/read_live_candidates/run.py; committed path outside declared scope: scripts/prototypes/read_live_candidates/verify_combined.py; committed path outside declared scope: scripts/prototypes/read_warm_wall/measure.py; committed path outside declared scope: scripts/prototypes/read_warm_wall/summarize.py; committed path outside declared scope: scripts/prototypes/saddle_expansion/expansion.py; committed path outside declared scope: scripts/prototypes/saddle_expansion/render_gate.py; committed path outside declared scope: scripts/prototypes/saddle_expansion/speed_gate.py; committed path outside declared scope: scripts/prototypes/saddle_expansion/test_speed_gate_guard.py; committed path outside declared scope: scripts/prototypes/shared_root/inventory.py; committed path outside declared scope: scripts/prototypes/smfp_autodiff_step/present.py; committed path outside declared scope: scripts/prototypes/smfp_autodiff_step/probe_dense.py; committed path outside declared scope: scripts/prototypes/smfp_autodiff_step/probe_direction.py; committed path outside declared scope: scripts/prototypes/smfp_autodiff_step/shift.py; committed path outside declared scope: scripts/prototypes/solve_options/render.py; committed path outside declared scope: scripts/prototypes/solve_options/validate_frozen.py; committed path outside declared scope: scripts/prototypes/solve_wall_breakdown/check_units.py; committed path outside declared scope: scripts/prototypes/solve_wall_breakdown/figure.py; committed path outside declared scope: scripts/prototypes/stencil_conditioning/build_carrier.py; committed path outside declared scope: scripts/prototypes/stencil_conditioning/measure.py; committed path outside declared scope: scripts/prototypes/stencil_conditioning/negative_control.py; committed path outside declared scope: scripts/prototypes/stencil_conditioning/plot.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/attribute_input_drift.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/iter_record_seed_rerun.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/nominal_repeat.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/record_seed_rerun.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/report.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/run_cases.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/seed_sensitivity.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/suite_arms.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/test_panel_visibility.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/test_receipt_durability.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/test_record_claims.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_box_mask.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_connectivity.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_contour_reference.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_fixed_graph.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_join_tree.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_launches.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_outline_trace.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_point_window.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_production_seed.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_seeds.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_slice.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_solovev_window.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_tree.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_vmap.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_vmap_alternatives.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_vmap_field.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/measure_vmap_warm.py; committed path outside declared scope: scripts/prototypes/sub_millisecond/render_accuracy.py; committed path outside declared scope: scripts/prototypes/tcv_liuqe_known_answer/figures.py; committed path outside declared scope: scripts/prototypes/tcv_liuqe_known_answer/measure.py; committed path outside declared scope: scripts/prototypes/tcv_liuqe_known_answer/reference_sign.py; committed path outside declared scope: scripts/prototypes/tcv_liuqe_known_answer/report.py; committed path outside declared scope: scripts/prototypes/tcv_liuqe_known_answer/summarise.py; committed path outside declared scope: scripts/prototypes/tcv_liuqe_known_answer/test_coverage.py; committed path outside declared scope: scripts/prototypes/tie_pair_topology/component_check.py; committed path outside declared scope: scripts/prototypes/tie_pair_topology/measure.py; committed path outside declared scope: scripts/prototypes/tie_pair_topology/read_rule_probe.py; committed path outside declared scope: scripts/prototypes/tie_pair_topology/stationary.py; committed path outside declared scope: scripts/prototypes/tie_pair_topology/test_stationary.py; committed path outside declared scope: scripts/prototypes/tracked_read_batch/diagnose.py; committed path outside declared scope: scripts/prototypes/tracked_read_batch/profile_kernels.py; committed path outside declared scope: scripts/prototypes/tracked_read_batch/render.py; committed path outside declared scope: scripts/prototypes/tracked_read_h200/attribution_check.py; committed path outside declared scope: scripts/prototypes/tracked_read_h200/stage.py; committed path outside declared scope: scripts/prototypes/tracked_read_steady_batch/render.py; committed path outside declared scope: scripts/reconstructed_plasma_source/baseline_sign.py; committed path outside declared scope: scripts/ring_attribution/build_direct_target_bank.py; committed path outside declared scope: scripts/ring_attribution/localize_support_limit.py; committed path outside declared scope: scripts/ring_attribution/measure_direct_attribution.py; committed path outside declared scope: scripts/ring_attribution/probe_cell.py; committed path outside declared scope: scripts/ring_quadrature/measure_ring_quadrature.py; committed path outside declared scope: scripts/ring_quadrature/verify_results.py; committed path outside declared scope: scripts/root_gate_attribution/measure_root_attribution.py; committed path outside declared scope: scripts/saddle_gap_check/measure_saddle_gap.py; committed path outside declared scope: scripts/west_iron_galerkin/duplication.py; committed path outside declared scope: scripts/west_iron_galerkin/figure.py; committed path outside declared scope: scripts/west_iron_galerkin/mutant.py; committed path outside declared scope: scripts/west_iron_galerkin/negative_asymmetry.py; committed path outside declared scope: scripts/west_iron_galerkin/probe.py; committed path outside declared scope: scripts/west_iron_galerkin/suite.py; committed path outside declared scope: scripts/west_iron_galerkin_pair/figure.py; committed path outside declared scope: scripts/west_iron_inputs/pin.py; committed path outside declared scope: scripts/west_iron_inputs/verify.py; committed path outside declared scope: scripts/west_picard_control/figure.py; committed path outside declared scope: scripts/west_root_branch/record.py; committed path outside declared scope: scripts/window_contraction/measure.py; committed path outside declared scope: scripts/window_convergence_study/study.py; committed path outside declared scope: scripts/window_demonstration/exchange_diagnosis/probe.py; committed path outside declared scope: scripts/window_demonstration/figures.py; committed path outside declared scope: scripts/window_demonstration/run_window.py; committed path outside declared scope: scripts/window_demonstration/time_traces.py; committed path outside declared scope: scripts/window_gpu_benchmark/sensitivity_probe.py; committed path outside declared scope: scripts/window_pint_experiment/experiment.py; committed path outside declared scope: scripts/zero_current_audit/audit_zero_current_legs.py; orientation mismatch: write_paths expected=[\"benchmarks/near_field_elliptic.py\", \"docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html\", \"docs/figures/code-reuse-and-hot-path/bench-scripts-delete\", \"scripts/prototypes/diiid_xpoint_profile_extent/measure.py\"] reported=[\"/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete/docs/figures/code-reuse-and-hot-path/bench-scripts-delete\", \"docs/evidence/fragments/code-reuse-and-hot-path/\\\" + \\\"bench-scripts-delete\\\" + \\\".html\"]",
+          "expected": {
+            "base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete",
+            "write_paths": [
+              "benchmarks/near_field_elliptic.py",
+              "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html",
+              "docs/figures/code-reuse-and-hot-path/bench-scripts-delete",
+              "scripts/prototypes/diiid_xpoint_profile_extent/measure.py"
+            ]
+          },
+          "inputs": {
+            "commits": [
+              "62f9c6eca0dfc84ca96ca8f48609670ceb9392a8",
+              "5cd165998460733fee0c243ea5480436673a5cde",
+              "5d0dadbcca0aa1c0b301de4ef5f0b0b6b2397108",
+              "784964d799e8b5798a0246c5db8391bcae1f56ad",
+              "575e8dc62ecf968c2b40936ebdcea715582699b0",
+              "53afe126ea349d5e83e09b348ef4e670044e2919",
+              "47644cb021fcfd4c3c645a94085c00f4338edde4",
+              "f38f5fc1f85f353cf7aac722b3cc8d39c09c8756",
+              "ba0fe4eb89e68d54c7a8885880ec92d886ea3f2c",
+              "c9af10eedc510a1c8ea1e4b3d658e482761a66c0",
+              "76a7d44acfbea7cefb786849eacefa4135dda849",
+              "e75324fc6e0b6e8e6786146e991cc2d34ea98ac5",
+              "901496f3c0484e1ba89a13ca4b750b2cbb5c94e8",
+              "6790baf7969546382a3149fe8bd93bdd68285fa1",
+              "c6a9661b071580aafed24df9b7a83b5970f8ac8d",
+              "e1bc21735a5b5cda1ae6edec2d83846c18338b00"
+            ],
+            "expected": {
+              "base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete",
+              "write_paths": [
+                "benchmarks/near_field_elliptic.py",
+                "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html",
+                "docs/figures/code-reuse-and-hot-path/bench-scripts-delete",
+                "scripts/prototypes/diiid_xpoint_profile_extent/measure.py"
+              ]
+            },
+            "head": "e1bc21735a5b5cda1ae6edec2d83846c18338b00",
+            "reported": {
+              "base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete",
+              "write_paths": [
+                "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete/docs/figures/code-reuse-and-hot-path/bench-scripts-delete",
+                "docs/evidence/fragments/code-reuse-and-hot-path/\" + \"bench-scripts-delete\" + \".html"
+              ]
+            },
+            "status": "blocked"
+          },
+          "matched": false,
+          "mismatches": [
+            "write_paths"
+          ],
+          "reported": {
+            "base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete",
+            "write_paths": [
+              "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete/docs/figures/code-reuse-and-hot-path/bench-scripts-delete",
+              "docs/evidence/fragments/code-reuse-and-hot-path/\" + \"bench-scripts-delete\" + \".html"
+            ]
+          }
+        },
+        "phase": "blocked",
+        "plan": "code-reuse-and-hot-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261122T202603608268-bench-scripts-delete",
+        "session": "0891697d-eba7-4e66-96ff-e563938502e0",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261122T202603608268-bench-scripts-delete",
+          "session_id": "5c04bebb-b147-4bda-801f-2d70353cf8e6",
+          "source": "pointer"
+        },
+        "settled": null,
+        "stored_phase": "blocked",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 51545,
+        "terminal_at": "2026-11-23T18:03:18Z",
+        "wait_age_seconds": null,
+        "wait_class": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete"
+      },
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 14400,
+        "classification": "blocked",
+        "commits_beyond_base": 9,
+        "delivery": {},
+        "detail": "committed path outside declared scope: nova/datachain/ccfe_uda.py; committed path outside declared scope: nova/datachain/magnetic_signals.py; committed path outside declared scope: nova/datachain/uda_benchmark.py; committed path outside declared scope: nova/dataset/access.py; committed path outside declared scope: nova/field/elm_3d_field.py; committed path outside declared scope: nova/field/elm_inductance.py; committed path outside declared scope: nova/field/errorfield.py; committed path outside declared scope: nova/field/gpec_benchmark.py; committed path outside declared scope: nova/limits/central_solinoid_limit.py; committed path outside declared scope: nova/limits/tieplate.py; committed path outside declared scope: nova/linalg/fista.py; committed path outside declared scope: nova/thermalhydralic/attributes.py; committed path outside declared scope: nova/thermalhydralic/naka/sampledata.py; committed path outside declared scope: nova/thermalhydralic/spectrum.py; committed path outside declared scope: nova/thermalhydralic/sultan/clear.py; committed path outside declared scope: nova/thermalhydralic/sultan/ensemble.py; committed path outside declared scope: nova/thermalhydralic/twente/twentedata.py; committed path outside declared scope: nova/utilities/Bezier.py; committed path outside declared scope: nova/utilities/mesh.py; committed path outside declared scope: nova/utilities/polybezier.py; committed path outside declared scope: nova/utilities/qdafile.py; committed path outside declared scope: nova/utilities/stat.py; committed path outside declared scope: nova/utilities/stress.py; committed path outside declared scope: nova/utilities/surface.py; committed path outside declared scope: docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.json",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 2008,
+        "ended_during_launch": false,
+        "exit_record": {
+          "attempt": 4,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-23T18:55:21Z",
+          "last_record_type": "result",
+          "launched_at": "2026-11-23T18:21:55Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [],
+          "run_id": "r-20261122T202605453490-unreached-module-delete",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 48748,
+          "worker_pid": 2350951
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "committed path outside declared scope: nova/datachain/ccfe_uda.py; committed path outside declared scope: nova/datachain/magnetic_signals.py; committed path outside declared scope: nova/datachain/uda_benchmark.py; committed path outside declared scope: nova/dataset/access.py; committed path outside declared scope: nova/field/elm_3d_field.py; committed path outside declared scope: nova/field/elm_inductance.py; committed path outside declared scope: nova/field/errorfield.py; committed path outside declared scope: nova/field/gpec_benchmark.py; committed path outside declared scope: nova/limits/central_solinoid_limit.py; committed path outside declared scope: nova/limits/tieplate.py; committed path outside declared scope: nova/linalg/fista.py; committed path outside declared scope: nova/thermalhydralic/attributes.py; committed path outside declared scope: nova/thermalhydralic/naka/sampledata.py; committed path outside declared scope: nova/thermalhydralic/spectrum.py; committed path outside declared scope: nova/thermalhydralic/sultan/clear.py; committed path outside declared scope: nova/thermalhydralic/sultan/ensemble.py; committed path outside declared scope: nova/thermalhydralic/twente/twentedata.py; committed path outside declared scope: nova/utilities/Bezier.py; committed path outside declared scope: nova/utilities/mesh.py; committed path outside declared scope: nova/utilities/polybezier.py; committed path outside declared scope: nova/utilities/qdafile.py; committed path outside declared scope: nova/utilities/stat.py; committed path outside declared scope: nova/utilities/stress.py; committed path outside declared scope: nova/utilities/surface.py; committed path outside declared scope: docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.json",
+          "lifting_condition": null,
+          "next_action": "inspect the worktree at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/unreached-module-delete before promoting run r-20261122T202605453490-unreached-module-delete",
+          "promotion_recorded": false,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-23T18:55:21Z",
+        "lane_event": null,
+        "launch_error": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 48423,
+        "log_fresh": false,
+        "manifest_commits": [
+          "104c8b673bd2dab4ca3ac3833c930bf2489c507f",
+          "1bbcc381db9ebcd528de1bd10815804b412b0e37",
+          "dd7da6c697da58a349b977238d57ecdac7b555e4",
+          "dc3a174a7ef3af431fe60bed78133aa7ac73cdc8",
+          "00c8095ff7ea6457fbb3a725838d3d772da9cfd2",
+          "4a35a10f076462be2afd468041d36cd9d324c5cc",
+          "6d308dee032d2c72c7077ed066c21bc163696024",
+          "5ae605f519c670caddb13b81b77bd449464cd5f8",
+          "2d281377afd2debd64841346796bb83ab79c2a9b"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "5518cf5044e6d57075c11818687f65ee56a518abe673cf2be127706bcfab2eb9",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261122T202605453490-unreached-module-delete/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "inspect the worktree at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/unreached-module-delete before promoting run r-20261122T202605453490-unreached-module-delete",
+        "node": "unreached-module-delete",
+        "orientation_check": {
+          "checked_at": "2026-11-23T18:55:39Z",
+          "detail": "committed path outside declared scope: nova/datachain/ccfe_uda.py; committed path outside declared scope: nova/datachain/magnetic_signals.py; committed path outside declared scope: nova/datachain/uda_benchmark.py; committed path outside declared scope: nova/dataset/access.py; committed path outside declared scope: nova/field/elm_3d_field.py; committed path outside declared scope: nova/field/elm_inductance.py; committed path outside declared scope: nova/field/errorfield.py; committed path outside declared scope: nova/field/gpec_benchmark.py; committed path outside declared scope: nova/limits/central_solinoid_limit.py; committed path outside declared scope: nova/limits/tieplate.py; committed path outside declared scope: nova/linalg/fista.py; committed path outside declared scope: nova/thermalhydralic/attributes.py; committed path outside declared scope: nova/thermalhydralic/naka/sampledata.py; committed path outside declared scope: nova/thermalhydralic/spectrum.py; committed path outside declared scope: nova/thermalhydralic/sultan/clear.py; committed path outside declared scope: nova/thermalhydralic/sultan/ensemble.py; committed path outside declared scope: nova/thermalhydralic/twente/twentedata.py; committed path outside declared scope: nova/utilities/Bezier.py; committed path outside declared scope: nova/utilities/mesh.py; committed path outside declared scope: nova/utilities/polybezier.py; committed path outside declared scope: nova/utilities/qdafile.py; committed path outside declared scope: nova/utilities/stat.py; committed path outside declared scope: nova/utilities/stress.py; committed path outside declared scope: nova/utilities/surface.py; committed path outside declared scope: docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.json",
+          "expected": {
+            "base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/unreached-module-delete",
+            "write_paths": [
+              "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+              "docs/figures/code-reuse-and-hot-path/unreached-module-delete"
+            ]
+          },
+          "inputs": {
+            "commits": [
+              "104c8b673bd2dab4ca3ac3833c930bf2489c507f",
+              "1bbcc381db9ebcd528de1bd10815804b412b0e37",
+              "dd7da6c697da58a349b977238d57ecdac7b555e4",
+              "dc3a174a7ef3af431fe60bed78133aa7ac73cdc8",
+              "00c8095ff7ea6457fbb3a725838d3d772da9cfd2",
+              "4a35a10f076462be2afd468041d36cd9d324c5cc",
+              "6d308dee032d2c72c7077ed066c21bc163696024",
+              "5ae605f519c670caddb13b81b77bd449464cd5f8",
+              "2d281377afd2debd64841346796bb83ab79c2a9b"
+            ],
+            "expected": {
+              "base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/unreached-module-delete",
+              "write_paths": [
+                "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+                "docs/figures/code-reuse-and-hot-path/unreached-module-delete"
+              ]
+            },
+            "head": "2d281377afd2debd64841346796bb83ab79c2a9b",
+            "reported": {
+              "base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/unreached-module-delete",
+              "write_paths": [
+                "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+                "docs/figures/code-reuse-and-hot-path/unreached-module-delete"
+              ]
+            },
+            "status": "complete"
+          },
+          "matched": false,
+          "mismatches": [],
+          "reported": {
+            "base_sha": "348ed92c7ab08a9592a7f997d62bfec41ae687d4",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/unreached-module-delete",
+            "write_paths": [
+              "docs/evidence/fragments/code-reuse-and-hot-path/unreached-module-delete.html",
+              "docs/figures/code-reuse-and-hot-path/unreached-module-delete"
+            ]
+          }
+        },
+        "phase": "blocked",
+        "plan": "code-reuse-and-hot-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": true,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": "parsed",
+        "run_id": "r-20261122T202605453490-unreached-module-delete",
+        "session": "0891697d-eba7-4e66-96ff-e563938502e0",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261122T202605453490-unreached-module-delete",
+          "session_id": "31160954-0532-44b9-9201-17a8cfc61ef4",
+          "source": "pointer"
+        },
+        "settled": null,
+        "stored_phase": "blocked",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 48494,
+        "terminal_at": "2026-11-23T18:54:09Z",
+        "wait_age_seconds": null,
+        "wait_class": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/unreached-module-delete"
+      },
+      {
+        "backend": "codex",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 7200,
+        "classification": "blocked",
+        "commits_beyond_base": 8,
+        "delivery": {},
+        "detail": "committed path outside declared scope: benchmarks/arc_section_cost.py; committed path outside declared scope: benchmarks/bound_failability_census.py; committed path outside declared scope: benchmarks/bound_reference_classification.py; committed path outside declared scope: benchmarks/census_kernel_timing.py; committed path outside declared scope: benchmarks/class_coreachability.py; committed path outside declared scope: benchmarks/clipped_coupling_order.py; committed path outside declared scope: benchmarks/coil_construction.py; committed path outside declared scope: benchmarks/compile_host_memory.py; committed path outside declared scope: benchmarks/compiled_outer_loop_trace.py; committed path outside declared scope: benchmarks/constraint_shape_receipt.py; committed path outside declared scope: benchmarks/cpu_solve_discriminator.py; committed path outside declared scope: benchmarks/cs_winding_inductance.py; committed path outside declared scope: benchmarks/diiid_containment_recheck.py; committed path outside declared scope: benchmarks/diiid_prescribed_profile_forward.py; committed path outside declared scope: benchmarks/diiid_residual_decomposition.py; committed path outside declared scope: benchmarks/diiid_target_current_digest_probe.py; committed path outside declared scope: benchmarks/diiid_vacuum_from_description.py; committed path outside declared scope: benchmarks/diiid_vacuum_sensitivity_sweep.py; committed path outside declared scope: benchmarks/divergence_floor_scaling.py; committed path outside declared scope: benchmarks/early_frame_placement_test.py; committed path outside declared scope: benchmarks/efit_absent_quantity_triage.py; committed path outside declared scope: benchmarks/efit_affine_extraction.py; committed path outside declared scope: benchmarks/efit_cell_current_representation.py; committed path outside declared scope: benchmarks/efit_current_sign_census.py; committed path outside declared scope: benchmarks/efit_derived_quantity_census.py; committed path outside declared scope: benchmarks/efit_filament_truncation_contribution.py; committed path outside declared scope: benchmarks/efit_section_shape_zeta_order.py; committed path outside declared scope: benchmarks/efit_third_term_separation.py; committed path outside declared scope: benchmarks/efit_xpoint_fit_state.py; committed path outside declared scope: benchmarks/empty_exact_polygon_probe.py; committed path outside declared scope: benchmarks/exact_clip_warm_cost.py; committed path outside declared scope: benchmarks/flux_surface_flood.py; committed path outside declared scope: benchmarks/force_target_rule.py; committed path outside declared scope: benchmarks/fork_arming_economics.py; committed path outside declared scope: benchmarks/global_surface_clip_rescore.py; committed path outside declared scope: benchmarks/inner_solve_accuracy.py; committed path outside declared scope: benchmarks/iter_saddle_resolution.py; committed path outside declared scope: benchmarks/lane_resource_accumulation.py; committed path outside declared scope: benchmarks/moment_map_derivative_contract.py; committed path outside declared scope: benchmarks/newton_cycle_mask_switch.py; committed path outside declared scope: benchmarks/null_census_device_benchmark.py; committed path outside declared scope: benchmarks/order_vs_mesh_adjudication.py; committed path outside declared scope: benchmarks/passive_closure_mesh_response.py; committed path outside declared scope: benchmarks/polish_support_performance.py; committed path outside declared scope: benchmarks/polybeam_section_cost.py; committed path outside declared scope: benchmarks/portfolio_warm_start.py; committed path outside declared scope: benchmarks/private_region_parallel_kernel.py; committed path outside declared scope: benchmarks/receipt_topology_check.py; committed path outside declared scope: benchmarks/recovery_ladder_telemetry.py; committed path outside declared scope: benchmarks/reduced_newton_rows.py; committed path outside declared scope: benchmarks/sol_current_demonstration.py; committed path outside declared scope: benchmarks/solve_profile_kernel_count.py; committed path outside declared scope: benchmarks/steep_edge_moment_demonstration.py; committed path outside declared scope: benchmarks/tiled_assembly.py; committed path outside declared scope: benchmarks/vertex_ring_census.py; committed path outside declared scope: benchmarks/vertical_force_decomposition.py; committed path outside declared scope: benchmarks/wholecell_rows_reposed_fixture.py; committed path outside declared scope: benchmarks/wound_coil_finite_section.py; committed path outside declared scope: benchmarks/wound_coil_inductance.py; committed path outside declared scope: benchmarks/zero_residual_check.py; committed path outside declared scope: scripts/device_kernel_port/measure_unpaired_compile.py; committed path outside declared scope: scripts/mast_reference_evidence/contours.py; committed path outside declared scope: scripts/mast_slice_census/census.py; committed path outside declared scope: scripts/prototypes/bank_drive_barrier/plot.py; committed path outside declared scope: scripts/prototypes/bank_fold_radial/condition.py; committed path outside declared scope: scripts/prototypes/bank_fold_vertical/condition.py; committed path outside declared scope: scripts/prototypes/bank_hessian_blowup/geometry.py; committed path outside declared scope: scripts/prototypes/bank_route_rows/boundary_gap.py; committed path outside declared scope: scripts/prototypes/bank_solve_trace_four_read/capture.py; committed path outside declared scope: scripts/prototypes/bank_step_batch/fixture.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_booking/render.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_flux/summarize.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/fit.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/render.py; committed path outside declared scope: scripts/prototypes/lean_map/newton.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/report.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/run_cases.py; committed path outside declared scope: scripts/prototypes/tracked_read_batch/profile_kernels.py; committed path outside declared scope: scripts/reconstructed_plasma_source/baseline_sign.py; committed path outside declared scope: scripts/window_demonstration/exchange_diagnosis/probe.py; committed path outside declared scope: benchmarks/coupled_map_mode_identification.py; committed path outside declared scope: benchmarks/diiid_vacuum_gate.py; committed path outside declared scope: benchmarks/limited_anchor_containment.py; committed path outside declared scope: benchmarks/passive_closure_trace.py; committed path outside declared scope: scripts/prototypes/tcv_liuqe_known_answer/measure.py; committed path outside declared scope: scripts/window_demonstration/run_window.py",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 5075,
+        "ended_during_launch": false,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "ended_pids": [],
+          "exit_code": 0,
+          "exited_at": "2026-11-23T19:48:15Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-11-23T18:23:38Z",
+          "recorded_by": "supervisor",
+          "removed_harness_caches": [
+            {
+              "bytes": 93906967,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T180218543618-bench-scripts-delete-repair/codex-home/cache"
+            },
+            {
+              "bytes": 32756257,
+              "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T180218543618-bench-scripts-delete-repair/codex-home/plugins"
+            }
+          ],
+          "run_id": "r-20261123T180218543618-bench-scripts-delete-repair",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 946,
+          "worker_pid": 2358236
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "committed path outside declared scope: benchmarks/arc_section_cost.py; committed path outside declared scope: benchmarks/bound_failability_census.py; committed path outside declared scope: benchmarks/bound_reference_classification.py; committed path outside declared scope: benchmarks/census_kernel_timing.py; committed path outside declared scope: benchmarks/class_coreachability.py; committed path outside declared scope: benchmarks/clipped_coupling_order.py; committed path outside declared scope: benchmarks/coil_construction.py; committed path outside declared scope: benchmarks/compile_host_memory.py; committed path outside declared scope: benchmarks/compiled_outer_loop_trace.py; committed path outside declared scope: benchmarks/constraint_shape_receipt.py; committed path outside declared scope: benchmarks/cpu_solve_discriminator.py; committed path outside declared scope: benchmarks/cs_winding_inductance.py; committed path outside declared scope: benchmarks/diiid_containment_recheck.py; committed path outside declared scope: benchmarks/diiid_prescribed_profile_forward.py; committed path outside declared scope: benchmarks/diiid_residual_decomposition.py; committed path outside declared scope: benchmarks/diiid_target_current_digest_probe.py; committed path outside declared scope: benchmarks/diiid_vacuum_from_description.py; committed path outside declared scope: benchmarks/diiid_vacuum_sensitivity_sweep.py; committed path outside declared scope: benchmarks/divergence_floor_scaling.py; committed path outside declared scope: benchmarks/early_frame_placement_test.py; committed path outside declared scope: benchmarks/efit_absent_quantity_triage.py; committed path outside declared scope: benchmarks/efit_affine_extraction.py; committed path outside declared scope: benchmarks/efit_cell_current_representation.py; committed path outside declared scope: benchmarks/efit_current_sign_census.py; committed path outside declared scope: benchmarks/efit_derived_quantity_census.py; committed path outside declared scope: benchmarks/efit_filament_truncation_contribution.py; committed path outside declared scope: benchmarks/efit_section_shape_zeta_order.py; committed path outside declared scope: benchmarks/efit_third_term_separation.py; committed path outside declared scope: benchmarks/efit_xpoint_fit_state.py; committed path outside declared scope: benchmarks/empty_exact_polygon_probe.py; committed path outside declared scope: benchmarks/exact_clip_warm_cost.py; committed path outside declared scope: benchmarks/flux_surface_flood.py; committed path outside declared scope: benchmarks/force_target_rule.py; committed path outside declared scope: benchmarks/fork_arming_economics.py; committed path outside declared scope: benchmarks/global_surface_clip_rescore.py; committed path outside declared scope: benchmarks/inner_solve_accuracy.py; committed path outside declared scope: benchmarks/iter_saddle_resolution.py; committed path outside declared scope: benchmarks/lane_resource_accumulation.py; committed path outside declared scope: benchmarks/moment_map_derivative_contract.py; committed path outside declared scope: benchmarks/newton_cycle_mask_switch.py; committed path outside declared scope: benchmarks/null_census_device_benchmark.py; committed path outside declared scope: benchmarks/order_vs_mesh_adjudication.py; committed path outside declared scope: benchmarks/passive_closure_mesh_response.py; committed path outside declared scope: benchmarks/polish_support_performance.py; committed path outside declared scope: benchmarks/polybeam_section_cost.py; committed path outside declared scope: benchmarks/portfolio_warm_start.py; committed path outside declared scope: benchmarks/private_region_parallel_kernel.py; committed path outside declared scope: benchmarks/receipt_topology_check.py; committed path outside declared scope: benchmarks/recovery_ladder_telemetry.py; committed path outside declared scope: benchmarks/reduced_newton_rows.py; committed path outside declared scope: benchmarks/sol_current_demonstration.py; committed path outside declared scope: benchmarks/solve_profile_kernel_count.py; committed path outside declared scope: benchmarks/steep_edge_moment_demonstration.py; committed path outside declared scope: benchmarks/tiled_assembly.py; committed path outside declared scope: benchmarks/vertex_ring_census.py; committed path outside declared scope: benchmarks/vertical_force_decomposition.py; committed path outside declared scope: benchmarks/wholecell_rows_reposed_fixture.py; committed path outside declared scope: benchmarks/wound_coil_finite_section.py; committed path outside declared scope: benchmarks/wound_coil_inductance.py; committed path outside declared scope: benchmarks/zero_residual_check.py; committed path outside declared scope: scripts/device_kernel_port/measure_unpaired_compile.py; committed path outside declared scope: scripts/mast_reference_evidence/contours.py; committed path outside declared scope: scripts/mast_slice_census/census.py; committed path outside declared scope: scripts/prototypes/bank_drive_barrier/plot.py; committed path outside declared scope: scripts/prototypes/bank_fold_radial/condition.py; committed path outside declared scope: scripts/prototypes/bank_fold_vertical/condition.py; committed path outside declared scope: scripts/prototypes/bank_hessian_blowup/geometry.py; committed path outside declared scope: scripts/prototypes/bank_route_rows/boundary_gap.py; committed path outside declared scope: scripts/prototypes/bank_solve_trace_four_read/capture.py; committed path outside declared scope: scripts/prototypes/bank_step_batch/fixture.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_booking/render.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_flux/summarize.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/fit.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/render.py; committed path outside declared scope: scripts/prototypes/lean_map/newton.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/report.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/run_cases.py; committed path outside declared scope: scripts/prototypes/tracked_read_batch/profile_kernels.py; committed path outside declared scope: scripts/reconstructed_plasma_source/baseline_sign.py; committed path outside declared scope: scripts/window_demonstration/exchange_diagnosis/probe.py; committed path outside declared scope: benchmarks/coupled_map_mode_identification.py; committed path outside declared scope: benchmarks/diiid_vacuum_gate.py; committed path outside declared scope: benchmarks/limited_anchor_containment.py; committed path outside declared scope: benchmarks/passive_closure_trace.py; committed path outside declared scope: scripts/prototypes/tcv_liuqe_known_answer/measure.py; committed path outside declared scope: scripts/window_demonstration/run_window.py",
+          "lifting_condition": null,
+          "next_action": "inspect the worktree at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete-repair before promoting run r-20261123T180218543618-bench-scripts-delete-repair",
+          "promotion_recorded": false,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-11-23T19:48:15Z",
+        "lane_event": null,
+        "launch_error": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 45252,
+        "log_fresh": false,
+        "manifest_commits": [
+          "2c1227b4e9e2dae5843412c00b399f1f7676fb2e",
+          "ff6b1e5d746f7410f4b050612a9e5e001746c705",
+          "df65d9933aa3960b60afc9406a7bba144bb92e8e",
+          "66cc5815b734feac5bb0a05e7ba8ce8de155e12c",
+          "d94a8b4e471fab3d71cb8f81809c677ff13e73ef",
+          "122d5276f44907f345de30933fedbd13f716491e",
+          "0a4ee9f26f55df04e2bfbe3a8f8a4da9392a8478",
+          "8b64914fb2795911c56a9b46684179e20e0acc24"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "a57d29ec467d299af526d07e581e12b46b6166adf8dc1cfc8aa0900bf7b5d1d9",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T180218543618-bench-scripts-delete-repair/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "inspect the worktree at /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete-repair before promoting run r-20261123T180218543618-bench-scripts-delete-repair",
+        "node": "bench-scripts-delete-repair",
+        "orientation_check": {
+          "checked_at": "2026-11-23T19:48:25Z",
+          "detail": "committed path outside declared scope: benchmarks/arc_section_cost.py; committed path outside declared scope: benchmarks/bound_failability_census.py; committed path outside declared scope: benchmarks/bound_reference_classification.py; committed path outside declared scope: benchmarks/census_kernel_timing.py; committed path outside declared scope: benchmarks/class_coreachability.py; committed path outside declared scope: benchmarks/clipped_coupling_order.py; committed path outside declared scope: benchmarks/coil_construction.py; committed path outside declared scope: benchmarks/compile_host_memory.py; committed path outside declared scope: benchmarks/compiled_outer_loop_trace.py; committed path outside declared scope: benchmarks/constraint_shape_receipt.py; committed path outside declared scope: benchmarks/cpu_solve_discriminator.py; committed path outside declared scope: benchmarks/cs_winding_inductance.py; committed path outside declared scope: benchmarks/diiid_containment_recheck.py; committed path outside declared scope: benchmarks/diiid_prescribed_profile_forward.py; committed path outside declared scope: benchmarks/diiid_residual_decomposition.py; committed path outside declared scope: benchmarks/diiid_target_current_digest_probe.py; committed path outside declared scope: benchmarks/diiid_vacuum_from_description.py; committed path outside declared scope: benchmarks/diiid_vacuum_sensitivity_sweep.py; committed path outside declared scope: benchmarks/divergence_floor_scaling.py; committed path outside declared scope: benchmarks/early_frame_placement_test.py; committed path outside declared scope: benchmarks/efit_absent_quantity_triage.py; committed path outside declared scope: benchmarks/efit_affine_extraction.py; committed path outside declared scope: benchmarks/efit_cell_current_representation.py; committed path outside declared scope: benchmarks/efit_current_sign_census.py; committed path outside declared scope: benchmarks/efit_derived_quantity_census.py; committed path outside declared scope: benchmarks/efit_filament_truncation_contribution.py; committed path outside declared scope: benchmarks/efit_section_shape_zeta_order.py; committed path outside declared scope: benchmarks/efit_third_term_separation.py; committed path outside declared scope: benchmarks/efit_xpoint_fit_state.py; committed path outside declared scope: benchmarks/empty_exact_polygon_probe.py; committed path outside declared scope: benchmarks/exact_clip_warm_cost.py; committed path outside declared scope: benchmarks/flux_surface_flood.py; committed path outside declared scope: benchmarks/force_target_rule.py; committed path outside declared scope: benchmarks/fork_arming_economics.py; committed path outside declared scope: benchmarks/global_surface_clip_rescore.py; committed path outside declared scope: benchmarks/inner_solve_accuracy.py; committed path outside declared scope: benchmarks/iter_saddle_resolution.py; committed path outside declared scope: benchmarks/lane_resource_accumulation.py; committed path outside declared scope: benchmarks/moment_map_derivative_contract.py; committed path outside declared scope: benchmarks/newton_cycle_mask_switch.py; committed path outside declared scope: benchmarks/null_census_device_benchmark.py; committed path outside declared scope: benchmarks/order_vs_mesh_adjudication.py; committed path outside declared scope: benchmarks/passive_closure_mesh_response.py; committed path outside declared scope: benchmarks/polish_support_performance.py; committed path outside declared scope: benchmarks/polybeam_section_cost.py; committed path outside declared scope: benchmarks/portfolio_warm_start.py; committed path outside declared scope: benchmarks/private_region_parallel_kernel.py; committed path outside declared scope: benchmarks/receipt_topology_check.py; committed path outside declared scope: benchmarks/recovery_ladder_telemetry.py; committed path outside declared scope: benchmarks/reduced_newton_rows.py; committed path outside declared scope: benchmarks/sol_current_demonstration.py; committed path outside declared scope: benchmarks/solve_profile_kernel_count.py; committed path outside declared scope: benchmarks/steep_edge_moment_demonstration.py; committed path outside declared scope: benchmarks/tiled_assembly.py; committed path outside declared scope: benchmarks/vertex_ring_census.py; committed path outside declared scope: benchmarks/vertical_force_decomposition.py; committed path outside declared scope: benchmarks/wholecell_rows_reposed_fixture.py; committed path outside declared scope: benchmarks/wound_coil_finite_section.py; committed path outside declared scope: benchmarks/wound_coil_inductance.py; committed path outside declared scope: benchmarks/zero_residual_check.py; committed path outside declared scope: scripts/device_kernel_port/measure_unpaired_compile.py; committed path outside declared scope: scripts/mast_reference_evidence/contours.py; committed path outside declared scope: scripts/mast_slice_census/census.py; committed path outside declared scope: scripts/prototypes/bank_drive_barrier/plot.py; committed path outside declared scope: scripts/prototypes/bank_fold_radial/condition.py; committed path outside declared scope: scripts/prototypes/bank_fold_vertical/condition.py; committed path outside declared scope: scripts/prototypes/bank_hessian_blowup/geometry.py; committed path outside declared scope: scripts/prototypes/bank_route_rows/boundary_gap.py; committed path outside declared scope: scripts/prototypes/bank_solve_trace_four_read/capture.py; committed path outside declared scope: scripts/prototypes/bank_step_batch/fixture.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_booking/render.py; committed path outside declared scope: scripts/prototypes/diiid_finite_edge_flux/summarize.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_coil_correction/fit.py; committed path outside declared scope: scripts/prototypes/diiid_xpoint_profile_extent/render.py; committed path outside declared scope: scripts/prototypes/lean_map/newton.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/report.py; committed path outside declared scope: scripts/prototypes/stored_state_refusals/run_cases.py; committed path outside declared scope: scripts/prototypes/tracked_read_batch/profile_kernels.py; committed path outside declared scope: scripts/reconstructed_plasma_source/baseline_sign.py; committed path outside declared scope: scripts/window_demonstration/exchange_diagnosis/probe.py; committed path outside declared scope: benchmarks/coupled_map_mode_identification.py; committed path outside declared scope: benchmarks/diiid_vacuum_gate.py; committed path outside declared scope: benchmarks/limited_anchor_containment.py; committed path outside declared scope: benchmarks/passive_closure_trace.py; committed path outside declared scope: scripts/prototypes/tcv_liuqe_known_answer/measure.py; committed path outside declared scope: scripts/window_demonstration/run_window.py",
+          "expected": {
+            "base_sha": "e1bc21735a5b5cda1ae6edec2d83846c18338b00",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete-repair",
+            "write_paths": [
+              "benchmarks/incomplete_third_kind.py",
+              "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete-repair.html",
+              "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html",
+              "docs/figures/code-reuse-and-hot-path/bench-scripts-delete-repair",
+              "scripts/iron_limb_production/",
+              "scripts/prototypes/polygon_stable_evaluator/production_pair.py"
+            ]
+          },
+          "inputs": {
+            "commits": [
+              "2c1227b4e9e2dae5843412c00b399f1f7676fb2e",
+              "ff6b1e5d746f7410f4b050612a9e5e001746c705",
+              "df65d9933aa3960b60afc9406a7bba144bb92e8e",
+              "66cc5815b734feac5bb0a05e7ba8ce8de155e12c",
+              "d94a8b4e471fab3d71cb8f81809c677ff13e73ef",
+              "122d5276f44907f345de30933fedbd13f716491e",
+              "0a4ee9f26f55df04e2bfbe3a8f8a4da9392a8478",
+              "8b64914fb2795911c56a9b46684179e20e0acc24"
+            ],
+            "expected": {
+              "base_sha": "e1bc21735a5b5cda1ae6edec2d83846c18338b00",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete-repair",
+              "write_paths": [
+                "benchmarks/incomplete_third_kind.py",
+                "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete-repair.html",
+                "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html",
+                "docs/figures/code-reuse-and-hot-path/bench-scripts-delete-repair",
+                "scripts/iron_limb_production/",
+                "scripts/prototypes/polygon_stable_evaluator/production_pair.py"
+              ]
+            },
+            "head": "8b64914fb2795911c56a9b46684179e20e0acc24",
+            "reported": {
+              "base_sha": "e1bc21735a5b5cda1ae6edec2d83846c18338b00",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete-repair",
+              "write_paths": [
+                "benchmarks/incomplete_third_kind.py",
+                "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete-repair.html",
+                "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html",
+                "docs/figures/code-reuse-and-hot-path/bench-scripts-delete-repair",
+                "scripts/iron_limb_production/",
+                "scripts/prototypes/polygon_stable_evaluator/production_pair.py"
+              ]
+            },
+            "status": "complete"
+          },
+          "matched": false,
+          "mismatches": [],
+          "reported": {
+            "base_sha": "e1bc21735a5b5cda1ae6edec2d83846c18338b00",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete-repair",
+            "write_paths": [
+              "benchmarks/incomplete_third_kind.py",
+              "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete-repair.html",
+              "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html",
+              "docs/figures/code-reuse-and-hot-path/bench-scripts-delete-repair",
+              "scripts/iron_limb_production/",
+              "scripts/prototypes/polygon_stable_evaluator/production_pair.py"
+            ]
+          }
+        },
+        "phase": "blocked",
+        "plan": "code-reuse-and-hot-path",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_run_id": null,
+        "review_run_phase": null,
+        "review_status": null,
+        "run_id": "r-20261123T180218543618-bench-scripts-delete-repair",
+        "session": "0891697d-eba7-4e66-96ff-e563938502e0",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261123T180218543618-bench-scripts-delete-repair",
+          "session_id": "01a20993-80fb-7722-ae93-af2126d76a42",
+          "source": "pointer"
+        },
+        "settled": null,
+        "stored_phase": "blocked",
+        "stuck": false,
+        "stuck_reason": null,
+        "terminal_age_seconds": 45307,
+        "terminal_at": "2026-11-23T19:47:16Z",
+        "wait_age_seconds": null,
+        "wait_class": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/0891697d-eba7-4e66-96ff-e563938502e0/bench-scripts-delete-repair"
+      }
+    ]
+  },
+  "wall_seconds": 1045,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-24T08:40:37Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-24T08:23:24Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 5118,
+    "worker_pid": 2532983
+  },
+  "worker_seconds": 1017,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

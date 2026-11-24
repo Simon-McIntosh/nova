@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-24T08:40:34.598Z",
+  "dispatched_at": "2026-11-24T08:23:09Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html",
+      "line": 366,
+      "severity": "non-blocking",
+      "text": "86 restored drivers sit outside the declared write paths, so the diff exceeds the node's declared scope under a ruling recorded only in the resume advice."
+    },
+    {
+      "file": "docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html",
+      "line": 419,
+      "severity": "non-blocking",
+      "text": "the done_when's named gate.log at ~/.cache/nova-s33/bench-scripts-delete-repair ends EXIT=1 (measurement at ff6b1e5d); the passing EXIT=0 result exists only in gate-final.log in the run directory."
+    },
+    {
+      "file": "tests/test_scripts_census.py",
+      "line": 139,
+      "severity": "non-blocking",
+      "text": "no committed test fails if this restoration regresses; the kept-reference closure is enforced only by run-directory helpers deletion_gate.py and reference_closure.py, so a later census could re-delete with a green suite."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit over e1bc21735..8b64914fb; 93 paths change, 92 are byte-exact restorations from 348ed92c and one is the evidence fragment edit.",
+    "done_when": "gate-final.log:80-82 records 0 new import failures, 0 new collection errors, identical focused failure list and EXIT=0 at head 8b64914fb, and the fragment reconciles 185431 - 72484 = 112947 at bench-scripts-delete.html:366.",
+    "goal": "the brief asks for six named restorations, one deletion gate at the final head and a reconciled evidence fragment; the diff delivers those plus a coordinator-authorized closure, recorded at bench-scripts-delete.html:217.",
+    "manifest": "read; status complete, final all_debug job 1340743 with EXIT=0, and baseline_suite/after_suite each record the one pre-existing failure test_scanned_tree_holds_no_crew_or_worktree_literal.",
+    "write_paths": "declared scope covers scripts/iron_limb_production/, scripts/prototypes/polygon_stable_evaluator/production_pair.py and benchmarks/incomplete_third_kind.py; six restored files sit inside it and 86 sit outside it under the coordinator resume ruling."
+  },
+  "justifications": {
+    "durability": "no committed test reddens if the restored drivers are re-deleted; tests/test_scripts_census.py:139 refuses only import-based deletions and the closure is enforced in run-directory helpers.",
+    "evidence": "gate-final.log:80-82 records the done_when measure with EXIT=0 at the true head, while the done_when's named ~/.cache/nova-s33/bench-scripts-delete-repair/gate.log ends EXIT=1.",
+    "fit": "the 92 restored files are the repository's own blobs at 348ed92c and the eight commits carry conventional subjects with bodies.",
+    "goal_fidelity": "all four brief steps landed and the six exact restorations verify at 8b64914fb, though the gate log sits at gate-final.log rather than the brief's named ~/.cache/nova-s33 path.",
+    "reuse": "the landed change adds no definition; the gate reuses benchmarks/scripts_census.py's parser and an existing import-sweep probe, so no capability is forked.",
+    "scope_discipline": "86 of 92 restored files (bench-scripts-delete.html:366) lie outside the declared write paths, authorized by the resume advice rather than an extended dispatch."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the brief asks for six named restorations, one deletion gate at the final head and a reconciled evidence fragment; the diff delivers those plus a coordinator-authorized closure, recorded at docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html:217.\nVERDICT done_when: gate-final.log:80-82 records 0 new import failures, 0 new collection errors, identical focused failure list and EXIT=0 at head 8b64914fb, and the fragment reconciles 185431 - 72484 = 112947 at bench-scripts-delete.html:366.\nVERDICT write_paths: declared scope covers scripts/iron_limb_production/, scripts/prototypes/polygon_stable_evaluator/production_pair.py and benchmarks/incomplete_third_kind.py; six restored files sit inside it and 86 sit outside it under the coordinator resume ruling.\nVERDICT manifest: read; status complete, final all_debug job 1340743 with EXIT=0, and baseline_suite/after_suite each record the one pre-existing failure test_scanned_tree_holds_no_crew_or_worktree_literal.\nVERDICT diff: read commit by commit over e1bc21735..8b64914fb; 93 paths change, 92 are byte-exact restorations from 348ed92c and one is the evidence fragment edit.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: all four brief steps landed and the six exact restorations verify at 8b64914fb, though the gate log sits at gate-final.log rather than the brief's named ~/.cache/nova-s33 path.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-final.log:80-82 records the done_when measure with EXIT=0 at the true head, while the done_when's named ~/.cache/nova-s33/bench-scripts-delete-repair/gate.log ends EXIT=1.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: 86 of 92 restored files (bench-scripts-delete.html:366) lie outside the declared write paths, authorized by the resume advice rather than an extended dispatch.\nSCORE durability: 8\nJUSTIFICATION durability: no committed test reddens if the restored drivers are re-deleted; tests/test_scripts_census.py:139 refuses only import-based deletions and the closure is enforced in run-directory helpers.\nSCORE fit: 18\nJUSTIFICATION fit: the 92 restored files are the repository's own blobs at 348ed92c and the eight commits carry conventional subjects with bodies.\nSCORE reuse: 20\nJUSTIFICATION reuse: the landed change adds no definition; the gate reuses benchmarks/scripts_census.py's parser and an existing import-sweep probe, so no capability is forked.\nFINDING docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html:366 non-blocking: 86 restored drivers sit outside the declared write paths, so the diff exceeds the node's declared scope under a ruling recorded only in the resume advice.\nFINDING docs/evidence/fragments/code-reuse-and-hot-path/bench-scripts-delete.html:419 non-blocking: the done_when's named gate.log at ~/.cache/nova-s33/bench-scripts-delete-repair ends EXIT=1 (measurement at ff6b1e5d); the passing EXIT=0 result exists only in gate-final.log in the run directory.\nFINDING tests/test_scripts_census.py:139 non-blocking: no committed test fails if this restoration regresses; the kept-reference closure is enforced only by run-directory helpers deletion_gate.py and reference_closure.py, so a later census could re-delete with a green suite.\n",
+  "review_run_id": "r-20261124T082220929079-review-of-bench-scripts-delete-repair-8b64914fb279",
+  "reviewed_base_sha": "e1bc21735a5b5cda1ae6edec2d83846c18338b00",
+  "reviewed_head_sha": "8b64914fb2795911c56a9b46684179e20e0acc24",
+  "reviewed_run_id": "r-20261123T180218543618-bench-scripts-delete-repair",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T08:41:47.304601+00:00",
+  "total": 92
+}

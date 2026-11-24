@@ -10,6 +10,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T134835525003-forward-gs-boundary-separation",
       "section": "\u00a78"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-24T05:08:59.085714+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T134835525003-forward-gs-boundary-separation",
+      "section": "\u00a78"
     }
   },
   "findings": [

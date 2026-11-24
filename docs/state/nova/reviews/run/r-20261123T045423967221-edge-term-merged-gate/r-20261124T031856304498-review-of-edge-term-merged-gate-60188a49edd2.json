@@ -1,0 +1,125 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": {
+    "added": [],
+    "note": "The reviewed increment adds no assertion: it is prose, a table and log citations. The guard for the merged repair it reports is tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_terms] and test_truncated_tangent_fails_identity[edge_terms], demonstrated reddening at main.log and passing at merged.log in the gate the fragment records."
+  },
+  "call_site_note": "The increment's own four commits are HTML evidence with no runtime path. The runtime code in the delivered diff is the reviewed-head kernel repair to nova/biot/polygonanalytic.py that the required merge 547295e9b carries, reached by edge.terms()/vertex.arsinh_terms() through packed_arc_greens and polygon_arc_greens in nova/biot/polygonarc.py.",
+  "call_sites": [
+    "nova/biot/polygonarc.py:packed_arc_greens",
+    "nova/biot/polygonarc.py:polygon_arc_greens"
+  ],
+  "completed_at": "2026-11-24T03:26:39.499Z",
+  "dispatched_at": "2026-11-24T03:19:46Z",
+  "failure_id_comparison": {
+    "added_failure_ids": [],
+    "after_suite": {
+      "exit": "EXIT=1",
+      "failure_count": 8,
+      "failure_ids": [
+        "test_tangent_compiles_within_bound[edge_integrands]",
+        "test_tangent_compiles_within_bound[flux_line_moments]",
+        "test_tangent_compiles_within_bound[flux_and_moment_terms]",
+        "test_tangent_compiles_within_bound[edge_terms]",
+        "test_tangent_compiles_within_three_primals[vertex]",
+        "test_tangent_compiles_within_three_primals[arsinh_terms]",
+        "test_tangent_compiles_within_three_primals[flux_moment_residuals]",
+        "test_tangent_compiles_within_three_primals[horizontal_flux_line_moments]"
+      ],
+      "job": "1338302",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T045423967221-edge-term-merged-gate/merged.log",
+      "revision": "547295e9b78f3251b05c876861a71500849d7319"
+    },
+    "baseline_suite": {
+      "exit": "EXIT=1",
+      "failure_count": 10,
+      "failure_ids": [
+        "test_tangent_matches_base_jvp[edge_terms]",
+        "test_truncated_tangent_fails_identity[edge_terms]",
+        "test_tangent_compiles_within_bound[edge_integrands]",
+        "test_tangent_compiles_within_bound[flux_line_moments]",
+        "test_tangent_compiles_within_bound[flux_and_moment_terms]",
+        "test_tangent_compiles_within_bound[edge_terms]",
+        "test_tangent_compiles_within_three_primals[vertex]",
+        "test_tangent_compiles_within_three_primals[arsinh_terms]",
+        "test_tangent_compiles_within_three_primals[flux_moment_residuals]",
+        "test_tangent_compiles_within_three_primals[horizontal_flux_line_moments]"
+      ],
+      "job": "1338302",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T045423967221-edge-term-merged-gate/main.log",
+      "revision": "03b10519204fa44ab0084cb4fbf2839d19426606"
+    },
+    "source": "The reviewed run's declared baseline_suite and after_suite are null and its base-suite.log/after-suite.log end EXIT=137 with no pytest summary, so no suite-arm delta is computable; the delta below is derived from the run's own gate arms, main.log (baseline) and merged.log (after), job 1338302.",
+    "supplementary_single_invocation": {
+      "added_failure_ids": [
+        "test_tangent_compiles_within_three_primals[against_first_arsinh]"
+      ],
+      "after_revision": "547295e9b78f3251b05c876861a71500849d7319",
+      "baseline_revision": "03b10519204fa44ab0084cb4fbf2839d19426606",
+      "job": "1339328",
+      "note": "One added id, a 300 s pytest-timeout ceiling rather than an assertion; verified by diffing the FAILED lines of merged-single.log and main-single.log."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html",
+      "line": "88",
+      "severity": "non-blocking",
+      "text": "the job's start and completion are labelled UTC ('queued from 12:57Z to 22:10Z ... completed at 00:14Z') but sacct reports Submit 2026-11-23T14:00:18 and Start 22:10:09 in the host's local CET (the log's own 22:10:50 stamp matches), so the values are an hour off Z and the 12:57 queue start does not reconcile with the 14:00:18 submit; a reader cross-checking sacct sees a mismatch."
+    },
+    {
+      "file": "docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html",
+      "line": "34",
+      "severity": "non-blocking",
+      "text": "'Both arms fail exactly the compile rows' overstates the main arm, which main.log shows fails ten ids: eight compile timeouts plus test_tangent_matches_base_jvp[edge_terms] and test_truncated_tangent_fails_identity[edge_terms], as :51-59 itself says; only the shared ids are the compile rows. This predates the reviewed increment (first raised at head 4e4bbaeb) and persists unaddressed."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T045423967221-edge-term-merged-gate/manifest.md",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "the `commits` line lists five node commits but omits b4d3e90b3, which first added the suite-attempts section, so a reader reconciling the node's commits against the range sees an incomplete list."
+    }
+  ],
+  "increment_reviewed": "4e4bbaeb345fc99ebf1d7c80b4f8d836c550df30..60188a49edd2734201591ba246643e03e3002f48",
+  "item_verdicts": {
+    "diff": "Reviewed 4e4bbaeb..60188a49e commit by commit: d69dc8cd1 adds the supplementary single-invocation section (+51), b4d3e90b3 adds the suite-attempts section (+45), 6cdf460c1 corrects the flushed counts (8+/7-), 60188a49e reframes the suite arms as not run and the single invocation as supplementary (18+/10-); net +105 lines in one file, and every number re-derived from merged-single.log/main-single.log and base-suite.log/after-suite.log matched except the clock labels at :88.",
+    "done_when": "Read the three done-when clauses; clause (2)'s gate is job 1338302, whose arms (merged.log, main.log) open with revision/tree/command and close EXIT=1 and whose per-file counts reconcile with :27-28, while the increment adds no new gate and honestly marks the 27-file suite arms not run at :136-158 (both suite logs end EXIT=137 with no pytest summary).",
+    "goal": "The reviewed node's goal is a merged-head H200 gate for the edge-term tangent rows; docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:3-78 records the gate (merge 547295e9b onto main 03b105192, job 1338302, zero added ids, four target rows pass), and the four commits this review covers (:80-183) add the supplementary single-invocation reading and the not-run suite arms without altering that gate record.",
+    "manifest": "Read; its per-file counts, job ids, EXIT codes and log paths reconcile with the logs, but its `commits` line omits b4d3e90b3, the commit that first added the suite-attempts section.",
+    "write_paths": "The declared write path is the single fragment; all four increment commits (d69dc8cd1, b4d3e90b3, 6cdf460c1, 60188a49e) change only docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html, and the other 24 delivered paths are reviewed-head content brought by the required merge 547295e9b."
+  },
+  "justifications": {
+    "durability": "the four commits add only prose and tables; no assertion reddens if these claims regress, and the gate they report is not itself a repository test.",
+    "evidence": "every added count reconciles with its cited log (e.g. :97-99 match merged-single.log/main-single.log arm totals of 9 failed/39 passed and 10 failed/38 passed, and :161-162 match the 18-vs-15 flushed progress strings), but :88 labels local CET job times as Z and gives a 12:57 queue start that sacct reports as a 14:00:18 submit.",
+    "fit": "docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:80-183 follows the sibling sections' h4/table/code idiom and adds no banned name, marred only by the timestamp labels at :88.",
+    "goal_fidelity": "docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:3-183 keeps the gate record intact while adding supplementary evidence; the increment does not itself produce the gate, so it is not a full 20.",
+    "reuse": "the increment adds no function, class or module and forks no capability; it cites the existing nova/jax/config.py:232 bound_compilation_retention rather than reimplementing it.",
+    "scope_discipline": "all four increment commits touch only docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html, the single declared write path."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed node's goal is a merged-head H200 gate for the edge-term tangent rows; docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:3-78 records the gate (merge 547295e9b onto main 03b105192, job 1338302, zero added ids, four target rows pass), and the four commits this review covers (:80-183) add the supplementary single-invocation reading and the not-run suite arms without altering that gate record.\nVERDICT done_when: Read the three done-when clauses; clause (2)'s gate is job 1338302, whose arms (merged.log, main.log) open with revision/tree/command and close EXIT=1 and whose per-file counts reconcile with :27-28, while the increment adds no new gate and honestly marks the 27-file suite arms not run at :136-158 (both suite logs end EXIT=137 with no pytest summary).\nVERDICT write_paths: The declared write path is the single fragment; all four increment commits (d69dc8cd1, b4d3e90b3, 6cdf460c1, 60188a49e) change only docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html, and the other 24 delivered paths are reviewed-head content brought by the required merge 547295e9b.\nVERDICT manifest: Read; its per-file counts, job ids, EXIT codes and log paths reconcile with the logs, but its `commits` line omits b4d3e90b3, the commit that first added the suite-attempts section.\nVERDICT diff: Reviewed 4e4bbaeb..60188a49e commit by commit: d69dc8cd1 adds the supplementary single-invocation section (+51), b4d3e90b3 adds the suite-attempts section (+45), 6cdf460c1 corrects the flushed counts (8+/7-), 60188a49e reframes the suite arms as not run and the single invocation as supplementary (18+/10-); net +105 lines in one file, and every number re-derived from merged-single.log/main-single.log and base-suite.log/after-suite.log matched except the clock labels at :88.\nCALL_SITES: nova/biot/polygonarc.py:packed_arc_greens, nova/biot/polygonarc.py:polygon_arc_greens\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:3-183 keeps the gate record intact while adding supplementary evidence; the increment does not itself produce the gate, so it is not a full 20.\nSCORE evidence: 16\nJUSTIFICATION evidence: every added count reconciles with its cited log (e.g. :97-99 match merged-single.log/main-single.log arm totals of 9 failed/39 passed and 10 failed/38 passed, and :161-162 match the 18-vs-15 flushed progress strings), but :88 labels local CET job times as Z and gives a 12:57 queue start that sacct reports as a 14:00:18 submit.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all four increment commits touch only docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html, the single declared write path.\nSCORE durability: 14\nJUSTIFICATION durability: the four commits add only prose and tables; no assertion reddens if these claims regress, and the gate they report is not itself a repository test.\nSCORE fit: 18\nJUSTIFICATION fit: docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:80-183 follows the sibling sections' h4/table/code idiom and adds no banned name, marred only by the timestamp labels at :88.\nSCORE reuse: 20\nJUSTIFICATION reuse: the increment adds no function, class or module and forks no capability; it cites the existing nova/jax/config.py:232 bound_compilation_retention rather than reimplementing it.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:88 non-blocking: the job's start and completion are labelled UTC ('queued from 12:57Z to 22:10Z ... completed at 00:14Z') but sacct reports Submit 2026-11-23T14:00:18 and Start 22:10:09 in the host's local CET (the log's own 22:10:50 stamp matches), so the values are an hour off Z and the 12:57 queue start does not reconcile with the 14:00:18 submit.\nFINDING docs/evidence/fragments/kernel-compile-barrier/edge-term-merged-gate.html:34 non-blocking: 'Both arms fail exactly the compile rows' overstates the main arm, which main.log shows fails ten ids: eight compile timeouts plus the two [edge_terms] assertion rows that :51-59 names; this predates the reviewed increment and persists unaddressed.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261123T045423967221-edge-term-merged-gate/manifest.md:11 non-blocking: the `commits` line lists five node commits but omits b4d3e90b3, which first added the suite-attempts section.",
+  "review_method": "Read the plan s6 goal and done_when (docs/plans/kernel-compile-barrier.html), the run brief, the run manifest, the four commits gained since the prior review at 4e4bbaeb (d69dc8cd1, b4d3e90b3, 6cdf460c1, 60188a49e) and the logs they cite (merged.log, main.log, merged-single.log, main-single.log, base-suite.log, after-suite.log), plus sacct for jobs 1338302 and 1339328 and sinfo for rigel's memory. No suite rerun, no mutation.",
+  "review_run_id": "r-20261124T031856304498-review-of-edge-term-merged-gate-60188a49edd2",
+  "reviewed_base_sha": "4e4bbaeb345fc99ebf1d7c80b4f8d836c550df30",
+  "reviewed_head_sha": "60188a49edd2734201591ba246643e03e3002f48",
+  "reviewed_run_id": "r-20261123T045423967221-edge-term-merged-gate",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "source_commits": [
+    "d69dc8cd14b5bde3171bc55beb13831541f96119",
+    "b4d3e90b38535330b91283943f2060819daf550b",
+    "6cdf460c11c00e6da6eb6d51e6727d5788a23fc5",
+    "60188a49edd2734201591ba246643e03e3002f48"
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T03:42:15.337549+00:00",
+  "total": 106
+}

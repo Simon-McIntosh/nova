@@ -1012,6 +1012,42 @@
   "plan_link": null,
   "promoted_by": "review-self",
   "promoted_revision": "cfb4a59a3e100fedd636fb719e2e86e6fcfeca03",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261124T070625946456-review-of-converged-forward-solve-s7-111380e5bcc3",
+    "scratch_absent": true,
+    "scratch_bytes": null,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261124T070625946456-review-of-converged-forward-solve-s7-111380e5bcc3",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "scratch directory is no longer present",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/906c06ae-8766-4281-8a78-e20c226c00f5/review-of-converged-forward-solve-s7-111380e5bcc3",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/_trash/r-20261124T070625946456-review-of-converged-forward-solve-s7-111380e5bcc3-20261124T074040772007Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

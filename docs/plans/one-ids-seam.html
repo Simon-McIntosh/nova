@@ -24,7 +24,7 @@
 <meta name="plan-sprint" content="S30">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s3&quot;:[&quot;one-ids-seam#s1&quot;,&quot;one-ids-seam#s4&quot;,&quot;one-ids-seam#s8&quot;],&quot;s4&quot;:[&quot;one-ids-seam#s1&quot;],&quot;s5&quot;:[&quot;one-ids-seam#s3&quot;,&quot;one-ids-seam#s4&quot;],&quot;s6&quot;:[&quot;one-ids-seam#s5&quot;,&quot;one-ids-seam#s7&quot;],&quot;s7&quot;:[&quot;one-ids-seam#s5&quot;],&quot;s8&quot;:[&quot;one-ids-seam#s1&quot;]}">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 <meta name="plan-modified" content="2026-11-24">
 </head>
 <body>
@@ -205,6 +205,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261124T070331344685-review-of-one-ids-seam-s2-0a7723181745" data-who="reckon-build" data-when="2026-11-24T07:12:49.536Z">
     <div class="r-comment-body"><p>Review of r-20261122T143932212403-one-ids-seam-s2 at base 7a93be4008dadfdcb5879caabdfc5388f2259b2b and head 0a77231817459e2446f7340be16b049000e55cc6 stored as a parsed record; verdict: §2 does not meet its first done-when clause — nova/imas/ensemble.py and nova/imas/pulseprofile.py are classed unreached by the head census yet remain, and docs/evidence/fragments/one-ids-seam/one-ids-seam-s2.html:47 falsely states every unreached module is gone.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261124T070427454789-review-of-one-ids-seam-s4-1e18d9ce9df0" data-who="reckon-build" data-when="2026-11-24T07:13:22.439Z">
+    <div class="r-comment-body"><p>Independent review of r-20261122T143935246475-one-ids-seam-s4 at head 1e18d9ce9 scores goal_fidelity 15, evidence 14, scope_discipline 16, durability 15, fit 18, reuse 17 (total 95); the DIII-D authoring move is sound and the seam invariants are genuinely guarded, with five non-blocking findings on the deferred machine_artifact row, the un-granted docs/figures edit, the base-identity having no durable test, a leaf-comparison reuse gap, and the stale census record.</p></div>
 </div>
 </section>
 </main>

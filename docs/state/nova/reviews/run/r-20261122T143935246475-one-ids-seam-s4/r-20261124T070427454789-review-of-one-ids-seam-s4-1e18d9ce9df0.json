@@ -1,0 +1,70 @@
+{
+  "added_failure_basis": "the reviewed run records no baseline_suite/after_suite pair (its declared write paths held no test file, so its suite fence was unarmed); at head 1e18d9ce9 the focused gate logs read seam-structure.log 5 passed EXIT=0, identity-gate.log 3 passed EXIT=0, negative-control.log 1 passed EXIT=0 and diiid-suite.log 140 passed EXIT=0, all at revision 3d97d4df4, and no red arm exists in the run, so no failure is added",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-24T07:13:22.439Z",
+  "dispatched_at": "2026-11-24T07:05:11Z",
+  "findings": [
+    {
+      "file": "nova/imas/machine_artifact.py",
+      "id": "1bffa863fec",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "a machine_* row whose section-1 census destination is \"moves to the ingest member\" (docs/research/imas-seam-census.html:80) and which section 1 explicitly says moves with its DDv4 publication floor was left in nova, so the node's \"every machine_* row whose section-1 destination is the ingest member is in the member\" is unmet; the node defers it to the section that moves and rewires the MAST callers."
+    },
+    {
+      "file": "docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py",
+      "id": "64c31ec05ab",
+      "line": 25,
+      "severity": "non-blocking",
+      "text": "a non-mergeable path under docs/figures, which the node was not granted, was edited to import from the member; it must be ratified with crew complete --accept-path or reverted before landing."
+    },
+    {
+      "file": "packages/nova-ingest/tests/test_diiid_description_identity.py",
+      "id": "af12b058a40",
+      "line": 136,
+      "severity": "non-blocking",
+      "text": "the round-trip test compares the head-written entry against the head in-memory bundle, so a regression in the authoring logic changes both sides together and the assertion stays green; the \"bit-identical to the base revision\" measure rests only on the one-shot snapshot script logs and has no committed guard."
+    },
+    {
+      "file": "packages/nova-ingest/tests/test_diiid_description_identity.py",
+      "id": "40c1904c42a",
+      "line": 52,
+      "severity": "non-blocking",
+      "text": "_leaf_arrays builds a flat per-leaf dict and compares it inline, re-implementing the leaf comparison that packages/nova-ingest/nova_ingest/diiid_machine_ids.py:845 round_trip_leaf_receipt already owns in the same package; reuse that owner instead of a second comparison path."
+    },
+    {
+      "file": "docs/research/imas-seam-census.html",
+      "id": "02910211222",
+      "line": 80,
+      "severity": "non-blocking",
+      "text": "the committed census record still renders the six removed DIII-D rows and no post-move DIII-D row, so the record contradicts the tree; the recomputed census test passes because it scans the tree rather than this file, and the manifest defers the refresh to a later section."
+    }
+  ],
+  "justifications": {
+    "durability": "packages/nova-ingest/tests/test_diiid_seam.py reddens if a diiid module returns to nova, if nova imports the member, if a consumer keeps a moved import, or if a second authoring function appears, but the \"bit-identical to base\" property has no committed guard since test_diiid_description_identity.py:136 compares head-written leaves against head-memory leaves that move together.",
+    "evidence": "the structural and round-trip gates and the perturbed-turn control are recorded green, and the base/head digest is identical over 1804 leaves (snapshot-compare.log), but the done_when's \"nova suite adds no failures against base\" is measured only as a focused 140-test set with no baseline arm and the base snapshot log names no revision or tree.",
+    "fit": "the moved modules keep their names and logic (R100), the member follows the workspace-member idiom of its pyproject and README, and no banned plan label, ticket id or AI trailer appears in the diff or commit bodies; the machine names stay inside the member where section 1 puts machine authoring.",
+    "goal_fidelity": "the six DIII-D modules and their consumers moved cleanly, but nova/imas/machine_artifact.py, whose census row (docs/research/imas-seam-census.html:80) names \"moves to the ingest member\", remains in nova against the done_when's \"every machine_* row whose section-1 destination is the ingest member\".",
+    "reuse": "the move rehomes the modules under the member rather than forking them, but packages/nova-ingest/tests/test_diiid_description_identity.py:52 hand-rolls a per-leaf comparison that packages/nova-ingest/nova_ingest/diiid_machine_ids.py:845 round_trip_leaf_receipt already performs.",
+    "scope_discipline": "the diff is a move plus import rewrites the done_when requires, but docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py:25 lies under docs/figures, a non-mergeable path the node was not granted, and was edited anyway (disclosed, accept-path requested)."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to move DIII-D authoring into the ingest member with exactly one authoring module; packages/nova-ingest/nova_ingest/diiid_machine_ids.py:676 defines build_diiid_machine_ids and no nova module remains, but nova/imas/machine_artifact.py (a machine_* row whose section-1 destination is the member) was left in nova, so the done_when's \"every machine_* row\" clause is unmet.\nVERDICT done_when: read; the structural invariants are asserted by packages/nova-ingest/tests/test_diiid_seam.py (5 passed, EXIT=0), the round-trip identity and perturbed-turn control by test_diiid_description_identity.py (3 passed, EXIT=0), and 140 consumer tests by diiid-suite.log (140 passed, EXIT=0) at revision 3d97d4df4; but the clause \"the nova suite adds no failures against base\" is only exercised as a focused 140-test set with no base arm, and the base-vs-head bit-identity rests on the one-shot snapshot logs (snapshot-compare.log: 1804 leaves, VERDICT IDENTICAL), not a committed test.\nVERDICT write_paths: the declared paths were docs/evidence/fragments/one-ids-seam/one-ids-seam-s4.html and docs/figures/one-ids-seam/one-ids-seam-s4; the fragment is written and no figure was made, but the diff also edits docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py:25, a non-mergeable path under docs/figures the node was not granted (disclosed in the manifest and commit d015a5d5d).\nVERDICT manifest: read; it reports status complete, the three gates (5/3/140 passed), names the four log paths, records the combined digest 41a58a27... identical at base and head over 1804 leaves, the perturbed-turn control, and discloses the deferred machine_artifact row, the root pyproject registration, the stale census record and the un-granted figure script.\nVERDICT diff: read all nine commits 1e86c41ed..1e18d9ce9; six modules are R100/R099 renames into packages/nova-ingest, thirty-three benchmark, eleven prototype-script and fourteen test modules are pure import-path rewrites (nova.imas.diiid_* / nova.scripts.diiid_machine_artifact / nova.media.sources.diiid_efit -> nova_ingest.*), nova/imas/__init__.py drops the DIII-D re-export, plus the member package, its two tests and the evidence fragment.\nCALL_SITES: benchmarks/diiid_forward_gs_match.py, benchmarks/diiid_ids_machine_description.py, scripts/media/efit_pulse_gif.py, docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py, packages/nova-ingest/nova_ingest/diiid_machine_artifact.py\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: the six DIII-D modules and their consumers moved cleanly, but nova/imas/machine_artifact.py, whose census row (docs/research/imas-seam-census.html:80) names \"moves to the ingest member\", remains in nova against the done_when's \"every machine_* row whose section-1 destination is the ingest member\".\nSCORE evidence: 14\nJUSTIFICATION evidence: the structural and round-trip gates and the perturbed-turn control are recorded green, and the base/head digest is identical over 1804 leaves (snapshot-compare.log), but the done_when's \"nova suite adds no failures against base\" is measured only as a focused 140-test set with no baseline arm and the base snapshot log names no revision or tree.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: the diff is a move plus import rewrites the done_when requires, but docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py:25 lies under docs/figures, a non-mergeable path the node was not granted, and was edited anyway (disclosed, accept-path requested).\nSCORE durability: 15\nJUSTIFICATION durability: packages/nova-ingest/tests/test_diiid_seam.py reddens if a diiid module returns to nova, if nova imports the member, if a consumer keeps a moved import, or if a second authoring function appears, but the \"bit-identical to base\" property has no committed guard since test_diiid_description_identity.py:136 compares head-written leaves against head-memory leaves that move together.\nSCORE fit: 18\nJUSTIFICATION fit: the moved modules keep their names and logic (R100), the member follows the workspace-member idiom of its pyproject and README, and no banned plan label, ticket id or AI trailer appears in the diff or commit bodies; the machine names stay inside the member where section 1 puts machine authoring.\nSCORE reuse: 17\nJUSTIFICATION reuse: the move rehomes the modules under the member rather than forking them, but packages/nova-ingest/tests/test_diiid_description_identity.py:52 hand-rolls a per-leaf comparison that packages/nova-ingest/nova_ingest/diiid_machine_ids.py:845 round_trip_leaf_receipt already performs.\nFINDING nova/imas/machine_artifact.py:1 non-blocking: a machine_* row whose section-1 census destination is \"moves to the ingest member\" (docs/research/imas-seam-census.html:80) and which section 1 explicitly says moves with its DDv4 publication floor was left in nova, so the node's \"every machine_* row whose section-1 destination is the ingest member is in the member\" is unmet; the node defers it to the section that moves and rewires the MAST callers.\nFINDING docs/figures/diiid-forward-onboarding/ids-set/regenerate_pf_active_and_passive.py:25 non-blocking: a non-mergeable path under docs/figures, which the node was not granted, was edited to import from the member; it must be ratified with crew complete --accept-path or reverted before landing.\nFINDING packages/nova-ingest/tests/test_diiid_description_identity.py:136 non-blocking: the round-trip test compares the head-written entry against the head in-memory bundle, so a regression in the authoring logic changes both sides together and the assertion stays green; the \"bit-identical to the base revision\" measure rests only on the one-shot snapshot script logs and has no committed guard.\nFINDING packages/nova-ingest/tests/test_diiid_description_identity.py:52 non-blocking: _leaf_arrays builds a flat per-leaf dict and compares it inline, re-implementing the leaf comparison that packages/nova-ingest/nova_ingest/diiid_machine_ids.py:845 round_trip_leaf_receipt already owns in the same package; reuse that owner instead of a second comparison path.\nFINDING docs/research/imas-seam-census.html:80 non-blocking: the committed census record still renders the six removed DIII-D rows and no post-move DIII-D row, so the record contradicts the tree; the recomputed census test passes because it scans the tree rather than this file, and the manifest defers the refresh to a later section.\n",
+  "review_run_id": "r-20261124T070427454789-review-of-one-ids-seam-s4-1e18d9ce9df0",
+  "reviewed_base_sha": "1e86c41ed7e14f44c87d2cfb84408182cc709cb6",
+  "reviewed_head_sha": "1e18d9ce9df07bad66c993e0eff523cffc4a28aa",
+  "reviewed_run_id": "r-20261122T143935246475-one-ids-seam-s4",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T07:12:25.485993+00:00",
+  "total": 95
+}

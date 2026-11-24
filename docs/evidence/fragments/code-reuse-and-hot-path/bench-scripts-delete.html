@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="code-reuse-and-hot-path">
+  <title>Delete and merge benchmarks and scripts | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="bench-scripts-delete-summary">Delete and merge benchmarks and scripts</h2>
+    <p>This node applies the <code>bench-scripts-census</code> delete and merge
+    verdicts. The census was taken at revision
+    <code>2653ef0c9b5fa5b9b05b9d9d9d01d5e9b416a5e9</code>; this batch base is
+    <code>348ed92c7ab0</code>.</p>
+
+    <h3 id="bench-scripts-delete-partition">The verdicts split on a kept-code reference</h3>
+    <p>The census models Python imports only. Applying its 715 delete and 3
+    merge <em>unconditionally</em> would orphan files the census did not model
+    as consumers: shell and <code>sbatch</code> drivers invoke a
+    prototype&rsquo;s entry module by name, kept Python modules import a sibling
+    the census marked delete, and product docstrings name a benchmark. Those
+    references break the census&rsquo;s own keep rule (&ldquo;imported by kept
+    code&rdquo;) because the keeping happens after the citation pass and does
+    not cascade into the newly kept file&rsquo;s imports.</p>
+    <p>So each delete path is checked against the whole tracked tree before it
+    is removed. A path named by any kept <code>.py</code>, <code>.sh</code>,
+    <code>.bash</code> or <code>.sbatch</code> file outside <code>docs/</code>
+    is withheld from this node and reported to the census defect. The initial
+    scan exempted <code>docs/</code> references; the final check
+    below verifies that each exempted evidence reference carries a revision
+    at which its named driver exists.</p>
+    <table id="bench-scripts-delete-partition-table">
+      <tr><th>set</th><th>files</th><th>lines</th></tr>
+      <tr><td>census delete + merge</td><td>718</td><td>214021</td></tr>
+      <tr><td>withheld: named by kept code</td><td>102</td><td>28590</td></tr>
+      <tr><td>deletable by the path-string scan</td><td>616</td><td>185431</td></tr>
+      <tr><td>deleted at the head, after restoring two sibling imports</td><td>614</td><td>184989</td></tr>
+      <tr><td>deleted after the first repair round</td><td>562</td><td>163332</td></tr>
+      <tr><td>restored in the first two rounds, including sibling imports</td><td>54</td><td>22099</td></tr>
+      <tr><td>restored: owned scope and an unpinned citation</td><td>6</td><td>1221</td></tr>
+      <tr><td>restored by the kept-reference closure</td><td>86</td><td>49164</td></tr>
+      <tr><td>all restored files</td><td>146</td><td>72484</td></tr>
+      <tr><td>deleted at the final measured head</td><td>470</td><td>112947</td></tr>
+    </table>
+
+    <h3 id="bench-scripts-delete-batches">Batches</h3>
+    <p>Each batch is one commit of no more than about thirty thousand removed
+    lines. Before every commit the absence check re-derives, from the whole
+    tracked tree, that no batch path is present and that no kept code file
+    names one.</p>
+    <table id="bench-scripts-delete-batch-table">
+      <tr><th>batch</th><th>files</th><th>lines removed</th><th>running total</th></tr>
+      <tr><td>1</td><td>54</td><td>29789</td><td>29789</td></tr>
+      <tr><td>2</td><td>54</td><td>29105</td><td>58894</td></tr>
+          <tr><td>3</td><td>42</td><td>29924</td><td>88818</td></tr>
+      <tr><td>4</td><td>113</td><td>29931</td><td>118749</td></tr>
+      <tr><td>5</td><td>197</td><td>29959</td><td>148708</td></tr>
+      <tr><td>6</td><td>148</td><td>29691</td><td>178399</td></tr>
+      <tr><td>7</td><td>8</td><td>7032</td><td>185431</td></tr>
+      <tr><td>restored after verification</td><td>2</td><td>-442</td><td>184989</td></tr>
+      <tr><td>restored in the repair round</td><td>52</td><td>-21657</td><td>163332</td></tr>
+      <tr><td>restored owned scripts</td><td>5</td><td>-994</td><td>162338</td></tr>
+      <tr><td>restored benchmark with an unpinned citation</td><td>1</td><td>-227</td><td>162111</td></tr>
+      <tr><td>kept-reference restore pass 1</td><td>80</td><td>-43342</td><td>118769</td></tr>
+      <tr><td>kept-reference restore pass 2</td><td>4</td><td>-3765</td><td>115004</td></tr>
+      <tr><td>kept-reference restore pass 3</td><td>2</td><td>-2057</td><td>112947</td></tr>
+      <tr><td>net at final measured head</td><td>470</td><td>112947</td><td>112947</td></tr>
+    </table>
+
+    <h3 id="bench-scripts-delete-withheld">Withheld paths</h3>
+    <p>The 102 withheld paths are named by 112 kept files across 138
+    references: 76 shell or <code>sbatch</code> drivers, 28 other kept
+    <code>Python</code> modules, four test modules and four product modules
+    under <code>nova/</code>. By area, 82 sit under
+    <code>scripts/prototypes</code>, 14 under <code>benchmarks</code>, and the
+    remaining six in six other script directories. They are reported on the
+    node&rsquo;s manifest rather than edited here, because repairing a shell
+    driver or a product docstring is a separate decision from applying the
+    census.</p>
+
+    <p>The same non-cascade defect reaches one step further. Two withheld
+    files are reached only through another kept file&rsquo;s bare sibling
+    import: <code>measure_branches.py</code> imports
+    <code>terminal_class.py</code> by its bare name after putting its own
+    directory on <code>sys.path</code>, and
+    <code>test_terminal_panel_geometry.py</code> imports
+    <code>render_terminal_panels.py</code> the same way. Both siblings were
+    deleted in the batches and both are restored here, because deleting them
+    broke test collection with <code>ModuleNotFoundError</code>. The reference
+    scan that keeps a path is a path-string scan, so it sees neither a bare
+    module name nor the directory that resolves it.</p>
+
+    <h3 id="bench-scripts-delete-repair">Repairs after review</h3>
+    <p>A review of the first round found kept content still naming deleted
+    paths. Every one is now restored from the batch base rather than edited:
+    editing a caller to hide a reference leaves its behaviour broken, while a
+    restored file is byte-identical to the revision it came from.</p>
+    <ul>
+      <li><code>benchmarks/nearfar_error.py</code>: the kept module
+      <code>benchmarks/near_field_elliptic.py</code> runs it through
+      <code>subprocess.run(check=True)</code>. That caller cannot import at the
+      base either, because it names <code>_R_FLOOR</code> from
+      <code>nova.biot.greens</code> and the name is gone, so the deletion added
+      no new failure; the reference itself is what the clause forbids, and it
+      now resolves.</li>
+      <li><code>scripts/prototypes/diiid_xpoint_held_nodes/</code>: the five
+      modules the kept prototype loads by path, restored with
+      <code>measure.py</code>, <code>batch.py</code>, <code>preflight.py</code>,
+      <code>provenance.py</code> and <code>render.py</code>. Loading the kept
+      prototype then failed further down its chain, so the restore follows
+      imports rather than one directory: it reaches
+      <code>diiid_core_hold/measure.py</code>, then
+      <code>diiid_diverted_branch/measure.py</code>, whose
+      <code>import measure</code> resolves through
+      <code>scripts/prototypes/diiid_warmup_admission</code>, the directory
+      that file puts on <code>sys.path</code>.
+      That directory&rsquo;s eight modules are restored too, as is
+      <code>diiid_core_hold/batch.py</code>, and the prototype now loads.</li>
+      <li><code>benchmarks/BASELINE.md</code>: a kept document naming deleted
+      drivers. The eight drivers it names are restored, so the document reads
+      true at the head without a revision stamp.</li>
+      <li>The six <code>scripts/&lt;topic&gt;/report.md</code> receipts named
+      twenty more deleted drivers. Each restored driver named four others in
+      turn, and the restore ran to a fixed point: 47 files, 18107 lines.</li>
+      <li>Re-running the same scan at that head found twelve more references, all
+      of them in <code>scripts/&lt;topic&gt;/run*.log</code> receipts naming five
+      deleted drivers. Those drivers are restored in a second commit: five
+      files, 3550 lines. The repair round therefore restores 52 files and 21657
+      lines in total.</li>
+    </ul>
+    <p>The scan that keeps these honest is re-run to a fixed point over the
+    whole tracked tree: every deleted path is searched for as a path string in
+    every kept file outside <code>docs/</code>, and every kept module is parsed
+    for a bare import whose module file is deleted and whose directory the
+    importer puts on <code>sys.path</code>. At the head it reports no path
+    string and no bare import. The first round&rsquo;s scan reported neither
+    defect because it matched only a whole path in a code file and knew nothing
+    of a directory put on <code>sys.path</code>.</p>
+    <p>The batch table above is corrected here: batches four, five and six
+    removed 29931, 29959 and 29691 lines against the 29926, 29946 and 29685
+    first recorded, taken from each commit&rsquo;s own
+    <code>--shortstat</code>.</p>
+    <h3 id="bench-scripts-delete-verification">Earlier verification</h3>
+    <p>The following measurements precede the six scoped restorations; the
+    final source-head results follow in their own table.</p>
+    <p>No test or source file changed between the batch base
+    <code>348ed92c</code> and the head: the diff over <code>tests/</code>,
+    <code>nova/</code>, <code>pyproject.toml</code> and <code>uv.lock</code> is
+    empty. Every deleted path is absent at the head, and the whole-tree scan
+    finds no kept code, test or <code>AGENTS.md</code> reference to any of
+    them; the remaining references are historical records under
+    <code>docs/</code> that carry the revision they ran at.</p>
+    <table id="bench-scripts-delete-verification-table">
+      <tr><th>measure</th><th>revision</th><th>result</th></tr>
+      <tr><td>absence check, 562 paths</td><td><code>6790baf79</code></td><td>0 code/test/AGENTS references</td></tr>
+      <tr><td>reachable gate, worktree at head</td><td><code>6790baf79</code></td><td><code>5 failed, 49 passed, 4 xfailed, 1 warning in 221.12s (0:03:41)</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>scratch-tree arm at the batch base</td><td><code>348ed92c7ab0</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 31.92s</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>scratch-tree arm at the head</td><td><code>6790baf79</code></td><td><code>11 failed, 35 passed, 4 xfailed, 1 warning, 8 errors in 42.14s</code> (<code>EXIT=1</code>)</td></tr>
+      <tr><td>added failures, base to head</td><td>&mdash;</td><td>0; the two arms report the same nineteen failure and error ids</td></tr>
+      <tr><td>fast-lane collection, worktree</td><td><code>e75324fc6</code></td><td><code>9715/10939 tests collected (1224 deselected) in 25.02s</code> (<code>EXIT=0</code>), 0 collection errors</td></tr>
+    </table>
+    <p>Each measurement is one <code>all_debug</code> job submitted with
+    <code>sbatch --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=32G</code>;
+    its log opens with the revision it ran at and the literal
+    <code>python -m pytest</code> command, and ends with that command&rsquo;s own
+    <code>EXIT=</code> line. The four logs are
+    <code>gate-worktree-6790baf7.log</code>,
+    <code>arm-base-348ed92c.log</code>,
+    <code>arm-head-scratch-6790baf7.log</code> and
+    <code>collect-worktree-e75324fc.log</code>. The full fast lane was started
+    and stopped after twenty-eight minutes without completing: its execution
+    time on a one-hour partition is not a result, so the record rests on the
+    collection pass above and on the eight-file gate both arms run.</p>
+    <p>The two scratch-tree arms carry identical failure and error ids: they
+    run the same instrument against the base and the head from a clean
+    extraction, so the identical results are the delta measurement, and the
+    base and head differ by zero added failures. That instrument lacks a
+    <code>.git</code>, which the census tests read through
+    <code>git ls-files</code>, so it reports six more failures and eight setup
+    errors than the worktree arm; those are scaffolding, present identically
+    in both arms.</p>
+    <p>The repair round is checked by one script run against two revisions:
+    it searches every deleted path across the whole tracked tree as a path
+    string and as a bare import, and it compares each batch row with that
+    commit's own <code>--shortstat</code>. At the reviewed head
+    <code>76a7d44ac</code> it reports 32 failures and exits 1; that is the
+    negative control, and without the restorations the check the findings name
+    fails. The three runs are logged as <code>repair-check-parent.log</code>,
+    <code>repair-check-head-6790baf7.log</code> and
+    <code>repair-check-head.log</code>. At the repaired head
+    <code>6790baf79</code>, and again at the record commit
+    <code>c6a9661b0</code> that follows it, it reports no failure and exits 0,
+    so each answering commit is what closes the reference its finding names.</p>
+    <p>The worktree arm's five failures are pre-existing. Two are retired
+    evidence: the census receipt test cites
+    <code>docs/figures/millisecond-converged-solve/program-shapes/program-shape-buckets.svg</code>,
+    which an ancestor of the batch base retired, and the census machinery
+    itself names a crew home literal at
+    <code>benchmarks/scripts_census.py:389</code>, a line the batches do not
+    touch. Two are git-hook tests whose scratch repositories fail on
+    <code>.git/index: Not a directory</code> before any code under test runs.
+    The fifth reads that same retired SVG file, so it fails for the same
+    reason. The collection pass at the head walks the whole fast suite and
+    reports no collection error, which is the check the two restored siblings
+    repair.</p>
+
+    <h3 id="bench-scripts-delete-repair-restored">Scoped and cited drivers retained</h3>
+    <p>At the delivered head <code>e1bc21735a5b5cda1ae6edec2d83846c18338b00</code>,
+    the reproduction reported <q>REPRODUCED: 6 required files absent at delivered head</q>
+    and <code>EXIT=1</code>. Each file below is restored byte for byte from
+    <code>348ed92c7ab08a9592a7f997d62bfec41ae687d4</code>. The four iron-limb
+    files keep the declared driver directory whole; the polygon production
+    comparison is also owned by active work. The benchmark is retained because
+    its archived citation carries no revision.</p>
+    <table id="bench-scripts-delete-repair-restored-table">
+      <tr><th>restored path</th><th>lines restored</th></tr>
+      <tr><td><code>scripts/iron_limb_production/comparison.py</code></td><td>51</td></tr>
+      <tr><td><code>scripts/iron_limb_production/figure.py</code></td><td>292</td></tr>
+      <tr><td><code>scripts/iron_limb_production/negative_control_west.py</code></td><td>48</td></tr>
+      <tr><td><code>scripts/iron_limb_production/refinement.py</code></td><td>335</td></tr>
+      <tr><td><code>scripts/prototypes/polygon_stable_evaluator/production_pair.py</code></td><td>268</td></tr>
+      <tr><td><code>benchmarks/incomplete_third_kind.py</code></td><td>227</td></tr>
+      <tr><td>this repair</td><td>1221</td></tr>
+      <tr><td>all restoration rounds</td><td>23320</td></tr>
+    </table>
+    <p>The seven deletion batches removed 616 files and 185431 lines. Before
+    the kept-reference closure, restoration rounds retained 60 files and
+    23320 lines, leaving 556 files and 162111 lines removed: <code>185431 - 23320 = 162111</code>. The earlier
+    aggregate restoration row omitted the two sibling imports' 442 lines;
+    the corrected total includes them.</p>
+    <h3 id="bench-scripts-delete-repair-final-verification">Gate before dependency restoration</h3>
+    <p>One <code>all_debug</code> job, <code>1340500</code>, ran the locked
+    deletion check at source head <code>ff6b1e5d746f7410f4b050612a9e5e001746c705</code>
+    against batch base <code>348ed92c7ab08a9592a7f997d62bfec41ae687d4</code>. The log and
+    JSON receipts live under <code>~/.cache/nova-s33/bench-scripts-delete-repair/</code>.
+    That measurement preceded the kept-reference restorations recorded below.</p>
+    <table id="bench-scripts-delete-repair-final-verification-table">
+      <tr><th>measure</th><th>base</th><th>head / delta</th></tr>
+      <tr><td>fresh-interpreter module imports</td><td>473 modules; 23 failures</td><td>473 modules; 23 failures; 0 new failures</td></tr>
+      <tr><td>whole tests tree collection</td><td>10934 tests collected in 28.11s; EXIT=0</td><td>10930 tests collected in 28.44s; EXIT=0; 0 new collection errors</td></tr>
+      <tr><td>focused set</td><td>initial selector: 0 files</td><td>superseded: directory consumers and population guards are included in the final gate</td></tr>
+      <tr><td>whole tracked-tree absence check</td><td>&mdash;</td><td>556 paths remain deleted; 1241 reference candidates not admitted by the conservative evidence exemption</td></tr>
+      <tr><td>deletion gate</td><td>&mdash;</td><td><code>FAIL; EXIT=1</code></td></tr>
+    </table>
+    <p><code>result.json</code> stores both measured revisions;
+    <code>base.json</code> and <code>head.json</code> enumerate every import,
+    collection summary and focused failure id. <code>focused-set.json</code>
+    names the paths selecting each test. The existing census parser supplies
+    bare-import resolution; the existing import-sweep probe supplies one fresh
+    interpreter per module. The batch-base arm has a local tracked-file index
+    and revision backed by the repository's objects, so its tests can inspect
+    git without mutating the shared index.</p>
+    <p>The absence check reads every tracked text file, including tests and
+    <code>AGENTS.md</code>. Its negative control injects one deleted path into
+    an in-memory kept test: <code>absence-negative-control.log</code> records
+    the named refusal and <code>EXIT=1</code>. A known importable module and a
+    synthetic benchmark import are positive controls on the import sweep and
+    focused-test selector. Evidence exemptions require a revision that resolves
+    to the cited file, checked through one batched <code>git cat-file</code>
+    operation.</p>
+
+    <h3 id="bench-scripts-delete-repair-kept-reference-closure">Kept references retain their drivers</h3>
+    <p>The reference rule is applied to a fixed point: a deleted driver named
+    by a kept tracked file is restored from
+    <code>348ed92c7ab08a9592a7f997d62bfec41ae687d4</code>, and each restored
+    file becomes a kept consumer on the next pass. The only exemption is a
+    historical evidence record with a revision that resolves to its cited
+    driver. Executable consumers remain consumers wherever they are stored;
+    run receipts under <code>docs/state/</code> are historical evidence when
+    their cited revision resolves. Kept files are not edited to hide a
+    reference.</p>
+    <p>The closure restores 86 further files and 49164 lines.
+    Together with the six scoped restorations and the earlier rounds, the
+    total is 146 retained files and 72484 restored lines.
+    The seven deletion batches therefore leave 470 files and 112947
+    lines removed: <code>185431 - 72484 = 112947</code>.</p>
+    <table id="bench-scripts-delete-repair-kept-reference-table">
+      <tr><th>restored path</th><th>lines</th><th>kept consumer or unpinned record</th></tr>
+      <tr><td><code>benchmarks/arc_section_cost.py</code></td><td>251</td><td><code>docs/polybow-arc-section.html</code></td></tr>
+      <tr><td><code>benchmarks/bound_failability_census.py</code></td><td>373</td><td><code>docs/state/nova/manifests/bound-failability-sweep.md</code></td></tr>
+      <tr><td><code>benchmarks/bound_reference_classification.py</code></td><td>423</td><td><code>docs/plans/roundoff-scale-acceptance-bounds.html</code></td></tr>
+      <tr><td><code>benchmarks/census_kernel_timing.py</code></td><td>1297</td><td><code>docs/plans/cut-cell-current-attribution.html</code></td></tr>
+      <tr><td><code>benchmarks/class_coreachability.py</code></td><td>488</td><td><code>docs/state/nova/manifests/class-coreachability.md</code></td></tr>
+      <tr><td><code>benchmarks/clipped_coupling_order.py</code></td><td>399</td><td><code>docs/research/forward-accuracy-reuse-map.html</code></td></tr>
+      <tr><td><code>benchmarks/coil_construction.py</code></td><td>67</td><td><code>docs/nova-spine-refactor.html</code></td></tr>
+      <tr><td><code>benchmarks/compile_host_memory.py</code></td><td>490</td><td><code>docs/state/nova/reviews/plan/cpu-compile-abort/r-20261004T164421269786-plan-review-of-cpu-compile-abort.json</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/compiled_outer_loop_trace.py</code></td><td>1016</td><td><code>docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/run_outer_loop_trace.sbatch</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/constraint_shape_receipt.py</code></td><td>1217</td><td><code>docs/plans/constraint-augmented-newton-krylov.html</code></td></tr>
+      <tr><td><code>benchmarks/cpu_solve_discriminator.py</code></td><td>1194</td><td><code>docs/plans/cpu-solve-viability.html</code></td></tr>
+      <tr><td><code>benchmarks/cs_winding_inductance.py</code></td><td>1211</td><td><code>docs/nova-3d-native.html</code></td></tr>
+      <tr><td><code>benchmarks/diiid_containment_recheck.py</code></td><td>279</td><td><code>docs/state/nova/manifests/diiid-containment-recheck.md</code></td></tr>
+      <tr><td><code>benchmarks/diiid_prescribed_profile_forward.py</code></td><td>312</td><td><code>docs/figures/diiid-vertical-force-balance/prescribed-profile-prototype/run-frame.sh</code></td></tr>
+      <tr><td><code>benchmarks/diiid_residual_decomposition.py</code></td><td>589</td><td><code>docs/plans/diiid-vertical-force-balance.html</code></td></tr>
+      <tr><td><code>benchmarks/diiid_target_current_digest_probe.py</code></td><td>223</td><td><code>docs/plans/diiid-vertical-force-balance.html</code></td></tr>
+      <tr><td><code>benchmarks/diiid_vacuum_from_description.py</code></td><td>507</td><td><code>docs/plans/diiid-vertical-force-balance.html</code></td></tr>
+      <tr><td><code>benchmarks/diiid_vacuum_sensitivity_sweep.py</code></td><td>257</td><td><code>docs/research/diiid-vacuum-gate-diagnosis.html</code></td></tr>
+      <tr><td><code>benchmarks/divergence_floor_scaling.py</code></td><td>457</td><td><code>docs/plans/roundoff-scale-acceptance-bounds.html</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/early_frame_placement_test.py</code></td><td>916</td><td><code>docs/figures/playable-forward-solve/early-frame-placement/run_placement_test.sh</code></td></tr>
+      <tr><td><code>benchmarks/efit_absent_quantity_triage.py</code></td><td>581</td><td><code>docs/plans/equilibrium-metric-parity.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_affine_extraction.py</code></td><td>618</td><td><code>docs/plans/diiid-forward-onboarding.html</code> (+2 more)</td></tr>
+      <tr><td><code>benchmarks/efit_cell_current_representation.py</code></td><td>625</td><td><code>docs/plans/efit-flux-decomposition.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_current_sign_census.py</code></td><td>328</td><td><code>docs/plans/efit-map-inversion.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_derived_quantity_census.py</code></td><td>640</td><td><code>docs/plans/equilibrium-metric-parity.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_filament_truncation_contribution.py</code></td><td>446</td><td><code>docs/plans/efit-flux-decomposition.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_section_shape_zeta_order.py</code></td><td>362</td><td><code>docs/plans/efit-flux-decomposition.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_third_term_separation.py</code></td><td>280</td><td><code>docs/plans/efit-map-inversion.html</code></td></tr>
+      <tr><td><code>benchmarks/efit_xpoint_fit_state.py</code></td><td>406</td><td><code>docs/plans/efit-map-inversion.html</code></td></tr>
+      <tr><td><code>benchmarks/empty_exact_polygon_probe.py</code></td><td>640</td><td><code>docs/figures/cut-cell-current-attribution/empty-exact-polygon/run.log</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/exact_clip_warm_cost.py</code></td><td>1021</td><td><code>docs/plans/exact-clip-moment-quadrature.html</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/flux_surface_flood.py</code></td><td>95</td><td><code>docs/plans/spine-boundary-accelerator.html</code></td></tr>
+      <tr><td><code>benchmarks/force_target_rule.py</code></td><td>241</td><td><code>benchmarks/coil_section_cost.py</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/fork_arming_economics.py</code></td><td>325</td><td><code>docs/plans/dual-branch-selection.html</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/global_surface_clip_rescore.py</code></td><td>502</td><td><code>docs/plans/curved-clip-global-surface.html</code></td></tr>
+      <tr><td><code>benchmarks/inner_solve_accuracy.py</code></td><td>514</td><td><code>docs/state/nova/manifests/inner-solve-accuracy.md</code></td></tr>
+      <tr><td><code>benchmarks/iter_saddle_resolution.py</code></td><td>312</td><td><code>docs/state/nova/manifests/iter-saddle-resolution.md</code></td></tr>
+      <tr><td><code>benchmarks/lane_resource_accumulation.py</code></td><td>679</td><td><code>docs/plans/nova-test-lane-health.html</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/moment_map_derivative_contract.py</code></td><td>252</td><td><code>docs/plans/forward-solver-route-integrity.html</code></td></tr>
+      <tr><td><code>benchmarks/newton_cycle_mask_switch.py</code></td><td>591</td><td><code>docs/state/nova/manifests/newton-cycle-mask-switch.md</code></td></tr>
+      <tr><td><code>benchmarks/null_census_device_benchmark.py</code></td><td>382</td><td><code>docs/state/nova/manifests/dual-sweep-device-lock.md</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/order_vs_mesh_adjudication.py</code></td><td>588</td><td><code>docs/state/nova/reviews/plan/diiid-forward-onboarding/r-20261006T091918405157-plan-review-of-diiid-forward-onboarding.json</code></td></tr>
+      <tr><td><code>benchmarks/passive_closure_mesh_response.py</code></td><td>334</td><td><code>docs/mast-catalog-gpu-solve.html</code></td></tr>
+      <tr><td><code>benchmarks/polish_support_performance.py</code></td><td>1157</td><td><code>docs/figures/polish-support-performance/shared-spline/measure.sh</code> (+2 more)</td></tr>
+      <tr><td><code>benchmarks/polybeam_section_cost.py</code></td><td>653</td><td><code>docs/polybeam-prism-section.html</code></td></tr>
+      <tr><td><code>benchmarks/portfolio_warm_start.py</code></td><td>1383</td><td><code>docs/plans/dual-basin-solve.html</code></td></tr>
+      <tr><td><code>benchmarks/private_region_parallel_kernel.py</code></td><td>494</td><td><code>docs/plans/cut-cell-current-attribution.html</code></td></tr>
+      <tr><td><code>benchmarks/receipt_topology_check.py</code></td><td>251</td><td><code>docs/state/nova/reviews/plan/forward-solver-route-integrity/r-20261019T081156107541-plan-review-of-forward-solver-route-integrity.json</code></td></tr>
+      <tr><td><code>benchmarks/recovery_ladder_telemetry.py</code></td><td>99</td><td><code>docs/plans/forward-solver-route-integrity.html</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/reduced_newton_rows.py</code></td><td>1035</td><td><code>docs/figures/millisecond-converged-solve/adaptive-refresh/run_measurement.sbatch</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/sol_current_demonstration.py</code></td><td>966</td><td><code>docs/plans/sol-current-demonstration.html</code></td></tr>
+      <tr><td><code>benchmarks/solve_profile_kernel_count.py</code></td><td>538</td><td><code>docs/figures/millisecond-converged-solve/solve-profile/run_measurement.sbatch</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/steep_edge_moment_demonstration.py</code></td><td>735</td><td><code>docs/plans/plasma-edge-current-representation.html</code></td></tr>
+      <tr><td><code>benchmarks/tiled_assembly.py</code></td><td>168</td><td><code>benchmarks/gpu_pair_sharding.py</code> (+1 more)</td></tr>
+      <tr><td><code>benchmarks/vertex_ring_census.py</code></td><td>1887</td><td><code>docs/state/nova/reviews/plan/topology-read-containment-and-rebank/r-20261005T154908754876-plan-review-of-topology-read-containment-and-rebank.json</code></td></tr>
+      <tr><td><code>benchmarks/vertical_force_decomposition.py</code></td><td>1495</td><td><code>docs/plans/solver-convergence-regression.html</code></td></tr>
+      <tr><td><code>benchmarks/wholecell_rows_reposed_fixture.py</code></td><td>319</td><td><code>docs/state/nova/reviews/run/r-20260922T185213450631-fsa-locate-the-renderers-of-the-dark-cut-cell-figure-families/r-20260922T194617097714-review-of-fsa-locate-the-renderers-of-the-dark-cut-cell-figure-families.json</code></td></tr>
+      <tr><td><code>benchmarks/wound_coil_finite_section.py</code></td><td>2190</td><td><code>docs/coil-conductor-fidelity.html</code></td></tr>
+      <tr><td><code>benchmarks/wound_coil_inductance.py</code></td><td>1658</td><td><code>docs/coil-conductor-fidelity.html</code></td></tr>
+      <tr><td><code>benchmarks/zero_residual_check.py</code></td><td>967</td><td><code>docs/state/nova/reviews/plan/figure-and-solver-audit/r-20261004T170538395135-plan-review-of-figure-and-solver-audit.json</code></td></tr>
+      <tr><td><code>scripts/device_kernel_port/measure_unpaired_compile.py</code></td><td>356</td><td><code>docs/state/nova/reviews/plan/converged-forward-solve/r-20261004T172220967085-plan-review-of-converged-forward-solve.json</code></td></tr>
+      <tr><td><code>scripts/mast_reference_evidence/contours.py</code></td><td>824</td><td><code>docs/plans/machine-description-retirement.html</code> (+3 more)</td></tr>
+      <tr><td><code>scripts/mast_slice_census/census.py</code></td><td>370</td><td><code>docs/mast-catalog-gpu-solve.html</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_drive_barrier/plot.py</code></td><td>114</td><td><code>docs/state/nova/reviews/run/r-20261108T051046088854-bank-fold-vertical/r-20261108T061723286814-review-of-bank-fold-vertical-c1cf8bf25ae9.json</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_fold_radial/condition.py</code></td><td>30</td><td><code>scripts/prototypes/bank_fold_radial/measure.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_fold_vertical/condition.py</code></td><td>53</td><td><code>scripts/prototypes/bank_fold_vertical/measure.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_hessian_blowup/geometry.py</code></td><td>55</td><td><code>docs/evidence/fragments/sub-millisecond-forward-path/bank-hessian-blowup.html</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_route_rows/boundary_gap.py</code></td><td>143</td><td><code>docs/evidence/fragments/sub-millisecond-forward-path/bank-route-rows.html</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_solve_trace_four_read/capture.py</code></td><td>44</td><td><code>scripts/prototypes/bank_solve_trace_four_read/device.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/bank_step_batch/fixture.py</code></td><td>74</td><td><code>scripts/prototypes/bank_step_batch/measure.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/diiid_finite_edge_booking/render.py</code></td><td>249</td><td><code>docs/state/nova/runs/r-20261114T103416820235-ilf-true-outline-read.json</code> (+2 more)</td></tr>
+      <tr><td><code>scripts/prototypes/diiid_finite_edge_flux/summarize.py</code></td><td>135</td><td><code>docs/plans/diiid-vertical-force-balance.html</code></td></tr>
+      <tr><td><code>scripts/prototypes/diiid_xpoint_coil_correction/fit.py</code></td><td>91</td><td><code>docs/plans/diiid-vertical-force-balance.html</code></td></tr>
+      <tr><td><code>scripts/prototypes/diiid_xpoint_profile_extent/render.py</code></td><td>505</td><td><code>docs/state/nova/runs/r-20261114T074150540287-ilf-six-limb-reference.json</code> (+3 more)</td></tr>
+      <tr><td><code>scripts/prototypes/lean_map/newton.py</code></td><td>128</td><td><code>scripts/prototypes/lean_map/probe_forward.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/stored_state_refusals/report.py</code></td><td>404</td><td><code>docs/state/nova/runs/r-20261114T174204179431-smfp-autodiff-free-newton.json</code> (+6 more)</td></tr>
+      <tr><td><code>scripts/prototypes/stored_state_refusals/run_cases.py</code></td><td>325</td><td><code>docs/state/nova/runs/r-20261114T174204179431-smfp-autodiff-free-newton.json</code> (+6 more)</td></tr>
+      <tr><td><code>scripts/prototypes/tracked_read_batch/profile_kernels.py</code></td><td>227</td><td><code>scripts/prototypes/tracked_read_steady_batch/measure.py</code></td></tr>
+      <tr><td><code>scripts/reconstructed_plasma_source/baseline_sign.py</code></td><td>49</td><td><code>docs/state/nova/reviews/plan/dd-cocos-ingest/r-20261022T130300161334-plan-review-of-dd-cocos-ingest.json</code></td></tr>
+      <tr><td><code>scripts/window_demonstration/exchange_diagnosis/probe.py</code></td><td>443</td><td><code>docs/plans/solovev-exact-recovery.html</code></td></tr>
+      <tr><td><code>benchmarks/coupled_map_mode_identification.py</code></td><td>1079</td><td><code>benchmarks/order_vs_mesh_adjudication.py</code></td></tr>
+      <tr><td><code>benchmarks/diiid_vacuum_gate.py</code></td><td>195</td><td><code>benchmarks/diiid_vacuum_sensitivity_sweep.py</code></td></tr>
+      <tr><td><code>benchmarks/limited_anchor_containment.py</code></td><td>1036</td><td><code>benchmarks/early_frame_placement_test.py</code></td></tr>
+      <tr><td><code>benchmarks/passive_closure_trace.py</code></td><td>1455</td><td><code>benchmarks/order_vs_mesh_adjudication.py</code></td></tr>
+      <tr><td><code>scripts/prototypes/tcv_liuqe_known_answer/measure.py</code></td><td>736</td><td><code>scripts/prototypes/tcv_liuqe_known_answer/test_boundary_geometry.py</code></td></tr>
+      <tr><td><code>scripts/window_demonstration/run_window.py</code></td><td>1321</td><td><code>scripts/window_demonstration/exchange_diagnosis/probe.py</code> (+1 more)</td></tr>
+      <tr><td>additional retained drivers</td><td>49164</td><td>86 files</td></tr>
+    </table>
+    <p><code>widened-restored.json</code> in the run directory records every
+    restoring reference and its scope note. <code>closure-rounds.json</code>
+    preserves each missing-path reproduction before the restore.
+    All restored blobs are identical to the batch base; the kept code files
+    retain their original contents. Path strings, dotted names, package
+    imports, assembled path segments and bare sibling imports are checked
+    with the existing census parser. Positive controls include
+    <code>from scripts.window_demonstration import run_window</code>, so
+    package imports cannot silently disappear from the selection.</p>
+    <h3 id="bench-scripts-delete-repair-completed-gate">Deletion gate after the closure</h3>
+    <p>One <code>all_debug</code> job, <code>1340635</code>, compares baseline
+    <code>e1bc21735a5b5cda1ae6edec2d83846c18338b00</code> with restored source head
+    <code>122d5276f44907f345de30933fedbd13f716491e</code>. The receipts are under this run's
+    directory at <code>measure/</code>; <code>gate-widened.log</code> records
+    the literal command and ends with the gate program's own
+    <code>EXIT=0</code>.</p>
+    <table id="bench-scripts-delete-repair-completed-gate-table">
+      <tr><th>measure</th><th>baseline</th><th>restored source head</th></tr>
+      <tr><td>fresh imports</td><td>473 modules; 23 failures</td><td>473 modules; 23 failures; 0 new failures</td></tr>
+      <tr><td>whole-tree collection</td><td>10930 tests collected in 36.21s; EXIT=0</td><td>10931 tests collected in 21.69s; EXIT=0; 0 new collection errors</td></tr>
+      <tr><td>focused set</td><td>initial selector: 0 files</td><td>superseded: directory consumers and population guards are included in the final gate</td></tr>
+      <tr><td>absence check</td><td>&mdash;</td><td>470 deleted paths; 0 unpermitted kept references</td></tr>
+      <tr><td>negative control</td><td>&mdash;</td><td>injected kept reference refused with its deleted path; EXIT=1</td></tr>
+      <tr><td>deletion gate</td><td>&mdash;</td><td>preliminary EXIT=0; focused selection superseded by the final receipt</td></tr>
+    </table>
+    <p>The complete focused comparison includes directory consumers and the\n    tracked-population guards; it supersedes the preliminary empty selection.\n    The exact final record commit is checked by the same
+    <code>all_debug</code> gate. <code>gate-final.log</code> and
+    <code>measure-final/result.json</code> stamp that revision, and the
+    manifest records it as the final head. Both the initial and final gate
+    commands use the shared interpreter, one fresh process per library
+    module, the complete test collection and the same focused selection.
+    The final receipt is accepted only when its own terminal marker is
+    <code>EXIT=0</code>.</p>
+
+    <h3 id="bench-scripts-delete-repair-directory-consumer-gate">Complete focused comparison</h3>
+    <p>Collection adds one case for the restored
+    <code>summarize.py</code> driver in
+    <code>tests/equilibrium/test_finite_edge_flux_function.py</code>; no
+    collected test disappears. That case exposed the preliminary selector's
+    omission of directory consumers. The complete focused set below includes
+    directory enumerators and guards that inspect the tracked driver
+    population. The selector asserts that the real grammar-test consumer is
+    present, alongside its package-import positive control.</p>
+    <ul><li><code>tests/equilibrium/test_finite_edge_flux_function.py</code></li><li><code>tests/test_artifacts_carry_no_worktree_paths.py</code></li><li><code>tests/test_evidence_tooling_paths.py</code></li><li><code>tests/test_material_mask_limiter.py</code></li><li><code>tests/test_scripts_census.py</code></li></ul>
+    <p>Job <code>1340687</code> on <code>all_debug</code> compares
+    <code>e1bc21735a5b5cda1ae6edec2d83846c18338b00</code> with
+    <code>0a4ee9f26f55df04e2bfbe3a8f8a4da9392a8478</code>. The five-file focused commands
+    run in fresh processes at their own revisions; the baseline extraction
+    has its own local git index and HEAD. <code>gate-focused.log</code> and
+    the receipts under <code>measure-focused/</code> carry the actual commands,
+    imported module paths, working directories and complete summaries.</p>
+    <table id="bench-scripts-delete-repair-directory-consumer-gate-table">
+      <tr><th>measure</th><th>baseline</th><th>restored head</th></tr>
+      <tr><td>fresh library imports</td><td>473 modules; 23 failures</td><td>473 modules; 23 failures; 0 new failures</td></tr>
+      <tr><td>collection</td><td>10930 tests collected in 27.95s; EXIT=0</td><td>10931 tests collected in 17.51s; EXIT=0; 0 new errors</td></tr>
+      <tr><td>focused tests</td><td>1 failed, 33 passed, 1 warning in 156.44s (0:02:36); EXIT=1</td><td>1 failed, 34 passed, 1 warning in 193.70s (0:03:13); EXIT=1</td></tr>
+      <tr><td>focused failure ids</td><td>1</td><td>identical; 0 added or removed failure ids</td></tr>
+      <tr><td>absence</td><td>&mdash;</td><td>470 deleted paths; 0 unpermitted references</td></tr>
+      <tr><td>deletion gate</td><td>&mdash;</td><td>PASS; EXIT=0</td></tr>
+    </table>
+    <p>The common focused failure ids are retained explicitly:</p>
+    <ul><li><code>tests/test_evidence_tooling_paths.py::test_scanned_tree_holds_no_crew_or_worktree_literal</code></li></ul>
+    <p>The final record commit is rechecked with this same complete selection.
+    Its exact revision and both arms are in
+    <code>measure-final/result.json</code>, <code>base.json</code>,
+    <code>head.json</code> and <code>gate-final.log</code>, named by the
+    manifest. The preliminary empty-focused result above is historical and
+    does not satisfy the final gate.</p>
+  </main>
+</body>
+</html>

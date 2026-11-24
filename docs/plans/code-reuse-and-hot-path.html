@@ -25,7 +25,7 @@
 <title>Code Reuse and the Hot Path | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-modified" content="2026-11-24">
 </head>
 <body>
@@ -284,6 +284,9 @@ nothing is lost; a driver a live gate or test still runs is kept.</p>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261123T180218543618-bench-scripts-delete-repair" data-who="reckon-build" data-when="2026-11-23T19:48:11Z">
     <div class="r-comment-body"><p>Restored the six scoped drivers plus 86 drivers named by kept content, all exact batch-base blobs; total restored 72484 lines, leaving 470 files / 112947 lines removed. Final all_debug job 1340743 at 8b64914fb2795911c56a9b46684179e20e0acc24 against e1bc21735a5b5cda1ae6edec2d83846c18338b00 reports 0 kept references to deleted paths, 0 new import failures, 0 new collection errors and identical focused failure ids; EXIT=0.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261122T202603608268-bench-scripts-delete" data-who="reckon-build" data-when="2026-11-23T17:59:04Z">
+    <div class="r-comment-body"><p>Deleted 562 unreached benchmark and script files (163332 lines) in seven reviewable batches, withheld 102 paths that kept code still names, and measured zero added failures from the batch base to the repaired head; the repair round restored 52 files (21657 lines) that kept code or a kept record still names.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261123T124148141242-review-of-unreached-module-delete-dc3a174a7ef3" data-who="reckon-build" data-when="2026-11-23T13:03:40.005Z">
     <div class="r-comment-body"><p>no plan edit; the review is delivered as a stored record on run r-20261122T202605453490-unreached-module-delete at head dc3a174a7 with scores goal_fidelity 19, evidence 14, scope_discipline 18, durability 5, fit 18, reuse 17 and four non-blocking findings.</p></div>

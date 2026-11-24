@@ -1,0 +1,70 @@
+{
+  "added_failure_basis": "the reviewed run records no baseline_suite/after_suite pair (its declared write paths held no test file, so its suite fence was unarmed); at head 9686881f1 the focused gate logs/joint-acceptance-gate.log reads 9 passed EXIT=0 and the adjacent contracts logs/adjacent-acceptance-contracts.log read 22 passed EXIT=0, and the only red in the run is the declared mutation arm logs/joint-acceptance-mutation.log (1 failed by id, EXIT=1), which is the negative control and not an added failure",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-24T06:27:19.861Z",
+  "dispatched_at": "2026-11-24T06:19:51Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/joint_acceptance.py",
+      "id": "6fc98e61fb4",
+      "line": 318,
+      "severity": "non-blocking",
+      "text": "_residual_only() treats every value except the empty string and \"0\" as enabling, so NOVA_JOINT_ACCEPTANCE_RESIDUAL_ONLY=false (or \"no\", \"off\") silently reduces the production predicate to the global residual and admits the strong-1000 class of state; parse an explicit truthy set instead."
+    },
+    {
+      "file": "nova/equilibrium/joint_acceptance.py",
+      "id": "8b922651a6d",
+      "line": 378,
+      "severity": "non-blocking",
+      "text": "when null_position is required but no clause key ends in \".axis\", the branch appends one not_measured verdict and continues, dropping every declared X-point clause from the receipt, against the module's \"a verdict per clause\" contract; the row is still incomplete, so the overall state stays safe."
+    },
+    {
+      "file": "nova/equilibrium/joint_acceptance.py",
+      "id": "52a7edf6e92",
+      "line": 74,
+      "severity": "non-blocking",
+      "text": "ATTRIBUTES is exported in __all__ and placed in _FAMILY_ORDER, but it appears in no kind's _REQUIRED or _EXCLUDED, so any attributes clause is always judged not_applicable and the exported name promises a judging path that does not exist."
+    },
+    {
+      "file": "tests/test_joint_acceptance.py",
+      "id": "ebd6e78f501",
+      "line": 177,
+      "severity": "non-blocking",
+      "text": "_passing_lane_clauses is defined and never called, so its lane bounds are dead code and a reader cannot tell whether the passing-lane control was dropped from the suite."
+    },
+    {
+      "file": "tests/test_joint_acceptance.py",
+      "id": "12abec756a6",
+      "line": 96,
+      "severity": "non-blocking",
+      "text": "the worked centroid clause set collapses every constraint row into one sup judged against min(row_tolerance_pitches), so a row inside its own declared tolerance but above the tightest row's is refused, and the done_when's \"each constraint row at its declared scale\" is exercised nowhere even though evaluate() supports it."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_joint_acceptance.py:266 reddens when the predicate reverts to the residual alone (logs/joint-acceptance-mutation.log FAILED by id), but no test declares an X-point clause, so the half of the one-pitch bound covering admitted X-points (nova/equilibrium/joint_acceptance.py:397) is unguarded.",
+    "evidence": "the refusal is read from an independent receipt whose own values were re-read (net_boundary_level_over_span -0.0274 against boundary_limit_over_span 0.001 at docs/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/strong-rotation-compact-static-1000.json), and the mutation log is a real red by id; the run files no baseline/after suite pair, so the count rests on the focused gate and adjacent contracts, both green.",
+    "fit": "the module follows the frozen-dataclass and module-constant idiom of nova/equilibrium/observable_acceptance.py:1, ruff check passes, and both commit messages carry bodies with no AI trailer and no plan identifier, but nova/equilibrium/joint_acceptance.py:74 exports ATTRIBUTES, a family no kind ever judges.",
+    "goal_fidelity": "nova/equilibrium/joint_acceptance.py:326 evaluates every applicable family and returns a ClauseVerdict per clause, but support_stability and boundary_class are judged by kind (only AIR_CORE) rather than by declaration as the done_when words it, so a non-air-core row declaring them is recorded not_applicable (nova/equilibrium/joint_acceptance.py:146).",
+    "reuse": "a search over nova/equilibrium found only nova/equilibrium/observable_acceptance.py:203, which judges registered observables of a throughput batch and owns a different capability; plan section 7 records no predicate existing, so the addition neither extends nor forks an owner.",
+    "scope_discipline": "the diff is confined to nova/equilibrium/joint_acceptance.py and tests/test_joint_acceptance.py, both implied by the goal, but neither lies in the node's declared write paths and the declared evidence fragment and figure directory were never written."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is one predicate that judges every clause applying to a row and returns a verdict per clause, with the strong-1000 row refused naming its clause and a residual-only mutation admitting it; nova/equilibrium/joint_acceptance.py:326 evaluate() does exactly that.\nVERDICT done_when: done_when (1)-(3) are asserted by tests/test_joint_acceptance.py:266 (refused, constraint_row.boundary_level named, residual and row clauses pass), and the recorded mutation log logs/joint-acceptance-mutation.log fails that test id at EXIT=1 with 'admitted' == 'refused'.\nVERDICT write_paths: the node declared docs/evidence/fragments/converged-forward-solve/converged-forward-solve-s7.html and docs/figures/converged-forward-solve/converged-forward-solve-s7; the diff lands nova/equilibrium/joint_acceptance.py and tests/test_joint_acceptance.py instead, and no fragment or figure was written.\nVERDICT manifest: read; it reports 9 passed at 9686881f1 (EXIT=0), the mutation red by id, and names the gate and both log paths, and it states the residual-only values 1.60e-15, 2.07e-16 and 2.74e-2 of span.\nVERDICT diff: read both commits (cd59e2bda, 9686881f1) against 1e86c41ed; two files, 771 insertions, no deletions and no unrelated hunk.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/joint_acceptance.py:326 evaluates every applicable family and returns a ClauseVerdict per clause, but support_stability and boundary_class are judged by kind (only AIR_CORE) rather than by declaration as the done_when words it, so a non-air-core row that declares them is recorded not_applicable (nova/equilibrium/joint_acceptance.py:146).\nSCORE evidence: 17\nJUSTIFICATION evidence: the refusal is read from an independent receipt whose own values I re-read (net_boundary_level_over_span -0.0274 against boundary_limit_over_span 0.001 at docs/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/strong-rotation-compact-static-1000.json), and the mutation log is a real red by id; the run files no baseline_suite/after_suite pair, so the added-failure count rests on the focused gate and the adjacent contracts, both green.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: the diff is confined to nova/equilibrium/joint_acceptance.py and tests/test_joint_acceptance.py, both implied by the goal, but neither lies in the node's declared write paths and the declared evidence fragment and figure directory were never written.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_joint_acceptance.py:266 reddens when the predicate reverts to the residual alone (logs/joint-acceptance-mutation.log FAILED by id), but no test declares an X-point clause, so the half of the one-pitch bound that covers admitted X-points (nova/equilibrium/joint_acceptance.py:397) is unguarded.\nSCORE fit: 17\nJUSTIFICATION fit: the module follows the frozen-dataclass and module-constant idiom of nova/equilibrium/observable_acceptance.py:1, ruff check passes, and both commit messages carry bodies with no AI trailer and no plan identifier, but nova/equilibrium/joint_acceptance.py:74 exports ATTRIBUTES, a family no kind ever judges.\nSCORE reuse: 18\nJUSTIFICATION reuse: I searched nova/equilibrium for an acceptance predicate and found only nova/equilibrium/observable_acceptance.py:203, which judges registered observables of a throughput batch and owns a different capability; plan section 7 records no predicate existing, so the addition neither extends nor forks an owner.\nFINDING nova/equilibrium/joint_acceptance.py:318 non-blocking: _residual_only() treats every value except \"\" and \"0\" as enabling, so NOVA_JOINT_ACCEPTANCE_RESIDUAL_ONLY=false (or \"no\", \"off\") silently reduces the production predicate to the global residual and admits the strong-1000 class of state; parse an explicit truthy set instead.\nFINDING nova/equilibrium/joint_acceptance.py:378 non-blocking: when null_position is required but no clause key ends in \".axis\", the branch appends one not_measured verdict and continues, so any declared X-point clause gets no verdict at all in the receipt, against the module's \"a verdict per clause\" contract; the row is still incomplete, so the overall state stays safe.\nFINDING nova/equilibrium/joint_acceptance.py:74 non-blocking: ATTRIBUTES is exported in __all__ and placed in _FAMILY_ORDER, but it appears in no kind's _REQUIRED or _EXCLUDED, so any attributes clause is always judged not_applicable (joint_acceptance.py:366) and the exported name promises a judging path that does not exist.\nFINDING tests/test_joint_acceptance.py:177 non-blocking: _passing_lane_clauses is defined and never called, so the helper's lane bounds are dead code and a reader cannot tell whether the passing-lane control was dropped from the suite.\nFINDING tests/test_joint_acceptance.py:96 non-blocking: the worked centroid clause set collapses every constraint row into one sup judged against min(row_tolerance_pitches), so a row inside its own declared tolerance but above the tightest row's is refused, and the done_when's \"each constraint row at its declared scale\" is exercised nowhere even though evaluate() supports it.\n",
+  "review_run_id": "r-20261124T061907506591-review-of-converged-forward-solve-s7-9686881f1c1b",
+  "reviewed_base_sha": "1e86c41ed7e14f44c87d2cfb84408182cc709cb6",
+  "reviewed_head_sha": "9686881f1c1bca03d4dd291751fd80f5000c1d67",
+  "reviewed_run_id": "r-20261122T192250673466-converged-forward-solve-s7",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T06:25:39.892406+00:00",
+  "total": 103
+}

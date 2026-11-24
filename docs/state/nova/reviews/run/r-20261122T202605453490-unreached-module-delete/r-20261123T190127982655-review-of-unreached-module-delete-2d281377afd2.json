@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-23T19:17:13.999Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "The plan asks section 4 to delete unreached modules under a measured deletion gate; it requires no committed guard against re-import. A re-import would fail at import time, and the record names the absence check as evidence, not a guard. Building one is out of this plan's scope.",
+      "recorded_at": "2026-11-24T08:18:39.522294+00:00"
+    }
+  },
   "dispatched_at": "2026-11-23T19:02:13Z",
   "findings": [
     {

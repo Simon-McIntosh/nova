@@ -1,12 +1,11 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-24T02:42:57.378Z",
   "dispatched_at": "2026-11-24T02:35:35Z",
   "findings": [
     {
       "file": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/converged-vs-nonconverged.png",
-      "id": "fa32200c767",
       "line": null,
       "rubric": "legibility",
       "severity": "non-blocking",
@@ -14,7 +13,6 @@
     },
     {
       "file": "docs/figures/single-grid-solver-cutover/titan-converged-vs-nonconverged.png",
-      "id": "f1b1f99cf6c",
       "line": null,
       "rubric": "legibility",
       "severity": "non-blocking",
@@ -22,7 +20,6 @@
     },
     {
       "file": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/converged-vs-nonconverged.png",
-      "id": "ff9459de8e4",
       "line": null,
       "rubric": "legibility",
       "severity": "non-blocking",
@@ -30,7 +27,6 @@
     },
     {
       "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
-      "id": "f79289581dc",
       "line": null,
       "rubric": "legibility",
       "severity": "non-blocking",
@@ -38,7 +34,6 @@
     },
     {
       "file": "docs/figures/mast-centroid-capability/converged-vs-nonconverged.png",
-      "id": "f94af14caf9",
       "line": null,
       "rubric": "data_ink",
       "severity": "non-blocking",
@@ -46,7 +41,6 @@
     },
     {
       "file": "docs/evidence/fragments/separatrix-spline-extraction/coil-edit-panels-on-solve-currents.html",
-      "id": "f288bc1a59e",
       "line": 6,
       "rubric": "legibility",
       "severity": "non-blocking",
@@ -79,6 +73,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-24T02:43:02.083308+00:00",
+  "timestamp": "2026-11-24T03:02:40.501391+00:00",
   "total": null
 }

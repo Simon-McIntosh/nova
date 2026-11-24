@@ -1,26 +1,23 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-24T02:38:39.713Z",
   "dispatched_at": "2026-11-24T02:33:03Z",
   "findings": [
     {
       "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
-      "id": "f9eaf616eba",
       "line": null,
       "severity": "non-blocking",
       "summary": "The limit reference is the faintest ink in a figure whose subject is that limit. Measured from the rendered PNG, the dotted vm.max_map_count line sits near ~#c8c8c8 (~1.6:1 against white at its median pixels) and its 'vm.max_map_count / 65,530' label at (146,146,146) ~3.1:1 - both materially paler than every other element (axis title ~19.7:1, value labels ~12.6:1, stage labels ~7.9:1). A reader scanning for the threshold the caption says the process dies against finds the least visible mark on the page. Darkening the line and its label toward the existing body-text greys would fix it without changing any data."
     },
     {
       "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
-      "id": "f9eaf616eba",
       "line": null,
       "severity": "non-blocking",
       "summary": "The plot shows only the release run, so no bar approaches the limit and the truncated bar reads as a settled value. The final bar 'MAST solving, run stopped' at 31,476 is, per its caption and the adjacent table, a reading taken while the count was climbing when the driver was stopped - yet it is drawn at a fixed length indistinguishable from the settled bars such as 'Solov'ev solved' at 28,552. More significantly, neither the no-release run's 40,883 nor the 65,271-at-limit reading that motivate the whole figure are plotted, so the picture shows headroom (the largest bar is ~48% of the 65,530 line) where the caption describes a process that exhausts the limit. The caption and table carry the missing numbers so a careful reader recovers them and this does not block, but rendering the truncated bar as unfinished, or plotting the no-release run beside it, would let the figure show the danger it argues."
     },
     {
       "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
-      "id": "f9eaf616eba",
       "line": null,
       "severity": "non-blocking",
       "summary": "The caption names a different number for the dotted line than the figure does. The rendered figure labels the line 'vm.max_map_count 65,530', which is the kernel's per-process mapping limit; the figure's caption in the evidence fragment says the line is 'the kernel's per-process mapping limit, which the earlier node's sampler recorded at 65,271 while a worker was compiling'. 65,271 was the measured mapping count the sampler observed approaching that limit, not the limit itself (the evidence text states 65,271 mappings against a limit of 65,530). The picture is internally consistent, so this does not block, but a reader who checks the caption sees two different values for one line; stating 65,530 as the limit and 65,271 as the peak usage would remove the ambiguity."
@@ -45,6 +42,6 @@
   },
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-24T02:38:43.522760+00:00",
+  "timestamp": "2026-11-24T03:01:15.614729+00:00",
   "total": null
 }

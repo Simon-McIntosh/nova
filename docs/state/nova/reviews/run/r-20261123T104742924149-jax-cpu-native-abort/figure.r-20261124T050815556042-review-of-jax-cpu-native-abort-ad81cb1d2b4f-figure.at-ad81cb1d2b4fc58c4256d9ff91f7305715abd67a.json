@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-24T05:08:56Z",
+  "findings": [
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
+      "id": "f9eaf616eba",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The label naming the limit the process dies against is the palest text in the figure. Measured from the rendered PNG the 'vm.max_map_count / 65,530' annotation renders at (146,146,146), about 3.1:1 against white, against 7.7:1 for the stage labels and 12.6:1 for the value labels. That is under the 4.5:1 floor for normal text; it is readable but a reader scanning for the threshold the caption describes finds the least visible words on the page. Darkening the label toward the existing body-text grey would fix it without changing data."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
+      "id": "f9eaf616eba",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The final bar, 'MAST solving, run stopped' at 31,476, was a reading still climbing when the driver was stopped, but it is drawn at a fixed length indistinguishable from settled bars such as 'Solov'ev solved' at 28,552 - so a reader sees a final measurement where the run was truncated. Its row label says 'run stopped', which recovers the caveat, but the bar geometry alone does not. An unfinished bar (hatched end, or a direction marker) would let the shape show what the label says."
+    },
+    {
+      "file": "docs/figures/inverse-equilibrium-baseline/jax-cpu-native-abort/jax-cpu-mappings-two-machines.svg",
+      "id": "f9eaf616eba",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The figure plots only the release arm, so no bar approaches the dotted limit and the picture reads as comfortable headroom (largest bar 31,476 of 65,530, ~48%). The evidence table's no-release arm - MAST built on top of Solov'ev at 30,246 and MAST solving without a release at 40,883 - is what shows the count climbing toward the limit, and the earlier sampler's 65,271-at-limit reading is the motivation named in the caption; none of these is drawn. A reader who takes the figure alone sees a mechanism that stays well clear of its own danger. Plotting the no-release arm beside the release arm, or the 65,271 near-limit point, would let the picture carry the argument the caption makes."
+    }
+  ],
+  "project": "nova",
+  "review_run_id": "r-20261124T050815556042-review-of-jax-cpu-native-abort-ad81cb1d2b4f-figure",
+  "reviewed_base_sha": "e28db604eee205382f5c7874129eebfe4339cd92",
+  "reviewed_figures": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261124T050815556042-review-of-jax-cpu-native-abort-ad81cb1d2b4f-figure/image-0.png"
+  ],
+  "reviewed_head_sha": "ad81cb1d2b4fc58c4256d9ff91f7305715abd67a",
+  "reviewed_run_id": "r-20261123T104742924149-jax-cpu-native-abort",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "Defect, non-blocking. Body text clears white strongly: the axis title measures (11,11,11) ~19.6:1, value labels (51,51,51) ~12.6:1 and stage labels (82,81,78) ~7.7:1 on the rendered PNG. The reference annotation 'vm.max_map_count / 65,530' is drawn at (146,146,146) ~3.1:1, below the 4.5:1 floor for normal text and only just at the 3:1 large-text floor. The dotted limit line itself is the same (146,146,146) ~3.1:1, which clears the 3:1 non-text floor, so the defect is the label, not the rule.",
+    "data_ink": "Pass. The grey bars carry nearly all the ink; the only text on the data are the value labels, the axes are despined apart from the bottom spine, and there is no gradient, fill band or shadow. Colour is spent on the one bar that is the figure's subject (the cleared count), and its meaning is also carried by its label and its row name, so colour is not the sole carrier.",
+    "decoration": "Pass. No gradient, background fill, shading or decorative styling is present. The single dotted vertical rule is a measured limit (vm.max_map_count), so it is data rather than decoration.",
+    "label_collision": "Pass. No label is clipped: the outermost row and column of the 1400x720 PNG carry no non-white pixel, so nothing runs off the canvas. Stage labels fit the left margin ('MAST solving, run stopped' wraps cleanly to two lines), value labels sit just right of their bars clear of the following row, and the annotation's rightmost glyph stops short of the dotted line. The axis title and tick labels are clear of the plot.",
+    "legibility": "Pass. The rendered PNG reads at a glance as five horizontal bars ordered as the process's stages, each direct-labelled at its bar end (Solov'ev built 6,809; Solov'ev solved 28,552; cache cleared 3,031; MAST built 6,695; MAST solving, run stopped 31,476), over an x axis titled 'mapped regions [thousands]' with ticks 0, 10, ... 70. The drop to 3,031 is the most salient feature and is visible without the table.",
+    "table_form": "Pass. The six counts also appear in the evidence table beside the figure, but the chart earns its place by placing each stage's count against the dotted limit line in one view - a spatial comparison a table of numbers does not give at a glance. It is not a picture of a table."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T05:12:16.474094+00:00",
+  "total": null
+}

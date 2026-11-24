@@ -1,0 +1,59 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's baseline_suite (reuse-baseline_suite.log, revision 138cc686a, 2 passed, EXIT=0, failure_ids []) and after_suite (reuse-after_suite.log, revision f4c645453, 4 passed, EXIT=0, failure_ids []) are both complete and green; the two extra head passes are the containment and independent-reference regressions. The set difference is empty.",
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2605 TotalField.evaluate -> coupling.evaluate",
+    "nova/equilibrium/topology.py:1580 _stationary_position_primal step -> field.evaluate",
+    "nova/equilibrium/topology.py:3342 _curvature_derivatives -> jax.jacfwd(field.evaluate(target).hessian)",
+    "nova/equilibrium/topology.py:3362 _curvature_derivatives -> finite differences of field.evaluate(...).hessian",
+    "nova/equilibrium/fixed_points.py:773 implicit step -> jax.vmap(field.evaluate)(position).hessian",
+    "nova/equilibrium/fixed_points.py:647 stationary position polish via field.evaluate"
+  ],
+  "completed_at": "2026-11-24T07:48:33.103Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-24T07:39:46Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_read_hessian_assembly.py",
+      "line": "262",
+      "severity": "non-blocking",
+      "text": "non-blocking: the exact-symmetry assertion compares hessian[:,0,1] with hessian[:,1,0], and both entries are assigned the same `mixed` value at nova/equilibrium/topology.py:2565-2572, so the assertion holds whatever the physics does and can only fail under an asymmetric future refactor; the evidence fragment cites it among the passing numerical checks as though it independently measured symmetry."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit against 97ee1aad: topology.py factors the value/gradient reduction into _field_rows and rebuilds evaluate from five derivative triplets plus the divergence and Ampere identities; the test file adds the lowering counter, the 200-target comparison, the containment-owner regression and the independent-reference control; the evidence fragment records base failure, paired compile arms, both numerical sessions and the reuse repair.",
+    "done_when": "the done_when asks for one packed-kernel instance per field evaluation, 200-target Hessian agreement to 1e-9, 24/132-cell CPU compile with memory analysis, and a forward-mode negative control failing the instance-count id; the manifest's gate and the receipts at reproduce.log, negative-control.log, paired-compile.log, reuse-after_suite.log and reuse-controls.json assert each clause, with the H200 first-call fills explicitly deferred by the plan text to section 4.",
+    "goal": "the node assembles the read's flux Hessian from one packed analytic field-derivative reduction plus Maxwell identities instead of a forward-mode path; nova/equilibrium/topology.py:2539-2577 does exactly that, keeping value and gradient on the shared _field_rows arithmetic at :2510.",
+    "manifest": "read; status complete, 13 commits, changed_paths the three landed files, tests the exact focused pytest command, test_logs reuse-after_suite.log, baseline_suite 2 passed / after_suite 4 passed both EXIT=0 with failure_ids [], and negative_control_log naming reuse-negative-containment.log.",
+    "write_paths": "declared paths are nova/equilibrium/topology.py, tests/equilibrium/test_read_hessian_assembly.py, the evidence fragment and a figures directory; git diff --stat 97ee1aad..07e1fd2c touches exactly the first three and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_read_hessian_assembly.py:166 fails under the restored differentiated evaluator (negative-control.log: instances=3, 1 failed EXIT=1) and :104 fails under the restored local containment block (reuse-negative-containment.log: 1 failed, EXIT=1), so both guards are exercised red rather than assumed green.",
+    "evidence": "reuse-after_suite.log header reads revision f4c645453 and its tail records HESSIAN_AGREEMENT 4.1266315467316982e-10 under bound 1e-9, VALUE_AGREEMENT 9.1504807026559478e-16, GRADIENT_AGREEMENT 1.2250737948978239e-11 and 4 passed EXIT=0, with reproduce.log/negative-control.log each reporting instances=3 and 1 failed EXIT=1.",
+    "fit": "the landed code follows the module's jnp/vmap idiom and its comment at topology.py:2544 states the padding-closure mechanism with no plan label, ticket or attribution.",
+    "goal_fidelity": "nova/equilibrium/topology.py:2539-2577 replaces jax.jacfwd over the gradient with one field_derivatives=True reduction and the Maxwell identities, which is the plan's assembled-Hessian mechanism.",
+    "reuse": "topology.py:2551 delegates containment to nova/equilibrium/connectivity_boundary.py:207 _points_inside_polygon and topology.py:2545 takes presence from nova/biot/polygon.py:294 _packed_topology, extending both owners instead of forking them.",
+    "scope_discipline": "git diff --stat 97ee1aad..07e1fd2c lists only nova/equilibrium/topology.py, tests/equilibrium/test_read_hessian_assembly.py and the evidence fragment, all inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node assembles the read's flux Hessian from one packed analytic field-derivative reduction plus Maxwell identities instead of a forward-mode path; nova/equilibrium/topology.py:2539-2577 does exactly that, keeping value and gradient on the shared _field_rows arithmetic at :2510.\nVERDICT done_when: the done_when asks for one packed-kernel instance per field evaluation, 200-target Hessian agreement to 1e-9, 24/132-cell CPU compile with memory analysis, and a forward-mode negative control failing the instance-count id; the manifest's gate and receipts at reproduce.log, negative-control.log, paired-compile.log, reuse-after_suite.log and reuse-controls.json assert each clause, with the H200 first-call fills explicitly deferred by the plan text to section 4.\nVERDICT write_paths: declared paths are nova/equilibrium/topology.py, tests/equilibrium/test_read_hessian_assembly.py, the evidence fragment and a figures directory; git diff --stat 97ee1aad..07e1fd2c touches exactly the first three and nothing outside them.\nVERDICT manifest: read; status complete, 13 commits, changed_paths the three landed files, tests the exact focused pytest command, test_logs reuse-after_suite.log, baseline_suite 2 passed / after_suite 4 passed both EXIT=0 with failure_ids [], and negative_control_log naming reuse-negative-containment.log.\nVERDICT diff: read commit by commit against 97ee1aad: topology.py factors the value/gradient reduction into _field_rows and rebuilds evaluate from five derivative triplets plus the divergence and Ampere identities; the test file adds the lowering counter, the 200-target comparison, the containment-owner regression and the independent-reference control; the evidence fragment records base failure, paired compile arms, both numerical sessions and the reuse repair.\nCALL_SITES: nova/equilibrium/topology.py:2605 TotalField.evaluate -> coupling.evaluate, nova/equilibrium/topology.py:1580 _stationary_position_primal step -> field.evaluate, nova/equilibrium/topology.py:3342 _curvature_derivatives -> jax.jacfwd(field.evaluate(target).hessian), nova/equilibrium/topology.py:3362 _curvature_derivatives -> finite differences of field.evaluate(...).hessian, nova/equilibrium/fixed_points.py:773 implicit step -> jax.vmap(field.evaluate)(position).hessian, nova/equilibrium/fixed_points.py:647 stationary position polish via field.evaluate\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:2539-2577 replaces jax.jacfwd over the gradient with one field_derivatives=True reduction and the Maxwell identities, which is the plan's assembled-Hessian mechanism.\nSCORE evidence: 19\nJUSTIFICATION evidence: reuse-after_suite.log header reads revision f4c645453 and its tail records HESSIAN_AGREEMENT 4.1266315467316982e-10 under bound 1e-9, VALUE_AGREEMENT 9.1504807026559478e-16, GRADIENT_AGREEMENT 1.2250737948978239e-11 and 4 passed EXIT=0, with reproduce.log/negative-control.log each reporting instances=3 and 1 failed EXIT=1.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 97ee1aad..07e1fd2c lists only nova/equilibrium/topology.py, tests/equilibrium/test_read_hessian_assembly.py and the evidence fragment, all inside the declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: tests/equilibrium/test_read_hessian_assembly.py:166 fails under the restored differentiated evaluator (negative-control.log: instances=3, 1 failed EXIT=1) and :104 fails under the restored local containment block (reuse-negative-containment.log: 1 failed, EXIT=1), so both guards are exercised red rather than assumed green.\nSCORE fit: 19\nJUSTIFICATION fit: the landed code follows the module's jnp/vmap idiom and its comment at topology.py:2544 states the padding-closure mechanism with no plan label, ticket or attribution.\nSCORE reuse: 20\nJUSTIFICATION reuse: topology.py:2551 delegates containment to nova/equilibrium/connectivity_boundary.py:207 _points_inside_polygon and topology.py:2545 takes presence from nova/biot/polygon.py:294 _packed_topology, extending both owners instead of forking them.\nFINDING tests/equilibrium/test_read_hessian_assembly.py:262 non-blocking: the exact-symmetry assertion compares hessian[:,0,1] with hessian[:,1,0], and both entries are assigned the same `mixed` value at nova/equilibrium/topology.py:2565-2572, so the assertion holds whatever the physics does and can only fail under an asymmetric future refactor; the evidence fragment cites it among the passing numerical checks as though it independently measured symmetry.",
+  "review_run_id": "r-20261124T073841662098-review-of-kcb-assembled-read-hessian-07e1fd2c7aa5",
+  "reviewed_base_sha": "97ee1aad5e7e50f547bd4c8af899a2b7cf970118",
+  "reviewed_head_sha": "07e1fd2c7aa51cf75b79efad8b3521a176cdc416",
+  "reviewed_run_id": "r-20261123T062959420490-kcb-assembled-read-hessian",
+  "reviewer_run_id": "r-20261124T073841662098-review-of-kcb-assembled-read-hessian-07e1fd2c7aa5",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T07:50:56.749300+00:00",
+  "total": 116
+}

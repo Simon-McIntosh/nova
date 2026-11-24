@@ -25,7 +25,7 @@
   <title>Kernel Compile Barrier | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="148">
+<meta name="plan-version" content="149">
 <meta name="plan-modified" content="2026-11-24">
 </head>
 <body>
@@ -397,6 +397,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261124T032217270016-review-of-kcb-assembled-read-hessian-138cc686ac93" data-who="reckon-build" data-when="2026-11-24T03:28:38.105Z">
     <div class="r-comment-body"><p>Reviewed r-20261123T062959420490-kcb-assembled-read-hessian at base 97ee1aad5e7e50f547bd4c8af899a2b7cf970118 and head 138cc686ac931a4e212326f80632896e083630fa; scores goal_fidelity 20, evidence 19, scope_discipline 19, durability 17, fit 18, reuse 5; added_failure_count 0 with no added ids; two non-blocking findings (duplicated point-in-polygon block at nova/equilibrium/topology.py:2546, partially shared-helper value/gradient assertions at tests/equilibrium/test_read_hessian_assembly.py:147); no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261124T073841662098-review-of-kcb-assembled-read-hessian-07e1fd2c7aa5" data-who="reckon-build" data-when="2026-11-24T07:48:33.103Z">
+    <div class="r-comment-body"><p>Independent review of r-20261123T062959420490-kcb-assembled-read-hessian read at base 97ee1aad5e7e50f547bd4c8af899a2b7cf970118 and head 07e1fd2c7aa51cf75b79efad8b3521a176cdc416. Verdict: no blocking finding. The prior reuse finding is repaired — topology.py:2551 delegates containment to connectivity_boundary._points_inside_polygon and topology.py:2545 takes presence from polygon._packed_topology; reuse scores 20. The prior shared-helper finding is also repaired — the numerical reference now reduces kernel rows directly and test_primal_reference_excludes_shared_reduction fails if it routes through _field_rows. Scores goal_fidelity 20, evidence 19, scope_discipline 19, durability 19, fit 19, reuse 20. One non-blocking finding: the exact-symmetry assertion at test_read_hessian_assembly.py:262 is tautological because both off-diagonals are assigned the same `mixed` value at topology.py:2565-2572.</p></div>
 </div>
 </section>
 </main>

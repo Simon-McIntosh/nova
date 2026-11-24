@@ -12,6 +12,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T143918823268-one-ids-seam-s1",
       "section": "\u00a71"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-24T05:46:31.643954+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T143918823268-one-ids-seam-s1",
+      "section": "\u00a71"
     }
   },
   "findings": [

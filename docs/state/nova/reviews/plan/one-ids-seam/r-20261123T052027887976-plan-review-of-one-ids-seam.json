@@ -35,9 +35,28 @@
       "note": "Plan v15 (bf435c2b7): \u00a71's class rule now says the conversion moves to the member, and a nova module that only derives a convention to read its data (nova/io/ingest.py, signalstore.py) loses the derivation and stays with the fixed convention, as \u00a75 states. The landed census already labels them 'conversion moves to the ingest member', which reads consistently.",
       "reason": "",
       "when": "2026-11-24T06:26:50.693717+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "bf435c2b7bf8d5d0dcd46676c55755303ff6b5bf",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Plan v15: \u00a72's control clause adds a negative control: a scratch copy of the tree that keeps one import of a deleted module fails the no-reference check, naming that module.",
+      "reason": "",
+      "when": "2026-11-24T06:27:08.690622+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",
+      "commit": "bf435c2b7bf8d5d0dcd46676c55755303ff6b5bf",
+      "commit_basis": "edit",
+      "note": "Plan v15: \u00a72's control clause adds a negative control: a scratch copy of the tree that keeps one import of a deleted module fails the no-reference check, naming that module.",
+      "reason": "",
+      "when": "2026-11-24T06:27:08.690622+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "f11e82bb-3e5e-411f-9c3b-47cad61282e3",

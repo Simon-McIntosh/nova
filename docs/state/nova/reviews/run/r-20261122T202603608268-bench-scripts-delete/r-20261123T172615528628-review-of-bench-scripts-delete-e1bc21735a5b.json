@@ -22,6 +22,20 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T202603608268-bench-scripts-delete",
       "section": "\u00a73"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-24T08:46:35.575629+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T202603608268-bench-scripts-delete",
+      "section": "\u00a73"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-24T08:47:17.848353+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T202603608268-bench-scripts-delete",
+      "section": "\u00a73"
     }
   },
   "findings": [

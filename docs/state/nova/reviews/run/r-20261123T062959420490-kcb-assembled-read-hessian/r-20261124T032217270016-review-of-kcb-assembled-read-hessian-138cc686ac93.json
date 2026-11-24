@@ -1,0 +1,71 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run records after_suite at 09c124e51 with 0 failures (scale-relative-gate.log, 2 passed, EXIT=0) and an adjudicated null baseline_suite (baseline_suite_reason: the new test file is absent at base). With no base arm to difference, no head failure exists to add, so the count is the empty set the head arm measured rather than a comparison.",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2608 TotalField.evaluate -> coupling.evaluate",
+    "nova/equilibrium/topology.py:1580 _stationary_position_primal step -> field.evaluate",
+    "nova/equilibrium/topology.py:1619 _implicit_stationary_position_jvp -> operand.evaluate",
+    "nova/equilibrium/topology.py:3307 _curvature_derivatives -> field.evaluate(target).hessian",
+    "nova/equilibrium/topology.py:2912 stationary_read caller"
+  ],
+  "completed_at": "2026-11-24T03:28:38.105Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "kcb-assembled-read-hessian",
+      "recorded_at": "2026-11-24T03:34:32.249032+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-24T03:23:11Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": "2546",
+      "severity": "non-blocking",
+      "text": "non-blocking: the straddle/crossing/parity ray test at 2546-2553 duplicates the point-in-polygon capability that nova/equilibrium/connectivity_boundary.py:207 (_points_inside_polygon) already owns in the same package, and the padding predicate ~jnp.signbit(self.weight) repeats present from nova/biot/polygon.py:304 (_packed_topology); the block neither calls nor extends either owner, so a future correction to the parity rule has three places to land."
+    },
+    {
+      "file": "tests/equilibrium/test_read_hessian_assembly.py",
+      "line": "147",
+      "severity": "non-blocking",
+      "text": "non-blocking: the value and gradient assertions compare evaluate's output against value_gradient's output, and both sides are produced by the same _field_rows helper (topology.py:2510) differing only in the field_derivatives flag, so a defect inside that shared reduction that moves both branches together keeps these two assertions green; the Hessian assertion at :143 and the lowering counter at :67 are the parts that fail independently."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified that nova/equilibrium/topology.py:2608 TotalField.evaluate reaches BiotMomentCoupling.evaluate, and that the read path at 1580, 1619 and 3307 reaches it through stationary_read.",
+    "diff": "read commit by commit against 97ee1aad: topology.py factors the value/gradient reduction into _field_rows and rebuilds evaluate from the derivative rows plus two Maxwell identities; the test file adds the lowering counter and the 200-target comparison; the evidence fragment records the base failure, the paired compile arms and both numerical sessions.",
+    "done_when": "the done_when asks for one packed-kernel instance per field evaluation, 200-target Hessian agreement to 1e-9, 24- and 132-cell compile measurements, and an instance-count negative control; the manifest's gate and the receipts at scale-relative-gate.log, reproduce.log, negative-control.log and head-24/head-132.log assert each one.",
+    "goal": "the node's goal is to assemble the read's flux Hessian from one packed analytic field-derivative reduction rather than a forward-mode pass; nova/equilibrium/topology.py:2539-2576 does exactly that, keeping value and gradient on the shared moment-row arithmetic.",
+    "manifest": "read; status complete, nine commits, changed_paths the three landed files, tests the focused pytest command, test_logs naming scale-relative-gate.log, after_suite 09c124e51 with 0 failures, and an adjudicated null baseline_suite with its reason.",
+    "write_paths": "the declared paths are topology.py, the new test file, the evidence fragment and a figures directory; git diff 97ee1aad..138cc686 touches exactly the first three and nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_read_hessian_assembly.py:37 fails at base and under the restored differentiated evaluator (reproduce.log and negative-control.log each read instances=3 and 1 failed EXIT=1), so the guard is exercised rather than assumed green; the value and gradient assertions at :147-160 are weaker because both operands route through the same _field_rows helper at topology.py:2510.",
+    "evidence": "scale-relative-gate.log header reads revision 09c124e51 and the command in the manifest, and its lines 36-38 and 40 record HESSIAN_AGREEMENT 4.1266383450376652e-10 under bound 1e-9, VALUE_AGREEMENT 9.6753246559252636e-16, GRADIENT_AGREEMENT 1.2250737948978237e-11 and 2 passed EXIT=0, with head-24.log/head-132.log carrying the paired compile arms.",
+    "fit": "the landed code follows the module's jnp idiom and its comments at topology.py:2543-2544 state the divergence and Ampere mechanism with no plan label, ticket or attribution.",
+    "goal_fidelity": "nova/equilibrium/topology.py:2539-2576 replaces jax.jacfwd over the gradient with one packed field_derivatives=True reduction plus the Maxwell identities, which is exactly the plan's assembled-Hessian mechanism.",
+    "reuse": "topology.py:2546-2553 re-implements the ray-crossing point-in-polygon that nova/equilibrium/connectivity_boundary.py:207 already owns, without calling or extending it.",
+    "scope_discipline": "git diff --stat 97ee1aad..138cc686 lists only nova/equilibrium/topology.py, tests/equilibrium/test_read_hessian_assembly.py and the evidence fragment, all inside the node's declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to assemble the read's flux Hessian from one packed analytic field-derivative reduction rather than a forward-mode pass; nova/equilibrium/topology.py:2539-2576 does exactly that, keeping value and gradient on the shared moment-row arithmetic.\nVERDICT done_when: the done_when asks for one packed-kernel instance per field evaluation, 200-target Hessian agreement to 1e-9, 24- and 132-cell compile measurements, and an instance-count negative control; the manifest's gate and the receipts at scale-relative-gate.log, reproduce.log, negative-control.log and head-24/head-132.log assert each one.\nVERDICT write_paths: the declared paths are topology.py, the new test file, the evidence fragment and a figures directory; git diff 97ee1aad..138cc686 touches exactly the first three and nothing outside them.\nVERDICT manifest: read; status complete, nine commits, changed_paths the three landed files, tests the focused pytest command, test_logs naming scale-relative-gate.log, after_suite 09c124e51 with 0 failures, and an adjudicated null baseline_suite with its reason.\nVERDICT diff: read commit by commit against 97ee1aad: topology.py factors the value/gradient reduction into _field_rows and rebuilds evaluate from the derivative rows plus two Maxwell identities; the test file adds the lowering counter and the 200-target comparison; the evidence fragment records the base failure, the paired compile arms and both numerical sessions.\nCALL_SITES: nova/equilibrium/topology.py:2608 TotalField.evaluate -> coupling.evaluate, nova/equilibrium/topology.py:1580 _stationary_position_primal step -> field.evaluate, nova/equilibrium/topology.py:1619 _implicit_stationary_position_jvp -> operand.evaluate, nova/equilibrium/topology.py:3307 _curvature_derivatives -> field.evaluate(target).hessian, nova/equilibrium/topology.py:2912 stationary_read caller\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:2539-2576 replaces jax.jacfwd over the gradient with one packed field_derivatives=True reduction plus the Maxwell identities, which is exactly the plan's assembled-Hessian mechanism.\nSCORE evidence: 19\nJUSTIFICATION evidence: scale-relative-gate.log header reads revision 09c124e51 and the command in the manifest, and its lines 36-38 and 40 record HESSIAN_AGREEMENT 4.1266383450376652e-10 under bound 1e-9, VALUE_AGREEMENT 9.6753246559252636e-16, GRADIENT_AGREEMENT 1.2250737948978237e-11 and 2 passed EXIT=0, with head-24.log/head-132.log carrying the paired compile arms.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 97ee1aad..138cc686 lists only nova/equilibrium/topology.py, tests/equilibrium/test_read_hessian_assembly.py and the evidence fragment, all inside the node's declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/equilibrium/test_read_hessian_assembly.py:37 fails at base and under the restored differentiated evaluator (reproduce.log and negative-control.log each read instances=3 and 1 failed EXIT=1), so the guard is exercised rather than assumed green; the value and gradient assertions at :147-160 are weaker because both operands route through the same _field_rows helper at topology.py:2510.\nSCORE fit: 18\nJUSTIFICATION fit: the landed code follows the module's jnp idiom and its comments at topology.py:2543-2544 state the divergence and Ampere mechanism with no plan label, ticket or attribution.\nSCORE reuse: 5\nJUSTIFICATION reuse: topology.py:2546-2553 re-implements the ray-crossing point-in-polygon that nova/equilibrium/connectivity_boundary.py:207 already owns, without calling or extending it.\nFINDING nova/equilibrium/topology.py:2546 non-blocking: the straddle/crossing/parity ray test at 2546-2553 duplicates the point-in-polygon capability that nova/equilibrium/connectivity_boundary.py:207 (_points_inside_polygon) already owns in the same package, and the padding predicate ~jnp.signbit(self.weight) repeats present from nova/biot/polygon.py:304 (_packed_topology); the block neither calls nor extends either owner, so a future correction to the parity rule has three places to land.\nFINDING tests/equilibrium/test_read_hessian_assembly.py:147 non-blocking: the value and gradient assertions compare evaluate's output against value_gradient's output, and both sides are produced by the same _field_rows helper (topology.py:2510) differing only in the field_derivatives flag, so a defect inside that shared reduction that moves both branches together keeps these two assertions green; the Hessian assertion at :143 and the lowering counter at :67 are the parts that fail independently.",
+  "review_run_id": "r-20261124T032217270016-review-of-kcb-assembled-read-hessian-138cc686ac93",
+  "reviewed_base_sha": "97ee1aad5e7e50f547bd4c8af899a2b7cf970118",
+  "reviewed_head_sha": "138cc686ac931a4e212326f80632896e083630fa",
+  "reviewed_run_id": "r-20261123T062959420490-kcb-assembled-read-hessian",
+  "reviewer_run_id": "r-20261124T032217270016-review-of-kcb-assembled-read-hessian-138cc686ac93",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T03:42:33.386524+00:00",
+  "total": 98
+}

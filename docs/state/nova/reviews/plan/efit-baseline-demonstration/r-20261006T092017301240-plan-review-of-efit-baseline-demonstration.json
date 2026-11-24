@@ -34,9 +34,28 @@
       "note": "carried into section 3 node ebd-rescore-at-head: its brief makes both cohorts consume the comparator's typed topology_class_agreement, one agreement owner, pinned on one MAST and one DIII-D row",
       "reason": "",
       "when": "2026-11-24T05:49:26.707557+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f43d7fc5425fde4269d7961012fddda2db077662",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "carried into section 3 node ebd-rescore-at-head: its brief makes mast_efit_referee._boundary_distance and mast_parity_chain._lcfs_distance delegate to boundary_comparison.compare_closed_boundaries and retires both copies, pinned by a test",
+      "reason": "",
+      "when": "2026-11-24T05:50:10.955813+00:00"
     }
   ],
   "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f43d7fc5425fde4269d7961012fddda2db077662",
+      "commit_basis": "edit",
+      "note": "carried into section 3 node ebd-rescore-at-head: its brief makes mast_efit_referee._boundary_distance and mast_parity_chain._lcfs_distance delegate to boundary_comparison.compare_closed_boundaries and retires both copies, pinned by a test",
+      "reason": "",
+      "when": "2026-11-24T05:50:10.955813+00:00"
+    },
     "thin_wrapper-1": {
       "action": "acted",
       "by": "",

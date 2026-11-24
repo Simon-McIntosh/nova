@@ -18,6 +18,13 @@
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261122T150133906524-cfs-map-fidelity-rungs",
       "section": "\u00a74"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-24T05:47:37.176189+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261122T150133906524-cfs-map-fidelity-rungs",
+      "section": "\u00a74"
     }
   },
   "findings": [

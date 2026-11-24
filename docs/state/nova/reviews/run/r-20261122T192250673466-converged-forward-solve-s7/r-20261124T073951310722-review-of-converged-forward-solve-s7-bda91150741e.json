@@ -1,0 +1,46 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-24T07:47:48.549Z",
+  "dispatched_at": "2026-11-24T07:41:20Z",
+  "findings": [
+    {
+      "file": "tests/test_joint_acceptance.py",
+      "line": 490,
+      "severity": "non-blocking",
+      "text": "verdict.measured == 5.0e-2 and verdict.bound == 1.0e-2 (lines 490-491), and verdict.measured == \"diverted\" / verdict.bound == \"limited\" (lines 548-549), compare the predicate's echo of the clause back to the literal the test itself passed in; ClauseVerdict copies Clause.measured and Clause.bound through unchanged, so these four assertions hold whatever the predicate does with the value and cannot catch the regression. The independent guard in each test is the failing_clauses assertion at line 488 / 536 / 546, which does fail if the clause stops being judged."
+    },
+    {
+      "file": "nova/equilibrium/joint_acceptance.py",
+      "line": 97,
+      "severity": "non-blocking",
+      "text": "GLOBAL_RESIDUAL and COMPILE_COST are required families for every kind yet no test drives either past its bound and expects a refusal: every refusal test exercises a constraint-row, null-position, map-fidelity, support-stability or boundary-class clause, and the strong-1000 test asserts only that boundary_level names the refusal while compile cost fails incidentally without being asserted. A regression specific to how the global residual or the executable-size clause is judged would leave the suite green, so the clause the design exists to refuse on is the one whose refusal is unproven at the predicate level."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against 1e86c41ed: cd59e2bda adds the predicate (391 lines) and its test (342), 9686881f1 holds the null ceiling to one pitch and records the judged bound, 111380e5b removes the production env-var residual-only path and adds 111 test lines, and bda911507 adds three refusal tests for map fidelity, support stability and the boundary class; the whole base..head diff is the same two files.",
+    "done_when": "The done_when requires a per-clause predicate, strong-1000 refused by test id naming the failing clause, and a residual-only control; tests/test_joint_acceptance.py:279 drives the strong receipt to refused and asserts constraint_row.boundary_level in failing_clauses at :292, and the mutation log records that test failing by id with the state admitted.",
+    "goal": "The goal is one predicate evaluating the clauses that apply to a row and returning a verdict per clause; nova/equilibrium/joint_acceptance.py:306 evaluate fixes applicability by row kind (_REQUIRED at :96, _EXCLUDED at :133), returns RowAcceptance.verdicts at :379, and a required family with no clause reports not_measured at :349 so absence never admits; the goal is met.",
+    "manifest": "Read; it records status complete, four commits (cd59e2bda, 9686881f1, 111380e5b, bda911507), changed_paths matching the diff, gate 14 passed EXIT=0 on all_debug job 1343784, baseline 0 tests EXIT=4 because the module is absent at the base, and the residual-only control red by id at EXIT=1.",
+    "write_paths": "Declared paths are the evidence fragment and figure directory, both docs-only, while the diff touches nova/equilibrium/joint_acceptance.py and tests/test_joint_acceptance.py; plan section 7's text ('one function that every acceptance row and the receipt call') implies a source module, so this reads as an under-specified declaration rather than an out-of-section edit, already recorded by the two prior reviews."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is one predicate evaluating the clauses that apply to a row and returning a verdict per clause; nova/equilibrium/joint_acceptance.py:306 evaluate fixes applicability by row kind (_REQUIRED at :96, _EXCLUDED at :133) and returns RowAcceptance.verdicts at :379, so the goal is met.\nVERDICT done_when: tests/test_joint_acceptance.py:279 drives the strong-1000 receipt to refused, asserts constraint_row.boundary_level in failing_clauses at :292, and the recorded control log reddens that test by id; the gate log records 14 passed EXIT=0 at bda911507.\nVERDICT write_paths: declared paths are docs/evidence/fragments/converged-forward-solve/converged-forward-solve-s7.html and docs/figures/converged-forward-solve/converged-forward-solve-s7 while the diff touches only nova/equilibrium/joint_acceptance.py and tests/test_joint_acceptance.py, so the declaration is under-specified rather than the edit out of section.\nVERDICT manifest: read; it states status complete, four commits, gate 14 passed EXIT=0, baseline 0 tests EXIT=4 with the module-absent reason, and the residual-only control red by id at EXIT=1, all on all_debug job 1343784.\nVERDICT diff: read commit by commit against 1e86c41ed; four commits add the predicate module and its test, tighten the null ceiling to one pitch, remove the production env-var residual-only path, and add three clause-refusal tests, 928 insertions across two files.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/joint_acceptance.py:96 and :133 fix each kind's required and excluded families, so a caller cannot admit a row by declaring fewer clauses.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/test_joint_acceptance.py:292 asserts the refusal by id and clause while the mutation log records that same test failing by id at EXIT=1, and the gate log records 14 passed EXIT=0.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: every line of the diff is in nova/equilibrium/joint_acceptance.py and tests/test_joint_acceptance.py, which plan section 7 implies though both lie outside the docs-only declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_joint_acceptance.py:488, :536 and :546 each fail if map fidelity, support stability or the boundary class stops being judged, but no test drives GLOBAL_RESIDUAL or COMPILE_COST past its bound and the echo assertions at :490-:491 and :548-:549 cannot fail.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/joint_acceptance.py:152 uses frozen dataclasses, __all__ exports and mechanism-named constants in the package idiom, with no plan, version or attribution text.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner of per-row forward-solve clause acceptance exists; a search over nova/ for a Clause/evaluate owner found only nova/equilibrium/observable_acceptance.py:203 (envelopes over numpy observables on case/batch axes) and nova/imas/mast_flux_loop_adjudication.py (loop geometry dispositions), neither of which this overlaps.\nFINDING tests/test_joint_acceptance.py:490 non-blocking: verdict.measured and verdict.bound are echoed straight from the Clause the test passed in, so these assertions hold whatever the predicate does with the value; the independent guard is the failing_clauses assertion above each, and the same echo shape recurs at :548-:549.\nFINDING nova/equilibrium/joint_acceptance.py:97 non-blocking: GLOBAL_RESIDUAL and COMPILE_COST are required families for every row kind yet no test drives either past its bound and expects a refusal, so a regression in how those two are judged would leave the suite green.\n",
+  "review_run_id": "r-20261124T073951310722-review-of-converged-forward-solve-s7-bda91150741e",
+  "reviewed_base_sha": "1e86c41ed7e14f44c87d2cfb84408182cc709cb6",
+  "reviewed_head_sha": "bda91150741ef2449bc5cb0ca0ed0b7216066253",
+  "reviewed_run_id": "r-20261122T192250673466-converged-forward-solve-s7",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-24T07:59:24.266838+00:00",
+  "total": 104
+}

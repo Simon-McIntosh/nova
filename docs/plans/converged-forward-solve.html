@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s0&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s11&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
-<meta name="plan-version" content="651">
+<meta name="plan-version" content="652">
 <meta name="plan-modified" content="2026-11-24">
 <meta name="plan-section-depends-on" content="{&quot;s7&quot;:[&quot;converged-forward-solve#s4&quot;],&quot;s8&quot;:[&quot;converged-forward-solve#s5&quot;,&quot;converged-forward-solve#s7&quot;],&quot;s9&quot;:[&quot;converged-forward-solve#s8&quot;],&quot;s10&quot;:[&quot;converged-forward-solve#s8&quot;],&quot;s6&quot;:[&quot;converged-forward-solve#s9&quot;,&quot;converged-forward-solve#s10&quot;,&quot;converged-forward-solve#s11&quot;],&quot;s5&quot;:[&quot;converged-forward-solve#s4&quot;]}">
 </head>
@@ -2538,7 +2538,10 @@ oracle _reference_moments already owns.</p></div>
     <div class="r-comment-body"><p>Review of run r-20261122T192250673466-converged-forward-solve-s7 at head 9686881f1 (base 1e86c41ed): scores goal_fidelity 18, evidence 17, scope_discipline 16, durability 17, fit 17, reuse 18, total 103; the joint acceptance predicate is refused correctly on the strong-1000 receipt (boundary level -2.74e-2 of span against its 1e-3 bound) and the residual-only mutation reddens the refusal test by id, with five non-blocking findings and no blocking one.</p></div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261124T070625946456-review-of-converged-forward-solve-s7-111380e5bcc3" data-who="reckon-build" data-when="2026-11-24T07:13:42.225Z">
-    <div class="r-comment-body"><p>Independent review of r-20261122T192250673466-converged-forward-solve-s7 at head 111380e5b records a parsed six-dimension verdict (goal_fidelity 18, evidence 18, scope_discipline 15, durability 14, fit 17, reuse 18), added_failure_count 0, and three non-blocking findings on the analytic map-fidelity and air-core judging tests being unproven and the docs-only declared write paths; the landed predicate meets plan section 7&#x27;s done_when.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261122T192250673466-converged-forward-solve-s7 at head 111380e5b records a parsed six-dimension verdict (goal_fidelity 18, evidence 18, scope_discipline 15, durability 14, fit 17, reuse 18), added_failure_count 0, and three non-blocking findings on the analytic map-fidelity and air-core judging tests being unproven and the docs-only declared write paths; the landed predicate meets plan section 7's done_when.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261124T073951310722-review-of-converged-forward-solve-s7-bda91150741e" data-who="reckon-build" data-when="2026-11-24T07:47:48.549Z">
+    <div class="r-comment-body"><p>Review of run r-20261122T192250673466-converged-forward-solve-s7 at head bda9115074 (base 1e86c41ed): scores goal_fidelity 18, evidence 18, scope_discipline 15, durability 15, fit 18, reuse 20; the joint acceptance predicate is refused on the strong-1000 receipt naming constraint_row.boundary_level, the residual-only control reddens that test by id, and the three refusal tests added at this head (map fidelity on an analytic row, support stability and boundary class on an air-core row) are genuine guards; two non-blocking findings on echoed assertions and on GLOBAL_RESIDUAL/COMPILE_COST refusals being unexercised; no blocking finding.</p></div>
 </div>
 </section>
 </main>
